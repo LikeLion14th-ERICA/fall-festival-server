@@ -4,7 +4,7 @@
 
 ## 결론: 현실적인 선택
 
-이 구성에는 Next.js, Java, PostgreSQL, Caddy가 계속 실행되고 백엔드가 외부 FCM/Apple Push endpoint로 HTTPS 요청을 보낼 수 있는 VM과 영속 디스크가 필요합니다. A1을 확보할 수 있다면 `VM.Standard.A1.Flex`가 더 적합하지만, 현재 Tokyo 콘솔에는 A1이 없고 `VM.Standard.E2.1.Micro`만 `Always Free-eligible`로 표시됩니다. 따라서 이 가이드는 **E2.1.Micro 1대에서 소수 실기기의 단기 기능 검증**을 목표로 합니다.
+이 구성에는 Next.js, Java, PostgreSQL, Caddy가 계속 실행되고 백엔드가 외부 FCM/Apple Push endpoint로 HTTPS 요청을 보낼 수 있는 VM과 영속 디스크가 필요합니다. A1을 확보할 수 있다면 `VM.Standard.A1.Flex`가 더 적합하지만, Tokyo AD-1에서 실제 생성 시 `Out of capacity`가 발생해 `VM.Standard.E2.1.Micro`를 사용했습니다. 따라서 이 가이드는 **E2.1.Micro 1대에서 소수 실기기의 단기 기능 검증**을 목표로 합니다.
 
 E2.1.Micro는 1/8 OCPU burstable과 메모리 1 GB뿐입니다. 일반 `docker-compose.yml`로 서버 안에서 이미지를 빌드하면 OOM 또는 장시간 정체 가능성이 높습니다. 반드시 Docker Buildx를 사용할 수 있는 개발 컴퓨터/CI에서 `linux/amd64` 이미지를 빌드하고 `docker-compose.e2-micro.yml`로 pull-only 배포합니다. 이것은 무료·24시간·영구·무중단을 보장하지 않으며 실제 축제 운영 사양도 아닙니다.
 
@@ -202,6 +202,41 @@ curl -fsS https://pwa.example.com/healthz
 Caddy 인증서 오류가 나면 가장 먼저 DNS A/AAAA, TCP 80/443, VM 시간, 도메인 오타, Caddy log를 확인합니다. IP 주소 자체나 사설 hostname으로는 휴대전화에서 신뢰되는 자동 인증서를 기대하지 않습니다.
 
 백엔드는 브라우저 push service의 TCP 443 outbound가 필요합니다. 일반 OCI public VM은 public IPv4 경로를 통해 이를 사용하며, egress rule이나 조직 방화벽을 제한했다면 기본 allowlist의 `fcm.googleapis.com`, `jmt17.google.com`, `*.push.apple.com`, `*.push.services.mozilla.com`, `*.notify.windows.com` HTTPS 연결을 허용합니다. Apple의 요구사항은 [WebKit 공식 문서](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/), WNS FQDN은 [Microsoft 방화벽 allowlist 문서](https://learn.microsoft.com/en-us/windows/apps/develop/notifications/push-notifications/firewall-allowlist-config)를 참고합니다.
+
+### 5.3 레지스트리 없이 TAR로 직접 전송
+
+테스트 배포에서는 애플리케이션 image를 public registry에 올리지 않고 Docker Desktop에서 TAR로 내보내 서버에 직접 보낼 수 있습니다. PostgreSQL과 Caddy는 서버가 Docker Hub에서 직접 pull하므로 자체 image 두 개만 묶습니다.
+
+```powershell
+docker save --output "$env:TEMP\espero-app-images.tar" `
+  espero-pwa-backend:RELEASE_TAG `
+  espero-pwa-frontend:RELEASE_TAG
+
+ssh -i "C:\path\to\private.key" ubuntu@SERVER_IP "mkdir -p /home/ubuntu/espero/test"
+scp -i "C:\path\to\private.key" `
+  "$env:TEMP\espero-app-images.tar" `
+  docker-compose.e2-micro.yml Caddyfile .env.example `
+  ubuntu@SERVER_IP:/home/ubuntu/espero/test/
+```
+
+서버에서는 image를 불러오고 공식 runtime image를 받습니다.
+
+```bash
+cd /home/ubuntu/espero/test
+docker load -i espero-app-images.tar
+docker pull --platform linux/amd64 postgres:16-alpine
+docker pull --platform linux/amd64 caddy:2-alpine
+```
+
+이 저장소의 `scripts/init-e2-env.sh`는 현재 테스트 도메인용 `.env`를 서버 내부에서 처음 한 번만 생성합니다. 기존 `.env`가 있으면 덮어쓰지 않으며 파일 권한을 `600`으로 설정합니다. PostgreSQL 비밀번호, token pepper와 VAPID private key는 출력하지 않고, 참여자에게 필요한 `TEST_ACCESS_CODE`만 한 번 표시합니다.
+
+```bash
+chmod 700 init-e2-env.sh
+./init-e2-env.sh
+docker compose -f docker-compose.e2-micro.yml config --quiet
+```
+
+표시된 접근 코드는 별도 password manager에 보관합니다. `.env`와 image TAR를 Git에 추가하지 않습니다. 다른 도메인이나 release tag로 재배포할 때는 스크립트 내부의 공개 설정값을 먼저 바꾸고 검토합니다.
 
 E2 profile은 backend 416 MiB, PostgreSQL 160 MiB, 정적 frontend 32 MiB, Caddy 96 MiB로 물리 메모리 상한을 두며 합계는 704 MiB입니다. Ubuntu, Docker daemon과 page cache에 이론상 약 320 MiB를 남깁니다. 각 서비스의 `memswap_limit`은 순간적인 swap 사용도 제한합니다. Docker에서 `memswap_limit`은 memory와 swap의 합계 상한이며 swap을 자주 쓰면 성능 비용이 발생합니다: [Compose service memory 설정](https://docs.docker.com/reference/compose-file/services/#mem_limit). JVM heap은 192 MiB, Hikari pool은 4, Tomcat worker는 16으로 제한합니다. frontend는 Node 없이 정적 파일만 제공합니다. PostgreSQL은 32 MiB shared buffers, 최대 12 connections, parallel worker 비활성화로 시작합니다. 데이터 안전성을 해치는 `fsync=off`, `full_page_writes=off`는 사용하지 않습니다.
 
