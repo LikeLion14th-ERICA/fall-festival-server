@@ -1,19 +1,19 @@
 # 무료 서버 배포 가이드
 
-이 문서는 Docker Compose 네 서비스를 공인 HTTPS로 올려 Android/iOS 실기기에서 Web Push를 시험하는 절차입니다. 조사 기준은 2026-09-05이며, 무료 정책과 가용성은 가입·배포 직전 공식 페이지에서 다시 확인해야 합니다.
+이 문서는 Docker Compose 네 서비스를 공인 HTTPS로 올려 Android/iOS 실기기에서 Web Push를 시험하는 절차입니다. 조사 기준은 2026-09-05이며, 무료 정책과 가용성은 가입·배포 직전 공식 페이지에서 다시 확인해야 합니다. 아래 기본 절차는 사용자가 Tokyo home region에서 실제로 확인한 `VM.Standard.E2.1.Micro` 1대만 사용할 수 있다는 조건을 반영합니다.
 
 ## 결론: 현실적인 선택
 
-이 구성에는 Next.js, Java, PostgreSQL, Caddy가 계속 실행되고 백엔드가 외부 FCM/Apple Push endpoint로 HTTPS 요청을 보낼 수 있는 VM과 영속 디스크가 필요합니다. 2026년 9월 기준으로 신규 가입자가 장기간 무료로 시도할 수 있는 가장 현실적인 단일 호스트 후보는 **Oracle Cloud Infrastructure(OCI) Always Free Ampere A1 VM**입니다.
+이 구성에는 Next.js, Java, PostgreSQL, Caddy가 계속 실행되고 백엔드가 외부 FCM/Apple Push endpoint로 HTTPS 요청을 보낼 수 있는 VM과 영속 디스크가 필요합니다. A1을 확보할 수 있다면 `VM.Standard.A1.Flex`가 더 적합하지만, 현재 Tokyo 콘솔에는 A1이 없고 `VM.Standard.E2.1.Micro`만 `Always Free-eligible`로 표시됩니다. 따라서 이 가이드는 **E2.1.Micro 1대에서 소수 실기기의 단기 기능 검증**을 목표로 합니다.
 
-하지만 "무료·24시간·영구·무중단"을 보장하는 서비스는 아닙니다. Oracle은 Always Free가 계정 수명 동안 무료 한도를 제공한다고 설명하는 동시에, 지역 내 무료 shape 용량 부족과 유휴 인스턴스 회수 가능성을 명시합니다. 따라서 이 가이드는 비용을 낮춘 테스트 배포이지 SLA가 있는 운영 배포가 아닙니다.
+E2.1.Micro는 1/8 OCPU burstable과 메모리 1 GB뿐입니다. 일반 `docker-compose.yml`로 서버 안에서 이미지를 빌드하면 OOM 또는 장시간 정체 가능성이 높습니다. 반드시 Docker Buildx를 사용할 수 있는 개발 컴퓨터/CI에서 `linux/amd64` 이미지를 빌드하고 `docker-compose.e2-micro.yml`로 pull-only 배포합니다. 이것은 무료·24시간·영구·무중단을 보장하지 않으며 실제 축제 운영 사양도 아닙니다.
 
 ### 2026-09 공식 조건 비교
 
 | 후보                     | 공식 무료 조건                                                                                                                         | 이 프로젝트 판단                                                       |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| OCI Always Free A1     | home region에서 월 1,500 OCPU-hour + 9,000 GB-hour, Always Free tenancy 기준 합계 2 OCPU/12 GB; block volume 총 200 GB; outbound 월 10 TB | 가장 적합. 1대에 Compose 실행 가능성이 높지만 ARM 호환·용량 부족·유휴 회수 확인 필요         |
-| OCI E2.1.Micro         | 최대 2대, 각 1/8 OCPU·1 GB                                                                                                           | Java+Next+Postgres 동시 실행에는 메모리/CPU가 너무 작아 비추천                   |
+| OCI Always Free A1     | home region에서 월 1,500 OCPU-hour + 9,000 GB-hour, Always Free tenancy 기준 합계 2 OCPU/12 GB; block volume 총 200 GB; outbound 월 10 TB | 사양상 가장 적합하지만 Tokyo tenancy의 현재 shape 목록에는 없음                         |
+| OCI E2.1.Micro         | 최대 2대, 각 1/8 OCPU·1 GB                                                                                                           | 현재 선택. 외부 빌드·swap·강한 메모리 제한을 적용한 소수 기기 테스트만 지원               |
 | Google Cloud Free Tier | 미국 3개 region 중 e2-micro 1대, 30 GB disk, 북미 outbound 1 GB/월                                                                       | 사양이 작고 VM 외부 IPv4는 월 1시간 초과 시 $0.005/시간이라 공개 IPv4 배포는 완전 무료가 아님 |
 | AWS 신규 Free Plan       | 2025-07-15 이후 신규 계정은 6개월 또는 credit 소진 중 먼저 도래할 때 종료                                                                              | 장기 Always Free VM 대안 아님                                         |
 | Azure 신규 무료            | 대상 VM은 신규 고객 12개월 월 750시간; 이후 실행분은 PAYG                                                                                          | 영구 무료 아님. 30일 후 무료 항목을 계속 받으려면 PAYG 전환 필요                       |
@@ -33,9 +33,9 @@ OCI의 이전 안내를 인용한 블로그에는 A1 `4 OCPU/24 GB`가 남아 �
 ## 비용·가입 위험을 먼저 확인
 
 1. OCI 무료 가입에는 유효한 이메일, 주소, 전화번호, 결제 검증용 카드가 필요합니다. 작은 임시 승인 금액이 보일 수 있고 자동 해제됩니다. Oracle은 사용자가 유료 계정으로 업그레이드하지 않는 한 카드를 청구하지 않는다고 안내합니다: [OCI 가입 공식 문서](https://docs.oracle.com/en-us/iaas/Content/GSG/Tasks/signingup_topic-Sign_Up_for_Free_Oracle_Cloud_Promotion.htm).
-2. Home Region은 가입 후 변경할 수 없고 Always Free compute는 그 region에 만들어야 합니다. 가까운 region보다 **A1 Always Free 용량 확보 가능성**과 서비스 조건을 우선 확인합니다. Oracle 문서에는 다중 AD region의 South Korea North(Chuncheon) A1 예외도 명시되어 있으므로 서울/춘천 명칭을 추측해 고르지 말고 콘솔의 `Always Free eligible` 표시를 확인합니다.
+2. Home Region은 가입 후 변경할 수 없고 Always Free compute는 그 region에 만들어야 합니다. 이 배포에서는 Tokyo에서 콘솔이 실제로 `Always Free-eligible`로 표시한 `VM.Standard.E2.1.Micro`만 사용합니다. 이름이 비슷한 `VM.Standard.E2.1`, `E2.2`, `E3.Flex`, `VM.Standard2.*`는 무료라고 가정하지 않습니다.
 3. `Out of host capacity`이면 무료 자원이 없는 상태일 수 있습니다. 다른 availability domain을 시도하거나 기다려야 하며, PAYG upgrade는 무료 한도 밖 리소스를 만들 때 실제 과금 위험을 엽니다.
-4. Oracle은 7일 동안 CPU p95, network, 그리고 A1의 memory가 모두 20% 미만이면 idle로 보고 회수할 수 있다고 명시합니다. 의미 없는 부하를 만들어 회피하지 마세요. 테스트가 중요하면 유료 VM 또는 다른 SLA 있는 호스팅으로 전환합니다.
+4. Oracle은 일정 조건의 Always Free VM을 idle로 보고 회수할 수 있다고 명시합니다. 의미 없는 부하를 만들어 회피하지 마세요. 테스트가 중요하면 유료 VM 또는 다른 SLA 있는 호스팅으로 전환합니다.
 5. 도메인 등록비는 보통 별도이며 이 가이드의 무료 범위에 포함되지 않습니다. 이미 소유한 도메인의 subdomain을 쓰는 것이 가장 단순합니다.
 6. OCI budget/notification은 경고 수단이지 hard spending cap으로 가정하지 않습니다. PAYG로 전환했다면 Always Free eligible shape·region·volume 표시를 배포 때마다 확인하고, paid resource 생성을 막을 quota/policy를 별도로 검토합니다.
 
@@ -43,14 +43,37 @@ OCI의 이전 안내를 인용한 블로그에는 A1 `4 OCPU/24 GB`가 남아 �
 
 OCI Console에서 다음처럼 만듭니다.
 
-- Image: Ubuntu 24.04 LTS 또는 현재 Docker가 공식 지원하는 64-bit Ubuntu LTS
-- Shape: `VM.Standard.A1.Flex`, 콘솔에서 `Always Free eligible` 확인
-- 크기: 최대 무료 총량 안의 2 OCPU/12 GB 한 대. 작은 테스트라면 2 OCPU/8~12 GB 권장
-- Boot volume: 기본 50 GB 이상, 계정의 Always Free 총 200 GB 한도 안
+- Image: Ubuntu 24.04 LTS x86-64 또는 현재 Docker가 공식 지원하는 64-bit Ubuntu LTS
+- Shape: 정확히 `VM.Standard.E2.1.Micro`, 콘솔에서 `Always Free-eligible` 확인
+- 크기: 고정 1 GB. 비슷한 이름의 유료 shape로 변경하지 않음
+- Boot volume: 기본 50 GB 정도, 계정의 Always Free 총 200 GB 한도 안
 - Network: public subnet, public IPv4 할당
 - SSH: 새 전용 key pair; private key는 안전하게 보관
 
-ARM64에서 frontend/backend/postgres/caddy 이미지가 모두 빌드되는지 확인해야 합니다. 이 저장소의 런타임 base image는 multi-architecture 계열을 선택하지만, 실제 build가 최종 판정입니다.
+두 번째 E2.1.Micro를 무료로 만들 수 있다면 PostgreSQL을 private VCN의 별도 VM으로 옮겨 메모리 여유를 확보할 수 있습니다. 다만 현재 절차는 우선 한 대에서 기능을 검증합니다. DB 분리는 5432를 인터넷에 공개하지 않고 NSG, `pg_hba.conf`, TLS/credential을 다시 설계해야 하므로 단순히 Compose service 주소만 바꾸지 않습니다.
+
+### 1.1 2 GB swap 준비
+
+서비스를 설치하기 전에 swap 존재 여부를 확인합니다.
+
+```bash
+free -h
+sudo swapon --show
+```
+
+swap이 없을 때만 다음과 같이 2 GB 파일을 만듭니다.
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-espero-memory.conf
+sudo sysctl --system
+```
+
+`swapon --show`와 `free -h`로 다시 확인합니다. 기존 `/swapfile` 또는 동일한 `fstab` 항목이 있다면 위 명령을 반복하지 않습니다. swap은 순간적인 OOM 방지 장치일 뿐 추가 RAM이나 빌드 공간이 아닙니다. swap 입출력이 계속 발생하면 푸시 작업이 1분 이상 지연되어 시계 알림이 `MISSED_SCHEDULE`로 끝날 수 있습니다.
 
 ## 2. DNS와 방화벽
 
@@ -104,7 +127,7 @@ sudo docker compose version
 
 ## 4. 코드와 비밀 설정
 
-서버에 저장소를 clone하거나 검증된 release archive를 전송한 뒤 `test` 디렉터리로 이동합니다. `.env`는 배포 서버에서만 만듭니다.
+서버에 저장소를 clone하거나 검증된 release archive를 전송한 뒤 `test` 디렉터리로 이동합니다. `.env`는 배포 서버에서만 만들고, frontend/backend 이미지는 서버 밖에서 먼저 빌드합니다.
 
 ```bash
 cd /opt/espero/test
@@ -112,13 +135,13 @@ cp .env.example .env
 chmod 600 .env
 ```
 
-비밀값 생성:
+비밀값은 신뢰할 수 있는 로컬 컴퓨터에서 생성합니다. E2 VM에서 `npx`나 Docker build를 실행하지 않습니다.
 
 ```bash
 openssl rand -hex 32
 openssl rand -hex 24
 openssl rand -hex 32
-sudo docker run --rm node:24-alpine npx --yes web-push generate-vapid-keys --json
+docker run --rm node:24-alpine npx --yes web-push generate-vapid-keys --json
 ```
 
 - 첫 임의값 → `POSTGRES_PASSWORD`
@@ -133,21 +156,43 @@ sudo docker run --rm node:24-alpine npx --yes web-push generate-vapid-keys --jso
 APP_DOMAIN=pwa.example.com
 APP_ALLOWED_ORIGINS=https://pwa.example.com
 APP_COOKIE_SECURE=true
+BACKEND_IMAGE=ghcr.io/ACCOUNT/espero-pwa-backend@sha256:BACKEND_DIGEST
+FRONTEND_IMAGE=ghcr.io/ACCOUNT/espero-pwa-frontend@sha256:FRONTEND_DIGEST
+POSTGRES_IMAGE=postgres:16-alpine@sha256:POSTGRES_DIGEST
+CADDY_IMAGE=caddy:2-alpine@sha256:CADDY_DIGEST
 ```
+
+네 image reference는 모두 반드시 `linux/amd64`를 포함하고 `@sha256:...` digest로 고정해야 합니다. private registry를 쓴다면 서버에서 최소 read 권한 token으로 로그인하고 해당 token을 `.env`나 shell history에 적지 않습니다.
 
 `TEST_ACCESS_CODE`는 참여자에게 안전한 채널로 전달하고 URL query나 QR에 직접 넣지 않습니다. 이미 발급된 세션은 다시 코드를 요구하지 않습니다. `APP_TOKEN_PEPPER`는 공유하지 않으며, 회전하면 기존 세션과 아직 확인하지 않은 알림 ACK가 무효화됩니다. `APP_PUSH_ALLOWED_ENDPOINT_HOST_SUFFIXES` 기본값은 Chromium의 FCM/Google, Apple Web Push, Firefox의 Mozilla Push, Windows용 Microsoft Edge의 WNS endpoint를 포함합니다. 다른 provider는 실제 endpoint를 확인한 뒤에만 확장합니다.
 
-## 5. 빌드와 기동
+## 5. 외부 빌드와 E2 기동
 
-```bash
-sudo docker compose config --quiet
-sudo docker compose build --pull
-sudo docker compose up -d
-sudo docker compose ps
-sudo docker compose logs --tail=100 caddy backend frontend postgres
+### 5.1 개발 컴퓨터/CI에서 이미지 빌드
+
+다음 예시는 저장소의 `test` 디렉터리에서 x86-64 이미지를 GHCR에 push합니다. `ACCOUNT`와 tag를 실제 값으로 바꾸고 `docker login ghcr.io`의 비밀번호 prompt에는 registry token을 입력합니다. token을 명령행 인자로 넘기지 않습니다.
+
+```powershell
+docker login ghcr.io -u ACCOUNT
+docker buildx build --platform linux/amd64 --pull --push -t ghcr.io/ACCOUNT/espero-pwa-backend:COMMIT_SHA ./backend
+docker buildx build --platform linux/amd64 --pull --push --build-arg NEXT_PUBLIC_API_BASE_PATH=/api/v1 -f ./frontend/Dockerfile.e2-micro -t ghcr.io/ACCOUNT/espero-pwa-frontend:COMMIT_SHA ./frontend
+docker buildx imagetools inspect postgres:16-alpine
+docker buildx imagetools inspect caddy:2-alpine
 ```
 
-`config --quiet`이 실패하면 누락된 `.env` 값부터 해결합니다. 정상 상태가 된 뒤 외부 네트워크에서 확인합니다.
+frontend의 E2 전용 Dockerfile은 Next.js를 정적 export하고 최종 image에는 Node 대신 non-root BusyBox `httpd`만 남깁니다. 빌드 출력 또는 registry 화면에서 애플리케이션 image digest를 확인하고, `imagetools inspect`의 최상위 `Digest`에서 공식 image digest를 확인합니다. E2 서버 `.env`에 네 reference를 `이름@sha256:값` 형태로 기록합니다. 최상위 manifest-list digest를 고정해도 Compose의 `platform: linux/amd64`가 그 안의 x86-64 image를 선택합니다. 이미지를 public으로 공개하지 않는다면 E2 서버에서도 read-only token으로 `docker login ghcr.io`를 한 번 수행합니다.
+
+### 5.2 E2 서버에서는 pull만 수행
+
+```bash
+sudo docker compose -f docker-compose.e2-micro.yml config --quiet
+sudo docker compose -f docker-compose.e2-micro.yml pull
+sudo docker compose -f docker-compose.e2-micro.yml up -d --no-build
+sudo docker compose -f docker-compose.e2-micro.yml ps
+sudo docker compose -f docker-compose.e2-micro.yml logs --tail=100 caddy backend frontend postgres
+```
+
+`docker-compose.e2-micro.yml`에는 의도적으로 `build:`가 없습니다. `config --quiet`이 실패하면 누락된 `.env` 값부터 해결합니다. `pull` 중 registry 인증이나 architecture 오류가 나면 실행을 강행하지 않습니다. 정상 상태가 된 뒤 외부 네트워크에서 확인합니다.
 
 ```bash
 curl -I https://pwa.example.com/
@@ -158,7 +203,9 @@ Caddy 인증서 오류가 나면 가장 먼저 DNS A/AAAA, TCP 80/443, VM 시간
 
 백엔드는 브라우저 push service의 TCP 443 outbound가 필요합니다. 일반 OCI public VM은 public IPv4 경로를 통해 이를 사용하며, egress rule이나 조직 방화벽을 제한했다면 기본 allowlist의 `fcm.googleapis.com`, `jmt17.google.com`, `*.push.apple.com`, `*.push.services.mozilla.com`, `*.notify.windows.com` HTTPS 연결을 허용합니다. Apple의 요구사항은 [WebKit 공식 문서](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/), WNS FQDN은 [Microsoft 방화벽 allowlist 문서](https://learn.microsoft.com/en-us/windows/apps/develop/notifications/push-notifications/firewall-allowlist-config)를 참고합니다.
 
-기본 `APP_PUSH_REQUEST_TIMEOUT=PT15S`는 응답 없는 provider가 worker를 오래 점유하지 않게 하고, `APP_SCHEDULER_POOL_SIZE=2`는 시계 dispatcher와 push worker가 별도 scheduler thread에서 진행될 여지를 줍니다. 작은 무료 VM에서 값을 무작정 늘리면 connection·memory 경쟁이 커집니다. delivery claim lease는 고정값이 아니라 `min(claim 시각 + request timeout + 5초, event 만료 시각)`으로 함께 조정됩니다. 각 재시도도 event 만료까지 남은 TTL만 provider에 전달합니다.
+E2 profile은 backend 416 MiB, PostgreSQL 160 MiB, 정적 frontend 32 MiB, Caddy 96 MiB로 물리 메모리 상한을 두며 합계는 704 MiB입니다. Ubuntu, Docker daemon과 page cache에 이론상 약 320 MiB를 남깁니다. 각 서비스의 `memswap_limit`은 순간적인 swap 사용도 제한합니다. Docker에서 `memswap_limit`은 memory와 swap의 합계 상한이며 swap을 자주 쓰면 성능 비용이 발생합니다: [Compose service memory 설정](https://docs.docker.com/reference/compose-file/services/#mem_limit). JVM heap은 192 MiB, Hikari pool은 4, Tomcat worker는 16으로 제한합니다. frontend는 Node 없이 정적 파일만 제공합니다. PostgreSQL은 32 MiB shared buffers, 최대 12 connections, parallel worker 비활성화로 시작합니다. 데이터 안전성을 해치는 `fsync=off`, `full_page_writes=off`는 사용하지 않습니다.
+
+기본 `APP_PUSH_REQUEST_TIMEOUT=PT15S`는 응답 없는 provider가 worker를 오래 점유하지 않게 하고, `APP_SCHEDULER_POOL_SIZE=2`는 시계 dispatcher와 push worker가 별도 scheduler thread에서 진행될 여지를 줍니다. 이를 1로 줄이면 한 push의 최대 15초 대기가 clock scheduler도 막을 수 있으므로 E2 profile에서도 2를 유지합니다. 작은 무료 VM에서 값을 무작정 늘리면 connection·memory 경쟁이 커집니다. delivery claim lease는 고정값이 아니라 `min(claim 시각 + request timeout + 5초, event 만료 시각)`으로 함께 조정됩니다. 각 재시도도 event 만료까지 남은 TTL만 provider에 전달합니다.
 
 ## 6. iOS 실기기 시험
 
@@ -194,7 +241,7 @@ DB dump 전에 백업 디렉터리 권한을 제한합니다.
 ```bash
 mkdir -p backups
 chmod 700 backups
-sudo docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "backups/espero-$(date -u +%Y%m%dT%H%M%SZ).dump"
+sudo docker compose -f docker-compose.e2-micro.yml exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "backups/espero-$(date -u +%Y%m%dT%H%M%SZ).dump"
 chmod 600 backups/*.dump
 ```
 
@@ -203,7 +250,7 @@ single quote 안의 `$POSTGRES_USER`와 `$POSTGRES_DB`는 PostgreSQL 컨테이�
 복원은 **별도 빈 DB/검증 환경에서 먼저 연습**합니다.
 
 ```bash
-sudo docker compose exec -T postgres sh -c 'pg_restore --clean --if-exists --no-owner -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backups/FILE.dump
+sudo docker compose -f docker-compose.e2-micro.yml exec -T postgres sh -c 'pg_restore --clean --if-exists --no-owner -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backups/FILE.dump
 ```
 
 이 명령은 대상 DB 객체를 교체할 수 있으므로 운영 DB에 즉시 실행하지 않습니다. PostgreSQL 공식 도구: [pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html), [pg_restore](https://www.postgresql.org/docs/current/app-pgrestore.html).
@@ -214,18 +261,17 @@ Caddy의 `caddy_data`에는 인증서 상태가 있지만 없어져도 DNS/port 
 
 1. PostgreSQL dump와 `.env`/VAPID 별도 백업을 확인합니다.
 2. 변경 commit/tag를 기록합니다.
-3. 이미지를 가져오고 build합니다.
-4. `docker compose config --quiet`를 실행합니다.
-5. `docker compose up -d`로 바뀐 서비스만 재생성합니다.
+3. 외부에서 검증·고정한 새 image digest를 `.env`에 기록하고 pull합니다.
+4. E2 profile의 `config --quiet`를 실행합니다.
+5. E2 profile을 `up -d --no-build`로 재생성합니다.
 6. health, logs, 카운터 복원, 한 기기 Push를 smoke test합니다.
 
 ```bash
-sudo docker compose pull
-sudo docker compose build --pull
-sudo docker compose config --quiet
-sudo docker compose up -d
-sudo docker compose ps
-sudo docker compose logs --since=10m --tail=200
+sudo docker compose -f docker-compose.e2-micro.yml pull
+sudo docker compose -f docker-compose.e2-micro.yml config --quiet
+sudo docker compose -f docker-compose.e2-micro.yml up -d --no-build
+sudo docker compose -f docker-compose.e2-micro.yml ps
+sudo docker compose -f docker-compose.e2-micro.yml logs --since=10m --tail=200
 ```
 
 PostgreSQL major image tag를 바꾸는 것은 일반 앱 업데이트가 아닙니다. 별도의 dump/restore 또는 공식 upgrade 절차가 필요합니다. `docker compose down -v`, `docker volume rm`, `/var/lib/docker` 삭제는 데이터와 인증서 상태를 지우므로 사용하지 않습니다.
@@ -265,7 +311,7 @@ PostgreSQL major image tag를 바꾸는 것은 일반 앱 업데이트가 아닙
 ### Caddy 인증서 발급 실패
 
 ```bash
-sudo docker compose logs --tail=200 caddy
+sudo docker compose -f docker-compose.e2-micro.yml logs --tail=200 caddy
 dig +short A pwa.example.com
 curl -I http://pwa.example.com
 ```
@@ -275,13 +321,15 @@ DNS가 다른 IP를 가리키는지, 잘못된 AAAA가 있는지, TCP 80/443이 
 ### 컨테이너가 unhealthy/restart loop
 
 ```bash
-sudo docker compose ps
-sudo docker compose logs --tail=200 postgres backend frontend
+sudo docker compose -f docker-compose.e2-micro.yml ps
+sudo docker compose -f docker-compose.e2-micro.yml logs --tail=200 postgres backend frontend
 sudo docker stats --no-stream
+free -h
+sudo swapon --show
 df -h
 ```
 
-DB credentials 불일치, migration 실패, 누락된 필수 env, ARM image 문제, 메모리/디스크 부족을 확인합니다. `.env` 값을 log나 지원 게시물에 붙이지 않습니다.
+DB credentials 불일치, migration 실패, 누락된 필수 env, `linux/amd64` image 문제, 메모리/디스크 부족을 확인합니다. `docker inspect`의 memory/memory-swap 제한도 Compose 값과 일치하는지 확인합니다. 커널 log의 OOM 기록이 있거나 swap 입출력이 지속되면 동시 테스트 수를 줄이고, 서버에서 build·package update를 실행하지 않습니다. `.env` 값을 log나 지원 게시물에 붙이지 않습니다.
 
 ### 비용이 발생하거나 VM이 사라짐
 
@@ -292,9 +340,14 @@ DB credentials 불일치, migration 실패, 누락된 필수 env, ARM image 문�
 ## 배포 완료 체크리스트
 
 - [ ] 비용 정책을 다시 읽고 home region/shape/volume의 Always Free 표시를 캡처했다.
+- [ ] shape가 정확히 `VM.Standard.E2.1.Micro`이고 다른 E2/E3/Standard shape가 아님을 확인했다.
 - [ ] 도메인 A/AAAA가 정확하며 TCP 80/443만 공개했다.
 - [ ] SSH 22는 관리 IP로 제한했다.
+- [ ] 2 GB swap을 만들고 재부팅 후에도 활성화되는지 확인했다.
 - [ ] `.env` 권한이 600이고 Git에 추적되지 않는다.
+- [ ] frontend/backend를 외부에서 `linux/amd64`로 빌드하고 image digest를 `.env`에 고정했다.
+- [ ] 서버에서는 `docker-compose.e2-micro.yml`과 `--no-build`만 사용했다.
+- [ ] `docker stats`로 네 서비스가 메모리 상한 안에서 안정적인지 확인했다.
 - [ ] DB/접근 코드/token pepper/VAPID private key가 모두 강한 임의값이며 pepper는 최소 32바이트다.
 - [ ] Caddy 인증서와 HTTP→HTTPS redirect가 정상이다.
 - [ ] backend의 대상 브라우저 push service HTTPS outbound가 가능하다.

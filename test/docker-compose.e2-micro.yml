@@ -1,0 +1,194 @@
+name: espero-pwa-push-test-e2
+
+# Runtime-only profile for OCI VM.Standard.E2.1.Micro (1 GB RAM, linux/amd64).
+# Build frontend/backend images on another machine and set their immutable image
+# references in .env. The E2 frontend image is a static BusyBox runtime, not Node.
+# Do not add build: sections to this file.
+
+x-log-options: &log-options
+  driver: json-file
+  options:
+    max-size: "5m"
+    max-file: "2"
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?Set POSTGRES_IMAGE to a pinned postgres linux/amd64 image in .env}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 160m
+    memswap_limit: 224m
+    pids_limit: 64
+    shm_size: 64m
+    command:
+      - postgres
+      - -c
+      - shared_buffers=32MB
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - work_mem=1MB
+      - -c
+      - maintenance_work_mem=16MB
+      - -c
+      - autovacuum_work_mem=8MB
+      - -c
+      - temp_buffers=4MB
+      - -c
+      - max_connections=12
+      - -c
+      - wal_buffers=1MB
+      - -c
+      - max_worker_processes=2
+      - -c
+      - max_parallel_workers=0
+      - -c
+      - max_parallel_workers_per_gather=0
+      - -c
+      - autovacuum_max_workers=1
+      - -c
+      - jit=off
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging: *log-options
+    networks:
+      - data
+
+  backend:
+    image: ${BACKEND_IMAGE:?Set BACKEND_IMAGE to a prebuilt linux/amd64 image in .env}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 416m
+    memswap_limit: 544m
+    pids_limit: 128
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -XX:+UseSerialGC
+        -Xms64m
+        -Xmx192m
+        -Xss512k
+        -XX:MaxMetaspaceSize=96m
+        -XX:ReservedCodeCacheSize=32m
+        -XX:MaxDirectMemorySize=16m
+        -XX:TieredStopAtLevel=1
+        -XX:+ExitOnOutOfMemoryError
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      SERVER_TOMCAT_THREADS_MAX: 16
+      SERVER_TOMCAT_THREADS_MIN_SPARE: 2
+      SERVER_TOMCAT_MAX_CONNECTIONS: 64
+      SERVER_TOMCAT_ACCEPT_COUNT: 32
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      SPRING_DATASOURCE_MAXIMUM_POOL_SIZE: 4
+      SPRING_DATASOURCE_MINIMUM_IDLE: 1
+      TEST_ACCESS_CODE: ${TEST_ACCESS_CODE:?Set TEST_ACCESS_CODE in .env}
+      APP_TOKEN_PEPPER: ${APP_TOKEN_PEPPER:?Set APP_TOKEN_PEPPER in .env}
+      APP_ACCESS_MAX_FAILURES: ${APP_ACCESS_MAX_FAILURES:-5}
+      APP_ACCESS_FAILURE_WINDOW: ${APP_ACCESS_FAILURE_WINDOW:-PT15M}
+      APP_ACK_MAX_REQUESTS: ${APP_ACK_MAX_REQUESTS:-60}
+      APP_ACK_RATE_WINDOW: ${APP_ACK_RATE_WINDOW:-PT1M}
+      APP_ALLOWED_ORIGINS: ${APP_ALLOWED_ORIGINS:?Set APP_ALLOWED_ORIGINS in .env}
+      APP_COOKIE_SECURE: ${APP_COOKIE_SECURE:-true}
+      APP_SESSION_TTL: ${APP_SESSION_TTL:-P7D}
+      APP_SESSION_CLEANUP_DELAY: ${APP_SESSION_CLEANUP_DELAY:-PT1H}
+      APP_PUSH_ENABLED: ${APP_PUSH_ENABLED:-true}
+      APP_CLOCK_ZONE: ${APP_CLOCK_ZONE:-Asia/Seoul}
+      APP_VAPID_PUBLIC_KEY: ${APP_VAPID_PUBLIC_KEY:?Set APP_VAPID_PUBLIC_KEY in .env}
+      APP_VAPID_PRIVATE_KEY: ${APP_VAPID_PRIVATE_KEY:?Set APP_VAPID_PRIVATE_KEY in .env}
+      APP_VAPID_SUBJECT: ${APP_VAPID_SUBJECT:?Set APP_VAPID_SUBJECT in .env}
+      APP_PUSH_ALLOWED_ENDPOINT_HOST_SUFFIXES: ${APP_PUSH_ALLOWED_ENDPOINT_HOST_SUFFIXES:-fcm.googleapis.com,jmt17.google.com,.push.apple.com,.push.services.mozilla.com,.notify.windows.com}
+      APP_PUSH_TTL: ${APP_PUSH_TTL:-PT70S}
+      APP_PUSH_MAX_ATTEMPTS: ${APP_PUSH_MAX_ATTEMPTS:-3}
+      APP_PUSH_REQUEST_TIMEOUT: ${APP_PUSH_REQUEST_TIMEOUT:-PT15S}
+      APP_PUSH_WORKER_DELAY: ${APP_PUSH_WORKER_DELAY:-PT5S}
+      APP_CLOCK_SCHEDULER_DELAY: ${APP_CLOCK_SCHEDULER_DELAY:-PT5S}
+      APP_SCHEDULER_POOL_SIZE: ${APP_SCHEDULER_POOL_SIZE:-2}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/actuator/health/readiness | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+    logging: *log-options
+    networks:
+      - edge
+      - data
+
+  frontend:
+    image: ${FRONTEND_IMAGE:?Set FRONTEND_IMAGE to the prebuilt static linux/amd64 image in .env}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 32m
+    memswap_limit: 48m
+    pids_limit: 16
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/healthz || exit 1"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *log-options
+    networks:
+      - edge
+
+  caddy:
+    image: ${CADDY_IMAGE:?Set CADDY_IMAGE to a pinned caddy linux/amd64 image in .env}
+    platform: linux/amd64
+    restart: unless-stopped
+    mem_limit: 96m
+    memswap_limit: 128m
+    pids_limit: 64
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    logging: *log-options
+    networks:
+      - edge
+
+networks:
+  edge:
+  data:
+    internal: true
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

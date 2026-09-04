@@ -16,11 +16,11 @@ Next.js PWA와 Spring Boot API를 동일한 HTTPS origin으로 서비스하는 �
 Spring Boot --> 브라우저별 Web Push endpoint (HTTPS outbound)
 ```
 
-호스트에는 Caddy의 `80/tcp`, `443/tcp`, 선택적 HTTP/3용 `443/udp`만 공개됩니다. API와 데이터베이스 포트는 Docker 네트워크에만 노출됩니다.
+일반 profile은 Caddy의 `80/tcp`, `443/tcp`, 선택적 HTTP/3용 `443/udp`만 공개합니다. E2.1.Micro profile은 메모리를 아끼기 위해 `80/tcp`, `443/tcp`만 공개합니다. 두 profile 모두 API와 데이터베이스 포트는 Docker 네트워크에만 노출합니다.
 
 ## 빠른 시작
 
-필요 조건은 Docker Engine과 Compose 플러그인, 공개 도메인, 해당 도메인을 가리키는 공인 IP, 외부에서 접근 가능한 TCP 80/443입니다. iPhone 실기기 테스트에는 공인 인증서가 적용된 HTTPS가 필요합니다.
+필요 조건은 Docker Engine과 Compose 플러그인, 공개 도메인, 해당 도메인을 가리키는 공인 IP, 외부에서 접근 가능한 TCP 80/443입니다. iPhone 실기기 테스트에는 공인 인증서가 적용된 HTTPS가 필요합니다. 아래 기본 명령은 빌드할 메모리가 충분한 호스트용입니다. OCI `VM.Standard.E2.1.Micro`에서는 서버 빌드를 실행하지 말고 다음 절의 전용 profile을 사용합니다.
 
 1. 환경 파일을 만듭니다.
 
@@ -46,7 +46,7 @@ Spring Boot --> 브라우저별 Web Push endpoint (HTTPS outbound)
    APP_ALLOWED_ORIGINS=https://pwa.example.com
    ```
 
-4. 설정을 검증하고 빌드·기동합니다.
+4. **E2.1.Micro가 아닌 메모리 여유가 있는 호스트에서만** 설정을 검증하고 빌드·기동합니다. E2 사용자는 이 단계를 건너뛰고 바로 아래 전용 절차를 사용합니다.
 
    ```bash
    docker compose config --quiet
@@ -56,6 +56,24 @@ Spring Boot --> 브라우저별 Web Push endpoint (HTTPS outbound)
    ```
 
 5. 데스크톱에서 `https://APP_DOMAIN/healthz`와 메인 화면을 확인한 뒤 휴대전화 설치 테스트를 진행합니다. 배포 환경 준비는 [무료 서버 배포 가이드](docs/FREE_SERVER_DEPLOYMENT.md), 실기기 확인은 아래 테스트 핵심 절차를 따릅니다.
+
+### OCI E2.1.Micro 1 GB
+
+Tokyo home region에서 `VM.Standard.E2.1.Micro`만 Always Free로 제공되는 경우 다음 원칙을 적용합니다.
+
+- 2 GB host swap을 먼저 설정합니다.
+- frontend/backend 이미지는 Docker Buildx를 사용할 수 있는 개발 컴퓨터나 CI에서 `linux/amd64`로 빌드합니다. frontend는 `Dockerfile.e2-micro`로 정적 export하여 실행 중 Node를 제거합니다.
+- `.env`의 `BACKEND_IMAGE`, `FRONTEND_IMAGE`, `POSTGRES_IMAGE`, `CADDY_IMAGE`를 검증된 image digest로 채웁니다.
+- 서버에서는 빌드 항목이 없는 저메모리 Compose만 실행합니다.
+
+```bash
+docker compose -f docker-compose.e2-micro.yml config --quiet
+docker compose -f docker-compose.e2-micro.yml pull
+docker compose -f docker-compose.e2-micro.yml up -d --no-build
+docker compose -f docker-compose.e2-micro.yml ps
+```
+
+이 profile은 backend 416 MiB, PostgreSQL 160 MiB, 정적 frontend 32 MiB, Caddy 96 MiB로 제한하며 합계는 704 MiB입니다. 소수 실기기의 단기 기능 검증용이며 실제 축제 운영 사양이 아닙니다. swap, 외부 빌드, registry 설정과 장애 진단은 [E2 배포 절차](docs/FREE_SERVER_DEPLOYMENT.md)를 그대로 따릅니다.
 
 ## 테스트 핵심 절차
 
@@ -70,6 +88,23 @@ Spring Boot --> 브라우저별 Web Push endpoint (HTTPS outbound)
 
 ## 자주 쓰는 운영 명령
 
+### OCI E2.1.Micro
+
+E2에서는 아래처럼 모든 명령에 전용 파일을 명시합니다. 일반 `docker compose build`나 파일을 생략한 `up`은 실행하지 않습니다.
+
+```bash
+docker compose -f docker-compose.e2-micro.yml ps
+docker compose -f docker-compose.e2-micro.yml logs -f --tail=200 backend
+docker compose -f docker-compose.e2-micro.yml logs -f --tail=200 caddy
+docker compose -f docker-compose.e2-micro.yml pull
+docker compose -f docker-compose.e2-micro.yml up -d --no-build
+docker compose -f docker-compose.e2-micro.yml down
+```
+
+### 메모리가 충분한 일반 호스트
+
+E2.1.Micro가 아닌 개발·일반 호스트에서만 다음 기본 Compose 명령을 사용합니다.
+
 ```bash
 docker compose ps
 docker compose logs -f --tail=200 backend
@@ -80,7 +115,7 @@ docker compose up -d
 docker compose down
 ```
 
-`docker compose down`은 컨테이너와 네트워크만 제거하고 named volume은 유지합니다. `docker compose down -v`는 PostgreSQL과 Caddy 인증서 데이터를 삭제하므로 이 프로젝트 문서에서는 사용하지 않습니다.
+같은 profile의 `docker compose down`은 컨테이너와 네트워크만 제거하고 named volume은 유지합니다. `docker compose down -v`는 PostgreSQL과 Caddy 인증서 데이터를 삭제하므로 이 프로젝트 문서에서는 사용하지 않습니다.
 
 ## 보안·데이터 한계
 

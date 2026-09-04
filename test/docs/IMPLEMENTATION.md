@@ -20,7 +20,7 @@ Web Push 전송 성공은 브라우저 push service의 접수를 뜻합니다. �
 
 | 계층 | 구현 | 책임 | 공개 범위 |
 |---|---|---|---|
-| Edge | Caddy 2 Alpine | 자동 TLS, HTTP→HTTPS, 동일-origin reverse proxy | `80/tcp`, `443/tcp`, `443/udp` |
+| Edge | Caddy 2 Alpine | 자동 TLS, HTTP→HTTPS, 동일-origin reverse proxy | 일반: `80/tcp`, `443/tcp`, `443/udp`; E2: TCP 80/443만 |
 | UI | Next.js 16.3.3, React 19.2.0, Node 24 Alpine | 설치 gate, 카운터, Push 구독, 상태·이력 UI, Service Worker | Caddy 내부 `3000` |
 | API | Spring Boot 4.1.1, Java 21, `web-push` 5.1.2 | 세션·CSRF, 진행도, 구독 검증, 예약·전송·ACK | Caddy 내부 `8080` |
 | DB | PostgreSQL 16 Alpine, Flyway | 모든 서버 상태와 전송 결과 영속화 | 내부 `5432` |
@@ -35,8 +35,10 @@ Docker의 `data` network는 `internal: true`이며 PostgreSQL은 이 network에�
 test/
   Caddyfile
   docker-compose.yml
+  docker-compose.e2-micro.yml         OCI E2 1 GB용 pull-only 저메모리 profile
   frontend/
     Dockerfile                      Node 24 multi-stage standalone image
+    Dockerfile.e2-micro             Next static export + non-root BusyBox runtime
     .dockerignore                   node_modules, build output, env 제외
     public/sw.js                    Service Worker, offline shell, Push 표시와 ACK
     src/components/pwa-test-app.tsx 설치 gate와 전체 사용자 흐름
@@ -60,6 +62,10 @@ test/
 | 변수 | 값/기본 | 용도 |
 |---|---|---|
 | `APP_DOMAIN` | 필수 | scheme·port·path 없는 Caddy 공개 hostname |
+| `BACKEND_IMAGE` | E2 profile에서 필수 | digest로 고정한 외부 빌드 `linux/amd64` backend image |
+| `FRONTEND_IMAGE` | E2 profile에서 필수 | digest로 고정한 외부 빌드 static `linux/amd64` frontend image |
+| `POSTGRES_IMAGE` | E2 profile에서 필수 | digest로 고정한 PostgreSQL 16 Alpine `linux/amd64` image |
+| `CADDY_IMAGE` | E2 profile에서 필수 | digest로 고정한 Caddy 2 Alpine `linux/amd64` image |
 | `APP_ALLOWED_ORIGINS` | 필수 | 쉼표 구분 허용 origin. 기본 배포는 `https://APP_DOMAIN` 하나 |
 | `POSTGRES_DB` | `espero_push` | DB 이름 |
 | `POSTGRES_USER` | `espero_push` | 애플리케이션 DB 사용자 |
@@ -460,9 +466,25 @@ ACTIVE 시계 테스트 동안 UI는 10초마다 state를 다시 읽습니다. �
 
 Flyway `V1__create_stamp_push_schema.sql`이 시작 시 schema를 생성합니다. `spring.flyway.clean-disabled=true`이므로 애플리케이션에서 clean을 실행하지 않습니다. PostgreSQL volume이나 migration을 되돌리는 작업은 별도 백업 없이 수행하면 안 됩니다.
 
+## OCI E2.1.Micro 저메모리 profile
+
+일반 `docker-compose.yml`은 개발·충분한 메모리의 호스트에서 이미지를 빌드할 수 있는 구성입니다. `docker-compose.e2-micro.yml`은 Tokyo에서 A1을 선택할 수 없고 1 GB `VM.Standard.E2.1.Micro`만 Always Free인 상황을 위한 별도 runtime 계약입니다.
+
+- E2 서버에는 Maven/Next build context가 없고, 외부에서 만든 `linux/amd64` frontend/backend image와 공식 PostgreSQL/Caddy image를 모두 digest로 pull합니다. 네 서비스 모두 Compose에서 `platform: linux/amd64`를 고정해 ARM image를 잘못 배포하지 않게 합니다.
+- E2 frontend build는 같은 Next.js 소스를 [공식 static export 방식](https://nextjs.org/docs/app/guides/static-exports)으로 만들고 최종 image에는 non-root BusyBox `httpd`만 둡니다. 브라우저가 동일 origin `/api/v1`을 호출하므로 SSR이나 Node runtime이 필요하지 않습니다. 일반 개발 profile의 Next standalone image는 그대로 유지합니다.
+- `mem_limit` 합계는 backend 416 MiB, PostgreSQL 160 MiB, 정적 frontend 32 MiB, Caddy 96 MiB의 총 704 MiB입니다. 나머지 약 320 MiB는 Ubuntu, Docker daemon과 page cache를 위해 남깁니다.
+- 각 컨테이너는 `memswap_limit`과 `pids_limit`도 가지며 호스트에는 2 GB swap을 별도로 준비합니다. swap은 순간 OOM 방지용이고 지속 부하를 감당하는 RAM이 아닙니다.
+- Java는 192 MiB heap, 96 MiB metaspace, Serial GC와 제한된 code/direct memory를 사용합니다. 416 MiB container 상한 안에 JVM native 영역 여유를 두고 Tomcat 16 threads, Hikari 4 connections로 동시성 상한을 낮춥니다.
+- PostgreSQL은 32 MiB shared buffers, 최대 12 connections, parallel query/JIT 비활성화로 시작합니다. 내구성을 훼손하는 `fsync=off`나 `full_page_writes=off`는 적용하지 않습니다.
+- 정적 frontend는 32 MiB memory와 16 PID 상한, read-only filesystem, 모든 Linux capability 제거를 적용합니다. CSP·frame 방지와 Service Worker 전용 cache/scope header는 외부 Caddy가 설정합니다.
+- scheduler pool은 2를 유지합니다. 1로 줄이면 외부 Push 요청 대기가 clock dispatcher를 막아 예정 슬롯이 누락될 수 있습니다.
+- JSON container log는 서비스당 5 MiB×2개로 회전합니다. 저메모리 VM에서 이미지 빌드나 package update를 테스트와 동시에 실행하지 않습니다.
+
+이 profile은 휴대전화 한 대 또는 소수 기기의 단기 기능 검증용입니다. 실제 축제 트래픽, 무중단 운영이나 정확한 분 단위 전송을 보장하는 사양이 아닙니다. 설정·이미지 빌드·swap·관측 절차는 [무료 서버 배포 가이드](FREE_SERVER_DEPLOYMENT.md)를 따릅니다.
+
 ## Health와 운영 관찰
 
-- Frontend: `GET /healthz`; 컨테이너의 Node `fetch` healthcheck가 확인합니다.
+- Frontend: 정적으로 export된 `GET /healthz`; 컨테이너의 BusyBox `wget` healthcheck가 확인합니다.
 - Backend: `GET /actuator/health/readiness`; readiness group은 application readiness와 DB를 포함하고 상세를 노출하지 않습니다.
 - PostgreSQL: `pg_isready`.
 - Caddy: frontend/backend가 healthy가 된 뒤 시작하고 공개 HTTPS를 제공합니다.
