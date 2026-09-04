@@ -1,0 +1,67 @@
+server:
+  port: 8080
+  forward-headers-strategy: ${SERVER_FORWARD_HEADERS_STRATEGY:framework}
+
+spring:
+  application:
+    name: stamp-test-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/espero}
+    username: ${SPRING_DATASOURCE_USERNAME:espero}
+    password: ${SPRING_DATASOURCE_PASSWORD:espero}
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:10}
+      minimum-idle: ${SPRING_DATASOURCE_MINIMUM_IDLE:1}
+  flyway:
+    enabled: true
+    clean-disabled: true
+  task:
+    scheduling:
+      pool:
+        size: ${APP_SCHEDULER_POOL_SIZE:2}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+      group:
+        readiness:
+          include: readinessState,db
+        liveness:
+          include: livenessState
+
+app:
+  session:
+    ttl: ${APP_SESSION_TTL:P7D}
+    cookie-secure: ${APP_COOKIE_SECURE:true}
+    cleanup-delay: ${APP_SESSION_CLEANUP_DELAY:PT1H}
+  access:
+    code: ${TEST_ACCESS_CODE:}
+    max-failures: ${APP_ACCESS_MAX_FAILURES:5}
+    window: ${APP_ACCESS_FAILURE_WINDOW:PT15M}
+  security:
+    allowed-origins: ${APP_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+    token-pepper: ${APP_TOKEN_PEPPER:}
+    ack-max-requests: ${APP_ACK_MAX_REQUESTS:60}
+    ack-window: ${APP_ACK_RATE_WINDOW:PT1M}
+  push:
+    enabled: ${APP_PUSH_ENABLED:false}
+    public-key: ${APP_VAPID_PUBLIC_KEY:}
+    private-key: ${APP_VAPID_PRIVATE_KEY:}
+    subject: ${APP_VAPID_SUBJECT:mailto:admin@example.invalid}
+    allowed-endpoint-host-suffixes: ${APP_PUSH_ALLOWED_ENDPOINT_HOST_SUFFIXES:fcm.googleapis.com,jmt17.google.com,.push.apple.com,.push.services.mozilla.com,.notify.windows.com}
+    ttl: ${APP_PUSH_TTL:PT70S}
+    max-attempts: ${APP_PUSH_MAX_ATTEMPTS:3}
+    worker-delay: ${APP_PUSH_WORKER_DELAY:PT5S}
+    request-timeout: ${APP_PUSH_REQUEST_TIMEOUT:PT15S}
+  clock-test:
+    zone: ${APP_CLOCK_ZONE:Asia/Seoul}
+    duration: PT5M
+    interval: PT1M
+    notification-count: 5
+    scheduler-delay: ${APP_CLOCK_SCHEDULER_DELAY:PT5S}

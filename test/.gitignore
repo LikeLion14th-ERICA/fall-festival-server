@@ -1,0 +1,21 @@
+# Runtime configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Local backups and database exports
+backups/
+*.dump
+*.sql.gz
+
+# Build output and dependencies
+frontend/.next/
+frontend/node_modules/
+backend/target/
+
+# Logs and editor/OS metadata
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

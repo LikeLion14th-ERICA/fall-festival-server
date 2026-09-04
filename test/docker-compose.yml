@@ -1,0 +1,110 @@
+name: espero-pwa-push-test
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      TEST_ACCESS_CODE: ${TEST_ACCESS_CODE:?Set TEST_ACCESS_CODE in .env}
+      APP_TOKEN_PEPPER: ${APP_TOKEN_PEPPER:?Set APP_TOKEN_PEPPER in .env}
+      APP_ACCESS_MAX_FAILURES: ${APP_ACCESS_MAX_FAILURES:-5}
+      APP_ACCESS_FAILURE_WINDOW: ${APP_ACCESS_FAILURE_WINDOW:-PT15M}
+      APP_ACK_MAX_REQUESTS: ${APP_ACK_MAX_REQUESTS:-60}
+      APP_ACK_RATE_WINDOW: ${APP_ACK_RATE_WINDOW:-PT1M}
+      APP_ALLOWED_ORIGINS: ${APP_ALLOWED_ORIGINS:?Set APP_ALLOWED_ORIGINS in .env}
+      APP_COOKIE_SECURE: ${APP_COOKIE_SECURE:-true}
+      APP_SESSION_TTL: ${APP_SESSION_TTL:-P7D}
+      APP_SESSION_CLEANUP_DELAY: ${APP_SESSION_CLEANUP_DELAY:-PT1H}
+      APP_PUSH_ENABLED: ${APP_PUSH_ENABLED:-true}
+      APP_CLOCK_ZONE: ${APP_CLOCK_ZONE:-Asia/Seoul}
+      APP_VAPID_PUBLIC_KEY: ${APP_VAPID_PUBLIC_KEY:?Set APP_VAPID_PUBLIC_KEY in .env}
+      APP_VAPID_PRIVATE_KEY: ${APP_VAPID_PRIVATE_KEY:?Set APP_VAPID_PRIVATE_KEY in .env}
+      APP_VAPID_SUBJECT: ${APP_VAPID_SUBJECT:?Set APP_VAPID_SUBJECT in .env}
+      APP_PUSH_ALLOWED_ENDPOINT_HOST_SUFFIXES: ${APP_PUSH_ALLOWED_ENDPOINT_HOST_SUFFIXES:-fcm.googleapis.com,jmt17.google.com,.push.apple.com,.push.services.mozilla.com,.notify.windows.com}
+      APP_PUSH_TTL: ${APP_PUSH_TTL:-PT70S}
+      APP_PUSH_MAX_ATTEMPTS: ${APP_PUSH_MAX_ATTEMPTS:-3}
+      APP_PUSH_REQUEST_TIMEOUT: ${APP_PUSH_REQUEST_TIMEOUT:-PT15S}
+      APP_PUSH_WORKER_DELAY: ${APP_PUSH_WORKER_DELAY:-PT5S}
+      APP_CLOCK_SCHEDULER_DELAY: ${APP_CLOCK_SCHEDULER_DELAY:-PT5S}
+      APP_SCHEDULER_POOL_SIZE: ${APP_SCHEDULER_POOL_SIZE:-2}
+      SPRING_DATASOURCE_MAXIMUM_POOL_SIZE: ${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:-10}
+      SPRING_DATASOURCE_MINIMUM_IDLE: ${SPRING_DATASOURCE_MINIMUM_IDLE:-1}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8080"
+    networks:
+      - edge
+      - data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_PATH: /api/v1
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "3000"
+    networks:
+      - edge
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks:
+      - edge
+
+networks:
+  edge:
+  data:
+    internal: true
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

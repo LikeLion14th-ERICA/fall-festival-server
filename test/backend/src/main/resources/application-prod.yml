@@ -1,0 +1,12 @@
+app:
+  session:
+    cookie-secure: true
+
+logging:
+  level:
+    org.springframework.jdbc.core: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: never

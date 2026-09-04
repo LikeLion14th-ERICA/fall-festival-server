@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:stamp-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=VALUE
+    username: sa
+    password:
+  flyway:
+    enabled: true
+
+app:
+  session:
+    cookie-secure: false
+  access:
+    code: test-access-code
+  security:
+    allowed-origins: http://localhost:3000
+    token-pepper: test-token-pepper-that-is-at-least-thirty-two-bytes
+  push:
+    enabled: true
+    public-key: test-public-key
+    private-key: test-private-key
+    subject: mailto:test@example.com
+    allowed-endpoint-host-suffixes: push.example.test
+    worker-delay: PT1H
+  clock-test:
+    scheduler-delay: PT1H

@@ -1,0 +1,40 @@
+# Secrets and local runtime configuration
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+target/
+
+# Test and tool caches
+coverage/
+.cache/
+.pytest_cache/
+*.tsbuildinfo
+
+# Logs and local data
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+backups/
+*.dump
+*.sql.gz
+
+# IDE and operating-system state
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.obsidian/workspace.json
+
+# Linked worktrees used by parallel agents
+.worktrees/
+
+# Empty metadata backup created while normalizing repository ownership
+.git-sandbox-init-backup/

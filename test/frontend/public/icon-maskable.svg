@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Espero test">
+  <rect width="512" height="512" fill="#101a16"/>
+  <circle cx="256" cy="256" r="136" fill="#d7ff5f"/>
+  <path d="M256 174v164M174 256h164" stroke="#101a16" stroke-width="38" stroke-linecap="round"/>
+</svg>
