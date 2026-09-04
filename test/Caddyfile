@@ -1,6 +1,31 @@
 {$APP_DOMAIN} {
 	encode zstd gzip
 
+	@serviceWorker path /sw.js
+	header @serviceWorker {
+		>Cache-Control "no-cache, no-store, must-revalidate"
+		>Content-Type "application/javascript; charset=utf-8"
+		>Service-Worker-Allowed "/"
+	}
+
+	@frontendHealth path /healthz
+	header @frontendHealth {
+		>Cache-Control "no-store"
+		>Content-Type "application/json; charset=utf-8"
+	}
+
+	@manifest path /manifest.webmanifest
+	header @manifest {
+		>Cache-Control "no-cache"
+		>Content-Type "application/manifest+json; charset=utf-8"
+	}
+
+	@appShell path / /index.html
+	header @appShell >Cache-Control "no-cache"
+
+	@nextStatic path /_next/static/*
+	header @nextStatic >Cache-Control "public, max-age=31536000, immutable"
+
 	@api path /api/*
 	handle @api {
 		reverse_proxy backend:8080
@@ -12,7 +37,9 @@
 
 	header {
 		-Server
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob:; manifest-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:"
 		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), geolocation=(), microphone=()"
 	}

@@ -1,0 +1,24 @@
+FROM node:24-alpine AS dependencies
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+FROM node:24-alpine AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_OUTPUT_MODE=export
+ARG NEXT_PUBLIC_API_BASE_PATH=/api/v1
+ENV NEXT_PUBLIC_API_BASE_PATH=${NEXT_PUBLIC_API_BASE_PATH}
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+FROM busybox:1.38.0-musl AS runner
+WORKDIR /srv
+COPY --from=builder --chown=65534:65534 /app/out ./
+
+USER 65534:65534
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget -q -O /dev/null http://127.0.0.1:3000/healthz || exit 1
+CMD ["httpd", "-f", "-p", "3000", "-h", "/srv"]
