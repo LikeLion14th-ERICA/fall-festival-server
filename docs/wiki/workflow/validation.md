@@ -2,7 +2,30 @@
 
 [위키 홈](../README.md) · 읽는 때: 코드·의존성·배포 변경 검증
 
-현재 실행 코드는 `test/frontend`의 Next.js 애플리케이션, `test/backend`의
+## 서비스 백엔드
+
+이 저장소는 `LikeLion14th-ERICA/fall-festival-server` 백엔드 저장소다.
+루트 `pom.xml`은 Java 21 기준 Spring Boot 4.1.1 서버를 구성한다.
+Maven Wrapper 3.3.4가 Maven 3.9.11과 배포 SHA-256을 고정한다.
+별도 Maven 설치 없이 저장소 루트에서 실행한다.
+
+```powershell
+.\mvnw.cmd --batch-mode --no-transfer-progress verify
+```
+
+macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 사용한다.
+루트 backend 변경의 최소 검증 명령이며 테스트와 실행 가능한 JAR 패키징을 포함한다.
+테스트 위치는 `src/test/java`다. DB 및 운영 배포는 아직 구성하지 않았다.
+
+`.github/workflows/backend-ci.yml`의 검사 이름은 `backend-verify (Java 21)`과
+`backend-verify (Java 25)`다. GitHub에서 실행된 후 저장소 관리자가 두 검사를
+보호 규칙의 필수 검사로 지정해야 한다. 로컬 실행이 GitHub CI 성공을 뜻하지 않는다.
+실행과 환경변수는 [루트 README](../../../README.md)를 따른다.
+초기 구성의 실제 결과와 미실행 항목은 [개발 준비 기록](../../backend-setup-verification.md)에 있다.
+
+## 기존 실기기 검증 환경
+
+기존 실행 코드는 `test/frontend`의 Next.js 애플리케이션, `test/backend`의
 Spring Boot 애플리케이션과 `test/docker-compose.yml`의 실기기 검증 환경으로
 구성되어 있다. 이 환경은 축제 서비스 전체 아키텍처가 아니다. Git 저장소는 구성되어 있다. CI workflow와 원격 보호 규칙은 설정 여부를 확인하고,
 아래 검증 명령을 필수 검사로 연결한다.

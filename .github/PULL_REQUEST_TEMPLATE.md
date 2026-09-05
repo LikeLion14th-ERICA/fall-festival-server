@@ -29,6 +29,7 @@
 
 | 구분 | 환경 | 명령 또는 절차 | 결과 |
 |---|---|---|---|
+| 서비스 backend 테스트·패키징 | | `sh ./mvnw --batch-mode --no-transfer-progress verify` (Windows: `.\mvnw.cmd --batch-mode --no-transfer-progress verify`) | |
 | frontend 정적 검사·테스트·빌드 | | `cd test/frontend && npm run check` | |
 | backend 테스트·패키징 | | `cd test/backend && mvn verify` | |
 | Compose 설정·빌드 | | `cd test && docker compose config --quiet && docker compose build` | |

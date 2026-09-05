@@ -1,0 +1,29 @@
+name: Backend CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'chore/import-festival-project', 'build/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-verify:
+    name: backend-verify (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        java: ['21', '25']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+          cache-dependency-path: pom.xml
+      - name: Verify backend
+        run: sh ./mvnw --batch-mode --no-transfer-progress verify
