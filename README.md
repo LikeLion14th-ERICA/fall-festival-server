@@ -78,6 +78,11 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 |---|---|---|
 | `SERVER_ADDRESS` | `127.0.0.1` | 로컬 접속 주소 |
 | `SERVER_PORT` | `8080` | HTTP 포트 |
+| `SPRING_PROFILES_ACTIVE` | (없음) | `db`로 설정해야 아래 DB 변수가 적용됨 |
+| `SPRING_DATASOURCE_URL` | (없음) | `jdbc:postgresql://host:5432/db` 형식. `db` profile에서만 사용 |
+| `SPRING_DATASOURCE_USERNAME` | (없음) | DB 계정 |
+| `SPRING_DATASOURCE_PASSWORD` | (없음) | DB 비밀번호 |
+| `SPRING_FLYWAY_ENABLED` | `false` | 마이그레이션 파일이 생기기 전까지 `false` 유지 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
 
@@ -86,9 +91,23 @@ $env:SERVER_PORT = '8081'
 .\mvnw.cmd spring-boot:run
 ```
 
-현재 DB·Redis·관리자 비밀키 없이 실행할 수 있습니다. 비밀값은 저장소에 넣지 않으며,
-관련 구현을 추가할 때 [보안 규칙](docs/wiki/engineering/security.md)을 먼저 확인합니다.
-운영 배포 절차는 추후 인프라와 인증·관측성 구성을 확정하면서 작성합니다.
+`SPRING_PROFILES_ACTIVE`를 지정하지 않으면 DB 없이 실행됩니다. 공유 DB에 연결하려면
+아래처럼 `db` profile과 세 DB 변수를 함께 지정합니다. 팀이 공유한 접속 정보가
+`postgres://사용자:비밀번호@호스트:5432/db명` 형식이면 `SPRING_DATASOURCE_URL`에는
+`jdbc:postgresql://호스트:5432/db명`만 넣고 사용자·비밀번호는 별도 변수로 분리합니다.
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = 'db'
+$env:SPRING_DATASOURCE_URL = 'jdbc:postgresql://<host>:5432/<db>'
+$env:SPRING_DATASOURCE_USERNAME = '<user>'
+$env:SPRING_DATASOURCE_PASSWORD = '<password>'
+.\mvnw.cmd spring-boot:run
+```
+
+DB 접속 정보는 절대 저장소나 커밋 메시지, PR, 이슈에 붙여넣지 않습니다. 비밀값은
+`.env`(gitignore 대상) 또는 셸·IDE 실행 설정에만 둡니다. 관련 구현을 추가할 때
+[보안 규칙](docs/wiki/engineering/security.md)을 먼저 확인합니다. 운영 배포 절차는
+추후 인프라와 인증·관측성 구성을 확정하면서 작성합니다.
 
 ## 디렉터리
 
