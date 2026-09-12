@@ -10,6 +10,7 @@
 | 작업 | 읽을 페이지 | 조건부 자료 |
 |---|---|---|
 | 기능 추가·활성화·제품 판단 | [범위](product/scope.md), [근거](product/sources.md), [결정 대기](product/decisions.md) | 해당 도메인·Figma node |
+| Product 기능·Figma 화면 흐름 대조 | [Design / Wireframe Reference](design/README.md), 해당 [Product 문서](product/overview.md) | Figma node `438:2` |
 | 홈·탭·공지 진입 | [내비게이션](product/navigation.md), [홈](product/home.md) | 앱 내부 공지는 [알림 메시지](product/notice.md) |
 | 굿즈·재고·현장 송금 | [굿즈샵](product/goods.md) | 계좌·운영값은 결정 대기 |
 | 외부인 티켓·현장 수령 | [외부인 티켓](product/ticket.md), [지도](product/map.md) | 계좌·운영값은 결정 대기 |
