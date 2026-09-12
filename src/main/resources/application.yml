@@ -1,6 +1,14 @@
 spring:
   application:
     name: fall-festival-server
+  # HikariCP is on the classpath (via spring-boot-starter-jdbc) purely so the
+  # "db" profile below can use it. Its presence alone makes DataSourceAutoConfiguration
+  # try to build a pool regardless of whether spring.datasource.url is set, so
+  # both auto-configurations are excluded here and re-enabled only in "db".
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
 
 server:
   address: ${SERVER_ADDRESS:127.0.0.1}
@@ -9,3 +17,25 @@ server:
     include-message: never
     include-stacktrace: never
     include-binding-errors: never
+
+---
+# Activate with SPRING_PROFILES_ACTIVE=db once SPRING_DATASOURCE_* variables are
+# set. Without this profile no datasource property exists, so no DataSource bean
+# is created and the app keeps starting without external services.
+spring:
+  config:
+    activate:
+      on-profile: db
+  autoconfigure:
+    exclude: []
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      # Negative timeout skips the eager connection check so the app still
+      # starts if the shared DB is temporarily unreachable.
+      initialization-fail-timeout: -1
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED:false}
+    clean-disabled: true
