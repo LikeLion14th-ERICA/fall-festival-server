@@ -11,6 +11,11 @@
 |---|---|---|
 | 기능 추가·활성화·제품 판단 | [범위](product/scope.md), [근거](product/sources.md), [결정 대기](product/decisions.md) | 해당 도메인·Figma node |
 | 홈·탭·공지 진입 | [내비게이션](product/navigation.md), [홈](product/home.md) | 앱 내부 공지는 [알림 메시지](product/notice.md) |
+| 에리카 웰컴 데이·학교 소개 연결 | [웰컴 데이](product/welcome.md), [범위](product/scope.md) | 자료·URL은 결정 대기 |
+| FAQ 콘텐츠·제공 방식 | [홈](product/home.md), [FAQ 검토용 초안](product/faq-draft.md), [결정 대기](product/decisions.md) | 화면·다국어는 확정 후 구현 |
+| 관리자 혼잡도·운영 시간 연동 | [관리자 목차](product/admin.md), [혼잡도 관리](product/admin-crowd.md), [데이터·반영·검증](product/admin-crowd-state.md), [홈](product/home.md), [지도](product/map.md) | 구현 시 보안·API |
+| 관리자 공지 목록·등록·수정·삭제·템플릿 | [관리자 목차](product/admin.md), [공지 목록](product/admin-notice.md), [삭제](product/admin-notice-delete.md), [템플릿](product/admin-notice-template.md), [알림 메시지](product/notice.md) | 구현 시 보안·다국어·API |
+| 관리자 굿즈 재고 | [관리자 재고](product/admin-goods.md), [굿즈샵](product/goods.md) | 구현 시 보안·API |
 | 굿즈·재고·현장 송금 | [굿즈샵](product/goods.md) | 계좌·운영값은 결정 대기 |
 | 외부인 티켓·현장 수령 | [외부인 티켓](product/ticket.md), [지도](product/map.md) | 계좌·운영값은 결정 대기 |
 | 공연·라인업 | [라인업](product/lineup.md) | 타임테이블은 해당 행도 적용 |
