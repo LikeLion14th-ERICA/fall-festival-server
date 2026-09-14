@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "가을 축제 게시·운영일 논리 ERD",
+    "output": "festival-publication-erd.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/LikeLion14th-ERICA/fall-festival-server",
+      "revision": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883"
+    },
+    "views": [
+      {
+        "id": "revision",
+        "label": "회차와 게시",
+        "focus": ["festival", "festival_revision", "festival_day"],
+        "note": "공개 응답은 축제 회차의 승인된 revision에서만 만든다는 논리 경계입니다."
+      },
+      {
+        "id": "crowding",
+        "label": "운영일과 혼잡도",
+        "focus": ["festival_day", "crowding_state"],
+        "note": "운영 시간과 담당자가 저장한 마지막 단계를 분리하고 실제 인원은 저장하지 않습니다."
+      },
+      {
+        "id": "notice",
+        "label": "공지와 번역",
+        "focus": ["notice", "notice_translation", "notice_link", "notice_template", "notice_template_translation"],
+        "note": "READY인 언어만 공개하며 링크와 템플릿은 공지 본문과 분리합니다."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [64, 64],
+    "cols": 3,
+    "gapX": 58,
+    "gapY": 24,
+    "cellW": 250,
+    "cellH": 74
+  },
+  "components": [
+    {
+      "id": "festival",
+      "type": "database",
+      "label": "Festival",
+      "sublabel": "PK festival_id · title · timezone",
+      "tag": "회차 경계",
+      "row": 0,
+      "col": 0,
+      "size": [230, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/api.md", "line": 63, "label": "회차·revision 귀속" },
+        { "path": "api-v2/contract-source.mjs", "line": 20, "label": "응답 Meta" }
+      ]
+    },
+    {
+      "id": "festival_revision",
+      "type": "database",
+      "label": "FestivalRevision",
+      "sublabel": "PK revision_id · state · approved_at",
+      "tag": "draft | scheduled | published | archived",
+      "row": 0,
+      "col": 1,
+      "size": [230, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/publishing.md", "line": 5, "label": "게시 revision" },
+        { "path": "docs/wiki/engineering/publishing.md", "line": 9, "label": "published 공개" }
+      ]
+    },
+    {
+      "id": "festival_day",
+      "type": "database",
+      "label": "FestivalDay",
+      "sublabel": "PK day_id · FK revision_id · date · opens_at · closes_at",
+      "tag": "Asia/Seoul 운영일",
+      "row": 0,
+      "col": 2,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 27, "label": "행사 날짜" },
+        { "path": "docs/wiki/product/admin/crowd.md", "line": 12, "label": "개발자 등록 운영 시간" }
+      ]
+    },
+    {
+      "id": "crowding_state",
+      "type": "database",
+      "label": "CrowdingState",
+      "sublabel": "PK day_id · saved_level · updated_at",
+      "tag": "마지막 운영자 판단값 · 수량 없음",
+      "row": 1,
+      "col": 2,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 28, "label": "혼잡도 응답" },
+        { "path": "docs/wiki/product/admin/crowd.md", "line": 13, "label": "저장 상태·수정 시각" }
+      ]
+    },
+    {
+      "id": "notice",
+      "type": "database",
+      "label": "Notice",
+      "sublabel": "PK notice_id · FK revision_id · template_id?",
+      "tag": "GENERAL | LOST_FOUND · timestamps",
+      "row": 1,
+      "col": 1,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 55, "label": "관리자 공지" },
+        { "path": "docs/wiki/product/admin/notice.md", "line": 55, "label": "수정 시각" }
+      ]
+    },
+    {
+      "id": "notice_translation",
+      "type": "database",
+      "label": "NoticeTranslation",
+      "sublabel": "PK notice_id + locale · title? · body? · status",
+      "tag": "READY | PENDING | FAILED",
+      "row": 2,
+      "col": 2,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/admin-contract.mjs", "line": 25, "label": "번역 상태" },
+        { "path": "docs/wiki/product/admin/notice.md", "line": 44, "label": "언어별 게시" }
+      ]
+    },
+    {
+      "id": "notice_link",
+      "type": "database",
+      "label": "NoticeLink",
+      "sublabel": "PK link_id · FK notice_id · label · url · sort_order",
+      "tag": "외부 HTTPS 새 탭",
+      "row": 2,
+      "col": 1,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 54, "label": "공지 링크 입력" },
+        { "path": "docs/wiki/product/admin/notice.md", "line": 32, "label": "외부 링크" }
+      ]
+    },
+    {
+      "id": "notice_template",
+      "type": "database",
+      "label": "NoticeTemplate",
+      "sublabel": "PK template_id · FK revision_id · name",
+      "tag": "선택 적용 원본",
+      "row": 1,
+      "col": 0,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 57, "label": "템플릿" },
+        { "path": "docs/wiki/product/admin/notice.md", "line": 42, "label": "선택 적용" }
+      ]
+    },
+    {
+      "id": "notice_template_translation",
+      "type": "database",
+      "label": "NoticeTemplateTranslation",
+      "sublabel": "PK template_id + locale · title · body",
+      "tag": "사전 준비 번역문",
+      "row": 2,
+      "col": 0,
+      "size": [230, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 52, "label": "다국어 Translation" },
+        { "path": "api-v2/contract-source.mjs", "line": 57, "label": "템플릿 translations" }
+      ]
+    }
+  ],
+  "connections": [
+    { "id": "festival-revisions", "from": "festival", "to": "festival_revision", "label": "1:N revision", "fromSide": "right", "toSide": "left" },
+    { "id": "revision-days", "from": "festival_revision", "to": "festival_day", "label": "1:N 운영일", "fromSide": "right", "toSide": "left" },
+    { "id": "day-crowding", "from": "festival_day", "to": "crowding_state", "label": "1:0..1 마지막 상태", "fromSide": "bottom", "toSide": "top", "labelAt": [795, 150] },
+    { "id": "revision-notices", "from": "festival_revision", "to": "notice", "label": "1:N 공지", "fromSide": "bottom", "toSide": "top", "labelAt": [487, 150] },
+    { "id": "notice-translations", "from": "notice", "to": "notice_translation", "label": "1:N 언어별 본문", "fromSide": "right", "toSide": "left", "labelAt": [641, 246] },
+    { "id": "notice-links", "from": "notice", "to": "notice_link", "label": "1:N 링크", "fromSide": "bottom", "toSide": "top", "labelAt": [487, 246] },
+    { "id": "template-translations", "from": "notice_template", "to": "notice_template_translation", "label": "1:N 언어별 본문", "fromSide": "bottom", "toSide": "top", "labelAt": [179, 246] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "게시 경계",
+      "items": [
+        "모든 운영 콘텐츠는 FestivalRevision에 귀속하며 공개 서비스는 승인된 published revision만 읽습니다.",
+        "revision의 실제 snapshot·동시성·rollback 구현은 migration 전에 확정합니다."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "혼잡도 규칙",
+      "items": [
+        "운영 시간은 개발자가 등록하고 관리자는 네 단계만 저장합니다.",
+        "실제 인원·점유율은 저장·계산하지 않으며 KST 자정에 전날 값을 이월하지 않습니다."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "번역 공개",
+      "items": [
+        "한국어는 READY 본문이 필수이고 외국어는 READY일 때만 사용자에게 보입니다.",
+        "관리자 인증·감사 actor 모델은 아직 확정하지 않아 이 도식에 물리 테이블로 넣지 않았습니다."
+      ]
+    }
+  ]
+}

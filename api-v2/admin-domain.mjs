@@ -31,6 +31,7 @@ export function adminExecute(op,state,ctx){
       const old=op.method==='PUT'?state.goods.find(g=>g.id===params.goodsId):null;
       if(op.method==='PUT'&&!old)failure(404,'NOT_FOUND','상품이 없습니다.');
       if(!body.name.trim())failure(422,'VALIDATION_FAILED','상품명을 입력해 주세요.');
+      if(!body.images.length)failure(409,'IMAGE_CONFIGURATION_UNRESOLVED','상품 이미지 입력 구성은 합의 대기입니다.');
       for(const key of ['colors','sizes']){
         if(new Set(body[key].map(x=>x.id)).size!==body[key].length)failure(422,'DUPLICATE_OPTION','옵션 ID가 중복됩니다.');
         if(old&&old[key].some(x=>!body[key].some(y=>y.id===x.id)))failure(409,'OPTION_DELETION_UNRESOLVED','옵션 삭제 정책은 합의 대기입니다.');

@@ -2,8 +2,8 @@
 const groups={
   'BOOTH-LIST':['Space.image','Space.name','Space.locationText','Space.category','브라우저: savedSpaceIds','브라우저: 선택 분류·스크롤'],
   'BOOTH-DETAIL':['Space.image','Space.name','Space.category','Space.operator','Space.hoursText','Space.locationText','Space.contact','Space.description','Space.experience','Space.events','Space.menu[].name','Space.menu[].price','브라우저: savedSpaceIds','Space.mapTarget','브라우저: 현재 상세 페이지 URL'],
-  'MAP-OVERVIEW':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Pin.target','Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정)','TicketGuide.mapTarget','제외: 지도 혼잡도 표시 없음','제외: 지도 혼잡도 색상 없음','제외: 지도 혼잡도 안내 없음','제외: 지도 혼잡도 수정 시각 없음'],
-  'MAP-AREA':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Space.mapTarget','Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정)'],
+  'MAP-OVERVIEW':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Pin.target','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)','TicketGuide.mapTarget','제외: 지도 혼잡도 표시 없음','제외: 지도 혼잡도 색상 없음','제외: 지도 혼잡도 안내 없음','제외: 지도 혼잡도 수정 시각 없음'],
+  'MAP-AREA':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Space.mapTarget','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)'],
   'MAP-POPUP':['Place.name','Place.hoursText','Place.description','Place.locationText','Place.usage','Place.spaceId'],
   'HOME':['Crowding.savedLevel','Crowding.status','Crowding.updatedAt + Crowding.timeBasis','Crowding.opensAt','Crowding.closesAt','프런트 고정 UI: Crowding.colorToken → 디자인 색상','프런트 번역: Crowding.status; Crowding.message는 참고','Config.languages','브라우저: 선택 언어, 기본 ko','Notices.items[0].title','Config.links.universityNotices','보류: Config.faqEnabled=false, FAQ 대상 미정','Config.links.welcomeDay','Config.links.officialChannels','Channel.label + Channel.iconKey','브라우저: 당일 stamp.started'],
   'NOTICE-LIST':['Notice.title','Notice.createdAt','Notice.body','Notice.links','Notice.type','서버: Translations의 READY 필터 후 Notices.items 반환','브라우저: Notices.visibleIds와 현재 목록 차이 비교'],
@@ -43,5 +43,5 @@ export function buildCoverage(source,operations){
   const screenRows=source.tabs.find(t=>t.title==='01 화면 현황').rows.filter(r=>groups[r[0]]&&r[0]!=='ADM-CROWD-HOURS');
   const screens=screenRows.map(r=>({id:r[0],name:r[1],operations:operations.filter(o=>o.screens.includes(r[0])).map(o=>o.operationId),browserData:data.filter(d=>d.screenId===r[0]&&d.owner!=='API').map(d=>d.id),legacySource:{pendingIds:r[9]}}));
   if(data.length!==186||screens.length!==26)throw new Error('Screen source changed; review coverage counts.');
-  return {basis:'Product Context v5 (user confirmed 2026-09-14)',baseCommit:'a8039cd',legacySourceUrl:source.url,screens,data};
+  return {basis:'Product Context v5 (user confirmed 2026-09-14)',baseCommit:'21eb76dacd78b3ad79ed4d9589dd341fbc25b883',legacySourceUrl:source.url,screens,data};
 }

@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "가을 축제 티켓·스탬프·외부 안내 논리 ERD",
+    "output": "festival-guide-erd.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/LikeLion14th-ERICA/fall-festival-server",
+      "revision": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883"
+    },
+    "views": [
+      {
+        "id": "ticket",
+        "label": "외부인 티켓 안내",
+        "focus": ["festival_revision", "ticket_guide", "bank_account", "map_pin_reference"],
+        "note": "가격·시간·계좌·수령 위치를 안내하지만 주문·결제·수령 완료는 기록하지 않습니다."
+      },
+      {
+        "id": "stamp",
+        "label": "스탬프 안내",
+        "focus": ["festival_revision", "stamp_guide", "stamp_reward"],
+        "note": "공통 QR과 경품 안내만 관리하고 로그인 없는 사용자 참여 상태는 저장하지 않습니다."
+      },
+      {
+        "id": "external-links",
+        "label": "공식 외부 연결",
+        "focus": ["festival_revision", "festival_link"],
+        "note": "공식 채널과 웰컴 데이는 확정된 HTTPS 주소만 새 탭으로 제공합니다."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [64, 64],
+    "cols": 3,
+    "gapX": 44,
+    "gapY": 22,
+    "cellW": 238,
+    "cellH": 74
+  },
+  "components": [
+    {
+      "id": "festival_revision",
+      "type": "database",
+      "label": "FestivalRevision",
+      "sublabel": "PK revision_id · publication state",
+      "tag": "콘텐츠 회차 경계",
+      "row": 0,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/api.md", "line": 63, "label": "revision 귀속" },
+        { "path": "docs/wiki/engineering/publishing.md", "line": 5, "label": "외부 링크 게시" }
+      ]
+    },
+    {
+      "id": "ticket_guide",
+      "type": "database",
+      "label": "TicketGuide",
+      "sublabel": "PK guide_id · FK revision_id · day_id?",
+      "tag": "status · unit_price? · transfer/pickup window",
+      "row": 0,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 50, "label": "티켓 안내" },
+        { "path": "docs/wiki/product/scope.md", "line": 19, "label": "외부 송금·현장 수령" }
+      ]
+    },
+    {
+      "id": "bank_account",
+      "type": "database",
+      "label": "BankAccount",
+      "sublabel": "PK account_id · bank_name · account_number · holder",
+      "tag": "송금 가능 시간에만 노출",
+      "row": 0,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 36, "label": "수취 계좌" },
+        { "path": "api-v2/contract-source.mjs", "line": 50, "label": "티켓 계좌" }
+      ]
+    },
+    {
+      "id": "map_pin_reference",
+      "type": "database",
+      "label": "MapPinReference",
+      "sublabel": "FK map_id · place_id · pin_id · map_version",
+      "tag": "map ERD의 MapPin 참조",
+      "row": 1,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 26, "label": "MapTarget" },
+        { "path": "api-v2/contract-source.mjs", "line": 50, "label": "티켓 수령 위치" }
+      ]
+    },
+    {
+      "id": "festival_link",
+      "type": "database",
+      "label": "FestivalLink",
+      "sublabel": "PK link_id · FK revision_id · kind · url",
+      "tag": "label · icon_key? · sort · 공식 HTTPS",
+      "row": 1,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 25, "label": "공식 채널" },
+        { "path": "api-v2/contract-source.mjs", "line": 27, "label": "외부 연결 설정" }
+      ]
+    },
+    {
+      "id": "stamp_guide",
+      "type": "database",
+      "label": "StampGuide",
+      "sublabel": "PK guide_id · FK revision_id · daily_limit=4",
+      "tag": "title · dates · qr_value? · 공통 QR 안내",
+      "row": 2,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 51, "label": "스탬프 안내" },
+        { "path": "docs/wiki/product/scope.md", "line": 18, "label": "하루 4개·1회 상품" }
+      ]
+    },
+    {
+      "id": "stamp_reward",
+      "type": "database",
+      "label": "StampReward",
+      "sublabel": "PK reward_id · FK guide_id · name",
+      "tag": "location? · hours? · notice · 소진 현장 안내",
+      "row": 2,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 51, "label": "경품 안내" },
+        { "path": "docs/wiki/product/scope.md", "line": 18, "label": "운영 정보 대기" }
+      ]
+    }
+  ],
+  "connections": [
+    { "id": "revision-ticket-guide", "from": "festival_revision", "to": "ticket_guide", "label": "1:N", "fromSide": "right", "toSide": "left" },
+    { "id": "ticket-account", "from": "ticket_guide", "to": "bank_account", "label": "0..1", "fromSide": "right", "toSide": "left" },
+    { "id": "ticket-location", "from": "ticket_guide", "to": "map_pin_reference", "label": "0..1", "fromSide": "bottom", "toSide": "top", "labelAt": [455, 150] },
+    { "id": "revision-links", "from": "festival_revision", "to": "festival_link", "label": "1:N 링크", "fromSide": "bottom", "toSide": "top", "labelAt": [173, 150] },
+    { "id": "stamp-reward", "from": "stamp_guide", "to": "stamp_reward", "label": "1:N", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "티켓 안내만 모델링",
+      "items": [
+        "TicketGuide는 날짜·시간·가격·계좌·수령 위치·운영 문구를 보관하는 콘텐츠입니다.",
+        "티켓 수량·주문·입금 확인·환불·입장·수령 완료와 구매자 정보는 저장하지 않습니다."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "스탬프 안내만 모델링",
+      "items": [
+        "StampGuide는 공통 QR과 기간·경품·수령 안내만 관리합니다.",
+        "로그인 없는 방식이므로 started/count/claimed/date 같은 참여 상태나 엄격한 중복 차단을 서버에 만들지 않습니다."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "외부 링크",
+      "items": [
+        "공식 채널과 웰컴 데이는 검증된 HTTPS URL만 연결하고 자료 미확보 시 null 또는 미노출입니다.",
+        "계좌와 QR의 공개 시점·보관 기준은 운영 승인 및 보안 검토에서 확정합니다."
+      ]
+    }
+  ]
+}

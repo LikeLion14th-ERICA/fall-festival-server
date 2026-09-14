@@ -48,7 +48,7 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 | 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, locale=en의 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
-| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인 및 같은 상태 재선택 |
+| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도 동일 상태 재선택의 저장·시각 처리는 결정 대기 |
 | 스탬프 | HTTP guide missing-optional와 별도 client-state-examples의 시작 전·2칸·4칸·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
@@ -70,6 +70,7 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 
 - 굿즈 상태는 실제 제공 조합에 `PUT /admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability`, 본문 `{ "status": "SOLD_OUT" }`로 저장합니다. quantity는 422입니다.
 - 신규 상품·옵션 초기 상태는 제품 미정입니다. 기본 생성은 409 INITIAL_AVAILABILITY_UNRESOLVED이며 자동 상태를 가정하지 않습니다. 생성 성공 화면은 new-option-on-sale 또는 new-option-sold-out 시나리오와 [예제 본문](examples.json)을 사용합니다. 이 헤더를 실제 서버 정책으로 이식하지 않습니다.
+- 상품명·가격·실제 제공 색상·사이즈·조합은 비어 있지 않아야 합니다. 빈 구성은 422로 거절하며 저장 전후 상품과 판매 상태를 바꾸지 않습니다. 이미지 개수·배치·업로드 방식과 옵션 없는 상품 입력 방식은 미정이고, 이미지 없는 저장은 409 IMAGE_CONFIGURATION_UNRESOLVED로 공개 상태 반영을 막습니다.
 - 영어 PENDING/FAILED에서도 한국어 저장은 성공합니다. 미리보기 canSave는 한국어 필수값 기준입니다. 템플릿 원문을 바꾸면 게시 전 기존 번역을 READY로 재사용하지 말고 변경 원문 기준으로 준비합니다. 늦은 미리보기 응답은 source와 현재 입력을 비교해 폐기합니다.
 - all-languages는 목 세션의 준비 언어를 바꾸고 partial-translation은 중·일 실패를 재현합니다. english-failed는 영어 실패와 한국어 게시를 함께 확인합니다.
 - /prohibited-items의 items·message는 상시 안내입니다. 기존 /performance-alert를 교체하세요.

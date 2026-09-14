@@ -5,14 +5,16 @@
 
 - GitHub: [LikeLion14th-ERICA/fall-festival-server](https://github.com/LikeLion14th-ERICA/fall-festival-server)
 - 제품 범위: [기능 범위](docs/wiki/product/scope.md)
-- API 계약: [핵심 기능 API 명세서 v1](핵심%20기능%20API%20명세서%20v1.md)
+- 새 화면 연동 계약 초안: [API v2](api-v2/README.md)
+- 기존 API v1 기록: [핵심 기능 API 명세서 v1](핵심%20기능%20API%20명세서%20v1.md)
+- 논리 데이터 모델·ERD: [설계 검토](docs/wiki/engineering/data-model.md)
 - 작업 시작: [AGENTS.md](AGENTS.md) · [기여 안내](CONTRIBUTING.md)
 
 ## 현재 구현 상태
 
 루트 프로젝트는 서버 실행·테스트·패키징을 위한 초기 구성입니다. 축제 도메인 API,
-DB 연결, 관리자 인증, 배포 구성은 아직 구현하지 않았습니다. API 명세서에 기재된
-기능이 모두 구현되거나 공개 승인된 상태는 아닙니다.
+DB 연결, 관리자 인증, 배포 구성은 아직 구현하지 않았습니다. API v2는 프런트 연동용
+draft.3이며, 명세에 기재된 기능이 모두 구현되거나 공개 승인된 상태는 아닙니다.
 
 일반 사용자는 설치·로그인·회원가입 없이 공개 정보를 조회합니다. 구현 대상은
 라인업, 타임테이블, 부스 & 마켓, 지도, 공지 등이며, 관리자 권한은 서버에서 검증해야
