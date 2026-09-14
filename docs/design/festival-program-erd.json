@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "가을 축제 공연·출연진 논리 ERD",
+    "output": "festival-program-erd.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/LikeLion14th-ERICA/fall-festival-server",
+      "revision": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883"
+    },
+    "views": [
+      {
+        "id": "timetable",
+        "label": "타임테이블",
+        "focus": ["festival_revision", "festival_day", "performance", "stage"],
+        "note": "운영일의 공연 순서와 여러 무대 동시 공연을 표현할 준비를 합니다."
+      },
+      {
+        "id": "artist-detail",
+        "label": "출연진 상세",
+        "focus": ["performance", "performance_artist", "artist", "artist_link", "artist_song"],
+        "note": "출연진과 공연을 조인 테이블로 연결해 표시 순서를 분리합니다."
+      },
+      {
+        "id": "show-guide",
+        "label": "공연 안내",
+        "focus": ["festival_revision", "prohibited_item"],
+        "note": "반입 금지 물품은 고정 안내 콘텐츠이며 사용자 행위 이력을 저장하지 않습니다."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [64, 64],
+    "cols": 3,
+    "gapX": 44,
+    "gapY": 22,
+    "cellW": 238,
+    "cellH": 74
+  },
+  "components": [
+    {
+      "id": "festival_revision",
+      "type": "database",
+      "label": "FestivalRevision",
+      "sublabel": "PK revision_id · publication state",
+      "tag": "콘텐츠 회차 경계",
+      "row": 0,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/publishing.md", "line": 5, "label": "공연 콘텐츠 게시" },
+        { "path": "docs/wiki/engineering/api.md", "line": 63, "label": "revision 귀속" }
+      ]
+    },
+    {
+      "id": "festival_day",
+      "type": "database",
+      "label": "FestivalDay",
+      "sublabel": "PK day_id · FK revision_id · date",
+      "tag": "공연 날짜",
+      "row": 0,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 27, "label": "행사 날짜" },
+        { "path": "api-v2/contract-source.mjs", "line": 41, "label": "타임테이블 날짜" }
+      ]
+    },
+    {
+      "id": "performance",
+      "type": "database",
+      "label": "Performance",
+      "sublabel": "PK performance_id · FK day_id · stage_id?",
+      "tag": "title · starts_at · ends_at · order",
+      "row": 0,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 40, "label": "공연 정보" },
+        { "path": "docs/wiki/engineering/api.md", "line": 30, "label": "여러 무대" }
+      ]
+    },
+    {
+      "id": "stage",
+      "type": "database",
+      "label": "Stage",
+      "sublabel": "PK stage_id · FK revision_id · name · map_place_id?",
+      "tag": "API field 확정 전 후보",
+      "row": 1,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/api.md", "line": 30, "label": "동시 공연 요구" },
+        { "path": "api-v2/contract-source.mjs", "line": 40, "label": "현재 Performance 계약" }
+      ]
+    },
+    {
+      "id": "performance_artist",
+      "type": "database",
+      "label": "PerformanceArtist",
+      "sublabel": "PK performance_id + artist_id · display_order",
+      "tag": "공연별 출연 순서",
+      "row": 1,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 39, "label": "라인업 순서" },
+        { "path": "api-v2/contract-source.mjs", "line": 40, "label": "공연 출연진" }
+      ]
+    },
+    {
+      "id": "artist",
+      "type": "database",
+      "label": "Artist",
+      "sublabel": "PK artist_id · FK revision_id · category",
+      "tag": "name · image · introduction? · ARTIST | CONTEST",
+      "row": 2,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 38, "label": "출연진 필드" },
+        { "path": "docs/wiki/product/lineup.md", "line": 44, "label": "출연진 상세" }
+      ]
+    },
+    {
+      "id": "artist_song",
+      "type": "database",
+      "label": "ArtistSong",
+      "sublabel": "PK song_id · FK artist_id · label · url · sort_order",
+      "tag": "최대 3곡 공개",
+      "row": 2,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 38, "label": "대표곡 링크" },
+        { "path": "docs/wiki/product/lineup.md", "line": 46, "label": "대표곡" }
+      ]
+    },
+    {
+      "id": "artist_link",
+      "type": "database",
+      "label": "ArtistLink",
+      "sublabel": "PK link_id · FK artist_id · label · url · sort_order",
+      "tag": "등록된 SNS만",
+      "row": 2,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 38, "label": "SNS 링크" },
+        { "path": "docs/wiki/product/lineup.md", "line": 45, "label": "등록 SNS" }
+      ]
+    },
+    {
+      "id": "prohibited_item",
+      "type": "database",
+      "label": "ProhibitedItem",
+      "sublabel": "PK item_id · FK revision_id · locale · label · sort_order",
+      "tag": "공연 고정 안내",
+      "row": 1,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 42, "label": "반입 금지 물품" },
+        { "path": "docs/wiki/product/scope.md", "line": 23, "label": "공연 안내 범위" }
+      ]
+    }
+  ],
+  "connections": [
+    { "id": "revision-days", "from": "festival_revision", "to": "festival_day", "label": "1:N 운영일", "fromSide": "right", "toSide": "left" },
+    { "id": "day-performances", "from": "festival_day", "to": "performance", "label": "1:N 공연", "fromSide": "right", "toSide": "left" },
+    { "id": "performance-artists", "from": "performance", "to": "performance_artist", "label": "1:N 출연 순서", "fromSide": "bottom", "toSide": "top", "labelAt": [737, 150] },
+    { "id": "artist-performances", "from": "artist", "to": "performance_artist", "label": "1:N 참여", "fromSide": "top", "toSide": "bottom", "labelAt": [737, 246] },
+    { "id": "revision-prohibited", "from": "festival_revision", "to": "prohibited_item", "label": "1:N 안내", "fromSide": "bottom", "toSide": "top", "labelAt": [173, 150] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "공연과 출연진",
+      "items": [
+        "PerformanceArtist로 N:M 관계와 공연별 표시 순서를 분리합니다.",
+        "출연진 상세의 소개·SNS·대표곡은 등록된 값만 노출합니다."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "무대 모델 게이트",
+      "items": [
+        "여러 무대의 동시 공연은 공통 API 요구지만 현재 Performance 응답에 stage field는 없습니다.",
+        "점선 Stage 관계는 API·운영 자료를 확정할 때만 migration과 함께 활성화할 후보입니다."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "범위",
+      "items": [
+        "ProhibitedItem은 언어별 고정 안내이며 관람·클릭 같은 사용자 행위를 기록하지 않습니다.",
+        "공연 일정은 실시간 갱신 대상이 아니므로 별도 실시간 이벤트 모델을 만들지 않습니다."
+      ]
+    }
+  ]
+}

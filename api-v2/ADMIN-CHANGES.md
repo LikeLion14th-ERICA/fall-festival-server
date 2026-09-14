@@ -1,6 +1,6 @@
 # API v2 draft.3 변경·마이그레이션
 
-main `a8039cd`(PR #1~#5 병합 완료) Product Context와 2026-09-14 사용자 결정에 따라
+main `21eb76dacd78b3ad79ed4d9589dd341fbc25b883`(PR #6 병합 완료) Product Context와 2026-09-14 사용자 결정에 따라
 [관리자 v5](../docs/wiki/product/admin/README.md)를 기준으로 통일했습니다.
 아래는 draft.2 소비자가 변경할 계약입니다. v1·Spring Boot 구현·운영 배포는 이번 범위가 아닙니다.
 
@@ -31,8 +31,10 @@ main `a8039cd`(PR #1~#5 병합 완료) Product Context와 2026-09-14 사용자 �
 새 조합 기본 요청은 409 INITIAL_AVAILABILITY_UNRESOLVED입니다. 성공 화면은
 `X-Mock-Scenario: new-option-on-sale` 또는 `new-option-sold-out`으로 개발합니다.
 새 조합에만 해당 상태를 적용합니다. 제품 결정 후 초기 상태 계약을 확정해야 하며
-목 시나리오를 운영 기본값으로 이식하지 않습니다. 기존 옵션 제거는 미정이므로
-409 OPTION_DELETION_UNRESOLVED입니다. 이미지 개수·배치·업로드 기술도 합의 대기입니다.
+목 시나리오를 운영 기본값으로 이식하지 않습니다. 상품 색상·사이즈·제공 조합 삭제 정책은
+미정이며 현재 목은 409 OPTION_DELETION_UNRESOLVED로 거절합니다. 이미지 개수·배치·업로드
+기술과 옵션 없는 상품 입력 방식은 합의 대기이며, 이미지가 없는 저장은
+409 IMAGE_CONFIGURATION_UNRESOLVED로 거절합니다.
 
 영어 실패 시 미리보기는 canSave=true, 번역은 FAILED일 수 있으며 한국어 생성201/수정200은
 성공합니다. 영어는 모든 공지의 준비 대상이나 한국어 저장의 선행 조건이 아닙니다.
@@ -42,12 +44,16 @@ main `a8039cd`(PR #1~#5 병합 완료) Product Context와 2026-09-14 사용자 �
 
 ## 화면 데이터와 출처
 
-[화면 데이터 표](SCREEN-DATA.md)는 26개 화면·176개 유효 데이터와 제외 이력10개를,
+[화면 데이터 표](SCREEN-DATA.md)는 26개 화면·유효 데이터176개와 제외 이력10개를,
 [화면 상태](SCREEN-STATES.md)는 조회·빈 상태·오류·프런트 책임을 연결합니다.
 지도 혼잡도4개·운영 시간 편집5개·수량1개를 제외하고 실제 조합2개·고정 안내 목록1개를 추가했습니다.
 공지 이미지 D04는 이전 버전에서 이미 폐기되어 원문 기록에만 남습니다.
 
 [source-screen-requirements.json](source-screen-requirements.json)과
 [source-admin-requirements.md](source-admin-requirements.md)는 비교용 과거 원본입니다.
-이번 작업은 저장소의 표를 갱신했으며 원격 Google Sheets 셀은 수정하지 않았습니다.
+원격 Google Sheets `화면 요구사항 정의 · 전체 화면 통합 작업`도 관련 셀만 갱신했습니다.
+02 데이터와 책임의 상품 이미지·색상·사이즈 및 지도 위치 식별, 03 동작 정의의 혼잡도·상품
+등록/수정, 04 상태 정의의 상품 입력·저장 실패, 05 조회 규칙의 동일 상태·상품 삭제,
+07 검토의 동일 상태 행을 수정했습니다. 원격 값의 전체 비교·복원 결과와 검증 한계는
+[검증 기록](VERIFICATION.md)에 기재했습니다.
 screen-coverage.json의 legacySource는 과거 질문·필수 표시 기록으로 현재 결정에 사용하지 않습니다.

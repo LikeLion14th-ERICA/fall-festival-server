@@ -3,7 +3,7 @@
 상태: **2.0.0-draft.3 — 프런트 개발에 사용할 수 있는 초안**. 백엔드 구현·운영 배포·미정 기능 승인을 의미하지 않습니다.
 
 [Product Context](../docs/PRODUCT_CONTEXT.md)와 2026-09-14 사용자 결정에 따라 관리자 규칙은
-[v5](../docs/wiki/product/admin/README.md)로 통일했습니다. main a8039cd에 PR #1~#5가 모두
+[v5](../docs/wiki/product/admin/README.md)로 통일했습니다. main 21eb76dacd78b3ad79ed4d9589dd341fbc25b883에 PR #6까지
 병합된 상태를 기준으로 동기화했습니다. 이전 화면 원문은 비교용 스냅샷으로 보존하며 현재
 요구는 [화면 데이터 표](SCREEN-DATA.md)와 [화면 상태](SCREEN-STATES.md)를 사용합니다.
 실제 행사 날짜·가격·계좌·사진은 운영 자료로 확정해야 하며 예제는 가상 데이터입니다.
@@ -12,7 +12,7 @@
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
 | [ENDPOINTS.md](ENDPOINTS.md) | 37개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 255개 응답 원문 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 257개 응답 원문 |
 | [SCREEN-DATA.md](SCREEN-DATA.md) | 26개 화면의 유효 176개·제외 10개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |

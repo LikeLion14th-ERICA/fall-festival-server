@@ -9107,7 +9107,7 @@
       },
       "put": {
         "operationId": "putAdminCrowding",
-        "summary": "혼잡도 저장",
+        "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안",
         "description": "연결 화면: ADM-CROWD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -9136,7 +9136,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "혼잡도 저장: normal",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: normal",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -9162,7 +9162,7 @@
                     }
                   },
                   "full": {
-                    "summary": "혼잡도 저장: full",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: full",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -9208,7 +9208,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "혼잡도 저장: bad-request",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -9248,7 +9248,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "혼잡도 저장: unauthorized",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -9288,7 +9288,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "혼잡도 저장: forbidden",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -9449,7 +9449,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "혼잡도 저장: rate-limited",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -9508,7 +9508,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "혼잡도 저장: error",
+                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -14627,8 +14627,8 @@
                     "summary": "상품 등록·초기 판매 상태 미정: missing-optional",
                     "value": {
                       "error": {
-                        "code": "INITIAL_AVAILABILITY_UNRESOLVED",
-                        "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+                        "code": "IMAGE_CONFIGURATION_UNRESOLVED",
+                        "message": "상품 이미지 입력 구성은 합의 대기입니다.",
                         "details": [],
                         "retryable": false
                       },
@@ -14700,7 +14700,41 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "empty-configuration": {
+                    "summary": "상품 등록·초기 판매 상태 미정: empty-configuration",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "요청 필드를 확인해 주세요.",
+                        "details": [
+                          {
+                            "field": "$.colors",
+                            "reason": "배열 항목이 부족합니다."
+                          },
+                          {
+                            "field": "$.sizes",
+                            "reason": "배열 항목이 부족합니다."
+                          },
+                          {
+                            "field": "$.options",
+                            "reason": "배열 항목이 부족합니다."
+                          }
+                        ],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -14820,6 +14854,7 @@
           "new-option-on-sale",
           "new-option-sold-out",
           "missing-optional",
+          "empty-configuration",
           "error",
           "bad-request",
           "rate-limited",
@@ -16169,7 +16204,41 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "empty-configuration": {
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: empty-configuration",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "요청 필드를 확인해 주세요.",
+                        "details": [
+                          {
+                            "field": "$.colors",
+                            "reason": "배열 항목이 부족합니다."
+                          },
+                          {
+                            "field": "$.sizes",
+                            "reason": "배열 항목이 부족합니다."
+                          },
+                          {
+                            "field": "$.options",
+                            "reason": "배열 항목이 부족합니다."
+                          }
+                        ],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -16290,6 +16359,7 @@
           "new-option-on-sale",
           "new-option-sold-out",
           "option-removal",
+          "empty-configuration",
           "not-found",
           "error",
           "bad-request",
@@ -17450,7 +17520,7 @@
                 "type": "null"
               }
             ],
-            "description": "실제 저장 성공 시각. 동일 상태 재선택·실패 시 불변."
+            "description": "실제 저장 성공 시각. 동일 상태 재선택 시 저장·시각을 갱신할지는 기술 초안·결정 대기."
           },
           "timeBasis": {
             "type": "string",
@@ -17694,7 +17764,8 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음."
+            "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.",
+            "minItems": 1
           },
           "images": {
             "type": "array",
@@ -17732,7 +17803,8 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "등록 색상. 실제 제공 조합은 options에 별도 등록"
+            "description": "등록 색상. 실제 제공 조합은 options에 별도 등록",
+            "minItems": 1
           }
         },
         "required": [
@@ -19407,7 +19479,7 @@
             "items": {
               "$ref": "#/components/schemas/Image"
             },
-            "description": "복수 이미지, URL 등록 방식은 목용 제안"
+            "description": "복수 이미지. 개수·크기·배치·업로드 방식은 미정."
           },
           "colors": {
             "type": "array",
@@ -19438,14 +19510,16 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "등록 색상. 실제 제공 조합은 options에 별도 등록"
+            "description": "등록 색상. 실제 제공 조합은 options에 별도 등록",
+            "minItems": 1
           },
           "sizes": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Size"
             },
-            "description": "등록된 관리 사이즈만"
+            "description": "등록된 관리 사이즈만",
+            "minItems": 1
           },
           "options": {
             "type": "array",
@@ -19466,7 +19540,8 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음."
+            "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.",
+            "minItems": 1
           },
           "description": {
             "anyOf": [
@@ -19492,7 +19567,7 @@
           "description"
         ],
         "additionalProperties": false,
-        "description": "상품과 실제 제공 조합 저장. 기존 상태 보존. 신규 조합 초기 상태·옵션 삭제 정책은 미정. 목의 신규 옵션 시나리오를 명시한 경우에만 생성 가능."
+        "description": "상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 기존 판매 상태를 보존하고 신규 조합 초기 상태와 삭제는 별도 계약을 따른다."
       },
       "NoticeSource": {
         "type": "object",
@@ -20010,7 +20085,7 @@
   },
   "x-source": {
     "basis": "Product Context wiki v5; user decision 2026-09-14",
-    "commit": "a8039cd",
+    "commit": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883",
     "paths": [
       "docs/wiki/product/",
       "docs/wiki/product/admin/"

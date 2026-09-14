@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "가을 축제 부스·지도 논리 ERD",
+    "output": "festival-map-erd.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/LikeLion14th-ERICA/fall-festival-server",
+      "revision": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883"
+    },
+    "views": [
+      {
+        "id": "spaces",
+        "label": "부스와 마켓",
+        "focus": ["festival_revision", "space", "space_event", "space_menu", "place"],
+        "note": "부스·주점·플리마켓의 목록 정보와 장소 팝업 대상을 분리합니다."
+      },
+      {
+        "id": "map-version",
+        "label": "지도 버전과 핀",
+        "focus": ["festival_revision", "map", "map_asset_version", "map_pin"],
+        "note": "지도 이미지와 좌표는 같은 map version에 귀속해 함께 교체합니다."
+      },
+      {
+        "id": "pin-target",
+        "label": "핀 대상",
+        "focus": ["map_pin", "place", "map_area", "map"],
+        "note": "핀 하나는 장소 팝업 또는 구역 지도 이동 중 정확히 하나만 대상으로 둡니다."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [64, 64],
+    "cols": 3,
+    "gapX": 44,
+    "gapY": 22,
+    "cellW": 238,
+    "cellH": 74
+  },
+  "components": [
+    {
+      "id": "festival_revision",
+      "type": "database",
+      "label": "FestivalRevision",
+      "sublabel": "PK revision_id · publication state",
+      "tag": "콘텐츠 회차 경계",
+      "row": 0,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/api.md", "line": 63, "label": "revision·map version" },
+        { "path": "docs/wiki/engineering/publishing.md", "line": 5, "label": "공간·지도 게시" }
+      ]
+    },
+    {
+      "id": "space",
+      "type": "database",
+      "label": "Space",
+      "sublabel": "PK space_id · FK revision_id · category",
+      "tag": "name · location · hours? · BOOTH | PUB | FLEA_MARKET",
+      "row": 0,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 43, "label": "공간 상세" },
+        { "path": "docs/wiki/product/scope.md", "line": 24, "label": "부스·마켓 범위" }
+      ]
+    },
+    {
+      "id": "space_event",
+      "type": "database",
+      "label": "SpaceEvent",
+      "sublabel": "PK event_id · FK space_id · text · sort_order",
+      "tag": "부스 체험·이벤트",
+      "row": 0,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 43, "label": "부스 이벤트" }
+      ]
+    },
+    {
+      "id": "space_menu",
+      "type": "database",
+      "label": "SpaceMenu",
+      "sublabel": "PK menu_id · FK space_id · name · price_krw · sort_order",
+      "tag": "주점 구조화 메뉴",
+      "row": 1,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 43, "label": "메뉴·가격" },
+        { "path": "docs/wiki/engineering/api.md", "line": 30, "label": "구조화 메뉴" }
+      ]
+    },
+    {
+      "id": "place",
+      "type": "database",
+      "label": "Place",
+      "sublabel": "PK place_id · FK revision_id · space_id?",
+      "tag": "kind · name? · SPACE | FACILITY | LANDMARK",
+      "row": 1,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 49, "label": "장소 팝업" },
+        { "path": "api-v2/contract-source.mjs", "line": 43, "label": "공간 지도 대상" }
+      ]
+    },
+    {
+      "id": "map",
+      "type": "database",
+      "label": "Map",
+      "sublabel": "PK map_id · FK revision_id · kind · name",
+      "tag": "OVERVIEW | AREA",
+      "row": 2,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 45, "label": "지도" },
+        { "path": "docs/wiki/product/map.md", "line": 33, "label": "전체·구역 지도" }
+      ]
+    },
+    {
+      "id": "map_asset_version",
+      "type": "database",
+      "label": "MapAssetVersion",
+      "sublabel": "PK map_version_id · FK map_id · version · image_asset",
+      "tag": "UNIQUE(map, version)",
+      "row": 2,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 45, "label": "불변 지도 버전" },
+        { "path": "api-v2/contract-source.mjs", "line": 48, "label": "핀 버전 요청" }
+      ]
+    },
+    {
+      "id": "map_pin",
+      "type": "database",
+      "label": "MapPin",
+      "sublabel": "PK pin_id · FK map_version_id · category · x · y",
+      "tag": "CHECK place_id XOR area_id",
+      "row": 2,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 47, "label": "PLACE | AREA 핀" },
+        { "path": "docs/wiki/product/map.md", "line": 33, "label": "두 종류 핀" }
+      ]
+    },
+    {
+      "id": "map_area",
+      "type": "database",
+      "label": "MapArea",
+      "sublabel": "PK area_id · FK revision_id · target_map_id · label",
+      "tag": "구역 지도 이동 대상",
+      "row": 1,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 47, "label": "AREA target map" },
+        { "path": "docs/wiki/product/map.md", "line": 36, "label": "구역 이동" }
+      ]
+    }
+  ],
+  "connections": [
+    { "id": "revision-spaces", "from": "festival_revision", "to": "space", "label": "1:N 공간", "fromSide": "right", "toSide": "left" },
+    { "id": "space-events", "from": "space", "to": "space_event", "label": "0..N 이벤트", "fromSide": "right", "toSide": "left" },
+    { "id": "space-menus", "from": "space", "to": "space_menu", "label": "0..N 메뉴", "fromSide": "bottom", "toSide": "top", "labelAt": [455, 150] },
+    { "id": "map-asset-versions", "from": "map", "to": "map_asset_version", "label": "1:N version", "fromSide": "right", "toSide": "left" },
+    { "id": "version-pins", "from": "map_asset_version", "to": "map_pin", "label": "1:N 핀", "fromSide": "right", "toSide": "left" },
+    { "id": "pin-area-target", "from": "map_pin", "to": "map_area", "label": "AREA", "fromSide": "top", "toSide": "bottom", "labelAt": [737, 246] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "좌표와 이미지의 버전 일치",
+      "items": [
+        "MapAssetVersion이 지도 이미지와 좌표 핀을 함께 묶어 다른 버전 조합을 방지합니다.",
+        "mapVersion이 다른 요청은 API가 충돌로 처리할 수 있게 같은 안정 ID·버전을 사용합니다."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "핀 target 제약",
+      "items": [
+        "MapPin은 Place 팝업 또는 MapArea 이동 중 정확히 하나만 참조해야 합니다.",
+        "Place.kind와 Pin.target.kind는 서로 다른 축이므로 하나의 테이블이나 enum으로 합치지 않습니다."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "운영 자료 게이트",
+      "items": [
+        "최종 지도 자산·좌표·필터 분류는 운영 자료가 확정된 뒤 검증해 게시합니다.",
+        "지도 혼잡도 연동, 핀 색상 변경, 사용자 위치·이동 이력은 현재 모델에 넣지 않습니다."
+      ]
+    }
+  ]
+}

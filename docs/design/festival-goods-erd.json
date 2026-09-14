@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "가을 축제 굿즈 논리 ERD",
+    "output": "festival-goods-erd.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/LikeLion14th-ERICA/fall-festival-server",
+      "revision": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883"
+    },
+    "views": [
+      {
+        "id": "product-config",
+        "label": "상품 구성",
+        "focus": ["festival_revision", "goods", "goods_color", "goods_size", "goods_image"],
+        "note": "상품별 색상·사이즈·이미지를 분리해 실제 제공 조합을 준비합니다."
+      },
+      {
+        "id": "availability",
+        "label": "옵션 판매 상태",
+        "focus": ["goods", "goods_color", "goods_size", "goods_option"],
+        "note": "색상×사이즈의 희소한 실제 조합만 만들고 판매 상태만 직접 저장합니다."
+      },
+      {
+        "id": "payment-guide",
+        "label": "송금 안내",
+        "focus": ["goods", "payment_guide", "bank_account"],
+        "note": "계좌는 안내용이며 입금·지급·주문 상태를 만들지 않습니다."
+      }
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [64, 64],
+    "cols": 3,
+    "gapX": 44,
+    "gapY": 22,
+    "cellW": 238,
+    "cellH": 74
+  },
+  "components": [
+    {
+      "id": "festival_revision",
+      "type": "database",
+      "label": "FestivalRevision",
+      "sublabel": "PK revision_id · publication state",
+      "tag": "콘텐츠 회차 경계",
+      "row": 0,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "docs/wiki/engineering/api.md", "line": 63, "label": "revision 귀속" },
+        { "path": "docs/wiki/engineering/publishing.md", "line": 7, "label": "게시 상태" }
+      ]
+    },
+    {
+      "id": "goods",
+      "type": "database",
+      "label": "Goods",
+      "sublabel": "PK goods_id · FK revision_id · name · price_krw",
+      "tag": "소개는 선택 콘텐츠",
+      "row": 0,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/admin-contract.mjs", "line": 24, "label": "상품 필수 입력" },
+        { "path": "docs/wiki/product/admin/goods.md", "line": 47, "label": "상품명·가격·소개" }
+      ]
+    },
+    {
+      "id": "goods_color",
+      "type": "database",
+      "label": "GoodsColor",
+      "sublabel": "PK color_id · FK goods_id · name · sort_order",
+      "tag": "상품별 등록 색상",
+      "row": 0,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/admin-contract.mjs", "line": 15, "label": "색상별 이미지" },
+        { "path": "docs/wiki/product/admin/goods.md", "line": 50, "label": "상품별 색상" }
+      ]
+    },
+    {
+      "id": "goods_size",
+      "type": "database",
+      "label": "GoodsSize",
+      "sublabel": "PK size_id · FK goods_id · label · sort_order",
+      "tag": "고정 enum 없음",
+      "row": 1,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 31, "label": "등록 사이즈명" },
+        { "path": "docs/wiki/product/admin/goods.md", "line": 16, "label": "상품별 사이즈" }
+      ]
+    },
+    {
+      "id": "goods_image",
+      "type": "database",
+      "label": "GoodsImage",
+      "sublabel": "PK image_id · FK goods_id · color_id?",
+      "tag": "asset_ref · 색상별 복수 이미지",
+      "row": 2,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/admin-contract.mjs", "line": 14, "label": "복수 이미지" },
+        { "path": "docs/wiki/product/admin/goods.md", "line": 52, "label": "색상별 이미지 구성" }
+      ]
+    },
+    {
+      "id": "goods_option",
+      "type": "database",
+      "label": "GoodsOption",
+      "sublabel": "PK option_id · goods/color/size FK",
+      "tag": "availability · updated_at · UNIQUE 조합 · 수량 없음",
+      "row": 1,
+      "col": 2,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/admin-contract.mjs", "line": 19, "label": "색상×사이즈 상태" },
+        { "path": "docs/wiki/product/admin/goods.md", "line": 21, "label": "상태 갱신" }
+      ]
+    },
+    {
+      "id": "payment_guide",
+      "type": "database",
+      "label": "PaymentGuide",
+      "sublabel": "PK guide_id · FK goods_id · account_id?",
+      "tag": "link? · location? · hours? · 현장 안내만",
+      "row": 2,
+      "col": 0,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 37, "label": "굿즈 송금 안내" },
+        { "path": "docs/wiki/product/scope.md", "line": 22, "label": "현장 예외 정책 대기" }
+      ]
+    },
+    {
+      "id": "bank_account",
+      "type": "database",
+      "label": "BankAccount",
+      "sublabel": "PK account_id · bank_name · account_number · holder",
+      "tag": "확정된 수취 안내만",
+      "row": 2,
+      "col": 1,
+      "size": [218, 72],
+      "sources": [
+        { "path": "api-v2/contract-source.mjs", "line": 36, "label": "송금 계좌" },
+        { "path": "api-v2/contract-source.mjs", "line": 37, "label": "PaymentGuide 계좌" }
+      ]
+    }
+  ],
+  "connections": [
+    { "id": "revision-goods", "from": "festival_revision", "to": "goods", "label": "1:N 상품", "fromSide": "right", "toSide": "left" },
+    { "id": "goods-colors", "from": "goods", "to": "goods_color", "label": "1:N 색상", "fromSide": "right", "toSide": "left" },
+    { "id": "goods-sizes", "from": "goods", "to": "goods_size", "label": "1:N 사이즈", "fromSide": "bottom", "toSide": "top", "labelAt": [455, 150] },
+    { "id": "color-options", "from": "goods_color", "to": "goods_option", "label": "1:N option FK", "fromSide": "bottom", "toSide": "top", "labelAt": [737, 150] },
+    { "id": "size-options", "from": "goods_size", "to": "goods_option", "label": "FK", "fromSide": "right", "toSide": "left", "labelAt": [596, 196] },
+    { "id": "guide-account", "from": "payment_guide", "to": "bank_account", "label": "0..1", "fromSide": "right", "toSide": "left", "labelAt": [596, 292] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "희소한 옵션 조합",
+      "items": [
+        "실제 제공하는 색상×사이즈 조합만 GoodsOption에 만들고 자동 곱집합은 생성하지 않습니다.",
+        "(goods_id, color_id, size_id) 고유 제약으로 중복 조합을 막습니다."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "품절 상태",
+      "items": [
+        "availability는 ON_SALE 또는 SOLD_OUT이며 변경 성공 시각을 남깁니다.",
+        "allSoldOut은 옵션이 하나 이상이고 모두 SOLD_OUT일 때 계산하는 파생값입니다."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "의도적으로 제외",
+      "items": [
+        "굿즈 실제 수량, 자동 품절, 주문, 입금 확인, 지급 완료, 예약은 현재 모델에 저장하지 않습니다.",
+        "계좌는 안내용 운영 콘텐츠이며 구매자 개인정보나 거래 이력을 만들지 않습니다."
+      ]
+    }
+  ]
+}

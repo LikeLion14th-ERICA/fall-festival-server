@@ -28,7 +28,7 @@
 | 스탬프·QR·경품 | [스탬프](product/stamp.md), [보안](engineering/security.md), [검증 서비스](engineering/test-service.md) | API 29절은 아래 경고 확인 |
 | PWA·푸시·익명 상태 복원 | [검증 서비스](engineering/test-service.md), [보안](engineering/security.md), [운영](engineering/operations.md) | 해당 test 구현·API 절 |
 | 사용자 화면·문자열·번역 | [다국어](engineering/i18n.md), [품질](engineering/quality.md) | 해당 화면 도메인 |
-| API·DB·schema·데이터 계약 | [API 규칙](engineering/api.md), [API 절 찾기](engineering/api-navigation.md) | 해당 도메인·계약 테스트 |
+| API·DB·schema·데이터 계약 | [API 규칙](engineering/api.md), [데이터 모델·ERD](engineering/data-model.md), [API 절 찾기](engineering/api-navigation.md) | 해당 도메인·계약 테스트 |
 | 관리자·인증·공개 쓰기·저장·로그·업로드 | [보안](engineering/security.md) | 관리자·미디어 API |
 | 콘텐츠·번역 게시·예약·revision | [게시](engineering/publishing.md), [운영](engineering/operations.md) | 관리자 콘텐츠 API |
 | 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md) | 변경 대상 runbook |
