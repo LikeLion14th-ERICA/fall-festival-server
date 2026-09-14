@@ -13,9 +13,11 @@
 | Product 기능·Figma 화면 흐름 대조 | [Design / Wireframe Reference](design/README.md), 해당 [Product 문서](product/overview.md) | Figma node `438:2` |
 | 홈·탭·공지 진입 | [내비게이션](product/navigation.md), [홈](product/home.md) | 앱 내부 공지는 [알림 메시지](product/notice.md) |
 | 관리자 공통 범위·제외 기능 | [관리자 Product](product/admin/README.md), [보안](engineering/security.md) | 인증·권한 계약은 별도 설계 |
-| 관리자 혼잡도 | [관리자 혼잡도](product/admin/crowd.md), [홈](product/home.md) | 운영 일정은 개발자 등록 |
-| 관리자 공지·번역·템플릿 | [관리자 공지](product/admin/notice.md), [알림 메시지](product/notice.md) | 게시·번역 구현은 engineering 문서 |
-| 관리자 굿즈·판매 상태 | [관리자 굿즈](product/admin/goods.md), [굿즈샵](product/goods.md) | 실제 수량 관리는 범위 밖 |
+| 관리자 혼잡도·운영 시간 연동 | [관리자 혼잡도](product/admin/crowd.md), [관리자 목차](product/admin.md), [홈](product/home.md), [지도](product/map.md) | 운영 일정은 개발자 등록, 구현 시 보안·API |
+| 관리자 공지·번역·템플릿 | [관리자 공지](product/admin/notice.md), [공지 상세 규칙](product/admin-notice.md), [알림 메시지](product/notice.md) | 게시·번역 구현은 engineering 문서 |
+| 관리자 굿즈·판매 상태 | [관리자 굿즈](product/admin/goods.md), [굿즈 재고 상세](product/admin-goods.md), [굿즈샵](product/goods.md) | 실제 수량 관리는 범위 밖 |
+| 에리카 웰컴 데이·학교 소개 연결 | [웰컴 데이](product/welcome.md), [범위](product/scope.md) | 자료·URL은 결정 대기 |
+| FAQ 콘텐츠·제공 방식 | [홈](product/home.md), [FAQ 검토용 초안](product/faq-draft.md), [결정 대기](product/decisions.md) | 화면·다국어는 확정 후 구현 |
 | 굿즈·재고·현장 송금 | [굿즈샵](product/goods.md) | 계좌·운영값은 결정 대기 |
 | 외부인 티켓·현장 수령 | [외부인 티켓](product/ticket.md), [지도](product/map.md) | 계좌·운영값은 결정 대기 |
 | 공연·라인업 | [라인업](product/lineup.md) | 타임테이블은 해당 행도 적용 |
