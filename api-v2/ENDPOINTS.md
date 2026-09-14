@@ -5,7 +5,7 @@
 | 메서드 | 경로 | 내용 | 화면 | 시나리오 |
 |---|---|---|---|---|
 | GET | `/api/v2/config` | 홈 공통 설정 | HOME | normal, empty, missing-optional, welcome-ready, error, all-languages, bad-request, rate-limited |
-| GET | `/api/v2/crowding` | 공유 혼잡도 | HOME, MAP-OVERVIEW, MAP-AREA | normal, before-open, closed, unmodified, error, bad-request, rate-limited |
+| GET | `/api/v2/crowding` | 홈 재학생존 혼잡도 | HOME | normal, before-open, closed, unmodified, error, bad-request, rate-limited |
 | GET | `/api/v2/notices` | 사용자 공지 전체 | HOME, NOTICE-LIST | normal, empty, missing-optional, new-notice, deleted, error, bad-request, rate-limited |
 | GET | `/api/v2/goods` | 상품 목록 | GOODS-LIST | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/goods-availability` | 상품 목록의 판매 상태 | GOODS-LIST | normal, empty, sold-out, error, bad-request, rate-limited |
@@ -16,7 +16,7 @@
 | GET | `/api/v2/artists/{artistId}` | 출연진 상세 | SHOW-ARTIST | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/timetable` | 3일 타임테이블 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/performances/{performanceId}` | 공연 정보 팝업 | SHOW-POPUP | normal, missing-optional, not-found, error, bad-request, rate-limited |
-| GET | `/api/v2/performance-alert` | 공연 중요 안내 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
+| GET | `/api/v2/prohibited-items` | 고정 반입 금지 물품 안내 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/spaces` | 부스·주점·플리마켓 목록 | BOOTH-LIST | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/spaces/{spaceId}` | 부스·주점·플리마켓 상세 | BOOTH-DETAIL | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/maps` | 지도 목록 | MAP-OVERVIEW, MAP-AREA | normal, empty, error, bad-request, rate-limited |
@@ -28,18 +28,16 @@
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/crowding` | 혼잡도 저장 | ADM-CROWD | normal, full, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, english-incomplete, stale-translation, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, english-incomplete, english-failed, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices/{noticeId}` | 공지 수정 초기값 | ADM-NOTICE-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/notices/{noticeId}` | 공지 수정 | ADM-NOTICE-EDIT | normal, not-found, error, english-incomplete, stale-translation, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/notices/{noticeId}` | 공지 수정 | ADM-NOTICE-EDIT | normal, not-found, error, english-incomplete, english-failed, bad-request, rate-limited, unauthorized, forbidden |
 | DELETE | `/api/v2/admin/notices/{noticeId}` | 공지 삭제 | ADM-NOTICE-DELETE | normal, already-deleted, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates` | 공지 템플릿 목록 | ADM-NOTICE-TEMPLATE | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates/{templateId}` | 템플릿 초기값 | ADM-NOTICE-TEMPLATE | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| GET | `/api/v2/admin/goods` | 관리자 색상×사이즈 재고 조회 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
-| GET | `/api/v2/admin/operating-hours` | 운영일별 운영 시간 | ADM-CROWD-HOURS | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/operating-hours/{operatingDay}` | 운영 시간 저장 | ADM-CROWD-HOURS | normal, invalid-range, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/inventory` | 색상×사이즈 남은 수량 저장 | ADM-GOODS | normal, sold-out, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/goods` | 관리자 실제 제공 옵션별 판매 상태 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability` | 옵션 판매 상태 저장 | ADM-GOODS | normal, sold-out, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products` | 관리자 상품 목록 | ADM-GOODS-PRODUCT-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/products` | 상품 등록·신규 조합 0개 생성 | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·기존 조합 재고 유지 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/products` | 상품 등록·초기 판매 상태 미정 | ADM-GOODS-PRODUCT-EDIT | normal, new-option-on-sale, new-option-sold-out, missing-optional, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·기존 조합 판매 상태 유지 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, new-option-on-sale, new-option-sold-out, option-removal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notice-translations` | 공지 번역 생성·재시도 | ADM-NOTICE-EDIT, ADM-NOTICE-TEMPLATE | normal, english-failed, partial-translation, error, bad-request, rate-limited, unauthorized, forbidden |

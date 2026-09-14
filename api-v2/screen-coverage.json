@@ -1,6 +1,7 @@
 {
-  "sourceUrl": "https://docs.google.com/spreadsheets/d/1_bWWbBi2TiRm5IaIuDX1CS2IFId8RFr5LnloQIEnKbo/edit",
-  "sourceModifiedTime": "2026-09-13T13:58:38.155Z",
+  "basis": "Product Context v5 (user confirmed 2026-09-14)",
+  "baseCommit": "a8039cd",
+  "legacySourceUrl": "https://docs.google.com/spreadsheets/d/1_bWWbBi2TiRm5IaIuDX1CS2IFId8RFr5LnloQIEnKbo/edit",
   "screens": [
     {
       "id": "HOME",
@@ -17,7 +18,9 @@
         "HOME-D12",
         "HOME-D16"
       ],
-      "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q04, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
+      "legacySource": {
+        "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q04, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
+      }
     },
     {
       "id": "GOODS-LIST",
@@ -27,7 +30,9 @@
         "getGoodsAvailability"
       ],
       "browserData": [],
-      "pendingIds": "GOODS-LIST-Q01, GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03, ADM-GOODS-Q04"
+      "legacySource": {
+        "pendingIds": "GOODS-LIST-Q01, GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03, ADM-GOODS-Q04"
+      }
     },
     {
       "id": "GOODS-DETAIL",
@@ -39,7 +44,9 @@
       "browserData": [
         "GOODS-DETAIL-D07"
       ],
-      "pendingIds": "GOODS-LIST-Q01, GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03, ADM-GOODS-Q04"
+      "legacySource": {
+        "pendingIds": "GOODS-LIST-Q01, GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03, ADM-GOODS-Q04"
+      }
     },
     {
       "id": "GOODS-PAYMENT",
@@ -48,7 +55,9 @@
         "getPaymentGuide"
       ],
       "browserData": [],
-      "pendingIds": "GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03"
+      "legacySource": {
+        "pendingIds": "GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03"
+      }
     },
     {
       "id": "SHOW-LINEUP",
@@ -57,7 +66,9 @@
         "getLineup"
       ],
       "browserData": [],
-      "pendingIds": "SHOW-LINEUP-Q01~Q02"
+      "legacySource": {
+        "pendingIds": "SHOW-LINEUP-Q01~Q02"
+      }
     },
     {
       "id": "SHOW-ARTIST",
@@ -66,19 +77,23 @@
         "getArtist"
       ],
       "browserData": [],
-      "pendingIds": "SHOW-LINEUP-Q01~Q02"
+      "legacySource": {
+        "pendingIds": "SHOW-LINEUP-Q01~Q02"
+      }
     },
     {
       "id": "SHOW-TIMETABLE",
       "name": "타임테이블",
       "operations": [
         "getTimetable",
-        "getPerformanceAlert"
+        "getProhibitedItems"
       ],
       "browserData": [
         "SHOW-TIMETABLE-D06"
       ],
-      "pendingIds": "SHOW-TIMETABLE-Q01, HOME-Q05, HOME-Q06"
+      "legacySource": {
+        "pendingIds": "SHOW-TIMETABLE-Q01, HOME-Q05, HOME-Q06"
+      }
     },
     {
       "id": "SHOW-POPUP",
@@ -87,7 +102,9 @@
         "getPerformance"
       ],
       "browserData": [],
-      "pendingIds": "SHOW-TIMETABLE-Q01"
+      "legacySource": {
+        "pendingIds": "SHOW-TIMETABLE-Q01"
+      }
     },
     {
       "id": "BOOTH-LIST",
@@ -99,7 +116,9 @@
         "BOOTH-LIST-D05",
         "BOOTH-LIST-D06"
       ],
-      "pendingIds": "BOOTH-LIST-Q01~Q02, BOOTH-DETAIL-Q06"
+      "legacySource": {
+        "pendingIds": "BOOTH-LIST-Q01~Q02, BOOTH-DETAIL-Q06"
+      }
     },
     {
       "id": "BOOTH-DETAIL",
@@ -111,28 +130,34 @@
         "BOOTH-DETAIL-D13",
         "BOOTH-DETAIL-D15"
       ],
-      "pendingIds": "BOOTH-DETAIL-Q01, BOOTH-DETAIL-Q02, BOOTH-DETAIL-Q03, BOOTH-DETAIL-Q04, BOOTH-DETAIL-Q06"
+      "legacySource": {
+        "pendingIds": "BOOTH-DETAIL-Q01, BOOTH-DETAIL-Q02, BOOTH-DETAIL-Q03, BOOTH-DETAIL-Q04, BOOTH-DETAIL-Q06"
+      }
     },
     {
       "id": "MAP-OVERVIEW",
       "name": "전체 지도",
       "operations": [
-        "getCrowding",
         "getMaps",
         "getMap",
         "getPins"
       ],
       "browserData": [
         "MAP-OVERVIEW-D04",
-        "MAP-OVERVIEW-D05"
+        "MAP-OVERVIEW-D05",
+        "MAP-OVERVIEW-D09",
+        "MAP-OVERVIEW-D10",
+        "MAP-OVERVIEW-D11",
+        "MAP-OVERVIEW-D12"
       ],
-      "pendingIds": "MAP-OVERVIEW-Q01, MAP-OVERVIEW-Q02, MAP-OVERVIEW-Q03, MAP-OVERVIEW-Q04, MAP-OVERVIEW-Q05, MAP-OVERVIEW-Q06"
+      "legacySource": {
+        "pendingIds": "MAP-OVERVIEW-Q01, MAP-OVERVIEW-Q02, MAP-OVERVIEW-Q03, MAP-OVERVIEW-Q04, MAP-OVERVIEW-Q05, MAP-OVERVIEW-Q06"
+      }
     },
     {
       "id": "MAP-AREA",
       "name": "구역 지도",
       "operations": [
-        "getCrowding",
         "getMaps",
         "getMap",
         "getPins"
@@ -141,7 +166,9 @@
         "MAP-AREA-D04",
         "MAP-AREA-D05"
       ],
-      "pendingIds": "MAP-OVERVIEW-Q01, MAP-OVERVIEW-Q02, MAP-OVERVIEW-Q03, MAP-OVERVIEW-Q04, MAP-OVERVIEW-Q05, MAP-OVERVIEW-Q06, BOOTH-DETAIL-Q01"
+      "legacySource": {
+        "pendingIds": "MAP-OVERVIEW-Q01, MAP-OVERVIEW-Q02, MAP-OVERVIEW-Q03, MAP-OVERVIEW-Q04, MAP-OVERVIEW-Q05, MAP-OVERVIEW-Q06, BOOTH-DETAIL-Q01"
+      }
     },
     {
       "id": "MAP-POPUP",
@@ -150,7 +177,9 @@
         "getPlace"
       ],
       "browserData": [],
-      "pendingIds": "MAP-POPUP-Q01~Q02, BOOTH-DETAIL-Q01"
+      "legacySource": {
+        "pendingIds": "MAP-POPUP-Q01~Q02, BOOTH-DETAIL-Q01"
+      }
     },
     {
       "id": "NOTICE-LIST",
@@ -161,7 +190,9 @@
       "browserData": [
         "NOTICE-LIST-D07"
       ],
-      "pendingIds": "ADM-NOTICE-EDIT-Q01, ADM-NOTICE-EDIT-Q03"
+      "legacySource": {
+        "pendingIds": "ADM-NOTICE-EDIT-Q01, ADM-NOTICE-EDIT-Q03"
+      }
     },
     {
       "id": "TICKET",
@@ -173,7 +204,9 @@
         "TICKET-D03",
         "TICKET-D04"
       ],
-      "pendingIds": "TICKET-Q01~Q03, MAP-OVERVIEW-Q03, HOME-Q06"
+      "legacySource": {
+        "pendingIds": "TICKET-Q01~Q03, MAP-OVERVIEW-Q03, HOME-Q06"
+      }
     },
     {
       "id": "STAMP-START",
@@ -182,7 +215,9 @@
         "getStampGuide"
       ],
       "browserData": [],
-      "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+      "legacySource": {
+        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+      }
     },
     {
       "id": "STAMP-COLLECT",
@@ -196,7 +231,9 @@
         "STAMP-COLLECT-D03",
         "STAMP-COLLECT-D04"
       ],
-      "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+      "legacySource": {
+        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+      }
     },
     {
       "id": "STAMP-REWARD",
@@ -207,7 +244,9 @@
       "browserData": [
         "STAMP-REWARD-D01"
       ],
-      "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+      "legacySource": {
+        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+      }
     },
     {
       "id": "ADM-CROWD",
@@ -219,7 +258,9 @@
       "browserData": [
         "ADM-CROWD-D09"
       ],
-      "pendingIds": "ADM-CROWD-Q01~Q03, ADM-CROWD-Q04, HOME-Q06"
+      "legacySource": {
+        "pendingIds": "ADM-CROWD-Q01~Q03, ADM-CROWD-Q04, HOME-Q06"
+      }
     },
     {
       "id": "ADM-NOTICE-LIST",
@@ -228,7 +269,9 @@
         "getAdminNotices"
       ],
       "browserData": [],
-      "pendingIds": "ADM-NOTICE-EDIT-Q01, ADM-NOTICE-EDIT-Q04"
+      "legacySource": {
+        "pendingIds": "ADM-NOTICE-EDIT-Q01, ADM-NOTICE-EDIT-Q04"
+      }
     },
     {
       "id": "ADM-NOTICE-EDIT",
@@ -240,7 +283,9 @@
         "previewNoticeTranslation"
       ],
       "browserData": [],
-      "pendingIds": "ADM-NOTICE-EDIT-Q01~Q03, ADM-NOTICE-EDIT-Q04"
+      "legacySource": {
+        "pendingIds": "ADM-NOTICE-EDIT-Q01~Q03, ADM-NOTICE-EDIT-Q04"
+      }
     },
     {
       "id": "ADM-NOTICE-DELETE",
@@ -249,7 +294,9 @@
         "deleteAdminNotice"
       ],
       "browserData": [],
-      "pendingIds": "ADM-NOTICE-DELETE-Q01~Q02"
+      "legacySource": {
+        "pendingIds": "ADM-NOTICE-DELETE-Q01~Q02"
+      }
     },
     {
       "id": "ADM-NOTICE-TEMPLATE",
@@ -260,29 +307,23 @@
         "previewNoticeTranslation"
       ],
       "browserData": [],
-      "pendingIds": "ADM-NOTICE-TEMPLATE-Q01~Q02"
+      "legacySource": {
+        "pendingIds": "ADM-NOTICE-TEMPLATE-Q01~Q02"
+      }
     },
     {
       "id": "ADM-GOODS",
       "name": "굿즈 재고 관리",
       "operations": [
         "getAdminGoods",
-        "putInventory"
-      ],
-      "browserData": [],
-      "pendingIds": "ADM-GOODS-Q04, GOODS-LIST-Q01, ADM-GOODS-Q03"
-    },
-    {
-      "id": "ADM-CROWD-HOURS",
-      "name": "재학생존 운영 시간 설정",
-      "operations": [
-        "getOperatingHours",
-        "putOperatingHours"
+        "putAdminAvailability"
       ],
       "browserData": [
-        "ADM-CROWD-HOURS-D05"
+        "ADM-GOODS-D05"
       ],
-      "pendingIds": "ADM-CROWD-Q01, ADM-CROWD-Q03"
+      "legacySource": {
+        "pendingIds": "ADM-GOODS-Q04, GOODS-LIST-Q01, ADM-GOODS-Q03"
+      }
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST",
@@ -291,7 +332,9 @@
         "getAdminProducts"
       ],
       "browserData": [],
-      "pendingIds": "GOODS-LIST-Q01, ADM-GOODS-Q03"
+      "legacySource": {
+        "pendingIds": "GOODS-LIST-Q01, ADM-GOODS-Q03"
+      }
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT",
@@ -304,7 +347,9 @@
       "browserData": [
         "ADM-GOODS-PRODUCT-EDIT-D07"
       ],
-      "pendingIds": "ADM-GOODS-PRODUCT-EDIT-Q01"
+      "legacySource": {
+        "pendingIds": "ADM-GOODS-PRODUCT-EDIT-Q01"
+      }
     }
   ],
   "data": [
@@ -312,2196 +357,3330 @@
       "id": "BOOTH-LIST-D01",
       "screenId": "BOOTH-LIST",
       "label": "대표 사진",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-LIST-D02",
       "screenId": "BOOTH-LIST",
       "label": "이름",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-LIST-D03",
       "screenId": "BOOTH-LIST",
       "label": "위치",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.locationText",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-LIST-D04",
       "screenId": "BOOTH-LIST",
       "label": "분류",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.category",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-LIST-D05",
       "screenId": "BOOTH-LIST",
       "label": "별 저장 여부",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "BOOTH-DETAIL-Q03",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: savedSpaceIds",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": "BOOTH-DETAIL-Q03"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-LIST-D06",
       "screenId": "BOOTH-LIST",
       "label": "선택 분류·스크롤 위치",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 선택 분류·스크롤",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D01",
       "screenId": "BOOTH-DETAIL",
       "label": "대표 사진",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D02",
       "screenId": "BOOTH-DETAIL",
       "label": "이름",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D03",
       "screenId": "BOOTH-DETAIL",
       "label": "분류",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.category",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D04",
       "screenId": "BOOTH-DETAIL",
       "label": "운영 주체",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.operator",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D05",
       "screenId": "BOOTH-DETAIL",
       "label": "운영 시간",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q02",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Space.hoursText",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q02"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D06",
       "screenId": "BOOTH-DETAIL",
       "label": "위치",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q01",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Space.locationText",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D07",
       "screenId": "BOOTH-DETAIL",
       "label": "문의 SNS",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Space.contact",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D08",
       "screenId": "BOOTH-DETAIL",
       "label": "소개·설명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.description",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D09",
       "screenId": "BOOTH-DETAIL",
       "label": "체험 방법",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.experience",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D10",
       "screenId": "BOOTH-DETAIL",
       "label": "진행 이벤트",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.events",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D11",
       "screenId": "BOOTH-DETAIL",
       "label": "메뉴명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q04",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.menu[].name",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q04"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D12",
       "screenId": "BOOTH-DETAIL",
       "label": "가격",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q04",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.menu[].price",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q04"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D13",
       "screenId": "BOOTH-DETAIL",
       "label": "별 저장 여부",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "BOOTH-DETAIL-Q03",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: savedSpaceIds",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": "BOOTH-DETAIL-Q03"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D14",
       "screenId": "BOOTH-DETAIL",
       "label": "대상 구역·장소 연결 정보",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Space.mapTarget",
-      "requiredInScreen": "필수",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "BOOTH-DETAIL-D15",
       "screenId": "BOOTH-DETAIL",
       "label": "현재 상세 링크",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/spaces.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "BOOTH-DETAIL-Q03",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 현재 상세 페이지 URL",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": "BOOTH-DETAIL-Q03"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/spaces.md"
     },
     {
       "id": "MAP-OVERVIEW-D01",
       "screenId": "MAP-OVERVIEW",
       "label": "지도 이미지",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Map.image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D02",
       "screenId": "MAP-OVERVIEW",
       "label": "장소별 핀 위치",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Pin.x + Pin.y",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D03",
       "screenId": "MAP-OVERVIEW",
       "label": "장소별 핀 종류",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q02",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Pin.category",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q02"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D04",
       "screenId": "MAP-OVERVIEW",
       "label": "필터 선택지",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "MAP-OVERVIEW-Q02",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": "MAP-OVERVIEW-Q02"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D05",
       "screenId": "MAP-OVERVIEW",
       "label": "선택 필터·선택 핀",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 선택 필터·핀",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D01",
       "screenId": "MAP-AREA",
       "label": "지도 이미지",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Map.image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D02",
       "screenId": "MAP-AREA",
       "label": "장소별 핀 위치",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Pin.x + Pin.y",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D03",
       "screenId": "MAP-AREA",
       "label": "장소별 핀 종류",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q02",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Pin.category",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q02"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D04",
       "screenId": "MAP-AREA",
       "label": "필터 선택지",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "MAP-OVERVIEW-Q02",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": "MAP-OVERVIEW-Q02"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D05",
       "screenId": "MAP-AREA",
       "label": "선택 필터·선택 핀",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 선택 필터·핀",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D06",
       "screenId": "MAP-OVERVIEW",
       "label": "구역 이동 대상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Pin.target",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D06",
       "screenId": "MAP-AREA",
       "label": "진입 대상 장소",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q01",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Space.mapTarget",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-POPUP-D01",
       "screenId": "MAP-POPUP",
       "label": "장소 이름",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Place.name",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-POPUP-D02",
       "screenId": "MAP-POPUP",
       "label": "운영 시간",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Place.hoursText",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-POPUP-D03",
       "screenId": "MAP-POPUP",
       "label": "간단한 소개",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Place.description",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-POPUP-D04",
       "screenId": "MAP-POPUP",
       "label": "위치 안내",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Place.locationText",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-POPUP-D05",
       "screenId": "MAP-POPUP",
       "label": "이용 안내",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Place.usage",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-POPUP-D06",
       "screenId": "MAP-POPUP",
       "label": "상세 대상 항목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "BOOTH-DETAIL-Q01",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Place.spaceId",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "BOOTH-DETAIL-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D07",
       "screenId": "MAP-OVERVIEW",
       "label": "장소명 또는 번호",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "미정",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정)",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "미정",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-AREA-D07",
       "screenId": "MAP-AREA",
       "label": "장소명 또는 번호",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "미정",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q01",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정)",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "미정",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D08",
       "screenId": "MAP-OVERVIEW",
       "label": "외부인 티켓존 위치",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "MAP-OVERVIEW-Q03",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "TicketGuide.mapTarget",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "MAP-OVERVIEW-Q03"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "HOME-D01",
       "screenId": "HOME",
       "label": "혼잡도 단계",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.savedLevel",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D02",
       "screenId": "HOME",
       "label": "운영 상태",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.status",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D03",
       "screenId": "HOME",
       "label": "마지막 수정 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Crowding.updatedAt + Crowding.timeBasis",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D04",
       "screenId": "HOME",
       "label": "당일 입장 시작 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.opensAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D05",
       "screenId": "HOME",
       "label": "당일 운영 종료 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.closesAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D06",
       "screenId": "HOME",
       "label": "혼잡도 색상",
-      "sourceOwner": "고정 UI",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "고정 UI",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "프런트",
       "target": "프런트 고정 UI: Crowding.colorToken → 디자인 색상",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D07",
       "screenId": "HOME",
       "label": "혼잡도 안내 문구",
-      "sourceOwner": "고정 UI",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "고정 UI",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "프런트",
       "target": "프런트 번역: Crowding.status; Crowding.message는 참고",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D08",
       "screenId": "HOME",
       "label": "제공 언어 목록",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Config.languages",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D09",
       "screenId": "HOME",
       "label": "선택 언어",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 선택 언어, 기본 ko",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D10",
       "screenId": "HOME",
       "label": "최신 공지 제목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Notices.items[0].title",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D11",
       "screenId": "HOME",
       "label": "공지사항 URL",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Config.links.universityNotices",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D12",
       "screenId": "HOME",
       "label": "FAQ 연결 대상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "보류",
       "target": "보류: Config.faqEnabled=false, FAQ 대상 미정",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D13",
       "screenId": "HOME",
       "label": "웰컴 데이 URL",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Config.links.welcomeDay",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D14",
       "screenId": "HOME",
       "label": "공식 채널 링크",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Config.links.officialChannels",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D15",
       "screenId": "HOME",
       "label": "공식 채널 표시명·아이콘",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Channel.label + Channel.iconKey",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "HOME-D16",
       "screenId": "HOME",
       "label": "당일 참여 시작 여부",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/home.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 당일 stamp.started",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/home.md"
     },
     {
       "id": "NOTICE-LIST-D01",
       "screenId": "NOTICE-LIST",
       "label": "제목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Notice.title",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "NOTICE-LIST-D02",
       "screenId": "NOTICE-LIST",
       "label": "등록 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Notice.createdAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "NOTICE-LIST-D03",
       "screenId": "NOTICE-LIST",
       "label": "본문 텍스트",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Notice.body",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "NOTICE-LIST-D04",
       "screenId": "NOTICE-LIST",
       "label": "본문 링크",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Notice.links",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "NOTICE-LIST-D05",
       "screenId": "NOTICE-LIST",
       "label": "공지 유형",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Notice.type",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "NOTICE-LIST-D06",
       "screenId": "NOTICE-LIST",
       "label": "언어별 번역 완료 여부",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "서버: Translations의 READY 필터 후 Notices.items 반환",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "NOTICE-LIST-D07",
       "screenId": "NOTICE-LIST",
       "label": "새 공지 존재 여부",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/notice.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "브라우저",
       "target": "브라우저: Notices.visibleIds와 현재 목록 차이 비교",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/notice.md"
     },
     {
       "id": "GOODS-LIST-D01",
       "screenId": "GOODS-LIST",
       "label": "상품 이미지",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-LIST-D02",
       "screenId": "GOODS-LIST",
       "label": "상품명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-LIST-D03",
       "screenId": "GOODS-LIST",
       "label": "가격",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.price",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-LIST-D04",
       "screenId": "GOODS-LIST",
       "label": "색상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.colors",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-LIST-D05",
       "screenId": "GOODS-LIST",
       "label": "사이즈",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "ADM-GOODS-Q04, GOODS-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.sizes",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "ADM-GOODS-Q04, GOODS-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-LIST-D06",
       "screenId": "GOODS-LIST",
       "label": "색상×사이즈별 구매 가능 여부",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "GOODS-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Availability.variants",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "GOODS-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D01",
       "screenId": "GOODS-DETAIL",
       "label": "상품 이미지",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.colorImages",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D02",
       "screenId": "GOODS-DETAIL",
       "label": "상품명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D03",
       "screenId": "GOODS-DETAIL",
       "label": "가격",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.price",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D04",
       "screenId": "GOODS-DETAIL",
       "label": "색상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.colors",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D05",
       "screenId": "GOODS-DETAIL",
       "label": "사이즈",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "ADM-GOODS-Q04, GOODS-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.sizes",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "ADM-GOODS-Q04, GOODS-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D06",
       "screenId": "GOODS-DETAIL",
       "label": "색상×사이즈별 구매 가능 여부",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "GOODS-LIST-Q01",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Availability.variants",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": "GOODS-LIST-Q01"
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-DETAIL-D07",
       "screenId": "GOODS-DETAIL",
       "label": "현장 확인·수령 안내",
-      "sourceOwner": "고정 UI",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "고정 UI",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "프런트",
       "target": "프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-PAYMENT-D01",
       "screenId": "GOODS-PAYMENT",
       "label": "상품명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "PaymentGuide.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-PAYMENT-D02",
       "screenId": "GOODS-PAYMENT",
       "label": "상품 가격",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "PaymentGuide.price",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-PAYMENT-D03",
       "screenId": "GOODS-PAYMENT",
       "label": "은행명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "BankAccount.bankName",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-PAYMENT-D04",
       "screenId": "GOODS-PAYMENT",
       "label": "계좌번호",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "BankAccount.accountNumber",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-PAYMENT-D05",
       "screenId": "GOODS-PAYMENT",
       "label": "예금주",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "BankAccount.holder",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "GOODS-PAYMENT-D06",
       "screenId": "GOODS-PAYMENT",
       "label": "현장 송금·수령 안내",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "PaymentGuide.instructions",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
       "id": "SHOW-LINEUP-D01",
       "screenId": "SHOW-LINEUP",
       "label": "대표 사진",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Lineup.items[].image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-LINEUP-D02",
       "screenId": "SHOW-LINEUP",
       "label": "이름",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Lineup.items[].name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-LINEUP-D03",
       "screenId": "SHOW-LINEUP",
       "label": "공연 날짜",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Lineup.date",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-LINEUP-D04",
       "screenId": "SHOW-LINEUP",
       "label": "분류",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Lineup.category",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-LINEUP-D05",
       "screenId": "SHOW-LINEUP",
       "label": "공연 순서",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Lineup.items[].order",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D01",
       "screenId": "SHOW-ARTIST",
       "label": "대표 사진",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Artist.image",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D02",
       "screenId": "SHOW-ARTIST",
       "label": "이름",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Artist.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D03",
       "screenId": "SHOW-ARTIST",
       "label": "공연 날짜",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Artist.performances[].date",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D04",
       "screenId": "SHOW-ARTIST",
       "label": "공연 시간",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Artist.performances[].startsAt + Artist.performances[].endsAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D05",
       "screenId": "SHOW-ARTIST",
       "label": "소개",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Artist.introduction",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D06",
       "screenId": "SHOW-ARTIST",
       "label": "SNS 링크",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Artist.socialLinks",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D07",
       "screenId": "SHOW-ARTIST",
       "label": "대표곡명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Artist.songs[].label",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-ARTIST-D08",
       "screenId": "SHOW-ARTIST",
       "label": "대표곡 유튜브 링크",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Artist.songs[].url",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/lineup.md"
     },
     {
       "id": "SHOW-TIMETABLE-D01",
       "screenId": "SHOW-TIMETABLE",
       "label": "공연명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.title",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-TIMETABLE-D02",
       "screenId": "SHOW-TIMETABLE",
       "label": "공연 날짜",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.date",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-TIMETABLE-D03",
       "screenId": "SHOW-TIMETABLE",
       "label": "시작 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.startsAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-TIMETABLE-D04",
       "screenId": "SHOW-TIMETABLE",
       "label": "종료 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.endsAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-TIMETABLE-D05",
       "screenId": "SHOW-TIMETABLE",
-      "label": "중요 공지 문구",
-      "sourceOwner": "서버 제공",
+      "label": "고정 반입 금지 물품 안내",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
-      "target": "PerformanceAlert.message",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "target": "ProhibitedItems.message",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-TIMETABLE-D06",
       "screenId": "SHOW-TIMETABLE",
       "label": "현재 시각",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "프런트",
-      "target": "프런트: Meta.serverTime + 경과 시간, Timetable.axis 범위 내 오늘 열만",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "target": "프런트: Meta.serverTime + 경과 시간, 축제 당일 17:00~22:00 오늘 열만 (시간축 변경과 별개)",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-POPUP-D01",
       "screenId": "SHOW-POPUP",
       "label": "공연명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.title",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-POPUP-D02",
       "screenId": "SHOW-POPUP",
       "label": "출연진",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.artists",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-POPUP-D03",
       "screenId": "SHOW-POPUP",
       "label": "시작·종료 시간",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Performance.startsAt + Performance.endsAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "SHOW-POPUP-D04",
       "screenId": "SHOW-POPUP",
       "label": "간단한 안내",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "Performance.description",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/timetable.md"
     },
     {
       "id": "TICKET-D01",
       "screenId": "TICKET",
       "label": "이용 날짜",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.date (서버 KST 기준을 사용)",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D02",
       "screenId": "TICKET",
       "label": "1인 금액",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.unitPrice",
-      "requiredInScreen": "필수",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D03",
       "screenId": "TICKET",
       "label": "선택 인원",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 기본·최소 1명, 토스 복귀 시 1명",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D04",
       "screenId": "TICKET",
       "label": "총액",
-      "sourceOwner": "화면 계산",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "화면 계산",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "프런트",
       "target": "프런트: 인원 × Money.amount, 안전 정수 범위 확인",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D05",
       "screenId": "TICKET",
       "label": "송금 제공 일정",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.transferOpensAt + TicketGuide.transferClosesAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D06",
       "screenId": "TICKET",
       "label": "현장 수령 시간",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "제안",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.pickupOpensAt + TicketGuide.pickupClosesAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "제안",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D07",
       "screenId": "TICKET",
       "label": "은행명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "BankAccount.bankName",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D08",
       "screenId": "TICKET",
       "label": "계좌번호",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.account (운영 밖 null)",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D09",
       "screenId": "TICKET",
       "label": "예금주",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "BankAccount.holder",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D10",
       "screenId": "TICKET",
       "label": "티켓존 위치",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.mapTarget",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "TICKET-D11",
       "screenId": "TICKET",
       "label": "송금·수령·환불 안내",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/ticket.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "TicketGuide.instructions",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/ticket.md"
     },
     {
       "id": "STAMP-START-D01",
       "screenId": "STAMP-START",
       "label": "축제 정보",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "StampGuide.title + StampGuide.reward.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-START-D02",
       "screenId": "STAMP-START",
       "label": "행사 기간",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "StampGuide.dates",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-START-D03",
       "screenId": "STAMP-START",
       "label": "참여 방법",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "StampGuide.instructions",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-START-D04",
       "screenId": "STAMP-START",
       "label": "지급 조건",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "StampGuide.reward.notice",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-COLLECT-D01",
       "screenId": "STAMP-COLLECT",
       "label": "참여 시작 여부",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: stamp.started",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-COLLECT-D02",
       "screenId": "STAMP-COLLECT",
       "label": "당일 스탬프 개수",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: stamp.count (0~4)",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-COLLECT-D03",
       "screenId": "STAMP-COLLECT",
       "label": "상품 수령 여부",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: stamp.claimed",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-COLLECT-D04",
       "screenId": "STAMP-COLLECT",
       "label": "기록 기준 날짜",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: stamp.date (KST 자정 초기화)",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-COLLECT-D05",
       "screenId": "STAMP-COLLECT",
       "label": "공통 QR 식별값",
-      "sourceOwner": "미정",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "미정",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "StampGuide.qrValue (제공 책임·배포 방식은 검토 필요)",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "STAMP-REWARD-D01",
       "screenId": "STAMP-REWARD",
       "label": "담당자 제시·직접 선택 금지 문구",
-      "sourceOwner": "고정 UI",
+      "wikiSource": "../docs/wiki/product/stamp.md",
+      "legacySource": {
+        "owner": "고정 UI",
+        "decision": "명세됨",
+        "material": "해당 없음",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "프런트",
       "target": "프런트 고정 UI: 담당자에게 제시·사용자 직접 수령 선택 금지 안내",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "해당 없음",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/stamp.md"
     },
     {
       "id": "ADM-CROWD-D01",
       "screenId": "ADM-CROWD",
       "label": "저장 혼잡도",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.savedLevel",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D02",
       "screenId": "ADM-CROWD",
       "label": "운영 상태",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.operatingStatus",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D03",
       "screenId": "ADM-CROWD",
       "label": "상태 색상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Crowding.colorToken",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D04",
       "screenId": "ADM-CROWD",
       "label": "사용자 노출 문구",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Crowding.message",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D05",
       "screenId": "ADM-CROWD",
       "label": "최종 수정 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.updatedAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D06",
       "screenId": "ADM-CROWD",
       "label": "운영일",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.operatingDay",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D07",
       "screenId": "ADM-CROWD",
       "label": "운영 시작 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.opensAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-D08",
       "screenId": "ADM-CROWD",
       "label": "운영 종료 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Crowding.closesAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-NOTICE-LIST-D01",
       "screenId": "ADM-NOTICE-LIST",
       "label": "공지 식별 정보",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.id",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-LIST-D02",
       "screenId": "ADM-NOTICE-LIST",
       "label": "유형",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.type",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-LIST-D03",
       "screenId": "ADM-NOTICE-LIST",
       "label": "제목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.translations.ko.title",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-LIST-D04",
       "screenId": "ADM-NOTICE-LIST",
       "label": "최종 수정 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.updatedAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D01",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "유형",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.type",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D02",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "한국어 제목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.translations.ko.title",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D03",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "한국어 본문",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.translations.ko.body",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D05",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "템플릿 정보",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "AdminNotice.templateId",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D06",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "언어별 번역 제목·본문",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.translations",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-DELETE-D01",
       "screenId": "ADM-NOTICE-DELETE",
       "label": "삭제 대상 식별 정보",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.id",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-DELETE-D02",
       "screenId": "ADM-NOTICE-DELETE",
       "label": "대상 공지 제목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.translations.ko.title",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-TEMPLATE-D01",
       "screenId": "ADM-NOTICE-TEMPLATE",
       "label": "사용 가능 템플릿 목록",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Templates.items",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-TEMPLATE-D02",
       "screenId": "ADM-NOTICE-TEMPLATE",
       "label": "템플릿 한국어 제목",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Template.translations.ko.title",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-TEMPLATE-D03",
       "screenId": "ADM-NOTICE-TEMPLATE",
       "label": "템플릿 한국어 본문",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Template.translations.ko.body",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-TEMPLATE-D04",
       "screenId": "ADM-NOTICE-TEMPLATE",
       "label": "언어별 번역문",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Template.translations",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-GOODS-D01",
       "screenId": "ADM-GOODS",
       "label": "상품 식별 정보",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
-      "target": "Inventory.goodsId",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "target": "Availability.goodsId",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-D02",
       "screenId": "ADM-GOODS",
       "label": "상품명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
-      "target": "Inventory.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "target": "Availability.name",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-D03",
       "screenId": "ADM-GOODS",
       "label": "색상×사이즈 조합",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
-      "target": "Inventory.variants[].colorId + Inventory.variants[].sizeId",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "target": "Availability.variants[].colorId + Availability.variants[].sizeId",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-D04",
       "screenId": "ADM-GOODS",
-      "label": "재고 상태",
-      "sourceOwner": "서버 제공",
+      "label": "판매 상태",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
-      "target": "Inventory.variants[].status",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "target": "Availability.variants[].status",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "MAP-OVERVIEW-D09",
       "screenId": "MAP-OVERVIEW",
       "label": "혼잡도 최종 상태",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "Crowding.status",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 지도 혼잡도 표시 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D10",
       "screenId": "MAP-OVERVIEW",
       "label": "혼잡도 색상",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "Crowding.colorToken",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 지도 혼잡도 색상 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D11",
       "screenId": "MAP-OVERVIEW",
       "label": "혼잡도 안내 문구",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "Crowding.message",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 지도 혼잡도 안내 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "MAP-OVERVIEW-D12",
       "screenId": "MAP-OVERVIEW",
       "label": "혼잡도 수정 시각·최초 표시",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "Crowding.updatedAt + Crowding.timeBasis",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/map.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 지도 혼잡도 수정 시각 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/map.md"
     },
     {
       "id": "ADM-NOTICE-LIST-D05",
       "screenId": "ADM-NOTICE-LIST",
       "label": "최초 등록 시각",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.createdAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D07",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "본문 링크",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "선택"
+      },
       "owner": "API",
       "target": "AdminNotice.links",
-      "requiredInScreen": "선택",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-NOTICE-EDIT-D08",
       "screenId": "ADM-NOTICE-EDIT",
       "label": "번역 완료 상태",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/notice.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "AdminNotice.translations + NoticeTranslationPreview.canSave",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/notice.md"
     },
     {
       "id": "ADM-GOODS-D05",
       "screenId": "ADM-GOODS",
       "label": "남은 재고 수량",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "Inventory.variants[].quantity",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 실제 재고 수량 미관리",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-D06",
       "screenId": "ADM-GOODS",
       "label": "상품 전체 품절 여부",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
-      "target": "Inventory.allSoldOut",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "target": "Availability.allSoldOut",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-CROWD-D09",
       "screenId": "ADM-CROWD",
       "label": "혼잡도 판단 기준",
-      "sourceOwner": "고정 UI",
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "고정 UI",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "프런트",
       "target": "프런트 고정 UI: 운영자 판단 기준·85% 자동 만석 아님",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-HOURS-D01",
       "screenId": "ADM-CROWD-HOURS",
       "label": "운영일",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "OperatingHours.operatingDay",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 운영 시간은 개발자 등록, 관리자 편집 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-HOURS-D02",
       "screenId": "ADM-CROWD-HOURS",
       "label": "입장 시작 시각",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "OperatingHours.opensAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 운영 시간은 개발자 등록, 관리자 편집 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-HOURS-D03",
       "screenId": "ADM-CROWD-HOURS",
       "label": "운영 종료 시각",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "OperatingHours.closesAt",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 운영 시간은 개발자 등록, 관리자 편집 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-HOURS-D04",
       "screenId": "ADM-CROWD-HOURS",
       "label": "기본값 적용 여부",
-      "sourceOwner": "서버 제공",
-      "owner": "API",
-      "target": "OperatingHours.isDefault",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 운영 시간은 개발자 등록, 관리자 편집 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-CROWD-HOURS-D05",
       "screenId": "ADM-CROWD-HOURS",
       "label": "입력 중 시간",
-      "sourceOwner": "브라우저 유지",
-      "owner": "브라우저",
-      "target": "브라우저: 저장 전 운영 시간 입력값",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "wikiSource": "../docs/wiki/product/admin/crowd.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
+      "owner": "제외",
+      "target": "제외: 운영 시간은 개발자 등록, 관리자 편집 없음",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/crowd.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST-D01",
       "screenId": "ADM-GOODS-PRODUCT-LIST",
       "label": "상품 ID",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.id",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST-D02",
       "screenId": "ADM-GOODS-PRODUCT-LIST",
       "label": "상품명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST-D03",
       "screenId": "ADM-GOODS-PRODUCT-LIST",
       "label": "가격",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.price",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST-D04",
       "screenId": "ADM-GOODS-PRODUCT-LIST",
       "label": "상품 이미지",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Goods.images",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST-D05",
       "screenId": "ADM-GOODS-PRODUCT-LIST",
       "label": "색상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.colors",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-LIST-D06",
       "screenId": "ADM-GOODS-PRODUCT-LIST",
       "label": "사이즈",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.sizes",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D01",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "상품 ID",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.id",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D02",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "상품명",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.name",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D03",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "가격",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.price",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D04",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "상품 이미지",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "조건부"
+      },
       "owner": "API",
       "target": "Goods.images",
-      "requiredInScreen": "조건부",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D05",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "색상",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.colors",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D06",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "사이즈",
-      "sourceOwner": "서버 제공",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "서버 제공",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "API",
       "target": "Goods.sizes",
-      "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
-      "pendingIds": ""
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
     },
     {
       "id": "ADM-GOODS-PRODUCT-EDIT-D07",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "작성 중 입력값",
-      "sourceOwner": "브라우저 유지",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "legacySource": {
+        "owner": "브라우저 유지",
+        "decision": "명세됨",
+        "material": "자료 대기",
+        "pendingIds": "",
+        "requiredInScreen": "필수"
+      },
       "owner": "브라우저",
       "target": "브라우저: 상품 작성 중 입력값",
+      "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "../docs/wiki/product/admin/goods.md"
+    },
+    {
+      "id": "GOODS-DETAIL-D08",
+      "screenId": "GOODS-DETAIL",
+      "label": "실제 제공 조합",
+      "target": "Goods.options",
+      "owner": "API",
+      "wikiSource": "../docs/wiki/product/goods.md",
       "requiredInScreen": "필수",
-      "sourceDecision": "명세됨",
-      "sourceMaterial": "자료 대기",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "운영 자료 대기",
+      "pendingIds": ""
+    },
+    {
+      "id": "ADM-GOODS-PRODUCT-EDIT-D08",
+      "screenId": "ADM-GOODS-PRODUCT-EDIT",
+      "label": "실제 제공 조합",
+      "target": "Goods.options",
+      "owner": "API",
+      "wikiSource": "../docs/wiki/product/admin/goods.md",
+      "requiredInScreen": "필수",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "운영 자료 대기",
+      "pendingIds": ""
+    },
+    {
+      "id": "SHOW-TIMETABLE-D07",
+      "screenId": "SHOW-TIMETABLE",
+      "label": "반입 금지 물품 목록",
+      "target": "ProhibitedItems.items",
+      "owner": "API",
+      "wikiSource": "../docs/wiki/product/timetable.md",
+      "requiredInScreen": "필수",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "운영 자료 대기",
       "pendingIds": ""
     }
   ]

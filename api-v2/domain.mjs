@@ -25,7 +25,6 @@ export function createState() {
   return initializeAdmin({
     revision:1,nextId:1,performances,notices,deleted:new Set(),crowding:{'2030-10-01':{level:'MODERATE',updatedAt:'2030-10-01T17:00:00+09:00'}},
     goods:[{id:'goods-shirt',name:'예시 의류',price:money(1000),image:image(),colorImages:[{colorId:'color-a',colorName:'예시 색상 A',image:image()},{colorId:'color-b',colorName:'예시 색상 B',image:image()}],sizes:[{id:'size-m',label:'M'},{id:'size-l',label:'L'}],description:'실제 상품·가격이 아닙니다.'}],
-    availability:{'goods-shirt':{goodsId:'goods-shirt',name:'예시 의류',sizes:[{sizeId:'size-m',label:'M',status:'ON_SALE'},{sizeId:'size-l',label:'L',status:'SOLD_OUT'}],allSoldOut:false,updatedAt:null}},
     spaces:[{...structuredClone(commonSpace),id:'space-booth',category:'BOOTH',name:'예시 체험 부스',experience:'개발용 체험 방법',events:['개발용 이벤트'],mapTarget:structuredClone(mapTarget)}, { ...structuredClone(commonSpace),id:'space-pub',category:'PUB',name:'예시 주점',menu:[{name:'예시 메뉴',price:money(2000)}],mapTarget:{...mapTarget,placeId:'place-pub',pinId:'pin-pub'} },{...structuredClone(commonSpace),id:'space-market',category:'FLEA_MARKET',name:'예시 마켓',mapTarget:{...mapTarget,placeId:'place-market',pinId:'pin-market'}}],
     maps:[{id:'map-overview',name:'예시 전체 지도',kind:'OVERVIEW',version:'mock-map-1',image:image()},{id:'map-area',name:'예시 구역 지도',kind:'AREA',version:'mock-map-1',image:image()}],
     pins:{'map-overview':[{id:'pin-area',category:'area',label:'예시 구역 이동',x:0.2,y:0.3,target:{kind:'AREA',mapId:'map-area'}},{id:'pin-ticket',category:'ticket',label:'예시 티켓존',x:0.6,y:0.7,target:{kind:'PLACE',placeId:'place-ticket'}}], 'map-area':[{id:'pin-booth',category:'booth',label:'예시 부스',x:0.2,y:0.4,target:{kind:'PLACE',placeId:'place-booth'}},{id:'pin-pub',category:'pub',label:'예시 주점',x:0.4,y:0.5,target:{kind:'PLACE',placeId:'place-pub'}},{id:'pin-market',category:'market',label:'예시 마켓',x:0.5,y:0.5,target:{kind:'PLACE',placeId:'place-market'}},{id:'pin-toilet',category:'toilet',label:'예시 편의시설',x:0.8,y:0.5,target:{kind:'PLACE',placeId:'place-toilet'}}]},
@@ -45,7 +44,7 @@ function crowdInfo(state,now,scenario,locale='ko') {
   const hours=hoursFor(state,operatingDay);
   const opensAt=`${operatingDay}T${hours.opensAt}:00+09:00`;
   const closesAt=`${operatingDay}T${hours.closesAt}:00+09:00`;
-  const stored=scenario==='unmodified'?null:state.crowding[operatingDay];
+  const stored=scenario==='unmodified'||today!==operatingDay?null:state.crowding[operatingDay];
   const status=+new Date(now)<+new Date(opensAt)?'BEFORE_OPEN':+new Date(now)>=+new Date(closesAt)?'CLOSED':stored?.level||'RELAXED';
   const colors={RELAXED:'green',MODERATE:'orange',CROWDED:'red',FULL:'black'};
   const messages={BEFORE_OPEN:'오늘 재학생존 입장은 12:00에 시작해요',RELAXED:'재학생존의 공간이 많이 남았어요.',MODERATE:'재학생존의 공간이 절반 이상 찼어요.',CROWDED:'재학생존이 많이 혼잡해요.',FULL:'재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.',CLOSED:'오늘 재학생존 운영이 종료됐어요'};
@@ -63,7 +62,7 @@ function localize(value,locale) {
   const walk=(v,key='')=> {
     if(Array.isArray(v))return v.map(x=>walk(x,key));
     if(v&&typeof v==='object')return Object.fromEntries(Object.entries(v).map(([k,x])=>[k,['translations','languages'].includes(k)?x:walk(x,k)]));
-    return typeof v==='string' && /[가-힣]/.test(v) && (translatable.has(key)||['instructions','events'].includes(key)) ? `Mock ${key}` : v;
+    return typeof v==='string' && /[가-힣]/.test(v) && (translatable.has(key)||['instructions','events','items'].includes(key)) ? `Mock ${key}` : v;
   };
   return walk(value);
 }
@@ -120,9 +119,9 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       if(!['artist-a','artist-b'].includes(params.artistId))failure(404,'NOT_FOUND','출연진이 없습니다.');
       data={id:params.artistId,category:params.artistId==='artist-a'?'ARTIST':'CONTEST',name:params.artistId==='artist-a'?'예시 아티스트 A':'예시 참가팀 B',image:image(),introduction:missing?null:'개발용 소개',socialLinks:missing?[]:[link('예시 SNS')],songs:missing?[]:[link('예시 대표곡')],performances:state.performances.filter(p=>p.artists.some(a=>a.id===params.artistId)).map(({id,date,startsAt,endsAt})=>({id,date,startsAt,endsAt}))};break;
     }
-    case 'getTimetable':data={dates:DATES,axis:{startTime:'17:00',endTime:'23:00'},items:empty?[]:structuredClone(state.performances).sort((a,b)=>a.startsAt.localeCompare(b.startsAt)||a.id.localeCompare(b.id))};break;
+    case 'getTimetable':data={dates:DATES,axis:{startTime:'17:00',endTime:'22:00'},items:empty?[]:structuredClone(state.performances).sort((a,b)=>a.startsAt.localeCompare(b.startsAt)||a.id.localeCompare(b.id))};break;
     case 'getPerformance':data=find(state.performances,params.performanceId);if(missing)data.description=null;break;
-    case 'getPerformanceAlert':data={message:empty?null:'개발용 공연 중요 안내',updatedAt:empty?null:'2030-10-01T16:00:00+09:00'};break;
+    case 'getProhibitedItems':data={items:empty?[]:['개발용 반입 금지 물품 예시'],message:empty?null:'총학생회 확정 자료를 사전 번역해 고정 표시합니다. 이 내용은 예시입니다.'};break;
     case 'getSpaces':data={items:empty?[]:structuredClone(state.spaces).filter(s=>!query.category||query.category==='ALL'||s.category===query.category).sort((a,b)=>a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id))};break;
     case 'getSpace':data=find(state.spaces,params.spaceId);if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null});break;
     case 'getMaps':data={items:empty?[]:structuredClone(state.maps),overviewId:empty?null:'map-overview'};break;
@@ -151,6 +150,6 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getTemplate':data=find(state.templates,params.templateId);if(missing)data.translations.en={title:null,body:null,status:'PENDING'};break;
     default:failure(404,'NOT_FOUND','경로가 없습니다.');
   }
-  if(op.operationId==='getConfig')data.languages=state.languages.map(code=>({code,label:{ko:'한국어',en:'English','zh-Hans':'简体中文',ja:'日本語'}[code]}));
+  if(op.operationId==='getConfig')data.languages=state.languages.map(code=>({code,label:{ko:'한국어',en:'English','zh-Hans':'中文',ja:'日本語'}[code]}));
   return {status,data:op.admin?data:localize(data,locale),now,locale};
 }

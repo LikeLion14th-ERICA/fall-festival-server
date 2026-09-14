@@ -295,7 +295,7 @@
               },
               {
                 "code": "zh-Hans",
-                "label": "简体中文"
+                "label": "中文"
               },
               {
                 "code": "ja",
@@ -392,9 +392,7 @@
   },
   "getCrowding": {
     "screens": [
-      "HOME",
-      "MAP-OVERVIEW",
-      "MAP-AREA"
+      "HOME"
     ],
     "method": "GET",
     "path": "/api/v2/crowding",
@@ -450,10 +448,10 @@
             "closesAt": "2030-10-01T22:00:00+09:00",
             "operatingStatus": "BEFORE_OPEN",
             "status": "BEFORE_OPEN",
-            "savedLevel": "MODERATE",
+            "savedLevel": null,
             "colorToken": null,
             "message": "오늘 재학생존 입장은 13:00에 시작해요",
-            "updatedAt": "2030-10-01T17:00:00+09:00",
+            "updatedAt": null,
             "timeBasis": "NONE"
           },
           "meta": {
@@ -1077,6 +1075,20 @@
                       }
                     ]
                   }
+                ],
+                "options": [
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-m"
+                  },
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-l"
+                  },
+                  {
+                    "colorId": "color-b",
+                    "sizeId": "size-m"
+                  }
                 ]
               }
             ]
@@ -1229,30 +1241,23 @@
                 "variants": [
                   {
                     "colorId": "color-a",
-                    "colorName": "예시 색상 A",
                     "sizeId": "size-m",
+                    "colorName": "예시 색상 A",
                     "sizeLabel": "M",
                     "status": "ON_SALE"
                   },
                   {
                     "colorId": "color-a",
+                    "sizeId": "size-l",
                     "colorName": "예시 색상 A",
-                    "sizeId": "size-l",
                     "sizeLabel": "L",
                     "status": "SOLD_OUT"
                   },
                   {
                     "colorId": "color-b",
-                    "colorName": "예시 색상 B",
                     "sizeId": "size-m",
-                    "sizeLabel": "M",
-                    "status": "SOLD_OUT"
-                  },
-                  {
-                    "colorId": "color-b",
                     "colorName": "예시 색상 B",
-                    "sizeId": "size-l",
-                    "sizeLabel": "L",
+                    "sizeLabel": "M",
                     "status": "SOLD_OUT"
                   }
                 ],
@@ -1316,30 +1321,23 @@
                 "variants": [
                   {
                     "colorId": "color-a",
-                    "colorName": "예시 색상 A",
                     "sizeId": "size-m",
+                    "colorName": "예시 색상 A",
                     "sizeLabel": "M",
                     "status": "SOLD_OUT"
                   },
                   {
                     "colorId": "color-a",
+                    "sizeId": "size-l",
                     "colorName": "예시 색상 A",
-                    "sizeId": "size-l",
                     "sizeLabel": "L",
                     "status": "SOLD_OUT"
                   },
                   {
                     "colorId": "color-b",
-                    "colorName": "예시 색상 B",
                     "sizeId": "size-m",
-                    "sizeLabel": "M",
-                    "status": "SOLD_OUT"
-                  },
-                  {
-                    "colorId": "color-b",
                     "colorName": "예시 색상 B",
-                    "sizeId": "size-l",
-                    "sizeLabel": "L",
+                    "sizeLabel": "M",
                     "status": "SOLD_OUT"
                   }
                 ],
@@ -1542,6 +1540,20 @@
                   }
                 ]
               }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
             ]
           },
           "meta": {
@@ -1644,6 +1656,20 @@
                     "height": 600
                   }
                 ]
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ]
           },
@@ -1796,30 +1822,23 @@
             "variants": [
               {
                 "colorId": "color-a",
-                "colorName": "예시 색상 A",
                 "sizeId": "size-m",
+                "colorName": "예시 색상 A",
                 "sizeLabel": "M",
                 "status": "ON_SALE"
               },
               {
                 "colorId": "color-a",
+                "sizeId": "size-l",
                 "colorName": "예시 색상 A",
-                "sizeId": "size-l",
                 "sizeLabel": "L",
                 "status": "SOLD_OUT"
               },
               {
                 "colorId": "color-b",
-                "colorName": "예시 색상 B",
                 "sizeId": "size-m",
-                "sizeLabel": "M",
-                "status": "SOLD_OUT"
-              },
-              {
-                "colorId": "color-b",
                 "colorName": "예시 색상 B",
-                "sizeId": "size-l",
-                "sizeLabel": "L",
+                "sizeLabel": "M",
                 "status": "SOLD_OUT"
               }
             ],
@@ -1854,30 +1873,23 @@
             "variants": [
               {
                 "colorId": "color-a",
-                "colorName": "예시 색상 A",
                 "sizeId": "size-m",
+                "colorName": "예시 색상 A",
                 "sizeLabel": "M",
                 "status": "SOLD_OUT"
               },
               {
                 "colorId": "color-a",
+                "sizeId": "size-l",
                 "colorName": "예시 색상 A",
-                "sizeId": "size-l",
                 "sizeLabel": "L",
                 "status": "SOLD_OUT"
               },
               {
                 "colorId": "color-b",
-                "colorName": "예시 색상 B",
                 "sizeId": "size-m",
-                "sizeLabel": "M",
-                "status": "SOLD_OUT"
-              },
-              {
-                "colorId": "color-b",
                 "colorName": "예시 색상 B",
-                "sizeId": "size-l",
-                "sizeLabel": "L",
+                "sizeLabel": "M",
                 "status": "SOLD_OUT"
               }
             ],
@@ -2641,7 +2653,7 @@
             ],
             "axis": {
               "startTime": "17:00",
-              "endTime": "23:00"
+              "endTime": "22:00"
             },
             "items": [
               {
@@ -2760,7 +2772,7 @@
             ],
             "axis": {
               "startTime": "17:00",
-              "endTime": "23:00"
+              "endTime": "22:00"
             },
             "items": []
           },
@@ -3054,17 +3066,17 @@
       }
     }
   },
-  "getPerformanceAlert": {
+  "getProhibitedItems": {
     "screens": [
       "SHOW-TIMETABLE"
     ],
     "method": "GET",
-    "path": "/api/v2/performance-alert",
+    "path": "/api/v2/prohibited-items",
     "scenarios": {
       "normal": {
         "request": {
           "method": "GET",
-          "path": "/api/v2/performance-alert",
+          "path": "/api/v2/prohibited-items",
           "headers": {
             "X-Mock-Scenario": "normal",
             "X-Mock-Session": "frontend-demo"
@@ -3073,8 +3085,10 @@
         "status": 200,
         "response": {
           "data": {
-            "message": "개발용 공연 중요 안내",
-            "updatedAt": "2030-10-01T16:00:00+09:00"
+            "items": [
+              "개발용 반입 금지 물품 예시"
+            ],
+            "message": "총학생회 확정 자료를 사전 번역해 고정 표시합니다. 이 내용은 예시입니다."
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -3090,7 +3104,7 @@
       "empty": {
         "request": {
           "method": "GET",
-          "path": "/api/v2/performance-alert",
+          "path": "/api/v2/prohibited-items",
           "headers": {
             "X-Mock-Scenario": "empty",
             "X-Mock-Session": "frontend-demo"
@@ -3099,8 +3113,8 @@
         "status": 200,
         "response": {
           "data": {
-            "message": null,
-            "updatedAt": null
+            "items": [],
+            "message": null
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -3116,7 +3130,7 @@
       "error": {
         "request": {
           "method": "GET",
-          "path": "/api/v2/performance-alert",
+          "path": "/api/v2/prohibited-items",
           "headers": {
             "X-Mock-Scenario": "error",
             "X-Mock-Session": "frontend-demo"
@@ -3144,7 +3158,7 @@
       "bad-request": {
         "request": {
           "method": "GET",
-          "path": "/api/v2/performance-alert",
+          "path": "/api/v2/prohibited-items",
           "headers": {
             "X-Mock-Scenario": "bad-request",
             "X-Mock-Session": "frontend-demo"
@@ -3172,7 +3186,7 @@
       "rate-limited": {
         "request": {
           "method": "GET",
-          "path": "/api/v2/performance-alert",
+          "path": "/api/v2/prohibited-items",
           "headers": {
             "X-Mock-Scenario": "rate-limited",
             "X-Mock-Session": "frontend-demo"
@@ -4977,10 +4991,10 @@
             "closesAt": "2030-10-01T22:00:00+09:00",
             "operatingStatus": "BEFORE_OPEN",
             "status": "BEFORE_OPEN",
-            "savedLevel": "MODERATE",
+            "savedLevel": null,
             "colorToken": null,
             "message": "오늘 재학생존 입장은 13:00에 시작해요",
-            "updatedAt": "2030-10-01T17:00:00+09:00",
+            "updatedAt": null,
             "timeBasis": "NONE"
           },
           "meta": {
@@ -5493,21 +5507,12 @@
                     "title": "지난 예시 공지",
                     "body": "사용자 목록에서는 제외합니다.",
                     "status": "READY"
-                  },
-                  "en": {
-                    "title": "Mock English notice",
-                    "body": "Mock only",
-                    "status": "READY"
                   }
                 },
                 "links": [],
                 "templateId": null,
                 "createdAt": "2030-09-30T18:00:00+09:00",
-                "updatedAt": "2030-10-01T17:00:00+09:00",
-                "translationSource": {
-                  "title": "지난 예시 공지",
-                  "body": "사용자 목록에서는 제외합니다."
-                }
+                "updatedAt": "2030-10-01T17:00:00+09:00"
               },
               {
                 "id": "notice-pending",
@@ -5521,17 +5526,13 @@
                   "en": {
                     "title": "Pending",
                     "body": "Not visible in English.",
-                    "status": "READY"
+                    "status": "PENDING"
                   }
                 },
                 "links": [],
                 "templateId": null,
                 "createdAt": "2030-10-01T17:00:00+09:00",
-                "updatedAt": "2030-10-01T17:00:00+09:00",
-                "translationSource": {
-                  "title": "번역 대기 예시",
-                  "body": "한국어에는 표시합니다."
-                }
+                "updatedAt": "2030-10-01T17:00:00+09:00"
               },
               {
                 "id": "notice-1",
@@ -5557,11 +5558,7 @@
                 ],
                 "templateId": null,
                 "createdAt": "2030-10-01T16:00:00+09:00",
-                "updatedAt": "2030-10-01T16:00:00+09:00",
-                "translationSource": {
-                  "title": "예시 공지",
-                  "body": "개발용 공지 본문입니다."
-                }
+                "updatedAt": "2030-10-01T16:00:00+09:00"
               },
               {
                 "id": "notice-lost",
@@ -5581,11 +5578,7 @@
                 "links": [],
                 "templateId": null,
                 "createdAt": "2030-09-30T16:00:00+09:00",
-                "updatedAt": "2030-09-30T16:00:00+09:00",
-                "translationSource": {
-                  "title": "예시 분실물",
-                  "body": "실제 분실물이 아닙니다."
-                }
+                "updatedAt": "2030-09-30T16:00:00+09:00"
               }
             ]
           },
@@ -5805,11 +5798,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 201,
@@ -5830,10 +5819,6 @@
             },
             "links": [],
             "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            },
             "id": "notice-created-1",
             "createdAt": "2030-10-01T18:00:00.002+09:00",
             "updatedAt": "2030-10-01T18:00:00.002+09:00"
@@ -5874,11 +5859,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 503,
@@ -5925,38 +5906,48 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
-        "status": 422,
+        "status": 201,
         "response": {
-          "error": {
-            "code": "ENGLISH_TRANSLATION_REQUIRED",
-            "message": "영어 번역 완료 후 저장해 주세요.",
-            "details": [],
-            "retryable": false
+          "data": {
+            "type": "GENERAL",
+            "translations": {
+              "ko": {
+                "title": "개발용 새 공지",
+                "body": "개발용 본문",
+                "status": "READY"
+              },
+              "en": {
+                "title": null,
+                "body": null,
+                "status": "PENDING"
+              }
+            },
+            "links": [],
+            "templateId": null,
+            "id": "notice-created-1",
+            "createdAt": "2030-10-01T18:00:00.002+09:00",
+            "updatedAt": "2030-10-01T18:00:00.002+09:00"
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T18:00:00.002+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 2,
             "locale": "ko",
             "mock": true
           }
         }
       },
-      "stale-translation": {
+      "english-failed": {
         "request": {
           "method": "POST",
           "path": "/api/v2/admin/notices",
           "headers": {
-            "X-Mock-Scenario": "stale-translation",
+            "X-Mock-Scenario": "english-failed",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json"
@@ -5965,38 +5956,48 @@
             "type": "GENERAL",
             "translations": {
               "ko": {
-                "title": "변경 후 제목",
+                "title": "개발용 새 공지",
                 "body": "개발용 본문",
                 "status": "READY"
               },
               "en": {
-                "title": "New mock notice",
-                "body": "Mock body",
+                "title": null,
+                "body": null,
+                "status": "FAILED"
+              }
+            },
+            "links": [],
+            "templateId": null
+          }
+        },
+        "status": 201,
+        "response": {
+          "data": {
+            "type": "GENERAL",
+            "translations": {
+              "ko": {
+                "title": "개발용 새 공지",
+                "body": "개발용 본문",
                 "status": "READY"
+              },
+              "en": {
+                "title": null,
+                "body": null,
+                "status": "FAILED"
               }
             },
             "links": [],
             "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
-          }
-        },
-        "status": 422,
-        "response": {
-          "error": {
-            "code": "STALE_TRANSLATION_SOURCE",
-            "message": "변경된 한국어 원문으로 번역을 갱신하거나 직접 검토해 주세요.",
-            "details": [],
-            "retryable": false
+            "id": "notice-created-1",
+            "createdAt": "2030-10-01T18:00:00.002+09:00",
+            "updatedAt": "2030-10-01T18:00:00.002+09:00"
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T18:00:00.002+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 2,
             "locale": "ko",
             "mock": true
           }
@@ -6027,11 +6028,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 400,
@@ -6078,11 +6075,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 429,
@@ -6129,11 +6122,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 401,
@@ -6180,11 +6169,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 403,
@@ -6251,11 +6236,7 @@
             ],
             "templateId": null,
             "createdAt": "2030-10-01T16:00:00+09:00",
-            "updatedAt": "2030-10-01T16:00:00+09:00",
-            "translationSource": {
-              "title": "예시 공지",
-              "body": "개발용 공지 본문입니다."
-            }
+            "updatedAt": "2030-10-01T16:00:00+09:00"
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -6298,11 +6279,7 @@
             "links": [],
             "templateId": null,
             "createdAt": "2030-10-01T16:00:00+09:00",
-            "updatedAt": "2030-10-01T16:00:00+09:00",
-            "translationSource": {
-              "title": "예시 공지",
-              "body": "개발용 공지 본문입니다."
-            }
+            "updatedAt": "2030-10-01T16:00:00+09:00"
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -6523,11 +6500,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 200,
@@ -6548,10 +6521,6 @@
             },
             "links": [],
             "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            },
             "id": "notice-1",
             "createdAt": "2030-10-01T16:00:00+09:00",
             "updatedAt": "2030-10-01T18:00:00.002+09:00"
@@ -6592,11 +6561,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 404,
@@ -6643,11 +6608,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 503,
@@ -6694,38 +6655,48 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
-        "status": 422,
+        "status": 200,
         "response": {
-          "error": {
-            "code": "ENGLISH_TRANSLATION_REQUIRED",
-            "message": "영어 번역 완료 후 저장해 주세요.",
-            "details": [],
-            "retryable": false
+          "data": {
+            "type": "GENERAL",
+            "translations": {
+              "ko": {
+                "title": "개발용 새 공지",
+                "body": "개발용 본문",
+                "status": "READY"
+              },
+              "en": {
+                "title": null,
+                "body": null,
+                "status": "PENDING"
+              }
+            },
+            "links": [],
+            "templateId": null,
+            "id": "notice-1",
+            "createdAt": "2030-10-01T16:00:00+09:00",
+            "updatedAt": "2030-10-01T18:00:00.002+09:00"
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T18:00:00.002+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 2,
             "locale": "ko",
             "mock": true
           }
         }
       },
-      "stale-translation": {
+      "english-failed": {
         "request": {
           "method": "PUT",
           "path": "/api/v2/admin/notices/notice-1",
           "headers": {
-            "X-Mock-Scenario": "stale-translation",
+            "X-Mock-Scenario": "english-failed",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json"
@@ -6734,38 +6705,48 @@
             "type": "GENERAL",
             "translations": {
               "ko": {
-                "title": "변경 후 제목",
+                "title": "개발용 새 공지",
                 "body": "개발용 본문",
                 "status": "READY"
               },
               "en": {
-                "title": "New mock notice",
-                "body": "Mock body",
+                "title": null,
+                "body": null,
+                "status": "FAILED"
+              }
+            },
+            "links": [],
+            "templateId": null
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "type": "GENERAL",
+            "translations": {
+              "ko": {
+                "title": "개발용 새 공지",
+                "body": "개발용 본문",
                 "status": "READY"
+              },
+              "en": {
+                "title": null,
+                "body": null,
+                "status": "FAILED"
               }
             },
             "links": [],
             "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
-          }
-        },
-        "status": 422,
-        "response": {
-          "error": {
-            "code": "STALE_TRANSLATION_SOURCE",
-            "message": "변경된 한국어 원문으로 번역을 갱신하거나 직접 검토해 주세요.",
-            "details": [],
-            "retryable": false
+            "id": "notice-1",
+            "createdAt": "2030-10-01T16:00:00+09:00",
+            "updatedAt": "2030-10-01T18:00:00.002+09:00"
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T18:00:00.002+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 2,
             "locale": "ko",
             "mock": true
           }
@@ -6796,11 +6777,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 400,
@@ -6847,11 +6824,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 429,
@@ -6898,11 +6871,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 401,
@@ -6949,11 +6918,7 @@
               }
             },
             "links": [],
-            "templateId": null,
-            "translationSource": {
-              "title": "개발용 새 공지",
-              "body": "개발용 본문"
-            }
+            "templateId": null
           }
         },
         "status": 403,
@@ -7698,35 +7663,24 @@
                 "variants": [
                   {
                     "colorId": "color-a",
-                    "colorName": "예시 색상 A",
                     "sizeId": "size-m",
+                    "colorName": "예시 색상 A",
                     "sizeLabel": "M",
-                    "status": "ON_SALE",
-                    "quantity": 5
+                    "status": "ON_SALE"
                   },
                   {
                     "colorId": "color-a",
+                    "sizeId": "size-l",
                     "colorName": "예시 색상 A",
-                    "sizeId": "size-l",
                     "sizeLabel": "L",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
+                    "status": "SOLD_OUT"
                   },
                   {
                     "colorId": "color-b",
-                    "colorName": "예시 색상 B",
                     "sizeId": "size-m",
-                    "sizeLabel": "M",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
-                  },
-                  {
-                    "colorId": "color-b",
                     "colorName": "예시 색상 B",
-                    "sizeId": "size-l",
-                    "sizeLabel": "L",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
+                    "sizeLabel": "M",
+                    "status": "SOLD_OUT"
                   }
                 ],
                 "allSoldOut": false,
@@ -7791,35 +7745,24 @@
                 "variants": [
                   {
                     "colorId": "color-a",
-                    "colorName": "예시 색상 A",
                     "sizeId": "size-m",
+                    "colorName": "예시 색상 A",
                     "sizeLabel": "M",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
+                    "status": "SOLD_OUT"
                   },
                   {
                     "colorId": "color-a",
+                    "sizeId": "size-l",
                     "colorName": "예시 색상 A",
-                    "sizeId": "size-l",
                     "sizeLabel": "L",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
+                    "status": "SOLD_OUT"
                   },
                   {
                     "colorId": "color-b",
-                    "colorName": "예시 색상 B",
                     "sizeId": "size-m",
-                    "sizeLabel": "M",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
-                  },
-                  {
-                    "colorId": "color-b",
                     "colorName": "예시 색상 B",
-                    "sizeId": "size-l",
-                    "sizeLabel": "L",
-                    "status": "SOLD_OUT",
-                    "quantity": 0
+                    "sizeLabel": "M",
+                    "status": "SOLD_OUT"
                   }
                 ],
                 "allSoldOut": true,
@@ -7985,527 +7928,17 @@
       }
     }
   },
-  "getOperatingHours": {
-    "screens": [
-      "ADM-CROWD-HOURS"
-    ],
-    "method": "GET",
-    "path": "/api/v2/admin/operating-hours",
-    "scenarios": {
-      "normal": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "normal",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "items": [
-              {
-                "operatingDay": "2030-10-01",
-                "opensAt": "13:00",
-                "closesAt": "22:00",
-                "isDefault": true,
-                "updatedAt": null
-              },
-              {
-                "operatingDay": "2030-10-02",
-                "opensAt": "13:00",
-                "closesAt": "22:00",
-                "isDefault": true,
-                "updatedAt": null
-              },
-              {
-                "operatingDay": "2030-10-03",
-                "opensAt": "13:00",
-                "closesAt": "22:00",
-                "isDefault": true,
-                "updatedAt": null
-              }
-            ]
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "empty": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "empty",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "items": []
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "error": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "error",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 503,
-        "response": {
-          "error": {
-            "code": "SERVICE_UNAVAILABLE",
-            "message": "일시적으로 정보를 불러올 수 없습니다.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "bad-request": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "bad-request",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 400,
-        "response": {
-          "error": {
-            "code": "INVALID_QUERY",
-            "message": "잘못된 요청 예시입니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "rate-limited": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "rate-limited",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 429,
-        "response": {
-          "error": {
-            "code": "RATE_LIMITED",
-            "message": "잠시 후 다시 요청해 주세요.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "unauthorized": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "unauthorized",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 401,
-        "response": {
-          "error": {
-            "code": "UNAUTHORIZED",
-            "message": "관리자 인증이 필요합니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "forbidden": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/admin/operating-hours",
-          "headers": {
-            "X-Mock-Scenario": "forbidden",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
-          }
-        },
-        "status": 403,
-        "response": {
-          "error": {
-            "code": "FORBIDDEN",
-            "message": "관리자 권한이 없습니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      }
-    }
-  },
-  "putOperatingHours": {
-    "screens": [
-      "ADM-CROWD-HOURS"
-    ],
-    "method": "PUT",
-    "path": "/api/v2/admin/operating-hours/{operatingDay}",
-    "scenarios": {
-      "normal": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "normal",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "operatingDay": "2030-10-01",
-            "opensAt": "13:00",
-            "closesAt": "23:00",
-            "isDefault": false,
-            "updatedAt": "2030-10-01T18:00:00.002+09:00"
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 2,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "invalid-range": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "invalid-range",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "22:00",
-            "closesAt": "13:00"
-          }
-        },
-        "status": 422,
-        "response": {
-          "error": {
-            "code": "INVALID_TIME_RANGE",
-            "message": "종료 시각은 시작 시각보다 이후여야 합니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "not-found": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "not-found",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 404,
-        "response": {
-          "error": {
-            "code": "NOT_FOUND",
-            "message": "요청한 정보를 찾을 수 없습니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "error": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "error",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 503,
-        "response": {
-          "error": {
-            "code": "SERVICE_UNAVAILABLE",
-            "message": "일시적으로 정보를 불러올 수 없습니다.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "bad-request": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "bad-request",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 400,
-        "response": {
-          "error": {
-            "code": "INVALID_QUERY",
-            "message": "잘못된 요청 예시입니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "rate-limited": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "rate-limited",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 429,
-        "response": {
-          "error": {
-            "code": "RATE_LIMITED",
-            "message": "잠시 후 다시 요청해 주세요.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "unauthorized": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "unauthorized",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 401,
-        "response": {
-          "error": {
-            "code": "UNAUTHORIZED",
-            "message": "관리자 인증이 필요합니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "forbidden": {
-        "request": {
-          "method": "PUT",
-          "path": "/api/v2/admin/operating-hours/2030-10-01",
-          "headers": {
-            "X-Mock-Scenario": "forbidden",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "opensAt": "13:00",
-            "closesAt": "23:00"
-          }
-        },
-        "status": 403,
-        "response": {
-          "error": {
-            "code": "FORBIDDEN",
-            "message": "관리자 권한이 없습니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      }
-    }
-  },
-  "putInventory": {
+  "putAdminAvailability": {
     "screens": [
       "ADM-GOODS"
     ],
     "method": "PUT",
-    "path": "/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/inventory",
+    "path": "/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability",
     "scenarios": {
       "normal": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "normal",
             "X-Mock-Session": "frontend-demo",
@@ -8513,7 +7946,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 200,
@@ -8524,35 +7957,24 @@
             "variants": [
               {
                 "colorId": "color-a",
-                "colorName": "예시 색상 A",
                 "sizeId": "size-m",
+                "colorName": "예시 색상 A",
                 "sizeLabel": "M",
-                "status": "ON_SALE",
-                "quantity": 3
+                "status": "ON_SALE"
               },
               {
                 "colorId": "color-a",
+                "sizeId": "size-l",
                 "colorName": "예시 색상 A",
-                "sizeId": "size-l",
                 "sizeLabel": "L",
-                "status": "SOLD_OUT",
-                "quantity": 0
+                "status": "SOLD_OUT"
               },
               {
                 "colorId": "color-b",
-                "colorName": "예시 색상 B",
                 "sizeId": "size-m",
-                "sizeLabel": "M",
-                "status": "SOLD_OUT",
-                "quantity": 0
-              },
-              {
-                "colorId": "color-b",
                 "colorName": "예시 색상 B",
-                "sizeId": "size-l",
-                "sizeLabel": "L",
-                "status": "SOLD_OUT",
-                "quantity": 0
+                "sizeLabel": "M",
+                "status": "SOLD_OUT"
               }
             ],
             "allSoldOut": false,
@@ -8572,7 +7994,7 @@
       "sold-out": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "sold-out",
             "X-Mock-Session": "frontend-demo",
@@ -8580,7 +8002,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 0
+            "status": "SOLD_OUT"
           }
         },
         "status": 200,
@@ -8591,35 +8013,24 @@
             "variants": [
               {
                 "colorId": "color-a",
-                "colorName": "예시 색상 A",
                 "sizeId": "size-m",
+                "colorName": "예시 색상 A",
                 "sizeLabel": "M",
-                "status": "SOLD_OUT",
-                "quantity": 0
+                "status": "SOLD_OUT"
               },
               {
                 "colorId": "color-a",
+                "sizeId": "size-l",
                 "colorName": "예시 색상 A",
-                "sizeId": "size-l",
                 "sizeLabel": "L",
-                "status": "SOLD_OUT",
-                "quantity": 0
+                "status": "SOLD_OUT"
               },
               {
                 "colorId": "color-b",
-                "colorName": "예시 색상 B",
                 "sizeId": "size-m",
-                "sizeLabel": "M",
-                "status": "SOLD_OUT",
-                "quantity": 0
-              },
-              {
-                "colorId": "color-b",
                 "colorName": "예시 색상 B",
-                "sizeId": "size-l",
-                "sizeLabel": "L",
-                "status": "SOLD_OUT",
-                "quantity": 0
+                "sizeLabel": "M",
+                "status": "SOLD_OUT"
               }
             ],
             "allSoldOut": true,
@@ -8639,7 +8050,7 @@
       "not-found": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "not-found",
             "X-Mock-Session": "frontend-demo",
@@ -8647,7 +8058,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 404,
@@ -8672,7 +8083,7 @@
       "error": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "error",
             "X-Mock-Session": "frontend-demo",
@@ -8680,7 +8091,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 503,
@@ -8705,7 +8116,7 @@
       "bad-request": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "bad-request",
             "X-Mock-Session": "frontend-demo",
@@ -8713,7 +8124,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 400,
@@ -8738,7 +8149,7 @@
       "rate-limited": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "rate-limited",
             "X-Mock-Session": "frontend-demo",
@@ -8746,7 +8157,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 429,
@@ -8771,7 +8182,7 @@
       "unauthorized": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "unauthorized",
             "X-Mock-Session": "frontend-demo",
@@ -8779,7 +8190,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 401,
@@ -8804,7 +8215,7 @@
       "forbidden": {
         "request": {
           "method": "PUT",
-          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory",
+          "path": "/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability",
           "headers": {
             "X-Mock-Scenario": "forbidden",
             "X-Mock-Session": "frontend-demo",
@@ -8812,7 +8223,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "quantity": 3
+            "status": "ON_SALE"
           }
         },
         "status": 403,
@@ -8935,6 +8346,20 @@
                         "height": 600
                       }
                     ]
+                  }
+                ],
+                "options": [
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-m"
+                  },
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-l"
+                  },
+                  {
+                    "colorId": "color-b",
+                    "sizeId": "size-m"
                   }
                 ]
               }
@@ -9222,6 +8647,20 @@
                   }
                 ]
               }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
             ]
           },
           "meta": {
@@ -9325,6 +8764,20 @@
                     "height": 600
                   }
                 ]
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ]
           },
@@ -9582,6 +9035,116 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
+            "description": "실제 상품·가격이 아닙니다."
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "INITIAL_AVAILABILITY_UNRESOLVED",
+            "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "new-option-on-sale": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/products",
+          "headers": {
+            "X-Mock-Scenario": "new-option-on-sale",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "url": "/__mock/assets/sample.svg",
+                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                "width": 800,
+                "height": 600
+              }
+            ],
+            "colors": [
+              {
+                "id": "color-a",
+                "name": "예시 색상 A",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-b",
+                "name": "예시 색상 B",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              }
+            ],
+            "sizes": [
+              {
+                "id": "size-m",
+                "label": "M"
+              },
+              {
+                "id": "size-l",
+                "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -9635,6 +9198,205 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
+            "description": "실제 상품·가격이 아닙니다.",
+            "id": "goods-created-1",
+            "image": {
+              "url": "/__mock/assets/sample.svg",
+              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+              "width": 800,
+              "height": 600
+            },
+            "colorImages": [
+              {
+                "colorId": "color-a",
+                "colorName": "예시 색상 A",
+                "image": {
+                  "url": "/__mock/assets/sample.svg",
+                  "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                  "width": 800,
+                  "height": 600
+                }
+              },
+              {
+                "colorId": "color-b",
+                "colorName": "예시 색상 B",
+                "image": {
+                  "url": "/__mock/assets/sample.svg",
+                  "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                  "width": 800,
+                  "height": 600
+                }
+              }
+            ]
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.002+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 2,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "new-option-sold-out": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/products",
+          "headers": {
+            "X-Mock-Scenario": "new-option-sold-out",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "url": "/__mock/assets/sample.svg",
+                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                "width": 800,
+                "height": 600
+              }
+            ],
+            "colors": [
+              {
+                "id": "color-a",
+                "name": "예시 색상 A",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-b",
+                "name": "예시 색상 B",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              }
+            ],
+            "sizes": [
+              {
+                "id": "size-m",
+                "label": "M"
+              },
+              {
+                "id": "size-l",
+                "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
+            "description": "실제 상품·가격이 아닙니다."
+          }
+        },
+        "status": 201,
+        "response": {
+          "data": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "url": "/__mock/assets/sample.svg",
+                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                "width": 800,
+                "height": 600
+              }
+            ],
+            "colors": [
+              {
+                "id": "color-a",
+                "name": "예시 색상 A",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-b",
+                "name": "예시 색상 B",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              }
+            ],
+            "sizes": [
+              {
+                "id": "size-m",
+                "label": "M"
+              },
+              {
+                "id": "size-l",
+                "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다.",
@@ -9732,86 +9494,37 @@
                 "label": "L"
               }
             ],
-            "description": null
-          }
-        },
-        "status": 201,
-        "response": {
-          "data": {
-            "name": "예시 의류",
-            "price": {
-              "amount": 1000,
-              "currency": "KRW"
-            },
-            "images": [],
-            "colors": [
-              {
-                "id": "color-a",
-                "name": "예시 색상 A",
-                "images": [
-                  {
-                    "url": "/__mock/assets/sample.svg",
-                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                    "width": 800,
-                    "height": 600
-                  }
-                ]
-              },
-              {
-                "id": "color-b",
-                "name": "예시 색상 B",
-                "images": [
-                  {
-                    "url": "/__mock/assets/sample.svg",
-                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                    "width": 800,
-                    "height": 600
-                  }
-                ]
-              }
-            ],
-            "sizes": [
-              {
-                "id": "size-m",
-                "label": "M"
-              },
-              {
-                "id": "size-l",
-                "label": "L"
-              }
-            ],
-            "description": null,
-            "id": "goods-created-1",
-            "image": null,
-            "colorImages": [
+            "options": [
               {
                 "colorId": "color-a",
-                "colorName": "예시 색상 A",
-                "image": {
-                  "url": "/__mock/assets/sample.svg",
-                  "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                  "width": 800,
-                  "height": 600
-                }
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
               },
               {
                 "colorId": "color-b",
-                "colorName": "예시 색상 B",
-                "image": {
-                  "url": "/__mock/assets/sample.svg",
-                  "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                  "width": 800,
-                  "height": 600
-                }
+                "sizeId": "size-m"
               }
-            ]
+            ],
+            "description": null
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "INITIAL_AVAILABILITY_UNRESOLVED",
+            "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+            "details": [],
+            "retryable": false
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 2,
+            "revision": 1,
             "locale": "ko",
             "mock": true
           }
@@ -9875,6 +9588,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
@@ -9959,6 +9686,20 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -10039,6 +9780,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
@@ -10123,6 +9878,20 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -10203,6 +9972,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
@@ -10296,6 +10079,20 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -10349,6 +10146,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다.",
@@ -10458,6 +10269,129 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-new",
+                "sizeId": "size-m"
+              }
+            ],
+            "description": "실제 상품·가격이 아닙니다."
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "INITIAL_AVAILABILITY_UNRESOLVED",
+            "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "new-option-on-sale": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "new-option-on-sale",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "url": "/__mock/assets/sample.svg",
+                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                "width": 800,
+                "height": 600
+              }
+            ],
+            "colors": [
+              {
+                "id": "color-a",
+                "name": "예시 색상 A",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-b",
+                "name": "예시 색상 B",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-new",
+                "name": "새 예시 색상",
+                "images": []
+              }
+            ],
+            "sizes": [
+              {
+                "id": "size-m",
+                "label": "M"
+              },
+              {
+                "id": "size-l",
+                "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-new",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -10516,6 +10450,227 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-new",
+                "sizeId": "size-m"
+              }
+            ],
+            "description": "실제 상품·가격이 아닙니다.",
+            "id": "goods-shirt",
+            "image": {
+              "url": "/__mock/assets/sample.svg",
+              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+              "width": 800,
+              "height": 600
+            },
+            "colorImages": [
+              {
+                "colorId": "color-a",
+                "colorName": "예시 색상 A",
+                "image": {
+                  "url": "/__mock/assets/sample.svg",
+                  "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                  "width": 800,
+                  "height": 600
+                }
+              },
+              {
+                "colorId": "color-b",
+                "colorName": "예시 색상 B",
+                "image": {
+                  "url": "/__mock/assets/sample.svg",
+                  "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                  "width": 800,
+                  "height": 600
+                }
+              }
+            ]
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.002+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 2,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "new-option-sold-out": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "new-option-sold-out",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "url": "/__mock/assets/sample.svg",
+                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                "width": 800,
+                "height": 600
+              }
+            ],
+            "colors": [
+              {
+                "id": "color-a",
+                "name": "예시 색상 A",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-b",
+                "name": "예시 색상 B",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-new",
+                "name": "새 예시 색상",
+                "images": []
+              }
+            ],
+            "sizes": [
+              {
+                "id": "size-m",
+                "label": "M"
+              },
+              {
+                "id": "size-l",
+                "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-new",
+                "sizeId": "size-m"
+              }
+            ],
+            "description": "실제 상품·가격이 아닙니다."
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "url": "/__mock/assets/sample.svg",
+                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                "width": 800,
+                "height": 600
+              }
+            ],
+            "colors": [
+              {
+                "id": "color-a",
+                "name": "예시 색상 A",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-b",
+                "name": "예시 색상 B",
+                "images": [
+                  {
+                    "url": "/__mock/assets/sample.svg",
+                    "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                    "width": 800,
+                    "height": 600
+                  }
+                ]
+              },
+              {
+                "id": "color-new",
+                "name": "새 예시 색상",
+                "images": []
+              }
+            ],
+            "sizes": [
+              {
+                "id": "size-m",
+                "label": "M"
+              },
+              {
+                "id": "size-l",
+                "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-new",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다.",
@@ -10608,14 +10763,28 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
         "status": 409,
         "response": {
           "error": {
-            "code": "OPTION_DELETION_NOT_SUPPORTED",
-            "message": "등록된 색상·사이즈 삭제는 제공하지 않습니다.",
+            "code": "OPTION_DELETION_UNRESOLVED",
+            "message": "옵션 삭제 정책은 합의 대기입니다.",
             "details": [],
             "retryable": false
           },
@@ -10688,6 +10857,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
@@ -10772,6 +10955,20 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -10852,6 +11049,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
@@ -10936,6 +11147,20 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -11018,6 +11243,20 @@
                 "label": "L"
               }
             ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
+              }
+            ],
             "description": "실제 상품·가격이 아닙니다."
           }
         },
@@ -11098,6 +11337,20 @@
               {
                 "id": "size-l",
                 "label": "L"
+              }
+            ],
+            "options": [
+              {
+                "colorId": "color-a",
+                "sizeId": "size-m"
+              },
+              {
+                "colorId": "color-a",
+                "sizeId": "size-l"
+              },
+              {
+                "colorId": "color-b",
+                "sizeId": "size-m"
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
@@ -11210,10 +11463,10 @@
               "en": {
                 "title": null,
                 "body": null,
-                "status": "PENDING"
+                "status": "FAILED"
               }
             },
-            "canSave": false
+            "canSave": true
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -11262,12 +11515,12 @@
               "zh-Hans": {
                 "title": null,
                 "body": null,
-                "status": "PENDING"
+                "status": "FAILED"
               },
               "ja": {
                 "title": null,
                 "body": null,
-                "status": "PENDING"
+                "status": "FAILED"
               }
             },
             "canSave": true
