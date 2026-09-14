@@ -7,7 +7,6 @@
 - [근거 자료와 충돌 처리](wiki/product/sources.md)
 - [공개 범위와 기능 상태](wiki/product/scope.md)
 - [공개 내비게이션](wiki/product/navigation.md)
-- [관리자 기능](wiki/product/admin.md)
 - [홈](wiki/product/home.md)
 - [에리카 웰컴 데이](wiki/product/welcome.md)
 - [FAQ 검토용 초안](wiki/product/faq-draft.md)

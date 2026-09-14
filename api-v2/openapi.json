@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Espero 화면 기반 API 명세서 v2",
-    "version": "2.0.0-draft.2",
+    "version": "2.0.0-draft.3",
     "description": "프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다."
   },
   "servers": [
@@ -279,7 +279,7 @@
                           },
                           {
                             "code": "zh-Hans",
-                            "label": "简体中文"
+                            "label": "中文"
                           },
                           {
                             "code": "ja",
@@ -562,8 +562,8 @@
     "/api/v2/crowding": {
       "get": {
         "operationId": "getCrowding",
-        "summary": "공유 혼잡도",
-        "description": "연결 화면: HOME, MAP-OVERVIEW, MAP-AREA. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "summary": "홈 재학생존 혼잡도",
+        "description": "연결 화면: HOME. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
         ],
@@ -605,7 +605,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "공유 혼잡도: normal",
+                    "summary": "홈 재학생존 혼잡도: normal",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -631,7 +631,7 @@
                     }
                   },
                   "before-open": {
-                    "summary": "공유 혼잡도: before-open",
+                    "summary": "홈 재학생존 혼잡도: before-open",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -639,10 +639,10 @@
                         "closesAt": "2030-10-01T22:00:00+09:00",
                         "operatingStatus": "BEFORE_OPEN",
                         "status": "BEFORE_OPEN",
-                        "savedLevel": "MODERATE",
+                        "savedLevel": null,
                         "colorToken": null,
                         "message": "오늘 재학생존 입장은 13:00에 시작해요",
-                        "updatedAt": "2030-10-01T17:00:00+09:00",
+                        "updatedAt": null,
                         "timeBasis": "NONE"
                       },
                       "meta": {
@@ -657,7 +657,7 @@
                     }
                   },
                   "closed": {
-                    "summary": "공유 혼잡도: closed",
+                    "summary": "홈 재학생존 혼잡도: closed",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -683,7 +683,7 @@
                     }
                   },
                   "unmodified": {
-                    "summary": "공유 혼잡도: unmodified",
+                    "summary": "홈 재학생존 혼잡도: unmodified",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -729,7 +729,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "공유 혼잡도: bad-request",
+                    "summary": "홈 재학생존 혼잡도: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -852,7 +852,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "공유 혼잡도: rate-limited",
+                    "summary": "홈 재학생존 혼잡도: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -911,7 +911,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "공유 혼잡도: error",
+                    "summary": "홈 재학생존 혼잡도: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -936,9 +936,7 @@
           }
         },
         "x-screen-ids": [
-          "HOME",
-          "MAP-OVERVIEW",
-          "MAP-AREA"
+          "HOME"
         ],
         "x-contract-status": "screen-specified",
         "x-mock-scenarios": [
@@ -1593,6 +1591,20 @@
                                   }
                                 ]
                               }
+                            ],
+                            "options": [
+                              {
+                                "colorId": "color-a",
+                                "sizeId": "size-m"
+                              },
+                              {
+                                "colorId": "color-a",
+                                "sizeId": "size-l"
+                              },
+                              {
+                                "colorId": "color-b",
+                                "sizeId": "size-m"
+                              }
                             ]
                           }
                         ]
@@ -1921,30 +1933,23 @@
                             "variants": [
                               {
                                 "colorId": "color-a",
-                                "colorName": "예시 색상 A",
                                 "sizeId": "size-m",
+                                "colorName": "예시 색상 A",
                                 "sizeLabel": "M",
                                 "status": "ON_SALE"
                               },
                               {
                                 "colorId": "color-a",
+                                "sizeId": "size-l",
                                 "colorName": "예시 색상 A",
-                                "sizeId": "size-l",
                                 "sizeLabel": "L",
                                 "status": "SOLD_OUT"
                               },
                               {
                                 "colorId": "color-b",
-                                "colorName": "예시 색상 B",
                                 "sizeId": "size-m",
-                                "sizeLabel": "M",
-                                "status": "SOLD_OUT"
-                              },
-                              {
-                                "colorId": "color-b",
                                 "colorName": "예시 색상 B",
-                                "sizeId": "size-l",
-                                "sizeLabel": "L",
+                                "sizeLabel": "M",
                                 "status": "SOLD_OUT"
                               }
                             ],
@@ -1992,30 +1997,23 @@
                             "variants": [
                               {
                                 "colorId": "color-a",
-                                "colorName": "예시 색상 A",
                                 "sizeId": "size-m",
+                                "colorName": "예시 색상 A",
                                 "sizeLabel": "M",
                                 "status": "SOLD_OUT"
                               },
                               {
                                 "colorId": "color-a",
+                                "sizeId": "size-l",
                                 "colorName": "예시 색상 A",
-                                "sizeId": "size-l",
                                 "sizeLabel": "L",
                                 "status": "SOLD_OUT"
                               },
                               {
                                 "colorId": "color-b",
-                                "colorName": "예시 색상 B",
                                 "sizeId": "size-m",
-                                "sizeLabel": "M",
-                                "status": "SOLD_OUT"
-                              },
-                              {
-                                "colorId": "color-b",
                                 "colorName": "예시 색상 B",
-                                "sizeId": "size-l",
-                                "sizeLabel": "L",
+                                "sizeLabel": "M",
                                 "status": "SOLD_OUT"
                               }
                             ],
@@ -2415,6 +2413,20 @@
                               }
                             ]
                           }
+                        ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          }
                         ]
                       },
                       "meta": {
@@ -2509,6 +2521,20 @@
                                 "height": 600
                               }
                             ]
+                          }
+                        ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
                           }
                         ]
                       },
@@ -2851,30 +2877,23 @@
                         "variants": [
                           {
                             "colorId": "color-a",
-                            "colorName": "예시 색상 A",
                             "sizeId": "size-m",
+                            "colorName": "예시 색상 A",
                             "sizeLabel": "M",
                             "status": "ON_SALE"
                           },
                           {
                             "colorId": "color-a",
+                            "sizeId": "size-l",
                             "colorName": "예시 색상 A",
-                            "sizeId": "size-l",
                             "sizeLabel": "L",
                             "status": "SOLD_OUT"
                           },
                           {
                             "colorId": "color-b",
-                            "colorName": "예시 색상 B",
                             "sizeId": "size-m",
-                            "sizeLabel": "M",
-                            "status": "SOLD_OUT"
-                          },
-                          {
-                            "colorId": "color-b",
                             "colorName": "예시 색상 B",
-                            "sizeId": "size-l",
-                            "sizeLabel": "L",
+                            "sizeLabel": "M",
                             "status": "SOLD_OUT"
                           }
                         ],
@@ -2901,30 +2920,23 @@
                         "variants": [
                           {
                             "colorId": "color-a",
-                            "colorName": "예시 색상 A",
                             "sizeId": "size-m",
+                            "colorName": "예시 색상 A",
                             "sizeLabel": "M",
                             "status": "SOLD_OUT"
                           },
                           {
                             "colorId": "color-a",
+                            "sizeId": "size-l",
                             "colorName": "예시 색상 A",
-                            "sizeId": "size-l",
                             "sizeLabel": "L",
                             "status": "SOLD_OUT"
                           },
                           {
                             "colorId": "color-b",
-                            "colorName": "예시 색상 B",
                             "sizeId": "size-m",
-                            "sizeLabel": "M",
-                            "status": "SOLD_OUT"
-                          },
-                          {
-                            "colorId": "color-b",
                             "colorName": "예시 색상 B",
-                            "sizeId": "size-l",
-                            "sizeLabel": "L",
+                            "sizeLabel": "M",
                             "status": "SOLD_OUT"
                           }
                         ],
@@ -4433,7 +4445,7 @@
                         ],
                         "axis": {
                           "startTime": "17:00",
-                          "endTime": "23:00"
+                          "endTime": "22:00"
                         },
                         "items": [
                           {
@@ -4544,7 +4556,7 @@
                         ],
                         "axis": {
                           "startTime": "17:00",
-                          "endTime": "23:00"
+                          "endTime": "22:00"
                         },
                         "items": []
                       },
@@ -5174,10 +5186,10 @@
         ]
       }
     },
-    "/api/v2/performance-alert": {
+    "/api/v2/prohibited-items": {
       "get": {
-        "operationId": "getPerformanceAlert",
-        "summary": "공연 중요 안내",
+        "operationId": "getProhibitedItems",
+        "summary": "고정 반입 금지 물품 안내",
         "description": "연결 화면: SHOW-TIMETABLE. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -5216,15 +5228,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PerformanceAlertResponse"
+                  "$ref": "#/components/schemas/ProhibitedItemsResponse"
                 },
                 "examples": {
                   "normal": {
-                    "summary": "공연 중요 안내: normal",
+                    "summary": "고정 반입 금지 물품 안내: normal",
                     "value": {
                       "data": {
-                        "message": "개발용 공연 중요 안내",
-                        "updatedAt": "2030-10-01T16:00:00+09:00"
+                        "items": [
+                          "개발용 반입 금지 물품 예시"
+                        ],
+                        "message": "총학생회 확정 자료를 사전 번역해 고정 표시합니다. 이 내용은 예시입니다."
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -5238,11 +5252,11 @@
                     }
                   },
                   "empty": {
-                    "summary": "공연 중요 안내: empty",
+                    "summary": "고정 반입 금지 물품 안내: empty",
                     "value": {
                       "data": {
-                        "message": null,
-                        "updatedAt": null
+                        "items": [],
+                        "message": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -5276,7 +5290,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "공연 중요 안내: bad-request",
+                    "summary": "고정 반입 금지 물품 안내: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -5399,7 +5413,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "공연 중요 안내: rate-limited",
+                    "summary": "고정 반입 금지 물품 안내: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -5458,7 +5472,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "공연 중요 안내: error",
+                    "summary": "고정 반입 금지 물품 안내: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -8718,10 +8732,10 @@
                         "closesAt": "2030-10-01T22:00:00+09:00",
                         "operatingStatus": "BEFORE_OPEN",
                         "status": "BEFORE_OPEN",
-                        "savedLevel": "MODERATE",
+                        "savedLevel": null,
                         "colorToken": null,
                         "message": "오늘 재학생존 입장은 13:00에 시작해요",
-                        "updatedAt": "2030-10-01T17:00:00+09:00",
+                        "updatedAt": null,
                         "timeBasis": "NONE"
                       },
                       "meta": {
@@ -9591,21 +9605,12 @@
                                 "title": "지난 예시 공지",
                                 "body": "사용자 목록에서는 제외합니다.",
                                 "status": "READY"
-                              },
-                              "en": {
-                                "title": "Mock English notice",
-                                "body": "Mock only",
-                                "status": "READY"
                               }
                             },
                             "links": [],
                             "templateId": null,
                             "createdAt": "2030-09-30T18:00:00+09:00",
-                            "updatedAt": "2030-10-01T17:00:00+09:00",
-                            "translationSource": {
-                              "title": "지난 예시 공지",
-                              "body": "사용자 목록에서는 제외합니다."
-                            }
+                            "updatedAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
                             "id": "notice-pending",
@@ -9619,17 +9624,13 @@
                               "en": {
                                 "title": "Pending",
                                 "body": "Not visible in English.",
-                                "status": "READY"
+                                "status": "PENDING"
                               }
                             },
                             "links": [],
                             "templateId": null,
                             "createdAt": "2030-10-01T17:00:00+09:00",
-                            "updatedAt": "2030-10-01T17:00:00+09:00",
-                            "translationSource": {
-                              "title": "번역 대기 예시",
-                              "body": "한국어에는 표시합니다."
-                            }
+                            "updatedAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
                             "id": "notice-1",
@@ -9655,11 +9656,7 @@
                             ],
                             "templateId": null,
                             "createdAt": "2030-10-01T16:00:00+09:00",
-                            "updatedAt": "2030-10-01T16:00:00+09:00",
-                            "translationSource": {
-                              "title": "예시 공지",
-                              "body": "개발용 공지 본문입니다."
-                            }
+                            "updatedAt": "2030-10-01T16:00:00+09:00"
                           },
                           {
                             "id": "notice-lost",
@@ -9679,11 +9676,7 @@
                             "links": [],
                             "templateId": null,
                             "createdAt": "2030-09-30T16:00:00+09:00",
-                            "updatedAt": "2030-09-30T16:00:00+09:00",
-                            "translationSource": {
-                              "title": "예시 분실물",
-                              "body": "실제 분실물이 아닙니다."
-                            }
+                            "updatedAt": "2030-09-30T16:00:00+09:00"
                           }
                         ]
                       },
@@ -10066,10 +10059,74 @@
                         },
                         "links": [],
                         "templateId": null,
-                        "translationSource": {
-                          "title": "개발용 새 공지",
-                          "body": "개발용 본문"
+                        "id": "notice-created-1",
+                        "createdAt": "2030-10-01T18:00:00.002+09:00",
+                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.002+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 2,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "english-incomplete": {
+                    "summary": "공지 등록: english-incomplete",
+                    "value": {
+                      "data": {
+                        "type": "GENERAL",
+                        "translations": {
+                          "ko": {
+                            "title": "개발용 새 공지",
+                            "body": "개발용 본문",
+                            "status": "READY"
+                          },
+                          "en": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          }
                         },
+                        "links": [],
+                        "templateId": null,
+                        "id": "notice-created-1",
+                        "createdAt": "2030-10-01T18:00:00.002+09:00",
+                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.002+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 2,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "english-failed": {
+                    "summary": "공지 등록: english-failed",
+                    "value": {
+                      "data": {
+                        "type": "GENERAL",
+                        "translations": {
+                          "ko": {
+                            "title": "개발용 새 공지",
+                            "body": "개발용 본문",
+                            "status": "READY"
+                          },
+                          "en": {
+                            "title": null,
+                            "body": null,
+                            "status": "FAILED"
+                          }
+                        },
+                        "links": [],
+                        "templateId": null,
                         "id": "notice-created-1",
                         "createdAt": "2030-10-01T18:00:00.002+09:00",
                         "updatedAt": "2030-10-01T18:00:00.002+09:00"
@@ -10319,48 +10376,7 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {
-                  "english-incomplete": {
-                    "summary": "공지 등록: english-incomplete",
-                    "value": {
-                      "error": {
-                        "code": "ENGLISH_TRANSLATION_REQUIRED",
-                        "message": "영어 번역 완료 후 저장해 주세요.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "stale-translation": {
-                    "summary": "공지 등록: stale-translation",
-                    "value": {
-                      "error": {
-                        "code": "STALE_TRANSLATION_SOURCE",
-                        "message": "변경된 한국어 원문으로 번역을 갱신하거나 직접 검토해 주세요.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
+                "examples": {}
               }
             }
           },
@@ -10479,7 +10495,7 @@
           "normal",
           "error",
           "english-incomplete",
-          "stale-translation",
+          "english-failed",
           "bad-request",
           "rate-limited",
           "unauthorized",
@@ -10508,11 +10524,7 @@
                   }
                 },
                 "links": [],
-                "templateId": null,
-                "translationSource": {
-                  "title": "개발용 새 공지",
-                  "body": "개발용 본문"
-                }
+                "templateId": null
               }
             }
           }
@@ -10590,11 +10602,7 @@
                         ],
                         "templateId": null,
                         "createdAt": "2030-10-01T16:00:00+09:00",
-                        "updatedAt": "2030-10-01T16:00:00+09:00",
-                        "translationSource": {
-                          "title": "예시 공지",
-                          "body": "개발용 공지 본문입니다."
-                        }
+                        "updatedAt": "2030-10-01T16:00:00+09:00"
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -10628,11 +10636,7 @@
                         "links": [],
                         "templateId": null,
                         "createdAt": "2030-10-01T16:00:00+09:00",
-                        "updatedAt": "2030-10-01T16:00:00+09:00",
-                        "translationSource": {
-                          "title": "예시 공지",
-                          "body": "개발용 공지 본문입니다."
-                        }
+                        "updatedAt": "2030-10-01T16:00:00+09:00"
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -11031,10 +11035,74 @@
                         },
                         "links": [],
                         "templateId": null,
-                        "translationSource": {
-                          "title": "개발용 새 공지",
-                          "body": "개발용 본문"
+                        "id": "notice-1",
+                        "createdAt": "2030-10-01T16:00:00+09:00",
+                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.002+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 2,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "english-incomplete": {
+                    "summary": "공지 수정: english-incomplete",
+                    "value": {
+                      "data": {
+                        "type": "GENERAL",
+                        "translations": {
+                          "ko": {
+                            "title": "개발용 새 공지",
+                            "body": "개발용 본문",
+                            "status": "READY"
+                          },
+                          "en": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          }
                         },
+                        "links": [],
+                        "templateId": null,
+                        "id": "notice-1",
+                        "createdAt": "2030-10-01T16:00:00+09:00",
+                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.002+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 2,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "english-failed": {
+                    "summary": "공지 수정: english-failed",
+                    "value": {
+                      "data": {
+                        "type": "GENERAL",
+                        "translations": {
+                          "ko": {
+                            "title": "개발용 새 공지",
+                            "body": "개발용 본문",
+                            "status": "READY"
+                          },
+                          "en": {
+                            "title": null,
+                            "body": null,
+                            "status": "FAILED"
+                          }
+                        },
+                        "links": [],
+                        "templateId": null,
                         "id": "notice-1",
                         "createdAt": "2030-10-01T16:00:00+09:00",
                         "updatedAt": "2030-10-01T18:00:00.002+09:00"
@@ -11305,48 +11373,7 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {
-                  "english-incomplete": {
-                    "summary": "공지 수정: english-incomplete",
-                    "value": {
-                      "error": {
-                        "code": "ENGLISH_TRANSLATION_REQUIRED",
-                        "message": "영어 번역 완료 후 저장해 주세요.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "stale-translation": {
-                    "summary": "공지 수정: stale-translation",
-                    "value": {
-                      "error": {
-                        "code": "STALE_TRANSLATION_SOURCE",
-                        "message": "변경된 한국어 원문으로 번역을 갱신하거나 직접 검토해 주세요.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
+                "examples": {}
               }
             }
           },
@@ -11466,7 +11493,7 @@
           "not-found",
           "error",
           "english-incomplete",
-          "stale-translation",
+          "english-failed",
           "bad-request",
           "rate-limited",
           "unauthorized",
@@ -11495,11 +11522,7 @@
                   }
                 },
                 "links": [],
-                "templateId": null,
-                "translationSource": {
-                  "title": "개발용 새 공지",
-                  "body": "개발용 본문"
-                }
+                "templateId": null
               }
             }
           }
@@ -12707,7 +12730,7 @@
     "/api/v2/admin/goods": {
       "get": {
         "operationId": "getAdminGoods",
-        "summary": "관리자 색상×사이즈 재고 조회",
+        "summary": "관리자 실제 제공 옵션별 판매 상태",
         "description": "연결 화면: ADM-GOODS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -12732,11 +12755,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InventoryListResponse"
+                  "$ref": "#/components/schemas/AvailabilityListResponse"
                 },
                 "examples": {
                   "normal": {
-                    "summary": "관리자 색상×사이즈 재고 조회: normal",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: normal",
                     "value": {
                       "data": {
                         "items": [
@@ -12746,35 +12769,24 @@
                             "variants": [
                               {
                                 "colorId": "color-a",
-                                "colorName": "예시 색상 A",
                                 "sizeId": "size-m",
+                                "colorName": "예시 색상 A",
                                 "sizeLabel": "M",
-                                "status": "ON_SALE",
-                                "quantity": 5
+                                "status": "ON_SALE"
                               },
                               {
                                 "colorId": "color-a",
+                                "sizeId": "size-l",
                                 "colorName": "예시 색상 A",
-                                "sizeId": "size-l",
                                 "sizeLabel": "L",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
+                                "status": "SOLD_OUT"
                               },
                               {
                                 "colorId": "color-b",
-                                "colorName": "예시 색상 B",
                                 "sizeId": "size-m",
-                                "sizeLabel": "M",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
-                              },
-                              {
-                                "colorId": "color-b",
                                 "colorName": "예시 색상 B",
-                                "sizeId": "size-l",
-                                "sizeLabel": "L",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
+                                "sizeLabel": "M",
+                                "status": "SOLD_OUT"
                               }
                             ],
                             "allSoldOut": false,
@@ -12794,7 +12806,7 @@
                     }
                   },
                   "empty": {
-                    "summary": "관리자 색상×사이즈 재고 조회: empty",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: empty",
                     "value": {
                       "data": {
                         "items": []
@@ -12811,7 +12823,7 @@
                     }
                   },
                   "sold-out": {
-                    "summary": "관리자 색상×사이즈 재고 조회: sold-out",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: sold-out",
                     "value": {
                       "data": {
                         "items": [
@@ -12821,35 +12833,24 @@
                             "variants": [
                               {
                                 "colorId": "color-a",
-                                "colorName": "예시 색상 A",
                                 "sizeId": "size-m",
+                                "colorName": "예시 색상 A",
                                 "sizeLabel": "M",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
+                                "status": "SOLD_OUT"
                               },
                               {
                                 "colorId": "color-a",
+                                "sizeId": "size-l",
                                 "colorName": "예시 색상 A",
-                                "sizeId": "size-l",
                                 "sizeLabel": "L",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
+                                "status": "SOLD_OUT"
                               },
                               {
                                 "colorId": "color-b",
-                                "colorName": "예시 색상 B",
                                 "sizeId": "size-m",
-                                "sizeLabel": "M",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
-                              },
-                              {
-                                "colorId": "color-b",
                                 "colorName": "예시 색상 B",
-                                "sizeId": "size-l",
-                                "sizeLabel": "L",
-                                "status": "SOLD_OUT",
-                                "quantity": 0
+                                "sizeLabel": "M",
+                                "status": "SOLD_OUT"
                               }
                             ],
                             "allSoldOut": true,
@@ -12889,7 +12890,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "관리자 색상×사이즈 재고 조회: bad-request",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -12929,7 +12930,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "관리자 색상×사이즈 재고 조회: unauthorized",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -12969,7 +12970,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "관리자 색상×사이즈 재고 조회: forbidden",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -13073,7 +13074,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "관리자 색상×사이즈 재고 조회: rate-limited",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -13132,7 +13133,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "관리자 색상×사이즈 재고 조회: error",
+                    "summary": "관리자 실제 제공 옵션별 판매 상태: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -13172,880 +13173,10 @@
         ]
       }
     },
-    "/api/v2/admin/operating-hours": {
-      "get": {
-        "operationId": "getOperatingHours",
-        "summary": "운영일별 운영 시간",
-        "description": "연결 화면: ADM-CROWD-HOURS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
-        "tags": [
-          "관리자"
-        ],
-        "security": [
-          {
-            "AdminBearer": []
-          }
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatingHoursListResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "운영일별 운영 시간: normal",
-                    "value": {
-                      "data": {
-                        "items": [
-                          {
-                            "operatingDay": "2030-10-01",
-                            "opensAt": "13:00",
-                            "closesAt": "22:00",
-                            "isDefault": true,
-                            "updatedAt": null
-                          },
-                          {
-                            "operatingDay": "2030-10-02",
-                            "opensAt": "13:00",
-                            "closesAt": "22:00",
-                            "isDefault": true,
-                            "updatedAt": null
-                          },
-                          {
-                            "operatingDay": "2030-10-03",
-                            "opensAt": "13:00",
-                            "closesAt": "22:00",
-                            "isDefault": true,
-                            "updatedAt": null
-                          }
-                        ]
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "empty": {
-                    "summary": "운영일별 운영 시간: empty",
-                    "value": {
-                      "data": {
-                        "items": []
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 예시입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "bad-request": {
-                    "summary": "운영일별 운영 시간: bad-request",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_QUERY",
-                        "message": "잘못된 요청 예시입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "관리자 인증이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "unauthorized": {
-                    "summary": "운영일별 운영 시간: unauthorized",
-                    "value": {
-                      "error": {
-                        "code": "UNAUTHORIZED",
-                        "message": "관리자 인증이 필요합니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "관리자 권한이 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "forbidden": {
-                    "summary": "운영일별 운영 시간: forbidden",
-                    "value": {
-                      "error": {
-                        "code": "FORBIDDEN",
-                        "message": "관리자 권한이 없습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "요청한 정보를 찾을 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "405": {
-            "description": "지원하지 않는 메서드입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "409": {
-            "description": "요청 상태가 충돌합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "429": {
-            "description": "잠시 후 다시 요청해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Retry-After": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "description": "재시도 전 대기 초"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate-limited": {
-                    "summary": "운영일별 운영 시간: rate-limited",
-                    "value": {
-                      "error": {
-                        "code": "RATE_LIMITED",
-                        "message": "잠시 후 다시 요청해 주세요.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "목 서버 처리 중 오류가 발생했습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "운영일별 운영 시간: error",
-                    "value": {
-                      "error": {
-                        "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-screen-ids": [
-          "ADM-CROWD-HOURS"
-        ],
-        "x-contract-status": "screen-specified",
-        "x-mock-scenarios": [
-          "normal",
-          "empty",
-          "error",
-          "bad-request",
-          "rate-limited",
-          "unauthorized",
-          "forbidden"
-        ]
-      }
-    },
-    "/api/v2/admin/operating-hours/{operatingDay}": {
+    "/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability": {
       "put": {
-        "operationId": "putOperatingHours",
-        "summary": "운영 시간 저장",
-        "description": "연결 화면: ADM-CROWD-HOURS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
-        "tags": [
-          "관리자"
-        ],
-        "security": [
-          {
-            "AdminBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "operatingDay",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Date"
-            },
-            "description": "운영일 또는 등록된 안정 ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatingHoursResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "운영 시간 저장: normal",
-                    "value": {
-                      "data": {
-                        "operatingDay": "2030-10-01",
-                        "opensAt": "13:00",
-                        "closesAt": "23:00",
-                        "isDefault": false,
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 2,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 예시입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "bad-request": {
-                    "summary": "운영 시간 저장: bad-request",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_QUERY",
-                        "message": "잘못된 요청 예시입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "관리자 인증이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "unauthorized": {
-                    "summary": "운영 시간 저장: unauthorized",
-                    "value": {
-                      "error": {
-                        "code": "UNAUTHORIZED",
-                        "message": "관리자 인증이 필요합니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "관리자 권한이 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "forbidden": {
-                    "summary": "운영 시간 저장: forbidden",
-                    "value": {
-                      "error": {
-                        "code": "FORBIDDEN",
-                        "message": "관리자 권한이 없습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "요청한 정보를 찾을 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "not-found": {
-                    "summary": "운영 시간 저장: not-found",
-                    "value": {
-                      "error": {
-                        "code": "NOT_FOUND",
-                        "message": "요청한 정보를 찾을 수 없습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "405": {
-            "description": "지원하지 않는 메서드입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "409": {
-            "description": "요청 상태가 충돌합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "413": {
-            "description": "요청 본문은 64KiB 이하입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "415": {
-            "description": "application/json 요청이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "422": {
-            "description": "요청 필드를 확인해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "invalid-range": {
-                    "summary": "운영 시간 저장: invalid-range",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_TIME_RANGE",
-                        "message": "종료 시각은 시작 시각보다 이후여야 합니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "잠시 후 다시 요청해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Retry-After": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "description": "재시도 전 대기 초"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate-limited": {
-                    "summary": "운영 시간 저장: rate-limited",
-                    "value": {
-                      "error": {
-                        "code": "RATE_LIMITED",
-                        "message": "잠시 후 다시 요청해 주세요.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "목 서버 처리 중 오류가 발생했습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "운영 시간 저장: error",
-                    "value": {
-                      "error": {
-                        "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-screen-ids": [
-          "ADM-CROWD-HOURS"
-        ],
-        "x-contract-status": "screen-specified",
-        "x-mock-scenarios": [
-          "normal",
-          "invalid-range",
-          "not-found",
-          "error",
-          "bad-request",
-          "rate-limited",
-          "unauthorized",
-          "forbidden"
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "저장할 변경값",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OperatingHoursInput"
-              },
-              "example": {
-                "opensAt": "13:00",
-                "closesAt": "23:00"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/inventory": {
-      "put": {
-        "operationId": "putInventory",
-        "summary": "색상×사이즈 남은 수량 저장",
+        "operationId": "putAdminAvailability",
+        "summary": "옵션 판매 상태 저장",
         "description": "연결 화면: ADM-GOODS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -14098,11 +13229,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InventoryResponse"
+                  "$ref": "#/components/schemas/AvailabilityResponse"
                 },
                 "examples": {
                   "normal": {
-                    "summary": "색상×사이즈 남은 수량 저장: normal",
+                    "summary": "옵션 판매 상태 저장: normal",
                     "value": {
                       "data": {
                         "goodsId": "goods-shirt",
@@ -14110,35 +13241,24 @@
                         "variants": [
                           {
                             "colorId": "color-a",
-                            "colorName": "예시 색상 A",
                             "sizeId": "size-m",
+                            "colorName": "예시 색상 A",
                             "sizeLabel": "M",
-                            "status": "ON_SALE",
-                            "quantity": 3
+                            "status": "ON_SALE"
                           },
                           {
                             "colorId": "color-a",
+                            "sizeId": "size-l",
                             "colorName": "예시 색상 A",
-                            "sizeId": "size-l",
                             "sizeLabel": "L",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
+                            "status": "SOLD_OUT"
                           },
                           {
                             "colorId": "color-b",
-                            "colorName": "예시 색상 B",
                             "sizeId": "size-m",
-                            "sizeLabel": "M",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
-                          },
-                          {
-                            "colorId": "color-b",
                             "colorName": "예시 색상 B",
-                            "sizeId": "size-l",
-                            "sizeLabel": "L",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
+                            "sizeLabel": "M",
+                            "status": "SOLD_OUT"
                           }
                         ],
                         "allSoldOut": false,
@@ -14156,7 +13276,7 @@
                     }
                   },
                   "sold-out": {
-                    "summary": "색상×사이즈 남은 수량 저장: sold-out",
+                    "summary": "옵션 판매 상태 저장: sold-out",
                     "value": {
                       "data": {
                         "goodsId": "goods-shirt",
@@ -14164,35 +13284,24 @@
                         "variants": [
                           {
                             "colorId": "color-a",
-                            "colorName": "예시 색상 A",
                             "sizeId": "size-m",
+                            "colorName": "예시 색상 A",
                             "sizeLabel": "M",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
+                            "status": "SOLD_OUT"
                           },
                           {
                             "colorId": "color-a",
+                            "sizeId": "size-l",
                             "colorName": "예시 색상 A",
-                            "sizeId": "size-l",
                             "sizeLabel": "L",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
+                            "status": "SOLD_OUT"
                           },
                           {
                             "colorId": "color-b",
-                            "colorName": "예시 색상 B",
                             "sizeId": "size-m",
-                            "sizeLabel": "M",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
-                          },
-                          {
-                            "colorId": "color-b",
                             "colorName": "예시 색상 B",
-                            "sizeId": "size-l",
-                            "sizeLabel": "L",
-                            "status": "SOLD_OUT",
-                            "quantity": 0
+                            "sizeLabel": "M",
+                            "status": "SOLD_OUT"
                           }
                         ],
                         "allSoldOut": true,
@@ -14230,7 +13339,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "색상×사이즈 남은 수량 저장: bad-request",
+                    "summary": "옵션 판매 상태 저장: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -14270,7 +13379,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "색상×사이즈 남은 수량 저장: unauthorized",
+                    "summary": "옵션 판매 상태 저장: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -14310,7 +13419,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "색상×사이즈 남은 수량 저장: forbidden",
+                    "summary": "옵션 판매 상태 저장: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -14350,7 +13459,7 @@
                 },
                 "examples": {
                   "not-found": {
-                    "summary": "색상×사이즈 남은 수량 저장: not-found",
+                    "summary": "옵션 판매 상태 저장: not-found",
                     "value": {
                       "error": {
                         "code": "NOT_FOUND",
@@ -14492,7 +13601,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "색상×사이즈 남은 수량 저장: rate-limited",
+                    "summary": "옵션 판매 상태 저장: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -14551,7 +13660,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "색상×사이즈 남은 수량 저장: error",
+                    "summary": "옵션 판매 상태 저장: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -14595,10 +13704,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InventoryInput"
+                "$ref": "#/components/schemas/AvailabilityInput"
               },
               "example": {
-                "quantity": 3
+                "status": "ON_SALE"
               }
             }
           }
@@ -14719,6 +13828,20 @@
                                     "height": 600
                                   }
                                 ]
+                              }
+                            ],
+                            "options": [
+                              {
+                                "colorId": "color-a",
+                                "sizeId": "size-m"
+                              },
+                              {
+                                "colorId": "color-a",
+                                "sizeId": "size-l"
+                              },
+                              {
+                                "colorId": "color-b",
+                                "sizeId": "size-m"
                               }
                             ]
                           }
@@ -15056,8 +14179,8 @@
       },
       "post": {
         "operationId": "postAdminProduct",
-        "summary": "상품 등록·신규 조합 0개 생성",
-        "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "summary": "상품 등록·초기 판매 상태 미정",
+        "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 미정 기획을 위한 검토 필요 계약. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
         ],
@@ -15084,8 +14207,8 @@
                   "$ref": "#/components/schemas/GoodsResponse"
                 },
                 "examples": {
-                  "normal": {
-                    "summary": "상품 등록·신규 조합 0개 생성: normal",
+                  "new-option-on-sale": {
+                    "summary": "상품 등록·초기 판매 상태 미정: new-option-on-sale",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -15137,6 +14260,20 @@
                             "label": "L"
                           }
                         ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          }
+                        ],
                         "description": "실제 상품·가격이 아닙니다.",
                         "id": "goods-created-1",
                         "image": {
@@ -15179,8 +14316,8 @@
                       }
                     }
                   },
-                  "missing-optional": {
-                    "summary": "상품 등록·신규 조합 0개 생성: missing-optional",
+                  "new-option-sold-out": {
+                    "summary": "상품 등록·초기 판매 상태 미정: new-option-sold-out",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -15188,7 +14325,14 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
-                        "images": [],
+                        "images": [
+                          {
+                            "url": "/__mock/assets/sample.svg",
+                            "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                            "width": 800,
+                            "height": 600
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -15225,9 +14369,28 @@
                             "label": "L"
                           }
                         ],
-                        "description": null,
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          }
+                        ],
+                        "description": "실제 상품·가격이 아닙니다.",
                         "id": "goods-created-1",
-                        "image": null,
+                        "image": {
+                          "url": "/__mock/assets/sample.svg",
+                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "width": 800,
+                          "height": 600
+                        },
                         "colorImages": [
                           {
                             "colorId": "color-a",
@@ -15283,7 +14446,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "상품 등록·신규 조합 0개 생성: bad-request",
+                    "summary": "상품 등록·초기 판매 상태 미정: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -15323,7 +14486,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "상품 등록·신규 조합 0개 생성: unauthorized",
+                    "summary": "상품 등록·초기 판매 상태 미정: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -15363,7 +14526,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "상품 등록·신규 조합 0개 생성: forbidden",
+                    "summary": "상품 등록·초기 판매 상태 미정: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -15439,7 +14602,48 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "normal": {
+                    "summary": "상품 등록·초기 판매 상태 미정: normal",
+                    "value": {
+                      "error": {
+                        "code": "INITIAL_AVAILABILITY_UNRESOLVED",
+                        "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "missing-optional": {
+                    "summary": "상품 등록·초기 판매 상태 미정: missing-optional",
+                    "value": {
+                      "error": {
+                        "code": "INITIAL_AVAILABILITY_UNRESOLVED",
+                        "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -15524,7 +14728,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "상품 등록·신규 조합 0개 생성: rate-limited",
+                    "summary": "상품 등록·초기 판매 상태 미정: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -15583,7 +14787,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "상품 등록·신규 조합 0개 생성: error",
+                    "summary": "상품 등록·초기 판매 상태 미정: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -15610,9 +14814,11 @@
         "x-screen-ids": [
           "ADM-GOODS-PRODUCT-EDIT"
         ],
-        "x-contract-status": "screen-specified",
+        "x-contract-status": "provisional",
         "x-mock-scenarios": [
           "normal",
+          "new-option-on-sale",
+          "new-option-sold-out",
           "missing-optional",
           "error",
           "bad-request",
@@ -15622,7 +14828,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "저장할 변경값",
+          "description": "목 연동용 입력 초안. 기획 합의 전 운영 구현 금지.",
           "content": {
             "application/json": {
               "schema": {
@@ -15676,6 +14882,20 @@
                   {
                     "id": "size-l",
                     "label": "L"
+                  }
+                ],
+                "options": [
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-m"
+                  },
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-l"
+                  },
+                  {
+                    "colorId": "color-b",
+                    "sizeId": "size-m"
                   }
                 ],
                 "description": "실제 상품·가격이 아닙니다."
@@ -15808,6 +15028,20 @@
                               }
                             ]
                           }
+                        ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          }
                         ]
                       },
                       "meta": {
@@ -15902,6 +15136,20 @@
                                 "height": 600
                               }
                             ]
+                          }
+                        ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
                           }
                         ]
                       },
@@ -16242,8 +15490,8 @@
       },
       "put": {
         "operationId": "putAdminProduct",
-        "summary": "상품 수정·기존 조합 재고 유지",
-        "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "summary": "상품 수정·기존 조합 판매 상태 유지",
+        "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 미정 기획을 위한 검토 필요 계약. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
         ],
@@ -16281,7 +15529,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "상품 수정·기존 조합 재고 유지: normal",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: normal",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -16333,6 +15581,20 @@
                             "label": "L"
                           }
                         ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          }
+                        ],
                         "description": "실제 상품·가격이 아닙니다.",
                         "id": "goods-shirt",
                         "image": {
@@ -16375,8 +15637,8 @@
                       }
                     }
                   },
-                  "new-option": {
-                    "summary": "상품 수정·기존 조합 재고 유지: new-option",
+                  "new-option-on-sale": {
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: new-option-on-sale",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -16431,6 +15693,142 @@
                           {
                             "id": "size-l",
                             "label": "L"
+                          }
+                        ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-new",
+                            "sizeId": "size-m"
+                          }
+                        ],
+                        "description": "실제 상품·가격이 아닙니다.",
+                        "id": "goods-shirt",
+                        "image": {
+                          "url": "/__mock/assets/sample.svg",
+                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "width": 800,
+                          "height": 600
+                        },
+                        "colorImages": [
+                          {
+                            "colorId": "color-a",
+                            "colorName": "예시 색상 A",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg",
+                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          },
+                          {
+                            "colorId": "color-b",
+                            "colorName": "예시 색상 B",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg",
+                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          }
+                        ]
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.002+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 2,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "new-option-sold-out": {
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: new-option-sold-out",
+                    "value": {
+                      "data": {
+                        "name": "예시 의류",
+                        "price": {
+                          "amount": 1000,
+                          "currency": "KRW"
+                        },
+                        "images": [
+                          {
+                            "url": "/__mock/assets/sample.svg",
+                            "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                            "width": 800,
+                            "height": 600
+                          }
+                        ],
+                        "colors": [
+                          {
+                            "id": "color-a",
+                            "name": "예시 색상 A",
+                            "images": [
+                              {
+                                "url": "/__mock/assets/sample.svg",
+                                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                                "width": 800,
+                                "height": 600
+                              }
+                            ]
+                          },
+                          {
+                            "id": "color-b",
+                            "name": "예시 색상 B",
+                            "images": [
+                              {
+                                "url": "/__mock/assets/sample.svg",
+                                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                                "width": 800,
+                                "height": 600
+                              }
+                            ]
+                          },
+                          {
+                            "id": "color-new",
+                            "name": "새 예시 색상",
+                            "images": []
+                          }
+                        ],
+                        "sizes": [
+                          {
+                            "id": "size-m",
+                            "label": "M"
+                          },
+                          {
+                            "id": "size-l",
+                            "label": "L"
+                          }
+                        ],
+                        "options": [
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-a",
+                            "sizeId": "size-l"
+                          },
+                          {
+                            "colorId": "color-b",
+                            "sizeId": "size-m"
+                          },
+                          {
+                            "colorId": "color-new",
+                            "sizeId": "size-m"
                           }
                         ],
                         "description": "실제 상품·가격이 아닙니다.",
@@ -16496,7 +15894,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "상품 수정·기존 조합 재고 유지: bad-request",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -16536,7 +15934,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "상품 수정·기존 조합 재고 유지: unauthorized",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -16576,7 +15974,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "상품 수정·기존 조합 재고 유지: forbidden",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -16616,7 +16014,7 @@
                 },
                 "examples": {
                   "not-found": {
-                    "summary": "상품 수정·기존 조합 재고 유지: not-found",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: not-found",
                     "value": {
                       "error": {
                         "code": "NOT_FOUND",
@@ -16674,12 +16072,32 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
-                  "option-removal": {
-                    "summary": "상품 수정·기존 조합 재고 유지: option-removal",
+                  "new-option": {
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: new-option",
                     "value": {
                       "error": {
-                        "code": "OPTION_DELETION_NOT_SUPPORTED",
-                        "message": "등록된 색상·사이즈 삭제는 제공하지 않습니다.",
+                        "code": "INITIAL_AVAILABILITY_UNRESOLVED",
+                        "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "option-removal": {
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: option-removal",
+                    "value": {
+                      "error": {
+                        "code": "OPTION_DELETION_UNRESOLVED",
+                        "message": "옵션 삭제 정책은 합의 대기입니다.",
                         "details": [],
                         "retryable": false
                       },
@@ -16779,7 +16197,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "상품 수정·기존 조합 재고 유지: rate-limited",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -16838,7 +16256,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "상품 수정·기존 조합 재고 유지: error",
+                    "summary": "상품 수정·기존 조합 판매 상태 유지: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -16865,10 +16283,12 @@
         "x-screen-ids": [
           "ADM-GOODS-PRODUCT-EDIT"
         ],
-        "x-contract-status": "screen-specified",
+        "x-contract-status": "provisional",
         "x-mock-scenarios": [
           "normal",
           "new-option",
+          "new-option-on-sale",
+          "new-option-sold-out",
           "option-removal",
           "not-found",
           "error",
@@ -16879,7 +16299,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "저장할 변경값",
+          "description": "목 연동용 입력 초안. 기획 합의 전 운영 구현 금지.",
           "content": {
             "application/json": {
               "schema": {
@@ -16933,6 +16353,20 @@
                   {
                     "id": "size-l",
                     "label": "L"
+                  }
+                ],
+                "options": [
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-m"
+                  },
+                  {
+                    "colorId": "color-a",
+                    "sizeId": "size-l"
+                  },
+                  {
+                    "colorId": "color-b",
+                    "sizeId": "size-m"
                   }
                 ],
                 "description": "실제 상품·가격이 아닙니다."
@@ -17023,10 +16457,10 @@
                           "en": {
                             "title": null,
                             "body": null,
-                            "status": "PENDING"
+                            "status": "FAILED"
                           }
                         },
-                        "canSave": false
+                        "canSave": true
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -17061,12 +16495,12 @@
                           "zh-Hans": {
                             "title": null,
                             "body": null,
-                            "status": "PENDING"
+                            "status": "FAILED"
                           },
                           "ja": {
                             "title": null,
                             "body": null,
-                            "status": "PENDING"
+                            "status": "FAILED"
                           }
                         },
                         "canSave": true
@@ -18034,7 +17468,7 @@
               "OPEN",
               "CLOSED"
             ],
-            "description": "관리자 운영 상태. 혼잡도 저장값과 별개."
+            "description": "개발자 등록 일정 기준. 관리자 운영 시간 편집 없음."
           }
         },
         "required": [
@@ -18241,6 +17675,27 @@
             ],
             "description": "null이면 제목과 영역을 함께 숨김. 빈 문자열로 대체하지 않음."
           },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "colorId": {
+                  "$ref": "#/components/schemas/Id"
+                },
+                "sizeId": {
+                  "$ref": "#/components/schemas/Id"
+                }
+              },
+              "required": [
+                "colorId",
+                "sizeId"
+              ],
+              "additionalProperties": false,
+              "description": ""
+            },
+            "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음."
+          },
           "images": {
             "type": "array",
             "items": {
@@ -18277,7 +17732,7 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "등록 색상. 사이즈와 조합하여 재고 관리"
+            "description": "등록 색상. 실제 제공 조합은 options에 별도 등록"
           }
         },
         "required": [
@@ -18288,6 +17743,7 @@
           "colorImages",
           "sizes",
           "description",
+          "options",
           "images",
           "colors"
         ],
@@ -18310,7 +17766,7 @@
           },
           "allSoldOut": {
             "type": "boolean",
-            "description": "등록된 조합이 1개 이상이고 모든 조합 수량이 0일 때 true."
+            "description": "실제 제공 조합이 1개 이상이고 모두 SOLD_OUT일 때 true."
           },
           "updatedAt": {
             "anyOf": [
@@ -18354,7 +17810,7 @@
                     "ON_SALE",
                     "SOLD_OUT"
                   ],
-                  "description": "저장 수량>=1 / 0으로 계산. 직접 입력 불가."
+                  "description": "관리자가 구매 가능 / 품절 직접 선택. 수량 계산 없음."
                 }
               },
               "required": [
@@ -18846,9 +18302,18 @@
         "additionalProperties": false,
         "description": ""
       },
-      "PerformanceAlert": {
+      "ProhibitedItems": {
         "type": "object",
         "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "description": "반입 금지 물품명"
+            },
+            "description": "선택 언어로 사전 번역한 고정 목록. 자료 대기 시 []."
+          },
           "message": {
             "anyOf": [
               {
@@ -18861,26 +18326,11 @@
               }
             ],
             "description": "null이면 제목과 영역을 함께 숨김. 빈 문자열로 대체하지 않음."
-          },
-          "updatedAt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
-                "format": "date-time",
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "안내가 없으면 null"
           }
         },
         "required": [
-          "message",
-          "updatedAt"
+          "items",
+          "message"
         ],
         "additionalProperties": false,
         "description": ""
@@ -19647,7 +19097,7 @@
                 "type": "null"
               }
             ],
-            "description": "PENDING이면 null 허용"
+            "description": "PENDING/FAILED이면 null 허용"
           },
           "body": {
             "anyOf": [
@@ -19660,15 +19110,16 @@
                 "type": "null"
               }
             ],
-            "description": "PENDING이면 null 허용"
+            "description": "PENDING/FAILED이면 null 허용"
           },
           "status": {
             "type": "string",
             "enum": [
               "READY",
-              "PENDING"
+              "PENDING",
+              "FAILED"
             ],
-            "description": "이 언어 노출 가능 여부"
+            "description": "완료 / 준비 중 / 실패. READY만 사용자 노출."
           }
         },
         "required": [
@@ -19735,20 +19186,16 @@
               }
             ],
             "description": "선택적 원본 템플릿 ID. 직접 작성이면 null."
-          },
-          "translationSource": {
-            "$ref": "#/components/schemas/NoticeSource"
           }
         },
         "required": [
           "type",
           "translations",
           "links",
-          "templateId",
-          "translationSource"
+          "templateId"
         ],
         "additionalProperties": false,
-        "description": "한국어·영어 READY 필수. 제공 중 중·일은 PENDING 가능. translationSource는 번역 검토 기준 한국어 원문이며 현재 원문과 일치해야 함. 원문 변경 시 재번역 또는 직접 수정·검토 후 함께 갱신."
+        "description": "한국어 제목·본문 READY 필수. 외국어 PENDING/FAILED는 한국어 저장을 막지 않음. 게시 후 상세 재번역 절차는 미정."
       },
       "AdminNotice": {
         "type": "object",
@@ -19804,9 +19251,6 @@
             "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-          },
-          "translationSource": {
-            "$ref": "#/components/schemas/NoticeSource"
           }
         },
         "required": [
@@ -19816,8 +19260,7 @@
           "links",
           "templateId",
           "createdAt",
-          "updatedAt",
-          "translationSource"
+          "updatedAt"
         ],
         "additionalProperties": false,
         "description": ""
@@ -19906,6 +19349,24 @@
         "additionalProperties": false,
         "description": ""
       },
+      "AvailabilityInput": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ON_SALE",
+              "SOLD_OUT"
+            ],
+            "description": "구매 가능 / 품절 직접 저장"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
       "Deleted": {
         "type": "object",
         "properties": {
@@ -19929,212 +19390,6 @@
         ],
         "additionalProperties": false,
         "description": ""
-      },
-      "OperatingHoursInput": {
-        "type": "object",
-        "properties": {
-          "opensAt": {
-            "type": "string",
-            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
-            "description": "KST HH:mm, 해당 운영일 안의 시각. 종료는 시작보다 이후."
-          },
-          "closesAt": {
-            "type": "string",
-            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
-            "description": "KST HH:mm, 해당 운영일 안의 시각. 종료는 시작보다 이후."
-          }
-        },
-        "required": [
-          "opensAt",
-          "closesAt"
-        ],
-        "additionalProperties": false,
-        "description": "해당 운영일의 시간 전체 저장. 기본 13:00~22:00. 같은 날짜 종료>시작."
-      },
-      "OperatingHours": {
-        "type": "object",
-        "properties": {
-          "operatingDay": {
-            "$ref": "#/components/schemas/Date"
-          },
-          "opensAt": {
-            "type": "string",
-            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
-            "description": "KST HH:mm, 해당 운영일 안의 시각. 종료는 시작보다 이후."
-          },
-          "closesAt": {
-            "type": "string",
-            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
-            "description": "KST HH:mm, 해당 운영일 안의 시각. 종료는 시작보다 이후."
-          },
-          "isDefault": {
-            "type": "boolean",
-            "description": "별도 설정 없이 기본값 사용"
-          },
-          "updatedAt": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Timestamp"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "운영 시간 저장 시각. 혼잡도 수정 시각과 별개."
-          }
-        },
-        "required": [
-          "operatingDay",
-          "opensAt",
-          "closesAt",
-          "isDefault",
-          "updatedAt"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "OperatingHoursList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OperatingHours"
-            },
-            "description": "행사 날짜별 시간, 운영일 오름차순"
-          }
-        },
-        "required": [
-          "items"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "Inventory": {
-        "type": "object",
-        "properties": {
-          "goodsId": {
-            "type": "string",
-            "minLength": 1,
-            "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
-            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "description": "상품명. 관리자 목록 표시용."
-          },
-          "allSoldOut": {
-            "type": "boolean",
-            "description": "등록된 조합이 1개 이상이고 모든 조합 수량이 0일 때 true."
-          },
-          "updatedAt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
-                "format": "date-time",
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "마지막 저장 성공 시각"
-          },
-          "variants": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "colorId": {
-                  "$ref": "#/components/schemas/Id"
-                },
-                "colorName": {
-                  "type": "string",
-                  "minLength": 1,
-                  "description": "색상명"
-                },
-                "sizeId": {
-                  "$ref": "#/components/schemas/Id"
-                },
-                "sizeLabel": {
-                  "type": "string",
-                  "minLength": 1,
-                  "description": "사이즈명"
-                },
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "ON_SALE",
-                    "SOLD_OUT"
-                  ],
-                  "description": "저장 수량>=1 / 0으로 계산. 직접 입력 불가."
-                },
-                "quantity": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 9007199254740991,
-                  "description": "0 이상의 정수. 관리자 전용 재고 수량."
-                }
-              },
-              "required": [
-                "colorId",
-                "colorName",
-                "sizeId",
-                "sizeLabel",
-                "status",
-                "quantity"
-              ],
-              "additionalProperties": false,
-              "description": ""
-            },
-            "description": "관리자만 정확한 재고 수량 조회"
-          }
-        },
-        "required": [
-          "goodsId",
-          "name",
-          "allSoldOut",
-          "updatedAt",
-          "variants"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "InventoryList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Inventory"
-            },
-            "description": "상품별 관리자 재고"
-          }
-        },
-        "required": [
-          "items"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "InventoryInput": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "description": "0 이상의 정수. 관리자 전용 재고 수량."
-          }
-        },
-        "required": [
-          "quantity"
-        ],
-        "additionalProperties": false,
-        "description": "선택 색상×사이즈의 남은 절대 수량. 증감량이 아님. 마지막 서버 저장 성공값 우선."
       },
       "ProductInput": {
         "type": "object",
@@ -20183,7 +19438,7 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "등록 색상. 사이즈와 조합하여 재고 관리"
+            "description": "등록 색상. 실제 제공 조합은 options에 별도 등록"
           },
           "sizes": {
             "type": "array",
@@ -20191,6 +19446,27 @@
               "$ref": "#/components/schemas/Size"
             },
             "description": "등록된 관리 사이즈만"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "colorId": {
+                  "$ref": "#/components/schemas/Id"
+                },
+                "sizeId": {
+                  "$ref": "#/components/schemas/Id"
+                }
+              },
+              "required": [
+                "colorId",
+                "sizeId"
+              ],
+              "additionalProperties": false,
+              "description": ""
+            },
+            "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음."
           },
           "description": {
             "anyOf": [
@@ -20212,10 +19488,11 @@
           "images",
           "colors",
           "sizes",
+          "options",
           "description"
         ],
         "additionalProperties": false,
-        "description": "상품 정보 전체 저장. 기존 옵션 ID 유지. 새 옵션은 새 ID; 기존 ID 생략은 삭제 요청으로 간주하여 409. 재고는 여기서 입력하지 않음."
+        "description": "상품과 실제 제공 조합 저장. 기존 상태 보존. 신규 조합 초기 상태·옵션 삭제 정책은 미정. 목의 신규 옵션 시나리오를 명시한 경우에만 생성 가능."
       },
       "NoticeSource": {
         "type": "object",
@@ -20252,7 +19529,7 @@
           },
           "canSave": {
             "type": "boolean",
-            "description": "영어 READY와 한국어 입력 조건 충족 여부"
+            "description": "한국어 입력 조건 충족 여부. 영어 실패도 한국어 저장 가능"
           }
         },
         "required": [
@@ -20261,7 +19538,7 @@
           "canSave"
         ],
         "additionalProperties": false,
-        "description": "저장 전 번역 미리보기. 실제 번역 엔진 없이 목 문구 반환. 실패 언어는 PENDING."
+        "description": "저장 전 번역 미리보기. 실제 번역 엔진 없이 목 문구 반환. 실패 언어는 FAILED."
       },
       "ConfigResponse": {
         "type": "object",
@@ -20467,11 +19744,11 @@
         "additionalProperties": false,
         "description": ""
       },
-      "PerformanceAlertResponse": {
+      "ProhibitedItemsResponse": {
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/PerformanceAlert"
+            "$ref": "#/components/schemas/ProhibitedItems"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"
@@ -20705,74 +19982,6 @@
         "additionalProperties": false,
         "description": ""
       },
-      "InventoryListResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/InventoryList"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "OperatingHoursListResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/OperatingHoursList"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "OperatingHoursResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/OperatingHours"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "InventoryResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Inventory"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
       "NoticeTranslationPreviewResponse": {
         "type": "object",
         "properties": {
@@ -20795,13 +20004,18 @@
       "AdminBearer": {
         "type": "http",
         "scheme": "bearer",
-        "description": "관리자 서버 권한 검증 경계. 실 인증 프로토콜은 HOME-Q05 미정. 목에서만 Bearer mock-admin을 사용하며 운영 자격증명이 아니다."
+        "description": "관리자 서버 권한 검증 경계. 실 인증 프로토콜은 DECISIONS.md의 관리자 인증 항목 참조. 목에서만 Bearer mock-admin을 사용하며 운영 자격증명이 아니다."
       }
     }
   },
   "x-source": {
-    "url": "https://docs.google.com/spreadsheets/d/1_bWWbBi2TiRm5IaIuDX1CS2IFId8RFr5LnloQIEnKbo/edit",
-    "snapshot": "source-screen-requirements.json"
+    "basis": "Product Context wiki v5; user decision 2026-09-14",
+    "commit": "a8039cd",
+    "paths": [
+      "docs/wiki/product/",
+      "docs/wiki/product/admin/"
+    ],
+    "legacySnapshot": "source-screen-requirements.json"
   },
   "x-mock-controls": {
     "scenario": "X-Mock-Scenario 또는 __scenario 쿼리(목 전용)",

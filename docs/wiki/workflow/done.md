@@ -43,7 +43,7 @@
 
 ### API·backend
 
-- 요청·응답·오류·enum 변경을 버전 1 API 명세에 반영했다.
+- 요청·응답·오류·enum 변경을 해당 버전 API 명세와 계약 테스트에 반영했다.
 - 목록 응답, pagination, sort, locale fallback을 일관되게 검증했다.
 - 공개 endpoint가 실수로 관리자 인증을 요구하지 않는다.
 - rate limit, validation, cache·게시 상태, 관측 가능성 영향을 확인했다.

@@ -1,46 +1,53 @@
-# 새 관리자 명세 반영 · 2026-09-13
+# API v2 draft.3 변경·마이그레이션
 
-API v2 **2.0.0-draft.2**. 근거는 [사용자가 제공한 관리자 기능명세서](source-admin-requirements.md)이며, 화면 데이터 표의 기존 관리자 요구보다 우선합니다. 운영 자료와 기술 선택은 별도로 남겼습니다.
+main `a8039cd`(PR #1~#5 병합 완료) Product Context와 2026-09-14 사용자 결정에 따라
+[관리자 v5](../docs/wiki/product/admin/README.md)를 기준으로 통일했습니다.
+아래는 draft.2 소비자가 변경할 계약입니다. v1·Spring Boot 구현·운영 배포는 이번 범위가 아닙니다.
 
-| 영역 | 이전 계약 | 변경 계약 |
+| 영역 | draft.2 | draft.3 |
 |---|---|---|
-| 운영 시간 | 고정 목 시간·별도 관리 명세 대기 | ADM-CROWD-002 추가. 날짜별 HH:mm 시작·종료, 기본 13:00~22:00, 종료>시작 |
-| 혼잡도 | 가상 overnight 시나리오 | 시간 저장 후 즉시 재판정. 당일 이력 복원·다른 날짜 미이월. 자정 초과 시나리오 제거 |
-| 재고 | 상품×사이즈 ON_SALE/SOLD_OUT 직접 저장 | 상품×색상×사이즈의 0 이상 정수 수량 저장, 서버가 상태 계산 |
-| 공개 재고 | 사이즈 공통 상태 | 색상×사이즈 상태와 전체 품절만 제공. 정확한 수량은 관리자 전용 |
-| 상품 | 별도 상품 관리 없음 | 목록·신규 등록·수정, 복수/색상별 이미지와 옵션 관리 |
-| 옵션 | 재고 생성 연동 없음 | 신규 조합은 0개, 기존 옵션 ID를 유지한 이름 수정은 재고 보존. 상품·옵션 삭제 없음 |
-| 공지 입력 | 독립 명세 대기·image 필드 존재 | 한국어 필수, 링크 입력·검증, 이미지 필드 제거 |
-| 번역 | READY/PENDING 수동 저장 초안 | 저장 전 자동 번역 미리보기·직접 수정, 영어 완료 필수. 제공 중 중·일은 실패 저장 가능 |
-| 원문 수정 | 번역 갱신 확인 없음 | 현재 원문과 translationSource 일치 검증. 번역 재생성/검토 완료를 표현하는 기술 초안 |
-| 시간·노출 | 기존 규칙 유지 | createdAt 불변·updatedAt 갱신, 영어 저장 차단·언어별 READY 필터 검증 강화 |
+| 혼잡도 | 홈·지도 표시 | 홈만 표시, 지도 핀·색상 연동 없음 |
+| 운영 시간 | 관리자 GET/PUT | 개발자 등록, 관리자 시간 편집 경로 제거 |
+| 날짜 | 운영일 이력 | KST 00:00 전날 상태·수정 시각 초기화 |
+| 굿즈 상태 | 정수 수량에서 자동 판정 | 실제 조합별 ON_SALE/SOLD_OUT 직접 저장. 관리자도 수량 미관리 |
+| 상품 옵션 | 전체 색상×사이즈 곱집합 | Goods.options에 등록된 실제 조합만 |
+| 신규 옵션 | 자동 0개·품절 | 최초 상태 미정, 자동 기본값 없음 |
+| 공지 | 영어 완료 전 저장 차단 | 한국어 우선 게시, 영어 PENDING/FAILED도 성공 |
+| 번역 | translationSource 저장 검증 | 저장 필드 제거. READY/PENDING/FAILED, 선택 언어 READY만 공개 |
+| 공연 안내 | 실시간 performance-alert | 상시 prohibited-items 목록·안내 |
+| 갱신 | 5초 보장 | 새로고침 없는 반영만 확정, 전송 방식·지연 합의 대기 |
 
-## 경로 변경과 프런트 마이그레이션
+## 경로·필드 교체
 
-| 변경 | 요청 |
-|---|---|
-| 추가 | `GET /api/v2/admin/operating-hours` |
-| 추가 | `PUT /api/v2/admin/operating-hours/{operatingDay}` — `{ "opensAt": "13:00", "closesAt": "22:00" }` |
-| 제거 | `PUT /api/v2/admin/goods/{goodsId}/sizes/{sizeId}` |
-| 대체 | `PUT /api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/inventory` — `{ "quantity": 5 }` |
-| 추가 | `GET /api/v2/admin/products`, `POST /api/v2/admin/products` |
-| 추가 | `GET /api/v2/admin/products/{goodsId}`, `PUT /api/v2/admin/products/{goodsId}` |
-| 추가 | `POST /api/v2/admin/notice-translations` — `{ "title": "한국어 제목", "body": "한국어 본문" }`, 200 반환 |
+- `GET /api/v2/admin/operating-hours`, `PUT /api/v2/admin/operating-hours/{operatingDay}`를 제거합니다.
+- `PUT /api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/inventory`는 끝 경로를 **availability**로 바꿉니다.
+- 저장 본문은 `{ "status": "ON_SALE" }` 또는 `{ "status": "SOLD_OUT" }`입니다. quantity는 422입니다.
+- 관리자 Inventory 응답은 Availability로 교체합니다. variants에 수량이 없습니다.
+- Goods와 ProductInput에 `options: [{ colorId, sizeId }]`가 필수입니다. 실제 제공 조합만 등록하고 존재하지 않는 조합 저장은 404입니다.
+- `GET /api/v2/performance-alert`는 `GET /api/v2/prohibited-items`로 교체합니다. 응답은 items(string[])·message(string 또는 null)이며 공연 전후에도 조회합니다.
+- 공지 저장의 translationSource를 제거합니다. 한국어 READY·공백 아닌 제목/본문은 필수이며 외국어 PENDING/FAILED의 title/body는 null을 허용합니다.
 
-- 공개 `Availability.sizes`는 `variants`로 교체합니다. 각 항목은 `colorId`, `colorName`, `sizeId`, `sizeLabel`, `status`입니다. 관리자 `Inventory.variants`에만 `quantity`가 추가됩니다.
-- `GET /admin/goods`는 상품 재고 목록입니다. 상품 편집 목록은 `GET /admin/products`를 사용합니다.
-- 상품의 색상 목록은 `colors`, 복수 이미지는 `images`를 사용합니다. `image`는 대표 이미지이며 없으면 null입니다. 기존 `colorImages`는 호환용 이미지 목록으로 유지합니다.
-- 상품 PUT에는 기존 옵션을 모두 포함합니다. 기존 ID 누락은 옵션 삭제로 간주하여 409입니다. 옵션 이름 변경은 ID를 유지하며 새 옵션은 새 ID를 사용합니다. 옵션 ID 발급·이미지 업로드의 실제 방식은 기술 합의 대기입니다.
-- 공지 요청·응답의 `image`를 제거하고 `translationSource: {title, body}`를 추가합니다. 한국어 현재 값과 다르면 `STALE_TRANSLATION_SOURCE`(422), 영어가 미완료면 `ENGLISH_TRANSLATION_REQUIRED`(422)입니다. 공지 원문 변경 뒤 이전 번역 응답을 적용하지 마세요.
-- 번역 미리보기는 공지를 저장하지 않습니다. 응답 `source`가 현재 편집 중인 원문과 같은 경우에만 번역을 적용합니다. 직접 수정·검토한 번역도 현재 원문과 함께 저장할 수 있습니다. 이 필드는 번역 의미의 정확성을 자동 보증하지 않습니다.
-- 미리보기의 영어 실패는 200과 `canSave:false`, 해당 번역의 `PENDING`으로 표현합니다. 실제 저장 요청은 422로 거절합니다. 번역 서비스 전체 오류는 503입니다.
-- `GET /config?__scenario=all-languages`는 **같은 목 세션**에 중·일 언어를 추가하는 테스트 제어입니다. `partial-translation`으로 제공 중 중·일 실패를 재현할 수 있습니다. 초기화하면 ko/en으로 돌아갑니다. 실제 서비스 언어 활성화를 의미하지 않습니다.
-- 운영 상태는 `Crowding.operatingStatus`로 확인합니다. 시작 시각은 포함, 종료 시각은 제외합니다. 운영 시간 변경 시각과 혼잡도 수정 시각은 서로 독립입니다.
+상품명·가격·옵션 이름 변경 시 기존 ID와 options를 보존하면 기존 판매 상태를 유지합니다.
+새 조합 기본 요청은 409 INITIAL_AVAILABILITY_UNRESOLVED입니다. 성공 화면은
+`X-Mock-Scenario: new-option-on-sale` 또는 `new-option-sold-out`으로 개발합니다.
+새 조합에만 해당 상태를 적용합니다. 제품 결정 후 초기 상태 계약을 확정해야 하며
+목 시나리오를 운영 기본값으로 이식하지 않습니다. 기존 옵션 제거는 미정이므로
+409 OPTION_DELETION_UNRESOLVED입니다. 이미지 개수·배치·업로드 기술도 합의 대기입니다.
 
-## 화면 데이터 표 변경
+영어 실패 시 미리보기는 canSave=true, 번역은 FAILED일 수 있으며 한국어 생성201/수정200은
+성공합니다. 영어는 모든 공지의 준비 대상이나 한국어 저장의 선행 조건이 아닙니다.
+선택 언어 READY만 공개하고 번역이 없으면 PENDING을 남깁니다. 템플릿 원문을 게시 전에
+바꾸면 이전 번역을 그대로 READY로 보내지 않습니다. 미리보기 source는 현재 입력과
+비교해 늦은 응답을 폐기하는 UI용입니다. 게시 후 상세 재번역 절차는 미정입니다.
 
-기존 8개 탭을 유지하고 `ADM-CROWD-HOURS`, `ADM-GOODS-PRODUCT-LIST`, `ADM-GOODS-PRODUCT-EDIT`를 추가했습니다. 총 27개 화면·183개 활성 데이터입니다. `ADM-NOTICE-EDIT-D04`는 폐기한 이미지 계약의 이력으로 남기고 활성 API 매핑에서 제외했습니다. 링크는 새 D07, 번역 완료 상태는 D08로 추가하여 기존 ID 의미를 바꾸지 않았습니다.
+## 화면 데이터와 출처
 
-이미지 업로드 제외와 재고 저장 방식 질문은 결정 완료로 기록했습니다. 운영 시간·공지 작성·번역 관련 질문은 해결된 내용을 결과에 남기고 남은 질문만 좁혔습니다. 실제 운영 수량·담당자·이미지 제한과 관리자 인증은 여전히 확인이 필요합니다.
+[화면 데이터 표](SCREEN-DATA.md)는 26개 화면·176개 유효 데이터와 제외 이력10개를,
+[화면 상태](SCREEN-STATES.md)는 조회·빈 상태·오류·프런트 책임을 연결합니다.
+지도 혼잡도4개·운영 시간 편집5개·수량1개를 제외하고 실제 조합2개·고정 안내 목록1개를 추가했습니다.
+공지 이미지 D04는 이전 버전에서 이미 폐기되어 원문 기록에만 남습니다.
 
-이번 수정은 기존 v1 경로와 실제 Spring Boot 구현을 변경하지 않습니다. draft.1 소비자는 위 필드·경로 변경을 적용한 뒤 목 서버를 재시작해야 합니다.
+[source-screen-requirements.json](source-screen-requirements.json)과
+[source-admin-requirements.md](source-admin-requirements.md)는 비교용 과거 원본입니다.
+이번 작업은 저장소의 표를 갱신했으며 원격 Google Sheets 셀은 수정하지 않았습니다.
+screen-coverage.json의 legacySource는 과거 질문·필수 표시 기록으로 현재 결정에 사용하지 않습니다.

@@ -22,7 +22,7 @@ const payload = await response.json();
 if (!response.ok) throw new Error(payload.error.code);
 const goods = payload.data.items;
 // 이미지 상대 URL은 프런트 origin이 아닌 API origin으로 해석합니다.
-const imageUrl = goods[0] && new URL(goods[0].image.url, apiOrigin).href;
+const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).href : null;
 ```
 
 관리자 요청에는 `Authorization: Bearer mock-admin`을 추가합니다. 토큰 없음 또는 `Bearer mock-expired`는 401, 다른 값은 403입니다. 이 토큰을 실제 인증 기능에 사용하지 않습니다. POST·PUT은 `Content-Type: application/json`이 필요하며 입력 본문은 [examples.json](examples.json)의 해당 요청을 복사할 수 있습니다.
@@ -53,7 +53,10 @@ const imageUrl = goods[0] && new URL(goods[0].image.url, apiOrigin).href;
 
 ## 갱신과 프런트 책임
 
-혼잡도·공지 제거는 기존 화면 데이터의 5초 기준을 따릅니다. 상품·재고는 새로고침 없는 자동 반영이 요구되며 최대 지연 시간은 합의 대기입니다. 개발 시작점으로 2초 폴링을 사용할 수 있으나 실제 통신 방식은 합의 대기입니다. 요청 시간과 백그라운드 탭 제한까지 포함한 운영 환경의 5초 보장은 이번 목 검증 범위에 포함하지 않습니다. 페이지를 다시 활성화할 때 즉시 조회하고, 같은 데이터의 이전 revision 또는 먼저 시작한 요청의 늦은 응답이 최신 화면을 덮지 않게 처리합니다.
+혼잡도(홈만)·공지·굿즈 판매 상태는 새로고침 없이 반영합니다. 통신 방식과 최대 지연은
+합의 대기이며 5초 SLA를 확정 계약으로 사용하지 않습니다. 화면 재활성화 시 조회하고,
+같은 데이터의 이전 revision 또는 먼저 시작한 요청의 늦은 응답이 최신 화면을 덮지 않게 합니다.
+목은 HTTP 재조회 동작만 제공하며 운영 환경의 실시간 전송·지연을 검증하지 않습니다.
 
 공지 조회 성공 시 현재 카드 중 `visibleIds`에 없는 ID를 즉시 제거합니다. 기존 ID의 내용은 최신 응답으로 갱신하고 새로운 ID는 대기 목록에 넣어 ‘새 공지’ 버튼을 누를 때 추가합니다. 삭제된 ID는 대기 목록에서도 제거합니다. 최초 조회는 items 전체를 표시합니다. 삭제 API 성공 후 재조회가 실패해도 삭제한 카드를 되살리지 않습니다.
 
@@ -63,7 +66,13 @@ const imageUrl = goods[0] && new URL(goods[0].image.url, apiOrigin).href;
 
 ## 새 관리자 계약 연동
 
-운영 시간, 재고 수량, 상품 등록·수정, 번역 미리보기의 경로·필드와 시나리오는 [관리자 변경 내역](ADMIN-CHANGES.md)을 확인하세요. `all-languages`는 같은 목 세션의 언어 설정을 바꾸며 `partial-translation`은 중·일 실패를 재현합니다.
+[관리자 변경 내역](ADMIN-CHANGES.md)의 draft.3 경로와 필드를 사용합니다. 수량 및 운영 시간 편집 요청은 제거했습니다.
+
+- 굿즈 상태는 실제 제공 조합에 `PUT /admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability`, 본문 `{ "status": "SOLD_OUT" }`로 저장합니다. quantity는 422입니다.
+- 신규 상품·옵션 초기 상태는 제품 미정입니다. 기본 생성은 409 INITIAL_AVAILABILITY_UNRESOLVED이며 자동 상태를 가정하지 않습니다. 생성 성공 화면은 new-option-on-sale 또는 new-option-sold-out 시나리오와 [예제 본문](examples.json)을 사용합니다. 이 헤더를 실제 서버 정책으로 이식하지 않습니다.
+- 영어 PENDING/FAILED에서도 한국어 저장은 성공합니다. 미리보기 canSave는 한국어 필수값 기준입니다. 템플릿 원문을 바꾸면 게시 전 기존 번역을 READY로 재사용하지 말고 변경 원문 기준으로 준비합니다. 늦은 미리보기 응답은 source와 현재 입력을 비교해 폐기합니다.
+- all-languages는 목 세션의 준비 언어를 바꾸고 partial-translation은 중·일 실패를 재현합니다. english-failed는 영어 실패와 한국어 게시를 함께 확인합니다.
+- /prohibited-items의 items·message는 상시 안내입니다. 기존 /performance-alert를 교체하세요.
 
 ## 계약 검증
 

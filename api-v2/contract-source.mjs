@@ -39,7 +39,7 @@ export const schemas = {
   Lineup: object({ date, category: enumeration(['ARTIST', 'CONTEST'], '선택 분류'), items: array(object({ artistId: id, performanceId: id, name: text('출연진명'), image: ref('Image'), order: integer('선택 날짜·분류 내 공연 순서', 1) }), '공연순, 동률 id순. + 버튼만 상세 이동.') }),
   Performance: object({ id, date, title: text('공연명'), artists: array(object({ id, name: text('출연진명') }), '출연진'), startsAt: timestamp, endsAt: timestamp, description: optionalText }),
   Timetable: object({ dates: array(date, '행사 날짜'), axis: object({ startTime: text('시간축 시작 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }), endTime: text('시간축 끝 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }) }), items: array(ref('Performance'), '날짜·시작시각·id 순. 공연 일정은 실시간 갱신 대상 아님.') }),
-  PerformanceAlert: object({ message: optionalText, updatedAt: nullable(timestamp, '안내가 없으면 null') }),
+  ProhibitedItems: object({ items: array(text('반입 금지 물품명'), '선택 언어로 사전 번역한 고정 목록. 자료 대기 시 [].'), message: optionalText }),
   Space: object({ id, category: enumeration(['BOOTH', 'PUB', 'FLEA_MARKET'], '부스/주점/플리마켓'), name: text('장소명'), image: ref('Image'), locationText: text('목록 필수 위치 안내'), operator: optionalText, hoursText: optionalText, description: optionalText, contact: nullable(ref('Link'), '없으면 영역 숨김'), experience: optionalText, events: array(text('부스 이벤트'), '부스만, 없으면 []'), menu: array(object({ name: text('메뉴명'), price: ref('Money') }), '주점만. 미확정 가격 메뉴의 노출 정책은 별도 결정.'), mapTarget: nullable(ref('MapTarget'), '미연결이면 null. 버튼 처리는 기획 미정.') }),
   Spaces: object({ items: array(ref('Space'), '선택 분류 목록. 검색·날짜·페이지 파라미터 없음. 별 우선 정렬은 브라우저.') }),
   Map: object({ id, name: text('지도명'), kind: enumeration(['OVERVIEW', 'AREA'], '전체/구역 지도'), version: text('불변 이미지·좌표 버전'), image: ref('Image') }),
@@ -67,7 +67,7 @@ const pathParam = name => ({ name, in: 'path', required: true, schema: id, descr
 // status = 계약 근거 상태, schema/URI 설계 자체는 이 v2에서 처음 제안한 프런트 연동 계약.
 export const operations = [
   ['getConfig','GET','/config','Config','홈 공통 설정',['HOME'],[],['normal','empty','missing-optional','welcome-ready','error']],
-  ['getCrowding','GET','/crowding','Crowding','공유 혼잡도',['HOME','MAP-OVERVIEW','MAP-AREA'],[],['normal','before-open','closed','unmodified','overnight','error']],
+  ['getCrowding','GET','/crowding','Crowding','홈 혼잡도',['HOME'],[],['normal','before-open','closed','unmodified','error']],
   ['getNotices','GET','/notices','Notices','사용자 공지 전체',['HOME','NOTICE-LIST'],[],['normal','empty','missing-optional','new-notice','deleted','error']],
   ['getGoods','GET','/goods','GoodsList','상품 목록',['GOODS-LIST'],[],['normal','empty','error']],
   ['getGoodsAvailability','GET','/goods-availability','AvailabilityList','상품 목록의 판매 상태',['GOODS-LIST'],[],['normal','empty','sold-out','error']],
@@ -78,7 +78,7 @@ export const operations = [
   ['getArtist','GET','/artists/{artistId}','Artist','출연진 상세',['SHOW-ARTIST'],[],['normal','missing-optional','not-found','error']],
   ['getTimetable','GET','/timetable','Timetable','3일 타임테이블',['SHOW-TIMETABLE'],[],['normal','empty','error']],
   ['getPerformance','GET','/performances/{performanceId}','Performance','공연 정보 팝업',['SHOW-POPUP'],[],['normal','missing-optional','not-found','error']],
-  ['getPerformanceAlert','GET','/performance-alert','PerformanceAlert','공연 중요 안내',['SHOW-TIMETABLE'],[],['normal','empty','error']],
+  ['getProhibitedItems','GET','/prohibited-items','ProhibitedItems','고정 반입 금지 물품 안내',['SHOW-TIMETABLE'],[],['normal','empty','error']],
   ['getSpaces','GET','/spaces','Spaces','부스·주점·플리마켓 목록',['BOOTH-LIST'],[param('category',enumeration(['ALL','BOOTH','PUB','FLEA_MARKET'],'생략하면 ALL'),'분류 선택')],['normal','empty','error']],
   ['getSpace','GET','/spaces/{spaceId}','Space','부스·주점·플리마켓 상세',['BOOTH-DETAIL'],[],['normal','missing-optional','not-found','error']],
   ['getMaps','GET','/maps','Maps','지도 목록',['MAP-OVERVIEW','MAP-AREA'],[],['normal','empty','error']],

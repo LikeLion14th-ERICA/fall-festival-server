@@ -6,6 +6,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { createMockServer } from './server.mjs';
 import { validate as localValidate } from './validate.mjs';
+import { createState } from './domain.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
 const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json');
@@ -20,7 +21,7 @@ const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
-test('27 screens and 183 active data items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,27);assert.equal(coverage.data.length,183);assert.equal(new Set(coverage.data.map(x=>x.id)).size,183);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));});
+test('26 screens and 176 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,186);assert.equal(new Set(coverage.data.map(x=>x.id)).size,186);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));});
 test('Every public route has no authentication requirement; every admin route has one',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods))assert.equal(o.security.length>0,path.includes('/admin/'));});
 test('No out-of-scope payment, user identity, stamp write, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances|\/stamp\//);});
 
@@ -57,20 +58,19 @@ test('Crowding no-op, FULL confirmation, day boundary, restoration, shared read 
   assert.equal((await call('/api/v2/crowding',{session})).body.data.status,'FULL');
   assert.equal((await call('/api/v2/crowding',{session:'separate-client'})).body.data.status,'MODERATE');
   const closed=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});assert.equal(closed.body.data.status,'CLOSED');assert.equal(closed.body.data.timeBasis,'NONE');
-  await call('/api/v2/admin/operating-hours/2030-10-01',{...opts,method:'PUT',body:{opensAt:'13:00',closesAt:'23:59'}});
-  const restored=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});assert.equal(restored.body.data.status,'FULL');assert.equal(restored.body.data.updatedAt,full.body.data.updatedAt);
+  const midnight=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T00:00:00+09:00'}});assert.equal(midnight.body.data.savedLevel,null);assert.equal(midnight.body.data.updatedAt,null);
   const next=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T13:00:00+09:00'}});assert.equal(next.body.data.status,'RELAXED');assert.equal(next.body.data.timeBasis,'OPENING');assert.equal(next.body.data.savedLevel,null);
 });
 test('Goods save changes only one size and derives sold-out; failed writes do not mutate',async()=>{
-  const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory';
+  const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability';
   const before=await call('/api/v2/goods/goods-shirt/availability',{session});
-  await call(path,{method:'PUT',session,headers:{...admin,'X-Mock-Scenario':'error'},body:{quantity:0}});
+  await call(path,{method:'PUT',session,headers:{...admin,'X-Mock-Scenario':'error'},body:{status:'SOLD_OUT'}});
   assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,before.body.data);
-  assert.equal((await call(path,{method:'PUT',session,headers:admin,body:{quantity:0}})).status,200);
+  assert.equal((await call(path,{method:'PUT',session,headers:admin,body:{status:'SOLD_OUT'}})).status,200);
   const sold=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;assert.equal(sold.allSoldOut,true);assert.equal(sold.variants[1].status,'SOLD_OUT');
   assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,1);
   assert.ok((await call('/api/v2/goods/goods-shirt/payment-guide',{session})).body.data.account);
-  await call(path,{method:'PUT',session,headers:admin,body:{quantity:1}});assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
+  await call(path,{method:'PUT',session,headers:admin,body:{status:'ON_SALE'}});assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
 });
 test('Notice create/edit/delete synchronizes public list, language visibility and immutable template',async()=>{
   const session='notice-flow';
@@ -80,8 +80,9 @@ test('Notice create/edit/delete synchronizes public list, language visibility an
   const id=created.body.data.id;
   assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
   body.translations.en.status='PENDING';
-  assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body})).status,422);
-  assert.ok((await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
+  assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body})).status,200);
+  assert.ok(!(await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
+  assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
   assert.deepEqual((await call('/api/v2/admin/notice-templates/template-1',{session,headers:admin})).body.data,template);
   assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'DELETE'})).status,200);
   assert.ok(!(await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
@@ -116,68 +117,70 @@ test('Runtime validator rejects representative schema violations independently o
   assert.ok(localValidate(spec.components.schemas.Pin,{id:'p',label:'p',category:'p',x:1.1,y:0,target:{kind:'PLACE',placeId:'a',mapId:'b'}},spec).length);
 });
 
-test('Operating-hour edits re-evaluate shared state, validate same-day range and isolate days',async()=>{
-  const session='hours-boundaries',path='/api/v2/admin/operating-hours/2030-10-01';
-  const initial=(await call('/api/v2/admin/operating-hours',{session,headers:admin})).body.data.items;
-  assert.deepEqual(initial.map(h=>[h.opensAt,h.closesAt,h.isDefault]),Array(3).fill(['13:00','22:00',true]));
-  for(const body of [{opensAt:'22:00',closesAt:'13:00'},{opensAt:'13:00',closesAt:'13:00'},{opensAt:'24:00',closesAt:'25:00'},{opensAt:'13:00'},{}])assert.equal((await call(path,{session,headers:admin,method:'PUT',body})).status,422);
-  for(const [time,state]of [['12:59:59','BEFORE_OPEN'],['13:00:00','OPEN'],['21:59:59','OPEN'],['22:00:00','CLOSED']])assert.equal((await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':`2030-10-01T${time}+09:00`}})).body.data.operatingStatus,state);
-  const saved=(await call('/api/v2/crowding',{session})).body.data;
-  for(const [hours,status]of [[{opensAt:'13:00',closesAt:'17:00'},'CLOSED'],[{opensAt:'13:00',closesAt:'22:00'},'MODERATE'],[{opensAt:'19:00',closesAt:'22:00'},'BEFORE_OPEN']]){
-    assert.equal((await call(path,{session,headers:admin,method:'PUT',body:hours})).status,200);
-    const shared=(await call('/api/v2/crowding',{session})).body.data;assert.equal(shared.status,status);assert.equal(shared.updatedAt,saved.updatedAt);
+test('v5 removes operating-hour and quantity writes and map crowd consumers',async()=>{
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,176);
+  for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
+  assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
+  for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);
+  assert.doesNotMatch(JSON.stringify(createState()),/"quantit(?:y|ies)"/);
+  for(const path of ['/api/v2/admin/goods','/api/v2/goods-availability']){
+    const d=(await call(path,{headers:admin})).body.data;
+    assert.equal(d.items[0].variants.length,3);assert.doesNotMatch(JSON.stringify(d),/quantity/);
   }
-  const before=(await call('/api/v2/admin/operating-hours',{session,headers:admin})).body.data;
-  assert.deepEqual(before.items[1],initial[1]);
-  await call(path,{session,headers:{...admin,'X-Mock-Scenario':'error'},method:'PUT',body:{opensAt:'13:00',closesAt:'22:00'}});
-  assert.deepEqual((await call('/api/v2/admin/operating-hours',{session,headers:admin})).body.data,before);
 });
 
-test('Inventory is private, integer-only, color-specific and last successful absolute count wins',async()=>{
-  const session='inventory-private',root='/api/v2/admin/goods/goods-shirt/colors/',path=root+'color-b/sizes/size-m/inventory';
-  const initial=(await call('/api/v2/admin/goods',{session,headers:admin})).body.data.items[0];
-  for(const quantity of [-1,1.5,'2',null,Number.MAX_SAFE_INTEGER+1])assert.equal((await call(path,{session,headers:admin,method:'PUT',body:{quantity}})).status,422);
-  assert.equal((await call(path,{session,headers:admin,method:'PUT',body:{status:'SOLD_OUT'}})).status,422);
-  assert.equal((await call(root+'unknown/sizes/size-m/inventory',{session,headers:admin,method:'PUT',body:{quantity:1}})).status,404);
-  for(const quantity of [7,3])assert.equal((await call(path,{session,headers:admin,method:'PUT',body:{quantity}})).status,200);
-  const current=(await call('/api/v2/admin/goods',{session,headers:admin})).body.data.items[0];
-  assert.equal(current.variants.find(v=>v.colorId==='color-b'&&v.sizeId==='size-m').quantity,3);
-  assert.deepEqual(current.variants.filter(v=>v.colorId==='color-a'),initial.variants.filter(v=>v.colorId==='color-a'));
-  for(const publicPath of ['/api/v2/goods','/api/v2/goods/goods-shirt','/api/v2/goods-availability','/api/v2/goods/goods-shirt/availability'])assert.doesNotMatch(JSON.stringify((await call(publicPath,{session})).body),/"quantity"|"quantities"/);
-  assert.equal((await call('/api/v2/admin/goods/goods-shirt/sizes/size-m',{session,headers:admin,method:'PUT',body:{status:'SOLD_OUT'}})).status,404);
+test('v5 sparse options stay independent; counts and nonexistent combinations are rejected',async()=>{
+  const session='sparse-options',path='/api/v2/admin/goods/goods-shirt/colors/color-b/sizes/size-m/availability';
+  for(const body of [{quantity:3},{status:'ON_SALE',quantity:3},{status:'UNKNOWN'}])assert.equal((await call(path,{session,headers:admin,method:'PUT',body})).status,422);
+  const before=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  assert.equal((await call(path,{session,headers:admin,method:'PUT',body:{status:'ON_SALE'}})).status,200);
+  const after=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  assert.deepEqual(after.variants.filter(v=>v.colorId==='color-a'),before.variants.filter(v=>v.colorId==='color-a'));
+  assert.equal(after.variants.find(v=>v.colorId==='color-b').status,'ON_SALE');
+  assert.equal((await call(path.replace('size-m','size-l'),{session,headers:admin,method:'PUT',body:{status:'ON_SALE'}})).status,404);
 });
 
-test('Product creation and option additions start at zero, renaming preserves inventory and removals fail',async()=>{
-  const session='product-flow',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
-  const created=await call('/api/v2/admin/products',{session,headers:admin,method:'POST',body});assert.equal(created.status,201);assert.ok(created.headers.get('location').includes('/products/'));
-  const id=created.body.data.id,productPath='/api/v2/admin/products/'+id,stockPath=`/api/v2/admin/goods/${id}/colors/color-a/sizes/size-m/inventory`;
-  const inventory=async()=>((await call('/api/v2/admin/goods',{session,headers:admin})).body.data.items.find(g=>g.goodsId===id));
-  assert.equal((await inventory()).variants.length,4);assert.ok((await inventory()).variants.every(v=>v.quantity===0));assert.equal((await inventory()).allSoldOut,true);
-  await call(stockPath,{session,headers:admin,method:'PUT',body:{quantity:9}});
-  body.colors[0].name='이름 수정';body.sizes[0].label='새 사이즈 표시명';body.colors.push({id:'color-c',name:'새 색상',images:[]});body.sizes.push({id:'size-xl',label:'XL'});
-  assert.equal((await call(productPath,{session,headers:admin,method:'PUT',body})).status,200);
-  const current=await inventory();assert.equal(current.variants.length,9);assert.equal(current.variants.find(v=>v.colorId==='color-a'&&v.sizeId==='size-m').quantity,9);assert.ok(current.variants.filter(v=>v.colorId==='color-c'||v.sizeId==='size-xl').every(v=>v.quantity===0));
-  const publicProduct=(await call('/api/v2/goods/'+id,{session})).body.data;assert.equal(publicProduct.colors[0].name,'이름 수정');
-  const removal=structuredClone(body);removal.colors.pop();assert.equal((await call(productPath,{session,headers:admin,method:'PUT',body:removal})).status,409);
-  const duplicate=structuredClone(body);duplicate.sizes.push(duplicate.sizes[0]);assert.equal((await call(productPath,{session,headers:admin,method:'PUT',body:duplicate})).status,422);
-  await call(productPath,{session,headers:{...admin,'X-Mock-Scenario':'error'},method:'PUT',body:{...body,name:'실패값'}});
-  assert.deepEqual((await call('/api/v2/goods/'+id,{session})).body.data,publicProduct);assert.deepEqual(await inventory(),current);
-  assert.equal((await call(productPath,{session,headers:admin,method:'DELETE'})).status,405);
+test('New options require an explicit mock policy; existing states survive product edits',async()=>{
+  const session='products-v5',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
+  const opts={session,headers:admin,method:'POST',body};
+  const blocked=await call('/api/v2/admin/products',opts);assert.equal(blocked.status,409);assert.equal(blocked.body.error.code,'INITIAL_AVAILABILITY_UNRESOLVED');
+  assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,1);
+  const created=await call('/api/v2/admin/products',{...opts,headers:{...admin,'X-Mock-Scenario':'new-option-on-sale'}});assert.equal(created.status,201);
+  const id=created.body.data.id;
+  body.name='수정 상품';body.price.amount=3000;
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,200);
+  assert.ok((await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants.every(v=>v.status==='ON_SALE'));
+  body.options.push({colorId:'color-b',sizeId:'size-l'});
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,409);
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'X-Mock-Scenario':'new-option-sold-out'},method:'PUT',body})).status,200);
+  const variants=(await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants;
+  assert.equal(variants.length,4);assert.equal(variants.filter(v=>v.status==='ON_SALE').length,3);
+  const invalid=structuredClone(body);invalid.options.push({colorId:'unknown',sizeId:'size-m'});
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body:invalid})).status,422);
 });
 
-test('Translation preview and save enforce English, source freshness and active-language partial failures',async()=>{
-  const session='translation-flow',input={title:'한국어 제목',body:'한국어 본문'},path='/api/v2/admin/notice-translations';
-  const preview=await call(path,{session,headers:admin,method:'POST',body:input});assert.equal(preview.status,200);assert.equal(preview.body.data.canSave,true);assert.equal(preview.headers.get('location'),null);
-  const failed=await call(path,{session,headers:{...admin,'X-Mock-Scenario':'english-failed'},method:'POST',body:input});assert.equal(failed.body.data.canSave,false);
-  const body={type:'GENERAL',translations:failed.body.data.translations,translationSource:input,links:[],templateId:null};
-  assert.equal((await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body})).status,422);
-  await call('/api/v2/config?__scenario=all-languages',{session});
-  const partial=(await call(path,{session,headers:{...admin,'X-Mock-Scenario':'partial-translation'},method:'POST',body:input})).body.data;
-  body.translations=partial.translations;
-  const created=await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body});assert.equal(created.status,201);const id=created.body.data.id;
-  assert.ok((await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));assert.ok(!(await call('/api/v2/notices?locale=ja',{session})).body.data.visibleIds.includes(id));
-  body.translations.ko.title='변경된 제목';assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body})).body.error.code,'STALE_TRANSLATION_SOURCE');
-  body.translationSource={title:body.translations.ko.title,body:body.translations.ko.body};body.translations.en.title='Manually reviewed title';
-  const updated=await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body});assert.equal(updated.status,200);assert.equal(updated.body.data.createdAt,created.body.data.createdAt);assert.notEqual(updated.body.data.updatedAt,created.body.data.updatedAt);
+test('Korean notice publishes despite failed English; retry enables only READY languages',async()=>{
+  const session='notice-v5',source={title:'한국어 제목',body:'첫 줄\n다음 줄'};
+  const preview=(await call('/api/v2/admin/notice-translations',{session,headers:{...admin,'X-Mock-Scenario':'english-failed'},method:'POST',body:source})).body.data;
+  assert.equal(preview.canSave,true);assert.equal(preview.translations.en.status,'FAILED');
+  const body={type:'GENERAL',translations:preview.translations,links:[],templateId:null};
+  const saved=await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body});assert.equal(saved.status,201);
+  const id=saved.body.data.id;
+  assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
+  assert.ok(!(await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
+  const retry=(await call('/api/v2/admin/notice-translations',{session,headers:admin,method:'POST',body:source})).body.data;
+  body.translations=retry.translations;
+  const updated=await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body});
+  assert.equal(updated.status,200);assert.equal(updated.body.data.createdAt,saved.body.data.createdAt);
+  assert.ok((await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
+  assert.equal(updated.body.data.translations.ko.body,source.body);
+  assert.equal((await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body:{...body,translations:{ko:{title:' ',body:' ',status:'READY'}}}})).status,422);
   assert.equal((await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body:{...body,image:null}})).status,422);
+});
+
+test('Fixed prohibited-items guidance is available outside performance hours',async()=>{
+  for(const time of ['2030-09-30T08:00:00+09:00','2030-10-01T18:00:00+09:00','2030-10-04T00:00:00+09:00'])assert.ok((await call('/api/v2/prohibited-items',{headers:{'X-Mock-Time':time}})).body.data.items.length);
+  assert.equal((await call('/api/v2/timetable')).body.data.axis.endTime,'22:00');
+  const english=(await call('/api/v2/prohibited-items?locale=en')).body.data;
+  assert.doesNotMatch(JSON.stringify(english),/[가-힣]/);
 });
