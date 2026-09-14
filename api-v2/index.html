@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espero · API v2 목 콘솔</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#16243a;font:16px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:36px 24px}h1{font-size:30px;line-height:1.2}p{max-width:850px}.tag{font-size:13px;font-weight:700;color:#9a3412}label{display:block;margin-top:16px;font-weight:650}input,select,textarea,button{font:inherit;border:1px solid #a7b5c8;border-radius:6px;padding:10px;width:100%;background:white;color:inherit}textarea{font:14px/1.5 ui-monospace,monospace;min-height:160px}button{width:auto;background:#173f73;color:white;cursor:pointer;min-height:44px;margin:16px 10px 0 0}button:disabled{opacity:.5}a{color:#164c92}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#10233d;color:#e8f1ff;padding:20px;border-radius:8px;font-size:13px}.grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}:focus-visible{outline:3px solid #cc6e00;outline-offset:3px}@media(max-width:650px){.grid{grid-template-columns:1fr}main{padding:24px 16px}}
+</style>
+<main>
+<span class="tag">개발용 · 실제 행사 데이터가 아닙니다</span>
+<h1>API v2 목 콘솔</h1>
+<p>화면별 요청과 시나리오를 선택해 응답을 확인하세요. 저장·삭제는 선택한 목 세션의 메모리에만 적용됩니다. 계좌와 링크는 실제 송금을 지원하지 않습니다.</p>
+<p><a href="/openapi.json">OpenAPI JSON</a> · <a href="/examples.json">전체 예제 응답</a> · <a href="/__mock/catalog">요청 목록</a></p>
+<div class="grid"><div><label for="operation">API 요청</label><select id="operation"></select></div><div><label for="scenario">응답 시나리오</label><select id="scenario"></select></div></div>
+<div class="grid"><div><label for="session">목 세션</label><input id="session" value="frontend-demo" pattern="[a-zA-Z0-9_-]{1,64}" maxlength="64"></div><div><label for="time">가상 시각 (선택)</label><input id="time" placeholder="2030-10-02T00:00:00+09:00"></div></div>
+<label for="request">요청 본문 (JSON, 저장 API만)</label><textarea id="request" spellcheck="false"></textarea>
+<button id="run">요청 실행</button><button id="reset">이 세션 초기화</button>
+<p id="status" role="status" aria-live="polite">요청 목록을 불러오는 중입니다.</p>
+<pre id="response" tabindex="0" aria-label="API 응답">요청을 선택해 주세요.</pre>
+</main>
+<script type="module">
+const $=id=>document.getElementById(id);let examples;
+function selectScenario(){const example=examples[$('operation').value].scenarios[$('scenario').value];$('request').value=example.request.body?JSON.stringify(example.request.body,null,2):'';$('request').disabled=!example.request.body;}
+function selectOperation(){$('scenario').replaceChildren(...Object.keys(examples[$('operation').value].scenarios).map(s=>new Option(s,s)));selectScenario();}
+try{examples=await fetch('/examples.json').then(r=>r.json());$('operation').replaceChildren(...Object.entries(examples).map(([id,e])=>new Option(`${e.method} ${e.path} · ${e.screens.join(', ')}`,id)));selectOperation();$('status').textContent='준비되었습니다. 기본 가상 시각: 2030-10-01 18:00 KST';}catch{$('status').textContent='요청 목록을 불러오지 못했습니다.';$('run').disabled=true;}
+$('operation').onchange=selectOperation;$('scenario').onchange=selectScenario;
+$('run').onclick=async()=>{const e=examples[$('operation').value].scenarios[$('scenario').value];$('run').disabled=true;$('status').textContent='요청 중…';try{const headers={...e.request.headers,'X-Mock-Session':$('session').value};if($('time').value)headers['X-Mock-Time']=$('time').value;const response=await fetch(e.request.path,{method:e.request.method,headers,...(e.request.body?{body:JSON.stringify(JSON.parse($('request').value))}:{})});const json=await response.json();$('status').textContent=`${e.request.method} ${e.request.path} → HTTP ${response.status}`;$('response').textContent=JSON.stringify(json,null,2);}catch(error){$('status').textContent='요청 또는 JSON 입력을 확인해 주세요.';$('response').textContent=String(error.message);}finally{$('run').disabled=false;}};
+$('reset').onclick=async()=>{try{const r=await fetch('/__mock/reset',{method:'POST',headers:{'Content-Type':'application/json','X-Mock-Session':$('session').value},body:'{}'});$('status').textContent=r.ok?'이 세션을 초기화했습니다.':'세션 초기화에 실패했습니다.';}catch{$('status').textContent='세션 초기화에 실패했습니다.'}};
+</script>
+</html>

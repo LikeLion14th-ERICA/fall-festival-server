@@ -1,0 +1,20 @@
+{
+  "name": "espero-api-v2-mock",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "generate": "node generate.mjs",
+    "test": "node --test contract.test.mjs",
+    "check": "node generate.mjs --check && node --test contract.test.mjs"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.0.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}
