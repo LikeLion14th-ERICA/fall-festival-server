@@ -160,6 +160,28 @@ test('Map links resolve to the same version, place, pin and space',async()=>{
   for(const space of spaces){const target=space.mapTarget;const pins=(await call(`/api/v2/maps/${target.mapId}/pins?mapVersion=${target.mapVersion}`)).body.data;assert.equal(pins.mapVersion,target.mapVersion);const pin=pins.items.find(p=>p.id===target.pinId);assert.equal(pin.target.placeId,target.placeId);const place=(await call('/api/v2/places/'+target.placeId)).body.data;assert.equal(place.spaceId,space.id);}
   assert.equal((await call('/api/v2/places/place-toilet')).body.data.spaceId,null);
 });
+test('MapTarget is a canonical current PLACE pin and null means unlinked',async()=>{
+  const description=spec.components.schemas.MapTarget.description;
+  assert.match(description,/published FestivalRevision/);
+  assert.match(description,/현재 map version/);
+  assert.match(description,/PLACE/);
+  assert.match(description,/null/);
+  assert.equal(spec.components.schemas.Space.properties.mapTarget.description,description);
+  assert.equal(spec.components.schemas.TicketGuide.properties.mapTarget.description,description);
+  const session='map-target-contract',spacesResponse=await call('/api/v2/spaces',{session}),spaces=spacesResponse.body.data.items;
+  assert.ok(spaces.length>0);
+  for(const space of spaces){
+    const target=space.mapTarget;assert.ok(target);
+    const response=await call(`/api/v2/maps/${target.mapId}/pins?mapVersion=${target.mapVersion}`,{session});
+    assert.deepEqual({festivalId:response.body.meta.festivalId,revision:response.body.meta.revision},{festivalId:spacesResponse.body.meta.festivalId,revision:spacesResponse.body.meta.revision});
+    const pin=response.body.data.items.find(p=>p.id===target.pinId);assert.ok(pin);assert.deepEqual(pin.target,{kind:'PLACE',placeId:target.placeId});
+  }
+  const ticket=await call('/api/v2/ticket-guide',{session}),ticketTarget=ticket.body.data.mapTarget;assert.ok(ticketTarget);
+  const ticketPins=await call(`/api/v2/maps/${ticketTarget.mapId}/pins?mapVersion=${ticketTarget.mapVersion}`,{session});
+  const ticketPin=ticketPins.body.data.items.find(p=>p.id===ticketTarget.pinId);assert.ok(ticketPin);assert.deepEqual(ticketPin.target,{kind:'PLACE',placeId:ticketTarget.placeId});
+  assert.equal((await call('/api/v2/ticket-guide',{session,headers:{'X-Mock-Scenario':'unconfigured'}})).body.data.mapTarget,null);
+  assert.equal((await call('/api/v2/spaces/space-booth',{session,headers:{'X-Mock-Scenario':'missing-optional'}})).body.data.mapTarget,null);
+});
 test('CORS preflight and response metadata support frontend dev origins only',async()=>{
   const catalog=await call('/__mock/catalog');assert.equal(catalog.body.baseUrl,base);
   const ok=await fetch(base+'/api/v2/config',{method:'OPTIONS',headers:{Origin:'http://localhost:5173','Access-Control-Request-Method':'GET'}});assert.equal(ok.status,204);assert.equal(ok.headers.get('access-control-allow-origin'),'http://localhost:5173');
