@@ -2,15 +2,17 @@
 param(
     [int]$WarmupSeconds = 10,
     [int]$StageSeconds = 30,
+    [int]$MaxSockets = 500,
     [string]$OutputDirectory = "$(Join-Path (Get-Location) 'target\load-test-results')"
 )
 
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $container = "espero-catalog-load-$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
+$runId = "{0}-{1}" -f ([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')), ([Guid]::NewGuid().ToString('N').Substring(0, 8))
 $dbPassword = [Guid]::NewGuid().ToString('N')
 $port = Get-Random -Minimum 18080 -Maximum 18999
-$runDirectory = Join-Path $OutputDirectory ([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ'))
+$runDirectory = Join-Path $OutputDirectory $runId
 $fixtureDirectory = Join-Path $runDirectory 'db'
 $fixturePath = Join-Path $fixtureDirectory 'R__synthetic_catalog.sql'
 $resultPath = Join-Path $runDirectory 'load-results.json'
@@ -21,11 +23,24 @@ $stdoutTask = $null
 $stderrTask = $null
 $serverLog = $null
 $serverError = $null
+$statusPath = Join-Path $runDirectory 'run-status.json'
+$loadLog = Join-Path $runDirectory 'load-generator.log'
+$loadError = Join-Path $runDirectory 'load-generator-error.log'
+$loadExitPath = Join-Path $runDirectory 'load-generator-exit.json'
+
+if ($MaxSockets -lt 500) { throw 'MaxSockets must be at least 500 so the 500 VU stage is not client-capped.' }
+function Write-RunStatus([string]$status, [hashtable]$detail = @{}) {
+    $tempStatus = "$statusPath.tmp-$PID"
+    [pscustomobject]@{ status = $status; at = [DateTime]::UtcNow.ToString('o'); detail = $detail } | ConvertTo-Json -Depth 6 | Set-Content $tempStatus
+    Move-Item -Force $tempStatus $statusPath
+}
 
 New-Item -ItemType Directory -Path $fixtureDirectory -Force | Out-Null
 
 try {
+    Write-RunStatus 'starting'
     Push-Location $root
+    Write-RunStatus 'fixture-generated'
     node tools/catalog-load-fixture.mjs $fixturePath | Out-Host
 
     if ($env:MAVEN_CMD) {
@@ -41,6 +56,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Maven package failed with exit code $LASTEXITCODE" }
     $jar = Get-ChildItem (Join-Path $root 'target') -Filter '*.jar' | Where-Object { $_.Name -notmatch 'original|plain' } | Select-Object -First 1
     if (-not $jar) { throw 'Packaged Spring JAR was not found under target.' }
+    Write-RunStatus 'jar-ready'
 
     docker run --rm -d --name $container -P -e "POSTGRES_PASSWORD=$dbPassword" -e POSTGRES_DB=espero_load postgres:16-alpine | Out-Null
     try {
@@ -76,12 +92,17 @@ try {
 
         $samplesPath = Join-Path $runDirectory 'jstat-samples.csv'
         $smokeReadyPath = Join-Path $runDirectory 'smoke-ready'
+        Write-RunStatus 'server-started' @{ pid = $server.Id; port = $port }
         $samplerScript = Join-Path $root 'tools\load-test\jstat-sampler.ps1'
         $samplerArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$samplerScript`" -ProcessId $($server.Id) -OutputPath `"$samplesPath`" -JstatPath `"$jstatPath`" -WarmupSeconds $WarmupSeconds -StageSeconds $StageSeconds -ReadyPath `"$smokeReadyPath`""
         $sampler = Start-Process powershell -WindowStyle Hidden -PassThru -ArgumentList $samplerArgs
 
-        node tools/load-test/http-load.mjs --base-url "http://127.0.0.1:$port" --output $resultPath --smoke-ready-file $smokeReadyPath --warmup-ms ($WarmupSeconds * 1000) --stage-ms ($StageSeconds * 1000) | Out-Host
-        if ($LASTEXITCODE -ne 0) { throw "HTTP load generator failed with exit code $LASTEXITCODE" }
+        Write-RunStatus 'load-running' @{ maxSockets = $MaxSockets }
+        & java tools/load-test/CatalogLoadGenerator.java --base-url "http://127.0.0.1:$port" --output $resultPath --status-file (Join-Path $runDirectory 'load-status.json') --smoke-ready-file $smokeReadyPath --warmup-ms ($WarmupSeconds * 1000) --stage-ms ($StageSeconds * 1000) --max-sockets $MaxSockets 1> $loadLog 2> $loadError
+        $loadExit = $LASTEXITCODE
+        [pscustomobject]@{ exitCode = $loadExit; at = [DateTime]::UtcNow.ToString('o') } | ConvertTo-Json | Set-Content $loadExitPath
+        if ($loadExit -ne 0) { throw "HTTP load generator failed with exit code $loadExit" }
+        Write-RunStatus 'load-complete'
         if ($sampler -and -not $sampler.HasExited) { Wait-Process -Id $sampler.Id -Timeout 10 -ErrorAction SilentlyContinue }
         if ($sampler -and -not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
 
@@ -100,6 +121,7 @@ try {
             }
         }
         [pscustomobject]@{ machine = [Environment]::MachineName; javaExecutable = (Get-Command java).Source; jstat = $jstatPath; fixture = 'synthetic:100 spaces, 7 maps, 101 places, 207 pins'; localhostOnly = $true; jstatStages = @($jstatSummary) } | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $runDirectory 'environment-and-gc.json')
+        Write-RunStatus 'complete'
         Write-Host "Load verification results: $resultPath"
     }
     finally {
@@ -109,6 +131,10 @@ try {
         if ($stderrTask) { [System.IO.File]::WriteAllText($serverError, $stderrTask.GetAwaiter().GetResult()) }
         docker rm -f $container 2>$null | Out-Null
     }
+}
+catch {
+    try { Write-RunStatus 'failed' @{ error = $_.Exception.Message } } catch {}
+    throw
 }
 finally {
     Pop-Location
