@@ -85,14 +85,14 @@
                         "links": {
                           "universityNotices": {
                             "label": "예시 학교 공지",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
                           "officialChannels": [
                             {
                               "id": "channel-mock",
                               "label": "예시 공식 채널",
-                              "url": "https://example.invalid/mock-not-payable",
+                              "url": "https://example.invalid/mock-link",
                               "target": "_blank",
                               "iconKey": "website"
                             }
@@ -135,7 +135,7 @@
                         "links": {
                           "universityNotices": {
                             "label": "예시 학교 공지",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
                           "officialChannels": [],
@@ -223,21 +223,21 @@
                         "links": {
                           "universityNotices": {
                             "label": "예시 학교 공지",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
                           "officialChannels": [
                             {
                               "id": "channel-mock",
                               "label": "예시 공식 채널",
-                              "url": "https://example.invalid/mock-not-payable",
+                              "url": "https://example.invalid/mock-link",
                               "target": "_blank",
                               "iconKey": "website"
                             }
                           ],
                           "welcomeDay": {
                             "label": "에리카 웰컴 데이",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           }
                         },
@@ -289,14 +289,14 @@
                         "links": {
                           "universityNotices": {
                             "label": "예시 학교 공지",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
                           "officialChannels": [
                             {
                               "id": "channel-mock",
                               "label": "예시 공식 채널",
-                              "url": "https://example.invalid/mock-not-payable",
+                              "url": "https://example.invalid/mock-link",
                               "target": "_blank",
                               "iconKey": "website"
                             }
@@ -1001,6 +1001,44 @@
                       "data": {
                         "items": [
                           {
+                            "id": "notice-safety",
+                            "type": "GENERAL",
+                            "title": "목 안전 안내",
+                            "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
+                            "links": [
+                              {
+                                "label": "개발용 안내 링크",
+                                "url": "https://example.invalid/mock-notice/safety",
+                                "target": "_blank"
+                              }
+                            ],
+                            "createdAt": "2030-10-01T17:40:00+09:00"
+                          },
+                          {
+                            "id": "notice-weather",
+                            "type": "GENERAL",
+                            "title": "목 날씨 대비 안내",
+                            "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:30:00+09:00"
+                          },
+                          {
+                            "id": "notice-stage",
+                            "type": "GENERAL",
+                            "title": "목 공연 대기 안내",
+                            "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:20:00+09:00"
+                          },
+                          {
+                            "id": "notice-route",
+                            "type": "GENERAL",
+                            "title": "목 구역 이동 안내",
+                            "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:10:00+09:00"
+                          },
+                          {
                             "id": "notice-pending",
                             "type": "GENERAL",
                             "title": "번역 대기 예시",
@@ -1016,7 +1054,7 @@
                             "links": [
                               {
                                 "label": "예시 안내",
-                                "url": "https://example.invalid/mock-not-payable",
+                                "url": "https://example.invalid/mock-link",
                                 "target": "_blank"
                               }
                             ],
@@ -1029,12 +1067,34 @@
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
                             "createdAt": "2030-09-30T16:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-card",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 카드지갑",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-29T15:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-earbuds",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 이어폰 케이스",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-28T15:00:00+09:00"
                           }
                         ],
                         "visibleIds": [
+                          "notice-safety",
+                          "notice-weather",
+                          "notice-stage",
+                          "notice-route",
                           "notice-pending",
                           "notice-1",
-                          "notice-lost"
+                          "notice-lost",
+                          "notice-lost-card",
+                          "notice-lost-earbuds"
                         ],
                         "asOfDate": "2030-10-01"
                       },
@@ -1074,6 +1134,38 @@
                       "data": {
                         "items": [
                           {
+                            "id": "notice-safety",
+                            "type": "GENERAL",
+                            "title": "목 안전 안내",
+                            "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:40:00+09:00"
+                          },
+                          {
+                            "id": "notice-weather",
+                            "type": "GENERAL",
+                            "title": "목 날씨 대비 안내",
+                            "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:30:00+09:00"
+                          },
+                          {
+                            "id": "notice-stage",
+                            "type": "GENERAL",
+                            "title": "목 공연 대기 안내",
+                            "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:20:00+09:00"
+                          },
+                          {
+                            "id": "notice-route",
+                            "type": "GENERAL",
+                            "title": "목 구역 이동 안내",
+                            "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:10:00+09:00"
+                          },
+                          {
                             "id": "notice-pending",
                             "type": "GENERAL",
                             "title": "번역 대기 예시",
@@ -1096,12 +1188,34 @@
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
                             "createdAt": "2030-09-30T16:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-card",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 카드지갑",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-29T15:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-earbuds",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 이어폰 케이스",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-28T15:00:00+09:00"
                           }
                         ],
                         "visibleIds": [
+                          "notice-safety",
+                          "notice-weather",
+                          "notice-stage",
+                          "notice-route",
                           "notice-pending",
                           "notice-1",
-                          "notice-lost"
+                          "notice-lost",
+                          "notice-lost-card",
+                          "notice-lost-earbuds"
                         ],
                         "asOfDate": "2030-10-01"
                       },
@@ -1130,6 +1244,44 @@
                             "createdAt": "2030-10-01T18:00:00+09:00"
                           },
                           {
+                            "id": "notice-safety",
+                            "type": "GENERAL",
+                            "title": "목 안전 안내",
+                            "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
+                            "links": [
+                              {
+                                "label": "개발용 안내 링크",
+                                "url": "https://example.invalid/mock-notice/safety",
+                                "target": "_blank"
+                              }
+                            ],
+                            "createdAt": "2030-10-01T17:40:00+09:00"
+                          },
+                          {
+                            "id": "notice-weather",
+                            "type": "GENERAL",
+                            "title": "목 날씨 대비 안내",
+                            "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:30:00+09:00"
+                          },
+                          {
+                            "id": "notice-stage",
+                            "type": "GENERAL",
+                            "title": "목 공연 대기 안내",
+                            "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:20:00+09:00"
+                          },
+                          {
+                            "id": "notice-route",
+                            "type": "GENERAL",
+                            "title": "목 구역 이동 안내",
+                            "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:10:00+09:00"
+                          },
+                          {
                             "id": "notice-pending",
                             "type": "GENERAL",
                             "title": "번역 대기 예시",
@@ -1145,7 +1297,7 @@
                             "links": [
                               {
                                 "label": "예시 안내",
-                                "url": "https://example.invalid/mock-not-payable",
+                                "url": "https://example.invalid/mock-link",
                                 "target": "_blank"
                               }
                             ],
@@ -1158,13 +1310,35 @@
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
                             "createdAt": "2030-09-30T16:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-card",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 카드지갑",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-29T15:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-earbuds",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 이어폰 케이스",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-28T15:00:00+09:00"
                           }
                         ],
                         "visibleIds": [
                           "notice-new",
+                          "notice-safety",
+                          "notice-weather",
+                          "notice-stage",
+                          "notice-route",
                           "notice-pending",
                           "notice-1",
-                          "notice-lost"
+                          "notice-lost",
+                          "notice-lost-card",
+                          "notice-lost-earbuds"
                         ],
                         "asOfDate": "2030-10-01"
                       },
@@ -1185,6 +1359,44 @@
                       "data": {
                         "items": [
                           {
+                            "id": "notice-safety",
+                            "type": "GENERAL",
+                            "title": "목 안전 안내",
+                            "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
+                            "links": [
+                              {
+                                "label": "개발용 안내 링크",
+                                "url": "https://example.invalid/mock-notice/safety",
+                                "target": "_blank"
+                              }
+                            ],
+                            "createdAt": "2030-10-01T17:40:00+09:00"
+                          },
+                          {
+                            "id": "notice-weather",
+                            "type": "GENERAL",
+                            "title": "목 날씨 대비 안내",
+                            "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:30:00+09:00"
+                          },
+                          {
+                            "id": "notice-stage",
+                            "type": "GENERAL",
+                            "title": "목 공연 대기 안내",
+                            "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:20:00+09:00"
+                          },
+                          {
+                            "id": "notice-route",
+                            "type": "GENERAL",
+                            "title": "목 구역 이동 안내",
+                            "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
+                            "links": [],
+                            "createdAt": "2030-10-01T17:10:00+09:00"
+                          },
+                          {
                             "id": "notice-pending",
                             "type": "GENERAL",
                             "title": "번역 대기 예시",
@@ -1199,11 +1411,33 @@
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
                             "createdAt": "2030-09-30T16:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-card",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 카드지갑",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-29T15:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-earbuds",
+                            "type": "LOST_FOUND",
+                            "title": "목 분실물 안내: 이어폰 케이스",
+                            "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                            "links": [],
+                            "createdAt": "2030-09-28T15:00:00+09:00"
                           }
                         ],
                         "visibleIds": [
+                          "notice-safety",
+                          "notice-weather",
+                          "notice-stage",
+                          "notice-route",
                           "notice-pending",
-                          "notice-lost"
+                          "notice-lost",
+                          "notice-lost-card",
+                          "notice-lost-earbuds"
                         ],
                         "asOfDate": "2030-10-01"
                       },
@@ -3681,14 +3915,62 @@
                           {
                             "artistId": "artist-a",
                             "performanceId": "show-1",
-                            "name": "예시 아티스트 A",
+                            "name": "목 루미너스",
                             "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "url": "/__mock/assets/sample.svg?variant=artist-artist-a",
+                              "alt": "개발용 가상 artist 목 루미너스 이미지 · 실제 축제 자료 아님",
                               "width": 800,
                               "height": 600
                             },
                             "order": 1
+                          },
+                          {
+                            "artistId": "artist-breeze",
+                            "performanceId": "show-d1-2",
+                            "name": "목 블루아워",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=artist-artist-breeze",
+                              "alt": "개발용 가상 artist 목 블루아워 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "order": 2
+                          },
+                          {
+                            "artistId": "artist-cosmos",
+                            "performanceId": "show-d1-3",
+                            "name": "목 코스믹웨이브",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=artist-artist-cosmos",
+                              "alt": "개발용 가상 artist 목 코스믹웨이브 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "order": 3
+                          },
+                          {
+                            "artistId": "artist-drift",
+                            "performanceId": "show-d1-4",
+                            "name": "목 드리프트",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=artist-artist-drift",
+                              "alt": "개발용 가상 artist 목 드리프트 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "order": 4
+                          },
+                          {
+                            "artistId": "artist-ember",
+                            "performanceId": "show-d1-5",
+                            "name": "목 엠버라인",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=artist-artist-ember",
+                              "alt": "개발용 가상 artist 목 엠버라인 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "order": 5
                           }
                         ]
                       },
@@ -4025,25 +4307,35 @@
                       "data": {
                         "id": "artist-a",
                         "category": "ARTIST",
-                        "name": "예시 아티스트 A",
+                        "name": "목 루미너스",
                         "image": {
-                          "url": "/__mock/assets/sample.svg",
-                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "url": "/__mock/assets/sample.svg?variant=artist-artist-a",
+                          "alt": "개발용 가상 artist 목 루미너스 이미지 · 실제 축제 자료 아님",
                           "width": 800,
                           "height": 600
                         },
-                        "introduction": "개발용 소개",
+                        "introduction": "목 루미너스은(는) 프런트 목록·상세 화면 검증을 위한 가상 아티스트입니다. 실제 축제 출연 정보가 아닙니다.",
                         "socialLinks": [
                           {
-                            "label": "예시 SNS",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "label": "개발용 공식 채널",
+                            "url": "https://example.invalid/mock-social/artist-a",
                             "target": "_blank"
                           }
                         ],
                         "songs": [
                           {
-                            "label": "예시 대표곡",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "label": "첫 파동",
+                            "url": "https://example.invalid/mock-song/artist-a/1",
+                            "target": "_blank"
+                          },
+                          {
+                            "label": "빛의 경로",
+                            "url": "https://example.invalid/mock-song/artist-a/2",
+                            "target": "_blank"
+                          },
+                          {
+                            "label": "새벽 기록",
+                            "url": "https://example.invalid/mock-song/artist-a/3",
                             "target": "_blank"
                           }
                         ],
@@ -4051,20 +4343,8 @@
                           {
                             "id": "show-1",
                             "date": "2030-10-01",
-                            "startsAt": "2030-10-01T18:00:00+09:00",
-                            "endsAt": "2030-10-01T18:40:00+09:00"
-                          },
-                          {
-                            "id": "show-2",
-                            "date": "2030-10-02",
-                            "startsAt": "2030-10-02T18:00:00+09:00",
-                            "endsAt": "2030-10-02T18:40:00+09:00"
-                          },
-                          {
-                            "id": "show-3",
-                            "date": "2030-10-03",
-                            "startsAt": "2030-10-03T18:00:00+09:00",
-                            "endsAt": "2030-10-03T18:40:00+09:00"
+                            "startsAt": "2030-10-01T18:20:00+09:00",
+                            "endsAt": "2030-10-01T18:50:00+09:00"
                           }
                         ]
                       },
@@ -4085,10 +4365,10 @@
                       "data": {
                         "id": "artist-a",
                         "category": "ARTIST",
-                        "name": "예시 아티스트 A",
+                        "name": "목 루미너스",
                         "image": {
-                          "url": "/__mock/assets/sample.svg",
-                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "url": "/__mock/assets/sample.svg?variant=artist-artist-a",
+                          "alt": "개발용 가상 artist 목 루미너스 이미지 · 실제 축제 자료 아님",
                           "width": 800,
                           "height": 600
                         },
@@ -4099,20 +4379,8 @@
                           {
                             "id": "show-1",
                             "date": "2030-10-01",
-                            "startsAt": "2030-10-01T18:00:00+09:00",
-                            "endsAt": "2030-10-01T18:40:00+09:00"
-                          },
-                          {
-                            "id": "show-2",
-                            "date": "2030-10-02",
-                            "startsAt": "2030-10-02T18:00:00+09:00",
-                            "endsAt": "2030-10-02T18:40:00+09:00"
-                          },
-                          {
-                            "id": "show-3",
-                            "date": "2030-10-03",
-                            "startsAt": "2030-10-03T18:00:00+09:00",
-                            "endsAt": "2030-10-03T18:40:00+09:00"
+                            "startsAt": "2030-10-01T18:20:00+09:00",
+                            "endsAt": "2030-10-01T18:50:00+09:00"
                           }
                         ]
                       },
@@ -4451,86 +4719,338 @@
                           {
                             "id": "contest-1",
                             "date": "2030-10-01",
-                            "title": "예시 콘테스트 1",
+                            "title": "목 콘테스트 DAY 1-1",
                             "artists": [
                               {
                                 "id": "artist-b",
-                                "name": "예시 참가팀 B"
+                                "name": "목 캠퍼스 밴드 01"
                               }
                             ],
                             "startsAt": "2030-10-01T17:00:00+09:00",
-                            "endsAt": "2030-10-01T17:30:00+09:00",
-                            "description": null
+                            "endsAt": "2030-10-01T17:20:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
+                          },
+                          {
+                            "id": "contest-d1-2",
+                            "date": "2030-10-01",
+                            "title": "목 콘테스트 DAY 1-2",
+                            "artists": [
+                              {
+                                "id": "contest-d1-2",
+                                "name": "목 캠퍼스 댄스 01"
+                              }
+                            ],
+                            "startsAt": "2030-10-01T17:25:00+09:00",
+                            "endsAt": "2030-10-01T17:45:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
+                          },
+                          {
+                            "id": "contest-d1-3",
+                            "date": "2030-10-01",
+                            "title": "목 콘테스트 DAY 1-3",
+                            "artists": [
+                              {
+                                "id": "contest-d1-3",
+                                "name": "목 보컬 스테이지 01"
+                              }
+                            ],
+                            "startsAt": "2030-10-01T17:50:00+09:00",
+                            "endsAt": "2030-10-01T18:10:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
                           },
                           {
                             "id": "show-1",
                             "date": "2030-10-01",
-                            "title": "예시 공연 1",
+                            "title": "목 메인 스테이지 DAY 1-1",
                             "artists": [
                               {
                                 "id": "artist-a",
-                                "name": "예시 아티스트 A"
+                                "name": "목 루미너스"
                               }
                             ],
-                            "startsAt": "2030-10-01T18:00:00+09:00",
-                            "endsAt": "2030-10-01T18:40:00+09:00",
-                            "description": "개발용 공연 안내"
+                            "startsAt": "2030-10-01T18:20:00+09:00",
+                            "endsAt": "2030-10-01T18:50:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d1-2",
+                            "date": "2030-10-01",
+                            "title": "목 메인 스테이지 DAY 1-2",
+                            "artists": [
+                              {
+                                "id": "artist-breeze",
+                                "name": "목 블루아워"
+                              }
+                            ],
+                            "startsAt": "2030-10-01T19:00:00+09:00",
+                            "endsAt": "2030-10-01T19:35:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d1-3",
+                            "date": "2030-10-01",
+                            "title": "목 메인 스테이지 DAY 1-3",
+                            "artists": [
+                              {
+                                "id": "artist-cosmos",
+                                "name": "목 코스믹웨이브"
+                              }
+                            ],
+                            "startsAt": "2030-10-01T19:45:00+09:00",
+                            "endsAt": "2030-10-01T20:20:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d1-4",
+                            "date": "2030-10-01",
+                            "title": "목 메인 스테이지 DAY 1-4",
+                            "artists": [
+                              {
+                                "id": "artist-drift",
+                                "name": "목 드리프트"
+                              }
+                            ],
+                            "startsAt": "2030-10-01T20:30:00+09:00",
+                            "endsAt": "2030-10-01T21:05:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d1-5",
+                            "date": "2030-10-01",
+                            "title": "목 메인 스테이지 DAY 1-5",
+                            "artists": [
+                              {
+                                "id": "artist-ember",
+                                "name": "목 엠버라인"
+                              }
+                            ],
+                            "startsAt": "2030-10-01T21:15:00+09:00",
+                            "endsAt": "2030-10-01T21:50:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
                           },
                           {
                             "id": "contest-2",
                             "date": "2030-10-02",
-                            "title": "예시 콘테스트 2",
+                            "title": "목 콘테스트 DAY 2-1",
                             "artists": [
                               {
-                                "id": "artist-b",
-                                "name": "예시 참가팀 B"
+                                "id": "contest-d2-1",
+                                "name": "목 캠퍼스 밴드 02"
                               }
                             ],
                             "startsAt": "2030-10-02T17:00:00+09:00",
-                            "endsAt": "2030-10-02T17:30:00+09:00",
-                            "description": null
+                            "endsAt": "2030-10-02T17:20:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
+                          },
+                          {
+                            "id": "contest-d2-2",
+                            "date": "2030-10-02",
+                            "title": "목 콘테스트 DAY 2-2",
+                            "artists": [
+                              {
+                                "id": "contest-d2-2",
+                                "name": "목 퍼포먼스 팀 02"
+                              }
+                            ],
+                            "startsAt": "2030-10-02T17:25:00+09:00",
+                            "endsAt": "2030-10-02T17:45:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
+                          },
+                          {
+                            "id": "contest-d2-3",
+                            "date": "2030-10-02",
+                            "title": "목 콘테스트 DAY 2-3",
+                            "artists": [
+                              {
+                                "id": "contest-d2-3",
+                                "name": "목 보컬 스테이지 02"
+                              }
+                            ],
+                            "startsAt": "2030-10-02T17:50:00+09:00",
+                            "endsAt": "2030-10-02T18:10:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
                           },
                           {
                             "id": "show-2",
                             "date": "2030-10-02",
-                            "title": "예시 공연 2",
+                            "title": "목 메인 스테이지 DAY 2-1",
                             "artists": [
                               {
-                                "id": "artist-a",
-                                "name": "예시 아티스트 A"
+                                "id": "artist-fable",
+                                "name": "목 페이블"
                               }
                             ],
-                            "startsAt": "2030-10-02T18:00:00+09:00",
-                            "endsAt": "2030-10-02T18:40:00+09:00",
-                            "description": "개발용 공연 안내"
+                            "startsAt": "2030-10-02T18:20:00+09:00",
+                            "endsAt": "2030-10-02T18:50:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d2-2",
+                            "date": "2030-10-02",
+                            "title": "목 메인 스테이지 DAY 2-2",
+                            "artists": [
+                              {
+                                "id": "artist-groove",
+                                "name": "목 그루브메이커"
+                              }
+                            ],
+                            "startsAt": "2030-10-02T19:00:00+09:00",
+                            "endsAt": "2030-10-02T19:35:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d2-3",
+                            "date": "2030-10-02",
+                            "title": "목 메인 스테이지 DAY 2-3",
+                            "artists": [
+                              {
+                                "id": "artist-halo",
+                                "name": "목 헤일로"
+                              }
+                            ],
+                            "startsAt": "2030-10-02T19:45:00+09:00",
+                            "endsAt": "2030-10-02T20:20:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d2-4",
+                            "date": "2030-10-02",
+                            "title": "목 메인 스테이지 DAY 2-4",
+                            "artists": [
+                              {
+                                "id": "artist-iris",
+                                "name": "목 아이리스"
+                              }
+                            ],
+                            "startsAt": "2030-10-02T20:30:00+09:00",
+                            "endsAt": "2030-10-02T21:05:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d2-5",
+                            "date": "2030-10-02",
+                            "title": "목 메인 스테이지 DAY 2-5",
+                            "artists": [
+                              {
+                                "id": "artist-junction",
+                                "name": "목 정션"
+                              }
+                            ],
+                            "startsAt": "2030-10-02T21:15:00+09:00",
+                            "endsAt": "2030-10-02T21:50:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
                           },
                           {
                             "id": "contest-3",
                             "date": "2030-10-03",
-                            "title": "예시 콘테스트 3",
+                            "title": "목 콘테스트 DAY 3-1",
                             "artists": [
                               {
-                                "id": "artist-b",
-                                "name": "예시 참가팀 B"
+                                "id": "contest-d3-1",
+                                "name": "목 캠퍼스 밴드 03"
                               }
                             ],
                             "startsAt": "2030-10-03T17:00:00+09:00",
-                            "endsAt": "2030-10-03T17:30:00+09:00",
-                            "description": null
+                            "endsAt": "2030-10-03T17:20:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
+                          },
+                          {
+                            "id": "contest-d3-2",
+                            "date": "2030-10-03",
+                            "title": "목 콘테스트 DAY 3-2",
+                            "artists": [
+                              {
+                                "id": "contest-d3-2",
+                                "name": "목 퍼포먼스 팀 03"
+                              }
+                            ],
+                            "startsAt": "2030-10-03T17:25:00+09:00",
+                            "endsAt": "2030-10-03T17:45:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
+                          },
+                          {
+                            "id": "contest-d3-3",
+                            "date": "2030-10-03",
+                            "title": "목 콘테스트 DAY 3-3",
+                            "artists": [
+                              {
+                                "id": "contest-d3-3",
+                                "name": "목 보컬 스테이지 03"
+                              }
+                            ],
+                            "startsAt": "2030-10-03T17:50:00+09:00",
+                            "endsAt": "2030-10-03T18:10:00+09:00",
+                            "description": "가상 콘테스트 무대 순서 예시입니다."
                           },
                           {
                             "id": "show-3",
                             "date": "2030-10-03",
-                            "title": "예시 공연 3",
+                            "title": "목 메인 스테이지 DAY 3-1",
                             "artists": [
                               {
-                                "id": "artist-a",
-                                "name": "예시 아티스트 A"
+                                "id": "artist-kite",
+                                "name": "목 카이트"
                               }
                             ],
-                            "startsAt": "2030-10-03T18:00:00+09:00",
-                            "endsAt": "2030-10-03T18:40:00+09:00",
-                            "description": "개발용 공연 안내"
+                            "startsAt": "2030-10-03T18:20:00+09:00",
+                            "endsAt": "2030-10-03T18:50:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d3-2",
+                            "date": "2030-10-03",
+                            "title": "목 메인 스테이지 DAY 3-2",
+                            "artists": [
+                              {
+                                "id": "artist-lunar",
+                                "name": "목 루나폴"
+                              }
+                            ],
+                            "startsAt": "2030-10-03T19:00:00+09:00",
+                            "endsAt": "2030-10-03T19:35:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d3-3",
+                            "date": "2030-10-03",
+                            "title": "목 메인 스테이지 DAY 3-3",
+                            "artists": [
+                              {
+                                "id": "artist-mono",
+                                "name": "목 모노크롬"
+                              }
+                            ],
+                            "startsAt": "2030-10-03T19:45:00+09:00",
+                            "endsAt": "2030-10-03T20:20:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d3-4",
+                            "date": "2030-10-03",
+                            "title": "목 메인 스테이지 DAY 3-4",
+                            "artists": [
+                              {
+                                "id": "artist-nova",
+                                "name": "목 노바셀"
+                              }
+                            ],
+                            "startsAt": "2030-10-03T20:30:00+09:00",
+                            "endsAt": "2030-10-03T21:05:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
+                          },
+                          {
+                            "id": "show-d3-5",
+                            "date": "2030-10-03",
+                            "title": "목 메인 스테이지 DAY 3-5",
+                            "artists": [
+                              {
+                                "id": "artist-orbit",
+                                "name": "목 오르빗"
+                              }
+                            ],
+                            "startsAt": "2030-10-03T21:15:00+09:00",
+                            "endsAt": "2030-10-03T21:50:00+09:00",
+                            "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
                           }
                         ]
                       },
@@ -4874,16 +5394,16 @@
                       "data": {
                         "id": "show-1",
                         "date": "2030-10-01",
-                        "title": "예시 공연 1",
+                        "title": "목 메인 스테이지 DAY 1-1",
                         "artists": [
                           {
                             "id": "artist-a",
-                            "name": "예시 아티스트 A"
+                            "name": "목 루미너스"
                           }
                         ],
-                        "startsAt": "2030-10-01T18:00:00+09:00",
-                        "endsAt": "2030-10-01T18:40:00+09:00",
-                        "description": "개발용 공연 안내"
+                        "startsAt": "2030-10-01T18:20:00+09:00",
+                        "endsAt": "2030-10-01T18:50:00+09:00",
+                        "description": "가상 메인 무대 순서 예시입니다. 실제 공연 일정이 아닙니다."
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -4902,15 +5422,15 @@
                       "data": {
                         "id": "show-1",
                         "date": "2030-10-01",
-                        "title": "예시 공연 1",
+                        "title": "목 메인 스테이지 DAY 1-1",
                         "artists": [
                           {
                             "id": "artist-a",
-                            "name": "예시 아티스트 A"
+                            "name": "목 루미너스"
                           }
                         ],
-                        "startsAt": "2030-10-01T18:00:00+09:00",
-                        "endsAt": "2030-10-01T18:40:00+09:00",
+                        "startsAt": "2030-10-01T18:20:00+09:00",
+                        "endsAt": "2030-10-01T18:50:00+09:00",
                         "description": null
                       },
                       "meta": {
@@ -5576,90 +6096,517 @@
                       "data": {
                         "items": [
                           {
+                            "id": "space-pub-07",
+                            "category": "PUB",
+                            "name": "목 골목작전",
                             "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-07",
+                              "alt": "개발용 가상 space 목 골목작전 이미지 · 실제 축제 자료 아님",
                               "width": 800,
                               "height": 600
                             },
-                            "locationText": "예시 구역 A",
-                            "operator": "예시 운영팀",
-                            "hoursText": "개발용 12:00~23:00",
-                            "description": "실제 축제 자료가 아닌 화면 개발용 설명입니다.",
+                            "locationText": "목 주점 구역 P-07",
+                            "operator": "목 개발 운영팀 P07",
+                            "hoursText": null,
+                            "description": "목 골목작전의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
                             "contact": {
-                              "label": "예시 문의",
-                              "url": "https://example.invalid/mock-not-payable",
-                              "target": "_blank"
-                            },
-                            "experience": null,
-                            "events": [],
-                            "menu": [],
-                            "mapTarget": {
-                              "mapId": "map-area",
-                              "placeId": "place-market",
-                              "pinId": "pin-market",
-                              "mapVersion": "mock-map-1"
-                            },
-                            "id": "space-market",
-                            "category": "FLEA_MARKET",
-                            "name": "예시 마켓"
-                          },
-                          {
-                            "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                              "width": 800,
-                              "height": 600
-                            },
-                            "locationText": "예시 구역 A",
-                            "operator": "예시 운영팀",
-                            "hoursText": "개발용 12:00~23:00",
-                            "description": "실제 축제 자료가 아닌 화면 개발용 설명입니다.",
-                            "contact": {
-                              "label": "예시 문의",
-                              "url": "https://example.invalid/mock-not-payable",
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-07",
                               "target": "_blank"
                             },
                             "experience": null,
                             "events": [],
                             "menu": [
                               {
-                                "name": "예시 메뉴",
+                                "name": "골목 시그니처 하이볼",
                                 "price": {
-                                  "amount": 2000,
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "골목 과일 에이드",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 7500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 6500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 11500,
                                   "currency": "KRW"
                                 }
                               }
                             ],
                             "mapTarget": {
-                              "mapId": "map-area",
-                              "placeId": "place-pub",
-                              "pinId": "pin-pub",
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-07",
+                              "pinId": "pin-pub-07",
                               "mapVersion": "mock-map-1"
-                            },
-                            "id": "space-pub",
-                            "category": "PUB",
-                            "name": "예시 주점"
+                            }
                           },
                           {
+                            "id": "space-market-03",
+                            "category": "FLEA_MARKET",
+                            "name": "목 그래픽마켓",
                             "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-03",
+                              "alt": "개발용 가상 space 목 그래픽마켓 이미지 · 실제 축제 자료 아님",
                               "width": 800,
                               "height": 600
                             },
-                            "locationText": "예시 구역 A",
-                            "operator": "예시 운영팀",
-                            "hoursText": "개발용 12:00~23:00",
-                            "description": "실제 축제 자료가 아닌 화면 개발용 설명입니다.",
+                            "locationText": "목 플리마켓 구역 M-03",
+                            "operator": "목 개발 셀러 03",
+                            "hoursText": null,
+                            "description": "목 그래픽마켓의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
                             "contact": {
-                              "label": "예시 문의",
-                              "url": "https://example.invalid/mock-not-payable",
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/market-03",
                               "target": "_blank"
                             },
-                            "experience": "개발용 체험 방법",
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-03",
+                              "pinId": "pin-market-03",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-02",
+                            "category": "PUB",
+                            "name": "목 노을상회",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-02",
+                              "alt": "개발용 가상 space 목 노을상회 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-02",
+                            "operator": "목 개발 운영팀 P02",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 노을상회의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-02",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "노을 시그니처 하이볼",
+                                "price": {
+                                  "amount": 5500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "노을 과일 에이드",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 8000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 7000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 12500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-02",
+                              "pinId": "pin-pub-02",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub",
+                            "category": "PUB",
+                            "name": "목 달빛포차",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub",
+                              "alt": "개발용 가상 space 목 달빛포차 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-01",
+                            "operator": "목 개발 운영팀 P01",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 달빛포차의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "달빛 시그니처 하이볼",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "달빛 과일 에이드",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 7500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 6500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 11500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub",
+                              "pinId": "pin-pub",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-12",
+                            "category": "BOOTH",
+                            "name": "목 드로잉 살롱",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-12",
+                              "alt": "개발용 가상 space 목 드로잉 살롱 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-12",
+                            "operator": "목 개발 운영팀 12",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 드로잉 살롱의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-12",
+                              "target": "_blank"
+                            },
+                            "experience": "한 장의 엽서를 꾸미는 가상 체험",
                             "events": [
-                              "개발용 이벤트"
+                              "목 엽서 전시"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-12",
+                              "pinId": "pin-booth-12",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market-02",
+                            "category": "FLEA_MARKET",
+                            "name": "목 레코드마켓",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-02",
+                              "alt": "개발용 가상 space 목 레코드마켓 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 플리마켓 구역 M-02",
+                            "operator": "목 개발 셀러 02",
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 레코드마켓의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-02",
+                              "pinId": "pin-market-02",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-02",
+                            "category": "BOOTH",
+                            "name": "목 리듬 아케이드",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-02",
+                              "alt": "개발용 가상 space 목 리듬 아케이드 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-02",
+                            "operator": "목 개발 운영팀 02",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 리듬 아케이드의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-02",
+                              "target": "_blank"
+                            },
+                            "experience": "리듬 버튼으로 완성하는 가상 미션",
+                            "events": [
+                              "목 리듬 미션"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-02",
+                              "pinId": "pin-booth-02",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market-07",
+                            "category": "FLEA_MARKET",
+                            "name": "목 리빙마켓",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-07",
+                              "alt": "개발용 가상 space 목 리빙마켓 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 플리마켓 구역 M-07",
+                            "operator": "목 개발 셀러 07",
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 리빙마켓의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-07",
+                              "pinId": "pin-market-07",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-05",
+                            "category": "BOOTH",
+                            "name": "목 미션 스튜디오",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-05",
+                              "alt": "개발용 가상 space 목 미션 스튜디오 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-05",
+                            "operator": "목 개발 운영팀 05",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 미션 스튜디오의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": "단계별 선택으로 진행하는 가상 추리 게임",
+                            "events": [
+                              "목 미션 완주 선물"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-05",
+                              "pinId": "pin-booth-05",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-08",
+                            "category": "PUB",
+                            "name": "목 밤산책",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-08",
+                              "alt": "개발용 가상 space 목 밤산책 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-08",
+                            "operator": "목 개발 운영팀 P08",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 밤산책의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-08",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "밤산책 시그니처 하이볼",
+                                "price": {
+                                  "amount": 5500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "밤산책 과일 에이드",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 8000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 7000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 12500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-08",
+                              "pinId": "pin-pub-08",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-04",
+                            "category": "PUB",
+                            "name": "목 별빛식당",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-04",
+                              "alt": "개발용 가상 space 목 별빛식당 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-04",
+                            "operator": "목 개발 운영팀 P04",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 별빛식당의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "별빛 시그니처 하이볼",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "별빛 과일 에이드",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 7500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 7000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 11500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-04",
+                              "pinId": "pin-pub-04",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth",
+                            "category": "BOOTH",
+                            "name": "목 별자리 연구소",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth",
+                              "alt": "개발용 가상 space 목 별자리 연구소 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-01",
+                            "operator": "목 개발 운영팀 01",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 별자리 연구소의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth",
+                              "target": "_blank"
+                            },
+                            "experience": "나만의 별자리 카드를 조합하는 가상 체험",
+                            "events": [
+                              "목 스탬프 카드 꾸미기",
+                              "목 현장 퀴즈"
                             ],
                             "menu": [],
                             "mapTarget": {
@@ -5667,10 +6614,713 @@
                               "placeId": "place-booth",
                               "pinId": "pin-booth",
                               "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market-04",
+                            "category": "FLEA_MARKET",
+                            "name": "목 빈티지서랍",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-04",
+                              "alt": "개발용 가상 space 목 빈티지서랍 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
                             },
-                            "id": "space-booth",
+                            "locationText": "목 플리마켓 구역 M-04",
+                            "operator": "목 개발 셀러 04",
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 빈티지서랍의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/market-04",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-04",
+                              "pinId": "pin-market-04",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-04",
                             "category": "BOOTH",
-                            "name": "예시 체험 부스"
+                            "name": "목 사운드 랩",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-04",
+                              "alt": "개발용 가상 space 목 사운드 랩 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-04",
+                            "operator": "목 개발 운영팀 04",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 사운드 랩의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-04",
+                              "target": "_blank"
+                            },
+                            "experience": "소리 조합을 듣고 기록하는 가상 체험",
+                            "events": [
+                              "목 사운드 투표"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-04",
+                              "pinId": "pin-booth-04",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market-06",
+                            "category": "FLEA_MARKET",
+                            "name": "목 손편지상점",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-06",
+                              "alt": "개발용 가상 space 목 손편지상점 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 플리마켓 구역 M-06",
+                            "operator": null,
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 손편지상점의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/market-06",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-06",
+                              "pinId": "pin-market-06",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-08",
+                            "category": "BOOTH",
+                            "name": "목 업사이클 공방",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-08",
+                              "alt": "개발용 가상 space 목 업사이클 공방 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-08",
+                            "operator": "목 개발 운영팀 08",
+                            "hoursText": null,
+                            "description": "목 업사이클 공방의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-08",
+                              "target": "_blank"
+                            },
+                            "experience": "폐현수막 조각을 활용한 가상 소품 만들기",
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-08",
+                              "pinId": "pin-booth-08",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-10",
+                            "category": "PUB",
+                            "name": "목 열두번째테이블",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-10",
+                              "alt": "개발용 가상 space 목 열두번째테이블 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-10",
+                            "operator": "목 개발 운영팀 P10",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 열두번째테이블의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-10",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "열두번째 시그니처 하이볼",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "열두번째 과일 에이드",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 7500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 7000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 11500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-10",
+                              "pinId": "pin-pub-10",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-06",
+                            "category": "PUB",
+                            "name": "목 오후열한시",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-06",
+                              "alt": "개발용 가상 space 목 오후열한시 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-06",
+                            "operator": "목 개발 운영팀 P06",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 오후열한시의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-06",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "오후 시그니처 하이볼",
+                                "price": {
+                                  "amount": 6000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "오후 과일 에이드",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 8500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 7000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 13500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-06",
+                              "pinId": "pin-pub-06",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market-05",
+                            "category": "FLEA_MARKET",
+                            "name": "목 작은책방",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-05",
+                              "alt": "개발용 가상 space 목 작은책방 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 플리마켓 구역 M-05",
+                            "operator": "목 개발 셀러 05",
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 작은책방의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/market-05",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-05",
+                              "pinId": "pin-market-05",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market-08",
+                            "category": "FLEA_MARKET",
+                            "name": "목 주말공방",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market-08",
+                              "alt": "개발용 가상 space 목 주말공방 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 플리마켓 구역 M-08",
+                            "operator": "목 개발 셀러 08",
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 주말공방의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/market-08",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market-08",
+                              "pinId": "pin-market-08",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-05",
+                            "category": "PUB",
+                            "name": "목 청춘포차",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-05",
+                              "alt": "개발용 가상 space 목 청춘포차 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-05",
+                            "operator": "목 개발 운영팀 P05",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 청춘포차의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-05",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "청춘 시그니처 하이볼",
+                                "price": {
+                                  "amount": 5500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "청춘 과일 에이드",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 8000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 6500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 12500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-05",
+                              "pinId": "pin-pub-05",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-03",
+                            "category": "BOOTH",
+                            "name": "목 초록 공방",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-03",
+                              "alt": "개발용 가상 space 목 초록 공방 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-03",
+                            "operator": "목 개발 운영팀 03",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 초록 공방의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-03",
+                              "target": "_blank"
+                            },
+                            "experience": "재사용 소재로 만드는 가상 키링 체험",
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-03",
+                              "pinId": "pin-booth-03",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-10",
+                            "category": "BOOTH",
+                            "name": "목 캠퍼스 라디오",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-10",
+                              "alt": "개발용 가상 space 목 캠퍼스 라디오 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-10",
+                            "operator": "목 개발 운영팀 10",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 캠퍼스 라디오의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": "사연을 남기고 듣는 가상 라디오 부스",
+                            "events": [
+                              "목 사연 소개"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-10",
+                              "pinId": "pin-booth-10",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-07",
+                            "category": "BOOTH",
+                            "name": "목 퀘스트 아지트",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-07",
+                              "alt": "개발용 가상 space 목 퀘스트 아지트 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-07",
+                            "operator": "목 개발 운영팀 07",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 퀘스트 아지트의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-07",
+                              "target": "_blank"
+                            },
+                            "experience": "팀 단위로 풀어보는 가상 미니 퀘스트",
+                            "events": [
+                              "목 팀 기록판"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-07",
+                              "pinId": "pin-booth-07",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-03",
+                            "category": "PUB",
+                            "name": "목 파도주점",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-03",
+                              "alt": "개발용 가상 space 목 파도주점 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-03",
+                            "operator": "목 개발 운영팀 P03",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 파도주점의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-03",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "파도 시그니처 하이볼",
+                                "price": {
+                                  "amount": 6000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "파도 과일 에이드",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 8500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 6500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 13500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-03",
+                              "pinId": "pin-pub-03",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-06",
+                            "category": "BOOTH",
+                            "name": "목 포스터 인쇄소",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-06",
+                              "alt": "개발용 가상 space 목 포스터 인쇄소 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-06",
+                            "operator": "목 개발 운영팀 06",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 포스터 인쇄소의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-06",
+                              "target": "_blank"
+                            },
+                            "experience": "문구와 색상을 고르는 가상 포스터 제작",
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-06",
+                              "pinId": "pin-booth-06",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-11",
+                            "category": "BOOTH",
+                            "name": "목 픽셀 아틀리에",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-11",
+                              "alt": "개발용 가상 space 목 픽셀 아틀리에 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-11",
+                            "operator": "목 개발 운영팀 11",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 픽셀 아틀리에의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-11",
+                              "target": "_blank"
+                            },
+                            "experience": "픽셀 스티커를 완성하는 가상 드로잉 체험",
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-11",
+                              "pinId": "pin-booth-11",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-market",
+                            "category": "FLEA_MARKET",
+                            "name": "목 필름마켓",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-market",
+                              "alt": "개발용 가상 space 목 필름마켓 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 플리마켓 구역 M-01",
+                            "operator": "목 개발 셀러 01",
+                            "hoursText": "개발용 14:00~21:00",
+                            "description": "목 필름마켓의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/market",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-market",
+                              "placeId": "place-market",
+                              "pinId": "pin-market",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-pub-09",
+                            "category": "PUB",
+                            "name": "목 한잔연구소",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-pub-09",
+                              "alt": "개발용 가상 space 목 한잔연구소 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 주점 구역 P-09",
+                            "operator": "목 개발 운영팀 P09",
+                            "hoursText": "개발용 17:00~23:00",
+                            "description": "목 한잔연구소의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/pub-09",
+                              "target": "_blank"
+                            },
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "연구소 시그니처 하이볼",
+                                "price": {
+                                  "amount": 6000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "연구소 과일 에이드",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "바삭 감자 플레이트",
+                                "price": {
+                                  "amount": 8500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "숯불 닭꼬치",
+                                "price": {
+                                  "amount": 6500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 야식 한상",
+                                "price": {
+                                  "amount": 13500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-pub",
+                              "placeId": "place-pub-09",
+                              "pinId": "pin-pub-09",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-booth-09",
+                            "category": "BOOTH",
+                            "name": "목 향기 연구소",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-booth-09",
+                              "alt": "개발용 가상 space 목 향기 연구소 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 A-09",
+                            "operator": "목 개발 운영팀 09",
+                            "hoursText": "개발용 15:00~22:00",
+                            "description": "목 향기 연구소의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/booth-09",
+                              "target": "_blank"
+                            },
+                            "experience": "향 조합을 고르는 가상 감각 체험",
+                            "events": [
+                              "목 향기 투표"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-booth-09",
+                              "pinId": "pin-booth-09",
+                              "mapVersion": "mock-map-1"
+                            }
                           }
                         ]
                       },
@@ -6003,24 +7653,28 @@
                     "summary": "부스·주점·플리마켓 상세: normal",
                     "value": {
                       "data": {
+                        "id": "space-booth",
+                        "category": "BOOTH",
+                        "name": "목 별자리 연구소",
                         "image": {
-                          "url": "/__mock/assets/sample.svg",
-                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "url": "/__mock/assets/sample.svg?variant=space-space-booth",
+                          "alt": "개발용 가상 space 목 별자리 연구소 이미지 · 실제 축제 자료 아님",
                           "width": 800,
                           "height": 600
                         },
-                        "locationText": "예시 구역 A",
-                        "operator": "예시 운영팀",
-                        "hoursText": "개발용 12:00~23:00",
-                        "description": "실제 축제 자료가 아닌 화면 개발용 설명입니다.",
+                        "locationText": "목 부스 구역 A-01",
+                        "operator": "목 개발 운영팀 01",
+                        "hoursText": "개발용 15:00~22:00",
+                        "description": "목 별자리 연구소의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
                         "contact": {
-                          "label": "예시 문의",
-                          "url": "https://example.invalid/mock-not-payable",
+                          "label": "개발용 문의",
+                          "url": "https://example.invalid/mock-contact/booth",
                           "target": "_blank"
                         },
-                        "experience": "개발용 체험 방법",
+                        "experience": "나만의 별자리 카드를 조합하는 가상 체험",
                         "events": [
-                          "개발용 이벤트"
+                          "목 스탬프 카드 꾸미기",
+                          "목 현장 퀴즈"
                         ],
                         "menu": [],
                         "mapTarget": {
@@ -6028,10 +7682,7 @@
                           "placeId": "place-booth",
                           "pinId": "pin-booth",
                           "mapVersion": "mock-map-1"
-                        },
-                        "id": "space-booth",
-                        "category": "BOOTH",
-                        "name": "예시 체험 부스"
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -6048,13 +7699,16 @@
                     "summary": "부스·주점·플리마켓 상세: missing-optional",
                     "value": {
                       "data": {
+                        "id": "space-booth",
+                        "category": "BOOTH",
+                        "name": "목 별자리 연구소",
                         "image": {
-                          "url": "/__mock/assets/sample.svg",
-                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "url": "/__mock/assets/sample.svg?variant=space-space-booth",
+                          "alt": "개발용 가상 space 목 별자리 연구소 이미지 · 실제 축제 자료 아님",
                           "width": 800,
                           "height": 600
                         },
-                        "locationText": "예시 구역 A",
+                        "locationText": "목 부스 구역 A-01",
                         "operator": null,
                         "hoursText": null,
                         "description": null,
@@ -6062,10 +7716,7 @@
                         "experience": null,
                         "events": [],
                         "menu": [],
-                        "mapTarget": null,
-                        "id": "space-booth",
-                        "category": "BOOTH",
-                        "name": "예시 체험 부스"
+                        "mapTarget": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -6392,24 +8043,84 @@
                         "items": [
                           {
                             "id": "map-overview",
-                            "name": "예시 전체 지도",
+                            "name": "목 전체 지도",
                             "kind": "OVERVIEW",
                             "version": "mock-map-1",
                             "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "url": "/__mock/assets/sample.svg?variant=map-map-overview",
+                              "alt": "개발용 가상 map 목 전체 지도 이미지 · 실제 축제 자료 아님",
                               "width": 800,
                               "height": 600
                             }
                           },
                           {
                             "id": "map-area",
-                            "name": "예시 구역 지도",
+                            "name": "목 부스 구역 지도",
                             "kind": "AREA",
                             "version": "mock-map-1",
                             "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                              "url": "/__mock/assets/sample.svg?variant=map-map-area",
+                              "alt": "개발용 가상 map 목 부스 구역 지도 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          },
+                          {
+                            "id": "map-pub",
+                            "name": "목 주점 구역 지도",
+                            "kind": "AREA",
+                            "version": "mock-map-1",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=map-map-pub",
+                              "alt": "개발용 가상 map 목 주점 구역 지도 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          },
+                          {
+                            "id": "map-market",
+                            "name": "목 플리마켓 구역 지도",
+                            "kind": "AREA",
+                            "version": "mock-map-1",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=map-map-market",
+                              "alt": "개발용 가상 map 목 플리마켓 구역 지도 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          },
+                          {
+                            "id": "map-stage",
+                            "name": "목 공연장 구역 지도",
+                            "kind": "AREA",
+                            "version": "mock-map-1",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=map-map-stage",
+                              "alt": "개발용 가상 map 목 공연장 구역 지도 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          },
+                          {
+                            "id": "map-food",
+                            "name": "목 푸드트럭 구역 지도",
+                            "kind": "AREA",
+                            "version": "mock-map-1",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=map-map-food",
+                              "alt": "개발용 가상 map 목 푸드트럭 구역 지도 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            }
+                          },
+                          {
+                            "id": "map-lake",
+                            "name": "목 호수공원 구역 지도",
+                            "kind": "AREA",
+                            "version": "mock-map-1",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=map-map-lake",
+                              "alt": "개발용 가상 map 목 호수공원 구역 지도 이미지 · 실제 축제 자료 아님",
                               "width": 800,
                               "height": 600
                             }
@@ -6749,12 +8460,12 @@
                     "value": {
                       "data": {
                         "id": "map-area",
-                        "name": "예시 구역 지도",
+                        "name": "목 부스 구역 지도",
                         "kind": "AREA",
                         "version": "mock-map-1",
                         "image": {
-                          "url": "/__mock/assets/sample.svg",
-                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
+                          "url": "/__mock/assets/sample.svg?variant=map-map-area",
+                          "alt": "개발용 가상 map 목 부스 구역 지도 이미지 · 실제 축제 자료 아님",
                           "width": 800,
                           "height": 600
                         }
@@ -7110,45 +8821,155 @@
                           {
                             "id": "pin-booth",
                             "category": "booth",
-                            "label": "예시 부스",
-                            "x": 0.2,
-                            "y": 0.4,
+                            "label": "목 별자리 연구소",
+                            "x": 0.14,
+                            "y": 0.18,
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth"
                             }
                           },
                           {
-                            "id": "pin-pub",
-                            "category": "pub",
-                            "label": "예시 주점",
-                            "x": 0.4,
-                            "y": 0.5,
+                            "id": "pin-booth-02",
+                            "category": "booth",
+                            "label": "목 리듬 아케이드",
+                            "x": 0.37,
+                            "y": 0.18,
                             "target": {
                               "kind": "PLACE",
-                              "placeId": "place-pub"
+                              "placeId": "place-booth-02"
                             }
                           },
                           {
-                            "id": "pin-market",
-                            "category": "market",
-                            "label": "예시 마켓",
-                            "x": 0.5,
-                            "y": 0.5,
+                            "id": "pin-booth-03",
+                            "category": "booth",
+                            "label": "목 초록 공방",
+                            "x": 0.6000000000000001,
+                            "y": 0.18,
                             "target": {
                               "kind": "PLACE",
-                              "placeId": "place-market"
+                              "placeId": "place-booth-03"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-04",
+                            "category": "booth",
+                            "label": "목 사운드 랩",
+                            "x": 0.8300000000000001,
+                            "y": 0.18,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-04"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-05",
+                            "category": "booth",
+                            "label": "목 미션 스튜디오",
+                            "x": 0.14,
+                            "y": 0.41000000000000003,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-05"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-06",
+                            "category": "booth",
+                            "label": "목 포스터 인쇄소",
+                            "x": 0.37,
+                            "y": 0.41000000000000003,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-06"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-07",
+                            "category": "booth",
+                            "label": "목 퀘스트 아지트",
+                            "x": 0.6000000000000001,
+                            "y": 0.41000000000000003,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-07"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-08",
+                            "category": "booth",
+                            "label": "목 업사이클 공방",
+                            "x": 0.8300000000000001,
+                            "y": 0.41000000000000003,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-08"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-09",
+                            "category": "booth",
+                            "label": "목 향기 연구소",
+                            "x": 0.14,
+                            "y": 0.64,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-09"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-10",
+                            "category": "booth",
+                            "label": "목 캠퍼스 라디오",
+                            "x": 0.37,
+                            "y": 0.64,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-10"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-11",
+                            "category": "booth",
+                            "label": "목 픽셀 아틀리에",
+                            "x": 0.6000000000000001,
+                            "y": 0.64,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-11"
+                            }
+                          },
+                          {
+                            "id": "pin-booth-12",
+                            "category": "booth",
+                            "label": "목 드로잉 살롱",
+                            "x": 0.8300000000000001,
+                            "y": 0.64,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-booth-12"
                             }
                           },
                           {
                             "id": "pin-toilet",
                             "category": "toilet",
-                            "label": "예시 편의시설",
-                            "x": 0.8,
-                            "y": 0.5,
+                            "label": "목 화장실",
+                            "x": 0.88,
+                            "y": 0.78,
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-toilet"
+                            }
+                          },
+                          {
+                            "id": "pin-smoking",
+                            "category": "smoking",
+                            "label": "목 흡연구역",
+                            "x": 0.08,
+                            "y": 0.78,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-smoking"
                             }
                           }
                         ]
@@ -7531,10 +9352,10 @@
                       "data": {
                         "id": "place-booth",
                         "kind": "SPACE",
-                        "name": "예시 체험 부스",
-                        "locationText": "예시 구역 A",
-                        "hoursText": "개발용 12~23시",
-                        "description": "예시 체험 소개",
+                        "name": "목 별자리 연구소",
+                        "locationText": "목 부스 구역 A-01",
+                        "hoursText": "개발용 15:00~22:00",
+                        "description": "목 별자리 연구소의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.",
                         "usage": null,
                         "spaceId": "space-booth"
                       },
@@ -7555,8 +9376,8 @@
                       "data": {
                         "id": "place-booth",
                         "kind": "SPACE",
-                        "name": "예시 체험 부스",
-                        "locationText": "예시 구역 A",
+                        "name": "목 별자리 연구소",
+                        "locationText": "목 부스 구역 A-01",
                         "hoursText": null,
                         "description": null,
                         "usage": null,
@@ -9598,6 +11419,92 @@
                       "data": {
                         "items": [
                           {
+                            "id": "notice-safety",
+                            "type": "GENERAL",
+                            "translations": {
+                              "ko": {
+                                "title": "목 안전 안내",
+                                "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
+                                "status": "READY"
+                              },
+                              "en": {
+                                "title": "Mock safety notice",
+                                "body": "A fictional safety notice for frontend work.",
+                                "status": "READY"
+                              }
+                            },
+                            "links": [
+                              {
+                                "label": "개발용 안내 링크",
+                                "url": "https://example.invalid/mock-notice/safety",
+                                "target": "_blank"
+                              }
+                            ],
+                            "templateId": null,
+                            "createdAt": "2030-10-01T17:40:00+09:00",
+                            "updatedAt": "2030-10-01T17:40:00+09:00"
+                          },
+                          {
+                            "id": "notice-weather",
+                            "type": "GENERAL",
+                            "translations": {
+                              "ko": {
+                                "title": "목 날씨 대비 안내",
+                                "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
+                                "status": "READY"
+                              },
+                              "en": {
+                                "title": "Mock weather notice",
+                                "body": "A fictional weather notice for frontend work.",
+                                "status": "READY"
+                              }
+                            },
+                            "links": [],
+                            "templateId": null,
+                            "createdAt": "2030-10-01T17:30:00+09:00",
+                            "updatedAt": "2030-10-01T17:30:00+09:00"
+                          },
+                          {
+                            "id": "notice-stage",
+                            "type": "GENERAL",
+                            "translations": {
+                              "ko": {
+                                "title": "목 공연 대기 안내",
+                                "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
+                                "status": "READY"
+                              },
+                              "en": {
+                                "title": "Mock stage notice",
+                                "body": "A fictional stage notice for frontend work.",
+                                "status": "READY"
+                              }
+                            },
+                            "links": [],
+                            "templateId": null,
+                            "createdAt": "2030-10-01T17:20:00+09:00",
+                            "updatedAt": "2030-10-01T17:20:00+09:00"
+                          },
+                          {
+                            "id": "notice-route",
+                            "type": "GENERAL",
+                            "translations": {
+                              "ko": {
+                                "title": "목 구역 이동 안내",
+                                "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
+                                "status": "READY"
+                              },
+                              "en": {
+                                "title": "Mock route notice",
+                                "body": "A fictional route notice for frontend work.",
+                                "status": "READY"
+                              }
+                            },
+                            "links": [],
+                            "templateId": null,
+                            "createdAt": "2030-10-01T17:10:00+09:00",
+                            "updatedAt": "2030-10-01T17:10:00+09:00"
+                          },
+                          {
                             "id": "notice-old",
                             "type": "GENERAL",
                             "translations": {
@@ -9650,13 +11557,53 @@
                             "links": [
                               {
                                 "label": "예시 안내",
-                                "url": "https://example.invalid/mock-not-payable",
+                                "url": "https://example.invalid/mock-link",
                                 "target": "_blank"
                               }
                             ],
                             "templateId": null,
                             "createdAt": "2030-10-01T16:00:00+09:00",
                             "updatedAt": "2030-10-01T16:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-card",
+                            "type": "LOST_FOUND",
+                            "translations": {
+                              "ko": {
+                                "title": "목 분실물 안내: 카드지갑",
+                                "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                                "status": "READY"
+                              },
+                              "en": {
+                                "title": "Mock lost card holder",
+                                "body": "This is a fictional lost-item example.",
+                                "status": "READY"
+                              }
+                            },
+                            "links": [],
+                            "templateId": null,
+                            "createdAt": "2030-09-29T15:00:00+09:00",
+                            "updatedAt": "2030-10-01T15:00:00+09:00"
+                          },
+                          {
+                            "id": "notice-lost-earbuds",
+                            "type": "LOST_FOUND",
+                            "translations": {
+                              "ko": {
+                                "title": "목 분실물 안내: 이어폰 케이스",
+                                "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
+                                "status": "READY"
+                              },
+                              "en": {
+                                "title": "Mock lost earbuds case",
+                                "body": "This is a fictional lost-item example.",
+                                "status": "READY"
+                              }
+                            },
+                            "links": [],
+                            "templateId": null,
+                            "createdAt": "2030-09-28T15:00:00+09:00",
+                            "updatedAt": "2030-10-01T14:00:00+09:00"
                           },
                           {
                             "id": "notice-lost",
@@ -10596,7 +12543,7 @@
                         "links": [
                           {
                             "label": "예시 안내",
-                            "url": "https://example.invalid/mock-not-payable",
+                            "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           }
                         ],
