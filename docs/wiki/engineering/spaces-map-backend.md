@@ -4,12 +4,12 @@
 
 ## 목적과 현재 기준
 
-이 문서는 `origin/main`의 `1247890`(2026-09-15)과 API v2 draft.3을 기준으로 한다.
-V2~V6은 `Festival`·`FestivalRevision`과 published revision 1건을 만들었지만, `Space`,
-`Place`, 지도 자산·핀 테이블과 공개 조회 API는 아직 없다. V3의 `ticket_guide`는 map target
-네 필드를 독립 nullable 값으로 저장하므로 실제 핀을 만들 때 참조 무결성을 추가해야 한다.
+이 문서는 API v2 draft.3과 V7 카탈로그 구현을 기준으로 한다. V2~V6의 `Festival`·
+`FestivalRevision`과 published revision 1건 위에 V7이 `Space`, `Place`, 지도 자산·핀 테이블,
+공개 조회 API를 추가했다. V3의 `ticket_guide`가 독립 nullable로 두었던 map target 네 필드는
+V7에서 전부 null 또는 전부 존재하도록 하고, 실제 현재 `PLACE` 핀을 참조하게 만들었다.
 
-첫 배포 단위는 작은 읽기 전용 카탈로그다. published revision을 시작 시 검증·적재한 불변
+현재 배포 단위는 작은 읽기 전용 카탈로그다. published revision을 시작 시 검증·적재한 불변
 snapshot에서 다음 공개 GET을 제공한다.
 
 - `/api/v2/spaces`, `/api/v2/spaces/{spaceId}`
