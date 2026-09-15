@@ -11,9 +11,9 @@
 | 결과물 | 용도 |
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
-| [ENDPOINTS.md](ENDPOINTS.md) | 37개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 257개 응답 원문 |
-| [SCREEN-DATA.md](SCREEN-DATA.md) | 26개 화면의 유효 176개·제외 10개 필드 → API 또는 프런트 상태 추적표 |
+| [ENDPOINTS.md](ENDPOINTS.md) | 38개 요청과 지원 시나리오 빠른 조회 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 263개 응답 원문 |
+| [SCREEN-DATA.md](SCREEN-DATA.md) | 26개 화면의 유효 177개·제외 10개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |
 | [client-state-examples.json](client-state-examples.json) | 스탬프 등 HTTP 응답으로 만들지 않는 로컬 상태 |
@@ -75,8 +75,8 @@
 - 공지는 당일 일반 공지와 날짜와 무관한 분실물 공지를 합칩니다. 신규 공지와 삭제 공지의 갱신 UX가 달라 `visibleIds`를 제공합니다. 공개 상세·공지 이미지 API는 없습니다.
 - 지도 이미지와 핀 요청을 분리합니다. 핀 요청의 `mapVersion`은 필수이며 이미지 버전 불일치는 409입니다. 구역 이동과 장소 팝업 대상은 서로 다른 타입입니다.
 - 티켓은 오늘의 송금·수령 안내입니다. 수량과 합계는 프런트 상태입니다. 입금 확인·주문 생성·지급 완료 API는 없습니다. 송금 시간 밖에는 계좌를 반환하지 않습니다.
-- 스탬프는 안내만 조회합니다. 참여 시작·4칸 누적·수령·KST 날짜 초기화는 브라우저 상태이며 서버 참여 기록·중복 차단·상품 재고 API는 없습니다.
-- 웰컴 데이는 준비 완료된 외부 소개 페이지를 새 탭으로 연결합니다. 자료·공개 확인 전 `welcomeDay: null`입니다. FAQ는 비활성입니다.
+- 스탬프는 안내를 조회하고, 수령 안내 창에서 현장 담당자가 입력한 코드는 `POST /stamp-receipt-verifications`로 서버 검증합니다. 참여 시작·4칸 누적·수령 완료·KST 날짜 초기화는 브라우저 상태이며, 인증 성공의 `verified: true`일 때만 `claimed`를 저장합니다. 코드는 서버 비밀 설정으로만 관리하고 서버 참여 기록·중복 차단·상품 재고 API는 만들지 않습니다. START 전 기본 카메라 QR 직접 진입은 시작 화면으로 보내고 자동 시작·적립하지 않습니다.
+- 웰컴 데이와 FAQ는 준비 완료된 외부 페이지를 새 탭으로 연결합니다. 자료·공개 확인 전 `welcomeDay`와 `faq`는 각각 `null`이며 FAQ 콘텐츠·번역·전용 API는 제공하지 않습니다.
 
 ## 변경·백엔드 인계
 

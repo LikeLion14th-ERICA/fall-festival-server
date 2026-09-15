@@ -24,7 +24,7 @@ export const schemas = {
   Link: object({ label: text('선택 언어의 링크 표시명'), url: text('외부 HTTPS 주소. 목에서는 송금 불가 예시 주소.', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭. rel=noopener noreferrer 권장.') }),
   Channel: object({ id, label: text('공식 채널 표시명'), url: text('확인된 공식 채널 HTTPS 주소', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭'), iconKey: text('프런트 아이콘 사전 키. URL이나 공식 명칭에서 추측하지 않음.') }),
   MapTarget: object({ mapId: id, placeId: id, pinId: id, mapVersion: text('좌표와 이미지 버전이 일치해야 함') }),
-  Config: object({ festival: object({ id, title: text('행사 표시명'), dates: array(date, '행사 날짜 오름차순. 자료 미확보 시 [].', { uniqueItems: true }), defaultDate: nullable(date, '축제 전 첫날·기간중 오늘·종료 후 마지막날. 날짜 미확보 시 null.') }), languages: array(object({ code: locale, label: text('원어 언어명') }), '준비 완료 언어만 순서대로 제공', { minItems: 1 }), links: object({ universityNotices: nullable(ref('Link'), '자료 미확보 시 null'), officialChannels: array(ref('Channel'), '선정·준비 완료 채널만 제공'), welcomeDay: nullable(ref('Link'), '외부 새 탭 연결. 자료·공개 확인 전 null.') }), faqEnabled: enumeration([false], 'FAQ 미정. v2 초안에서 활성화하지 않음.') }),
+  Config: object({ festival: object({ id, title: text('행사 표시명'), dates: array(date, '행사 날짜 오름차순. 자료 미확보 시 [].', { uniqueItems: true }), defaultDate: nullable(date, '축제 전 첫날·기간중 오늘·종료 후 마지막날. 날짜 미확보 시 null.') }), languages: array(object({ code: locale, label: text('원어 언어명') }), '준비 완료 언어만 순서대로 제공', { minItems: 1 }), links: object({ universityNotices: nullable(ref('Link'), '자료 미확보 시 null'), faq: nullable(ref('Link'), 'FAQ 외부 새 탭 연결. 승인 URL 미확보 시 null.'), officialChannels: array(ref('Channel'), '선정·준비 완료 채널만 제공'), welcomeDay: nullable(ref('Link'), '외부 새 탭 연결. 자료·공개 확인 전 null.') }) }),
   Crowding: object({ operatingDay: date, opensAt: timestamp, closesAt: timestamp, status: enumeration(['BEFORE_OPEN', 'RELAXED', 'MODERATE', 'CROWDED', 'FULL', 'CLOSED'], '운영 시간과 마지막 저장 상태를 결합한 최종 상태'), savedLevel: nullable(crowd, '해당 운영일에 아직 저장하지 않았으면 null'), colorToken: nullable(enumeration(['green', 'orange', 'red', 'black'], '색상 의미 토큰. 정확한 디자인 HEX는 미정.'), '운영 전/종료면 null'), message: text('선택한 상태의 안내 문구'), updatedAt: nullable(timestamp, '실제 저장 성공 시각. 동일 상태 재선택 시 저장·시각을 갱신할지는 기술 초안·결정 대기.'), timeBasis: enumeration(['NONE', 'OPENING', 'OPERATOR'], '시각 숨김 / 운영 시작 기준 / 관리자 수정시각') }),
   Notice: object({ id, type: enumeration(['GENERAL', 'LOST_FOUND'], '일반은 당일 등록분, 분실물은 날짜와 무관'), title: text('전체 제목'), body: text('전체 본문, plain text. HTML 실행 금지.'), links: array(ref('Link'), '본문 외부 링크. 이미지를 직접 표시하는 필드 없음.'), createdAt: timestamp }),
   Notices: object({ items: array(ref('Notice'), '현재 날짜·언어에 노출 가능한 공지 전체. createdAt 내림차순, 동률 id 오름차순.'), visibleIds: array(id, '이 snapshot에서 노출 가능한 ID 전체. 삭제·날짜 만료·번역 미완료를 즉시 제거할 때 사용.', { uniqueItems: true }), asOfDate: date }),
@@ -49,6 +49,8 @@ export const schemas = {
   Place: object({ id, kind: enumeration(['SPACE', 'FACILITY', 'LANDMARK'], '유형별 팝업 구성'), name: optionalText, locationText: optionalText, hoursText: optionalText, description: optionalText, usage: optionalText, spaceId: nullable(id, 'SPACE 유형만 상세 연결. 나머지는 null.') }),
   TicketGuide: object({ date, status: enumeration(['BEFORE_FESTIVAL', 'TRANSFER_OPEN', 'DAILY_CLOSED', 'FESTIVAL_ENDED', 'UNCONFIGURED'], '시간별 송금 안내 상태. 미설정은 확정 전 목용 안전 표현.'), unitPrice: nullable(ref('Money'), '가격 자료 대기 시 null. 0원과 다름.'), transferOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), transferClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), account: nullable(ref('BankAccount'), '송금 제공 시간 밖·미설정이면 null. 계좌번호 숨김.'), transferLink: nullable(ref('Link'), '미확정 또는 송금시간 밖이면 null'), mapTarget: nullable(ref('MapTarget'), '실제 위치·진입 지도 미확정이면 null'), instructions: array(text('안내'), '승인된 현장 안내. 목에서 환불 정책을 임의로 확정하지 않음.') }),
   StampGuide: object({ title: text('행사 제목'), dates: array(date, '실제 행사 기간'), instructions: array(text('참여·상품 안내'), '없으면 []'), reward: object({ name: text('경품명'), locationText: optionalText, hoursText: optionalText, notice: text('당일 1회·소진 시 현장 안내') }), dailyLimit: enumeration([4], '당일 최대 적립'), timezone: enumeration(['Asia/Seoul'], '자정 초기화'), qrValue: nullable(text('공통 QR 비교값. 비밀키가 아님.'), '배포 방식·책임 미합의 시 null. 서명·부스별 고유값 없음.') }),
+  StampReceiptVerificationInput: object({ code: text('멋사 부스 담당자가 현장에서 입력하는 수령 인증 코드. 실제 값은 서버 비밀 설정으로만 관리하며 클라이언트·로그에 저장하지 않음.', { maxLength: 128, writeOnly: true }) }),
+  StampReceiptVerification: object({ verified: enumeration([true], '서버가 현장 수령 인증 코드를 확인했음을 뜻함. 사용자 참여·지급 이력은 만들지 않음.') }),
   Translation: object({ title: text('제목. 200자는 목 입력 검증 제안.', { maxLength: 200 }), body: text('본문. 10000자는 목 입력 검증 제안.', { maxLength: 10000 }), status: enumeration(['READY', 'PENDING'], '이 언어 노출 가능 여부') }),
   Translations: object({ ko: ref('Translation'), en: ref('Translation'), 'zh-Hans': ref('Translation'), ja: ref('Translation') }, ['ko'], '없는 언어는 property 생략. public은 선택 언어 READY만 반환.'),
   NoticeInput: object({ type: enumeration(['GENERAL', 'LOST_FOUND'], '공지 유형'), translations: ref('Translations'), links: array(ref('Link'), '외부 링크'), image: nullable(ref('Image'), '관리자 초기값 전용. 업로드 API·사용자 이미지 노출은 미합의.'), templateId: nullable(id, '선택적 원본 템플릿 ID. 직접 작성이면 null.') }),
@@ -66,7 +68,7 @@ const lang = param('locale', { ...locale, default: 'ko' }, 'config.languages의 
 const pathParam = name => ({ name, in: 'path', required: true, schema: id, description: '목의 실제 ID는 /__mock/catalog 또는 examples.json 참고.' });
 // status = 계약 근거 상태, schema/URI 설계 자체는 이 v2에서 처음 제안한 프런트 연동 계약.
 export const operations = [
-  ['getConfig','GET','/config','Config','홈 공통 설정',['HOME'],[],['normal','empty','missing-optional','welcome-ready','error']],
+  ['getConfig','GET','/config','Config','홈 공통 설정',['HOME'],[],['normal','empty','missing-optional','faq-ready','welcome-ready','error']],
   ['getCrowding','GET','/crowding','Crowding','홈 혼잡도',['HOME'],[],['normal','before-open','closed','unmodified','error']],
   ['getNotices','GET','/notices','Notices','사용자 공지 전체',['HOME','NOTICE-LIST'],[],['normal','empty','missing-optional','new-notice','deleted','error']],
   ['getGoods','GET','/goods','GoodsList','상품 목록',['GOODS-LIST'],[],['normal','empty','error']],
@@ -87,6 +89,7 @@ export const operations = [
   ['getPlace','GET','/places/{placeId}','Place','장소 팝업',['MAP-POPUP'],[],['normal','missing-optional','not-found','error']],
   ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 안내',['TICKET'],[],['normal','before-open','closed','ended','unconfigured','error']],
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
+  ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','error'],'StampReceiptVerificationInput'],
   ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','error']],
   ['putAdminCrowding','PUT','/admin/crowding','Crowding','혼잡도 저장·동일 상태 재선택 처리는 기술 초안',['ADM-CROWD'],[],['normal','full','error'],'CrowdingInput'],
   ['getAdminNotices','GET','/admin/notices','AdminNotices','관리자 공지 목록',['ADM-NOTICE-LIST'],[],['normal','empty','error']],
@@ -99,6 +102,7 @@ export const operations = [
   ['getAdminGoods','GET','/admin/goods','AvailabilityList','관리자 상품별 판매 상태',['ADM-GOODS'],[],['normal','empty','sold-out','error']],
   ['putAdminAvailability','PUT','/admin/goods/{goodsId}/sizes/{sizeId}','Availability','사이즈 판매 상태 저장',['ADM-GOODS'],[],['normal','sold-out','not-found','error'],'AvailabilityInput'],
 ].map(([operationId,method,path,schema,summary,screens,parameters,scenarios,input]) => ({ operationId,method,path:`/api/v2${path}`,schema,summary,screens,parameters:[...(path.startsWith('/admin')?[]:[lang]),...parameters,...[...path.matchAll(/\{(\w+)\}/g)].map(m=>pathParam(m[1]))],scenarios,input,admin:path.startsWith('/admin'),provisional: ['postAdminNotice','putAdminNotice','getStampGuide','putAdminAvailability'].includes(operationId) }));
+operations.find(operation=>operation.operationId==='verifyStampReceipt').successStatus=200;
 
 applyAdminContract(schemas,operations);
 export const envelopeSchema = name => object({ data: ref(name), meta: ref('Meta') });

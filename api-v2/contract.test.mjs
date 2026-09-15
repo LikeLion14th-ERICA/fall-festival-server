@@ -9,7 +9,7 @@ import { validate as localValidate } from './validate.mjs';
 import { createState,DATES } from './domain.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
-const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json');
+const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json'),clientStates=await read('./client-state-examples.json');
 const ajv=new Ajv2020({strict:false,allErrors:true});addFormats(ajv);
 const compiled=new Map();
 function standardValidate(schema,value){const key=JSON.stringify(schema);if(!compiled.has(key))compiled.set(key,ajv.compile({...schema,components:spec.components}));const validate=compiled.get(key);assert.equal(validate(value),true,JSON.stringify(validate.errors));}
@@ -21,9 +21,25 @@ const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
-test('26 screens and 176 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,186);assert.equal(new Set(coverage.data.map(x=>x.id)).size,186);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));});
+test('26 screens and 177 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,187);assert.equal(new Set(coverage.data.map(x=>x.id)).size,187);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');});
 test('Every public route has no authentication requirement; every admin route has one',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods))assert.equal(o.security.length>0,path.includes('/admin/'));});
-test('No out-of-scope payment, user identity, stamp write, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances|\/stamp\//);});
+test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
+test('FAQ is an external config link and direct QR before START stays in local start state',async()=>{
+  const unconfigured=(await call('/api/v2/config')).body.data;assert.equal(unconfigured.links.faq,null);
+  const ready=(await call('/api/v2/config',{headers:{'X-Mock-Scenario':'faq-ready'}})).body.data.links.faq;
+  assert.equal(ready.target,'_blank');assert.match(ready.url,/^https:\/\//);
+  assert.deepEqual(clientStates.stamp.directQrBeforeStart,{date:'2030-10-01',started:false,count:0,claimed:false,route:'STAMP-START',startRecorded:false,stampAdded:false});
+});
+test('Stamp receipt verification hides the code and changes claimed only after success',async()=>{
+  const guide=(await call('/api/v2/stamp-guide')).body.data;assert.doesNotMatch(JSON.stringify(guide),/MOCK-RECEIPT-CODE/);
+  assert.equal(spec.components.schemas.StampReceiptVerificationInput.properties.code.writeOnly,true);assert.doesNotMatch(JSON.stringify(clientStates),/MOCK-RECEIPT-CODE/);
+  const invalid=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'wrong-code'},session:'stamp-receipt'});
+  assert.equal(invalid.status,422);assert.equal(invalid.body.error.code,'INVALID_RECEIPT_CODE');assert.doesNotMatch(JSON.stringify(invalid.body),/wrong-code/);
+  const verified=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'MOCK-RECEIPT-CODE'},session:'stamp-receipt'});
+  assert.equal(verified.status,200);assert.deepEqual(verified.body.data,{verified:true});
+  assert.deepEqual(clientStates.stamp.receiptCodeRejected,{date:'2030-10-01',started:true,count:4,claimed:false,route:'STAMP-REWARD',message:'코드를 확인해 주세요'});
+  assert.deepEqual(clientStates.stamp.claimed,{date:'2030-10-01',started:true,count:4,claimed:true});
+});
 
 test('Fictional fixtures provide dense, linked data for frontend list and detail layouts',()=>{
   const state=createState(),artistById=new Map(state.artists.map(artist=>[artist.id,artist]));
@@ -157,7 +173,7 @@ test('Runtime validator rejects representative schema violations independently o
 });
 
 test('v5 removes operating-hour and quantity writes and map crowd consumers',async()=>{
-  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,176);
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,177);
   for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
   assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
   for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);

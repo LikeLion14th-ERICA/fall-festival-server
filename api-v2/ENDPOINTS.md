@@ -4,7 +4,7 @@
 
 | 메서드 | 경로 | 내용 | 화면 | 시나리오 |
 |---|---|---|---|---|
-| GET | `/api/v2/config` | 홈 공통 설정 | HOME | normal, empty, missing-optional, welcome-ready, error, all-languages, bad-request, rate-limited |
+| GET | `/api/v2/config` | 홈 공통 설정 | HOME | normal, empty, missing-optional, faq-ready, welcome-ready, error, all-languages, bad-request, rate-limited |
 | GET | `/api/v2/crowding` | 홈 재학생존 혼잡도 | HOME | normal, before-open, closed, unmodified, error, bad-request, rate-limited |
 | GET | `/api/v2/notices` | 사용자 공지 전체 | HOME, NOTICE-LIST | normal, empty, missing-optional, new-notice, deleted, error, bad-request, rate-limited |
 | GET | `/api/v2/goods` | 상품 목록 | GOODS-LIST | normal, empty, error, bad-request, rate-limited |
@@ -25,6 +25,7 @@
 | GET | `/api/v2/places/{placeId}` | 장소 팝업 | MAP-POPUP | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/ticket-guide` | 외부인 티켓 안내 | TICKET | normal, before-open, closed, ended, unconfigured, error, bad-request, rate-limited |
 | GET | `/api/v2/stamp-guide` | 스탬프 안내·공통 QR | STAMP-START, STAMP-COLLECT, STAMP-REWARD | normal, missing-optional, error, bad-request, rate-limited |
+| POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, error, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/crowding` | 혼잡도 저장·동일 상태 재선택 처리는 기술 초안 | ADM-CROWD | normal, full, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |

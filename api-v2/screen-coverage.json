@@ -15,11 +15,10 @@
         "HOME-D06",
         "HOME-D07",
         "HOME-D09",
-        "HOME-D12",
         "HOME-D16"
       ],
       "legacySource": {
-        "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q04, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
+        "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
       }
     },
     {
@@ -216,7 +215,7 @@
       ],
       "browserData": [],
       "legacySource": {
-        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+        "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
     },
     {
@@ -232,20 +231,21 @@
         "STAMP-COLLECT-D04"
       ],
       "legacySource": {
-        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+        "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
     },
     {
       "id": "STAMP-REWARD",
       "name": "스탬프 수령 안내",
       "operations": [
-        "getStampGuide"
+        "getStampGuide",
+        "verifyStampReceipt"
       ],
       "browserData": [
         "STAMP-REWARD-D01"
       ],
       "legacySource": {
-        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+        "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
     },
     {
@@ -1319,8 +1319,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "보류",
-      "target": "보류: Config.faqEnabled=false, FAQ 대상 미정",
+      "owner": "API",
+      "target": "Config.links.faq",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/home.md"
@@ -2642,7 +2642,7 @@
     {
       "id": "STAMP-REWARD-D01",
       "screenId": "STAMP-REWARD",
-      "label": "담당자 제시·직접 선택 금지 문구",
+      "label": "담당자 제시·수령 인증 코드 입력 안내",
       "wikiSource": "../docs/wiki/product/stamp.md",
       "legacySource": {
         "owner": "고정 UI",
@@ -2652,7 +2652,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "프런트",
-      "target": "프런트 고정 UI: 담당자에게 제시·사용자 직접 수령 선택 금지 안내",
+      "target": "프런트 고정 UI: 담당자에게 제시·수령 인증 코드 입력·확인 버튼; 상품 수령 버튼 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/stamp.md"
@@ -3678,6 +3678,18 @@
       "target": "ProhibitedItems.items",
       "owner": "API",
       "wikiSource": "../docs/wiki/product/timetable.md",
+      "requiredInScreen": "필수",
+      "sourceDecision": "위키 v5",
+      "sourceMaterial": "운영 자료 대기",
+      "pendingIds": ""
+    },
+    {
+      "id": "STAMP-REWARD-D02",
+      "screenId": "STAMP-REWARD",
+      "label": "수령 인증 결과",
+      "target": "StampReceiptVerificationInput.code → StampReceiptVerification.verified",
+      "owner": "API",
+      "wikiSource": "../docs/wiki/product/stamp.md",
       "requiredInScreen": "필수",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "운영 자료 대기",
