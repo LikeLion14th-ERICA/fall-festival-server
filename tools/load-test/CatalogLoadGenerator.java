@@ -1,27 +1,385 @@
 import java.net.URI;
-import java.net.http.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.time.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class CatalogLoadGenerator {
-  static final String[] ROUTES = {"/api/v2/spaces", "/api/v2/spaces/space-001", "/api/v2/maps", "/api/v2/maps/map-area-1", "/api/v2/maps/map-area-1/pins?mapVersion=map-v1", "/api/v2/places/place-space-001", "/api/v2/ticket-guide"};
-  record Hit(String route,long nanos, int status, long bytes, String error) {}
-  static Map<String,String> args(String[] a) { Map<String,String> m=new HashMap<>(); for(int i=0;i<a.length-1;i+=2)m.put(a[i],a[i+1]); return m; }
-  static void status(Path p,String s) throws Exception { Path t=Path.of(p+".tmp-"+ProcessHandle.current().pid()); Files.writeString(t,"{\"status\":\""+s+"\",\"at\":\""+Instant.now()+"\"}\n"); Files.move(t,p,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE); }
-  static HttpResponse<byte[]> get(HttpClient c, URI u, int timeout) { try { return c.send(HttpRequest.newBuilder(u).timeout(Duration.ofMillis(timeout)).GET().build(),HttpResponse.BodyHandlers.ofByteArray()); } catch(Exception e) { return null; } }
-  static int occurrences(String value, String needle) { int count=0, at=0; while((at=value.indexOf(needle,at))>=0){count++;at+=needle.length();} return count; }
-  static int jsonIds(String value, String prefix) { return (int)Pattern.compile("\\\"id\\\"\\s*:\\s*\\\""+Pattern.quote(prefix)).matcher(value).results().count(); }
-  static String transportErrors(List<Hit> hits) { Map<String,Integer> errors=new TreeMap<>(); for(Hit x:hits) if(!x.error.isEmpty()) errors.merge(x.error,1,Integer::sum); StringBuilder b=new StringBuilder("{"); for(var e:errors.entrySet()){if(b.length()>1)b.append(',');b.append(String.format(Locale.ROOT,"\"%s\":%d",e.getKey().replace("\"","\\\""),e.getValue()));} return b.append('}').toString(); }
-  static List<Hit> stage(HttpClient c, String base, int vus, long ms, Path status, String name, int timeout) throws Exception {
-    status(status,name); ExecutorService ex=Executors.newVirtualThreadPerTaskExecutor(); CountDownLatch ready=new CountDownLatch(vus), go=new CountDownLatch(1); List<Future<List<Hit>>> fs=new ArrayList<>();
-    for(int v=0;v<vus;v++){ final int worker=v; fs.add(ex.submit(()->{ ready.countDown(); go.await(); long end=System.nanoTime()+Duration.ofMillis(ms).toNanos(); List<Hit> out=new ArrayList<>(); int r=worker%ROUTES.length; while(System.nanoTime()<end){ String route=ROUTES[r++%ROUTES.length]; long n=System.nanoTime(); try { var x=c.send(HttpRequest.newBuilder(URI.create(base+route)).timeout(Duration.ofMillis(timeout)).GET().build(),HttpResponse.BodyHandlers.ofByteArray()); out.add(new Hit(route,System.nanoTime()-n,x.statusCode(),x.body().length,"")); } catch(java.net.http.HttpTimeoutException e){out.add(new Hit(route,System.nanoTime()-n,0,0,"TIMEOUT"));} catch(Exception e){out.add(new Hit(route,System.nanoTime()-n,0,0,e.getClass().getSimpleName()));} } return out;})); }
-    ready.await(30,TimeUnit.SECONDS); go.countDown();
-    List<Hit> all=new ArrayList<>(); for(var f:fs)all.addAll(f.get()); ex.shutdown(); return all;
-  }
-  static String jsonStage(String name,int vus,List<Hit> h,long elapsedMs){ int total=h.size(); long bytes=0;int bad=0,to=0;StringBuilder ep=new StringBuilder(); for(String route:ROUTES){List<Long> lat=new ArrayList<>();long rb=0;int rbad=0, rto=0,count=0;List<Hit> routeHits=new ArrayList<>();for(Hit x:h)if(x.route.equals(route)){count++;lat.add(x.nanos);routeHits.add(x);rb+=x.bytes;if(x.status<200||x.status>=300)rbad++;if("TIMEOUT".equals(x.error))rto++;}Collections.sort(lat);double p=lat.isEmpty()?0:lat.get(Math.max(0,(int)Math.ceil(lat.size()*.95)-1))/1e6;if(ep.length()>0)ep.append(',');ep.append(String.format(Locale.ROOT,"{\"endpoint\":\"%s\",\"count\":%d,\"throughputPerSecond\":%.3f,\"p95Ms\":%.3f,\"responseBytes\":%d,\"non2xx\":%d,\"timeout\":%d,\"transportErrors\":%s}",route.replace("\"","\\\""),count,count/(elapsedMs/1000.0),p,rb,rbad,rto,transportErrors(routeHits)));}for(Hit x:h){bytes+=x.bytes;if(x.status<200||x.status>=300)bad++;if("TIMEOUT".equals(x.error))to++;}return String.format(Locale.ROOT,"{\"name\":\"%s\",\"virtualUsers\":%d,\"durationMs\":%d,\"total\":{\"count\":%d,\"responseBytes\":%d,\"non2xx\":%d,\"timeout\":%d,\"transportErrors\":%s},\"endpoints\":[%s]}",name,vus,elapsedMs,total,bytes,bad,to,transportErrors(h),ep); }
-  public static void main(String[] raw) throws Exception { Map<String,String>a=args(raw); String base=a.get("--base-url"),out=a.get("--output"),status=a.get("--status-file"),ready=a.get("--smoke-ready-file"); long warm=Long.parseLong(a.getOrDefault("--warmup-ms","10000")), stage=Long.parseLong(a.getOrDefault("--stage-ms","30000")); int sockets=Integer.parseInt(a.getOrDefault("--max-sockets","500")); if(sockets<500)throw new IllegalArgumentException("maxSockets must be >= 500"); HttpClient c=HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).executor(Executors.newVirtualThreadPerTaskExecutor()).build(); boolean readyz=false;for(int i=0;i<120&&!readyz;i++){var x=get(c,URI.create(base+"/readyz"),5000);readyz=x!=null&&x.statusCode()==200;if(!readyz)Thread.sleep(500);}if(!readyz)throw new IllegalStateException("Readiness gate failed"); var spaces=get(c,URI.create(base+ROUTES[0]),5000);var maps=get(c,URI.create(base+ROUTES[2]),5000);var ticket=get(c,URI.create(base+ROUTES[6]),5000);if(spaces==null||spaces.statusCode()!=200||maps==null||maps.statusCode()!=200||ticket==null||ticket.statusCode()!=200)throw new IllegalStateException("Smoke route failed");String sb=new String(spaces.body(),StandardCharsets.UTF_8),mb=new String(maps.body(),StandardCharsets.UTF_8),tb=new String(ticket.body(),StandardCharsets.UTF_8);int spaceCount=jsonIds(sb,"space-"),mapCount=jsonIds(mb,"map-");if(spaceCount!=100||mapCount!=7||!tb.contains("place-ticket-zone")||!tb.contains("map-overview")||!tb.contains("pin-ticket-zone")||!tb.contains("overview-v1"))throw new IllegalStateException("Smoke cardinality/content failed: spaces="+spaceCount+" maps="+mapCount); Files.writeString(Path.of(ready),"smoke-ok\n"); status(Path.of(status),"smoke-ok"); stage(c,base,100,warm,Path.of(status),"warmup",5000); List<String> ss=new ArrayList<>(); for(int v:new int[]{100,200,500}){long began=System.currentTimeMillis();ss.add(jsonStage("vus-"+v,v,stage(c,base,v,stage,Path.of(status),"vus-"+v,5000),System.currentTimeMillis()-began));} status(Path.of(status),"complete"); String result="{\"generatedAt\":\""+Instant.now()+"\",\"baseUrl\":\""+base+"\",\"fixture\":{\"spaces\":100,\"maps\":7,\"places\":101,\"pins\":207},\"loadGenerator\":{\"maxSupportedVUs\":"+sockets+",\"implementation\":\"Java virtual-thread HttpClient\"},\"stages\":["+String.join(",",ss)+"]}\n"; Path t=Path.of(out+".tmp-"+ProcessHandle.current().pid());Files.writeString(t,result,StandardCharsets.UTF_8);Files.move(t,Path.of(out),StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE); }
+    private static final int HIGHEST_STAGE_VUS = 500;
+    private static final int READINESS_ATTEMPTS = 120;
+    private static final int REQUEST_TIMEOUT_MS = 5_000;
+    private static final String[] ROUTES = {
+        "/api/v2/spaces",
+        "/api/v2/spaces/space-001",
+        "/api/v2/maps",
+        "/api/v2/maps/map-area-1",
+        "/api/v2/maps/map-area-1/pins?mapVersion=map-v1",
+        "/api/v2/places/place-space-001",
+        "/api/v2/ticket-guide"
+    };
+
+    private record Hit(String route, long nanos, int status, long bytes, String error) {
+    }
+
+    private static Map<String, String> parseArguments(String[] arguments) {
+        Map<String, String> parsed = new HashMap<>();
+        for (int index = 0; index < arguments.length - 1; index += 2) {
+            parsed.put(arguments[index], arguments[index + 1]);
+        }
+        return parsed;
+    }
+
+    private static void writeStatus(Path path, String state) throws Exception {
+        Path temporaryPath = Path.of(path + ".tmp-" + ProcessHandle.current().pid());
+        String contents = "{\"status\":\"" + state + "\",\"at\":\""
+            + Instant.now() + "\"}\n";
+        Files.writeString(temporaryPath, contents);
+        Files.move(
+            temporaryPath,
+            path,
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE
+        );
+    }
+
+    private static HttpResponse<byte[]> sendGet(HttpClient client, URI uri, int timeoutMs) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(uri)
+                .timeout(Duration.ofMillis(timeoutMs))
+                .GET()
+                .build();
+            return client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static int countJsonIds(String value, String prefix) {
+        String expression = "\\\"id\\\"\\s*:\\s*\\\"" + Pattern.quote(prefix);
+        return (int) Pattern.compile(expression).matcher(value).results().count();
+    }
+
+    private static String formatTransportErrors(List<Hit> hits) {
+        Map<String, Integer> errors = new TreeMap<>();
+        for (Hit hit : hits) {
+            if (!hit.error().isEmpty()) {
+                errors.merge(hit.error(), 1, Integer::sum);
+            }
+        }
+
+        StringBuilder json = new StringBuilder("{");
+        for (Map.Entry<String, Integer> entry : errors.entrySet()) {
+            if (json.length() > 1) {
+                json.append(',');
+            }
+            json.append(String.format(
+                Locale.ROOT,
+                "\"%s\":%d",
+                entry.getKey().replace("\"", "\\\""),
+                entry.getValue()
+            ));
+        }
+        return json.append('}').toString();
+    }
+
+    private static List<Hit> runStage(
+        HttpClient client,
+        String baseUrl,
+        int virtualUsers,
+        long durationMs,
+        Path statusPath,
+        String stageName,
+        int timeoutMs
+    ) throws Exception {
+        writeStatus(statusPath, stageName);
+
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        CountDownLatch ready = new CountDownLatch(virtualUsers);
+        CountDownLatch start = new CountDownLatch(1);
+        List<Future<List<Hit>>> futures = new ArrayList<>(virtualUsers);
+
+        for (int workerIndex = 0; workerIndex < virtualUsers; workerIndex++) {
+            final int worker = workerIndex;
+            futures.add(executor.submit(() -> {
+                ready.countDown();
+                start.await();
+
+                long deadline = System.nanoTime() + Duration.ofMillis(durationMs).toNanos();
+                List<Hit> hits = new ArrayList<>();
+                int routeIndex = worker % ROUTES.length;
+                while (System.nanoTime() < deadline) {
+                    String route = ROUTES[routeIndex++ % ROUTES.length];
+                    long startedAt = System.nanoTime();
+                    try {
+                        HttpRequest request = HttpRequest.newBuilder(
+                                URI.create(baseUrl + route)
+                            )
+                            .timeout(Duration.ofMillis(timeoutMs))
+                            .GET()
+                            .build();
+                        HttpResponse<byte[]> response = client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofByteArray()
+                        );
+                        hits.add(new Hit(
+                            route,
+                            System.nanoTime() - startedAt,
+                            response.statusCode(),
+                            response.body().length,
+                            ""
+                        ));
+                    } catch (HttpTimeoutException exception) {
+                        hits.add(new Hit(
+                            route,
+                            System.nanoTime() - startedAt,
+                            0,
+                            0,
+                            "TIMEOUT"
+                        ));
+                    } catch (Exception exception) {
+                        hits.add(new Hit(
+                            route,
+                            System.nanoTime() - startedAt,
+                            0,
+                            0,
+                            exception.getClass().getSimpleName()
+                        ));
+                    }
+                }
+                return hits;
+            }));
+        }
+
+        ready.await(30, TimeUnit.SECONDS);
+        start.countDown();
+
+        List<Hit> allHits = new ArrayList<>();
+        for (Future<List<Hit>> future : futures) {
+            allHits.addAll(future.get());
+        }
+        executor.shutdown();
+        return allHits;
+    }
+
+    private static String formatStage(
+        String stageName,
+        int virtualUsers,
+        List<Hit> hits,
+        long elapsedMs
+    ) {
+        int total = hits.size();
+        long bytes = 0;
+        int non2xx = 0;
+        int timeouts = 0;
+        StringBuilder endpointJson = new StringBuilder();
+
+        for (String route : ROUTES) {
+            List<Long> latencies = new ArrayList<>();
+            List<Hit> routeHits = new ArrayList<>();
+            long responseBytes = 0;
+            int routeNon2xx = 0;
+            int routeTimeouts = 0;
+
+            for (Hit hit : hits) {
+                if (!hit.route().equals(route)) {
+                    continue;
+                }
+                latencies.add(hit.nanos());
+                routeHits.add(hit);
+                responseBytes += hit.bytes();
+                if (hit.status() < 200 || hit.status() >= 300) {
+                    routeNon2xx++;
+                }
+                if ("TIMEOUT".equals(hit.error())) {
+                    routeTimeouts++;
+                }
+            }
+
+            Collections.sort(latencies);
+            double p95Ms = latencies.isEmpty()
+                ? 0
+                : latencies.get(Math.max(0, (int) Math.ceil(latencies.size() * 0.95) - 1))
+                    / 1e6;
+            if (endpointJson.length() > 0) {
+                endpointJson.append(',');
+            }
+            endpointJson.append(String.format(
+                Locale.ROOT,
+                "{\"endpoint\":\"%s\",\"count\":%d,"
+                    + "\"throughputPerSecond\":%.3f,\"p95Ms\":%.3f,"
+                    + "\"responseBytes\":%d,\"non2xx\":%d,\"timeout\":%d,"
+                    + "\"transportErrors\":%s}",
+                route.replace("\"", "\\\""),
+                latencies.size(),
+                latencies.size() / (elapsedMs / 1000.0),
+                p95Ms,
+                responseBytes,
+                routeNon2xx,
+                routeTimeouts,
+                formatTransportErrors(routeHits)
+            ));
+        }
+
+        for (Hit hit : hits) {
+            bytes += hit.bytes();
+            if (hit.status() < 200 || hit.status() >= 300) {
+                non2xx++;
+            }
+            if ("TIMEOUT".equals(hit.error())) {
+                timeouts++;
+            }
+        }
+
+        return String.format(
+            Locale.ROOT,
+            "{\"name\":\"%s\",\"virtualUsers\":%d,\"durationMs\":%d,"
+                + "\"total\":{\"count\":%d,\"responseBytes\":%d,"
+                + "\"non2xx\":%d,\"timeout\":%d,\"transportErrors\":%s},"
+                + "\"endpoints\":[%s]}",
+            stageName,
+            virtualUsers,
+            elapsedMs,
+            total,
+            bytes,
+            non2xx,
+            timeouts,
+            formatTransportErrors(hits),
+            endpointJson
+        );
+    }
+
+    public static void main(String[] rawArguments) throws Exception {
+        Map<String, String> arguments = parseArguments(rawArguments);
+        String baseUrl = arguments.get("--base-url");
+        String output = arguments.get("--output");
+        String statusPath = arguments.get("--status-file");
+        String smokeReadyPath = arguments.get("--smoke-ready-file");
+        long warmupMs = Long.parseLong(arguments.getOrDefault("--warmup-ms", "10000"));
+        long stageMs = Long.parseLong(arguments.getOrDefault("--stage-ms", "30000"));
+        int maxSupportedVUs = Integer.parseInt(
+            arguments.getOrDefault("--max-supported-vus", "500")
+        );
+        if (maxSupportedVUs < HIGHEST_STAGE_VUS) {
+            throw new IllegalArgumentException(
+                "maxSupportedVUs must be >= " + HIGHEST_STAGE_VUS
+            );
+        }
+
+        HttpClient client = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .executor(Executors.newVirtualThreadPerTaskExecutor())
+            .build();
+
+        boolean ready = false;
+        for (int attempt = 0; attempt < READINESS_ATTEMPTS && !ready; attempt++) {
+            HttpResponse<byte[]> response = sendGet(
+                client,
+                URI.create(baseUrl + "/readyz"),
+                REQUEST_TIMEOUT_MS
+            );
+            ready = response != null && response.statusCode() == 200;
+            if (!ready) {
+                Thread.sleep(500);
+            }
+        }
+        if (!ready) {
+            throw new IllegalStateException("Readiness gate failed");
+        }
+
+        List<HttpResponse<byte[]>> smokeResponses = new ArrayList<>(ROUTES.length);
+        for (String route : ROUTES) {
+            HttpResponse<byte[]> response = sendGet(
+                client,
+                URI.create(baseUrl + route),
+                REQUEST_TIMEOUT_MS
+            );
+            if (response == null || response.statusCode() != 200) {
+                throw new IllegalStateException("Smoke route failed: " + route);
+            }
+            smokeResponses.add(response);
+        }
+
+        String spacesBody = new String(smokeResponses.get(0).body(), StandardCharsets.UTF_8);
+        String mapsBody = new String(smokeResponses.get(2).body(), StandardCharsets.UTF_8);
+        String ticketBody = new String(smokeResponses.get(6).body(), StandardCharsets.UTF_8);
+        int spaceCount = countJsonIds(spacesBody, "space-");
+        int mapCount = countJsonIds(mapsBody, "map-");
+        if (spaceCount != 100
+            || mapCount != 7
+            || !ticketBody.contains("place-ticket-zone")
+            || !ticketBody.contains("map-overview")
+            || !ticketBody.contains("pin-ticket-zone")
+            || !ticketBody.contains("overview-v1")) {
+            throw new IllegalStateException(
+                "Smoke cardinality/content failed: spaces=" + spaceCount + " maps=" + mapCount
+            );
+        }
+
+        Files.writeString(Path.of(smokeReadyPath), "smoke-ok\n");
+        writeStatus(Path.of(statusPath), "smoke-ok");
+        runStage(
+            client,
+            baseUrl,
+            100,
+            warmupMs,
+            Path.of(statusPath),
+            "warmup",
+            REQUEST_TIMEOUT_MS
+        );
+
+        List<String> stages = new ArrayList<>();
+        for (int virtualUsers : new int[]{100, 200, 500}) {
+            long startedAt = System.currentTimeMillis();
+            List<Hit> hits = runStage(
+                client,
+                baseUrl,
+                virtualUsers,
+                stageMs,
+                Path.of(statusPath),
+                "vus-" + virtualUsers,
+                REQUEST_TIMEOUT_MS
+            );
+            stages.add(formatStage(
+                "vus-" + virtualUsers,
+                virtualUsers,
+                hits,
+                System.currentTimeMillis() - startedAt
+            ));
+        }
+
+        writeStatus(Path.of(statusPath), "complete");
+        String result = "{\"generatedAt\":\"" + Instant.now()
+            + "\",\"baseUrl\":\"" + baseUrl
+            + "\",\"fixture\":{\"spaces\":100,\"maps\":7,\"places\":101,\"pins\":207}"
+            + ",\"loadGenerator\":{\"maxSupportedVUs\":" + maxSupportedVUs
+            + ",\"implementation\":\"Java virtual-thread HttpClient\"}"
+            + ",\"stages\":[" + String.join(",", stages) + "]}\n";
+        Path temporaryOutput = Path.of(output + ".tmp-" + ProcessHandle.current().pid());
+        Files.writeString(temporaryOutput, result, StandardCharsets.UTF_8);
+        Files.move(
+            temporaryOutput,
+            Path.of(output),
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE
+        );
+    }
 }
