@@ -181,6 +181,10 @@ class CatalogControllerOpenApiTest {
             "pin-booth", "booth", "테스트 부스", new java.math.BigDecimal("0.125"), new java.math.BigDecimal("0.875"),
             new PinTarget("PLACE", "place-booth")
         );
+        Pin areaPin = new Pin(
+            "pin-area", "area", "구역 이동", new java.math.BigDecimal("0.75"), new java.math.BigDecimal("0.25"),
+            new PinTarget("AREA", "map-area")
+        );
         return new CatalogSnapshot(
             new CatalogSnapshot.FestivalContext(
                 "festival-catalog", UUID.fromString("00000000-0000-0000-0000-000000000003"), 3
@@ -189,7 +193,7 @@ class CatalogControllerOpenApiTest {
             List.of(overview, area),
             List.of(place),
             Map.of(
-                new PinKey("map-overview", "overview-v1"), List.of(placePin),
+                new PinKey("map-overview", "overview-v1"), List.of(placePin, areaPin),
                 new PinKey("map-area", "map-v1"), List.of(placePin)
             ),
             new CatalogSnapshot.MapTarget("map-area", "place-booth", "pin-booth", "map-v1")
