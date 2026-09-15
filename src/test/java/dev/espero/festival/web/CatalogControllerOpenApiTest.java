@@ -61,7 +61,7 @@ class CatalogControllerOpenApiTest {
         mvc = MockMvcBuilders.standaloneSetup(
             new CatalogController(snapshots, metaSupport),
             new TicketGuideController(snapshots, metaSupport, clock)
-        ).build();
+        ).setControllerAdvice(new GlobalApiExceptionHandler(metaSupport)).build();
     }
 
     @Test
@@ -104,6 +104,43 @@ class CatalogControllerOpenApiTest {
         assertThat(validate(schema, invalidLink)).isNotEmpty();
     }
 
+    @Test
+    void validatesDocumentedCatalogErrorEnvelopesAgainstOpenApi() throws Exception {
+        when(snapshots.required()).thenReturn(snapshot());
+
+        assertMatchesErrorSchema(
+            "/api/v2/spaces",
+            "400",
+            "INVALID_QUERY",
+            get("/api/v2/spaces").param("category", "BOOTH", "PUB")
+        );
+        assertMatchesErrorSchema(
+            "/api/v2/spaces/{spaceId}",
+            "404",
+            "NOT_FOUND",
+            get("/api/v2/spaces/unknown-space")
+        );
+        assertMatchesErrorSchema(
+            "/api/v2/maps/{mapId}/pins",
+            "409",
+            "MAP_VERSION_MISMATCH",
+            get("/api/v2/maps/map-area/pins").param("mapVersion", "old-version")
+        );
+
+        when(snapshots.required()).thenThrow(new ApiException(
+            org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE,
+            "CATALOG_NOT_READY",
+            "카탈로그를 아직 사용할 수 없습니다.",
+            true
+        ));
+        assertMatchesErrorSchema(
+            "/api/v2/maps",
+            "503",
+            "CATALOG_NOT_READY",
+            get("/api/v2/maps")
+        );
+    }
+
     private void assertMatchesSchema(String openApiPath, org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request)
         throws Exception {
         MvcResult result = mvc.perform(request.header("X-Request-Id", "openapi-provider-test"))
@@ -118,11 +155,39 @@ class CatalogControllerOpenApiTest {
             .isEmpty();
     }
 
+    private void assertMatchesErrorSchema(
+        String openApiPath,
+        String status,
+        String expectedCode,
+        org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request
+    ) throws Exception {
+        MvcResult result = mvc.perform(request.header("X-Request-Id", "openapi-provider-error-test"))
+            .andExpect(status().is(Integer.parseInt(status)))
+            .andReturn();
+        JsonNode response = json.readTree(result.getResponse().getContentAsString());
+        Set<ValidationMessage> errors = validate(errorSchema(openApiPath, status), response);
+
+        assertThat(errors)
+            .as("Spring error response for %s (%s) must satisfy api-v2/openapi.json", openApiPath, status)
+            .isEmpty();
+        assertThat(response.path("error").path("code").asText()).isEqualTo(expectedCode);
+        assertThat(response.path("error").path("details").isArray()).isTrue();
+        assertThat(response.path("meta").path("revision").asInt()).isGreaterThanOrEqualTo(1);
+    }
+
     private JsonNode responseSchema(String path) {
         JsonNode operation = openApi.get("paths").get(path).get("get");
         assertThat(operation).as("OpenAPI GET operation for %s", path).isNotNull();
         JsonNode schema = operation.get("responses").get("200").get("content").get("application/json").get("schema");
         assertThat(schema).as("OpenAPI 200 JSON schema for %s", path).isNotNull();
+        return resolveReferences(schema);
+    }
+
+    private JsonNode errorSchema(String path, String status) {
+        JsonNode operation = openApi.get("paths").get(path).get("get");
+        assertThat(operation).as("OpenAPI GET operation for %s", path).isNotNull();
+        JsonNode schema = operation.get("responses").get(status).get("content").get("application/json").get("schema");
+        assertThat(schema).as("OpenAPI %s JSON schema for %s", status, path).isNotNull();
         return resolveReferences(schema);
     }
 

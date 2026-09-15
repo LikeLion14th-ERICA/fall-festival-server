@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import dev.espero.festival.domain.CatalogSnapshot;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,79 @@ class CatalogSnapshotStoreIntegrationTest {
         assertThat(snapshot.ticketMapTarget()).isEqualTo(new CatalogSnapshot.MapTarget(
             "map-area", "place-test", "pin-test", "map-v1"
         ));
+    }
+
+    @Test
+    @Transactional
+    void rejectsAPublishedSpaceWhenItsKoreanTranslationIsMissing() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            DELETE FROM space_translations
+            WHERE festival_revision_id = :revisionId AND space_id = 'space-test' AND locale = 'ko'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Published space is missing a Korean translation");
+    }
+
+    @Test
+    @Transactional
+    void rejectsAPublishedSpaceWhenItsKoreanSortRankIsMissing() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            DELETE FROM space_sort_orders
+            WHERE festival_revision_id = :revisionId AND space_id = 'space-test' AND locale = 'ko'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Published space is missing a Korean sort rank");
+    }
+
+    @Test
+    @Transactional
+    void loadsKoreanSpaceOrderWithoutReusingIndependentEnglishRanks() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE space_sort_orders
+            SET sort_rank = 2
+            WHERE festival_revision_id = :revisionId AND space_id = 'space-test' AND locale = 'ko'
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO spaces (festival_revision_id, id, category, image_url, image_width, image_height)
+            VALUES (:revisionId, 'space-second', 'BOOTH', '/assets/spaces/second.png', 100, 100)
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO space_translations (
+                festival_revision_id, space_id, locale, name, image_alt, location_text, experience_text
+            ) VALUES
+                (:revisionId, 'space-second', 'ko', '두 번째 부스', '두 번째 부스', '두 번째 위치', '두 번째 체험'),
+                (:revisionId, 'space-test', 'en', 'Test Booth', 'Test Booth', 'Test location', 'Test experience'),
+                (:revisionId, 'space-second', 'en', 'Second Booth', 'Second Booth', 'Second location', 'Second experience')
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO space_sort_orders (festival_revision_id, locale, space_id, sort_rank)
+            VALUES
+                (:revisionId, 'ko', 'space-second', 1),
+                (:revisionId, 'en', 'space-test', 1),
+                (:revisionId, 'en', 'space-second', 2)
+            """, parameters(revisionId));
+
+        CatalogSnapshot snapshot = store.loadPublished();
+        List<String> koreanOrder = snapshot.spaces().stream().map(CatalogSnapshot.Space::id).toList();
+        List<String> englishOrder = jdbc.query("""
+            SELECT space_id
+            FROM space_sort_orders
+            WHERE festival_revision_id = :revisionId AND locale = 'en'
+            ORDER BY sort_rank
+            """, parameters(revisionId), (resultSet, rowNumber) -> resultSet.getString("space_id"));
+
+        assertThat(koreanOrder).containsExactly("space-second", "space-test");
+        assertThat(englishOrder).containsExactly("space-test", "space-second");
     }
 
     @Test
@@ -438,6 +512,56 @@ class CatalogSnapshotStoreIntegrationTest {
             """, archived);
 
         assertThatCode(store::loadPublished).doesNotThrowAnyException();
+    }
+
+    @Test
+    @Transactional
+    void rejectsReusingAMapVersionWhenPinCoordinatesDrift() {
+        UUID publishedRevisionId = publishedRevisionId();
+        insertCatalogFixture(publishedRevisionId);
+        MapSqlParameterSource archived = insertArchivedRevision(publishedRevisionId);
+        jdbc.update("""
+            INSERT INTO maps (festival_revision_id, id, kind, sort_rank, current_version)
+            VALUES (:revisionId, 'map-area', 'AREA', 1, 'map-v1')
+            """, archived);
+        jdbc.update("""
+            INSERT INTO map_asset_versions (
+                festival_revision_id, map_id, version, image_url, image_alt, image_width, image_height
+            ) VALUES (:revisionId, 'map-area', 'map-v1', '/assets/maps/map-v1.png', '테스트 지도', 1000, 600)
+            """, archived);
+        jdbc.update("""
+            INSERT INTO places (festival_revision_id, id, kind, space_id)
+            VALUES (:revisionId, 'place-test', 'FACILITY', NULL)
+            """, archived);
+        jdbc.update("""
+            INSERT INTO map_pins (
+                festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id
+            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-test', 'booth', 0.75, 0.25, 'place-test', NULL)
+            """, archived);
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("different pin geometry or targets across revisions");
+    }
+
+    @Test
+    @Transactional
+    void keepsCoordinateChangesScopedToTheirMapVersion() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        insertMapVersion(revisionId, "map-v2");
+        jdbc.update("""
+            INSERT INTO map_pins (
+                festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id
+            ) VALUES (:revisionId, 'map-area', 'map-v2', 'pin-test-v2', 'booth', 0.75, 0.25, 'place-test', NULL)
+            """, parameters(revisionId));
+
+        CatalogSnapshot snapshot = store.loadPublished();
+
+        assertThat(snapshot.pinsFor("map-area", "map-v1"))
+            .singleElement()
+            .satisfies(pin -> assertThat(pin.x()).isEqualByComparingTo("0.5"));
+        assertThat(snapshot.pinsFor("map-area", "map-v2")).isEmpty();
     }
 
     @Test
