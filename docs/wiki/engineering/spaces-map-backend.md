@@ -127,7 +127,10 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
   ticket 안내 본문·target의 같은 snapshot 정합성 및 일정 미확정 상태의 target 반환,
   revision·place·pin·현재 mapVersion 정합성과 `Space → Place → Pin` 왕복 관계가 보장된다.
 - 부분·고아·다른 revision·AREA·구버전 ticket/space target 및 같은 mapVersion의 다른
-  이미지·좌표·AREA 목적지 삽입이 DB 제약 또는 snapshot 검증에서 거절된다. alt만 다른
+  이미지·좌표·AREA 목적지 삽입이 DB 제약 또는 snapshot 검증에서 거절된다. 이 경계는
+  `CatalogSnapshotStoreIntegrationTest`에서 즉시 `DataIntegrityViolationException`이 나는
+  FK/CHECK 사례와 `CatalogIntegrityException`으로 published snapshot load가 거절되는
+  사례를 구분해 확인한다. alt만 다른
   재게시는 같은 version으로 허용된다. Space target의 OVERVIEW 지도, API v2 형식 밖의
   공개 ID·mapVersion·이미지 URI reference도 snapshot 검증에서 거절된다.
   존재하는 `Space.contact`의 Link URL이 URI 문법 또는 `^https://` 조건을 벗어나면
@@ -140,7 +143,7 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 
 | 계층 | 반드시 확인할 결과 |
 |---|---|
-| Flyway/PostgreSQL | 실제 migration에서 FK·CHECK·UNIQUE 제약을 검증한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
+| Flyway/PostgreSQL | 실제 migration에서 FK·CHECK·UNIQUE 제약을 검증한다. ticket target partial, orphan/cross-revision, place-to-space 불일치, AREA 핀·구버전 target, `PLACE XOR AREA` 위반은 DB insert/update 경계에서 즉시 거절되는지 확인하고, asset·좌표·AREA 목적지 drift와 OVERVIEW 대표 target은 published snapshot load 검증으로 구분한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
 | Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, snapshot 기반 ticket 안내·target null/일정 미확정/정상 경로, 대표 target의 AREA 제약과 API v2 ID·이미지 URI 형식, 존재하는 `Space.contact` Link URL의 URI·`https://` 조건을 검증한다. |
 | API v2 | `contract-source.mjs`의 target 의미를 갱신하고 생성물 일치 및 mock contract check를 통과한다. Spring 응답은 JSON schema provider test로 별도 확인한다. |
 | 회귀 | `mvnw.cmd --batch-mode --no-transfer-progress verify`, `api-v2`의 `npm run generate`, `npm run check`, `git diff --check`를 실행한다. |
