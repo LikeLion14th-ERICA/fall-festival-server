@@ -17,8 +17,20 @@ public record CatalogSnapshot(
     List<CatalogMap> maps,
     List<Place> places,
     Map<PinKey, List<Pin>> pinsByMapVersion,
+    TicketGuideConfig ticketGuideConfig,
     MapTarget ticketMapTarget
 ) {
+
+    public CatalogSnapshot(
+        FestivalContext context,
+        List<Space> spaces,
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pinsByMapVersion,
+        MapTarget ticketMapTarget
+    ) {
+        this(context, spaces, maps, places, pinsByMapVersion, null, ticketMapTarget);
+    }
 
     public CatalogSnapshot {
         spaces = List.copyOf(spaces);
@@ -71,6 +83,7 @@ public record CatalogSnapshot(
         String operator,
         String hoursText,
         String description,
+        String experience,
         Link contact,
         List<String> events,
         List<Money> menu,

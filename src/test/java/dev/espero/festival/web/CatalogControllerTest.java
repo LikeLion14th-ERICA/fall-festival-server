@@ -60,6 +60,7 @@ class CatalogControllerTest {
             assertThat(space.mapTarget()).isEqualTo(new CatalogResponses.MapTarget(
                 "map-area", "place-test", "pin-test", "map-v1"
             ));
+            assertThat(space.experience()).isEqualTo("체험 안내");
         });
     }
 
@@ -117,7 +118,7 @@ class CatalogControllerTest {
         );
         Space space = new Space(
             "space-test", "BOOTH", "테스트 부스", new Image("/assets/test.png", "테스트 부스", 100, 100),
-            "테스트 위치", null, null, null, null, List.of(), List.of(), target
+            "테스트 위치", null, null, null, "체험 안내", null, List.of(), List.of(), target
         );
         CatalogMap map = new CatalogMap(
             "map-area", "테스트 구역", "AREA", "map-v1", new Image("/assets/map.png", "테스트 지도", 1000, 600)

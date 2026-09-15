@@ -29,6 +29,7 @@ CREATE TABLE space_translations (
     operator_text TEXT NULL,
     hours_text TEXT NULL,
     description_text TEXT NULL,
+    experience_text TEXT NULL,
     contact_label TEXT NULL,
     contact_url TEXT NULL,
     CONSTRAINT pk_space_translations PRIMARY KEY (festival_revision_id, space_id, locale),
@@ -45,6 +46,8 @@ CREATE TABLE space_translations (
         CHECK (hours_text IS NULL OR btrim(hours_text) <> ''),
     CONSTRAINT ck_space_translations_description_not_blank
         CHECK (description_text IS NULL OR btrim(description_text) <> ''),
+    CONSTRAINT ck_space_translations_experience_not_blank
+        CHECK (experience_text IS NULL OR btrim(experience_text) <> ''),
     CONSTRAINT ck_space_translations_contact_together
         CHECK ((contact_label IS NULL) = (contact_url IS NULL)),
     CONSTRAINT ck_space_translations_contact_label_not_blank

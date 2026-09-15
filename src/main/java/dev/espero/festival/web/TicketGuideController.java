@@ -2,7 +2,6 @@ package dev.espero.festival.web;
 
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.TicketGuideConfig;
-import dev.espero.festival.persistence.TicketGuideStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -24,7 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * festival_start_date/festival_end_date are unconfirmed, so this currently
  * returns status=UNCONFIGURED in practice. Once 총학생회 confirms the dates,
- * updating the ticket_guide row is enough — no code change needed.
+ * update the approved ticket_guide row and restart the single application
+ * instance after publication — no code change is needed.
  *
  * Only Korean is publicly ready. Other locale and unknown query parameters are
  * rejected instead of silently falling back to Korean.
@@ -37,18 +37,15 @@ public class TicketGuideController {
     private static final ZoneId TIMEZONE = ZoneId.of("Asia/Seoul");
     private static final String CONTENT_LOCALE = "ko";
 
-    private final TicketGuideStore store;
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
     private final Clock clock;
 
     public TicketGuideController(
-        TicketGuideStore store,
         CatalogSnapshotProvider snapshots,
         ApiMetaSupport metaSupport,
         Clock clock
     ) {
-        this.store = store;
         this.snapshots = snapshots;
         this.metaSupport = metaSupport;
         this.clock = clock;
@@ -59,7 +56,7 @@ public class TicketGuideController {
         CatalogSnapshot snapshot = snapshots.required();
         metaSupport.setContext(request, snapshot.context(), CONTENT_LOCALE);
         validateQuery(request);
-        Optional<TicketGuideConfig> config = store.find(snapshot.context().revisionId());
+        Optional<TicketGuideConfig> config = Optional.ofNullable(snapshot.ticketGuideConfig());
         LocalDate today = LocalDate.now(clock.withZone(TIMEZONE));
 
         TicketGuideResponse data = config.filter(TicketGuideConfig::hasSchedule)

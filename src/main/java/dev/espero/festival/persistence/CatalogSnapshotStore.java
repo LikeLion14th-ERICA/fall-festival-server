@@ -12,6 +12,7 @@ import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.domain.TicketGuideConfig;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,9 +41,11 @@ public class CatalogSnapshotStore {
     public static final String PUBLIC_LOCALE = "ko";
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final TicketGuideStore ticketGuideStore;
 
-    public CatalogSnapshotStore(NamedParameterJdbcTemplate jdbc) {
+    public CatalogSnapshotStore(NamedParameterJdbcTemplate jdbc, TicketGuideStore ticketGuideStore) {
         this.jdbc = jdbc;
+        this.ticketGuideStore = ticketGuideStore;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -54,6 +57,7 @@ public class CatalogSnapshotStore {
         Map<String, List<Money>> menus = loadMenus(context);
         List<Space> spaces = loadSpaces(context, events, menus);
         Map<PinKey, List<Pin>> pins = loadPins(context, maps);
+        TicketGuideConfig ticketGuideConfig = ticketGuideStore.find(context.revisionId()).orElse(null);
         MapTarget ticketMapTarget = loadTicketMapTarget(context);
 
         verifySingleOverview(maps);
@@ -63,7 +67,7 @@ public class CatalogSnapshotStore {
         verifyTicketTarget(ticketMapTarget, maps, places, pins);
         verifyVersionHistory(context);
 
-        return new CatalogSnapshot(context, spaces, maps, places, pins, ticketMapTarget);
+        return new CatalogSnapshot(context, spaces, maps, places, pins, ticketGuideConfig, ticketMapTarget);
     }
 
     private FestivalContext loadPublishedContext() {
@@ -186,7 +190,7 @@ public class CatalogSnapshotStore {
         jdbc.query("""
             SELECT s.id, s.category, s.image_url, s.image_width, s.image_height,
                    st.locale, st.name, st.image_alt, st.location_text, st.operator_text,
-                   st.hours_text, st.description_text, st.contact_label, st.contact_url,
+                   st.hours_text, st.description_text, st.experience_text, st.contact_label, st.contact_url,
                    so.sort_rank,
                    smt.map_id, smt.place_id, smt.pin_id, smt.map_version
             FROM spaces s
@@ -224,6 +228,7 @@ public class CatalogSnapshotStore {
                 resultSet.getString("operator_text"),
                 resultSet.getString("hours_text"),
                 resultSet.getString("description_text"),
+                resultSet.getString("experience_text"),
                 contact,
                 events.getOrDefault(spaceId, List.of()),
                 menus.getOrDefault(spaceId, List.of()),
@@ -298,7 +303,8 @@ public class CatalogSnapshotStore {
 
     private void verifySingleOverview(List<CatalogMap> maps) {
         long overviewCount = maps.stream().filter(map -> map.kind().equals("OVERVIEW")).count();
-        require(overviewCount <= 1, "Published catalog has more than one overview map.");
+        require(maps.isEmpty() || overviewCount == 1,
+            "A non-empty published catalog must have exactly one overview map.");
     }
 
     private void verifySpaceContent(List<Space> spaces) {
@@ -391,7 +397,7 @@ public class CatalogSnapshotStore {
 
         jdbc.query("""
             SELECT a.festival_revision_id, a.map_id, a.version,
-                   a.image_url, a.image_alt, a.image_width, a.image_height
+                   a.image_url, a.image_width, a.image_height
             FROM map_asset_versions a
             JOIN festival_revisions r ON r.id = a.festival_revision_id
             WHERE r.festival_id = :festivalId AND r.state IN ('published', 'archived')
@@ -405,7 +411,6 @@ public class CatalogSnapshotStore {
             revisionVersions.add(revisionVersion);
             AssetShape shape = new AssetShape(
                 resultSet.getString("image_url"),
-                resultSet.getString("image_alt"),
                 resultSet.getInt("image_width"),
                 resultSet.getInt("image_height")
             );
@@ -415,9 +420,13 @@ public class CatalogSnapshotStore {
         });
 
         jdbc.query("""
-            SELECT p.festival_revision_id, p.map_id, p.map_version, p.id, p.x, p.y, p.place_id, p.area_id
+            SELECT p.festival_revision_id, p.map_id, p.map_version, p.id, p.x, p.y,
+                   p.place_id, area.target_map_id
             FROM map_pins p
             JOIN festival_revisions r ON r.id = p.festival_revision_id
+            LEFT JOIN map_areas area
+              ON area.festival_revision_id = p.festival_revision_id
+             AND area.id = p.area_id
             WHERE r.festival_id = :festivalId AND r.state IN ('published', 'archived')
             ORDER BY p.map_id, p.map_version, p.festival_revision_id, p.id
             """, new MapSqlParameterSource("festivalId", festivalId), resultSet -> {
@@ -426,13 +435,17 @@ public class CatalogSnapshotStore {
                 resultSet.getString("map_id"),
                 resultSet.getString("map_version")
             );
+            String placeId = resultSet.getString("place_id");
+            String targetKind = placeId == null ? "AREA" : "PLACE";
+            String targetId = placeId == null ? resultSet.getString("target_map_id") : placeId;
+            require(targetId != null, "A historical area pin must resolve to its target map.");
             pinSets.computeIfAbsent(key, ignored -> new LinkedHashMap<>()).put(
                 resultSet.getString("id"),
                 new PinShape(
                     resultSet.getBigDecimal("x"),
                     resultSet.getBigDecimal("y"),
-                    resultSet.getString("place_id"),
-                    resultSet.getString("area_id")
+                    targetKind,
+                    targetId
                 )
             );
         });
@@ -488,7 +501,7 @@ public class CatalogSnapshotStore {
 
     private record RevisionVersionKey(UUID revisionId, String mapId, String version) {}
 
-    private record AssetShape(String url, String alt, int width, int height) {}
+    private record AssetShape(String url, int width, int height) {}
 
-    private record PinShape(BigDecimal x, BigDecimal y, String placeId, String areaId) {}
+    private record PinShape(BigDecimal x, BigDecimal y, String targetKind, String targetId) {}
 }

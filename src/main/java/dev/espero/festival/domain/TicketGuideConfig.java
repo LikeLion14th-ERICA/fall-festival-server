@@ -22,6 +22,10 @@ public record TicketGuideConfig(
     Instant updatedAt
 ) {
 
+    public TicketGuideConfig {
+        instructions = List.copyOf(instructions);
+    }
+
     public boolean hasSchedule() {
         return festivalStartDate != null && festivalEndDate != null
             && dailyTransferOpenTime != null && dailyTransferCloseTime != null

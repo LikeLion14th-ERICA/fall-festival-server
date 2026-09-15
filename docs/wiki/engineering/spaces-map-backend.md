@@ -55,10 +55,10 @@ FestivalRevision (published)
 - `MapArea.target_map_id`는 구역 이동의 목적 지도다. snapshot 검증기는 목적 지도가
   `AREA`인지 확인한다.
 - `MapAssetVersion`은 이미지와 핀 좌표를 묶는다. `Map.current_version`은 존재하는 asset을
-  참조한다. 이미지·좌표·핀 배치·target 연결이 바뀔 때만 `mapVersion`을 올린다. snapshot
-  검증기는 같은 festival/map/version이 published·archived revision과 이미지·크기·`pinId → 좌표·target`
-  집합이 같은지도 확인한다. 텍스트 수정 또는 같은 자산의 재게시·rollback은 version을
-  바꾸지 않는다.
+  참조한다. 이미지 URL·크기·좌표·핀 배치·target 연결이 바뀔 때만 `mapVersion`을 올린다.
+  snapshot 검증기는 같은 festival/map/version이 published·archived revision과 이미지 URL·크기·
+  `pinId → 좌표·실제 목적` 집합이 같은지도 확인한다. 이미지 alt·지도명·핀 label 같은 텍스트
+  수정 또는 같은 자산의 재게시·rollback은 version을 바꾸지 않는다.
 - `SpaceMapTarget`은 공간당 하나의 대표 `PLACE` 핀이다. `(revision, mapId, mapVersion,
   pinId, placeId)` 복합 FK와 현재 지도 version FK로, 다른 장소·AREA 핀·구버전 핀을
   참조할 수 없다. 여러 지도에 같은 장소 핀이 있어도 이 행이 화면의 대표 위치를 정한다.
@@ -68,11 +68,13 @@ FestivalRevision (published)
 
 ## snapshot과 API 동작
 
-`CatalogSnapshotLoader`는 repeatable-read 읽기 transaction에서 published revision을 한 번
-선택한 뒤 한국어 번역, 정렬, 현재 map asset, 핀 target, canonical target과 ticket target을
-같은 revision으로 읽고 검증한다. 번역·정렬·현재 asset·target 중 하나라도 빠지거나 target이
-현재 version과 다르면 snapshot을 거부한다. 빈 `spaces`/`maps`는 정상 snapshot이며 각각
-`items: []`, `overviewId: null`을 반환한다.
+`CatalogSnapshotStore`는 repeatable-read 읽기 transaction에서 published revision을 한 번
+선택한 뒤 한국어 번역, 정렬, 현재 map asset, 핀 target, canonical target, ticket 안내 본문과
+ticket target을 같은 revision으로 읽고 검증한다. `TicketGuideController`는 요청마다
+`ticket_guide`를 다시 읽지 않고 이 snapshot만 사용한다. 번역·정렬·현재 asset·target 중
+하나라도 빠지거나 target이 현재 version과 다르면 snapshot을 거부한다. 빈 `spaces`/`maps`는 정상 snapshot이며 각각
+`items: []`, `overviewId: null`을 반환한다. 지도가 하나라도 있으면 전체 지도는 정확히
+하나여야 한다.
 
 `/maps/{mapId}/pins`는 존재하지 않는 지도에 404, 현재 `Map.version`과 다른
 `mapVersion`에 `409 MAP_VERSION_MISMATCH`, 맞는 version에 그 version의 핀만 반환한다.
@@ -100,8 +102,8 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
    제약을 추가하고 V6의 published revision에 기존 ticket guide를 연결한다.
 2. **읽기 수직 절단:** JDBC snapshot loader, `/readyz`, spaces/maps/places controller와
    400·404·409·503 오류를 추가한다.
-3. **안전 연결:** TicketGuideStore가 원시 네 값을 그대로 신뢰하지 않고 같은 snapshot의
-   검증된 target만 반환하게 바꾸며, request ID 반사도 안전하게 만든다.
+3. **안전 연결:** ticket 안내 본문과 원시 네 target 값을 같은 snapshot에서 읽고, target은
+   검증된 canonical `PLACE` 핀으로만 반환하게 바꾸며, request ID 반사도 안전하게 만든다.
 4. **운영 자료 투입 전 gate:** 실제 asset·좌표·문구·번역·티켓존 자료를 별도 검증 입력으로
    확인한다. 이 PR은 승인 자료를 넣거나 publish/import API를 만들지 않는다.
 
@@ -109,10 +111,11 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 
 - 빈 초기 published catalog가 부스·지도 GET에서 계약 형식의 정상 빈 응답을 낸다.
 - 비어 있지 않은 테스트 fixture에서 locale별 순서, `PLACE XOR AREA`, 대표 space target,
-  ticket target의 revision·place·pin·현재 mapVersion 정합성과 `Space → Place → Pin` 왕복
-  관계가 보장된다.
+  ticket 안내 본문·target의 같은 snapshot 정합성, revision·place·pin·현재 mapVersion 정합성과
+  `Space → Place → Pin` 왕복 관계가 보장된다.
 - 부분·고아·다른 revision·AREA·구버전 ticket/space target 및 같은 mapVersion의 다른
-  이미지·좌표 삽입이 DB 제약 또는 snapshot 검증에서 거절된다.
+  이미지·좌표·AREA 목적지 삽입이 DB 제약 또는 snapshot 검증에서 거절된다. alt만 다른
+  재게시는 같은 version으로 허용된다.
 - 알려지지 않은 resource는 404, 잘못된 query는 400, pins의 구버전은 409,
   snapshot 미준비는 503이며 오류도 schema에 맞는 meta revision(최소 1)을 낸다.
 - 운영 데이터가 없는 migration에는 가짜 부스·지도·핀·티켓존·번역이 없다.
@@ -122,7 +125,7 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 | 계층 | 반드시 확인할 결과 |
 |---|---|
 | Flyway/PostgreSQL | 실제 migration에서 FK·CHECK·UNIQUE 제약을 검증한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
-| Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, ticket target null/정상 경로를 검증한다. |
+| Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, snapshot 기반 ticket 안내·target null/정상 경로를 검증한다. |
 | API v2 | `contract-source.mjs`의 target 의미를 갱신하고 생성물 일치 및 mock contract check를 통과한다. Spring 응답은 JSON schema provider test로 별도 확인한다. |
 | 회귀 | `mvnw.cmd --batch-mode --no-transfer-progress verify`, `api-v2`의 `npm run generate`, `npm run check`, `git diff --check`를 실행한다. |
 | 성능 | 승인된 운영 자료를 넣기 전 합성 fixture에서 100/200/500 동시 조회를 실행하고 결과·환경·한계를 운영 문서에 남긴다. |

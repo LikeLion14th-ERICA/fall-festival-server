@@ -14,9 +14,11 @@ API 버전과 v1 호환 전략을 명시한다.
 
 ## 현재 구현 경계
 
-- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V6), 티켓,
-  스탬프와 혼잡도 조회가 있다. V6은 하나의 published FestivalRevision을 seed하지만 부스,
-  장소, 지도 자산·핀 카탈로그 migration과 공개 조회는 아직 없다.
+- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V7), 티켓,
+  스탬프·혼잡도와 published revision의 부스·장소·지도 카탈로그 공개 조회가 있다. V7은
+  revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를 만들지만,
+  승인된 운영 부스·지도·좌표·티켓존 자료는 seed하지 않는다. 상세 물리 모델과 완료 기준은
+  [부스·지도 공개 카탈로그](spaces-map-backend.md)를 따른다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
   함께 준비한 뒤에만 운영 DB를 연결한다.
 - `test/`의 Next.js·Spring Boot·PostgreSQL 코드는 PWA·스탬프·Push 실기기 검증 환경이다.
@@ -31,8 +33,9 @@ API 버전과 v1 호환 전략을 명시한다.
 - 공개 조회는 로그인 없이 유지한다. 관리자 쓰기는 서버 권한 검증과 감사 이력이 필수지만,
   계정·역할·세션·권한 회수 모델은 아직 결정되지 않았다.
 - 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
-  Festival/FestivalRevision의 물리 schema는 V2~V6에 존재하지만, 나머지 모델의 실제 컬럼·
-  인덱스·삭제 방식은 migration 설계에서 확정한다.
+  다만 `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`와 canonical map target의
+  현재 물리 schema는 V7에 있다. 나머지 모델의 컬럼·인덱스·삭제 방식은 migration 설계에서
+  확정한다.
 
 ## 논리 모델과 관계
 
@@ -89,9 +92,9 @@ API 버전과 v1 호환 전략을 명시한다.
 ## migration 착수 순서
 
 1. 적용 API 버전과 v1 호환 전략, 관리자 인증 경계를 확정한다.
-2. Festival·FestivalRevision과 FestivalDay, 공지·번역, 굿즈·실제 제공 조합부터 Flyway migration으로 만든다.
-3. DB 제약으로 `(notice_id, locale)` 및 `(goods_id, color_id, size_id)` 중복을 막고, 수량·결제·사용자 참여 테이블을 추가하지 않는다.
-4. MapAssetVersion과 MapPin의 버전·XOR 무결성, PerformanceArtist의 표시 순서를 설계한 뒤 나머지 콘텐츠 migration을 추가한다.
+2. 완료된 V7 카탈로그에는 승인 콘텐츠를 별도 개발자 작업으로 넣고, 공개 전 번역·정렬·asset·핀·target 검증을 통과시킨다.
+3. 공지·번역, 굿즈·실제 제공 조합과 공연은 해당 제품·계약 결정이 난 뒤 Flyway migration으로 만든다. DB 제약으로 `(notice_id, locale)` 및 `(goods_id, color_id, size_id)` 중복을 막고, 수량·결제·사용자 참여 테이블을 추가하지 않는다.
+4. PerformanceArtist의 표시 순서와 아직 결정되지 않은 지도 필터 분류를 설계한 뒤 나머지 콘텐츠 migration을 추가한다.
 5. migration마다 rollback 또는 복구 방법, API 계약·예시·통합 테스트를 같은 변경에서 갱신한다.
 
 ## 검증
@@ -101,4 +104,5 @@ API 버전과 v1 호환 전략을 명시한다.
 - 같은 날 생성된 다섯 HTML은 Chrome에서 1440×900, 1600×1000, 1920×1080,
   2048×1320 해상도의 light/dark 화면으로 확인했다. 가로·세로 overflow와 Viewer 겹침이 없고,
   1440×900 light 스크린샷을 시각 검토했다.
-- 이 문서는 설계 검토용이며 migration·JPA Entity·운영 DB 연결을 변경하지 않았다.
+- 부스·지도 실제 구현은 V7과 [부스·지도 공개 카탈로그](spaces-map-backend.md)에 기록한다.
+  이 문서의 나머지 모델은 계속 설계 검토 대상이며 운영 자료·DB 연결 값은 포함하지 않는다.

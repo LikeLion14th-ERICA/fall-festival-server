@@ -190,7 +190,7 @@ public class CatalogController {
             space.hoursText(),
             space.description(),
             contact,
-            null,
+            space.experience(),
             space.events(),
             menu,
             targetResponse(space.mapTarget())

@@ -12,9 +12,13 @@
 
 ## 현재 구현 상태
 
-루트 프로젝트는 서버 실행·테스트·패키징을 위한 초기 구성입니다. 축제 도메인 API,
-DB 연결, 관리자 인증, 배포 구성은 아직 구현하지 않았습니다. API v2는 프런트 연동용
-draft.3이며, 명세에 기재된 기능이 모두 구현되거나 공개 승인된 상태는 아닙니다.
+루트 프로젝트는 JDBC·PostgreSQL·Flyway를 사용해 축제 회차, 티켓·스탬프·혼잡도와
+published revision의 부스·지도 카탈로그 조회를 구현합니다. `db` profile에서는
+`/api/v2/spaces`, `/maps`, `/places`, `/ticket-guide` 등을 공개 조회로 제공하며, 카탈로그는
+시작 시 검증한 published snapshot만 읽습니다. 실제 부스·지도·좌표·티켓존 운영 자료는
+승인 전이므로 migration에 seed하지 않았습니다. 관리자 인증과 배포 구성은 아직 구현하지
+않았습니다. API v2는 프런트 연동용 draft.3이며, 명세의 모든 기능이 구현되거나 공개 승인된
+상태는 아닙니다.
 
 일반 사용자는 설치·로그인·회원가입 없이 공개 정보를 조회합니다. 구현 대상은
 라인업, 타임테이블, 부스 & 마켓, 지도, 공지 등이며, 관리자 권한은 서버에서 검증해야
@@ -84,7 +88,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `SPRING_DATASOURCE_URL` | (없음) | `jdbc:postgresql://host:5432/db` 형식. `db` profile에서만 사용 |
 | `SPRING_DATASOURCE_USERNAME` | (없음) | DB 계정 |
 | `SPRING_DATASOURCE_PASSWORD` | (없음) | DB 비밀번호 |
-| `SPRING_FLYWAY_ENABLED` | `false` | 마이그레이션 파일이 생기기 전까지 `false` 유지 |
+| `SPRING_FLYWAY_ENABLED` | `true` | `db` profile에서 Flyway migration 실행 여부 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
 

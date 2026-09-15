@@ -3,11 +3,9 @@ package dev.espero.festival.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
 
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.TicketGuideConfig;
-import dev.espero.festival.persistence.TicketGuideStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
@@ -16,23 +14,22 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class TicketGuideControllerTest {
 
-    private final TicketGuideStore store = mock(TicketGuideStore.class);
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final HttpServletRequest request = mock(HttpServletRequest.class);
 
-    private TicketGuideController controllerAt(String instant) {
+    private TicketGuideController controllerAt(String instant, TicketGuideConfig config) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-        when(snapshots.required()).thenReturn(snapshot(null));
-        return new TicketGuideController(store, snapshots, new ApiMetaSupport(clock), clock);
+        when(request.getParameterMap()).thenReturn(Map.of());
+        when(snapshots.required()).thenReturn(snapshot(config, null));
+        return new TicketGuideController(snapshots, new ApiMetaSupport(clock), clock);
     }
 
-    private CatalogSnapshot snapshot(CatalogSnapshot.MapTarget ticketMapTarget) {
+    private CatalogSnapshot snapshot(TicketGuideConfig config, CatalogSnapshot.MapTarget ticketMapTarget) {
         return new CatalogSnapshot(
             new CatalogSnapshot.FestivalContext(
                 "festival-test", UUID.fromString("00000000-0000-0000-0000-000000000001"), 7
@@ -41,6 +38,7 @@ class TicketGuideControllerTest {
             List.of(),
             List.of(),
             Map.of(),
+            config,
             ticketMapTarget
         );
     }
@@ -65,10 +63,8 @@ class TicketGuideControllerTest {
     }
 
     @Test
-    void returnsUnconfiguredWhenNoRowExists() {
-        when(store.find(any(UUID.class))).thenReturn(Optional.empty());
-
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z").getTicketGuide(request).data();
+    void returnsUnconfiguredWhenTheSnapshotHasNoTicketGuide() {
+        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", null).getTicketGuide(request).data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
         assertThat(data.unitPrice()).isNull();
@@ -86,9 +82,8 @@ class TicketGuideControllerTest {
             LocalTime.parse("13:00"), LocalTime.parse("21:00"),
             Instant.parse("2030-09-01T00:00:00Z")
         );
-        when(store.find(any(UUID.class))).thenReturn(Optional.of(partial));
 
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z").getTicketGuide(request).data();
+        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", partial).getTicketGuide(request).data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
         assertThat(data.unitPrice().amount()).isEqualTo(15000);
@@ -97,9 +92,7 @@ class TicketGuideControllerTest {
 
     @Test
     void returnsBeforeFestivalAheadOfTheFirstDay() {
-        when(store.find(any(UUID.class))).thenReturn(Optional.of(scheduledConfig()));
-
-        TicketGuideResponse data = controllerAt("2030-09-30T09:00:00Z").getTicketGuide(request).data();
+        TicketGuideResponse data = controllerAt("2030-09-30T09:00:00Z", scheduledConfig()).getTicketGuide(request).data();
 
         assertThat(data.date()).isEqualTo(LocalDate.parse("2030-09-30"));
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.BEFORE_FESTIVAL);
@@ -109,9 +102,7 @@ class TicketGuideControllerTest {
 
     @Test
     void returnsTransferOpenDuringTheDayBeforeCloseTime() {
-        when(store.find(any(UUID.class))).thenReturn(Optional.of(scheduledConfig()));
-
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z").getTicketGuide(request).data();
+        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", scheduledConfig()).getTicketGuide(request).data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.TRANSFER_OPEN);
         assertThat(data.account()).isNotNull();
@@ -120,9 +111,7 @@ class TicketGuideControllerTest {
 
     @Test
     void returnsDailyClosedAtOrAfterCloseTimeAndHidesAccount() {
-        when(store.find(any(UUID.class))).thenReturn(Optional.of(scheduledConfig()));
-
-        TicketGuideResponse data = controllerAt("2030-10-01T12:00:00Z").getTicketGuide(request).data();
+        TicketGuideResponse data = controllerAt("2030-10-01T12:00:00Z", scheduledConfig()).getTicketGuide(request).data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.DAILY_CLOSED);
         assertThat(data.account()).isNull();
@@ -130,9 +119,7 @@ class TicketGuideControllerTest {
 
     @Test
     void returnsFestivalEndedAfterTheLastDayAndClampsScheduleDate() {
-        when(store.find(any(UUID.class))).thenReturn(Optional.of(scheduledConfig()));
-
-        TicketGuideResponse data = controllerAt("2030-10-05T09:00:00Z").getTicketGuide(request).data();
+        TicketGuideResponse data = controllerAt("2030-10-05T09:00:00Z", scheduledConfig()).getTicketGuide(request).data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.FESTIVAL_ENDED);
         assertThat(data.account()).isNull();
@@ -140,14 +127,14 @@ class TicketGuideControllerTest {
     }
 
     @Test
-    void returnsOnlyTheSnapshotVerifiedTicketMapTarget() {
+    void returnsOnlyTheTicketGuideAndMapTargetCapturedInTheSameSnapshot() {
         Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC);
         CatalogSnapshot.MapTarget target = new CatalogSnapshot.MapTarget(
             "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
         );
-        when(snapshots.required()).thenReturn(snapshot(target));
-        when(store.find(any(UUID.class))).thenReturn(Optional.of(scheduledConfig()));
-        TicketGuideController controller = new TicketGuideController(store, snapshots, new ApiMetaSupport(clock), clock);
+        when(request.getParameterMap()).thenReturn(Map.of());
+        when(snapshots.required()).thenReturn(snapshot(scheduledConfig(), target));
+        TicketGuideController controller = new TicketGuideController(snapshots, new ApiMetaSupport(clock), clock);
 
         ApiResponse<TicketGuideResponse> response = controller.getTicketGuide(request);
 
