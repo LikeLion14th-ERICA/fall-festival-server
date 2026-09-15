@@ -73,7 +73,8 @@ FestivalRevision (published)
   URI 문법을 검증한다. scheme이나 host를 별도로 제한하지 않는다.
 - `ticket_guide`의 네 target 값은 모두 null이거나 모두 존재해야 한다. 존재할 때 동일
   revision의 현재 지도 version에 속한 `PLACE` 핀과 복합 FK로 연결한다. 실제 티켓존과
-  수령 부스의 동일성은 결정 11·26이 해결될 때까지 null로 둔다.
+  수령 부스의 동일성은 결정 11·26이 해결될 때까지 null로 둔다. 티켓 일정이 아직
+  확정되지 않아 응답 status가 `UNCONFIGURED`여도 검증된 target은 독립적으로 반환한다.
 
 ## snapshot과 API 동작
 
@@ -120,11 +121,12 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 
 - 빈 초기 published catalog가 부스·지도 GET에서 계약 형식의 정상 빈 응답을 낸다.
 - 비어 있지 않은 테스트 fixture에서 locale별 순서, `PLACE XOR AREA`, 대표 space target,
-  ticket 안내 본문·target의 같은 snapshot 정합성, revision·place·pin·현재 mapVersion 정합성과
-  `Space → Place → Pin` 왕복 관계가 보장된다.
+  ticket 안내 본문·target의 같은 snapshot 정합성 및 일정 미확정 상태의 target 반환,
+  revision·place·pin·현재 mapVersion 정합성과 `Space → Place → Pin` 왕복 관계가 보장된다.
 - 부분·고아·다른 revision·AREA·구버전 ticket/space target 및 같은 mapVersion의 다른
   이미지·좌표·AREA 목적지 삽입이 DB 제약 또는 snapshot 검증에서 거절된다. alt만 다른
-  재게시는 같은 version으로 허용된다.
+  재게시는 같은 version으로 허용된다. Space target의 OVERVIEW 지도, API v2 형식 밖의
+  공개 ID·mapVersion·이미지 URI reference도 snapshot 검증에서 거절된다.
 - 알려지지 않은 resource는 404, 잘못된 query는 400, pins의 구버전은 409,
   snapshot 미준비는 503이며 오류도 schema에 맞는 meta revision(최소 1)을 낸다.
 - 운영 데이터가 없는 migration에는 가짜 부스·지도·핀·티켓존·번역이 없다.
@@ -134,7 +136,7 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 | 계층 | 반드시 확인할 결과 |
 |---|---|
 | Flyway/PostgreSQL | 실제 migration에서 FK·CHECK·UNIQUE 제약을 검증한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
-| Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, snapshot 기반 ticket 안내·target null/정상 경로를 검증한다. |
+| Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, snapshot 기반 ticket 안내·target null/일정 미확정/정상 경로, 대표 target의 AREA 제약과 API v2 ID·이미지 URI 형식을 검증한다. |
 | API v2 | `contract-source.mjs`의 target 의미를 갱신하고 생성물 일치 및 mock contract check를 통과한다. Spring 응답은 JSON schema provider test로 별도 확인한다. |
 | 회귀 | `mvnw.cmd --batch-mode --no-transfer-progress verify`, `api-v2`의 `npm run generate`, `npm run check`, `git diff --check`를 실행한다. |
 | 성능 | 승인된 운영 자료를 넣기 전 합성 fixture에서 100/200/500 동시 조회를 실행하고 결과·환경·한계를 운영 문서에 남긴다. |
