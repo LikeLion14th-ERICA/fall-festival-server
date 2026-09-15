@@ -1,6 +1,6 @@
 # 화면 데이터 → API 필드
 
-Product Context v5 기준 26개 화면의 데이터 176개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
+Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
 
 | 데이터 ID | 항목 | 처리 | 계약/프런트 책임 | 위키 근거 |
 |---|---|---|---|---|
@@ -131,7 +131,7 @@ Product Context v5 기준 26개 화면의 데이터 176개를 추적합니다. �
 | STAMP-COLLECT-D03 | 상품 수령 여부 | 브라우저 | 브라우저: stamp.claimed | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-COLLECT-D04 | 기록 기준 날짜 | 브라우저 | 브라우저: stamp.date (KST 자정 초기화) | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-COLLECT-D05 | 공통 QR 식별값 | API | StampGuide.qrValue (제공 책임·배포 방식은 검토 필요) | [위키](../docs/wiki/product/stamp.md) |
-| STAMP-REWARD-D01 | 담당자 제시·직접 선택 금지 문구 | 프런트 | 프런트 고정 UI: 담당자에게 제시·사용자 직접 수령 선택 금지 안내 | [위키](../docs/wiki/product/stamp.md) |
+| STAMP-REWARD-D01 | 담당자 제시·수령 인증 코드 입력 안내 | 프런트 | 프런트 고정 UI: 담당자에게 제시·수령 인증 코드 입력·확인 버튼; 상품 수령 버튼 없음 | [위키](../docs/wiki/product/stamp.md) |
 | ADM-CROWD-D01 | 저장 혼잡도 | API | Crowding.savedLevel | [위키](../docs/wiki/product/admin/crowd.md) |
 | ADM-CROWD-D02 | 운영 상태 | API | Crowding.operatingStatus | [위키](../docs/wiki/product/admin/crowd.md) |
 | ADM-CROWD-D03 | 상태 색상 | API | Crowding.colorToken | [위키](../docs/wiki/product/admin/crowd.md) |
@@ -190,3 +190,4 @@ Product Context v5 기준 26개 화면의 데이터 176개를 추적합니다. �
 | GOODS-DETAIL-D08 | 실제 제공 조합 | API | Goods.options | [위키](../docs/wiki/product/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D08 | 실제 제공 조합 | API | Goods.options | [위키](../docs/wiki/product/admin/goods.md) |
 | SHOW-TIMETABLE-D07 | 반입 금지 물품 목록 | API | ProhibitedItems.items | [위키](../docs/wiki/product/timetable.md) |
+| STAMP-REWARD-D02 | 수령 인증 결과 | API | StampReceiptVerificationInput.code → StampReceiptVerification.verified | [위키](../docs/wiki/product/stamp.md) |

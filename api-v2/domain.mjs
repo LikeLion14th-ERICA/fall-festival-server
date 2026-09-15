@@ -3,6 +3,7 @@ import { initializeAdmin,hoursFor,inventoryFor,adminExecute,validateNotice } fro
 export const MOCK_NOW = '2030-10-01T18:00:00+09:00';
 export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
+const MOCK_STAMP_RECEIPT_CODE = 'MOCK-RECEIPT-CODE';
 const MAP_VERSION = 'mock-map-1';
 const image = (alt=IMAGE.alt,variant='default') => ({...structuredClone(IMAGE),url:variant==='default'?IMAGE.url:`${IMAGE.url}?variant=${encodeURIComponent(variant)}`,alt});
 const mockImage = (kind,id,name) => image(`개발용 가상 ${kind} ${name} 이미지 · 실제 축제 자료 아님`,`${kind}-${id}`);
@@ -279,6 +280,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       data={date,status:ticketStatus,unitPrice:unconfigured?null:money(1500),transferOpensAt:unconfigured?null:`${schedule}T00:00:00+09:00`,transferClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,pickupOpensAt:unconfigured?null:`${schedule}T13:00:00+09:00`,pickupClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,account:open?{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'}:null,transferLink:null,mapTarget:unconfigured?null:{mapId:'map-overview',placeId:'place-ticket',pinId:'pin-ticket',mapVersion:'mock-map-1'},instructions:['실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.','입금과 지급 여부는 현장에서 확인합니다.']};break;
     }
     case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['START는 참여 시작만 기록합니다.','공통 QR 인식 1회당 1개, 하루 4개 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
+    case 'verifyStampReceipt':if(scenario==='invalid-code'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');data={verified:true};break;
     case 'getAdminNotices':data={items:empty?[]:structuredClone(state.notices).filter(n=>!state.deleted.has(n.id)).sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)||a.id.localeCompare(b.id))};break;
     case 'getAdminNotice':if(state.deleted.has(params.noticeId))failure(404,'NOT_FOUND','삭제된 공지입니다.');data=find(state.notices,params.noticeId);if(missing)Object.assign(data,{templateId:null,links:[]});break;
     case 'postAdminNotice':case 'putAdminNotice':{

@@ -49,7 +49,7 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
 | 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도 동일 상태 재선택의 저장·시각 처리는 결정 대기 |
-| 스탬프 | HTTP guide missing-optional와 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·수령·다음 날짜 |
+| 스탬프 | guide missing-optional, 수령 인증 normal / invalid-code / error, 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·코드 오류·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
 
@@ -64,7 +64,7 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 
 홈 FAQ 메뉴는 `Config.links.faq`가 있을 때만 그 HTTPS URL을 새 탭으로 엽니다. `faq=null`이면 임의 이동이나 앱 내부 FAQ 화면을 만들지 않습니다.
 
-부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계, 스탬프 누적은 프런트 상태입니다. 스탬프는 로그인 없이 공통 QR을 사용하므로 엄격한 중복 참여 차단을 약속할 수 없습니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
+부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계, 스탬프 누적은 프런트 상태입니다. 스탬프는 로그인 없이 공통 QR을 사용하므로 엄격한 중복 참여 차단을 약속할 수 없습니다. 4칸을 모은 사용자의 수령 안내 창에는 `상품 수령` 버튼을 만들지 말고 수령 인증 코드 입력칸과 `확인` 버튼을 둡니다. 멋사 부스 담당자가 입력한 코드만 `POST /stamp-receipt-verifications`로 보내며, `verified: true`일 때만 로컬 `stamp.claimed=true`로 바꾸고 입력값은 저장하지 않습니다. `INVALID_RECEIPT_CODE`·통신 오류에서는 미수령 상태와 안내 창을 유지합니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
 
 ## 새 관리자 계약 연동
 

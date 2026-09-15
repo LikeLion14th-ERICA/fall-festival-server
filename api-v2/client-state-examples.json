@@ -27,6 +27,14 @@
       "count": 4,
       "claimed": false
     },
+    "receiptCodeRejected": {
+      "date": "2030-10-01",
+      "started": true,
+      "count": 4,
+      "claimed": false,
+      "route": "STAMP-REWARD",
+      "message": "코드를 확인해 주세요"
+    },
     "claimed": {
       "date": "2030-10-01",
       "started": true,
@@ -45,5 +53,5 @@
     "wrongQr": "스탬프투어 QR이 아니에요",
     "language": "언어를 변경하지 못했어요. 다시 시도해 주세요"
   },
-  "note": "브라우저 상태 예시이며 HTTP 응답이 아니다. START 전 기본 카메라 QR 직접 진입은 시작 화면으로 이동하며 스탬프 적립·수령 서버 API는 추가하지 않는다."
+  "note": "브라우저 상태 예시이며 HTTP 응답이 아니다. START 전 기본 카메라 QR 직접 진입은 시작 화면으로 이동한다. 상품 수령은 현장 담당자가 입력한 코드를 서버가 확인해 verified:true를 돌려줄 때만 claimed를 브라우저에 저장하며, 코드 자체는 저장하지 않는다."
 }

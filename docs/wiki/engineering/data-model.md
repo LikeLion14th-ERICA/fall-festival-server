@@ -45,7 +45,7 @@ API 버전과 v1 호환 전략을 명시한다.
 | 굿즈 | `Goods`, `GoodsImage`, `GoodsColor`, `GoodsSize`, `GoodsOption`, `PaymentGuide`, `BankAccount` | 실제 제공 조합만 `GoodsOption`으로 만든다. `(goods_id, color_id, size_id)`는 고유하고 `availability`는 `ON_SALE` 또는 `SOLD_OUT`이며 `updated_at`을 남긴다. `allSoldOut`은 실제 조합이 하나 이상이고 모두 품절일 때의 파생값이다. 수량, 자동 품절, 입금 확인, 지급 완료는 저장하지 않는다. |
 | 공연 | `Artist`, `ArtistLink`, `ArtistSong`, `Performance`, `PerformanceArtist`, `ProhibitedItem` | 공연과 출연진은 `PerformanceArtist`로 연결해 여러 출연진과 표시 순서를 표현한다. Performance는 FestivalDay에 속한다. 여러 무대 지원용 `Stage` 후보는 공통 API 요구이지만 현재 Performance 계약 필드가 없어 확정 게이트로 남긴다. |
 | 부스·지도 | `Space`, `SpaceEvent`, `SpaceMenu`, `Place`, `Map`, `MapAssetVersion`, `MapPin`, `MapArea` | Space는 선택적으로 Place에 연결한다. MapAssetVersion 1:N MapPin으로 이미지와 좌표의 버전을 묶는다. MapPin은 `place_id` 또는 `area_id` 중 정확히 하나만 가진다. Place의 종류와 핀 target 종류를 같은 enum으로 합치지 않는다. |
-| 안내 설정 | `TicketGuide`, `StampGuide`, `StampReward`, `FestivalLink`, `BankAccount` | 축제/운영일에 귀속한 안내 콘텐츠만 저장한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
+| 안내 설정 | `TicketGuide`, `StampGuide`, `StampReward`, `FestivalLink`, `BankAccount` | 축제/운영일에 귀속한 안내 콘텐츠만 저장한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 수령 인증 코드는 서버 비밀 설정에서만 검증하고 콘텐츠·사용자 이력 모델로 저장하지 않는다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
 
 관리자 쓰기는 서버 권한 검증과 감사 이력이 필요하다. 다만 계정·역할·세션·권한 회수 모델은
 아직 확정되지 않았으므로 `AdminAuditEvent`의 actor 참조와 보관 정책은 인증 결정과 함께 설계한다.

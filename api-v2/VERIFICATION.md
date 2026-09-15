@@ -1,14 +1,15 @@
 # API v2 검증 기록
 
 검증일: 2026-09-15. 환경: Windows, Node.js 24.
-기준: main 76ee8b67ef2f85b24ea4a0391ca4c6b53a60526a 및 사용자 FAQ 외부 링크·START 전 QR 진입 결정.
+기준: main 63ccdf383839718faf4172cac578f672dd928658 및 사용자 FAQ 외부 링크·START 전 QR 진입·현장 수령 인증 코드 결정.
 
 | 검사 | 실제 결과 |
 |---|---|
 | npm ci --ignore-scripts | 16개 패키지 설치, audit 취약점 0 |
-| `node generate.mjs --check` 및 `node --test contract.test.mjs` (지정 Node 24) | 37개 API, 26개 화면, 186개 매핑, 예제258개. 테스트 282개 통과, 실패·건너뜀0 |
+| `node generate.mjs --check` 및 `node --test contract.test.mjs` (지정 Node 24) | 38개 API, 26개 화면, 187개 매핑, 예제263개. 테스트 288개 통과, 실패·건너뜀0 |
 | OpenAPI·JSON Schema | Swagger Parser OpenAPI3.1, Ajv2020/formats와 실제 HTTP 응답 검증 통과 |
-| HTTP 예제 | 258개 요청의 상태 코드·본문·스키마 일치 |
+| HTTP 예제 | 263개 요청의 상태 코드·본문·스키마 일치 |
+| 스탬프 수령 인증 | 현장 코드 정상·오류 응답, 코드 미노출, 성공 뒤에만 브라우저 `claimed` 상태 전환 검증 |
 | 관리자 v5 | 시간 편집·수량 경로 제거, 실제3조합 독립 상태, 잘못된 조합·quantity 거절 |
 | 신규 상품·옵션 | 최초 상태 미정409·실패 후 미변경, 명시적 목 상태 성공, 기존 상태 보존·삭제 거절 |
 | 공지 | 한국어 우선 게시·영어 실패/재시도·READY만 노출, createdAt 불변·줄바꿈·삭제·템플릿 보존 |

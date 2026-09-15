@@ -10546,6 +10546,400 @@
         ]
       }
     },
+    "/api/v2/stamp-receipt-verifications": {
+      "post": {
+        "operationId": "verifyStampReceipt",
+        "summary": "스탬프 상품 수령 인증",
+        "description": "연결 화면: STAMP-REWARD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ko",
+                "en",
+                "zh-Hans",
+                "ja"
+              ],
+              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
+              "default": "ko"
+            },
+            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampReceiptVerificationResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "스탬프 상품 수령 인증: normal",
+                    "value": {
+                      "data": {
+                        "verified": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "스탬프 상품 수령 인증: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "413": {
+            "description": "요청 본문은 64KiB 이하입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "415": {
+            "description": "application/json 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "422": {
+            "description": "요청 필드를 확인해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid-code": {
+                    "summary": "스탬프 상품 수령 인증: invalid-code",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_RECEIPT_CODE",
+                        "message": "수령 인증 코드를 확인해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "스탬프 상품 수령 인증: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "스탬프 상품 수령 인증: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "STAMP-REWARD"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "invalid-code",
+          "error",
+          "bad-request",
+          "rate-limited"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "저장할 변경값",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StampReceiptVerificationInput"
+              },
+              "example": {
+                "code": "MOCK-RECEIPT-CODE"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/admin/crowding": {
       "get": {
         "operationId": "getAdminCrowding",
@@ -21165,6 +21559,40 @@
         "additionalProperties": false,
         "description": ""
       },
+      "StampReceiptVerificationInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "description": "멋사 부스 담당자가 현장에서 입력하는 수령 인증 코드. 실제 값은 서버 비밀 설정으로만 관리하며 클라이언트·로그에 저장하지 않음.",
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "StampReceiptVerification": {
+        "type": "object",
+        "properties": {
+          "verified": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "서버가 현장 수령 인증 코드를 확인했음을 뜻함. 사용자 참여·지급 이력은 만들지 않음."
+          }
+        },
+        "required": [
+          "verified"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
       "Translation": {
         "type": "object",
         "properties": {
@@ -21970,6 +22398,23 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/StampGuide"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "StampReceiptVerificationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StampReceiptVerification"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"
