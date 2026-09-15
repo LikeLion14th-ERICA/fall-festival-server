@@ -7,9 +7,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -28,16 +29,21 @@ public class TicketGuideStore {
         this.jdbc = jdbc;
     }
 
-    public Optional<TicketGuideConfig> find() {
+    /**
+     * A ticket guide is only read for the captured published revision. Its
+     * map target is loaded by the same catalog snapshot, never as four
+     * independently trusted strings from this query.
+     */
+    public Optional<TicketGuideConfig> find(UUID festivalRevisionId) {
         return jdbc.query("""
             SELECT unit_price_amount, account_bank_name, account_number, account_holder,
-                   transfer_link_label, transfer_link_url, map_id, place_id, pin_id,
-                   map_version, instructions, festival_start_date, festival_end_date,
+                   transfer_link_label, transfer_link_url, instructions, festival_start_date, festival_end_date,
                    daily_transfer_open_time, daily_transfer_close_time,
                    daily_pickup_open_time, daily_pickup_close_time, updated_at
             FROM ticket_guide
-            WHERE id = 1
-            """, Map.of(), (resultSet, rowNumber) -> map(resultSet)
+            WHERE id = 1 AND festival_revision_id = :festivalRevisionId
+            """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
+            (resultSet, rowNumber) -> map(resultSet)
         ).stream().findFirst();
     }
 
@@ -49,10 +55,6 @@ public class TicketGuideStore {
             resultSet.getString("account_holder"),
             resultSet.getString("transfer_link_label"),
             resultSet.getString("transfer_link_url"),
-            resultSet.getString("map_id"),
-            resultSet.getString("place_id"),
-            resultSet.getString("pin_id"),
-            resultSet.getString("map_version"),
             readStrings(resultSet, "instructions"),
             resultSet.getObject("festival_start_date", LocalDate.class),
             resultSet.getObject("festival_end_date", LocalDate.class),

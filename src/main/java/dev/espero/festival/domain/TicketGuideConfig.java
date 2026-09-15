@@ -12,10 +12,6 @@ public record TicketGuideConfig(
     String accountHolder,
     String transferLinkLabel,
     String transferLinkUrl,
-    String mapId,
-    String placeId,
-    String pinId,
-    String mapVersion,
     List<String> instructions,
     LocalDate festivalStartDate,
     LocalDate festivalEndDate,
@@ -34,10 +30,6 @@ public record TicketGuideConfig(
 
     public boolean hasAccount() {
         return accountBankName != null && accountNumber != null && accountHolder != null;
-    }
-
-    public boolean hasMapTarget() {
-        return mapId != null && placeId != null && pinId != null && mapVersion != null;
     }
 
     public boolean hasTransferLink() {

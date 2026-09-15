@@ -1,0 +1,494 @@
+package dev.espero.festival.persistence;
+
+import dev.espero.festival.domain.CatalogSnapshot;
+import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
+import dev.espero.festival.domain.CatalogSnapshot.FestivalContext;
+import dev.espero.festival.domain.CatalogSnapshot.Image;
+import dev.espero.festival.domain.CatalogSnapshot.Link;
+import dev.espero.festival.domain.CatalogSnapshot.MapTarget;
+import dev.espero.festival.domain.CatalogSnapshot.Money;
+import dev.espero.festival.domain.CatalogSnapshot.Pin;
+import dev.espero.festival.domain.CatalogSnapshot.PinKey;
+import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
+import dev.espero.festival.domain.CatalogSnapshot.Place;
+import dev.espero.festival.domain.CatalogSnapshot.Space;
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Loads all public catalog data in one repeatable-read transaction. A bad
+ * catalog is rejected here instead of becoming a partially visible response.
+ */
+@Repository
+@Profile("db")
+public class CatalogSnapshotStore {
+
+    public static final String PUBLIC_LOCALE = "ko";
+
+    private final NamedParameterJdbcTemplate jdbc;
+
+    public CatalogSnapshotStore(NamedParameterJdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public CatalogSnapshot loadPublished() {
+        FestivalContext context = loadPublishedContext();
+        List<CatalogMap> maps = loadMaps(context);
+        List<Place> places = loadPlaces(context);
+        Map<String, List<String>> events = loadEvents(context);
+        Map<String, List<Money>> menus = loadMenus(context);
+        List<Space> spaces = loadSpaces(context, events, menus);
+        Map<PinKey, List<Pin>> pins = loadPins(context, maps);
+        MapTarget ticketMapTarget = loadTicketMapTarget(context);
+
+        verifySingleOverview(maps);
+        verifySpaceContent(spaces);
+        verifyPinTargets(maps, places, pins);
+        verifySpaceTargets(spaces, maps, places, pins);
+        verifyTicketTarget(ticketMapTarget, maps, places, pins);
+        verifyVersionHistory(context);
+
+        return new CatalogSnapshot(context, spaces, maps, places, pins, ticketMapTarget);
+    }
+
+    private FestivalContext loadPublishedContext() {
+        List<FestivalContext> contexts = jdbc.query("""
+            SELECT f.id AS festival_id, r.id AS revision_id, r.revision_number
+            FROM festival_revisions r
+            JOIN festivals f ON f.id = r.festival_id
+            WHERE r.state = 'published'
+            ORDER BY f.id
+            """, Map.of(), (resultSet, rowNumber) -> new FestivalContext(
+                resultSet.getObject("festival_id", UUID.class).toString(),
+                resultSet.getObject("revision_id", UUID.class),
+                resultSet.getLong("revision_number")
+            ));
+        if (contexts.size() != 1) {
+            throw new CatalogIntegrityException("Exactly one published festival revision is required.");
+        }
+        return contexts.getFirst();
+    }
+
+    private List<CatalogMap> loadMaps(FestivalContext context) {
+        List<CatalogMap> maps = new ArrayList<>();
+        jdbc.query("""
+            SELECT m.id, m.kind, m.current_version, mt.name,
+                   a.image_url, a.image_alt, a.image_width, a.image_height
+            FROM maps m
+            JOIN map_asset_versions a
+              ON a.festival_revision_id = m.festival_revision_id
+             AND a.map_id = m.id
+             AND a.version = m.current_version
+            LEFT JOIN map_translations mt
+              ON mt.festival_revision_id = m.festival_revision_id
+             AND mt.map_id = m.id
+             AND mt.locale = :locale
+            WHERE m.festival_revision_id = :revisionId
+            ORDER BY m.sort_rank, m.id
+            """, parameters(context), resultSet -> {
+            String name = resultSet.getString("name");
+            require(name != null, "Published map is missing a Korean translation.");
+            maps.add(new CatalogMap(
+                resultSet.getString("id"),
+                name,
+                resultSet.getString("kind"),
+                resultSet.getString("current_version"),
+                new Image(
+                    resultSet.getString("image_url"),
+                    resultSet.getString("image_alt"),
+                    resultSet.getInt("image_width"),
+                    resultSet.getInt("image_height")
+                )
+            ));
+        });
+        return List.copyOf(maps);
+    }
+
+    private List<Place> loadPlaces(FestivalContext context) {
+        List<Place> places = new ArrayList<>();
+        jdbc.query("""
+            SELECT p.id, p.kind, p.space_id, pt.locale,
+                   pt.name, pt.location_text, pt.hours_text, pt.description_text, pt.usage_text
+            FROM places p
+            LEFT JOIN place_translations pt
+              ON pt.festival_revision_id = p.festival_revision_id
+             AND pt.place_id = p.id
+             AND pt.locale = :locale
+            WHERE p.festival_revision_id = :revisionId
+            ORDER BY p.id
+            """, parameters(context), resultSet -> {
+            require(resultSet.getString("locale") != null, "Published place is missing a Korean translation row.");
+            places.add(new Place(
+                resultSet.getString("id"),
+                resultSet.getString("kind"),
+                resultSet.getString("name"),
+                resultSet.getString("location_text"),
+                resultSet.getString("hours_text"),
+                resultSet.getString("description_text"),
+                resultSet.getString("usage_text"),
+                resultSet.getString("space_id")
+            ));
+        });
+        return List.copyOf(places);
+    }
+
+    private Map<String, List<String>> loadEvents(FestivalContext context) {
+        Map<String, List<String>> events = new LinkedHashMap<>();
+        jdbc.query("""
+            SELECT space_id, content
+            FROM space_events
+            WHERE festival_revision_id = :revisionId AND locale = :locale
+            ORDER BY space_id, sort_order
+            """, parameters(context), resultSet -> {
+                events.computeIfAbsent(resultSet.getString("space_id"), ignored -> new ArrayList<>())
+                    .add(resultSet.getString("content"));
+            }
+        );
+        return immutableLists(events);
+    }
+
+    private Map<String, List<Money>> loadMenus(FestivalContext context) {
+        Map<String, List<Money>> menus = new LinkedHashMap<>();
+        jdbc.query("""
+            SELECT space_id, name, price_amount
+            FROM space_menu_items
+            WHERE festival_revision_id = :revisionId AND locale = :locale
+            ORDER BY space_id, sort_order
+            """, parameters(context), resultSet -> {
+                menus.computeIfAbsent(resultSet.getString("space_id"), ignored -> new ArrayList<>())
+                    .add(new Money(resultSet.getString("name"), resultSet.getInt("price_amount")));
+            }
+        );
+        return immutableLists(menus);
+    }
+
+    private List<Space> loadSpaces(
+        FestivalContext context,
+        Map<String, List<String>> events,
+        Map<String, List<Money>> menus
+    ) {
+        List<Space> spaces = new ArrayList<>();
+        jdbc.query("""
+            SELECT s.id, s.category, s.image_url, s.image_width, s.image_height,
+                   st.locale, st.name, st.image_alt, st.location_text, st.operator_text,
+                   st.hours_text, st.description_text, st.contact_label, st.contact_url,
+                   so.sort_rank,
+                   smt.map_id, smt.place_id, smt.pin_id, smt.map_version
+            FROM spaces s
+            LEFT JOIN space_translations st
+              ON st.festival_revision_id = s.festival_revision_id
+             AND st.space_id = s.id
+             AND st.locale = :locale
+            LEFT JOIN space_sort_orders so
+              ON so.festival_revision_id = s.festival_revision_id
+             AND so.space_id = s.id
+             AND so.locale = :locale
+            LEFT JOIN space_map_targets smt
+              ON smt.festival_revision_id = s.festival_revision_id
+             AND smt.space_id = s.id
+            WHERE s.festival_revision_id = :revisionId
+            ORDER BY so.sort_rank NULLS LAST, s.id
+            """, parameters(context), resultSet -> {
+            require(resultSet.getString("locale") != null, "Published space is missing a Korean translation.");
+            require(resultSet.getObject("sort_rank") != null, "Published space is missing a Korean sort rank.");
+            String contactLabel = resultSet.getString("contact_label");
+            String contactUrl = resultSet.getString("contact_url");
+            Link contact = contactLabel == null ? null : new Link(contactLabel, contactUrl);
+            String spaceId = resultSet.getString("id");
+            spaces.add(new Space(
+                spaceId,
+                resultSet.getString("category"),
+                resultSet.getString("name"),
+                new Image(
+                    resultSet.getString("image_url"),
+                    resultSet.getString("image_alt"),
+                    resultSet.getInt("image_width"),
+                    resultSet.getInt("image_height")
+                ),
+                resultSet.getString("location_text"),
+                resultSet.getString("operator_text"),
+                resultSet.getString("hours_text"),
+                resultSet.getString("description_text"),
+                contact,
+                events.getOrDefault(spaceId, List.of()),
+                menus.getOrDefault(spaceId, List.of()),
+                targetOrNull(resultSet)
+            ));
+        });
+        return List.copyOf(spaces);
+    }
+
+    private Map<PinKey, List<Pin>> loadPins(FestivalContext context, List<CatalogMap> maps) {
+        Map<String, CatalogMap> mapsById = maps.stream()
+            .collect(java.util.stream.Collectors.toMap(CatalogMap::id, map -> map));
+        Map<PinKey, List<Pin>> pins = new LinkedHashMap<>();
+        jdbc.query("""
+            SELECT p.map_id, p.map_version, p.id, p.category, p.x, p.y,
+                   p.place_id, p.area_id, pt.label, a.target_map_id
+            FROM map_pins p
+            JOIN maps m
+              ON m.festival_revision_id = p.festival_revision_id
+             AND m.id = p.map_id
+             AND m.current_version = p.map_version
+            LEFT JOIN map_pin_translations pt
+              ON pt.festival_revision_id = p.festival_revision_id
+             AND pt.map_id = p.map_id
+             AND pt.map_version = p.map_version
+             AND pt.pin_id = p.id
+             AND pt.locale = :locale
+            LEFT JOIN map_areas a
+              ON a.festival_revision_id = p.festival_revision_id
+             AND a.id = p.area_id
+            WHERE p.festival_revision_id = :revisionId
+            ORDER BY p.map_id, p.map_version, p.id
+            """, parameters(context), resultSet -> {
+            require(resultSet.getString("label") != null, "Published map pin is missing a Korean label.");
+            String placeId = resultSet.getString("place_id");
+            PinTarget target = placeId != null
+                ? new PinTarget("PLACE", placeId)
+                : new PinTarget("AREA", resultSet.getString("target_map_id"));
+            require(target.id() != null, "Published area pin has no target map.");
+            if (target.kind().equals("AREA")) {
+                CatalogMap targetMap = mapsById.get(target.id());
+                require(targetMap != null && targetMap.kind().equals("AREA"),
+                    "Published area pin must point to an AREA map in the same snapshot.");
+            }
+            PinKey key = new PinKey(resultSet.getString("map_id"), resultSet.getString("map_version"));
+            pins.computeIfAbsent(key, ignored -> new ArrayList<>()).add(new Pin(
+                resultSet.getString("id"),
+                resultSet.getString("category"),
+                resultSet.getString("label"),
+                resultSet.getBigDecimal("x"),
+                resultSet.getBigDecimal("y"),
+                target
+            ));
+        });
+        return immutablePinLists(pins);
+    }
+
+    private MapTarget loadTicketMapTarget(FestivalContext context) {
+        List<MapTarget> targets = jdbc.query("""
+            SELECT map_id, place_id, pin_id, map_version
+            FROM ticket_guide
+            WHERE id = 1 AND festival_revision_id = :revisionId
+            """, parameters(context), (resultSet, rowNumber) -> targetOrNull(resultSet));
+        if (targets.isEmpty()) {
+            return null;
+        }
+        if (targets.size() != 1) {
+            throw new CatalogIntegrityException("More than one current ticket guide was found.");
+        }
+        return targets.getFirst();
+    }
+
+    private void verifySingleOverview(List<CatalogMap> maps) {
+        long overviewCount = maps.stream().filter(map -> map.kind().equals("OVERVIEW")).count();
+        require(overviewCount <= 1, "Published catalog has more than one overview map.");
+    }
+
+    private void verifySpaceContent(List<Space> spaces) {
+        for (Space space : spaces) {
+            require(space.category().equals("BOOTH") || space.events().isEmpty(),
+                "Only BOOTH spaces can publish events.");
+            require(space.category().equals("PUB") || space.menu().isEmpty(),
+                "Only PUB spaces can publish menus.");
+        }
+    }
+
+    private void verifyPinTargets(
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pins
+    ) {
+        Map<String, Place> placesById = places.stream()
+            .collect(java.util.stream.Collectors.toMap(Place::id, place -> place));
+        for (List<Pin> pinsForMap : pins.values()) {
+            for (Pin pin : pinsForMap) {
+                if (pin.target().kind().equals("PLACE")) {
+                    require(placesById.containsKey(pin.target().id()),
+                        "Published place pin points to a missing place.");
+                }
+            }
+        }
+    }
+
+    private void verifySpaceTargets(
+        List<Space> spaces,
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pins
+    ) {
+        Map<String, Place> placesById = places.stream()
+            .collect(java.util.stream.Collectors.toMap(Place::id, place -> place));
+        for (Space space : spaces) {
+            MapTarget target = space.mapTarget();
+            if (target == null) {
+                continue;
+            }
+            Place place = placesById.get(target.placeId());
+            require(place != null && space.id().equals(place.spaceId()),
+                "Space map target must return to the same space through its place.");
+            requireCurrentMapTarget(target, maps, pins);
+        }
+    }
+
+    private void verifyTicketTarget(
+        MapTarget target,
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pins
+    ) {
+        if (target == null) {
+            return;
+        }
+        require(places.stream().anyMatch(place -> place.id().equals(target.placeId())),
+            "Ticket map target points to a missing place.");
+        requireCurrentMapTarget(target, maps, pins);
+    }
+
+    private void requireCurrentMapTarget(
+        MapTarget target,
+        List<CatalogMap> maps,
+        Map<PinKey, List<Pin>> pins
+    ) {
+        CatalogMap map = maps.stream().filter(candidate -> candidate.id().equals(target.mapId())).findFirst()
+            .orElseThrow(() -> new CatalogIntegrityException("Map target points to a missing map."));
+        require(map.version().equals(target.mapVersion()), "Map target must use the map's current version.");
+        boolean matchesPlacePin = pins.getOrDefault(new PinKey(target.mapId(), target.mapVersion()), List.of())
+            .stream()
+            .anyMatch(pin -> pin.id().equals(target.pinId())
+                && pin.target().kind().equals("PLACE")
+                && pin.target().id().equals(target.placeId()));
+        require(matchesPlacePin, "Map target must point to a matching PLACE pin.");
+    }
+
+    /**
+     * A map version is a geometry identity, not a revision number. The
+     * revision-scoped tables retain publication history, so validate that a
+     * reused version has the same image and pin geometry in every revision of
+     * the same festival before exposing it.
+     */
+    private void verifyVersionHistory(FestivalContext context) {
+        UUID festivalId = UUID.fromString(context.festivalId());
+        Map<VersionKey, AssetShape> assets = new HashMap<>();
+        Map<RevisionVersionKey, Map<String, PinShape>> pinSets = new LinkedHashMap<>();
+        List<RevisionVersionKey> revisionVersions = new ArrayList<>();
+
+        jdbc.query("""
+            SELECT a.festival_revision_id, a.map_id, a.version,
+                   a.image_url, a.image_alt, a.image_width, a.image_height
+            FROM map_asset_versions a
+            JOIN festival_revisions r ON r.id = a.festival_revision_id
+            WHERE r.festival_id = :festivalId AND r.state IN ('published', 'archived')
+            ORDER BY a.map_id, a.version, a.festival_revision_id
+            """, new MapSqlParameterSource("festivalId", festivalId), resultSet -> {
+            RevisionVersionKey revisionVersion = new RevisionVersionKey(
+                resultSet.getObject("festival_revision_id", UUID.class),
+                resultSet.getString("map_id"),
+                resultSet.getString("version")
+            );
+            revisionVersions.add(revisionVersion);
+            AssetShape shape = new AssetShape(
+                resultSet.getString("image_url"),
+                resultSet.getString("image_alt"),
+                resultSet.getInt("image_width"),
+                resultSet.getInt("image_height")
+            );
+            AssetShape previous = assets.putIfAbsent(new VersionKey(revisionVersion.mapId(), revisionVersion.version()), shape);
+            require(previous == null || previous.equals(shape),
+                "A mapVersion cannot have different image data across revisions.");
+        });
+
+        jdbc.query("""
+            SELECT p.festival_revision_id, p.map_id, p.map_version, p.id, p.x, p.y, p.place_id, p.area_id
+            FROM map_pins p
+            JOIN festival_revisions r ON r.id = p.festival_revision_id
+            WHERE r.festival_id = :festivalId AND r.state IN ('published', 'archived')
+            ORDER BY p.map_id, p.map_version, p.festival_revision_id, p.id
+            """, new MapSqlParameterSource("festivalId", festivalId), resultSet -> {
+            RevisionVersionKey key = new RevisionVersionKey(
+                resultSet.getObject("festival_revision_id", UUID.class),
+                resultSet.getString("map_id"),
+                resultSet.getString("map_version")
+            );
+            pinSets.computeIfAbsent(key, ignored -> new LinkedHashMap<>()).put(
+                resultSet.getString("id"),
+                new PinShape(
+                    resultSet.getBigDecimal("x"),
+                    resultSet.getBigDecimal("y"),
+                    resultSet.getString("place_id"),
+                    resultSet.getString("area_id")
+                )
+            );
+        });
+
+        Map<VersionKey, Map<String, PinShape>> canonicalPinSets = new HashMap<>();
+        for (RevisionVersionKey revisionVersion : revisionVersions) {
+            VersionKey version = new VersionKey(revisionVersion.mapId(), revisionVersion.version());
+            Map<String, PinShape> pinSet = pinSets.getOrDefault(revisionVersion, Map.of());
+            Map<String, PinShape> previous = canonicalPinSets.putIfAbsent(version, pinSet);
+            require(previous == null || previous.equals(pinSet),
+                "A mapVersion cannot have different pin geometry or targets across revisions.");
+        }
+    }
+
+    private MapSqlParameterSource parameters(FestivalContext context) {
+        return new MapSqlParameterSource()
+            .addValue("revisionId", context.revisionId())
+            .addValue("locale", PUBLIC_LOCALE);
+    }
+
+    private MapTarget targetOrNull(ResultSet resultSet) throws SQLException {
+        String mapId = resultSet.getString("map_id");
+        String placeId = resultSet.getString("place_id");
+        String pinId = resultSet.getString("pin_id");
+        String mapVersion = resultSet.getString("map_version");
+        if (mapId == null && placeId == null && pinId == null && mapVersion == null) {
+            return null;
+        }
+        require(mapId != null && placeId != null && pinId != null && mapVersion != null,
+            "A map target must contain all four fields.");
+        return new MapTarget(mapId, placeId, pinId, mapVersion);
+    }
+
+    private static <T> Map<String, List<T>> immutableLists(Map<String, ? extends Collection<T>> source) {
+        Map<String, List<T>> result = new LinkedHashMap<>();
+        source.forEach((key, values) -> result.put(key, List.copyOf(values)));
+        return Map.copyOf(result);
+    }
+
+    private static <T> Map<PinKey, List<T>> immutablePinLists(Map<PinKey, ? extends Collection<T>> source) {
+        Map<PinKey, List<T>> result = new LinkedHashMap<>();
+        source.forEach((key, values) -> result.put(key, List.copyOf(values)));
+        return Map.copyOf(result);
+    }
+
+    private static void require(boolean condition, String message) {
+        if (!condition) {
+            throw new CatalogIntegrityException(message);
+        }
+    }
+
+    private record VersionKey(String mapId, String version) {}
+
+    private record RevisionVersionKey(UUID revisionId, String mapId, String version) {}
+
+    private record AssetShape(String url, String alt, int width, int height) {}
+
+    private record PinShape(BigDecimal x, BigDecimal y, String placeId, String areaId) {}
+}

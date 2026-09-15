@@ -32,7 +32,7 @@ public class GlobalApiExceptionHandler {
     ResponseEntity<ApiErrorResponse> handleNoResourceFound(NoResourceFoundException exception, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.", List.of(), false),
-            metaSupport.meta(request, 0, "ko")
+            metaSupport.metaForError(request)
         ));
     }
 
@@ -43,7 +43,7 @@ public class GlobalApiExceptionHandler {
     ) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("METHOD_NOT_ALLOWED", "지원하지 않는 메서드입니다.", List.of(), false),
-            metaSupport.meta(request, 0, "ko")
+            metaSupport.metaForError(request)
         ));
     }
 
@@ -51,7 +51,7 @@ public class GlobalApiExceptionHandler {
     ResponseEntity<ApiErrorResponse> handleApiException(ApiException exception, HttpServletRequest request) {
         return ResponseEntity.status(exception.status()).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody(exception.code(), exception.getMessage(), List.of(), exception.retryable()),
-            metaSupport.meta(request, 0, "ko")
+            metaSupport.metaForError(request)
         ));
     }
 
@@ -60,7 +60,7 @@ public class GlobalApiExceptionHandler {
         log.error("Unhandled API exception: method={} path={}", request.getMethod(), request.getRequestURI(), exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("INTERNAL_ERROR", "처리 중 오류가 발생했습니다.", List.of(), true),
-            metaSupport.meta(request, 0, "ko")
+            metaSupport.metaForError(request)
         ));
     }
 }

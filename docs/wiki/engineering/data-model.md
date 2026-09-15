@@ -14,8 +14,9 @@ API 버전과 v1 호환 전략을 명시한다.
 
 ## 현재 구현 경계
 
-- 루트 Spring Boot 프로젝트는 실행·테스트·패키징을 위한 scaffold다. JDBC·PostgreSQL·Flyway
-  의존성은 있지만 축제 도메인 API, DB 연결, 관리자 인증과 migration은 아직 구현하지 않았다.
+- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V6), 티켓,
+  스탬프와 혼잡도 조회가 있다. V6은 하나의 published FestivalRevision을 seed하지만 부스,
+  장소, 지도 자산·핀 카탈로그 migration과 공개 조회는 아직 없다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
   함께 준비한 뒤에만 운영 DB를 연결한다.
 - `test/`의 Next.js·Spring Boot·PostgreSQL 코드는 PWA·스탬프·Push 실기기 검증 환경이다.
@@ -29,8 +30,9 @@ API 버전과 v1 호환 전략을 명시한다.
   v1 호환 전략과 적용 버전을 결정한다.
 - 공개 조회는 로그인 없이 유지한다. 관리자 쓰기는 서버 권한 검증과 감사 이력이 필수지만,
   계정·역할·세션·권한 회수 모델은 아직 결정되지 않았다.
-- 이 문서의 `FestivalRevision`과 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로
-  해석한 **논리 후보**다. migration·JPA Entity·운영 DB schema가 이미 존재한다는 뜻이 아니다.
+- 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
+  Festival/FestivalRevision의 물리 schema는 V2~V6에 존재하지만, 나머지 모델의 실제 컬럼·
+  인덱스·삭제 방식은 migration 설계에서 확정한다.
 
 ## 논리 모델과 관계
 

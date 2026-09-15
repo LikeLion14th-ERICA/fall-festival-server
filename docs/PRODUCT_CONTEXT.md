@@ -29,6 +29,7 @@
 - [다국어](wiki/engineering/i18n.md)
 - [API와 저장소 구조](wiki/engineering/api.md)
 - [데이터 모델·ERD 설계 검토](wiki/engineering/data-model.md)
+- [부스·지도 공개 카탈로그 백엔드](wiki/engineering/spaces-map-backend.md)
 - [콘텐츠 게시](wiki/engineering/publishing.md)
 - [캐시·배포·복구](wiki/engineering/operations.md)
 - [접근성·성능·관측성](wiki/engineering/quality.md)
