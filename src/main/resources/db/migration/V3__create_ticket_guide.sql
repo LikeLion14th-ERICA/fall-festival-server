@@ -7,6 +7,10 @@
 -- status=UNCONFIGURED.
 CREATE TABLE ticket_guide (
     id SMALLINT PRIMARY KEY,
+    -- Nullable until a real festival_revisions row exists to reference
+    -- (V2__create_festival_core.sql only creates the tables; no row has
+    -- been seeded yet). Wire this up and drop NULL once one exists.
+    festival_revision_id UUID NULL REFERENCES festival_revisions(id),
     unit_price_amount INTEGER NULL,
     account_bank_name TEXT NULL,
     account_number TEXT NULL,
