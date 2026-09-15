@@ -179,6 +179,20 @@ test('v5 sparse options stay independent; counts and nonexistent combinations ar
   assert.equal((await call(path.replace('size-m','size-l'),{session,headers:admin,method:'PUT',body:{status:'ON_SALE'}})).status,404);
 });
 
+test('Empty product configurations are rejected before state mutation',async()=>{
+  const session='products-empty-configuration';
+  const body=structuredClone(examples.postAdminProduct.scenarios['empty-configuration'].request.body);
+  const goodsBefore=(await call('/api/v2/goods',{session})).body.data;
+  const availabilityBefore=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  for(const [path,method] of [['/api/v2/admin/products','POST'],['/api/v2/admin/products/goods-shirt','PUT']]){
+    const response=await call(path,{session,headers:admin,method,body});
+    assert.equal(response.status,422);
+    assert.equal(response.body.error.code,'VALIDATION_FAILED');
+  }
+  assert.deepEqual((await call('/api/v2/goods',{session})).body.data,goodsBefore);
+  assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
+});
+
 test('New options require an explicit mock policy; existing states survive product edits',async()=>{
   const session='products-v5',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
   const opts={session,headers:admin,method:'POST',body};
@@ -190,12 +204,24 @@ test('New options require an explicit mock policy; existing states survive produ
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,200);
   assert.ok((await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants.every(v=>v.status==='ON_SALE'));
   body.options.push({colorId:'color-b',sizeId:'size-l'});
-  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,409);
+  const pendingInitial=await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body});
+  assert.equal(pendingInitial.status,409);assert.equal(pendingInitial.body.error.code,'INITIAL_AVAILABILITY_UNRESOLVED');
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'X-Mock-Scenario':'new-option-sold-out'},method:'PUT',body})).status,200);
   const variants=(await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants;
   assert.equal(variants.length,4);assert.equal(variants.filter(v=>v.status==='ON_SALE').length,3);
   const invalid=structuredClone(body);invalid.options.push({colorId:'unknown',sizeId:'size-m'});
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body:invalid})).status,422);
+});
+
+test('Option deletion remains blocked while its policy is unresolved',async()=>{
+  const session='products-option-deletion';
+  const goodsBefore=(await call('/api/v2/goods',{session})).body.data;
+  const availabilityBefore=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  const body=structuredClone(examples.putAdminProduct.scenarios['option-removal'].request.body);
+  const response=await call('/api/v2/admin/products/goods-shirt',{session,headers:admin,method:'PUT',body});
+  assert.equal(response.status,409);assert.equal(response.body.error.code,'OPTION_DELETION_UNRESOLVED');
+  assert.deepEqual((await call('/api/v2/goods',{session})).body.data,goodsBefore);
+  assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
 });
 
 test('Korean notice publishes despite failed English; retry enables only READY languages',async()=>{

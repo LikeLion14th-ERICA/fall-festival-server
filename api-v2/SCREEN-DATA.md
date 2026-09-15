@@ -43,8 +43,8 @@ Product Context v5 기준 26개 화면의 데이터 176개를 추적합니다. �
 | MAP-POPUP-D04 | 위치 안내 | API | Place.locationText | [위키](../docs/wiki/product/map.md) |
 | MAP-POPUP-D05 | 이용 안내 | API | Place.usage | [위키](../docs/wiki/product/map.md) |
 | MAP-POPUP-D06 | 상세 대상 항목 | API | Place.spaceId | [위키](../docs/wiki/product/map.md) |
-| MAP-OVERVIEW-D07 | 장소명 또는 번호 | API | Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정) | [위키](../docs/wiki/product/map.md) |
-| MAP-AREA-D07 | 장소명 또는 번호 | API | Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정) | [위키](../docs/wiki/product/map.md) |
+| MAP-OVERVIEW-D07 | 장소명 또는 번호 | API | Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의) | [위키](../docs/wiki/product/map.md) |
+| MAP-AREA-D07 | 장소명 또는 번호 | API | Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의) | [위키](../docs/wiki/product/map.md) |
 | MAP-OVERVIEW-D08 | 외부인 티켓존 위치 | API | TicketGuide.mapTarget | [위키](../docs/wiki/product/map.md) |
 | HOME-D01 | 혼잡도 단계 | API | Crowding.savedLevel | [위키](../docs/wiki/product/home.md) |
 | HOME-D02 | 운영 상태 | API | Crowding.status | [위키](../docs/wiki/product/home.md) |

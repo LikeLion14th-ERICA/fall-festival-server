@@ -1,6 +1,6 @@
 {
   "basis": "Product Context v5 (user confirmed 2026-09-14)",
-  "baseCommit": "a8039cd",
+  "baseCommit": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883",
   "legacySourceUrl": "https://docs.google.com/spreadsheets/d/1_bWWbBi2TiRm5IaIuDX1CS2IFId8RFr5LnloQIEnKbo/edit",
   "screens": [
     {
@@ -1068,7 +1068,7 @@
         "requiredInScreen": "조건부"
       },
       "owner": "API",
-      "target": "Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정)",
+      "target": "Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/map.md"
@@ -1086,7 +1086,7 @@
         "requiredInScreen": "조건부"
       },
       "owner": "API",
-      "target": "Map.image (장소명·번호는 최종 이미지 자산에 포함; 미정)",
+      "target": "Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/map.md"

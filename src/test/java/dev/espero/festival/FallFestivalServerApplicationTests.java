@@ -18,6 +18,20 @@ class FallFestivalServerApplicationTests {
     private int port;
 
     @Test
+    void exposesHealthEndpoint() throws Exception {
+        try (var client = HttpClient.newHttpClient()) {
+            var request = HttpRequest.newBuilder(
+                    URI.create("http://127.0.0.1:" + port + "/healthz")).build();
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.headers().firstValue("content-type"))
+                    .hasValueSatisfying(value -> assertThat(value).startsWith("application/json"));
+            assertThat(response.body()).isEqualTo("{\"status\":\"ok\"}");
+        }
+    }
+
+    @Test
     void startsWithoutExternalServicesAndDoesNotExposeUnimplementedApi() throws Exception {
         try (var client = HttpClient.newHttpClient()) {
             var request = HttpRequest.newBuilder(

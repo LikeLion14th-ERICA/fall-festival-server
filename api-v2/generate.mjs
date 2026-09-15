@@ -1,6 +1,7 @@
 import { readFile,writeFile } from 'node:fs/promises';
 import { schemas,operations,envelopeSchema } from './contract-source.mjs';
 import { createState,execute,MOCK_NOW,isoKst,scenarioTime,ApiFailure } from './domain.mjs';
+import { validate } from './validate.mjs';
 import { buildCoverage } from './screen-coverage.mjs';
 
 export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1'};
@@ -8,7 +9,7 @@ const noticeInput={type:'GENERAL',translations:{ko:{title:'개발용 새 공지'
 const g=createState().goods[0];
 const productInput=Object.fromEntries(['name','price','images','colors','sizes','options','description'].map(k=>[k,g[k]]));
 const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'ON_SALE'},ProductInput:productInput,NoticeInput:noticeInput,NoticeTranslationInput:{title:'개발용 제목',body:'개발용 본문'}};
-const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'관리자 서버 권한 검증 경계. 실 인증 프로토콜은 DECISIONS.md의 관리자 인증 항목 참조. 목에서만 Bearer mock-admin을 사용하며 운영 자격증명이 아니다.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-14',commit:'a8039cd',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json'},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
+const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'관리자 서버 권한 검증 경계. 실 인증 프로토콜은 DECISIONS.md의 관리자 인증 항목 참조. 목에서만 Bearer mock-admin을 사용하며 운영 자격증명이 아니다.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-14',commit:'21eb76dacd78b3ad79ed4d9589dd341fbc25b883',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json'},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
 const examples={};
 const genericErrors={400:['INVALID_QUERY','잘못된 요청 예시입니다.'],401:['UNAUTHORIZED','관리자 인증이 필요합니다.'],403:['FORBIDDEN','관리자 권한이 없습니다.'],404:['NOT_FOUND','요청한 정보를 찾을 수 없습니다.'],405:['METHOD_NOT_ALLOWED','지원하지 않는 메서드입니다.'],409:['CONFLICT','요청 상태가 충돌합니다.'],413:['PAYLOAD_TOO_LARGE','요청 본문은 64KiB 이하입니다.'],415:['UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.'],422:['VALIDATION_FAILED','요청 필드를 확인해 주세요.'],429:['RATE_LIMITED','잠시 후 다시 요청해 주세요.'],500:['INTERNAL_ERROR','목 서버 처리 중 오류가 발생했습니다.'],503:['SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.']};
 for(const op of operations){
@@ -29,6 +30,7 @@ for(const op of operations){
     if(op.operationId==='putAdminProduct'&&scenario.startsWith('new-option')){body.colors.push({id:'color-new',name:'새 예시 색상',images:[]});body.options.push({colorId:'color-new',sizeId:'size-m'});}
     if(op.operationId==='putAdminProduct'&&scenario==='option-removal')body.colors.pop();
     if(op.operationId==='postAdminProduct'&&scenario==='missing-optional')Object.assign(body,{images:[],description:null});
+    if((op.operationId==='postAdminProduct'||op.operationId==='putAdminProduct')&&scenario==='empty-configuration')Object.assign(body,{images:[],colors:[],sizes:[],options:[]});
     if(body?.translations&&scenario==='english-incomplete')body.translations.en={title:null,body:null,status:'PENDING'};
     if(body?.translations&&scenario==='english-failed')body.translations.en={title:null,body:null,status:'FAILED'};
     let now=scenarioTime(scenario,MOCK_NOW);
@@ -36,6 +38,7 @@ for(const op of operations){
     try{
       const special={ 'bad-request':400,'rate-limited':429,unauthorized:401,forbidden:403 }[scenario];
       if(special)throw new ApiFailure(special,...genericErrors[special]);
+      if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
       const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;response={data:result.data,meta:meta()};
     }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;response={error:{code:e.code,message:e.message,details:e.details,retryable:[429,500,503].includes(status)},meta:meta()};}
     if(!responses[status])throw new Error(`Missing response ${op.operationId} ${status}`);

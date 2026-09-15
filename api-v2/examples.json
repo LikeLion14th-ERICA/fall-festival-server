@@ -11461,9 +11461,64 @@
         "status": 409,
         "response": {
           "error": {
-            "code": "INITIAL_AVAILABILITY_UNRESOLVED",
-            "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
+            "code": "IMAGE_CONFIGURATION_UNRESOLVED",
+            "message": "상품 이미지 입력 구성은 합의 대기입니다.",
             "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "empty-configuration": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/products",
+          "headers": {
+            "X-Mock-Scenario": "empty-configuration",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [],
+            "colors": [],
+            "sizes": [],
+            "options": [],
+            "description": "실제 상품·가격이 아닙니다."
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "VALIDATION_FAILED",
+            "message": "요청 필드를 확인해 주세요.",
+            "details": [
+              {
+                "field": "$.colors",
+                "reason": "배열 항목이 부족합니다."
+              },
+              {
+                "field": "$.sizes",
+                "reason": "배열 항목이 부족합니다."
+              },
+              {
+                "field": "$.options",
+                "reason": "배열 항목이 부족합니다."
+              }
+            ],
             "retryable": false
           },
           "meta": {
@@ -12733,6 +12788,61 @@
             "code": "OPTION_DELETION_UNRESOLVED",
             "message": "옵션 삭제 정책은 합의 대기입니다.",
             "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "empty-configuration": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "empty-configuration",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "name": "예시 의류",
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [],
+            "colors": [],
+            "sizes": [],
+            "options": [],
+            "description": "실제 상품·가격이 아닙니다."
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "VALIDATION_FAILED",
+            "message": "요청 필드를 확인해 주세요.",
+            "details": [
+              {
+                "field": "$.colors",
+                "reason": "배열 항목이 부족합니다."
+              },
+              {
+                "field": "$.sizes",
+                "reason": "배열 항목이 부족합니다."
+              },
+              {
+                "field": "$.options",
+                "reason": "배열 항목이 부족합니다."
+              }
+            ],
             "retryable": false
           },
           "meta": {
