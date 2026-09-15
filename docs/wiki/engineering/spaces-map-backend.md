@@ -59,9 +59,18 @@ FestivalRevision (published)
   snapshot 검증기는 같은 festival/map/version이 published·archived revision과 이미지 URL·크기·
   `pinId → 좌표·실제 목적` 집합이 같은지도 확인한다. 이미지 alt·지도명·핀 label 같은 텍스트
   수정 또는 같은 자산의 재게시·rollback은 version을 바꾸지 않는다.
-- `SpaceMapTarget`은 공간당 하나의 대표 `PLACE` 핀이다. `(revision, mapId, mapVersion,
-  pinId, placeId)` 복합 FK와 현재 지도 version FK로, 다른 장소·AREA 핀·구버전 핀을
-  참조할 수 없다. 여러 지도에 같은 장소 핀이 있어도 이 행이 화면의 대표 위치를 정한다.
+- `SpaceMapTarget`은 공간당 하나의 대표 `PLACE` 핀이다. 대표 핀이 속한 지도는
+  `AREA` 종류여야 하며, `(revision, mapId, mapVersion, pinId, placeId)` 복합 FK와
+  현재 지도 version FK로 다른 장소·AREA 핀·구버전 핀을 참조할 수 없다. 여러 지도에
+  같은 장소 핀이 있어도 이 행이 화면의 대표 위치를 정한다. `TicketGuide.mapTarget`은
+  같은 현재 `PLACE` 핀 연결을 사용하지만 티켓존은 전체 지도에 있을 수 있으므로
+  `AREA` 지도 제한을 적용하지 않는다.
+- 공개 API v2로 내보내는 `Meta.festivalId`, `Space.id`, `Map.id`, `Place.id`, `Pin.id`,
+  `Pin.target`의 장소·지도 ID, `Place.spaceId`와 두 `MapTarget`의 ID는
+  `^[a-z0-9][a-z0-9-]{0,63}$`를 따른다. `Map.version`, 핀 목록의 map version과
+  `MapTarget.mapVersion`은 비어 있지 않아야 한다. `Space.image.url`과 현재 지도
+  asset의 `Image.url`은 API의 `uri-reference` 계약을 따르며, snapshot 로드 경계에서
+  URI 문법을 검증한다. scheme이나 host를 별도로 제한하지 않는다.
 - `ticket_guide`의 네 target 값은 모두 null이거나 모두 존재해야 한다. 존재할 때 동일
   revision의 현재 지도 version에 속한 `PLACE` 핀과 복합 FK로 연결한다. 실제 티켓존과
   수령 부스의 동일성은 결정 11·26이 해결될 때까지 null로 둔다.

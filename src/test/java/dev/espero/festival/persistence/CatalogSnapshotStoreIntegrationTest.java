@@ -79,6 +79,96 @@ class CatalogSnapshotStoreIntegrationTest {
     }
 
     @Test
+    @Transactional
+    void rejectsASpaceMapTargetOnAnOverviewMap() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        insertOverviewPlacePin(revisionId, "pin-overview");
+        jdbc.update("""
+            UPDATE space_map_targets
+            SET map_id = 'map-overview', map_version = 'overview-v1', pin_id = 'pin-overview'
+            WHERE festival_revision_id = :revisionId AND space_id = 'space-test'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Space map target must point to an AREA map");
+    }
+
+    @Test
+    @Transactional
+    void allowsATicketMapTargetOnAnOverviewMap() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        insertOverviewPlacePin(revisionId, "pin-overview");
+        jdbc.update("""
+            UPDATE ticket_guide
+            SET map_id = 'map-overview', place_id = 'place-test', pin_id = 'pin-overview', map_version = 'overview-v1'
+            WHERE id = 1 AND festival_revision_id = :revisionId
+            """, parameters(revisionId));
+
+        assertThat(store.loadPublished().ticketMapTarget()).isEqualTo(new CatalogSnapshot.MapTarget(
+            "map-overview", "place-test", "pin-overview", "overview-v1"
+        ));
+    }
+
+    @Test
+    @Transactional
+    void rejectsCatalogIdsOutsideTheApiPatternAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            INSERT INTO maps (festival_revision_id, id, kind, sort_rank, current_version)
+            VALUES (:revisionId, 'Map-Invalid', 'AREA', 3, 'invalid-v1')
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO map_asset_versions (
+                festival_revision_id, map_id, version, image_url, image_alt, image_width, image_height
+            ) VALUES (:revisionId, 'Map-Invalid', 'invalid-v1', '/assets/maps/invalid.png', '잘못된 ID 지도', 1000, 600)
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO map_translations (festival_revision_id, map_id, locale, name)
+            VALUES (:revisionId, 'Map-Invalid', 'ko', '잘못된 ID 지도')
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Map.id");
+    }
+
+    @Test
+    @Transactional
+    void rejectsASpaceImageUrlThatIsNotAUriReferenceAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE spaces
+            SET image_url = '/assets/space image.png'
+            WHERE festival_revision_id = :revisionId AND id = 'space-test'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Space.image.url");
+    }
+
+    @Test
+    @Transactional
+    void rejectsAMapImageUrlThatIsNotAUriReferenceAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE map_asset_versions
+            SET image_url = '/assets/map image.png'
+            WHERE festival_revision_id = :revisionId AND map_id = 'map-area' AND version = 'map-v1'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Map.image.url");
+    }
+
+    @Test
     void rejectsAPartialTicketMapTarget() {
         assertThatThrownBy(() -> jdbc.update(
             "UPDATE ticket_guide SET map_id = 'map-area' WHERE id = 1", Map.of()
@@ -294,6 +384,21 @@ class CatalogSnapshotStoreIntegrationTest {
             UPDATE ticket_guide
             SET map_id = 'map-area', place_id = 'place-test', pin_id = 'pin-test', map_version = 'map-v1'
             WHERE id = 1
+            """, parameters);
+    }
+
+    private void insertOverviewPlacePin(UUID revisionId, String pinId) {
+        MapSqlParameterSource parameters = parameters(revisionId)
+            .addValue("pinId", pinId);
+        jdbc.update("""
+            INSERT INTO map_pins (
+                festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id
+            ) VALUES (:revisionId, 'map-overview', 'overview-v1', :pinId, 'booth', 0.5, 0.25, 'place-test', NULL)
+            """, parameters);
+        jdbc.update("""
+            INSERT INTO map_pin_translations (
+                festival_revision_id, map_id, map_version, pin_id, locale, label
+            ) VALUES (:revisionId, 'map-overview', 'overview-v1', :pinId, 'ko', '테스트 부스 전체 위치')
             """, parameters);
     }
 

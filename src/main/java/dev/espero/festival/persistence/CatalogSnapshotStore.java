@@ -14,6 +14,8 @@ import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
 import dev.espero.festival.domain.TicketGuideConfig;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -39,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CatalogSnapshotStore {
 
     public static final String PUBLIC_LOCALE = "ko";
+    private static final Pattern API_ID_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
 
     private final NamedParameterJdbcTemplate jdbc;
     private final TicketGuideStore ticketGuideStore;
@@ -65,6 +69,7 @@ public class CatalogSnapshotStore {
         verifyPinTargets(maps, places, pins);
         verifySpaceTargets(spaces, maps, places, pins);
         verifyTicketTarget(ticketMapTarget, maps, places, pins);
+        verifyPublicContract(context, spaces, maps, places, pins, ticketMapTarget);
         verifyVersionHistory(context);
 
         return new CatalogSnapshot(context, spaces, maps, places, pins, ticketGuideConfig, ticketMapTarget);
@@ -349,7 +354,78 @@ public class CatalogSnapshotStore {
             Place place = placesById.get(target.placeId());
             require(place != null && space.id().equals(place.spaceId()),
                 "Space map target must return to the same space through its place.");
+            require(maps.stream().anyMatch(map -> map.id().equals(target.mapId()) && map.kind().equals("AREA")),
+                "Space map target must point to an AREA map.");
             requireCurrentMapTarget(target, maps, pins);
+        }
+    }
+
+    private void verifyPublicContract(
+        FestivalContext context,
+        List<Space> spaces,
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pins,
+        MapTarget ticketMapTarget
+    ) {
+        requireApiId(context.festivalId(), "Meta.festivalId");
+        for (Space space : spaces) {
+            requireApiId(space.id(), "Space.id");
+            verifyImage(space.image(), "Space.image");
+            verifyMapTargetIds(space.mapTarget(), "Space.mapTarget");
+        }
+        for (CatalogMap map : maps) {
+            requireApiId(map.id(), "Map.id");
+            requireText(map.version(), "Map.version");
+            verifyImage(map.image(), "Map.image");
+        }
+        for (Place place : places) {
+            requireApiId(place.id(), "Place.id");
+            if (place.spaceId() != null) {
+                requireApiId(place.spaceId(), "Place.spaceId");
+            }
+        }
+        for (Map.Entry<PinKey, List<Pin>> entry : pins.entrySet()) {
+            requireApiId(entry.getKey().mapId(), "Pins.mapId");
+            requireText(entry.getKey().mapVersion(), "Pins.mapVersion");
+            for (Pin pin : entry.getValue()) {
+                requireApiId(pin.id(), "Pin.id");
+                requireApiId(pin.target().id(), "Pin.target.id");
+            }
+        }
+        verifyMapTargetIds(ticketMapTarget, "TicketGuide.mapTarget");
+    }
+
+    private void verifyImage(Image image, String field) {
+        require(image != null, field + " is required.");
+        requireUriReference(image.url(), field + ".url");
+    }
+
+    private void verifyMapTargetIds(MapTarget target, String field) {
+        if (target == null) {
+            return;
+        }
+        requireApiId(target.mapId(), field + ".mapId");
+        requireApiId(target.placeId(), field + ".placeId");
+        requireApiId(target.pinId(), field + ".pinId");
+        requireText(target.mapVersion(), field + ".mapVersion");
+    }
+
+    private static void requireApiId(String value, String field) {
+        require(value != null && API_ID_PATTERN.matcher(value).matches(),
+            field + " must match the API v2 Id pattern.");
+    }
+
+    private static void requireText(String value, String field) {
+        require(value != null && !value.isEmpty(), field + " must contain at least one character.");
+    }
+
+    private static void requireUriReference(String value, String field) {
+        requireText(value, field);
+        try {
+            new URI(value);
+        } catch (URISyntaxException exception) {
+            throw new CatalogIntegrityException(field + " must be a valid URI reference.");
         }
     }
 
