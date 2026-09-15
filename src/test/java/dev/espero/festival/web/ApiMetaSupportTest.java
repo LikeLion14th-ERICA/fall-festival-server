@@ -33,6 +33,18 @@ class ApiMetaSupportTest {
     }
 
     @Test
+    void truncatesServerTimeToMillisecondPrecision() {
+        ApiMetaSupport microsecondClock = new ApiMetaSupport(
+            Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC)
+        );
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v2/maps");
+
+        ApiMeta meta = microsecondClock.meta(request, 3, "ko");
+
+        assertThat(meta.serverTime().getNano()).isEqualTo(123_000_000);
+    }
+
+    @Test
     void replacesInvalidClientRequestIdAndWritesTheSameHeader() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v2/maps");
         request.addHeader("X-Request-Id", "not allowed because it has spaces");

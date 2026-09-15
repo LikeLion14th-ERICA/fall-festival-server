@@ -61,6 +61,9 @@ API v1은 공개 앱과 관리자 운영 도구가 공유하는 HTTP 계약이�
 - 목록/상세 응답, 오류, pagination, locale fallback, 시간 표현을 OpenAPI 또는 동등한
   기계 판독 계약으로 검증한다. 오류 응답은 안전한 메시지와 추적 가능한 request ID를
   포함하고 내부 정보는 노출하지 않는다.
+- 루트 Spring provider 테스트는 저장소의 `api-v2/openapi.json`을 읽고 MockMvc가 만든
+  실제 JSON을 catalog와 ticket-guide의 전체 response envelope·payload schema에
+  대조한다. JSON 일부를 고르는 `jsonPath` 확인만으로 계약 검증을 대체하지 않는다.
 - 모든 운영 콘텐츠는 축제 회차와 revision에 귀속한다. 지도 위치는 map version에도
   귀속하며, 표시 이름과 안정적 ID를 분리한다.
 - 날짜·시각은 timezone을 잃지 않는 형식으로 교환하고, 정렬과 pagination은 동일 요청의

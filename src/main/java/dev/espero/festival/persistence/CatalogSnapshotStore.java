@@ -69,7 +69,7 @@ public class CatalogSnapshotStore {
         verifyPinTargets(maps, places, pins);
         verifySpaceTargets(spaces, maps, places, pins);
         verifyTicketTarget(ticketMapTarget, maps, places, pins);
-        verifyPublicContract(context, spaces, maps, places, pins, ticketMapTarget);
+        verifyPublicContract(context, spaces, maps, places, pins, ticketMapTarget, ticketGuideConfig);
         verifyVersionHistory(context);
 
         return new CatalogSnapshot(context, spaces, maps, places, pins, ticketGuideConfig, ticketMapTarget);
@@ -366,7 +366,8 @@ public class CatalogSnapshotStore {
         List<CatalogMap> maps,
         List<Place> places,
         Map<PinKey, List<Pin>> pins,
-        MapTarget ticketMapTarget
+        MapTarget ticketMapTarget,
+        TicketGuideConfig ticketGuideConfig
     ) {
         requireApiId(context.festivalId(), "Meta.festivalId");
         for (Space space : spaces) {
@@ -397,6 +398,7 @@ public class CatalogSnapshotStore {
             }
         }
         verifyMapTargetIds(ticketMapTarget, "TicketGuide.mapTarget");
+        verifyTicketTransferLink(ticketGuideConfig);
     }
 
     private void verifyImage(Image image, String field) {
@@ -425,6 +427,8 @@ public class CatalogSnapshotStore {
 
     private static void requireUriReference(String value, String field) {
         requireText(value, field);
+        require(value.codePoints().allMatch(codePoint -> codePoint <= 0x7F),
+            field + " must contain only ASCII URI characters.");
         try {
             new URI(value);
         } catch (URISyntaxException exception) {
@@ -435,6 +439,16 @@ public class CatalogSnapshotStore {
     private static void requireHttpsUri(String value, String field) {
         requireUriReference(value, field);
         require(value.startsWith("https://"), field + " must start with https://.");
+    }
+
+    private static void verifyTicketTransferLink(TicketGuideConfig config) {
+        if (config == null || (config.transferLinkLabel() == null && config.transferLinkUrl() == null)) {
+            return;
+        }
+        require(config.transferLinkLabel() != null && config.transferLinkUrl() != null,
+            "TicketGuide.transferLink must contain both label and url.");
+        requireText(config.transferLinkLabel(), "TicketGuide.transferLink.label");
+        requireHttpsUri(config.transferLinkUrl(), "TicketGuide.transferLink.url");
     }
 
     private void verifyTicketTarget(

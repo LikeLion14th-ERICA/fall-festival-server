@@ -75,6 +75,19 @@ class CatalogControllerJsonTest {
     }
 
     @Test
+    void serializesMicrosecondClockAsAnApiV2MillisecondTimestamp() throws Exception {
+        ApiMetaSupport microsecondClock = new ApiMetaSupport(
+            Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC)
+        );
+        mvc = MockMvcBuilders.standaloneSetup(new CatalogController(snapshots, microsecondClock)).build();
+        when(snapshots.required()).thenReturn(snapshot(List.of(), List.of(), Map.of()));
+
+        mvc.perform(get("/api/v2/maps").header("X-Request-Id", "microsecond-clock-test"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.meta.serverTime").value("2030-10-01T18:00:00.123+09:00"));
+    }
+
+    @Test
     void serializesMapPinsEnvelopeCoordinatesAndPlaceOrAreaTargets() throws Exception {
         Pin placePin = new Pin(
             "pin-place", "booth", "부스", new BigDecimal("0.1250"), new BigDecimal("0.8750"),

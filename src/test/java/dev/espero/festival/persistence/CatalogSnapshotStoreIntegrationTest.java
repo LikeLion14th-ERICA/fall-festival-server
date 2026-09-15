@@ -154,6 +154,23 @@ class CatalogSnapshotStoreIntegrationTest {
 
     @Test
     @Transactional
+    void rejectsASpaceImageUrlWithRawUnicodeAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE spaces
+            SET image_url = '/assets/지도.png'
+            WHERE festival_revision_id = :revisionId AND id = 'space-test'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Space.image.url")
+            .hasMessageContaining("ASCII URI characters");
+    }
+
+    @Test
+    @Transactional
     void rejectsASpaceContactUrlThatIsNotAValidHttpsUriAtSnapshotLoad() {
         UUID revisionId = publishedRevisionId();
         insertCatalogFixture(revisionId);
@@ -167,6 +184,40 @@ class CatalogSnapshotStoreIntegrationTest {
             .isInstanceOf(CatalogIntegrityException.class)
             .hasMessageContaining("Space.contact.url")
             .hasMessageContaining("valid URI reference");
+    }
+
+    @Test
+    @Transactional
+    void rejectsASpaceContactUrlWithRawUnicodeAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE space_translations
+            SET contact_label = '문의', contact_url = 'https://example.org/문의'
+            WHERE festival_revision_id = :revisionId AND space_id = 'space-test' AND locale = 'ko'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Space.contact.url")
+            .hasMessageContaining("ASCII URI characters");
+    }
+
+    @Test
+    @Transactional
+    void rejectsATicketTransferUrlWithRawUnicodeAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE ticket_guide
+            SET transfer_link_label = '송금', transfer_link_url = 'https://example.org/문의'
+            WHERE id = 1 AND festival_revision_id = :revisionId
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("TicketGuide.transferLink.url")
+            .hasMessageContaining("ASCII URI characters");
     }
 
     @Test

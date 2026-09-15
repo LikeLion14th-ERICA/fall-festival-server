@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
@@ -70,7 +71,7 @@ public class ApiMetaSupport {
     private ApiMeta buildMeta(HttpServletRequest request, String festivalId, long revision, String locale) {
         return new ApiMeta(
             resolveRequestId(request),
-            OffsetDateTime.now(clock.withZone(FESTIVAL_ZONE)),
+            OffsetDateTime.now(clock.withZone(FESTIVAL_ZONE)).truncatedTo(ChronoUnit.MILLIS),
             FESTIVAL_ZONE.getId(),
             festivalId,
             revision,
