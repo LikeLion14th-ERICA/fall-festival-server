@@ -37,5 +37,5 @@ spring:
       # starts if the shared DB is temporarily unreachable.
       initialization-fail-timeout: -1
   flyway:
-    enabled: ${SPRING_FLYWAY_ENABLED:false}
+    enabled: ${SPRING_FLYWAY_ENABLED:true}
     clean-disabled: true
