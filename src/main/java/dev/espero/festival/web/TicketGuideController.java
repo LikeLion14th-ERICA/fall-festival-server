@@ -61,7 +61,7 @@ public class TicketGuideController {
 
         TicketGuideResponse data = config.filter(TicketGuideConfig::hasSchedule)
             .map(guide -> scheduled(guide, today, snapshot.ticketMapTarget()))
-            .orElseGet(() -> unconfigured(config, today));
+            .orElseGet(() -> unconfigured(config, today, snapshot.ticketMapTarget()));
 
         return new ApiResponse<>(data, metaSupport.meta(request, snapshot.context(), CONTENT_LOCALE));
     }
@@ -102,7 +102,11 @@ public class TicketGuideController {
         );
     }
 
-    private TicketGuideResponse unconfigured(Optional<TicketGuideConfig> config, LocalDate today) {
+    private TicketGuideResponse unconfigured(
+        Optional<TicketGuideConfig> config,
+        LocalDate today,
+        CatalogSnapshot.MapTarget ticketMapTarget
+    ) {
         return new TicketGuideResponse(
             today,
             TicketGuideResponse.Status.UNCONFIGURED,
@@ -113,7 +117,7 @@ public class TicketGuideController {
             null,
             null,
             null,
-            null,
+            mapTarget(ticketMapTarget),
             config.map(TicketGuideConfig::instructions).orElse(List.of())
         );
     }

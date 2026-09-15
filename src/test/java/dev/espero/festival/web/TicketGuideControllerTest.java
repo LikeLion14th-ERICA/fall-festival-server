@@ -23,9 +23,17 @@ class TicketGuideControllerTest {
     private final HttpServletRequest request = mock(HttpServletRequest.class);
 
     private TicketGuideController controllerAt(String instant, TicketGuideConfig config) {
+        return controllerAt(instant, config, null);
+    }
+
+    private TicketGuideController controllerAt(
+        String instant,
+        TicketGuideConfig config,
+        CatalogSnapshot.MapTarget ticketMapTarget
+    ) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
         when(request.getParameterMap()).thenReturn(Map.of());
-        when(snapshots.required()).thenReturn(snapshot(config, null));
+        when(snapshots.required()).thenReturn(snapshot(config, ticketMapTarget));
         return new TicketGuideController(snapshots, new ApiMetaSupport(clock), clock);
     }
 
@@ -83,11 +91,19 @@ class TicketGuideControllerTest {
             Instant.parse("2030-09-01T00:00:00Z")
         );
 
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", partial).getTicketGuide(request).data();
+        CatalogSnapshot.MapTarget target = new CatalogSnapshot.MapTarget(
+            "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
+        );
+        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", partial, target)
+            .getTicketGuide(request)
+            .data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
         assertThat(data.unitPrice().amount()).isEqualTo(15000);
         assertThat(data.instructions()).containsExactly("안내1");
+        assertThat(data.mapTarget()).isEqualTo(new TicketGuideResponse.MapTarget(
+            "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
+        ));
     }
 
     @Test
