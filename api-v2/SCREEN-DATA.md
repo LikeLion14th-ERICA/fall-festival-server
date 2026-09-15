@@ -57,7 +57,7 @@ Product Context v5 기준 26개 화면의 데이터 176개를 추적합니다. �
 | HOME-D09 | 선택 언어 | 브라우저 | 브라우저: 선택 언어, 기본 ko | [위키](../docs/wiki/product/home.md) |
 | HOME-D10 | 최신 공지 제목 | API | Notices.items[0].title | [위키](../docs/wiki/product/home.md) |
 | HOME-D11 | 공지사항 URL | API | Config.links.universityNotices | [위키](../docs/wiki/product/home.md) |
-| HOME-D12 | FAQ 연결 대상 | 보류 | 보류: Config.faqEnabled=false, FAQ 대상 미정 | [위키](../docs/wiki/product/home.md) |
+| HOME-D12 | FAQ 연결 대상 | API | Config.links.faq | [위키](../docs/wiki/product/home.md) |
 | HOME-D13 | 웰컴 데이 URL | API | Config.links.welcomeDay | [위키](../docs/wiki/product/home.md) |
 | HOME-D14 | 공식 채널 링크 | API | Config.links.officialChannels | [위키](../docs/wiki/product/home.md) |
 | HOME-D15 | 공식 채널 표시명·아이콘 | API | Channel.label + Channel.iconKey | [위키](../docs/wiki/product/home.md) |

@@ -44,6 +44,7 @@
                 "url": "https://example.invalid/mock-link",
                 "target": "_blank"
               },
+              "faq": null,
               "officialChannels": [
                 {
                   "id": "channel-mock",
@@ -54,8 +55,7 @@
                 }
               ],
               "welcomeDay": null
-            },
-            "faqEnabled": false
+            }
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -102,10 +102,10 @@
                 "url": "https://example.invalid/mock-link",
                 "target": "_blank"
               },
+              "faq": null,
               "officialChannels": [],
               "welcomeDay": null
-            },
-            "faqEnabled": false
+            }
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -152,10 +152,76 @@
             ],
             "links": {
               "universityNotices": null,
+              "faq": null,
               "officialChannels": [],
               "welcomeDay": null
+            }
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "faq-ready": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/config",
+          "headers": {
+            "X-Mock-Scenario": "faq-ready",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "festival": {
+              "id": "festival-mock",
+              "title": "개발용 가상 축제",
+              "dates": [
+                "2030-10-01",
+                "2030-10-02",
+                "2030-10-03"
+              ],
+              "defaultDate": "2030-10-01"
             },
-            "faqEnabled": false
+            "languages": [
+              {
+                "code": "ko",
+                "label": "한국어"
+              },
+              {
+                "code": "en",
+                "label": "English"
+              }
+            ],
+            "links": {
+              "universityNotices": {
+                "label": "예시 학교 공지",
+                "url": "https://example.invalid/mock-link",
+                "target": "_blank"
+              },
+              "faq": {
+                "label": "예시 축제 FAQ",
+                "url": "https://example.invalid/mock-faq",
+                "target": "_blank"
+              },
+              "officialChannels": [
+                {
+                  "id": "channel-mock",
+                  "label": "예시 공식 채널",
+                  "url": "https://example.invalid/mock-link",
+                  "target": "_blank",
+                  "iconKey": "website"
+                }
+              ],
+              "welcomeDay": null
+            }
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -206,6 +272,7 @@
                 "url": "https://example.invalid/mock-link",
                 "target": "_blank"
               },
+              "faq": null,
               "officialChannels": [
                 {
                   "id": "channel-mock",
@@ -220,8 +287,7 @@
                 "url": "https://example.invalid/mock-link",
                 "target": "_blank"
               }
-            },
-            "faqEnabled": false
+            }
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -308,6 +374,7 @@
                 "url": "https://example.invalid/mock-link",
                 "target": "_blank"
               },
+              "faq": null,
               "officialChannels": [
                 {
                   "id": "channel-mock",
@@ -318,8 +385,7 @@
                 }
               ],
               "welcomeDay": null
-            },
-            "faqEnabled": false
+            }
           },
           "meta": {
             "requestId": "mock-example-request",

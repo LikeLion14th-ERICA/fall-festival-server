@@ -88,6 +88,7 @@
                             "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
+                          "faq": null,
                           "officialChannels": [
                             {
                               "id": "channel-mock",
@@ -98,8 +99,7 @@
                             }
                           ],
                           "welcomeDay": null
-                        },
-                        "faqEnabled": false
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -138,10 +138,10 @@
                             "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
+                          "faq": null,
                           "officialChannels": [],
                           "welcomeDay": null
-                        },
-                        "faqEnabled": false
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -180,10 +180,68 @@
                         ],
                         "links": {
                           "universityNotices": null,
+                          "faq": null,
                           "officialChannels": [],
                           "welcomeDay": null
+                        }
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "faq-ready": {
+                    "summary": "홈 공통 설정: faq-ready",
+                    "value": {
+                      "data": {
+                        "festival": {
+                          "id": "festival-mock",
+                          "title": "개발용 가상 축제",
+                          "dates": [
+                            "2030-10-01",
+                            "2030-10-02",
+                            "2030-10-03"
+                          ],
+                          "defaultDate": "2030-10-01"
                         },
-                        "faqEnabled": false
+                        "languages": [
+                          {
+                            "code": "ko",
+                            "label": "한국어"
+                          },
+                          {
+                            "code": "en",
+                            "label": "English"
+                          }
+                        ],
+                        "links": {
+                          "universityNotices": {
+                            "label": "예시 학교 공지",
+                            "url": "https://example.invalid/mock-link",
+                            "target": "_blank"
+                          },
+                          "faq": {
+                            "label": "예시 축제 FAQ",
+                            "url": "https://example.invalid/mock-faq",
+                            "target": "_blank"
+                          },
+                          "officialChannels": [
+                            {
+                              "id": "channel-mock",
+                              "label": "예시 공식 채널",
+                              "url": "https://example.invalid/mock-link",
+                              "target": "_blank",
+                              "iconKey": "website"
+                            }
+                          ],
+                          "welcomeDay": null
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -226,6 +284,7 @@
                             "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
+                          "faq": null,
                           "officialChannels": [
                             {
                               "id": "channel-mock",
@@ -240,8 +299,7 @@
                             "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           }
-                        },
-                        "faqEnabled": false
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -292,6 +350,7 @@
                             "url": "https://example.invalid/mock-link",
                             "target": "_blank"
                           },
+                          "faq": null,
                           "officialChannels": [
                             {
                               "id": "channel-mock",
@@ -302,8 +361,7 @@
                             }
                           ],
                           "welcomeDay": null
-                        },
-                        "faqEnabled": false
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -551,6 +609,7 @@
           "normal",
           "empty",
           "missing-optional",
+          "faq-ready",
           "welcome-ready",
           "error",
           "all-languages",
@@ -19334,6 +19393,17 @@
                 ],
                 "description": "자료 미확보 시 null"
               },
+              "faq": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Link"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "FAQ 외부 새 탭 연결. 승인 URL 미확보 시 null."
+              },
               "officialChannels": {
                 "type": "array",
                 "items": {
@@ -19355,25 +19425,18 @@
             },
             "required": [
               "universityNotices",
+              "faq",
               "officialChannels",
               "welcomeDay"
             ],
             "additionalProperties": false,
             "description": ""
-          },
-          "faqEnabled": {
-            "type": "boolean",
-            "enum": [
-              false
-            ],
-            "description": "FAQ 미정. v2 초안에서 활성화하지 않음."
           }
         },
         "required": [
           "festival",
           "languages",
-          "links",
-          "faqEnabled"
+          "links"
         ],
         "additionalProperties": false,
         "description": ""

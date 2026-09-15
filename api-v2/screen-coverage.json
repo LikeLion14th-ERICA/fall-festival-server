@@ -15,11 +15,10 @@
         "HOME-D06",
         "HOME-D07",
         "HOME-D09",
-        "HOME-D12",
         "HOME-D16"
       ],
       "legacySource": {
-        "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q04, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
+        "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
       }
     },
     {
@@ -216,7 +215,7 @@
       ],
       "browserData": [],
       "legacySource": {
-        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+        "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
     },
     {
@@ -232,7 +231,7 @@
         "STAMP-COLLECT-D04"
       ],
       "legacySource": {
-        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+        "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
     },
     {
@@ -245,7 +244,7 @@
         "STAMP-REWARD-D01"
       ],
       "legacySource": {
-        "pendingIds": "STAMP-START-Q01, STAMP-COLLECT-Q01, STAMP-START-Q02"
+        "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
     },
     {
@@ -1319,8 +1318,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "보류",
-      "target": "보류: Config.faqEnabled=false, FAQ 대상 미정",
+      "owner": "API",
+      "target": "Config.links.faq",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/home.md"

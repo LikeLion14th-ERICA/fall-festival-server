@@ -42,14 +42,14 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 
 | 개발할 화면 | 확인할 조합 |
 |---|---|
-| 홈 | config normal / missing-optional / empty, crowd before-open / closed / unmodified, notices empty / error |
+| 홈 | config normal / faq-ready / missing-optional / empty, crowd before-open / closed / unmodified, notices empty / error |
 | 목록·상세 | 목록 empty, 상세 missing-optional / not-found / error. 선택 정보가 없는 영역은 제목까지 숨김 |
 | 굿즈 | goods 정상 + goods-availability error, availability sold-out, payment-guide missing-optional. 품절과 조회 실패를 구분 |
 | 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, locale=en의 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
 | 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도 동일 상태 재선택의 저장·시각 처리는 결정 대기 |
-| 스탬프 | HTTP guide missing-optional와 별도 client-state-examples의 시작 전·2칸·4칸·수령·다음 날짜 |
+| 스탬프 | HTTP guide missing-optional와 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
 
@@ -62,7 +62,9 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 
 상품 상세·색상×사이즈 판매 상태는 독립 로딩과 오류 영역을 둡니다. 지도 핀 409는 지도 메타데이터·이미지를 다시 읽고 새 version으로 핀을 조회합니다. 이미지 로딩 성공 전에 새 핀을 겹치지 않습니다. 핀 실패 시 이미 로드된 지도 이미지를 유지합니다.
 
-부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계, 스탬프 누적은 프런트 상태입니다. 스탬프는 로그인 없이 공통 QR을 사용하므로 엄격한 중복 참여 차단을 약속할 수 없습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
+홈 FAQ 메뉴는 `Config.links.faq`가 있을 때만 그 HTTPS URL을 새 탭으로 엽니다. `faq=null`이면 임의 이동이나 앱 내부 FAQ 화면을 만들지 않습니다.
+
+부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계, 스탬프 누적은 프런트 상태입니다. 스탬프는 로그인 없이 공통 QR을 사용하므로 엄격한 중복 참여 차단을 약속할 수 없습니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
 
 ## 새 관리자 계약 연동
 

@@ -17,7 +17,7 @@
 | 관리자 공지·번역·템플릿 | [관리자 공지](product/admin/notice.md), [알림 메시지](product/notice.md) | 게시·번역 구현은 engineering 문서 |
 | 관리자 굿즈·판매 상태 | [관리자 굿즈](product/admin/goods.md), [굿즈샵](product/goods.md) | 실제 수량 관리는 범위 밖 |
 | 에리카 웰컴 데이·학교 소개 연결 | [웰컴 데이](product/welcome.md), [범위](product/scope.md) | 자료·URL은 결정 대기 |
-| FAQ 콘텐츠·제공 방식 | [홈](product/home.md), [FAQ 검토용 초안](product/faq-draft.md), [결정 대기](product/decisions.md) | 화면·다국어는 확정 후 구현 |
+| FAQ 외부 링크·URL | [홈](product/home.md), [범위](product/scope.md), [결정 대기](product/decisions.md) | [FAQ 검토용 초안](product/faq-draft.md)은 외부 콘텐츠 참고 기록 |
 | 굿즈·재고·현장 송금 | [굿즈샵](product/goods.md) | 계좌·운영값은 결정 대기 |
 | 외부인 티켓·현장 수령 | [외부인 티켓](product/ticket.md), [지도](product/map.md) | 계좌·운영값은 결정 대기 |
 | 공연·라인업 | [라인업](product/lineup.md) | 타임테이블은 해당 행도 적용 |

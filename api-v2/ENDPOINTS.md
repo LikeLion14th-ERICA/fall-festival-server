@@ -4,7 +4,7 @@
 
 | 메서드 | 경로 | 내용 | 화면 | 시나리오 |
 |---|---|---|---|---|
-| GET | `/api/v2/config` | 홈 공통 설정 | HOME | normal, empty, missing-optional, welcome-ready, error, all-languages, bad-request, rate-limited |
+| GET | `/api/v2/config` | 홈 공통 설정 | HOME | normal, empty, missing-optional, faq-ready, welcome-ready, error, all-languages, bad-request, rate-limited |
 | GET | `/api/v2/crowding` | 홈 재학생존 혼잡도 | HOME | normal, before-open, closed, unmodified, error, bad-request, rate-limited |
 | GET | `/api/v2/notices` | 사용자 공지 전체 | HOME, NOTICE-LIST | normal, empty, missing-optional, new-notice, deleted, error, bad-request, rate-limited |
 | GET | `/api/v2/goods` | 상품 목록 | GOODS-LIST | normal, empty, error, bad-request, rate-limited |

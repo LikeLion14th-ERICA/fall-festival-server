@@ -9,7 +9,7 @@ import { validate as localValidate } from './validate.mjs';
 import { createState,DATES } from './domain.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
-const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json');
+const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json'),clientStates=await read('./client-state-examples.json');
 const ajv=new Ajv2020({strict:false,allErrors:true});addFormats(ajv);
 const compiled=new Map();
 function standardValidate(schema,value){const key=JSON.stringify(schema);if(!compiled.has(key))compiled.set(key,ajv.compile({...schema,components:spec.components}));const validate=compiled.get(key);assert.equal(validate(value),true,JSON.stringify(validate.errors));}
@@ -24,6 +24,12 @@ test('OpenAPI 3.1 document passes standard parser validation',async()=>{await Sw
 test('26 screens and 176 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,186);assert.equal(new Set(coverage.data.map(x=>x.id)).size,186);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));});
 test('Every public route has no authentication requirement; every admin route has one',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods))assert.equal(o.security.length>0,path.includes('/admin/'));});
 test('No out-of-scope payment, user identity, stamp write, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances|\/stamp\//);});
+test('FAQ is an external config link and direct QR before START stays in local start state',async()=>{
+  const unconfigured=(await call('/api/v2/config')).body.data;assert.equal(unconfigured.links.faq,null);
+  const ready=(await call('/api/v2/config',{headers:{'X-Mock-Scenario':'faq-ready'}})).body.data.links.faq;
+  assert.equal(ready.target,'_blank');assert.match(ready.url,/^https:\/\//);
+  assert.deepEqual(clientStates.stamp.directQrBeforeStart,{date:'2030-10-01',started:false,count:0,claimed:false,route:'STAMP-START',startRecorded:false,stampAdded:false});
+});
 
 test('Fictional fixtures provide dense, linked data for frontend list and detail layouts',()=>{
   const state=createState(),artistById=new Map(state.artists.map(artist=>[artist.id,artist]));
