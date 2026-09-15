@@ -154,6 +154,23 @@ class CatalogSnapshotStoreIntegrationTest {
 
     @Test
     @Transactional
+    void rejectsASpaceContactUrlThatIsNotAValidHttpsUriAtSnapshotLoad() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            UPDATE space_translations
+            SET contact_label = '문의', contact_url = 'https://bad url'
+            WHERE festival_revision_id = :revisionId AND space_id = 'space-test' AND locale = 'ko'
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Space.contact.url")
+            .hasMessageContaining("valid URI reference");
+    }
+
+    @Test
+    @Transactional
     void rejectsAMapImageUrlThatIsNotAUriReferenceAtSnapshotLoad() {
         UUID revisionId = publishedRevisionId();
         insertCatalogFixture(revisionId);

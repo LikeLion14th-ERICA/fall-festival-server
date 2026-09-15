@@ -372,6 +372,9 @@ public class CatalogSnapshotStore {
         for (Space space : spaces) {
             requireApiId(space.id(), "Space.id");
             verifyImage(space.image(), "Space.image");
+            if (space.contact() != null) {
+                requireHttpsUri(space.contact().url(), "Space.contact.url");
+            }
             verifyMapTargetIds(space.mapTarget(), "Space.mapTarget");
         }
         for (CatalogMap map : maps) {
@@ -427,6 +430,11 @@ public class CatalogSnapshotStore {
         } catch (URISyntaxException exception) {
             throw new CatalogIntegrityException(field + " must be a valid URI reference.");
         }
+    }
+
+    private static void requireHttpsUri(String value, String field) {
+        requireUriReference(value, field);
+        require(value.startsWith("https://"), field + " must start with https://.");
     }
 
     private void verifyTicketTarget(

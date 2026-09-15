@@ -65,6 +65,9 @@ FestivalRevision (published)
   같은 장소 핀이 있어도 이 행이 화면의 대표 위치를 정한다. `TicketGuide.mapTarget`은
   같은 현재 `PLACE` 핀 연결을 사용하지만 티켓존은 전체 지도에 있을 수 있으므로
   `AREA` 지도 제한을 적용하지 않는다.
+- `Space.contact`가 있으면 `Link.url`은 API v2의 `format: uri`와 `^https://` 조건을
+  모두 만족해야 한다. snapshot 로드 경계에서 URI 문법과 HTTPS 접두사를 검증하며,
+  `https://bad url` 같은 값은 `CatalogIntegrityException`으로 공개 전에 거절한다.
 - 공개 API v2로 내보내는 `Meta.festivalId`, `Space.id`, `Map.id`, `Place.id`, `Pin.id`,
   `Pin.target`의 장소·지도 ID, `Place.spaceId`와 두 `MapTarget`의 ID는
   `^[a-z0-9][a-z0-9-]{0,63}$`를 따른다. `Map.version`, 핀 목록의 map version과
@@ -127,6 +130,8 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
   이미지·좌표·AREA 목적지 삽입이 DB 제약 또는 snapshot 검증에서 거절된다. alt만 다른
   재게시는 같은 version으로 허용된다. Space target의 OVERVIEW 지도, API v2 형식 밖의
   공개 ID·mapVersion·이미지 URI reference도 snapshot 검증에서 거절된다.
+  존재하는 `Space.contact`의 Link URL이 URI 문법 또는 `^https://` 조건을 벗어나면
+  snapshot 검증에서 거절된다.
 - 알려지지 않은 resource는 404, 잘못된 query는 400, pins의 구버전은 409,
   snapshot 미준비는 503이며 오류도 schema에 맞는 meta revision(최소 1)을 낸다.
 - 운영 데이터가 없는 migration에는 가짜 부스·지도·핀·티켓존·번역이 없다.
@@ -136,7 +141,7 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 | 계층 | 반드시 확인할 결과 |
 |---|---|
 | Flyway/PostgreSQL | 실제 migration에서 FK·CHECK·UNIQUE 제약을 검증한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
-| Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, snapshot 기반 ticket 안내·target null/일정 미확정/정상 경로, 대표 target의 AREA 제약과 API v2 ID·이미지 URI 형식을 검증한다. |
+| Java 단위/HTTP | 정상·빈 목록, category, not-found, mapVersion 409, 503, request ID 형식, snapshot 기반 ticket 안내·target null/일정 미확정/정상 경로, 대표 target의 AREA 제약과 API v2 ID·이미지 URI 형식, 존재하는 `Space.contact` Link URL의 URI·`https://` 조건을 검증한다. |
 | API v2 | `contract-source.mjs`의 target 의미를 갱신하고 생성물 일치 및 mock contract check를 통과한다. Spring 응답은 JSON schema provider test로 별도 확인한다. |
 | 회귀 | `mvnw.cmd --batch-mode --no-transfer-progress verify`, `api-v2`의 `npm run generate`, `npm run check`, `git diff --check`를 실행한다. |
 | 성능 | 승인된 운영 자료를 넣기 전 합성 fixture에서 100/200/500 동시 조회를 실행하고 결과·환경·한계를 운영 문서에 남긴다. |
