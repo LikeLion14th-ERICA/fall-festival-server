@@ -30,7 +30,7 @@ public class ApiSecurityErrorWriter {
         String code,
         String message
     ) throws IOException {
-        ApiMeta meta = metaSupport.meta(request, 0, "ko");
+        ApiMeta meta = metaSupport.metaForError(request);
         response.setStatus(status);
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

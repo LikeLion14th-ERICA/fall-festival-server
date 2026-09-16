@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.espero.festival.domain.TicketGuideConfig;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -40,9 +43,15 @@ class TicketGuideStoreIntegrationTest {
     @Autowired
     private TicketGuideStore store;
 
+    @Autowired
+    private NamedParameterJdbcTemplate jdbc;
+
     @Test
     void migrationSeedsThePriceAndScheduleButLeavesDatesAndAccountUnset() {
-        Optional<TicketGuideConfig> guide = store.find();
+        UUID publishedRevisionId = jdbc.queryForObject(
+            "SELECT id FROM festival_revisions WHERE state = 'published'", Map.of(), UUID.class
+        );
+        Optional<TicketGuideConfig> guide = store.find(publishedRevisionId);
 
         assertThat(guide).isPresent();
         TicketGuideConfig config = guide.get();
@@ -57,7 +66,6 @@ class TicketGuideStoreIntegrationTest {
         assertThat(config.accountBankName()).isNull();
         assertThat(config.hasSchedule()).isFalse();
         assertThat(config.hasAccount()).isFalse();
-        assertThat(config.hasMapTarget()).isFalse();
         assertThat(config.updatedAt()).isNotNull();
     }
 }

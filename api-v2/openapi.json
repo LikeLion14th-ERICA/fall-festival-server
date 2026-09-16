@@ -21309,7 +21309,7 @@
           "mapVersion"
         ],
         "additionalProperties": false,
-        "description": ""
+        "description": "같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태."
       },
       "Config": {
         "type": "object",
@@ -22567,7 +22567,7 @@
                 "type": "null"
               }
             ],
-            "description": "미연결이면 null. 버튼 처리는 기획 미정."
+            "description": "같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태."
           }
         },
         "required": [
@@ -23036,7 +23036,7 @@
                 "type": "null"
               }
             ],
-            "description": "실제 위치·진입 지도 미확정이면 null"
+            "description": "같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태."
           },
           "instructions": {
             "type": "array",

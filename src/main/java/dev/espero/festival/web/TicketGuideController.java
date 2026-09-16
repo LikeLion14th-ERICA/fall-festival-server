@@ -1,7 +1,7 @@
 package dev.espero.festival.web;
 
+import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.TicketGuideConfig;
-import dev.espero.festival.persistence.TicketGuideStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -23,10 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * festival_start_date/festival_end_date are unconfirmed, so this currently
  * returns status=UNCONFIGURED in practice. Once 총학생회 confirms the dates,
- * updating the ticket_guide row is enough — no code change needed.
+ * update the approved ticket_guide row and restart the single application
+ * instance after publication — no code change is needed.
  *
- * locale is intentionally not yet honored: only Korean content exists, so the
- * query parameter is accepted but ignored until translated content is stored.
+ * Only Korean is publicly ready. Other locale and unknown query parameters are
+ * rejected instead of silently falling back to Korean.
  */
 @RestController
 @RequestMapping("/api/v2")
@@ -36,29 +37,40 @@ public class TicketGuideController {
     private static final ZoneId TIMEZONE = ZoneId.of("Asia/Seoul");
     private static final String CONTENT_LOCALE = "ko";
 
-    private final TicketGuideStore store;
+    private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
     private final Clock clock;
 
-    public TicketGuideController(TicketGuideStore store, ApiMetaSupport metaSupport, Clock clock) {
-        this.store = store;
+    public TicketGuideController(
+        CatalogSnapshotProvider snapshots,
+        ApiMetaSupport metaSupport,
+        Clock clock
+    ) {
+        this.snapshots = snapshots;
         this.metaSupport = metaSupport;
         this.clock = clock;
     }
 
     @GetMapping("/ticket-guide")
     public ApiResponse<TicketGuideResponse> getTicketGuide(HttpServletRequest request) {
-        Optional<TicketGuideConfig> config = store.find();
+        CatalogSnapshot snapshot = snapshots.required();
+        metaSupport.setContext(request, snapshot.context(), CONTENT_LOCALE);
+        validateQuery(request);
+        Optional<TicketGuideConfig> config = Optional.ofNullable(snapshot.ticketGuideConfig());
         LocalDate today = LocalDate.now(clock.withZone(TIMEZONE));
 
         TicketGuideResponse data = config.filter(TicketGuideConfig::hasSchedule)
-            .map(guide -> scheduled(guide, today))
-            .orElseGet(() -> unconfigured(config, today));
+            .map(guide -> scheduled(guide, today, snapshot.ticketMapTarget()))
+            .orElseGet(() -> unconfigured(config, today, snapshot.ticketMapTarget()));
 
-        return new ApiResponse<>(data, metaSupport.meta(request, 1, CONTENT_LOCALE));
+        return new ApiResponse<>(data, metaSupport.meta(request, snapshot.context(), CONTENT_LOCALE));
     }
 
-    private TicketGuideResponse scheduled(TicketGuideConfig guide, LocalDate today) {
+    private TicketGuideResponse scheduled(
+        TicketGuideConfig guide,
+        LocalDate today,
+        CatalogSnapshot.MapTarget ticketMapTarget
+    ) {
         LocalDate scheduleDate = clamp(today, guide.festivalStartDate(), guide.festivalEndDate());
         LocalTime now = LocalTime.now(clock.withZone(TIMEZONE));
 
@@ -84,13 +96,17 @@ public class TicketGuideController {
             atSeoul(scheduleDate, guide.dailyPickupOpenTime()),
             atSeoul(scheduleDate, guide.dailyPickupCloseTime()),
             open ? account(guide) : null,
-            transferLink(guide),
-            mapTarget(guide),
+            open ? transferLink(guide) : null,
+            mapTarget(ticketMapTarget),
             guide.instructions()
         );
     }
 
-    private TicketGuideResponse unconfigured(Optional<TicketGuideConfig> config, LocalDate today) {
+    private TicketGuideResponse unconfigured(
+        Optional<TicketGuideConfig> config,
+        LocalDate today,
+        CatalogSnapshot.MapTarget ticketMapTarget
+    ) {
         return new TicketGuideResponse(
             today,
             TicketGuideResponse.Status.UNCONFIGURED,
@@ -101,7 +117,7 @@ public class TicketGuideController {
             null,
             null,
             null,
-            null,
+            mapTarget(ticketMapTarget),
             config.map(TicketGuideConfig::instructions).orElse(List.of())
         );
     }
@@ -124,10 +140,24 @@ public class TicketGuideController {
             : null;
     }
 
-    private TicketGuideResponse.MapTarget mapTarget(TicketGuideConfig guide) {
-        return guide.hasMapTarget()
-            ? new TicketGuideResponse.MapTarget(guide.mapId(), guide.placeId(), guide.pinId(), guide.mapVersion())
-            : null;
+    private TicketGuideResponse.MapTarget mapTarget(CatalogSnapshot.MapTarget target) {
+        return target == null
+            ? null
+            : new TicketGuideResponse.MapTarget(target.mapId(), target.placeId(), target.pinId(), target.mapVersion());
+    }
+
+    private void validateQuery(HttpServletRequest request) {
+        for (java.util.Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            if (!entry.getKey().equals("locale") || entry.getValue().length != 1
+                || !CONTENT_LOCALE.equals(entry.getValue()[0])) {
+                throw new ApiException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "INVALID_QUERY",
+                    "요청 파라미터를 확인해 주세요.",
+                    false
+                );
+            }
+        }
     }
 
     private OffsetDateTime atSeoul(LocalDate date, LocalTime time) {
