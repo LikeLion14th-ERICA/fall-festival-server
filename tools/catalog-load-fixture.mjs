@@ -9,7 +9,7 @@ const sql = [];
 const push = (statement) => sql.push(`${statement};`);
 
 push('SET search_path TO public');
-push("UPDATE ticket_guide SET map_id = NULL, place_id = NULL, pin_id = NULL, map_version = NULL WHERE id = 1");
+push(`UPDATE ticket_guide_revisions SET map_id = NULL, place_id = NULL, pin_id = NULL, map_version = NULL WHERE festival_revision_id = ${q(revision)} AND id = 1`);
 
 for (let index = 1; index <= 7; index += 1) {
   const mapId = index === 1 ? 'map-overview' : `map-area-${index - 1}`;
@@ -52,7 +52,7 @@ push(`INSERT INTO places (festival_revision_id, id, kind, space_id) VALUES (${q(
 push(`INSERT INTO place_translations (festival_revision_id, place_id, locale, name, location_text) VALUES (${q(revision)}, 'place-ticket-zone', 'ko', 'Synthetic ticket zone', 'Overview')`);
 push(`INSERT INTO map_pins (festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id) VALUES (${q(revision)}, 'map-overview', 'overview-v1', 'pin-ticket-zone', 'ticket', 0.5, 0.8, 'place-ticket-zone', NULL)`);
 push(`INSERT INTO map_pin_translations (festival_revision_id, map_id, map_version, pin_id, locale, label) VALUES (${q(revision)}, 'map-overview', 'overview-v1', 'pin-ticket-zone', 'ko', 'Synthetic ticket zone')`);
-push("UPDATE ticket_guide SET map_id = 'map-overview', place_id = 'place-ticket-zone', pin_id = 'pin-ticket-zone', map_version = 'overview-v1' WHERE id = 1");
+push(`UPDATE ticket_guide_revisions SET map_id = 'map-overview', place_id = 'place-ticket-zone', pin_id = 'pin-ticket-zone', map_version = 'overview-v1' WHERE festival_revision_id = ${q(revision)} AND id = 1`);
 
 fs.writeFileSync(output, `${sql.join('\n')}\n`, 'utf8');
 console.log(JSON.stringify({ output, spaces: 100, maps: 7, places: 101, pins: 207, ticketZone: true }));
