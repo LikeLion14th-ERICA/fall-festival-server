@@ -1,5 +1,6 @@
 package dev.espero.festival.persistence;
 
+import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
 import dev.espero.festival.domain.CatalogSnapshot.FestivalContext;
@@ -13,6 +14,7 @@ import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
 import dev.espero.festival.domain.TicketGuideConfig;
+import dev.espero.festival.domain.PublishedFestivalContext;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,10 +48,19 @@ public class CatalogSnapshotStore {
 
     private final NamedParameterJdbcTemplate jdbc;
     private final TicketGuideStore ticketGuideStore;
+    private final FestivalContextStore festivalContextStore;
+    private final FestivalProperties festivalProperties;
 
-    public CatalogSnapshotStore(NamedParameterJdbcTemplate jdbc, TicketGuideStore ticketGuideStore) {
+    public CatalogSnapshotStore(
+        NamedParameterJdbcTemplate jdbc,
+        TicketGuideStore ticketGuideStore,
+        FestivalContextStore festivalContextStore,
+        FestivalProperties festivalProperties
+    ) {
         this.jdbc = jdbc;
         this.ticketGuideStore = ticketGuideStore;
+        this.festivalContextStore = festivalContextStore;
+        this.festivalProperties = festivalProperties;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -76,21 +87,17 @@ public class CatalogSnapshotStore {
     }
 
     private FestivalContext loadPublishedContext() {
-        List<FestivalContext> contexts = jdbc.query("""
-            SELECT f.id AS festival_id, r.id AS revision_id, r.revision_number
-            FROM festival_revisions r
-            JOIN festivals f ON f.id = r.festival_id
-            WHERE r.state = 'published'
-            ORDER BY f.id
-            """, Map.of(), (resultSet, rowNumber) -> new FestivalContext(
-                resultSet.getObject("festival_id", UUID.class).toString(),
-                resultSet.getObject("revision_id", UUID.class),
-                resultSet.getLong("revision_number")
+        PublishedFestivalContext context = festivalContextStore
+            .findPublishedByFestivalId(festivalProperties.configuredFestivalId())
+            .orElseThrow(() -> new CatalogIntegrityException(
+                "The configured festival has no published revision."
             ));
-        if (contexts.size() != 1) {
-            throw new CatalogIntegrityException("Exactly one published festival revision is required.");
-        }
-        return contexts.getFirst();
+        return new FestivalContext(
+            context.festivalId().toString(),
+            context.festivalRevisionId(),
+            context.revisionNumber(),
+            context.timezone()
+        );
     }
 
     private List<CatalogMap> loadMaps(FestivalContext context) {

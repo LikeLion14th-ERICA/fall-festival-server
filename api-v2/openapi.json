@@ -408,7 +408,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -531,7 +531,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -590,7 +590,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -683,7 +683,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -709,7 +709,7 @@
                         "serverTime": "2030-09-30T10:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -735,7 +735,7 @@
                         "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -761,7 +761,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -801,7 +801,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -924,7 +924,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -983,7 +983,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1545,7 +1545,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1668,7 +1668,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1727,7 +1727,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1964,7 +1964,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2087,7 +2087,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2146,7 +2146,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2360,7 +2360,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2483,7 +2483,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2542,7 +2542,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2876,7 +2876,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -2935,7 +2935,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3020,7 +3020,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3079,7 +3079,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3281,7 +3281,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3340,7 +3340,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3425,7 +3425,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3484,7 +3484,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3664,7 +3664,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3723,7 +3723,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3808,7 +3808,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -3867,7 +3867,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4097,7 +4097,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4220,7 +4220,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4279,7 +4279,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4488,7 +4488,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4547,7 +4547,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4632,7 +4632,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -4691,7 +4691,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5184,7 +5184,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5307,7 +5307,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5366,7 +5366,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5537,7 +5537,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5596,7 +5596,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5681,7 +5681,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5740,7 +5740,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -5882,7 +5882,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -6005,7 +6005,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -6064,7 +6064,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -7445,7 +7445,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -7568,7 +7568,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -7627,7 +7627,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -7822,7 +7822,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -7881,7 +7881,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -7966,7 +7966,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8025,7 +8025,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8250,7 +8250,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8373,7 +8373,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8432,7 +8432,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8574,7 +8574,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8633,7 +8633,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8718,7 +8718,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -8777,7 +8777,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9097,7 +9097,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9156,7 +9156,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9215,7 +9215,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9262,7 +9262,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9321,7 +9321,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9487,7 +9487,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9546,7 +9546,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9631,7 +9631,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9690,7 +9690,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -9980,7 +9980,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10103,7 +10103,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10162,7 +10162,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10338,7 +10338,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10461,7 +10461,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10520,7 +10520,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10642,7 +10642,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10796,7 +10796,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10843,7 +10843,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10902,7 +10902,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -10991,7 +10991,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11017,7 +11017,7 @@
                         "serverTime": "2030-09-30T10:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11043,7 +11043,7 @@
                         "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11069,7 +11069,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11109,7 +11109,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11149,7 +11149,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11189,7 +11189,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11293,7 +11293,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11352,7 +11352,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11429,7 +11429,7 @@
                         "serverTime": "2030-10-01T18:00:00.002+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 2,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11455,7 +11455,7 @@
                         "serverTime": "2030-10-01T18:00:00.002+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 2,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11495,7 +11495,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11535,7 +11535,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11575,7 +11575,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11736,7 +11736,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -11795,7 +11795,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12142,7 +12142,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12182,7 +12182,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12222,7 +12222,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12326,7 +12326,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12385,7 +12385,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12576,7 +12576,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12616,7 +12616,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12656,7 +12656,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12817,7 +12817,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -12876,7 +12876,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13083,7 +13083,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13123,7 +13123,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13163,7 +13163,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13203,7 +13203,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13288,7 +13288,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13347,7 +13347,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13552,7 +13552,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13592,7 +13592,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13632,7 +13632,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13672,7 +13672,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13814,7 +13814,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13873,7 +13873,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14023,7 +14023,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14063,7 +14063,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14103,7 +14103,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14181,7 +14181,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14228,7 +14228,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14287,7 +14287,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14429,7 +14429,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14469,7 +14469,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14509,7 +14509,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14613,7 +14613,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14672,7 +14672,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14836,7 +14836,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14876,7 +14876,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14916,7 +14916,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -14956,7 +14956,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15041,7 +15041,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15100,7 +15100,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15303,7 +15303,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15343,7 +15343,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15383,7 +15383,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15487,7 +15487,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15546,7 +15546,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15752,7 +15752,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15792,7 +15792,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15832,7 +15832,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -15872,7 +15872,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16014,7 +16014,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16073,7 +16073,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16309,7 +16309,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16349,7 +16349,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16389,7 +16389,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16493,7 +16493,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16552,7 +16552,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16859,7 +16859,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16899,7 +16899,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -16939,7 +16939,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17017,7 +17017,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17037,7 +17037,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17128,7 +17128,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17175,7 +17175,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17234,7 +17234,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17633,7 +17633,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17673,7 +17673,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17713,7 +17713,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17753,7 +17753,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17838,7 +17838,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -17897,7 +17897,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18342,7 +18342,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18382,7 +18382,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18422,7 +18422,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18462,7 +18462,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18521,7 +18521,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18541,7 +18541,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18632,7 +18632,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18679,7 +18679,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -18738,7 +18738,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19020,7 +19020,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19060,7 +19060,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19100,7 +19100,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19261,7 +19261,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19320,7 +19320,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19414,7 +19414,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19454,7 +19454,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19494,7 +19494,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19514,7 +19514,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19554,7 +19554,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19715,7 +19715,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19774,7 +19774,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19868,7 +19868,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19908,7 +19908,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19948,7 +19948,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19968,7 +19968,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -19988,7 +19988,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20008,7 +20008,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20048,7 +20048,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20152,7 +20152,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20211,7 +20211,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20285,7 +20285,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20325,7 +20325,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20365,7 +20365,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20405,7 +20405,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20425,7 +20425,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20529,7 +20529,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20588,7 +20588,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20657,7 +20657,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20697,7 +20697,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20737,7 +20737,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20757,7 +20757,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20797,7 +20797,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20901,7 +20901,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -20960,7 +20960,7 @@
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -21046,8 +21046,8 @@
           },
           "revision": {
             "type": "integer",
-            "minimum": 1,
-            "description": "이 응답을 만든 데이터 revision. 증가 여부 비교에 사용."
+            "minimum": 0,
+            "description": "0은 특정 published FestivalRevision에 안전하게 귀속되지 않는 응답. 1 이상은 응답 데이터가 실제로 귀속된 FestivalRevision.revision_number."
           },
           "locale": {
             "type": "string",

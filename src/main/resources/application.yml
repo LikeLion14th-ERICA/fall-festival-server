@@ -19,6 +19,7 @@ server:
     include-binding-errors: never
 
 festival:
+  id: ${FESTIVAL_ID:}
   admin-auth:
     access-token-ttl: PT15M
     refresh-token-ttl: P7D

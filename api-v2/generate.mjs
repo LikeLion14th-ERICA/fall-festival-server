@@ -12,6 +12,10 @@ const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'
 const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'15분 유효 signed JWT access token. Authorization: Bearer로 전달.'},AdminRefreshCookie:{type:'apiKey',in:'cookie',name:'__Host-festival-admin-refresh',description:'7일 유효 opaque refresh token. Secure·HttpOnly·SameSite=Strict이며 서버에는 SHA-256 hash만 저장.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-16',commit:'1247890eaa2010d25955662aa172e5839c4da652',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json'},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
 const examples={};
 const genericErrors={400:['INVALID_QUERY','잘못된 요청 예시입니다.'],401:['UNAUTHORIZED','관리자 인증이 필요합니다.'],403:['FORBIDDEN','관리자 권한이 없습니다.'],404:['NOT_FOUND','요청한 정보를 찾을 수 없습니다.'],405:['METHOD_NOT_ALLOWED','지원하지 않는 메서드입니다.'],409:['CONFLICT','요청 상태가 충돌합니다.'],413:['PAYLOAD_TOO_LARGE','요청 본문은 64KiB 이하입니다.'],415:['UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.'],422:['VALIDATION_FAILED','요청 필드를 확인해 주세요.'],429:['RATE_LIMITED','잠시 후 다시 요청해 주세요.'],500:['INTERNAL_ERROR','목 서버 처리 중 오류가 발생했습니다.'],503:['SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.']};
+const unscopedOperations=new Set([
+  'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
+  'getCrowding','getAdminCrowding','putAdminCrowding'
+]);
 for(const op of operations){
   const responseName=`${op.schema}Response`;spec.components.schemas[responseName]=envelopeSchema(op.schema);
   const scenarios=[...op.scenarios,'bad-request','rate-limited',...(op.admin&&op.authRequired!==false?['unauthorized','forbidden']:[])];
@@ -36,14 +40,14 @@ for(const op of operations){
     if(body?.translations&&scenario==='english-incomplete')body.translations.en={title:null,body:null,status:'PENDING'};
     if(body?.translations&&scenario==='english-failed')body.translations.en={title:null,body:null,status:'FAILED'};
     let now=scenarioTime(scenario,MOCK_NOW);
-    const meta=()=>({requestId:'mock-example-request',serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision:state.revision,locale:'ko',mock:true});
+    const meta=revision=>({requestId:'mock-example-request',serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});
     try{
       const disabledFailure=op.operationId==='createAdminSession'?[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.']:op.operationId==='refreshAdminSession'?[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.']:[401,...genericErrors[401]];
       const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure}[scenario];
       if(special)throw new ApiFailure(...special);
       if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
-      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;response={data:result.data,meta:meta()};
-    }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;response={error:{code:e.code,message:e.message,details:e.details,retryable:[429,500,503].includes(status)},meta:meta()};}
+      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;response={data:result.data,meta:meta(unscopedOperations.has(op.operationId)?0:state.revision)};
+    }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;response={error:{code:e.code,message:e.message,details:e.details,retryable:[429,500,503].includes(status)},meta:meta(0)};}
     if(!responses[status])throw new Error(`Missing response ${op.operationId} ${status}`);
     responses[status].content['application/json'].examples[scenario]={summary:`${op.summary}: ${scenario}`,value:response};
     const actualPath=op.path.replace(/\{(\w+)\}/g,(_,key)=>sampleParams[key]);

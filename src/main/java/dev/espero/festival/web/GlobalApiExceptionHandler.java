@@ -67,7 +67,7 @@ public class GlobalApiExceptionHandler {
             .toList();
         return ResponseEntity.badRequest().body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("VALIDATION_ERROR", "요청 값을 확인해 주세요.", details, false),
-            metaSupport.meta(request, 0, "ko")
+            metaSupport.metaForError(request)
         ));
     }
 
@@ -78,7 +78,7 @@ public class GlobalApiExceptionHandler {
     ) {
         return ResponseEntity.badRequest().body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("INVALID_REQUEST", "요청 본문을 확인해 주세요.", List.of(), false),
-            metaSupport.meta(request, 0, "ko")
+            metaSupport.metaForError(request)
         ));
     }
 

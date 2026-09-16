@@ -11,9 +11,13 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const sessions=new Map();
   const routes=Object.entries(spec.paths).flatMap(([path,methods])=>Object.entries(methods).map(([method,o])=>{const schemes=(o.security||[]).flatMap(requirement=>Object.keys(requirement));return {path,method:method.toUpperCase(),definition:o,operationId:o.operationId,input:o.requestBody?.content['application/json'].schema.$ref?.split('/').at(-1),requiresBearer:schemes.includes('AdminBearer'),requiresRefreshCookie:schemes.includes('AdminRefreshCookie'),cookieCsrf:['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(o.operationId),scenarios:o['x-mock-scenarios'],regex:new RegExp('^'+path.replace(/\{\w+\}/g,'([a-z0-9][a-z0-9-]{0,63})')+'$'),keys:[...path.matchAll(/\{(\w+)\}/g)].map(m=>m[1])};}));
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin, X-Mock-Session, X-Mock-Scenario, X-Mock-Time'};
+  const unscopedOperations=new Set([
+    'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
+    'getCrowding','getAdminCrowding','putAdminCrowding'
+  ]);
   const server=http.createServer(async(req,res)=>{
     let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
-    const meta=()=>({requestId,serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision:state.revision,locale,mock:true});
+    const meta=revision=>({requestId,serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale,mock:true});
     const send=(status,value,extra={})=>{res.writeHead(status,{...headers,'X-Request-Id':requestId,...extra});res.end(JSON.stringify(value));};
     try{
       const origin=req.headers.origin;
@@ -67,7 +71,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='forbidden')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');
       if(scenario==='rate-limited')failure(429,'RATE_LIMITED','잠시 후 다시 요청해 주세요.');
       const result=execute(route,state,{params,query,body,scenario,now});now=result.now;
-      const response={data:result.data,meta:meta()};
+      const response={data:result.data,meta:meta(unscopedOperations.has(route.operationId)?0:state.revision)};
       const responseSchema=route.definition.responses[result.status].content['application/json'].schema;
       const issues=validate(responseSchema,response,spec);if(issues.length)throw new Error('Response contract mismatch: '+JSON.stringify(issues));
       const extra=result.status===201?{Location:`/api/v2/admin/${route.operationId==='postAdminProduct'?'products':'notices'}/${result.data.id}`}:{ };
@@ -79,7 +83,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const status=known?error.status:500;
       // Never log requests, tokens, bodies, or personal data.
       if(!known)process.stderr.write('mock internal response/handler failure\n');
-      return send(status,{error:{code:known?error.code:'INTERNAL_ERROR',message:known?error.message:'목 서버 처리 중 오류가 발생했습니다.',details:known?error.details:[],retryable:[429,500,503].includes(status)},meta:meta()},status===429?{'Retry-After':'1'}:{});
+      return send(status,{error:{code:known?error.code:'INTERNAL_ERROR',message:known?error.message:'목 서버 처리 중 오류가 발생했습니다.',details:known?error.details:[],retryable:[429,500,503].includes(status)},meta:meta(0)},status===429?{'Retry-After':'1'}:{});
     }
   });
   server.requestTimeout=10000;server.headersTimeout=5000;
