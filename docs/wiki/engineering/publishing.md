@@ -22,6 +22,9 @@
 - Current Festival은 서버 `FESTIVAL_ID` 환경변수로 선택한다. DB에서 현재 Festival을 자동
   추측하지 않으며, 설정된 회차에 published revision이 없으면 공개 콘텐츠를 가짜 revision으로
   제공하지 않는다.
+- V13은 공연 카탈로그의 물리 schema만 제공한다. 공연은 아직 `CatalogManifest`·CLI의
+  import·validate·rollback 대상이 아니므로 공개 API 활성화 전에 별도
+  `feat/performance-catalog-import` 작업에서 완전 revision 게시 흐름에 포함한다.
 - 일정·지도처럼 서로 의존하는 변경은 부분 게시하지 않는다. 예약 게시의 시간대와 실패 처리,
   중복 실행 안전성을 명시한다.
 - 긴급 공지는 일반 콘텐츠보다 우선해 즉시 게시·수정·회수할 수 있고, 게시 결과와 캐시

@@ -85,8 +85,8 @@ class AdminAuditEventStoreIntegrationTest {
     }
 
     @Test
-    void v1ThroughV12MigrateAndStorePersistsEveryFieldIncludingANullResourceId() {
-        assertThat(latestMigrationVersion()).isEqualTo("12");
+    void adminAuditMigrationIsAppliedAndStorePersistsEveryFieldIncludingANullResourceId() {
+        assertThat(successfulAdminAuditMigrationCount()).isEqualTo(1);
         UUID eventId = UUID.randomUUID();
         store.insert(new AdminAuditEvent(
             eventId, ADMIN_ID, AdminAuditAction.CROWDING_UPDATED, AdminAuditResourceType.CROWDING,
@@ -319,10 +319,10 @@ class AdminAuditEventStoreIntegrationTest {
         return count == null ? 0 : count;
     }
 
-    private String latestMigrationVersion() {
+    private long successfulAdminAuditMigrationCount() {
         return jdbc.queryForObject(
-            "SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1",
-            Map.of(), String.class
+            "SELECT count(*) FROM flyway_schema_history WHERE version = '12' AND success",
+            Map.of(), Long.class
         );
     }
 
