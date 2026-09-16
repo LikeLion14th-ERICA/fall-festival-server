@@ -22,7 +22,7 @@ const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.o
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
 test('26 screens and 177 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,187);assert.equal(new Set(coverage.data.map(x=>x.id)).size,187);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');});
-test('Every public route has no authentication requirement; every admin route has one',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods))assert.equal(o.security.length>0,path.includes('/admin/'));});
+test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
 test('FAQ is an external config link and direct QR before START stays in local start state',async()=>{
   const unconfigured=(await call('/api/v2/config')).body.data;assert.equal(unconfigured.links.faq,null);
@@ -99,9 +99,24 @@ test('Invalid input is rejected, not reflected into a success fixture',async()=>
 test('Mock administrator authorization is checked server-side for every admin method',async()=>{
   for(const [path,methods]of Object.entries(spec.paths))if(path.includes('/admin/'))for(const [method,o]of Object.entries(methods)){
     const sample=examples[o.operationId].scenarios.normal.request.path;
-    assert.equal((await call(sample,{method:method.toUpperCase()})).status,401);
-    assert.equal((await call(sample,{method:method.toUpperCase(),headers:{Authorization:'Bearer mock-viewer'}})).status,403);
+    if(o.operationId==='createAdminSession')continue;
+    if(o.operationId==='refreshAdminSession'){assert.equal((await call(sample,{method:method.toUpperCase(),headers:{Origin:'http://localhost:5173'}})).status,401);continue;}
+    const cookieHeaders=['refreshAdminSession','deleteCurrentAdminSession'].includes(o.operationId)?{Origin:'http://localhost:5173',Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{};
+    assert.equal((await call(sample,{method:method.toUpperCase(),headers:cookieHeaders})).status,401);
+    assert.equal((await call(sample,{method:method.toUpperCase(),headers:{...cookieHeaders,Authorization:'Bearer mock-viewer'}})).status,403);
   }
+});
+test('Admin cookie endpoints use the CSRF error contract and logout stays idempotent without a cookie',async()=>{
+  const loginBody={username:'mock-admin',password:'MOCK-NOT-A-REAL-SECRET'};
+  const missing=await call('/api/v2/admin/sessions',{method:'POST',body:loginBody});
+  assert.equal(missing.status,403);assert.equal(missing.body.error.code,'ADMIN_CSRF_INVALID');
+  const suffix=await call('/api/v2/admin/sessions',{method:'POST',body:loginBody,headers:{Origin:'http://localhost:5173.attacker.com'}});
+  assert.equal(suffix.status,403);assert.equal(suffix.body.error.code,'ADMIN_CSRF_INVALID');
+  const exact=await call('/api/v2/admin/sessions',{method:'POST',body:loginBody,headers:{Origin:'http://localhost:5173'}});
+  assert.equal(exact.status,200);
+  const logout=await call('/api/v2/admin/sessions/current',{method:'DELETE',headers:{...admin,Origin:'http://localhost:5173'}});
+  assert.equal(logout.status,200);assert.equal(logout.body.data.loggedOut,true);assert.match(logout.headers.get('set-cookie'),/Max-Age=0/);
+  assert.deepEqual(operation('deleteCurrentAdminSession').security,[{AdminBearer:[]}]);
 });
 test('Crowding no-op, FULL confirmation, day boundary, restoration, shared read and session isolation',async()=>{
   const session='crowding-flow',opts={session,headers:admin};

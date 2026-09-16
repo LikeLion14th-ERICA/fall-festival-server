@@ -16,6 +16,7 @@ main `21eb76dacd78b3ad79ed4d9589dd341fbc25b883`(PR #6 병합 완료) Product Con
 | 번역 | translationSource 저장 검증 | 저장 필드 제거. READY/PENDING/FAILED, 선택 언어 READY만 공개 |
 | 공연 안내 | 실시간 performance-alert | 상시 prohibited-items 목록·안내 |
 | 갱신 | 5초 보장 | 새로고침 없는 반영만 확정, 전송 방식·지연 합의 대기 |
+| 관리자 인증 | 고정 목 Bearer token만 사용 | username 로그인, 15분 JWT access token, 7일 opaque refresh cookie rotation/revoke, 단일 ADMIN |
 
 ## 경로·필드 교체
 

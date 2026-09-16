@@ -42,3 +42,7 @@
 | POST | `/api/v2/admin/products` | 상품 등록·초기 판매 상태 미정 | ADM-GOODS-PRODUCT-EDIT | normal, new-option-on-sale, new-option-sold-out, missing-optional, empty-configuration, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·기존 조합 판매 상태 유지 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, new-option-on-sale, new-option-sold-out, option-removal, empty-configuration, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notice-translations` | 공지 번역 생성·재시도 | ADM-NOTICE-EDIT, ADM-NOTICE-TEMPLATE | normal, english-failed, partial-translation, error, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/sessions` | 관리자 로그인 |  | normal, invalid-credentials, disabled, invalid-origin, error, bad-request, rate-limited |
+| POST | `/api/v2/admin/sessions/refresh` | 관리자 세션 갱신·refresh rotation |  | normal, expired, revoked, unknown, disabled, invalid-origin, error, bad-request, rate-limited |
+| DELETE | `/api/v2/admin/sessions/current` | 현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공 |  | normal, invalid-origin, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/me` | 현재 인증 관리자 확인 |  | normal, disabled, error, bad-request, rate-limited, unauthorized, forbidden |

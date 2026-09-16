@@ -18,6 +18,15 @@ server:
     include-stacktrace: never
     include-binding-errors: never
 
+festival:
+  admin-auth:
+    access-token-ttl: PT15M
+    refresh-token-ttl: P7D
+    jwt-signing-secret: ${ADMIN_JWT_SIGNING_SECRET:}
+    allowed-origin: ${ADMIN_ALLOWED_ORIGIN:}
+    bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}
+    bootstrap-password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+
 ---
 # Activate with SPRING_PROFILES_ACTIVE=db once SPRING_DATASOURCE_* variables are
 # set. Without this profile no datasource property exists, so no DataSource bean
