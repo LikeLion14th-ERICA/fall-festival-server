@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import dev.espero.festival.domain.AdminAccount;
 import dev.espero.festival.persistence.AdminAuthStore;
-import dev.espero.festival.web.ApiMetaSupport;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -66,6 +66,18 @@ class AdminJwtAuthenticationFilterTest {
     }
 
     @Test
+    void rejectsInvalidBearerTokenWithSystemRevision() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter(tokens(), mock(AdminAuthStore.class)).doFilter(
+            adminRequest("not-a-jwt"), response, new MockFilterChain()
+        );
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(response.getContentAsString()).contains("UNAUTHORIZED", "\"revision\":0");
+    }
+
+    @Test
     void returnsApiEnvelopeWhenAccountLookupIsUnavailable() throws Exception {
         AdminAccount account = account(true);
         AdminAuthStore store = mock(AdminAuthStore.class);
@@ -87,11 +99,14 @@ class AdminJwtAuthenticationFilterTest {
                 "\"retryable\":true"
             )
             .doesNotContain("sensitive SQL connection detail", "Bearer ", "stackTrace");
+        assertThat(response.getContentAsString()).contains("\"revision\":0");
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
     private AdminJwtAuthenticationFilter filter(AdminTokenService tokens, AdminAuthStore store) {
-        ApiSecurityErrorWriter writer = new ApiSecurityErrorWriter(new ObjectMapper(), new ApiMetaSupport(clock()));
+        ApiSecurityErrorWriter writer = new ApiSecurityErrorWriter(
+            new ObjectMapper(), ApiMetaTestFixtures.systemMetaSupport(clock())
+        );
         return new AdminJwtAuthenticationFilter(tokens, store, writer);
     }
 

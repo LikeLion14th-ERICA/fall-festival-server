@@ -1,4 +1,4 @@
--- V10 is intentionally additive for the live catalog. The V1/V3 singleton
+-- V11 is intentionally additive for the live catalog. The V1/V3 singleton
 -- tables remain intact as a compatibility mirror, while these tables retain
 -- one immutable guide row for every revision. Existing rows are copied; no
 -- existing content is deleted or rewritten. A legacy partial ticket schedule
@@ -63,21 +63,10 @@ CREATE TABLE stamp_guide_revisions (
     CONSTRAINT ck_stamp_guide_revisions_singleton CHECK (id = 1)
 );
 
--- V8 guarantees one published revision before the catalog tables are usable.
--- A legacy stamp row may still have a NULL revision from V4; attach its copy
--- to that published revision without changing the legacy source row.
+-- V9 established each legacy stamp guide's non-null revision. Preserve that
+-- exact association rather than selecting a published revision globally.
 DO $$
-DECLARE
-    published_revision UUID;
 BEGIN
-    SELECT id INTO published_revision
-    FROM festival_revisions
-    WHERE state = 'published';
-
-    IF published_revision IS NULL THEN
-        RAISE EXCEPTION 'V10 requires a published festival revision';
-    END IF;
-
     INSERT INTO ticket_guide_revisions (
         festival_revision_id, id, unit_price_amount, account_bank_name,
         account_number, account_holder, transfer_link_label, transfer_link_url,
@@ -120,7 +109,7 @@ BEGIN
         festival_revision_id, id, title, dates, instructions, reward_name,
         reward_location_text, reward_hours_text, reward_notice, qr_value, updated_at
     )
-    SELECT COALESCE(festival_revision_id, published_revision), id, title, dates,
+    SELECT festival_revision_id, id, title, dates,
            instructions, reward_name, reward_location_text, reward_hours_text,
            reward_notice, qr_value, updated_at
     FROM stamp_guide;

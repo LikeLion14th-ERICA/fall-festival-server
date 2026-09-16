@@ -76,3 +76,17 @@ API v2는 공개 앱과 관리자 운영 도구가 공유하는 단일 HTTP 계�
 [OpenAPI](../../../api-v2/openapi.json), [화면 추적표](../../../api-v2/SCREEN-DATA.md),
 [목 실행 안내](../../../api-v2/FRONTEND.md)를 함께 확인합니다. 기술 초안과 미확정 운영
 자료는 [v2 결정 대기](../../../api-v2/DECISIONS.md)에 구분합니다.
+
+## Festival context와 응답 meta
+
+- 서비스 인스턴스가 제공할 Current Festival은 `FESTIVAL_ID` 환경변수의 UUID로 명시한다.
+  DB의 첫 행, 최대 revision, 최근 게시 시각 또는 `LIMIT 1`로 자동 선택하지 않는다.
+- revision에 귀속된 공개 콘텐츠 응답은 요청마다 설정된 Festival의 `published`
+  FestivalRevision을 한 번 확정하고, 같은 revision ID로 데이터를 조회해 실제 Festival UUID,
+  revision number와 timezone을 meta에 사용한다. 이때 revision은 1 이상이다.
+- 특정 published FestivalRevision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용한다.
+  관리자 인증·시스템·오류 응답뿐 아니라 아직 FestivalDay 연결이 완료되지 않은 혼잡도 응답도
+  여기에 포함한다. 0은 published content revision의 대체값이 아니다.
+- 혼잡도는 실제 FestivalDay 일정과 `crowding_state.festival_day_id`를 연결한 뒤 같은
+  published revision으로 데이터를 제한하고 revision 1 이상으로 전환한다.
+- 보안·인프라 오류 meta는 추가 DB 조회 없이 만들어 원래 장애를 가리지 않는다.

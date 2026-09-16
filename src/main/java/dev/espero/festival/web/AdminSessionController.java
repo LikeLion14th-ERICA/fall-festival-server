@@ -52,7 +52,7 @@ public class AdminSessionController {
     ) {
         AdminAuthService.SessionResult result = authService.login(loginRequest.username(), loginRequest.password());
         setRefreshCookie(response, result.refreshToken(), result.refreshExpiresAt());
-        return new ApiResponse<>(SessionResponse.from(result), metaSupport.meta(request, 1, "ko"));
+        return new ApiResponse<>(SessionResponse.from(result), metaSupport.systemMeta(request, "ko"));
     }
 
     @PostMapping("/sessions/refresh")
@@ -63,7 +63,7 @@ public class AdminSessionController {
     ) {
         AdminAuthService.SessionResult result = authService.refresh(refreshToken);
         setRefreshCookie(response, result.refreshToken(), result.refreshExpiresAt());
-        return new ApiResponse<>(SessionResponse.from(result), metaSupport.meta(request, 1, "ko"));
+        return new ApiResponse<>(SessionResponse.from(result), metaSupport.systemMeta(request, "ko"));
     }
 
     @DeleteMapping("/sessions/current")
@@ -75,7 +75,7 @@ public class AdminSessionController {
     ) {
         authService.logout(refreshToken, principal);
         expireRefreshCookie(response);
-        return new ApiResponse<>(new LogoutResponse(true), metaSupport.meta(request, 1, "ko"));
+        return new ApiResponse<>(new LogoutResponse(true), metaSupport.systemMeta(request, "ko"));
     }
 
     @GetMapping("/me")
@@ -85,7 +85,7 @@ public class AdminSessionController {
     ) {
         return new ApiResponse<>(
             new AdminResponse(principal.adminId(), principal.username(), principal.authority(), true),
-            metaSupport.meta(request, 1, "ko")
+            metaSupport.systemMeta(request, "ko")
         );
     }
 

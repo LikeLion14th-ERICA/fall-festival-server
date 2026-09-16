@@ -24,7 +24,7 @@
 
 기본 경로는 `/api/v2`입니다. 공개 GET 요청은 인증이 없습니다. `/admin/` 요청은 서버에서 관리자 권한을 확인합니다. 목의 고정 토큰은 실제 인증 규격이 아닙니다. API v2가 제품의 유일한 계약이며, 실제 Spring Boot 적용 범위는 경로별 구현 상태와 함께 관리합니다.
 
-성공은 `{ data, meta }`, 오류는 `{ error, meta }`입니다. `meta`는 `requestId`, `serverTime`, `timezone`, `festivalId`, `revision`, `locale`, `mock`을 포함합니다. `X-Request-Id`도 같은 요청 ID입니다. 오류 `code`로 분기하고 `message`는 진단에 사용합니다. 화면 문구는 프런트 번역에서 선택합니다.
+성공은 `{ data, meta }`, 오류는 `{ error, meta }`입니다. `meta`는 `requestId`, `serverTime`, `timezone`, `festivalId`, `revision`, `locale`, `mock`을 포함합니다. `X-Request-Id`도 같은 요청 ID입니다. 특정 published `FestivalRevision`에 귀속된 콘텐츠의 `revision`은 실제 `FestivalRevision.revision_number`인 1 이상입니다. 인증·시스템·오류와 같이 특정 published revision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용합니다. 혼잡도는 실제 FestivalDay 연결 전까지 0을 사용하는 임시 예외이며, 스탬프·티켓 안내는 해당 revision ID로 조회하므로 1 이상을 사용합니다. 오류 `code`로 분기하고 `message`는 진단에 사용합니다. 화면 문구는 프런트 번역에서 선택합니다.
 
 ```json
 {
@@ -37,7 +37,7 @@
   "meta": {
     "requestId": "example-request", "serverTime": "2030-10-01T18:00:00+09:00",
     "timezone": "Asia/Seoul", "festivalId": "festival-mock",
-    "revision": 1, "locale": "ko", "mock": true
+    "revision": 0, "locale": "ko", "mock": true
   }
 }
 ```
@@ -53,7 +53,7 @@
 | 언어 | `locale` 쿼리, 생략 시 `ko`. 현재 공개 언어는 `ko`뿐이다. `config.languages`에 준비된 언어만 사용하며, 알려졌지만 준비되지 않은 언어는 `LOCALE_NOT_READY`, 알 수 없는 값은 `INVALID_QUERY`다. 공지·카탈로그 모두 한국어로 대신 노출하지 않는다. `all-languages`는 프런트 검증용 목 세션 제어값이다. |
 | 이미지·링크 | 이미지 URL은 절대 또는 origin 기준 상대 경로. 상대 경로는 API origin으로 해석. 외부 링크는 HTTPS·새 탭. 목 자산은 개발용 SVG이며 외부 예제 주소는 연결 불가 |
 | 목록 | 화면에서 필요한 전체 목록, 별도 pagination 없음. 정렬은 개별 스키마 설명에 명시. 부스 즐겨찾기 정렬은 브라우저 책임 |
-| 캐시·버전 | 목은 `Cache-Control: no-store`. `revision`은 같은 축제·세션의 데이터 변경 순서 비교용이며 응답 완료 순서가 아님. 실제 캐시·배포 환경 계약은 추가 합의 필요 |
+| 캐시·버전 | 목은 `Cache-Control: no-store`. `revision` 1 이상은 응답 데이터가 실제로 귀속된 published FestivalRevision 번호이며 응답 완료 순서가 아님. `0`은 특정 published FestivalRevision에 안전하게 귀속되지 않음을 뜻함. 혼잡도는 FestivalDay 연결 전까지 0. 실제 캐시·배포 환경 계약은 추가 합의 필요 |
 
 | HTTP | 의미 |
 |---|---|

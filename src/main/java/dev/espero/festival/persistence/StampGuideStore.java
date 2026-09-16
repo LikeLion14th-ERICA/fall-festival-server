@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
@@ -29,19 +28,6 @@ public class StampGuideStore {
 
     public StampGuideStore(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
-    }
-
-    public Optional<StampGuide> find() {
-        List<UUID> publishedRevisions = jdbc.query("""
-            SELECT id
-            FROM festival_revisions
-            WHERE state = 'published'
-            ORDER BY id
-            """, Map.of(), (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class));
-        if (publishedRevisions.size() != 1) {
-            return Optional.empty();
-        }
-        return find(publishedRevisions.getFirst());
     }
 
     /** Loads the immutable guide row belonging to one revision. */

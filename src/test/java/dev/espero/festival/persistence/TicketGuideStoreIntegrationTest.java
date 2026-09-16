@@ -19,17 +19,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/**
- * Runs the real V2__create_ticket_guide migration against an ephemeral
- * Postgres and reads it back through TicketGuideStore, closing the gap the
- * mocked TicketGuideControllerTest can't cover: that the nullable
- * DATE/TIME/INTEGER columns and the TEXT[] instructions column actually map
- * to TicketGuideConfig correctly.
- */
+/** Verifies the real V1-V9 Flyway chain and revision-scoped ticket guide mapping. */
 @SpringBootTest
 @ActiveProfiles("db")
 @Testcontainers(disabledWithoutDocker = true)
 class TicketGuideStoreIntegrationTest {
+
+    private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
+    private static final UUID REVISION_ID = UUID.fromString("f109dca2-8b28-4e09-8114-beebc2bd3ea2");
+    private static final UUID OTHER_REVISION_ID = UUID.fromString("e822e93f-f13d-4994-af15-e41722cccf4c");
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -58,6 +56,30 @@ class TicketGuideStoreIntegrationTest {
         Optional<TicketGuideConfig> guide = store.find(publishedRevisionId);
 
         assertThat(guide).isPresent();
+        assertThat(guide.get().dailyTransferOpenTime()).isNull();
+        assertThat(guide.get().dailyTransferCloseTime()).isNull();
+        assertThat(guide.get().dailyPickupOpenTime()).isNull();
+        assertThat(guide.get().dailyPickupCloseTime()).isNull();
+        assertThat(guide.get().hasSchedule()).isFalse();
+    }
+
+    @Test
+    void migrationBackfillsRevisionAndMapsTheSeededGuide() {
+        Optional<TicketGuideConfig> guide = store.find(REVISION_ID);
+        UUID storedRevisionId = jdbc.queryForObject(
+            "SELECT festival_revision_id FROM ticket_guide WHERE id = 1", Map.of(), UUID.class
+        );
+        String nullable = jdbc.queryForObject("""
+            SELECT is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'ticket_guide'
+              AND column_name = 'festival_revision_id'
+            """, Map.of(), String.class);
+
+        assertThat(guide).isPresent();
+        assertThat(storedRevisionId).isEqualTo(REVISION_ID);
+        assertThat(nullable).isEqualTo("NO");
         TicketGuideConfig config = guide.get();
         assertThat(config.unitPriceAmount()).isEqualTo(15000);
         assertThat(config.dailyTransferOpenTime()).isNull();
@@ -91,5 +113,21 @@ class TicketGuideStoreIntegrationTest {
         assertThat(guide).isPresent();
         assertThat(guide.get().unitPriceAmount()).isEqualTo(15000);
         assertThat(guide.get().accountBankName()).isNull();
+    }
+
+    @Test
+    @Transactional
+    void doesNotReturnGuideForAnotherRevision() {
+        jdbc.update("""
+            INSERT INTO festival_revisions (
+                id, festival_id, revision_number, state,
+                approved_at, scheduled_at, published_at, created_at, updated_at
+            ) VALUES (
+                :id, :festivalId, 2, 'archived',
+                NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            )
+            """, Map.of("id", OTHER_REVISION_ID, "festivalId", FESTIVAL_ID));
+
+        assertThat(store.find(OTHER_REVISION_ID)).isEmpty();
     }
 }

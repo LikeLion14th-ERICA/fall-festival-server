@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import dev.espero.festival.domain.CrowdingRecord;
 import dev.espero.festival.persistence.CrowdingStore;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
@@ -23,7 +24,7 @@ class CrowdingControllerTest {
 
     private CrowdingController controllerAt(String instant) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-        return new CrowdingController(store, new ApiMetaSupport(clock), clock);
+        return new CrowdingController(store, ApiMetaTestFixtures.contentMetaSupport(clock), clock);
     }
 
     @Test
@@ -44,12 +45,15 @@ class CrowdingControllerTest {
     void returnsRelaxedDefaultDuringOperatingHoursWhenNothingSaved() {
         when(store.findFor(LocalDate.parse("2030-10-01"))).thenReturn(Optional.empty());
 
-        CrowdingResponse data = controllerAt("2030-10-01T05:00:00Z").getCrowding(request).data();
+        ApiResponse<CrowdingResponse> response = controllerAt("2030-10-01T05:00:00Z").getCrowding(request);
+        CrowdingResponse data = response.data();
 
         assertThat(data.status()).isEqualTo(CrowdingResponse.Status.RELAXED);
         assertThat(data.colorToken()).isEqualTo("green");
         assertThat(data.savedLevel()).isNull();
         assertThat(data.timeBasis()).isEqualTo(CrowdingResponse.TimeBasis.OPENING);
+        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
+        assertThat(response.meta().revision()).isZero();
     }
 
     @Test

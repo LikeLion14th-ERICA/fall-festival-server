@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.TicketGuideConfig;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
@@ -35,13 +36,15 @@ class TicketGuideControllerTest {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
         when(request.getParameterMap()).thenReturn(Map.of());
         when(snapshots.required()).thenReturn(snapshot(config, ticketMapTarget));
-        return new TicketGuideController(snapshots, new ApiMetaSupport(clock), clock);
+        return new TicketGuideController(snapshots, ApiMetaTestFixtures.contentMetaSupport(clock), clock);
     }
 
     private CatalogSnapshot snapshot(TicketGuideConfig config, CatalogSnapshot.MapTarget ticketMapTarget) {
         return new CatalogSnapshot(
             new CatalogSnapshot.FestivalContext(
-                "festival-test", UUID.fromString("00000000-0000-0000-0000-000000000001"), 7
+                ApiMetaTestFixtures.FESTIVAL_ID.toString(),
+                ApiMetaTestFixtures.REVISION_ID,
+                7
             ),
             List.of(),
             List.of(),
@@ -73,13 +76,17 @@ class TicketGuideControllerTest {
 
     @Test
     void returnsUnconfiguredWhenTheSnapshotHasNoTicketGuide() {
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", null).getTicketGuide(request).data();
+        ApiResponse<TicketGuideResponse> response = controllerAt("2030-10-01T09:00:00Z", null)
+            .getTicketGuide(request);
+        TicketGuideResponse data = response.data();
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
         assertThat(data.unitPrice()).isNull();
         assertThat(data.account()).isNull();
         assertThat(data.mapTarget()).isNull();
         assertThat(data.instructions()).isEmpty();
+        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
+        assertThat(response.meta().revision()).isEqualTo(7);
     }
 
     @Test
@@ -151,14 +158,18 @@ class TicketGuideControllerTest {
         );
         when(request.getParameterMap()).thenReturn(Map.of());
         when(snapshots.required()).thenReturn(snapshot(scheduledConfig(), target));
-        TicketGuideController controller = new TicketGuideController(snapshots, new ApiMetaSupport(clock), clock);
+        TicketGuideController controller = new TicketGuideController(
+            snapshots,
+            ApiMetaTestFixtures.contentMetaSupport(clock),
+            clock
+        );
 
         ApiResponse<TicketGuideResponse> response = controller.getTicketGuide(request);
 
         assertThat(response.data().mapTarget()).isEqualTo(new TicketGuideResponse.MapTarget(
             "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
         ));
-        assertThat(response.meta().festivalId()).isEqualTo("festival-test");
+        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
         assertThat(response.meta().revision()).isEqualTo(7);
     }
 

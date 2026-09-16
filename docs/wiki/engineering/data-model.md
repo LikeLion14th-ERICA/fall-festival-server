@@ -13,10 +13,10 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 
 ## 현재 구현 경계
 
-- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V10), 티켓,
+- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V11), 티켓,
   스탬프·혼잡도와 published revision의 부스·장소·지도 카탈로그 공개 조회가 있다. V8은
-  revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를, V9는 지도
-  filter group을, V10은 revision-scoped guide·게시 CLI·감사 이력을 만든다. 승인된 운영
+  revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를, V10은 지도
+  filter group을, V11은 revision-scoped guide·게시 CLI·감사 이력을 만든다. 승인된 운영
   부스·지도·좌표·티켓존 자료는 seed하지 않는다. 상세 물리 모델과 완료 기준은
   [부스·지도 공개 카탈로그](spaces-map-backend.md)를 따른다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
@@ -35,7 +35,7 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
   결정이다.
 - 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
   `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`·filter group·canonical map
-  target과 revision-scoped ticket/stamp guide·catalog audit의 현재 물리 schema는 V8~V10에
+  target과 revision-scoped ticket/stamp guide·catalog audit의 현재 물리 schema는 V8~V11에
   있다. 나머지 모델의 컬럼·인덱스·삭제 방식은 migration 설계에서 확정한다.
 
 ## 논리 모델과 관계
@@ -99,5 +99,5 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 - 같은 날 생성된 다섯 HTML은 Chrome에서 1440×900, 1600×1000, 1920×1080,
   2048×1320 해상도의 light/dark 화면으로 확인했다. 가로·세로 overflow와 Viewer 겹침이 없고,
   1440×900 light 스크린샷을 시각 검토했다.
-- 부스·지도 실제 구현은 V8~V10과 [부스·지도 공개 카탈로그](spaces-map-backend.md)에 기록한다.
+- 부스·지도 실제 구현은 V8~V11과 [부스·지도 공개 카탈로그](spaces-map-backend.md)에 기록한다.
   이 문서의 나머지 모델은 계속 설계 검토 대상이며 운영 자료·DB 연결 값은 포함하지 않는다.

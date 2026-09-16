@@ -4,9 +4,9 @@
 
 ## 목적과 현재 기준
 
-이 문서는 API v2와 V8~V10 카탈로그 구현을 기준으로 한다. V2~V6의 `Festival`·
+이 문서는 API v2와 V8~V11 카탈로그 구현을 기준으로 한다. V2~V6의 `Festival`·
 `FestivalRevision`과 published revision 1건 위에 V8이 `Space`, `Place`, 지도 자산·핀 테이블과
-공개 조회 API를 추가했다. V9는 핀 대분류와 표시명 번역을, V10은 revision-scoped 티켓·스탬프
+공개 조회 API를 추가했다. V10은 핀 대분류와 표시명 번역을, V11은 revision-scoped 티켓·스탬프
 안내와 개발자 전용 publish CLI·감사 이력을 추가했다. V3의 `ticket_guide`가 독립 nullable로
 두었던 map target 네 필드는 V8에서 전부 null 또는 전부 존재하도록 하고, 실제 현재 `PLACE`
 핀을 참조하게 만들었다.
@@ -32,7 +32,7 @@ snapshot에서 다음 공개 GET을 제공한다.
 | cache/전파 | Outbox, CAS, CDN purge, 요청별 shared JSON 캐시는 넣지 않는다. 이들은 다중 인스턴스 또는 CDN 도입이 확정될 때 다시 평가한다. 해시 경로 지도 이미지는 배포 환경에서 immutable cache header를 쓴다. |
 | revision | `revision` query를 추가하지 않는다. `meta.revision`은 응답 비교용이며 늦은 응답 폐기는 클라이언트 책임이다. 409는 `mapVersion` 불일치에만 쓴다. |
 | locale | 현재 공개 언어는 `ko`뿐이다. 다른 locale은 fallback하지 않고 거절한다. 새 언어는 공간·장소·지도·핀·filter label·locale별 정렬이 모두 완결되고 승인된 경우에만 공개한다. |
-| migration | main의 관리자 인증은 V7, 카탈로그는 V8~V10이다. V9는 기존 핀의 분류를 추정해 채우지 않고 null로 보존한다. V10은 legacy guide 행을 삭제·재작성하지 않고 revision table에 복사하며, 날짜 없는 legacy ticket 시간값은 새 snapshot에서 명시적 미설정으로 정규화한다. 운영 DB의 Flyway history와 기존 데이터는 고치거나 재생성하지 않는다. |
+| migration | main의 관리자 인증은 V7·V9, 카탈로그는 V8~V11이다. V10은 기존 핀의 분류를 추정해 채우지 않고 null로 보존한다. V11은 legacy guide 행을 삭제·재작성하지 않고 revision table에 복사하며, 날짜 없는 legacy ticket 시간값은 새 snapshot에서 명시적 미설정으로 정규화한다. 운영 DB의 Flyway history와 기존 데이터는 고치거나 재생성하지 않는다. |
 
 ## 저장 모델과 불변식
 
@@ -138,9 +138,9 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 
 1. **V8 읽기 수직 절단:** JDBC snapshot loader, `/readyz`, spaces/maps/places controller와
    400·404·409·503 오류를 제공한다.
-2. **V9 지도 필터:** `Pin.filterGroup`과 지도별 `filters`를 제공하며, legacy revision의 전체
+2. **V10 지도 필터:** `Pin.filterGroup`과 지도별 `filters`를 제공하며, legacy revision의 전체
    null 그룹을 읽을 수 있게 보존한다.
-3. **V10 게시 경로:** immutable guide revision, manifest 검증, CLI import·validate·publish·rollback,
+3. **V11 게시 경로:** immutable guide revision, manifest 검증, CLI import·validate·publish·rollback,
    audit log를 제공한다. HTTP 콘텐츠 쓰기 경로는 만들지 않는다.
 4. **운영 자료 투입 gate:** 실제 asset·좌표·문구·번역·티켓존 자료는 manifest validation을
    통과한 완전 revision만 게시한다. 이 저장소에는 승인되지 않은 운영 부스·지도·핀·티켓존·번역을
@@ -157,7 +157,7 @@ revision·AREA·구버전 target, 같은 mapVersion의 자산·좌표·target dr
 
 | 계층 | 반드시 확인할 결과 |
 |---|---|
-| Flyway/PostgreSQL | V8~V10 migration에서 FK·CHECK·UNIQUE 제약, legacy guide 보존, revision guide 복사, audit row, filter group 제약을 검증한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
+| Flyway/PostgreSQL | V8~V11 migration에서 FK·CHECK·UNIQUE 제약, legacy guide 보존, revision guide 복사, audit row, filter group 제약을 검증한다. Testcontainers가 Docker 부재로 skip되면 성공과 구분해 기록한다. |
 | Java 단위/HTTP | 정상·빈 목록, category, 알려진 미준비 locale, unknown locale, not-found, mapVersion 409, 503, request ID 형식, ticket·stamp snapshot 및 target, 대표 target과 API v2 ID·이미지 URI 형식을 검증한다. |
 | CLI | 알려지지 않은 JSON key·불완전 revision·원격 경로·10 MiB 초과 manifest를 거절하고, import·validate·publish·rollback의 상태 전이와 audit 기록을 검증한다. |
 | API v2 | `contract-source.mjs`의 map filter·locale·target 의미와 생성물 일치, 목 contract check를 검증한다. Spring 응답은 JSON schema provider test로 별도 확인한다. |

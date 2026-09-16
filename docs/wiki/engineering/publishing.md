@@ -19,6 +19,11 @@
   부분 게시하지 않는다.
 - rollback은 archived revision을 새 증가 revision draft로 복제해 validate·publish를 다시 수행한다.
   이미지·좌표·핀 target이 같으면 기존 `mapVersion`을 유지한다.
+- Current Festival은 서버 `FESTIVAL_ID` 환경변수로 선택한다. DB에서 현재 Festival을 자동
+  추측하지 않으며, 설정된 회차에 published revision이 없으면 공개 콘텐츠를 가짜 revision으로
+  제공하지 않는다.
+- 일정·지도처럼 서로 의존하는 변경은 부분 게시하지 않는다. 예약 게시의 시간대와 실패 처리,
+  중복 실행 안전성을 명시한다.
 - 긴급 공지는 일반 콘텐츠보다 우선해 즉시 게시·수정·회수할 수 있고, 게시 결과와 캐시
   반영 상태를 운영자가 확인할 수 있어야 한다.
 - 잘못 게시한 콘텐츠를 직전의 검증된 revision으로 빠르게 되돌리는 rollback 기능과

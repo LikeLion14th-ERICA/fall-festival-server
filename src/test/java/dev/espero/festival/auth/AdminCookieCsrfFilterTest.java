@@ -2,7 +2,7 @@ package dev.espero.festival.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import dev.espero.festival.web.ApiMetaSupport;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -75,7 +75,9 @@ class AdminCookieCsrfFilterTest {
             Duration.ofMinutes(15), Duration.ofDays(7), "test-admin-jwt-signing-secret-at-least-32-bytes",
             allowedOrigin, null, null
         );
-        ApiSecurityErrorWriter writer = new ApiSecurityErrorWriter(new ObjectMapper(), new ApiMetaSupport(clock));
+        ApiSecurityErrorWriter writer = new ApiSecurityErrorWriter(
+            new ObjectMapper(), ApiMetaTestFixtures.systemMetaSupport(clock)
+        );
         return new AdminCookieCsrfFilter(properties, writer);
     }
 

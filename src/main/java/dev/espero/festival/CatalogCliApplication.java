@@ -1,9 +1,11 @@
 package dev.espero.festival;
 
+import dev.espero.festival.context.FestivalProperties;
 import java.time.Clock;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration(proxyBeanMethods = false)
 @Profile("catalog-cli")
 @EnableAutoConfiguration
+@EnableConfigurationProperties(FestivalProperties.class)
 @ComponentScan(basePackages = "dev.espero.festival.persistence")
 @Import({
     CatalogManifestValidator.class,

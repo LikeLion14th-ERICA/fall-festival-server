@@ -7,13 +7,13 @@ import static org.mockito.Mockito.when;
 
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.StampGuide;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,9 +25,9 @@ class StampGuideControllerTest {
 
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC);
-    private final ApiMetaSupport metaSupport = new ApiMetaSupport(clock);
+    private final ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
     private final StampGuideController controller = new StampGuideController(snapshots, metaSupport);
-    private final HttpServletRequest request = request(Map.of());
+    private final HttpServletRequest request = mock(HttpServletRequest.class);
 
     @Test
     void returnsGuideMatchingApiV2Schema() {
@@ -56,7 +56,7 @@ class StampGuideControllerTest {
         assertThat(response.data().qrValue()).isNull();
         assertThat(response.meta().mock()).isFalse();
         assertThat(response.meta().locale()).isEqualTo("ko");
-        assertThat(response.meta().festivalId()).isEqualTo("festival-test");
+        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
         assertThat(response.meta().revision()).isEqualTo(7);
     }
 
@@ -72,9 +72,9 @@ class StampGuideControllerTest {
 
     @Test
     void rejectsUnreadyAndUnknownLocalesWithoutFallingBack() {
-        when(snapshots.required()).thenReturn(snapshot(null));
         HttpServletRequest knownButUnready = request(Map.of("locale", new String[] {"en"}));
         HttpServletRequest unknown = request(Map.of("locale", new String[] {"xx"}));
+        when(snapshots.required()).thenReturn(snapshot(null));
         when(knownButUnready.getParameter("locale")).thenReturn("en");
         when(unknown.getParameter("locale")).thenReturn("xx");
 
@@ -89,7 +89,7 @@ class StampGuideControllerTest {
     private CatalogSnapshot snapshot(StampGuide guide) {
         return new CatalogSnapshot(
             new CatalogSnapshot.FestivalContext(
-                "festival-test", UUID.fromString("00000000-0000-0000-0000-000000000001"), 7
+                ApiMetaTestFixtures.FESTIVAL_ID.toString(), ApiMetaTestFixtures.REVISION_ID, 7
             ),
             List.of(),
             List.of(),

@@ -1,6 +1,7 @@
 package dev.espero.festival.domain;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,12 @@ public record CatalogSnapshot(
             .findFirst();
     }
 
-    public record FestivalContext(String festivalId, UUID revisionId, long revision) {}
+    public record FestivalContext(String festivalId, UUID revisionId, long revision, ZoneId timezone) {
+
+        public FestivalContext(String festivalId, UUID revisionId, long revision) {
+            this(festivalId, revisionId, revision, ZoneId.of("Asia/Seoul"));
+        }
+    }
 
     public record Image(String url, String alt, int width, int height) {}
 

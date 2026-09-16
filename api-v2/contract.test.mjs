@@ -26,6 +26,24 @@ const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
+test('Meta revision distinguishes aligned content from unscoped and error responses',()=>{
+  const metaSchema={$ref:'#/components/schemas/Meta'};
+  const baseMeta={requestId:'revision-contract',serverTime:'2030-10-01T12:00:00+09:00',timezone:'Asia/Seoul',festivalId:'festival-mock',locale:'ko',mock:true};
+  standardValidate(metaSchema,{...baseMeta,revision:0});
+  const validateNegative=ajv.compile({...metaSchema,components:spec.components});
+  assert.equal(validateNegative({...baseMeta,revision:-1}),false);
+  const unscopedOperations=new Set([
+    'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
+    'getCrowding','getAdminCrowding','putAdminCrowding'
+  ]);
+  for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
+    if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response.meta.revision,0,operationId);
+    else assert.ok(example.response.meta.revision>=1,operationId);
+  }
+  assert.ok(examples.getStampGuide.scenarios.normal.response.meta.revision>=1);
+  assert.ok(examples.getTicketGuide.scenarios.normal.response.meta.revision>=1);
+  assert.equal(examples.getCrowding.scenarios.normal.response.meta.revision,0);
+});
 test('26 screens and 177 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,187);assert.equal(new Set(coverage.data.map(x=>x.id)).size,187);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});

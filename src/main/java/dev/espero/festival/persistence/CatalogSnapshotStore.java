@@ -1,5 +1,6 @@
 package dev.espero.festival.persistence;
 
+import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
 import dev.espero.festival.domain.CatalogSnapshot.FestivalContext;
@@ -14,6 +15,7 @@ import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
 import dev.espero.festival.domain.StampGuide;
 import dev.espero.festival.domain.TicketGuideConfig;
+import dev.espero.festival.domain.PublishedFestivalContext;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -56,15 +58,21 @@ public class CatalogSnapshotStore {
     private final NamedParameterJdbcTemplate jdbc;
     private final TicketGuideStore ticketGuideStore;
     private final StampGuideStore stampGuideStore;
+    private final FestivalContextStore festivalContextStore;
+    private final FestivalProperties festivalProperties;
 
     public CatalogSnapshotStore(
         NamedParameterJdbcTemplate jdbc,
         TicketGuideStore ticketGuideStore,
-        StampGuideStore stampGuideStore
+        StampGuideStore stampGuideStore,
+        FestivalContextStore festivalContextStore,
+        FestivalProperties festivalProperties
     ) {
         this.jdbc = jdbc;
         this.ticketGuideStore = ticketGuideStore;
         this.stampGuideStore = stampGuideStore;
+        this.festivalContextStore = festivalContextStore;
+        this.festivalProperties = festivalProperties;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -115,21 +123,17 @@ public class CatalogSnapshotStore {
     }
 
     private FestivalContext loadPublishedContext() {
-        List<FestivalContext> contexts = jdbc.query("""
-            SELECT f.id AS festival_id, r.id AS revision_id, r.revision_number
-            FROM festival_revisions r
-            JOIN festivals f ON f.id = r.festival_id
-            WHERE r.state = 'published'
-            ORDER BY f.id
-            """, Map.of(), (resultSet, rowNumber) -> new FestivalContext(
-                resultSet.getObject("festival_id", UUID.class).toString(),
-                resultSet.getObject("revision_id", UUID.class),
-                resultSet.getLong("revision_number")
+        PublishedFestivalContext context = festivalContextStore
+            .findPublishedByFestivalId(festivalProperties.configuredFestivalId())
+            .orElseThrow(() -> new CatalogIntegrityException(
+                "The configured festival has no published revision."
             ));
-        if (contexts.size() != 1) {
-            throw new CatalogIntegrityException("Exactly one published festival revision is required.");
-        }
-        return contexts.getFirst();
+        return new FestivalContext(
+            context.festivalId().toString(),
+            context.festivalRevisionId(),
+            context.revisionNumber(),
+            context.timezone()
+        );
     }
 
     private FestivalContext loadRevisionContext(UUID revisionId) {
@@ -137,7 +141,7 @@ public class CatalogSnapshotStore {
             throw new CatalogIntegrityException("A revision id is required.");
         }
         List<FestivalContext> contexts = jdbc.query("""
-            SELECT f.id AS festival_id, r.id AS revision_id, r.revision_number
+            SELECT f.id AS festival_id, f.timezone, r.id AS revision_id, r.revision_number
             FROM festival_revisions r
             JOIN festivals f ON f.id = r.festival_id
             WHERE r.id = :revisionId
@@ -145,7 +149,8 @@ public class CatalogSnapshotStore {
             new FestivalContext(
                 resultSet.getObject("festival_id", UUID.class).toString(),
                 resultSet.getObject("revision_id", UUID.class),
-                resultSet.getLong("revision_number")
+                resultSet.getLong("revision_number"),
+                java.time.ZoneId.of(resultSet.getString("timezone"))
             )
         );
         if (contexts.size() != 1) {
@@ -417,7 +422,7 @@ public class CatalogSnapshotStore {
     }
 
     /**
-     * V9 is rolled out additively. A pre-V9 published revision has null for
+     * V10 is rolled out additively. A pre-V10 published revision has null for
      * every filter group and remains readable; once a revision starts using
      * the field, every PLACE pin must carry a supported group and its locale
      * label. This prevents a partial new snapshot without breaking an

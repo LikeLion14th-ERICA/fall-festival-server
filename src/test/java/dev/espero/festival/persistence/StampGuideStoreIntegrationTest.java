@@ -3,29 +3,37 @@ package dev.espero.festival.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.espero.festival.domain.StampGuide;
+import dev.espero.festival.web.ApiResponse;
+import dev.espero.festival.web.StampGuideController;
+import dev.espero.festival.web.StampGuideResponse;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Runs the real V1__create_stamp_guide migration against an ephemeral
- * Postgres and reads it back through StampGuideStore, closing the one gap
- * the mocked StampGuideControllerTest can't cover: that the DATE[]/TEXT[]
- * column-to-List<T> casting in StampGuideStore actually works.
+ * Runs the real Flyway chain through V8 against ephemeral Postgres and verifies
+ * the stamp guide's revision ownership, API meta, and array-column mapping.
  */
 @SpringBootTest
 @ActiveProfiles("db")
 @Testcontainers(disabledWithoutDocker = true)
 class StampGuideStoreIntegrationTest {
+
+    private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
+    private static final UUID REVISION_ID = UUID.fromString("f109dca2-8b28-4e09-8114-beebc2bd3ea2");
+    private static final UUID OTHER_REVISION_ID = UUID.fromString("d2ec6f1c-0567-4422-b24f-c7b779e8919d");
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -41,13 +49,33 @@ class StampGuideStoreIntegrationTest {
     private StampGuideStore store;
 
     @Autowired
+    private StampGuideController controller;
+
+    @Autowired
     private NamedParameterJdbcTemplate jdbc;
 
     @Test
-    void migrationSeedsTheGuideRowAndArrayColumnsMapCorrectly() {
-        Optional<StampGuide> guide = store.find();
+    void migrationBackfillsRevisionAndControllerReturnsMatchingMeta() {
+        Optional<StampGuide> guide = store.find(REVISION_ID);
+        UUID storedRevisionId = jdbc.queryForObject(
+            "SELECT festival_revision_id FROM stamp_guide WHERE id = 1",
+            Map.of(),
+            UUID.class
+        );
+        String nullable = jdbc.queryForObject("""
+            SELECT is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'stamp_guide'
+              AND column_name = 'festival_revision_id'
+            """, Map.of(), String.class);
+        ApiResponse<StampGuideResponse> response = controller.getStampGuide(new MockHttpServletRequest());
 
         assertThat(guide).isPresent();
+        assertThat(storedRevisionId).isEqualTo(REVISION_ID);
+        assertThat(nullable).isEqualTo("NO");
+        assertThat(response.meta().festivalId()).isEqualTo(FESTIVAL_ID.toString());
+        assertThat(response.meta().revision()).isEqualTo(1);
         assertThat(guide.get().title()).isEqualTo("스탬프투어");
         assertThat(guide.get().dates()).isEmpty();
         assertThat(guide.get().instructions()).containsExactly(
@@ -83,5 +111,25 @@ class StampGuideStoreIntegrationTest {
         assertThat(guide.get().rewardLocationText()).isNull();
         assertThat(guide.get().rewardHoursText()).isNull();
         assertThat(guide.get().qrValue()).isNull();
+    }
+
+    @Test
+    @Transactional
+    void doesNotReturnGuideForAnotherRevision() {
+        insertOtherRevision();
+
+        assertThat(store.find(OTHER_REVISION_ID)).isEmpty();
+    }
+
+    private void insertOtherRevision() {
+        jdbc.update("""
+            INSERT INTO festival_revisions (
+                id, festival_id, revision_number, state,
+                approved_at, scheduled_at, published_at, created_at, updated_at
+            ) VALUES (
+                :id, :festivalId, 2, 'archived',
+                NULL, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            )
+            """, Map.of("id", OTHER_REVISION_ID, "festivalId", FESTIVAL_ID));
     }
 }

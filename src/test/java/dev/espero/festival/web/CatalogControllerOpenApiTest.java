@@ -23,6 +23,7 @@ import dev.espero.festival.domain.CatalogSnapshot.Money;
 import dev.espero.festival.domain.CatalogSnapshot.Pin;
 import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
 import java.nio.file.Files;
@@ -57,7 +58,7 @@ class CatalogControllerOpenApiTest {
     void setUp() throws Exception {
         openApi = json.readTree(Files.readString(OPENAPI_FILE));
         Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC);
-        ApiMetaSupport metaSupport = new ApiMetaSupport(clock);
+        ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
         mvc = MockMvcBuilders.standaloneSetup(
             new CatalogController(snapshots, metaSupport),
             new TicketGuideController(snapshots, metaSupport, clock)
@@ -112,18 +113,21 @@ class CatalogControllerOpenApiTest {
             "/api/v2/spaces",
             "400",
             "INVALID_QUERY",
+            1,
             get("/api/v2/spaces").param("category", "BOOTH", "PUB")
         );
         assertMatchesErrorSchema(
             "/api/v2/spaces/{spaceId}",
             "404",
             "NOT_FOUND",
+            1,
             get("/api/v2/spaces/unknown-space")
         );
         assertMatchesErrorSchema(
             "/api/v2/maps/{mapId}/pins",
             "409",
             "MAP_VERSION_MISMATCH",
+            1,
             get("/api/v2/maps/map-area/pins").param("mapVersion", "old-version")
         );
 
@@ -137,6 +141,7 @@ class CatalogControllerOpenApiTest {
             "/api/v2/maps",
             "503",
             "CATALOG_NOT_READY",
+            0,
             get("/api/v2/maps")
         );
     }
@@ -159,6 +164,7 @@ class CatalogControllerOpenApiTest {
         String openApiPath,
         String status,
         String expectedCode,
+        int expectedRevision,
         org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request
     ) throws Exception {
         MvcResult result = mvc.perform(request.header("X-Request-Id", "openapi-provider-error-test"))
@@ -172,7 +178,12 @@ class CatalogControllerOpenApiTest {
             .isEmpty();
         assertThat(response.path("error").path("code").asText()).isEqualTo(expectedCode);
         assertThat(response.path("error").path("details").isArray()).isTrue();
-        assertThat(response.path("meta").path("revision").asInt()).isGreaterThanOrEqualTo(1);
+        int actualRevision = response.path("meta").path("revision").asInt();
+        if (expectedRevision == 0) {
+            assertThat(actualRevision).isZero();
+        } else {
+            assertThat(actualRevision).isGreaterThanOrEqualTo(1);
+        }
     }
 
     private JsonNode responseSchema(String path) {

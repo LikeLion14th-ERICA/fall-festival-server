@@ -11,6 +11,7 @@
 | 적용 API 버전 | API v2만 제품 계약으로 사용한다. | 이전 제품 계약·경로는 폐기했다. 공개 카탈로그(`spaces`, `maps`, `places`, ticket guide의 `mapTarget`)는 Spring·Flyway 구현과 계약 검증을 마쳤고, 나머지 화면 연동 목·관리 쓰기 경로의 실제 배포 범위와 migration은 계속 추적한다. |
 | 콘텐츠 revision | 축제 revision을 snapshot·행 버전·게시 이력 중 어떤 단위로 저장하고 rollback할까요? | 개발자 전용 CLI가 완전 JSON revision을 import·validate·publish·rollback한다. published snapshot은 단일 인스턴스의 제어된 재시작으로 반영하며, 다중 인스턴스 전파와 CDN은 도입 뒤 재평가한다. |
 | 카탈로그 locale | 어떤 언어를 공개하고 번역 누락을 어떻게 처리할까요? | 한국어만 현재 READY다. 승인·검수까지 끝난 언어만 locale 목록에 추가하며, 공간·장소·지도·핀·필터 label·정렬이 모두 준비되지 않으면 공개하지 않는다. fallback은 없다. |
+| Current Festival context | 어떤 축제 회차를 제공할지 서버가 어떻게 결정할까요? | `FESTIVAL_ID` 환경변수의 UUID로 명시한다. DB의 첫 행·최대 revision·최근 게시 시각으로 추측하지 않는다. 설정된 회차의 published revision에 안전하게 귀속되지 않는 응답의 `meta.revision`은 0이다. |
 | 공지 입력·번역 기술 | 길이 제한·번역 엔진·원문 갱신 확인 방식을 확정할 수 있나요? | 한국어 READY만 필수. 미완료/실패 언어는 미노출. 길이 제한·미리보기 source 비교는 기술 초안 |
 | 갱신 방식 | 새로고침 없는 반영의 통신 방식과 최대 지연을 어떻게 정할까요? | 화면이 보이는 동안 15초 HTTP polling을 쓴다. 진입·재활성화·온라인 복귀는 즉시 조회하고, 숨김·오프라인은 중단한다. 30초·60초 backoff, 요청 중복 방지, 늦은 응답 폐기를 적용한다. |
 | 혼잡도 동일 상태 재선택 | 같은 상태를 다시 선택할 때 저장·수정 시각을 갱신할까요? | 성공으로 응답하지만 저장·수정 시각은 유지한다. |
