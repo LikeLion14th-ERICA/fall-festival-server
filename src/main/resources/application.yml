@@ -13,6 +13,12 @@ spring:
 server:
   address: ${SERVER_ADDRESS:127.0.0.1}
   port: ${SERVER_PORT:8080}
+  tomcat:
+    # Admit the initial burst from the supported 500 concurrent readers and
+    # avoid the default 100-request HTTP/1.1 connection churn. Both remain
+    # bounded and deployment-specific limits can override them.
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:1024}
+    max-keep-alive-requests: ${SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS:10000}
   error:
     include-message: never
     include-stacktrace: never

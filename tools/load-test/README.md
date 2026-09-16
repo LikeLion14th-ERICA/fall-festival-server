@@ -37,7 +37,9 @@ manages its own connection reuse. The runner retains every latency sample and ca
 exact nearest-rank p95 values. It writes `load-results.json`, `environment-and-gc.json`,
 server logs, load-generator logs, `load-status.json` and `jstat-samples.csv` below
 `target/load-test-results/<UTC timestamp>-<GUID>/`. `target/` is ignored, so synthetic
-data and machine results are not committed.
+data and machine results are not committed. Every measured stage must finish with zero
+HTTP error responses, timeouts and transport errors. If one fails, the generator saves
+bounded diagnostic samples in `load-results.json` before returning a non-zero exit code.
 
 To use a Maven installation or a cached Maven binary when the wrapper is unavailable:
 
@@ -50,10 +52,16 @@ The harness generates a random local database password, binds both the database
 container's published port and the application to `127.0.0.1`, removes the server
 process and Docker container in `finally`, and does not define an SLA or pass/fail
 latency threshold. The child server receives explicit disposable-database Flyway and
-datasource settings plus a run-only JWT signing secret and loopback-only administrator
-origin. Inherited Spring, JVM and administrator bootstrap variables are removed. Results
+datasource settings, the V6 fixture festival ID, a run-only JWT signing secret and
+loopback-only administrator origin. Inherited Spring, JVM and administrator bootstrap
+variables are removed. Results
 are measurements for this machine, fixture and localhost path; they do not represent
 production capacity.
+
+The server defaults keep a bounded 1,024-connection admission queue and rotate an
+HTTP/1.1 keep-alive connection after 10,000 requests. Deployments can override these
+with `SERVER_TOMCAT_ACCEPT_COUNT` and `SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS` when
+their infrastructure has different limits.
 
 Each JSON stage records endpoint identity, count, throughput, p95 latency, response
 bytes, non-2xx count, timeout count and transport error type counts, plus whole-stage
@@ -69,11 +77,11 @@ because a process can remain alive after snapshot loading fails.
 ## Observed local run
 
 The latest full run completed on 2026-09-16 with Zulu Java 25.0.2 and Docker Desktop
-PostgreSQL 16.15. The 100/200/500 VU stages ran for 30.013 / 30.013 / 30.020 seconds
-and completed 1,094,111 / 1,015,377 / 703,501 requests. Maximum endpoint p95 values
-were 5.825 / 12.818 / 93.362 ms. The first two stages had 0 non-2xx responses; the
-500-VU stage recorded 34 `ConnectException` transport errors. Response bytes were
-7,884,609,589 / 7,317,227,661 / 5,069,360,115. jstat reported peak Java heap used
-of 198,907.8 / 201,253.1 / 203,079.7 KB, with 122 / 112 / 79 GC cycles and
-0.145 / 0.155 / 0.116 seconds of GC time. These are machine-specific localhost
-observations and have no production SLA meaning.
+PostgreSQL 16.15. Every 100/200/500 VU stage completed with zero non-2xx responses,
+timeouts and transport errors. The stages ran for 30.015 / 30.017 / 30.028 seconds and
+completed 924,496 / 424,867 / 515,011 requests. Maximum endpoint p95 values were
+13.499 / 31.849 / 212.467 ms. Response bytes were 6,702,827,829 / 3,081,199,992 /
+3,734,945,780. jstat reported peak Java heap used of 213,986.5 / 218,935.1 /
+228,576.0 KB, with 131 / 61 / 75 GC cycles and 0.148 / 0.118 / 0.122 seconds of GC
+time. These are machine-specific localhost observations and have no production SLA
+meaning.

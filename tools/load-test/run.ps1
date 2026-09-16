@@ -13,6 +13,8 @@ $runId = "{0}-{1}" -f ([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')), ([Gu
 $dbPassword = [Guid]::NewGuid().ToString('N')
 $adminSigningSecret = [Guid]::NewGuid().ToString('N')
 $adminAllowedOrigin = 'http://127.0.0.1:3000'
+# The generated fixture extends V6's published festival row.
+$fixtureFestivalId = 'ec00912b-763f-4f8f-8f57-4bdfc389ccbf'
 $port = Get-Random -Minimum 18080 -Maximum 18999
 $runDirectory = Join-Path $OutputDirectory $runId
 $fixtureDirectory = Join-Path $runDirectory 'db'
@@ -48,12 +50,7 @@ try {
     if ($env:MAVEN_CMD) {
         & $env:MAVEN_CMD --batch-mode --no-transfer-progress -DskipTests package
     } else {
-        $bash = Get-Command bash -ErrorAction SilentlyContinue
-        if ($bash) {
-            & $bash.Source -lc './mvnw --batch-mode --no-transfer-progress -DskipTests package'
-        } else {
-            & '.\mvnw.cmd' --batch-mode --no-transfer-progress -DskipTests package
-        }
+        & '.\mvnw.cmd' --batch-mode --no-transfer-progress -DskipTests package
     }
     if ($LASTEXITCODE -ne 0) { throw "Maven package failed with exit code $LASTEXITCODE" }
     $jar = Get-ChildItem (Join-Path $root 'target') -Filter '*.jar' | Where-Object { $_.Name -notmatch 'original|plain' } | Select-Object -First 1
@@ -97,6 +94,7 @@ try {
         $serverInfo.EnvironmentVariables['SPRING_FLYWAY_LOCATIONS'] = "classpath:db/migration,filesystem:$fixtureDirectory"
         $serverInfo.EnvironmentVariables['ADMIN_JWT_SIGNING_SECRET'] = $adminSigningSecret
         $serverInfo.EnvironmentVariables['ADMIN_ALLOWED_ORIGIN'] = $adminAllowedOrigin
+        $serverInfo.EnvironmentVariables['FESTIVAL_ID'] = $fixtureFestivalId
         $serverInfo.EnvironmentVariables['SERVER_PORT'] = "$port"
         $serverInfo.EnvironmentVariables['SERVER_ADDRESS'] = '127.0.0.1'
         $server = [System.Diagnostics.Process]::new()
@@ -116,12 +114,10 @@ try {
         & java tools/load-test/CatalogLoadGenerator.java --base-url "http://127.0.0.1:$port" --output $resultPath --status-file (Join-Path $runDirectory 'load-status.json') --smoke-ready-file $smokeReadyPath --warmup-ms ($WarmupSeconds * 1000) --stage-ms ($StageSeconds * 1000) --max-supported-vus $MaxSupportedVUs 1> $loadLog 2> $loadError
         $loadExit = $LASTEXITCODE
         [pscustomobject]@{ exitCode = $loadExit; at = [DateTime]::UtcNow.ToString('o') } | ConvertTo-Json | Set-Content $loadExitPath
-        if ($loadExit -ne 0) { throw "HTTP load generator failed with exit code $loadExit" }
-        Write-RunStatus 'load-complete'
         if ($sampler -and -not $sampler.HasExited) { Wait-Process -Id $sampler.Id -Timeout 30 -ErrorAction SilentlyContinue }
         if ($sampler -and -not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
 
-        $samples = @(Import-Csv $samplesPath)
+        $samples = if (Test-Path $samplesPath) { @(Import-Csv $samplesPath) } else { @() }
         $previousSample = $null
         $jstatSummary = foreach ($stageName in @('warmup', 'vus-100', 'vus-200', 'vus-500')) {
             $stageSamples = @($samples | Where-Object stage -eq $stageName)
@@ -142,6 +138,8 @@ try {
             }
         }
         [pscustomobject]@{ machine = [Environment]::MachineName; javaExecutable = (Get-Command java).Source; jstat = $jstatPath; fixture = 'synthetic:100 spaces, 7 maps, 101 places, 207 pins'; localhostOnly = $true; jstatStages = @($jstatSummary) } | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $runDirectory 'environment-and-gc.json')
+        if ($loadExit -ne 0) { throw "HTTP load generator failed with exit code $loadExit" }
+        Write-RunStatus 'load-complete'
         Write-RunStatus 'complete'
         Write-Host "Load verification results: $resultPath"
     }
