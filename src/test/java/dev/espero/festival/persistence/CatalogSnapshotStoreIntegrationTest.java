@@ -22,7 +22,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/** Exercises V7 constraints and the read path against PostgreSQL, not mocks. */
+/** Exercises V8 constraints and the read path against PostgreSQL, not mocks. */
 @SpringBootTest
 @ActiveProfiles("db")
 @Testcontainers(disabledWithoutDocker = true)

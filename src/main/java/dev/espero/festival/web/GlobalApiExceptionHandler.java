@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -52,6 +54,31 @@ public class GlobalApiExceptionHandler {
         return ResponseEntity.status(exception.status()).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody(exception.code(), exception.getMessage(), List.of(), exception.retryable()),
             metaSupport.metaForError(request)
+        ));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ApiErrorResponse> handleValidation(
+        MethodArgumentNotValidException exception,
+        HttpServletRequest request
+    ) {
+        List<ApiErrorResponse.ErrorDetail> details = exception.getBindingResult().getFieldErrors().stream()
+            .map(error -> new ApiErrorResponse.ErrorDetail(error.getField(), "INVALID"))
+            .toList();
+        return ResponseEntity.badRequest().body(new ApiErrorResponse(
+            new ApiErrorResponse.ErrorBody("VALIDATION_ERROR", "요청 값을 확인해 주세요.", details, false),
+            metaSupport.meta(request, 0, "ko")
+        ));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiErrorResponse> handleUnreadableBody(
+        HttpMessageNotReadableException exception,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.badRequest().body(new ApiErrorResponse(
+            new ApiErrorResponse.ErrorBody("INVALID_REQUEST", "요청 본문을 확인해 주세요.", List.of(), false),
+            metaSupport.meta(request, 0, "ko")
         ));
     }
 

@@ -4,10 +4,10 @@
 
 ## 목적과 현재 기준
 
-이 문서는 API v2 draft.3과 V7 카탈로그 구현을 기준으로 한다. V2~V6의 `Festival`·
-`FestivalRevision`과 published revision 1건 위에 V7이 `Space`, `Place`, 지도 자산·핀 테이블,
+이 문서는 API v2 draft.3과 V8 카탈로그 구현을 기준으로 한다. V2~V6의 `Festival`·
+`FestivalRevision`과 published revision 1건 위에 V8이 `Space`, `Place`, 지도 자산·핀 테이블,
 공개 조회 API를 추가했다. V3의 `ticket_guide`가 독립 nullable로 두었던 map target 네 필드는
-V7에서 전부 null 또는 전부 존재하도록 하고, 실제 현재 `PLACE` 핀을 참조하게 만들었다.
+V8에서 전부 null 또는 전부 존재하도록 하고, 실제 현재 `PLACE` 핀을 참조하게 만들었다.
 
 현재 배포 단위는 작은 읽기 전용 카탈로그다. published revision을 시작 시 검증·적재한 불변
 snapshot에서 다음 공개 GET을 제공한다.
@@ -30,6 +30,7 @@ snapshot에서 다음 공개 GET을 제공한다.
 | cache/전파 | Outbox, CAS, CDN purge, 요청별 shared JSON 캐시는 넣지 않는다. 이들은 다중 인스턴스 또는 CDN 도입이 확정될 때 다시 평가한다. 해시 경로 지도 이미지는 배포 환경에서 immutable cache header를 쓴다. |
 | revision | `revision` query를 추가하지 않는다. `meta.revision`은 응답 비교용이며 늦은 응답 폐기는 클라이언트 책임이다. 409는 `mapVersion` 불일치에만 쓴다. |
 | locale | 첫 공개 준비 언어는 `ko`뿐이다. 다른 locale은 fallback하지 않고 거절한다. 다른 언어 공개, 번역 누락 처리, locale별 정렬은 결정 36과 승인 번역을 받은 뒤 활성화한다. |
+| migration | main의 관리자 인증은 V7, 카탈로그는 V8이다. 이전 기능 브랜치의 V7 카탈로그를 적용한 폐기 가능한 DB는 재생성한다. 운영 DB의 기존 ticket target은 유효한 V8 핀으로 연결할 수 있을 때만 migration하며, Flyway history를 고쳐 버리지 않는다. |
 
 ## 저장 모델과 불변식
 

@@ -297,7 +297,7 @@ BEGIN
 
     IF published_revision IS NULL
        OR (SELECT count(*) FROM festival_revisions WHERE state = 'published') <> 1 THEN
-        RAISE EXCEPTION 'V7 requires exactly one published festival revision';
+        RAISE EXCEPTION 'V8 requires exactly one published festival revision';
     END IF;
 
     UPDATE ticket_guide

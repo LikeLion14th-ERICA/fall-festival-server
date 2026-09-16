@@ -50,7 +50,8 @@ The harness generates a random local database password, binds both the database
 container's published port and the application to `127.0.0.1`, removes the server
 process and Docker container in `finally`, and does not define an SLA or pass/fail
 latency threshold. The child server receives explicit disposable-database Flyway and
-datasource settings; inherited Spring and JVM override variables are removed. Results
+datasource settings plus a run-only JWT signing secret and loopback-only administrator
+origin. Inherited Spring, JVM and administrator bootstrap variables are removed. Results
 are measurements for this machine, fixture and localhost path; they do not represent
 production capacity.
 

@@ -11,6 +11,8 @@ $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $container = "espero-catalog-load-$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
 $runId = "{0}-{1}" -f ([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ')), ([Guid]::NewGuid().ToString('N').Substring(0, 8))
 $dbPassword = [Guid]::NewGuid().ToString('N')
+$adminSigningSecret = [Guid]::NewGuid().ToString('N')
+$adminAllowedOrigin = 'http://127.0.0.1:3000'
 $port = Get-Random -Minimum 18080 -Maximum 18999
 $runDirectory = Join-Path $OutputDirectory $runId
 $fixtureDirectory = Join-Path $runDirectory 'db'
@@ -77,7 +79,11 @@ try {
         $serverInfo.RedirectStandardOutput = $true
         $serverInfo.RedirectStandardError = $true
         $serverInfo.Arguments = "-jar `"$($jar.FullName)`""
-        foreach ($variable in @('SPRING_APPLICATION_JSON', 'JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS')) {
+        foreach ($variable in @(
+            'SPRING_APPLICATION_JSON', 'JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS',
+            'ADMIN_JWT_SIGNING_SECRET', 'ADMIN_ALLOWED_ORIGIN',
+            'ADMIN_BOOTSTRAP_USERNAME', 'ADMIN_BOOTSTRAP_PASSWORD'
+        )) {
             [void]$serverInfo.EnvironmentVariables.Remove($variable)
         }
         $serverInfo.EnvironmentVariables['SPRING_PROFILES_ACTIVE'] = 'db'
@@ -89,6 +95,8 @@ try {
         $serverInfo.EnvironmentVariables['SPRING_FLYWAY_PASSWORD'] = $dbPassword
         $serverInfo.EnvironmentVariables['SPRING_FLYWAY_ENABLED'] = 'true'
         $serverInfo.EnvironmentVariables['SPRING_FLYWAY_LOCATIONS'] = "classpath:db/migration,filesystem:$fixtureDirectory"
+        $serverInfo.EnvironmentVariables['ADMIN_JWT_SIGNING_SECRET'] = $adminSigningSecret
+        $serverInfo.EnvironmentVariables['ADMIN_ALLOWED_ORIGIN'] = $adminAllowedOrigin
         $serverInfo.EnvironmentVariables['SERVER_PORT'] = "$port"
         $serverInfo.EnvironmentVariables['SERVER_ADDRESS'] = '127.0.0.1'
         $server = [System.Diagnostics.Process]::new()

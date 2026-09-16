@@ -16,9 +16,9 @@
 published revision의 부스·지도 카탈로그 조회를 구현합니다. `db` profile에서는
 `/api/v2/spaces`, `/maps`, `/places`, `/ticket-guide` 등을 공개 조회로 제공하며, 카탈로그는
 시작 시 검증한 published snapshot만 읽습니다. 실제 부스·지도·좌표·티켓존 운영 자료는
-승인 전이므로 migration에 seed하지 않았습니다. 관리자 인증과 배포 구성은 아직 구현하지
-않았습니다. API v2는 프런트 연동용 draft.3이며, 명세의 모든 기능이 구현되거나 공개 승인된
-상태는 아닙니다.
+승인 전이므로 migration에 seed하지 않았습니다. `/api/v2/admin/**`는 단일 `ADMIN`의 JWT와
+회전되는 refresh cookie로 보호하며, 공개 카탈로그 조회는 인증 없이 유지합니다. API v2는
+프런트 연동용 draft.3이며, 명세의 모든 기능이 구현되거나 공개 승인된 상태는 아닙니다.
 
 일반 사용자는 설치·로그인·회원가입 없이 공개 정보를 조회합니다. 구현 대상은
 라인업, 타임테이블, 부스 & 마켓, 지도, 공지 등이며, 관리자 권한은 서버에서 검증해야
@@ -89,6 +89,8 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `SPRING_DATASOURCE_USERNAME` | (없음) | DB 계정 |
 | `SPRING_DATASOURCE_PASSWORD` | (없음) | DB 비밀번호 |
 | `SPRING_FLYWAY_ENABLED` | `true` | `db` profile에서 Flyway migration 실행 여부 |
+| `ADMIN_JWT_SIGNING_SECRET` | (없음) | UTF-8 32바이트 이상인 관리자 access token 서명 비밀 |
+| `ADMIN_ALLOWED_ORIGIN` | (없음) | refresh cookie를 허용할 관리자 프런트엔드의 단일 HTTP(S) origin |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
 
@@ -107,10 +109,13 @@ $env:SPRING_PROFILES_ACTIVE = 'db'
 $env:SPRING_DATASOURCE_URL = 'jdbc:postgresql://<host>:5432/<db>'
 $env:SPRING_DATASOURCE_USERNAME = '<user>'
 $env:SPRING_DATASOURCE_PASSWORD = '<password>'
+$env:ADMIN_JWT_SIGNING_SECRET = '<at-least-32-utf8-byte-secret>'
+$env:ADMIN_ALLOWED_ORIGIN = 'https://admin.example.invalid'
 .\mvnw.cmd spring-boot:run
 ```
 
-DB 접속 정보는 절대 저장소나 커밋 메시지, PR, 이슈에 붙여넣지 않습니다. 비밀값은
+`db` profile은 JWT signing secret과 명시적 관리자 origin이 없으면 시작하지 않습니다. DB 접속
+정보와 JWT secret은 절대 저장소나 커밋 메시지, PR, 이슈에 붙여넣지 않습니다. 비밀값은
 `.env`(gitignore 대상) 또는 셸·IDE 실행 설정에만 둡니다. 관련 구현을 추가할 때
 [보안 규칙](docs/wiki/engineering/security.md)을 먼저 확인합니다. 운영 배포 절차는
 추후 인프라와 인증·관측성 구성을 확정하면서 작성합니다.

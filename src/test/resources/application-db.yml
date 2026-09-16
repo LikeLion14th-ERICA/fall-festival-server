@@ -1,0 +1,4 @@
+festival:
+  admin-auth:
+    jwt-signing-secret: test-only-admin-jwt-signing-secret-32-bytes-minimum
+    allowed-origin: https://admin.test.invalid
