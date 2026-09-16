@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 /** Validates the internal V13 performance catalog before a revision is published. */
 @Repository
 @Profile("db")
-public final class PerformanceRevisionValidator {
+public class PerformanceRevisionValidator {
 
     private static final Set<String> LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
     private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
