@@ -30,6 +30,19 @@ public record CatalogManifest(
     List<MapPinTranslation> mapPinTranslations,
     List<MapPinFilterGroupTranslation> mapPinFilterGroupTranslations,
     List<SpaceMapTarget> spaceMapTargets,
+    List<Artist> artists,
+    List<ArtistTranslation> artistTranslations,
+    List<ArtistLink> artistLinks,
+    List<ArtistLinkTranslation> artistLinkTranslations,
+    List<ArtistSong> artistSongs,
+    List<ArtistSongTranslation> artistSongTranslations,
+    List<Performance> performances,
+    List<PerformanceTranslation> performanceTranslations,
+    List<PerformanceArtist> performanceArtists,
+    TimetableConfig timetableConfig,
+    List<ProhibitedItem> prohibitedItems,
+    List<ProhibitedItemTranslation> prohibitedItemTranslations,
+    List<ProhibitedMessage> prohibitedMessages,
     TicketGuide ticketGuide,
     StampGuide stampGuide
 ) {
@@ -53,6 +66,18 @@ public record CatalogManifest(
             "mapPinFilterGroupTranslations", mapPinFilterGroupTranslations
         );
         spaceMapTargets = required("spaceMapTargets", spaceMapTargets);
+        artists = required("artists", artists);
+        artistTranslations = required("artistTranslations", artistTranslations);
+        artistLinks = required("artistLinks", artistLinks);
+        artistLinkTranslations = required("artistLinkTranslations", artistLinkTranslations);
+        artistSongs = required("artistSongs", artistSongs);
+        artistSongTranslations = required("artistSongTranslations", artistSongTranslations);
+        performances = required("performances", performances);
+        performanceTranslations = required("performanceTranslations", performanceTranslations);
+        performanceArtists = required("performanceArtists", performanceArtists);
+        prohibitedItems = required("prohibitedItems", prohibitedItems);
+        prohibitedItemTranslations = required("prohibitedItemTranslations", prohibitedItemTranslations);
+        prohibitedMessages = required("prohibitedMessages", prohibitedMessages);
     }
 
     private static <T> List<T> required(String field, List<T> value) {
@@ -190,6 +215,89 @@ public record CatalogManifest(
         String mapVersion,
         String pinId,
         String placeId
+    ) {}
+
+    public record Artist(
+        String id,
+        String category,
+        String imageUrl,
+        int imageWidth,
+        int imageHeight
+    ) {}
+
+    public record ArtistTranslation(
+        String artistId,
+        String locale,
+        String name,
+        String imageAlt,
+        String introduction
+    ) {}
+
+    public record ArtistLink(
+        String artistId,
+        int sortOrder,
+        String url
+    ) {}
+
+    public record ArtistLinkTranslation(
+        String artistId,
+        int sortOrder,
+        String locale,
+        String label
+    ) {}
+
+    public record ArtistSong(
+        String artistId,
+        int sortOrder,
+        String url
+    ) {}
+
+    public record ArtistSongTranslation(
+        String artistId,
+        int sortOrder,
+        String locale,
+        String title
+    ) {}
+
+    public record Performance(
+        String id,
+        LocalDate festivalDate,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt
+    ) {}
+
+    public record PerformanceTranslation(
+        String performanceId,
+        String locale,
+        String title,
+        String description
+    ) {}
+
+    public record PerformanceArtist(
+        String performanceId,
+        String artistId,
+        int displayOrder
+    ) {}
+
+    public record TimetableConfig(
+        LocalTime axisStartTime,
+        LocalTime axisEndTime
+    ) {}
+
+    public record ProhibitedItem(
+        String id,
+        int sortOrder
+    ) {}
+
+    public record ProhibitedItemTranslation(
+        String itemId,
+        String locale,
+        String label
+    ) {}
+
+    public record ProhibitedMessage(
+        String locale,
+        String message
     ) {}
 
     public record TicketGuide(

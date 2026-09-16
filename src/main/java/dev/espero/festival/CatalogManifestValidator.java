@@ -2,6 +2,7 @@ package dev.espero.festival;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,8 @@ public final class CatalogManifestValidator {
     private static final Pattern API_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
     private static final Set<String> LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
     private static final Set<String> SPACE_CATEGORIES = Set.of("BOOTH", "PUB", "FLEA_MARKET");
+    private static final Set<String> ARTIST_CATEGORIES = Set.of("ARTIST", "CONTEST");
+    private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
     private static final Set<String> PLACE_KINDS = Set.of("SPACE", "FACILITY", "LANDMARK");
     private static final Set<String> MAP_KINDS = Set.of("OVERVIEW", "AREA");
     private static final Set<String> FILTER_GROUPS = Set.of(
@@ -205,8 +208,209 @@ public final class CatalogManifestValidator {
             require(target.placeId().equals(pin.placeId()), "spaceMapTargets pin must target its place");
         }
 
+        validatePerformanceCatalog(manifest);
+
         validateTicketGuide(manifest.ticketGuide(), maps, places, pins, currentVersions);
         validateStampGuide(manifest.stampGuide());
+    }
+
+    private void validatePerformanceCatalog(CatalogManifest manifest) {
+        Map<String, CatalogManifest.Artist> artists = unique(
+            "artists", manifest.artists(), CatalogManifest.Artist::id
+        );
+        for (CatalogManifest.Artist artist : artists.values()) {
+            id(artist.id(), "artists.id");
+            require(ARTIST_CATEGORIES.contains(artist.category()),
+                "Unsupported artist category: " + artist.category());
+            image(artist.imageUrl(), artist.imageWidth(), artist.imageHeight(), "artists.image");
+        }
+
+        Set<String> artistTranslationKeys = new HashSet<>();
+        Set<String> koreanArtists = new HashSet<>();
+        for (CatalogManifest.ArtistTranslation translation : manifest.artistTranslations()) {
+            require(translation != null && artists.containsKey(translation.artistId()),
+                "artistTranslations references an unknown artist");
+            locale(translation.locale());
+            text(translation.name(), "artistTranslations.name");
+            text(translation.imageAlt(), "artistTranslations.imageAlt");
+            optionalText(translation.introduction(), "artistTranslations.introduction");
+            require(artistTranslationKeys.add(key(translation.artistId(), translation.locale())),
+                "Duplicate artistTranslations row");
+            if ("ko".equals(translation.locale())) {
+                koreanArtists.add(translation.artistId());
+            }
+        }
+        require(koreanArtists.equals(artists.keySet()),
+            "Every artist needs a Korean artistTranslations row");
+
+        Set<String> artistLinks = new HashSet<>();
+        for (CatalogManifest.ArtistLink link : manifest.artistLinks()) {
+            require(link != null && artists.containsKey(link.artistId()),
+                "artistLinks references an unknown artist");
+            require(link.sortOrder() > 0, "artistLinks.sortOrder must be positive");
+            https(link.url(), "artistLinks.url");
+            require(artistLinks.add(key(link.artistId(), link.sortOrder())),
+                "Duplicate artistLinks row");
+        }
+        validateArtistLinkTranslations(manifest.artistLinkTranslations(), artistLinks);
+
+        Set<String> artistSongs = new HashSet<>();
+        for (CatalogManifest.ArtistSong song : manifest.artistSongs()) {
+            require(song != null && artists.containsKey(song.artistId()),
+                "artistSongs references an unknown artist");
+            require(song.sortOrder() >= 1 && song.sortOrder() <= 3,
+                "artistSongs.sortOrder must be between 1 and 3");
+            https(song.url(), "artistSongs.url");
+            require(artistSongs.add(key(song.artistId(), song.sortOrder())),
+                "Duplicate artistSongs row");
+        }
+        validateArtistSongTranslations(manifest.artistSongTranslations(), artistSongs);
+
+        Set<java.time.LocalDate> festivalDays = manifest.festivalDays().stream()
+            .map(CatalogManifest.FestivalDay::festivalDate)
+            .collect(java.util.stream.Collectors.toSet());
+        Map<String, CatalogManifest.Performance> performances = unique(
+            "performances", manifest.performances(), CatalogManifest.Performance::id
+        );
+        for (CatalogManifest.Performance performance : performances.values()) {
+            id(performance.id(), "performances.id");
+            require(performance.festivalDate() != null && festivalDays.contains(performance.festivalDate()),
+                "performances references an unknown festival day");
+            require(performance.startsAt() != null && performance.endsAt() != null,
+                "performances must contain startsAt and endsAt");
+            require(performance.startsAt().isBefore(performance.endsAt()),
+                "performances.startsAt must be before endsAt");
+            require(performance.startsAt().atZoneSameInstant(KOREA).toLocalDate()
+                    .equals(performance.festivalDate()),
+                "performances.startsAt must fall on festivalDate in Asia/Seoul");
+        }
+        validatePerformanceTranslations(manifest.performanceTranslations(), performances.keySet());
+
+        Set<String> performanceArtists = new HashSet<>();
+        Set<String> displayOrders = new HashSet<>();
+        for (CatalogManifest.PerformanceArtist row : manifest.performanceArtists()) {
+            require(row != null && performances.containsKey(row.performanceId()),
+                "performanceArtists references an unknown performance");
+            require(artists.containsKey(row.artistId()),
+                "performanceArtists references an unknown artist");
+            require(row.displayOrder() > 0, "performanceArtists.displayOrder must be positive");
+            require(performanceArtists.add(key(row.performanceId(), row.artistId())),
+                "Duplicate performanceArtists artist");
+            require(displayOrders.add(key(row.performanceId(), row.displayOrder())),
+                "Duplicate performanceArtists displayOrder");
+        }
+
+        CatalogManifest.TimetableConfig timetable = manifest.timetableConfig();
+        if (timetable != null) {
+            require(timetable.axisStartTime() != null && timetable.axisEndTime() != null,
+                "timetableConfig must contain axisStartTime and axisEndTime");
+            require(timetable.axisStartTime().isBefore(timetable.axisEndTime()),
+                "timetableConfig.axisStartTime must be before axisEndTime");
+        }
+
+        Map<String, CatalogManifest.ProhibitedItem> prohibitedItems = unique(
+            "prohibitedItems", manifest.prohibitedItems(), CatalogManifest.ProhibitedItem::id
+        );
+        Set<Integer> itemSortOrders = new HashSet<>();
+        for (CatalogManifest.ProhibitedItem item : prohibitedItems.values()) {
+            id(item.id(), "prohibitedItems.id");
+            require(item.sortOrder() > 0, "prohibitedItems.sortOrder must be positive");
+            require(itemSortOrders.add(item.sortOrder()), "Duplicate prohibitedItems.sortOrder");
+        }
+        validateProhibitedItemTranslations(
+            manifest.prohibitedItemTranslations(), prohibitedItems.keySet()
+        );
+
+        Set<String> messageLocales = new HashSet<>();
+        for (CatalogManifest.ProhibitedMessage message : manifest.prohibitedMessages()) {
+            require(message != null, "prohibitedMessages contains a null row");
+            locale(message.locale());
+            text(message.message(), "prohibitedMessages.message");
+            require(messageLocales.add(message.locale()), "Duplicate prohibitedMessages locale");
+        }
+        require(messageLocales.isEmpty() || messageLocales.contains("ko"),
+            "Non-empty prohibitedMessages needs a Korean row");
+    }
+
+    private void validateArtistLinkTranslations(
+        List<CatalogManifest.ArtistLinkTranslation> rows,
+        Set<String> links
+    ) {
+        Set<String> keys = new HashSet<>();
+        Set<String> korean = new HashSet<>();
+        for (CatalogManifest.ArtistLinkTranslation row : rows) {
+            String link = row == null ? null : key(row.artistId(), row.sortOrder());
+            require(row != null && links.contains(link),
+                "artistLinkTranslations references an unknown artist link");
+            locale(row.locale());
+            text(row.label(), "artistLinkTranslations.label");
+            require(keys.add(key(link, row.locale())), "Duplicate artistLinkTranslations row");
+            if ("ko".equals(row.locale())) {
+                korean.add(link);
+            }
+        }
+        require(korean.equals(links), "Every artist link needs a Korean translation");
+    }
+
+    private void validateArtistSongTranslations(
+        List<CatalogManifest.ArtistSongTranslation> rows,
+        Set<String> songs
+    ) {
+        Set<String> keys = new HashSet<>();
+        Set<String> korean = new HashSet<>();
+        for (CatalogManifest.ArtistSongTranslation row : rows) {
+            String song = row == null ? null : key(row.artistId(), row.sortOrder());
+            require(row != null && songs.contains(song),
+                "artistSongTranslations references an unknown artist song");
+            locale(row.locale());
+            text(row.title(), "artistSongTranslations.title");
+            require(keys.add(key(song, row.locale())), "Duplicate artistSongTranslations row");
+            if ("ko".equals(row.locale())) {
+                korean.add(song);
+            }
+        }
+        require(korean.equals(songs), "Every artist song needs a Korean translation");
+    }
+
+    private void validatePerformanceTranslations(
+        List<CatalogManifest.PerformanceTranslation> rows,
+        Set<String> performances
+    ) {
+        Set<String> keys = new HashSet<>();
+        Set<String> korean = new HashSet<>();
+        for (CatalogManifest.PerformanceTranslation row : rows) {
+            require(row != null && performances.contains(row.performanceId()),
+                "performanceTranslations references an unknown performance");
+            locale(row.locale());
+            text(row.title(), "performanceTranslations.title");
+            optionalText(row.description(), "performanceTranslations.description");
+            require(keys.add(key(row.performanceId(), row.locale())),
+                "Duplicate performanceTranslations row");
+            if ("ko".equals(row.locale())) {
+                korean.add(row.performanceId());
+            }
+        }
+        require(korean.equals(performances), "Every performance needs a Korean translation");
+    }
+
+    private void validateProhibitedItemTranslations(
+        List<CatalogManifest.ProhibitedItemTranslation> rows,
+        Set<String> items
+    ) {
+        Set<String> keys = new HashSet<>();
+        Set<String> korean = new HashSet<>();
+        for (CatalogManifest.ProhibitedItemTranslation row : rows) {
+            require(row != null && items.contains(row.itemId()),
+                "prohibitedItemTranslations references an unknown prohibited item");
+            locale(row.locale());
+            text(row.label(), "prohibitedItemTranslations.label");
+            require(keys.add(key(row.itemId(), row.locale())),
+                "Duplicate prohibitedItemTranslations row");
+            if ("ko".equals(row.locale())) {
+                korean.add(row.itemId());
+            }
+        }
+        require(korean.equals(items), "Every prohibited item needs a Korean translation");
     }
 
     private void validateSpaceTranslations(List<CatalogManifest.SpaceTranslation> translations, Set<String> spaces) {
