@@ -11,7 +11,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf"
+)
 class FallFestivalServerApplicationTests {
 
     @LocalServerPort

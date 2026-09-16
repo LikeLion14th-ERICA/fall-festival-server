@@ -18,7 +18,7 @@ const crowd = enumeration(['RELAXED', 'MODERATE', 'CROWDED', 'FULL'], '관리자
 const mapTargetDescription = '같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태.';
 export const schemas = {
   Id: id, Date: date, Timestamp: timestamp, Locale: locale,
-  Meta: object({ requestId: text('요청 추적 ID. 개인정보와 무관한 값.'), serverTime: timestamp, timezone: enumeration(['Asia/Seoul'], '축제 시간대'), festivalId: id, revision: integer('이 응답을 만든 데이터 revision. 증가 여부 비교에 사용.', 1), locale, mock: bool('목 서버는 항상 true. 운영 데이터와 구분.') }),
+  Meta: object({ requestId: text('요청 추적 ID. 개인정보와 무관한 값.'), serverTime: timestamp, timezone: enumeration(['Asia/Seoul'], '축제 시간대'), festivalId: id, revision: integer('0은 특정 published FestivalRevision에 안전하게 귀속되지 않는 응답. 1 이상은 응답 데이터가 실제로 귀속된 FestivalRevision.revision_number.', 0), locale, mock: bool('목 서버는 항상 true. 운영 데이터와 구분.') }),
   Error: object({ error: object({ code: text('프런트가 분기할 안정적인 오류 코드'), message: text('안전한 진단 문구. 화면별 오류 문구는 프런트 번역에서 선택.'), details: array(object({ field: text('요청 내 필드 또는 파라미터'), reason: text('검증 실패 이유') }), '추가 정보가 없으면 []'), retryable: bool('같은 요청 재시도 가능성. 화면 버튼 노출 요구와는 별개.') }), meta: ref('Meta') }),
   Money: object({ amount: integer('대한민국 원(KRW) 정수. 소수점·문자열·센트 단위 없음.', 0, { maximum: 9007199254740991 }), currency: enumeration(['KRW'], '금액 단위') }),
   Image: object({ url: text('HTTPS 또는 origin 기준 상대 URL. 목 자산은 /__mock/assets/ 아래.', { format: 'uri-reference' }), alt: text('이미지 대체 텍스트'), width: integer('원본 너비(px)', 1), height: integer('원본 높이(px)', 1) }),

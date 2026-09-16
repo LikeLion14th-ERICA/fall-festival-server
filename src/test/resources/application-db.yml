@@ -1,4 +1,5 @@
 festival:
+  id: ec00912b-763f-4f8f-8f57-4bdfc389ccbf
   admin-auth:
     jwt-signing-secret: test-only-admin-jwt-signing-secret-32-bytes-minimum
     allowed-origin: https://admin.test.invalid

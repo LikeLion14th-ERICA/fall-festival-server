@@ -1,5 +1,7 @@
 package dev.espero.festival.web;
 
+import dev.espero.festival.context.FestivalContextService;
+import dev.espero.festival.domain.PublishedFestivalContext;
 import dev.espero.festival.domain.StampGuide;
 import dev.espero.festival.persistence.StampGuideStore;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,16 +31,23 @@ public class StampGuideController {
     private static final String CONTENT_LOCALE = "ko";
 
     private final StampGuideStore store;
+    private final FestivalContextService festivalContextService;
     private final ApiMetaSupport metaSupport;
 
-    public StampGuideController(StampGuideStore store, ApiMetaSupport metaSupport) {
+    public StampGuideController(
+        StampGuideStore store,
+        FestivalContextService festivalContextService,
+        ApiMetaSupport metaSupport
+    ) {
         this.store = store;
+        this.festivalContextService = festivalContextService;
         this.metaSupport = metaSupport;
     }
 
     @GetMapping("/stamp-guide")
     public ApiResponse<StampGuideResponse> getStampGuide(HttpServletRequest request) {
-        StampGuide guide = store.find().orElseThrow(() -> new ApiException(
+        PublishedFestivalContext context = festivalContextService.currentPublished();
+        StampGuide guide = store.find(context.festivalRevisionId()).orElseThrow(() -> new ApiException(
             HttpStatus.SERVICE_UNAVAILABLE,
             "STAMP_GUIDE_NOT_CONFIGURED",
             "스탬프 안내가 아직 설정되지 않았습니다.",
@@ -59,6 +68,6 @@ public class StampGuideController {
             TIMEZONE,
             guide.qrValue()
         );
-        return new ApiResponse<>(data, metaSupport.meta(request, 1, CONTENT_LOCALE));
+        return new ApiResponse<>(data, metaSupport.contentMeta(request, CONTENT_LOCALE, context));
     }
 }

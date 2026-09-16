@@ -91,7 +91,7 @@ public class CrowdingController {
                 : CrowdingResponse.TimeBasis.NONE
         );
 
-        return new ApiResponse<>(data, metaSupport.meta(request, 1, CONTENT_LOCALE));
+        return new ApiResponse<>(data, metaSupport.unscopedMeta(request, CONTENT_LOCALE));
     }
 
     private String message(CrowdingResponse.Status status, OffsetDateTime opensAt) {

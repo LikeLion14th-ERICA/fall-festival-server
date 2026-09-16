@@ -1,6 +1,8 @@
 package dev.espero.festival.web;
 
+import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
+import dev.espero.festival.domain.PublishedFestivalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -10,44 +12,68 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
-/**
- * Builds the {@code meta} envelope shared by every api-v2 response. Catalog
- * routes set their published revision context before producing a response;
- * legacy routes retain the safe default until they move to that snapshot.
- */
+/** Builds the shared API v2 metadata envelope without querying the database. */
 @Component
 public class ApiMetaSupport {
 
     static final String REQUEST_ID_ATTRIBUTE = ApiMetaSupport.class.getName() + ".requestId";
     private static final String RESPONSE_CONTEXT_ATTRIBUTE = ApiMetaSupport.class.getName() + ".responseContext";
-    private static final ZoneId FESTIVAL_ZONE = ZoneId.of("Asia/Seoul");
-    private static final String FESTIVAL_ID = "default";
+    private static final ZoneId SYSTEM_ZONE = ZoneId.of("Asia/Seoul");
     private static final Pattern REQUEST_ID_PATTERN = Pattern.compile("[A-Za-z0-9][A-Za-z0-9._-]{0,127}");
 
     private final Clock clock;
+    private final FestivalProperties properties;
 
-    public ApiMetaSupport(Clock clock) {
+    public ApiMetaSupport(Clock clock, FestivalProperties properties) {
         this.clock = clock;
+        this.properties = properties;
     }
 
-    public ApiMeta meta(HttpServletRequest request, long revision, String locale) {
-        return meta(request, FESTIVAL_ID, revision, locale);
+    public ApiMeta contentMeta(
+        HttpServletRequest request,
+        String locale,
+        PublishedFestivalContext context
+    ) {
+        return scopedMeta(
+            request,
+            context.festivalId().toString(),
+            context.revisionNumber(),
+            locale,
+            context.timezone()
+        );
     }
 
     public ApiMeta meta(HttpServletRequest request, CatalogSnapshot.FestivalContext context, String locale) {
-        return meta(request, context.festivalId(), context.revision(), locale);
+        return scopedMeta(request, context.festivalId(), context.revision(), locale, context.timezone());
     }
 
     public void setContext(HttpServletRequest request, CatalogSnapshot.FestivalContext context, String locale) {
-        request.setAttribute(RESPONSE_CONTEXT_ATTRIBUTE, new ResponseContext(context.festivalId(), context.revision(), locale));
+        request.setAttribute(
+            RESPONSE_CONTEXT_ATTRIBUTE,
+            new ResponseContext(context.festivalId(), context.revision(), locale, context.timezone())
+        );
+    }
+
+    public ApiMeta systemMeta(HttpServletRequest request, String locale) {
+        return unscopedMeta(request, locale);
+    }
+
+    public ApiMeta unscopedMeta(HttpServletRequest request, String locale) {
+        return buildMeta(request, properties.configuredFestivalId().toString(), 0, locale, SYSTEM_ZONE);
     }
 
     public ApiMeta metaForError(HttpServletRequest request) {
         Object attribute = request.getAttribute(RESPONSE_CONTEXT_ATTRIBUTE);
         if (attribute instanceof ResponseContext context) {
-            return buildMeta(request, context.festivalId(), context.revision(), context.locale());
+            return buildMeta(
+                request,
+                context.festivalId(),
+                context.revision(),
+                context.locale(),
+                context.timezone()
+            );
         }
-        return buildMeta(request, FESTIVAL_ID, 1, "ko");
+        return unscopedMeta(request, "ko");
     }
 
     static String resolveRequestId(HttpServletRequest request) {
@@ -63,16 +89,31 @@ public class ApiMetaSupport {
         return requestId;
     }
 
-    private ApiMeta meta(HttpServletRequest request, String festivalId, long revision, String locale) {
-        request.setAttribute(RESPONSE_CONTEXT_ATTRIBUTE, new ResponseContext(festivalId, revision, locale));
-        return buildMeta(request, festivalId, revision, locale);
+    private ApiMeta scopedMeta(
+        HttpServletRequest request,
+        String festivalId,
+        long revision,
+        String locale,
+        ZoneId timezone
+    ) {
+        request.setAttribute(
+            RESPONSE_CONTEXT_ATTRIBUTE,
+            new ResponseContext(festivalId, revision, locale, timezone)
+        );
+        return buildMeta(request, festivalId, revision, locale, timezone);
     }
 
-    private ApiMeta buildMeta(HttpServletRequest request, String festivalId, long revision, String locale) {
+    private ApiMeta buildMeta(
+        HttpServletRequest request,
+        String festivalId,
+        long revision,
+        String locale,
+        ZoneId timezone
+    ) {
         return new ApiMeta(
             resolveRequestId(request),
-            OffsetDateTime.now(clock.withZone(FESTIVAL_ZONE)).truncatedTo(ChronoUnit.MILLIS),
-            FESTIVAL_ZONE.getId(),
+            OffsetDateTime.now(clock.withZone(timezone)).truncatedTo(ChronoUnit.MILLIS),
+            timezone.getId(),
             festivalId,
             revision,
             locale,
@@ -80,5 +121,5 @@ public class ApiMetaSupport {
         );
     }
 
-    private record ResponseContext(String festivalId, long revision, String locale) {}
+    private record ResponseContext(String festivalId, long revision, String locale, ZoneId timezone) {}
 }

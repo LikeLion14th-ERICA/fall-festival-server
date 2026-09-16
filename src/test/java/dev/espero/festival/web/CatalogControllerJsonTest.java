@@ -14,6 +14,7 @@ import dev.espero.festival.domain.CatalogSnapshot.Pin;
 import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -34,7 +35,7 @@ class CatalogControllerJsonTest {
 
     @BeforeEach
     void setUp() {
-        ApiMetaSupport metaSupport = new ApiMetaSupport(
+        ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(
             Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC)
         );
         mvc = MockMvcBuilders.standaloneSetup(new CatalogController(snapshots, metaSupport)).build();
@@ -76,7 +77,7 @@ class CatalogControllerJsonTest {
 
     @Test
     void serializesMicrosecondClockAsAnApiV2MillisecondTimestamp() throws Exception {
-        ApiMetaSupport microsecondClock = new ApiMetaSupport(
+        ApiMetaSupport microsecondClock = ApiMetaTestFixtures.contentMetaSupport(
             Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC)
         );
         mvc = MockMvcBuilders.standaloneSetup(new CatalogController(snapshots, microsecondClock)).build();

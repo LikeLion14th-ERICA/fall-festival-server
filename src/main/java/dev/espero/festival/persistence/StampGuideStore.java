@@ -8,9 +8,10 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -29,13 +30,16 @@ public class StampGuideStore {
         this.jdbc = jdbc;
     }
 
-    public Optional<StampGuide> find() {
+    public Optional<StampGuide> find(UUID festivalRevisionId) {
         return jdbc.query("""
             SELECT title, dates, instructions, reward_name, reward_location_text,
                    reward_hours_text, reward_notice, qr_value, updated_at
             FROM stamp_guide
             WHERE id = 1
-            """, Map.of(), (resultSet, rowNumber) -> map(resultSet)
+              AND festival_revision_id = :festivalRevisionId
+            """,
+            new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
+            (resultSet, rowNumber) -> map(resultSet)
         ).stream().findFirst();
     }
 

@@ -9,7 +9,7 @@
 |---|---|---|
 | 관리자 인증 | 확정: username 로그인, 단일 ADMIN, 15분 signed JWT access token, 7일 opaque refresh cookie와 rotation/revoke | 목은 실제 자격증명 대신 `MOCK-*` 값만 사용. 공개 회원가입·세부 RBAC 없음 |
 | 적용 API 버전 | API v1 호환 범위와 API v2를 실제 서버에 적용하는 시점은 무엇인가요? | v1은 기존 계약 기록으로 유지한다. v2 중 공개 카탈로그(`spaces`, `maps`, `places`, ticket guide의 `mapTarget`)는 Spring·Flyway 구현과 계약 검증을 마쳤다. 나머지 화면 연동 목·관리 쓰기 경로의 실제 배포 범위와 migration은 미확정이다. |
-| 콘텐츠 revision | 축제 revision을 snapshot·행 버전·게시 이력 중 어떤 단위로 저장하고 rollback할까요? | 공개 카탈로그는 `FestivalRevision`의 단일 published 포인터와 시작 시 적재하는 불변 snapshot으로 구현했다. 개발자 실행 publish/rollback 절차, 다중 인스턴스 전파·캐시 방식은 운영 설계가 필요하다. |
+| 콘텐츠 revision | 축제 revision을 snapshot·행 버전·게시 이력 중 어떤 단위로 저장하고 rollback할까요? | Current Festival은 서버 `FESTIVAL_ID` 설정으로 명시하며 DB에서 추측하지 않는다. 공개 카탈로그는 해당 Festival의 published revision을 시작 시 불변 snapshot으로 적재하고, 실제 published revision에 귀속된 데이터는 해당 번호(1 이상)를 사용한다. 안전하게 귀속되지 않는 인증·시스템·pre-context 오류 및 FestivalDay 연결 전 혼잡도는 0을 사용한다. 개발자 실행 publish/rollback 절차, revision별 guide snapshot, 다중 인스턴스 전파·캐시 방식은 계속 운영 설계가 필요하다. |
 | 공지 입력·번역 기술 | 길이 제한·번역 엔진·원문 갱신 확인 방식을 확정할 수 있나요? | 한국어 READY만 필수. 미완료/실패 언어는 미노출. 길이 제한·미리보기 source 비교는 기술 초안 |
 | 갱신 방식 | 새로고침 없는 반영의 통신 방식과 최대 지연을 어떻게 정할까요? | 조회 API와 revision. 전송 방식·지연 SLA 미확정 |
 | 혼잡도 동일 상태 재선택 | 같은 상태를 다시 선택할 때 저장·수정 시각을 갱신할까요? | 현재 목은 갱신하지 않지만 제품·기술 결정 전 초안이며 확정 계약으로 사용하지 않음 |

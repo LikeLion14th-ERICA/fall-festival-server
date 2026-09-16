@@ -28,6 +28,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 class CatalogSnapshotStoreIntegrationTest {
 
+    private static final UUID CONFIGURED_FESTIVAL_ID = UUID.fromString(
+        "ec00912b-763f-4f8f-8f57-4bdfc389ccbf"
+    );
+
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
 
@@ -48,12 +52,52 @@ class CatalogSnapshotStoreIntegrationTest {
     void loadsTheInitiallyPublishedButEmptyCatalog() {
         CatalogSnapshot snapshot = store.loadPublished();
 
+        assertThat(snapshot.context().festivalId()).isEqualTo(CONFIGURED_FESTIVAL_ID.toString());
         assertThat(snapshot.context().revision()).isEqualTo(1);
         assertThat(snapshot.spaces()).isEmpty();
         assertThat(snapshot.maps()).isEmpty();
         assertThat(snapshot.places()).isEmpty();
         assertThat(snapshot.ticketGuideConfig()).isNotNull();
         assertThat(snapshot.ticketMapTarget()).isNull();
+    }
+
+    @Test
+    @Transactional
+    void loadsOnlyTheConfiguredFestivalWhenAnotherFestivalIsPublished() {
+        UUID otherFestivalId = UUID.fromString("ba6432d0-f660-4c95-a55b-4f376f8e6914");
+        UUID otherRevisionId = UUID.fromString("12d46615-813d-4eca-a2f7-cee3900c695b");
+        jdbc.update("""
+            INSERT INTO festivals (id, title, timezone, created_at, updated_at)
+            VALUES (:festivalId, '다른 축제', 'Asia/Seoul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """, Map.of("festivalId", otherFestivalId));
+        jdbc.update("""
+            INSERT INTO festival_revisions (
+                id, festival_id, revision_number, state,
+                approved_at, scheduled_at, published_at, created_at, updated_at
+            ) VALUES (
+                :revisionId, :festivalId, 1, 'published',
+                CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            )
+            """, Map.of("revisionId", otherRevisionId, "festivalId", otherFestivalId));
+
+        CatalogSnapshot snapshot = store.loadPublished();
+
+        assertThat(snapshot.context().festivalId()).isEqualTo(CONFIGURED_FESTIVAL_ID.toString());
+        assertThat(snapshot.context().revisionId()).isNotEqualTo(otherRevisionId);
+    }
+
+    @Test
+    @Transactional
+    void rejectsTheCatalogWhenTheConfiguredFestivalHasNoPublishedRevision() {
+        jdbc.update("""
+            UPDATE festival_revisions
+            SET state = 'archived'
+            WHERE festival_id = :festivalId AND state = 'published'
+            """, Map.of("festivalId", CONFIGURED_FESTIVAL_ID));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("configured festival has no published revision");
     }
 
     @Test

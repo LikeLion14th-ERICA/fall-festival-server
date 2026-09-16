@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest
+@SpringBootTest(properties = "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf")
 @Import(SecurityConfigurationTest.ProbeController.class)
 class SecurityConfigurationTest {
 
@@ -46,6 +46,7 @@ class SecurityConfigurationTest {
         mockMvc.perform(get("/api/v2/admin/security-probe"))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
+            .andExpect(jsonPath("$.meta.revision").value(0))
             .andExpect(jsonPath("$.meta.requestId").isNotEmpty());
     }
 

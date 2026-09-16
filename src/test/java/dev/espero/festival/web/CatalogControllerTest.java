@@ -13,6 +13,7 @@ import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -29,7 +30,9 @@ class CatalogControllerTest {
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final CatalogController controller = new CatalogController(
         snapshots,
-        new ApiMetaSupport(Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC))
+        ApiMetaTestFixtures.contentMetaSupport(
+            Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC)
+        )
     );
 
     @Test
