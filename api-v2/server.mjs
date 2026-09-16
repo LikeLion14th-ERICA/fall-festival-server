@@ -9,7 +9,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const spec=JSON.parse(await readFile(new URL('./openapi.json',import.meta.url),'utf8'));
   const examples=JSON.parse(await readFile(new URL('./examples.json',import.meta.url),'utf8'));
   const sessions=new Map();
-  const routes=Object.entries(spec.paths).flatMap(([path,methods])=>Object.entries(methods).map(([method,o])=>({path,method:method.toUpperCase(),definition:o,operationId:o.operationId,input:o.requestBody?.content['application/json'].schema.$ref?.split('/').at(-1),admin:!!o.security?.length,scenarios:o['x-mock-scenarios'],regex:new RegExp('^'+path.replace(/\{\w+\}/g,'([a-z0-9][a-z0-9-]{0,63})')+'$'),keys:[...path.matchAll(/\{(\w+)\}/g)].map(m=>m[1])})));
+  const routes=Object.entries(spec.paths).flatMap(([path,methods])=>Object.entries(methods).map(([method,o])=>{const schemes=(o.security||[]).flatMap(requirement=>Object.keys(requirement));return {path,method:method.toUpperCase(),definition:o,operationId:o.operationId,input:o.requestBody?.content['application/json'].schema.$ref?.split('/').at(-1),requiresBearer:schemes.includes('AdminBearer'),requiresRefreshCookie:schemes.includes('AdminRefreshCookie'),cookieCsrf:['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(o.operationId),scenarios:o['x-mock-scenarios'],regex:new RegExp('^'+path.replace(/\{\w+\}/g,'([a-z0-9][a-z0-9-]{0,63})')+'$'),keys:[...path.matchAll(/\{(\w+)\}/g)].map(m=>m[1])};}));
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin, X-Mock-Session, X-Mock-Scenario, X-Mock-Time'};
   const server=http.createServer(async(req,res)=>{
     let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
@@ -17,10 +17,14 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
     const send=(status,value,extra={})=>{res.writeHead(status,{...headers,'X-Request-Id':requestId,...extra});res.end(JSON.stringify(value));};
     try{
       const origin=req.headers.origin;
-      if(origin&&!origins.includes(origin))failure(403,'ORIGIN_NOT_ALLOWED','이 개발 서버에 허용되지 않은 origin입니다.');
+      const url=new URL(req.url,'http://127.0.0.1');
+      const csrfRoute=routes.find(route=>route.method===req.method&&route.regex.test(url.pathname)&&route.cookieCsrf);
+      if(origin&&!origins.includes(origin)){
+        if(csrfRoute)failure(403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.');
+        failure(403,'ORIGIN_NOT_ALLOWED','이 개발 서버에 허용되지 않은 origin입니다.');
+      }
       if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location');}
       if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, X-Mock-Session, X-Mock-Scenario, X-Mock-Time, X-Mock-Delay','Access-Control-Max-Age':'600'});return res.end();}
-      const url=new URL(req.url,'http://127.0.0.1');
       const session=req.headers['x-mock-session']||'default';
       if(!/^[a-zA-Z0-9_-]{1,64}$/.test(session))failure(400,'INVALID_MOCK_SESSION','목 세션은 영숫자·밑줄·하이픈 1~64자입니다.');
       const wall=Date.now();for(const [key,item]of sessions)if(wall-item.used>3600000)sessions.delete(key);
@@ -41,7 +45,9 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const pathRoutes=routes.filter(r=>r.regex.test(url.pathname));
       const route=pathRoutes.find(r=>r.method===req.method);
       if(!route){if(pathRoutes.length){res.setHeader('Allow',pathRoutes.map(r=>r.method).join(', '));failure(405,'METHOD_NOT_ALLOWED','지원하지 않는 메서드입니다.');}failure(404,'NOT_FOUND','경로가 없습니다.');}
-      if(route.admin){const token=req.headers.authorization;if(!token||token==='Bearer mock-expired')failure(401,'UNAUTHORIZED','관리자 인증이 필요합니다.');if(token!=='Bearer mock-admin')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');}
+      if(route.cookieCsrf&&!origin)failure(403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.');
+      if(route.requiresBearer){const token=req.headers.authorization;if(!token||token==='Bearer mock-expired')failure(401,'UNAUTHORIZED','관리자 인증이 필요합니다.');if(token!=='Bearer mock-admin')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');}
+      if(route.requiresRefreshCookie&&!req.headers.cookie?.includes('__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'))failure(401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.');
       const params=Object.fromEntries(route.keys.map((key,i)=>[key,route.regex.exec(url.pathname)[i+1]]));
       const query={};
       for(const [key,v]of url.searchParams){if(Object.hasOwn(query,key))failure(400,'INVALID_QUERY','중복 쿼리 파라미터입니다.');if(key!=='__scenario'&&!route.definition.parameters.some(p=>p.in==='query'&&p.name===key))failure(400,'INVALID_QUERY','정의되지 않은 쿼리 파라미터입니다.');query[key]=v;}
@@ -64,7 +70,10 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const response={data:result.data,meta:meta()};
       const responseSchema=route.definition.responses[result.status].content['application/json'].schema;
       const issues=validate(responseSchema,response,spec);if(issues.length)throw new Error('Response contract mismatch: '+JSON.stringify(issues));
-      return send(result.status,response,result.status===201?{Location:`/api/v2/admin/${route.operationId==='postAdminProduct'?'products':'notices'}/${result.data.id}`}:{ });
+      const extra=result.status===201?{Location:`/api/v2/admin/${route.operationId==='postAdminProduct'?'products':'notices'}/${result.data.id}`}:{ };
+      if(['createAdminSession','refreshAdminSession'].includes(route.operationId))extra['Set-Cookie']='__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN; Path=/; Secure; HttpOnly; SameSite=Strict';
+      if(route.operationId==='deleteCurrentAdminSession')extra['Set-Cookie']='__Host-festival-admin-refresh=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict';
+      return send(result.status,response,extra);
     }catch(error){
       const known=error instanceof ApiFailure;
       const status=known?error.status:500;

@@ -28,6 +28,10 @@ export function applyAdminContract(s,ops){
   s.NoticeSource=obj({title:str('현재 한국어 제목'),body:str('현재 한국어 본문')});
   s.NoticeTranslationInput=ref('NoticeSource');
   s.NoticeTranslationPreview=obj({source:ref('NoticeSource'),translations:ref('Translations'),canSave:{type:'boolean',description:'한국어 입력 조건 충족 여부. 영어 실패도 한국어 저장 가능'}},'저장 전 번역 미리보기. 실제 번역 엔진 없이 목 문구 반환. 실패 언어는 FAILED.');
+  s.AdminIdentity=obj({id,username:{type:'string',minLength:1,maxLength:100,description:'관리자 로그인 식별자'},authority:en(['ADMIN'],'현재 Product 범위의 단일 관리자 권한'),enabled:{type:'boolean',description:'false이면 로그인·refresh·관리자 API 인증 거부'}});
+  s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
+  s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
+  s.AdminLogout=obj({loggedOut:{type:'boolean',enum:[true],description:'현재 refresh session revoke 및 cookie 만료 완료'}});
   for(const n of ['NoticeInput','AdminNotice']){
     delete s[n].properties.image;s[n].required=s[n].required.filter(k=>k!=='image');
 
@@ -50,4 +54,10 @@ export function applyAdminContract(s,ops){
   add('putAdminProduct','PUT','/admin/products/{goodsId}','Goods','상품 수정·기존 조합 판매 상태 유지',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','new-option-on-sale','new-option-sold-out','option-removal','empty-configuration','not-found','error'],true);
   add('previewNoticeTranslation','POST','/admin/notice-translations','NoticeTranslationPreview','공지 번역 생성·재시도',['ADM-NOTICE-EDIT','ADM-NOTICE-TEMPLATE'],'NoticeTranslationInput',['normal','english-failed','partial-translation','error'],true);
   find('previewNoticeTranslation').successStatus=200;
+  ops.push(
+    {operationId:'createAdminSession',method:'POST',path:'/api/v2/admin/sessions',schema:'AdminSession',summary:'관리자 로그인',screens:[],input:'AdminLoginInput',scenarios:['normal','invalid-credentials','disabled','invalid-origin','error'],admin:true,authRequired:false,security:[],parameters:[],provisional:false,successStatus:200},
+    {operationId:'refreshAdminSession',method:'POST',path:'/api/v2/admin/sessions/refresh',schema:'AdminSession',summary:'관리자 세션 갱신·refresh rotation',screens:[],scenarios:['normal','expired','revoked','unknown','disabled','invalid-origin','error'],admin:true,authRequired:false,security:[{AdminRefreshCookie:[]}],parameters:[],provisional:false,successStatus:200},
+    {operationId:'deleteCurrentAdminSession',method:'DELETE',path:'/api/v2/admin/sessions/current',schema:'AdminLogout',summary:'현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공',screens:[],scenarios:['normal','invalid-origin','error'],admin:true,authRequired:true,security:[{AdminBearer:[]}],parameters:[],provisional:false},
+    {operationId:'getCurrentAdmin',method:'GET',path:'/api/v2/admin/me',schema:'AdminIdentity',summary:'현재 인증 관리자 확인',screens:[],scenarios:['normal','disabled','error'],admin:true,authRequired:true,parameters:[],provisional:false},
+  );
 }

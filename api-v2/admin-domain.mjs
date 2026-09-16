@@ -17,8 +17,14 @@ export function inventoryFor(state,goodsId,{admin=false,sold=false,failure}={}){
 }
 export function adminExecute(op,state,ctx){
   const {params,body,scenario,mutate,failure,DATES}=ctx;
+  if(op.operationId==='createAdminSession'&&['invalid-credentials','disabled'].includes(scenario))failure(401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.');
+  if(op.operationId==='refreshAdminSession'&&['expired','revoked','unknown','disabled'].includes(scenario))failure(401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.');
+  if(op.operationId==='getCurrentAdmin'&&scenario==='disabled')failure(401,'UNAUTHORIZED','관리자 인증이 필요합니다.');
   const inv=id=>inventoryFor(state,id,{admin:true,failure});
   switch(op.operationId){
+    case 'createAdminSession':case 'refreshAdminSession':return {data:{accessToken:'MOCK-SIGNED-ACCESS-TOKEN',expiresAt:'2030-10-01T18:15:00+09:00',admin:{id:'00000000-0000-4000-8000-000000000001',username:'mock-admin',authority:'ADMIN',enabled:true}}};
+    case 'deleteCurrentAdminSession':return {data:{loggedOut:true}};
+    case 'getCurrentAdmin':return {data:{id:'00000000-0000-4000-8000-000000000001',username:'mock-admin',authority:'ADMIN',enabled:true}};
     case 'putAdminAvailability':{
       const a=inv(params.goodsId);if(!a.variants.some(v=>v.colorId===params.colorId&&v.sizeId===params.sizeId))failure(404,'NOT_FOUND','등록된 색상·사이즈 조합이 없습니다.');
       const stock=state.inventory[params.goodsId];stock.statuses[`${params.colorId}/${params.sizeId}`]=body.status;stock.updatedAt=mutate();return {data:inv(params.goodsId)};

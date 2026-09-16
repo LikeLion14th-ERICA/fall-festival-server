@@ -19362,6 +19362,1627 @@
           }
         }
       }
+    },
+    "/api/v2/admin/sessions": {
+      "post": {
+        "operationId": "createAdminSession",
+        "summary": "관리자 로그인",
+        "description": "연결 화면: 관리자 공통 인증. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Secure; HttpOnly; SameSite=Strict refresh cookie"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSessionResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "관리자 로그인: normal",
+                    "value": {
+                      "data": {
+                        "accessToken": "MOCK-SIGNED-ACCESS-TOKEN",
+                        "expiresAt": "2030-10-01T18:15:00+09:00",
+                        "admin": {
+                          "id": "00000000-0000-4000-8000-000000000001",
+                          "username": "mock-admin",
+                          "authority": "ADMIN",
+                          "enabled": true
+                        }
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "관리자 로그인: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid-credentials": {
+                    "summary": "관리자 로그인: invalid-credentials",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_AUTHENTICATION_FAILED",
+                        "message": "관리자 인증에 실패했습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "disabled": {
+                    "summary": "관리자 로그인: disabled",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_AUTHENTICATION_FAILED",
+                        "message": "관리자 인증에 실패했습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid-origin": {
+                    "summary": "관리자 로그인: invalid-origin",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_CSRF_INVALID",
+                        "message": "허용되지 않은 관리자 요청 출처입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "413": {
+            "description": "요청 본문은 64KiB 이하입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "415": {
+            "description": "application/json 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "422": {
+            "description": "요청 필드를 확인해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "관리자 로그인: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "관리자 로그인: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "invalid-credentials",
+          "disabled",
+          "invalid-origin",
+          "error",
+          "bad-request",
+          "rate-limited"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "저장할 변경값",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginInput"
+              },
+              "example": {
+                "username": "mock-admin",
+                "password": "MOCK-NOT-A-REAL-SECRET"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/admin/sessions/refresh": {
+      "post": {
+        "operationId": "refreshAdminSession",
+        "summary": "관리자 세션 갱신·refresh rotation",
+        "description": "연결 화면: 관리자 공통 인증. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminRefreshCookie": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Secure; HttpOnly; SameSite=Strict refresh cookie"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSessionResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "관리자 세션 갱신·refresh rotation: normal",
+                    "value": {
+                      "data": {
+                        "accessToken": "MOCK-SIGNED-ACCESS-TOKEN",
+                        "expiresAt": "2030-10-01T18:15:00+09:00",
+                        "admin": {
+                          "id": "00000000-0000-4000-8000-000000000001",
+                          "username": "mock-admin",
+                          "authority": "ADMIN",
+                          "enabled": true
+                        }
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "관리자 세션 갱신·refresh rotation: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "관리자 세션 갱신·refresh rotation: expired",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_REFRESH_TOKEN_INVALID",
+                        "message": "관리자 세션을 갱신할 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "revoked": {
+                    "summary": "관리자 세션 갱신·refresh rotation: revoked",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_REFRESH_TOKEN_INVALID",
+                        "message": "관리자 세션을 갱신할 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "unknown": {
+                    "summary": "관리자 세션 갱신·refresh rotation: unknown",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_REFRESH_TOKEN_INVALID",
+                        "message": "관리자 세션을 갱신할 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "disabled": {
+                    "summary": "관리자 세션 갱신·refresh rotation: disabled",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_REFRESH_TOKEN_INVALID",
+                        "message": "관리자 세션을 갱신할 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid-origin": {
+                    "summary": "관리자 세션 갱신·refresh rotation: invalid-origin",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_CSRF_INVALID",
+                        "message": "허용되지 않은 관리자 요청 출처입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "관리자 세션 갱신·refresh rotation: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "관리자 세션 갱신·refresh rotation: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "expired",
+          "revoked",
+          "unknown",
+          "disabled",
+          "invalid-origin",
+          "error",
+          "bad-request",
+          "rate-limited"
+        ]
+      }
+    },
+    "/api/v2/admin/sessions/current": {
+      "delete": {
+        "operationId": "deleteCurrentAdminSession",
+        "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공",
+        "description": "연결 화면: 관리자 공통 인증. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminBearer": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "refresh cookie 만료(Max-Age=0)"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminLogoutResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: normal",
+                    "value": {
+                      "data": {
+                        "loggedOut": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: unauthorized",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid-origin": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: invalid-origin",
+                    "value": {
+                      "error": {
+                        "code": "ADMIN_CSRF_INVALID",
+                        "message": "허용되지 않은 관리자 요청 출처입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "forbidden": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: forbidden",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "관리자 권한이 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "invalid-origin",
+          "error",
+          "bad-request",
+          "rate-limited",
+          "unauthorized",
+          "forbidden"
+        ]
+      }
+    },
+    "/api/v2/admin/me": {
+      "get": {
+        "operationId": "getCurrentAdmin",
+        "summary": "현재 인증 관리자 확인",
+        "description": "연결 화면: 관리자 공통 인증. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminBearer": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminIdentityResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "현재 인증 관리자 확인: normal",
+                    "value": {
+                      "data": {
+                        "id": "00000000-0000-4000-8000-000000000001",
+                        "username": "mock-admin",
+                        "authority": "ADMIN",
+                        "enabled": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "현재 인증 관리자 확인: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "disabled": {
+                    "summary": "현재 인증 관리자 확인: disabled",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "unauthorized": {
+                    "summary": "현재 인증 관리자 확인: unauthorized",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "현재 인증 관리자 확인: forbidden",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "관리자 권한이 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "현재 인증 관리자 확인: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "현재 인증 관리자 확인: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "disabled",
+          "error",
+          "bad-request",
+          "rate-limited",
+          "unauthorized",
+          "forbidden"
+        ]
+      }
     }
   },
   "components": {
@@ -22053,6 +23674,101 @@
         "additionalProperties": false,
         "description": "저장 전 번역 미리보기. 실제 번역 엔진 없이 목 문구 반환. 실패 언어는 FAILED."
       },
+      "AdminIdentity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Id"
+          },
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "관리자 로그인 식별자"
+          },
+          "authority": {
+            "type": "string",
+            "enum": [
+              "ADMIN"
+            ],
+            "description": "현재 Product 범위의 단일 관리자 권한"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "false이면 로그인·refresh·관리자 API 인증 거부"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "authority",
+          "enabled"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "AdminSession": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "minLength": 1,
+            "description": "15분 유효한 signed JWT. Authorization Bearer로 전달"
+          },
+          "expiresAt": {
+            "$ref": "#/components/schemas/Timestamp"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/AdminIdentity"
+          }
+        },
+        "required": [
+          "accessToken",
+          "expiresAt",
+          "admin"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "AdminLoginInput": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "additionalProperties": false,
+        "description": "공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인"
+      },
+      "AdminLogout": {
+        "type": "object",
+        "properties": {
+          "loggedOut": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "현재 refresh session revoke 및 cookie 만료 완료"
+          }
+        },
+        "required": [
+          "loggedOut"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
       "ConfigResponse": {
         "type": "object",
         "properties": {
@@ -22528,19 +24244,76 @@
         ],
         "additionalProperties": false,
         "description": ""
+      },
+      "AdminSessionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminSession"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "AdminLogoutResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminLogout"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "AdminIdentityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminIdentity"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
       }
     },
     "securitySchemes": {
       "AdminBearer": {
         "type": "http",
         "scheme": "bearer",
-        "description": "관리자 서버 권한 검증 경계. 실 인증 프로토콜은 DECISIONS.md의 관리자 인증 항목 참조. 목에서만 Bearer mock-admin을 사용하며 운영 자격증명이 아니다."
+        "description": "15분 유효 signed JWT access token. Authorization: Bearer로 전달."
+      },
+      "AdminRefreshCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-festival-admin-refresh",
+        "description": "7일 유효 opaque refresh token. Secure·HttpOnly·SameSite=Strict이며 서버에는 SHA-256 hash만 저장."
       }
     }
   },
   "x-source": {
-    "basis": "Product Context wiki v5; user decision 2026-09-14",
-    "commit": "21eb76dacd78b3ad79ed4d9589dd341fbc25b883",
+    "basis": "Product Context wiki v5; user decision 2026-09-16",
+    "commit": "1247890eaa2010d25955662aa172e5839c4da652",
     "paths": [
       "docs/wiki/product/",
       "docs/wiki/product/admin/"

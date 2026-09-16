@@ -82,6 +82,14 @@
 
 스키마·경로는 `contract-source.mjs`와 `admin-contract.mjs`, 동작·가상 자료는 `domain.mjs`와 `admin-domain.mjs`, 화면 연결은 `screen-coverage.mjs`에서 수정합니다. `npm run generate`로 산출물을 갱신하고 `npm run check`를 통과시킵니다. 생성 JSON만 수동 수정하면 검증이 실패합니다.
 
-백엔드는 먼저 [결정 대기](DECISIONS.md)의 기술 초안을 합의하고 같은 OpenAPI에 맞춰 구현합니다. 프런트는 API origin을 실제 서버로 전환하고 목 전용 헤더·쿼리·토큰을 제거합니다. 실제 관리자 인증·번역 엔진·이미지 업로드는 별도 연동이 필요합니다. 번역 생성·검토·실패·저장 계약은 목으로 제공합니다. 실제 서버에도 계약·화면 소비자 검증을 실행한 뒤 전환하며 v1 호환 경로를 조용히 덮어쓰지 않습니다.
+백엔드는 먼저 [결정 대기](DECISIONS.md)의 기술 초안을 합의하고 같은 OpenAPI에 맞춰 구현합니다. 프런트는 API origin을 실제 서버로 전환하고 목 전용 헤더·쿼리·토큰을 제거합니다. 번역 엔진·이미지 업로드는 별도 연동이 필요합니다. 번역 생성·검토·실패·저장 계약은 목으로 제공합니다. 실제 서버에도 계약·화면 소비자 검증을 실행한 뒤 전환하며 v1 호환 경로를 조용히 덮어쓰지 않습니다.
+
+## 관리자 인증 연동
+
+- `POST /api/v2/admin/sessions`에서 username/password로 로그인하고 access JWT를 응답으로 받습니다.
+- access JWT는 15분 동안 유효하며 이후 관리자 요청의 `Authorization: Bearer <token>` 헤더로 보냅니다.
+- refresh token은 7일 유효한 `Secure; HttpOnly; SameSite=Strict` cookie이므로 브라우저 코드에서 읽거나 별도 저장하지 않습니다. refresh 성공 시 기존 token은 폐기되고 cookie가 교체됩니다.
+- 로그인·refresh·logout 요청은 배포 환경에 설정된 관리자 origin에서만 받습니다. 프런트는 credentials를 포함해 요청하고 브라우저가 보내는 정확한 `Origin` 헤더를 변경하거나 제거하지 않습니다.
+- 일반 공개 API는 인증 없이 유지됩니다. 공개 회원가입과 세부 역할별 RBAC는 현재 범위에 없습니다.
 
 기계 판독 문서 형식은 [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0.html)을 사용합니다.

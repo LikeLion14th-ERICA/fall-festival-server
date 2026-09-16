@@ -7,7 +7,7 @@
 
 | 기술 계약 초안 | 답변할 질문 | 현재 목 처리 |
 |---|---|---|
-| 관리자 인증 | 실제 로그인·세션 만료·권한 모델은 무엇인가요? | 고정 테스트 토큰. 로그인·계정·비밀번호 API 없음 |
+| 관리자 인증 | 확정: username 로그인, 단일 ADMIN, 15분 signed JWT access token, 7일 opaque refresh cookie와 rotation/revoke | 목은 실제 자격증명 대신 `MOCK-*` 값만 사용. 공개 회원가입·세부 RBAC 없음 |
 | 적용 API 버전 | API v1 호환 범위와 API v2를 실제 서버에 적용하는 시점은 무엇인가요? | v1은 기존 계약 기록으로 유지하고, v2는 화면 연동 목·초안이다. 실제 배포 버전과 migration 계획은 미확정 |
 | 콘텐츠 revision | 축제 revision을 snapshot·행 버전·게시 이력 중 어떤 단위로 저장하고 rollback할까요? | 응답 Meta revision과 `FestivalRevision` 논리 후보만 있으며 migration·동시성·캐시 방식은 미정 |
 | 공지 입력·번역 기술 | 길이 제한·번역 엔진·원문 갱신 확인 방식을 확정할 수 있나요? | 한국어 READY만 필수. 미완료/실패 언어는 미노출. 길이 제한·미리보기 source 비교는 기술 초안 |
