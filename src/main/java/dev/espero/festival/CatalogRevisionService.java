@@ -1,6 +1,7 @@
 package dev.espero.festival;
 
 import dev.espero.festival.persistence.CatalogSnapshotStore;
+import dev.espero.festival.persistence.PerformanceRevisionValidator;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.Date;
@@ -32,6 +33,7 @@ public class CatalogRevisionService {
     private final NamedParameterJdbcTemplate jdbc;
     private final DataSource dataSource;
     private final CatalogSnapshotStore snapshots;
+    private final PerformanceRevisionValidator performanceRevisions;
     private final CatalogManifestReader manifests;
     private final Clock clock;
 
@@ -39,12 +41,14 @@ public class CatalogRevisionService {
         NamedParameterJdbcTemplate jdbc,
         DataSource dataSource,
         CatalogSnapshotStore snapshots,
+        PerformanceRevisionValidator performanceRevisions,
         CatalogManifestReader manifests,
         Clock clock
     ) {
         this.jdbc = jdbc;
         this.dataSource = dataSource;
         this.snapshots = snapshots;
+        this.performanceRevisions = performanceRevisions;
         this.manifests = manifests;
         this.clock = clock;
     }
@@ -66,7 +70,7 @@ public class CatalogRevisionService {
 
         // This is a draft validation. Any exception rolls back every inserted
         // row, including the revision and its audit entry.
-        snapshots.loadRevision(revisionId);
+        validateStoredRevision(revisionId);
         audit(festivalId, revisionId, "IMPORT", null, safeActor, document.sha256(), now);
         return revisionId;
     }
@@ -75,7 +79,7 @@ public class CatalogRevisionService {
     @Transactional
     public void validateRevision(UUID revisionId, String actor) {
         Revision revision = requireRevision(revisionId);
-        snapshots.loadRevision(revisionId);
+        validateStoredRevision(revisionId);
         audit(
             revision.festivalId(), revisionId, "VALIDATE", null, actor(actor), null, clock.instant()
         );
@@ -104,7 +108,7 @@ public class CatalogRevisionService {
         long revisionNumber = nextRevisionNumber(source.festivalId());
         insertRevision(newRevisionId, source.festivalId(), revisionNumber, now);
         copyRevision(source.id(), newRevisionId);
-        snapshots.loadRevision(newRevisionId);
+        validateStoredRevision(newRevisionId);
 
         String safeActor = actor(actor);
         audit(source.festivalId(), newRevisionId, "ROLLBACK", source.id(), safeActor, null, now);
@@ -120,7 +124,7 @@ public class CatalogRevisionService {
             "A revision older than the current published revision cannot be published.");
         // Re-read after the festival row lock so the validation and pointer
         // swap observe a single serialized operation.
-        snapshots.loadRevision(revision.id());
+        validateStoredRevision(revision.id());
         Instant now = clock.instant();
         jdbc.update("""
             UPDATE festival_revisions
@@ -337,6 +341,142 @@ public class CatalogRevisionService {
         ).toList());
         insertTicketGuide(revisionId, manifest.ticketGuide(), now);
         insertStampGuide(revisionId, manifest.stampGuide(), now);
+        insertPerformanceCatalog(revisionId, manifest);
+    }
+
+    private void insertPerformanceCatalog(UUID revisionId, CatalogManifest manifest) {
+        batch("""
+            INSERT INTO artists (
+                festival_revision_id, id, category, image_url, image_width, image_height
+            ) VALUES (:revisionId, :id, :category, :imageUrl, :imageWidth, :imageHeight)
+            """, manifest.artists().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("id", row.id())
+            .addValue("category", row.category())
+            .addValue("imageUrl", row.imageUrl())
+            .addValue("imageWidth", row.imageWidth())
+            .addValue("imageHeight", row.imageHeight())
+        ).toList());
+        batch("""
+            INSERT INTO artist_translations (
+                festival_revision_id, artist_id, locale, name, image_alt, introduction
+            ) VALUES (:revisionId, :artistId, :locale, :name, :imageAlt, :introduction)
+            """, manifest.artistTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("artistId", row.artistId())
+            .addValue("locale", row.locale())
+            .addValue("name", row.name())
+            .addValue("imageAlt", row.imageAlt())
+            .addValue("introduction", row.introduction())
+        ).toList());
+        batch("""
+            INSERT INTO artist_links (festival_revision_id, artist_id, sort_order, url)
+            VALUES (:revisionId, :artistId, :sortOrder, :url)
+            """, manifest.artistLinks().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("artistId", row.artistId())
+            .addValue("sortOrder", row.sortOrder())
+            .addValue("url", row.url())
+        ).toList());
+        batch("""
+            INSERT INTO artist_link_translations (
+                festival_revision_id, artist_id, sort_order, locale, label
+            ) VALUES (:revisionId, :artistId, :sortOrder, :locale, :label)
+            """, manifest.artistLinkTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("artistId", row.artistId())
+            .addValue("sortOrder", row.sortOrder())
+            .addValue("locale", row.locale())
+            .addValue("label", row.label())
+        ).toList());
+        batch("""
+            INSERT INTO artist_songs (festival_revision_id, artist_id, sort_order, url)
+            VALUES (:revisionId, :artistId, :sortOrder, :url)
+            """, manifest.artistSongs().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("artistId", row.artistId())
+            .addValue("sortOrder", row.sortOrder())
+            .addValue("url", row.url())
+        ).toList());
+        batch("""
+            INSERT INTO artist_song_translations (
+                festival_revision_id, artist_id, sort_order, locale, title
+            ) VALUES (:revisionId, :artistId, :sortOrder, :locale, :title)
+            """, manifest.artistSongTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("artistId", row.artistId())
+            .addValue("sortOrder", row.sortOrder())
+            .addValue("locale", row.locale())
+            .addValue("title", row.title())
+        ).toList());
+        batch("""
+            INSERT INTO performances (
+                festival_revision_id, id, festival_date, starts_at, ends_at
+            ) VALUES (:revisionId, :id, :festivalDate, :startsAt, :endsAt)
+            """, manifest.performances().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("id", row.id())
+            .addValue("festivalDate", row.festivalDate())
+            .addValue("startsAt", row.startsAt())
+            .addValue("endsAt", row.endsAt())
+        ).toList());
+        batch("""
+            INSERT INTO performance_translations (
+                festival_revision_id, performance_id, locale, title, description
+            ) VALUES (:revisionId, :performanceId, :locale, :title, :description)
+            """, manifest.performanceTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("performanceId", row.performanceId())
+            .addValue("locale", row.locale())
+            .addValue("title", row.title())
+            .addValue("description", row.description())
+        ).toList());
+        batch("""
+            INSERT INTO performance_artists (
+                festival_revision_id, performance_id, artist_id, display_order
+            ) VALUES (:revisionId, :performanceId, :artistId, :displayOrder)
+            """, manifest.performanceArtists().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("performanceId", row.performanceId())
+            .addValue("artistId", row.artistId())
+            .addValue("displayOrder", row.displayOrder())
+        ).toList());
+        if (manifest.timetableConfig() != null) {
+            batch("""
+                INSERT INTO timetable_configs (
+                    festival_revision_id, axis_start_time, axis_end_time
+                ) VALUES (:revisionId, :axisStartTime, :axisEndTime)
+                """, List.of(new MapSqlParameterSource()
+                .addValue("revisionId", revisionId)
+                .addValue("axisStartTime", manifest.timetableConfig().axisStartTime())
+                .addValue("axisEndTime", manifest.timetableConfig().axisEndTime())));
+        }
+        batch("""
+            INSERT INTO prohibited_items (festival_revision_id, id, sort_order)
+            VALUES (:revisionId, :id, :sortOrder)
+            """, manifest.prohibitedItems().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("id", row.id())
+            .addValue("sortOrder", row.sortOrder())
+        ).toList());
+        batch("""
+            INSERT INTO prohibited_item_translations (
+                festival_revision_id, item_id, locale, label
+            ) VALUES (:revisionId, :itemId, :locale, :label)
+            """, manifest.prohibitedItemTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("itemId", row.itemId())
+            .addValue("locale", row.locale())
+            .addValue("label", row.label())
+        ).toList());
+        batch("""
+            INSERT INTO prohibited_messages (festival_revision_id, locale, message)
+            VALUES (:revisionId, :locale, :message)
+            """, manifest.prohibitedMessages().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("locale", row.locale())
+            .addValue("message", row.message())
+        ).toList());
     }
 
     private void insertFestivalDays(UUID revisionId, List<CatalogManifest.FestivalDay> days, Instant now) {
@@ -416,6 +556,7 @@ public class CatalogRevisionService {
     }
 
     private void copyRevision(UUID sourceRevisionId, UUID newRevisionId) {
+        copyFestivalDays(sourceRevisionId, newRevisionId);
         copy("""
             INSERT INTO spaces (festival_revision_id, id, category, image_url, image_width, image_height)
             SELECT :newRevisionId, id, category, image_url, image_width, image_height
@@ -523,7 +664,80 @@ public class CatalogRevisionService {
                      reward_location_text, reward_hours_text, reward_notice, qr_value, updated_at
               FROM stamp_guide_revisions WHERE festival_revision_id = :sourceRevisionId
             """, sourceRevisionId, newRevisionId);
-        copyFestivalDays(sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO artists (
+                festival_revision_id, id, category, image_url, image_width, image_height
+            ) SELECT :newRevisionId, id, category, image_url, image_width, image_height
+              FROM artists WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO artist_translations (
+                festival_revision_id, artist_id, locale, name, image_alt, introduction
+            ) SELECT :newRevisionId, artist_id, locale, name, image_alt, introduction
+              FROM artist_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO artist_links (festival_revision_id, artist_id, sort_order, url)
+            SELECT :newRevisionId, artist_id, sort_order, url
+            FROM artist_links WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO artist_link_translations (
+                festival_revision_id, artist_id, sort_order, locale, label
+            ) SELECT :newRevisionId, artist_id, sort_order, locale, label
+              FROM artist_link_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO artist_songs (festival_revision_id, artist_id, sort_order, url)
+            SELECT :newRevisionId, artist_id, sort_order, url
+            FROM artist_songs WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO artist_song_translations (
+                festival_revision_id, artist_id, sort_order, locale, title
+            ) SELECT :newRevisionId, artist_id, sort_order, locale, title
+              FROM artist_song_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO performances (
+                festival_revision_id, id, festival_date, starts_at, ends_at
+            ) SELECT :newRevisionId, id, festival_date, starts_at, ends_at
+              FROM performances WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO performance_translations (
+                festival_revision_id, performance_id, locale, title, description
+            ) SELECT :newRevisionId, performance_id, locale, title, description
+              FROM performance_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO performance_artists (
+                festival_revision_id, performance_id, artist_id, display_order
+            ) SELECT :newRevisionId, performance_id, artist_id, display_order
+              FROM performance_artists WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO timetable_configs (
+                festival_revision_id, axis_start_time, axis_end_time
+            ) SELECT :newRevisionId, axis_start_time, axis_end_time
+              FROM timetable_configs WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO prohibited_items (festival_revision_id, id, sort_order)
+            SELECT :newRevisionId, id, sort_order
+            FROM prohibited_items WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO prohibited_item_translations (
+                festival_revision_id, item_id, locale, label
+            ) SELECT :newRevisionId, item_id, locale, label
+              FROM prohibited_item_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO prohibited_messages (festival_revision_id, locale, message)
+            SELECT :newRevisionId, locale, message
+            FROM prohibited_messages WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
     }
 
     private void copyFestivalDays(UUID sourceRevisionId, UUID newRevisionId) {
@@ -556,6 +770,11 @@ public class CatalogRevisionService {
         jdbc.update(sql, new MapSqlParameterSource()
             .addValue("sourceRevisionId", sourceRevisionId)
             .addValue("newRevisionId", newRevisionId));
+    }
+
+    private void validateStoredRevision(UUID revisionId) {
+        snapshots.loadRevision(revisionId);
+        performanceRevisions.validate(revisionId);
     }
 
     private void insertRevision(UUID id, UUID festivalId, long revisionNumber, Instant now) {

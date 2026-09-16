@@ -95,7 +95,7 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 ## migration 착수 순서
 
 1. 승인 콘텐츠는 개발자 CLI manifest로 import하고, 공개 전 번역·locale별 정렬·asset·핀·filter group·target·guide 검증을 통과시킨다.
-2. 공연 물리 schema는 V13에 만들었지만 아직 개발자 CLI manifest import·validate·rollback 대상이나 공개 조회 구현은 아니다. 별도 공연 카탈로그 import 작업에서 완전 revision 흐름에 포함한 뒤 공개 API를 활성화한다.
+2. V13 공연 카탈로그는 개발자 CLI manifest의 완전 revision import·validate·publish·rollback에 포함한다. 내부 DB 검증기는 저장된 공연 revision을 게시 직전에 다시 검증한다. 공개 라인업·타임테이블 조회는 아직 구현하지 않으며 별도 제품·계약 작업 뒤 활성화한다.
 3. 공지·번역과 굿즈·실제 제공 조합은 해당 제품·계약 결정이 난 뒤 Flyway migration으로 만든다. DB 제약으로 `(notice_id, locale)` 및 `(goods_id, color_id, size_id)` 중복을 막고, 수량·결제·사용자 참여 테이블을 추가하지 않는다.
 4. migration마다 운영 DB 보존, rollback 또는 복구 방법, API 계약·예시·통합 테스트를 같은 변경에서 갱신한다.
 
