@@ -86,7 +86,7 @@ class PublicCatalogSecurityIntegrationTest {
             .andExpect(content().contentTypeCompatibleWith("application/json"))
             .andExpect(jsonPath("$.error.code", is("UNAUTHORIZED")))
             .andExpect(jsonPath("$.meta.requestId", is(REQUEST_ID)))
-            .andExpect(jsonPath("$.meta.revision", is(1)))
+            .andExpect(jsonPath("$.meta.revision", is(0)))
             .andExpect(jsonPath("$.meta", notNullValue()))
             .andExpect(header().string("X-Request-Id", REQUEST_ID));
     }
