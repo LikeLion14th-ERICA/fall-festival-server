@@ -16,7 +16,8 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 - 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V11), 티켓,
   스탬프·혼잡도와 published revision의 부스·장소·지도 카탈로그 공개 조회가 있다. V8은
   revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를, V10은 지도
-  filter group을, V11은 revision-scoped guide·게시 CLI·감사 이력을 만든다. 승인된 운영
+  filter group을, V11은 revision-scoped guide·게시 CLI·카탈로그 감사 이력을, V12는
+  운영 관리자 감사 이력을 만든다. 승인된 운영
   부스·지도·좌표·티켓존 자료는 seed하지 않는다. 상세 물리 모델과 완료 기준은
   [부스·지도 공개 카탈로그](spaces-map-backend.md)를 따른다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
@@ -31,8 +32,9 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 - API v2는 제품의 유일한 계약이다. 공개 카탈로그와 관리자 인증은 서버에 구현됐고,
   나머지 화면 연동의 운영 전환 범위는 계속 결정한다.
 - 공개 조회는 로그인 없이 유지한다. 관리자 쓰기는 username 로그인, 단일 `ADMIN`, 짧은 JWT와
-  refresh cookie 회전·회수 모델로 서버에서 검증한다. 세부 RBAC와 감사 이력 보관 정책은 남은
-  결정이다.
+  refresh cookie 회전·회수 모델로 서버에서 검증한다. 세부 RBAC는 현재 Product 범위가
+  아니다. 운영 관리자 감사 이력은 1년 보관하되 자동 retention enforcement는 후속 운영
+  작업으로 남긴다.
 - 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
   `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`·filter group·canonical map
   target과 revision-scoped ticket/stamp guide·catalog audit의 현재 물리 schema는 V8~V11에
@@ -54,7 +56,9 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 | 안내 설정 | `TicketGuideRevision`, `StampGuideRevision`, `StampReward`, `FestivalLink`, `BankAccount` | 축제 revision에 귀속한 안내 콘텐츠만 snapshot으로 읽는다. 티켓 수령 부스와 외부인 티켓존은 한 Place로 모델링한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 수령 인증 코드는 서버 비밀 설정에서만 검증하고 콘텐츠·사용자 이력 모델로 저장하지 않는다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
 
 관리자 쓰기는 서버 권한 검증과 감사 이력이 필요하며 현재 관리자 인증은 구현되어 있다.
-계정·역할·세션·권한 회수와 `AdminAuditEvent`의 actor 참조·보관 정책은 현재 구현 경계를 따른다.
+`CatalogRevisionAudit`는 개발자 CLI의 revision lifecycle을 actor 문자열로 기록하고,
+`AdminAuditEvent`는 인증된 `admin_accounts.id`를 actor로 삼아 운영 콘텐츠 HTTP write를
+기록한다. 두 모델은 통합하지 않고, 변경과 같은 transaction에 append-only로 저장한다.
 비밀값과 개인정보는 콘텐츠 테이블, API 응답, 로그에 저장하지 않는다.
 
 ## ERD
@@ -78,7 +82,7 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 
 다음은 DDL 또는 API 동시성에 영향을 주므로 결정 전에는 기본값으로 추측하지 않는다.
 
-1. 세부 관리자 역할·감사 이력 보관과 긴급 권한 회수 운영
+1. 세부 관리자 역할과 긴급 권한 회수 운영, 관리자 감사 이력 1년 보관의 자동 삭제·archive 방식
 2. 공지 원문 변경 뒤 번역 무효화·재검토, 번역 엔진과 게시 이력
 3. 굿즈 이미지 업로드 방식, 옵션 없는 상품 입력 방식과 표시 순서
 4. 실제 일정·계좌·가격·지도 자산·공식 번역 등 운영 자료

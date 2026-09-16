@@ -38,3 +38,18 @@
   분석·접근 로그와 오류 응답에 넣지 않는다. 공개 검증 요청은 속도 제한하고 틀린 코드는
   상세 원인 없이 거절한다. 이 인증은 로그인 없는 참여의 엄격한 중복 차단이나 사용자별
   수령 이력을 만들지 않는다.
+
+## 관리자 감사 이력
+
+- `CatalogRevisionAudit`는 개발자 CLI의 카탈로그 `IMPORT / VALIDATE / PUBLISH / ROLLBACK`
+  lifecycle을 기록한다. `AdminAuditEvent`는 인증된 관리자의 혼잡도·공지·굿즈 등
+  운영 콘텐츠 HTTP write를 기록하며, 두 모델을 합치지 않는다.
+- 관리자 감사 이력은 append-only이고 해당 운영 데이터 변경과 같은 DB transaction에서
+  기록한다. 감사 저장이 실패하면 운영 데이터 변경도 rollback하고, 운영 변경이
+  rollback되면 감사 이력도 남기지 않는다.
+- `AdminAuditEvent`는 1년간 보관한다. V12는 보관 정책만 확정하며 자동 삭제·archive·
+  scheduler를 구현하지 않는다. 실제 retention enforcement는 별도 운영 작업으로 처리한다.
+- 감사 event에는 비밀번호, access/refresh token, cookie, Authorization header, request/response
+  body, IP, User-Agent, 원문 개인정보, 예외·SQL message와 임의 metadata를 저장하지 않는다.
+- login·refresh·logout·인증 실패 감사는 현재 `AdminAuditEvent` 범위가 아니며 후속
+  auth lifecycle 작업에서 다룬다.

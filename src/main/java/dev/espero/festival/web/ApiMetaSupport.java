@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /** Builds the shared API v2 metadata envelope without querying the database. */
@@ -19,7 +18,6 @@ public class ApiMetaSupport {
     static final String REQUEST_ID_ATTRIBUTE = ApiMetaSupport.class.getName() + ".requestId";
     private static final String RESPONSE_CONTEXT_ATTRIBUTE = ApiMetaSupport.class.getName() + ".responseContext";
     private static final ZoneId SYSTEM_ZONE = ZoneId.of("Asia/Seoul");
-    private static final Pattern REQUEST_ID_PATTERN = Pattern.compile("[A-Za-z0-9][A-Za-z0-9._-]{0,127}");
 
     private final Clock clock;
     private final FestivalProperties properties;
@@ -82,7 +80,7 @@ public class ApiMetaSupport {
             return requestId;
         }
         String provided = request.getHeader("X-Request-Id");
-        String requestId = provided != null && REQUEST_ID_PATTERN.matcher(provided).matches()
+        String requestId = RequestIdPolicy.isValid(provided)
             ? provided
             : UUID.randomUUID().toString();
         request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId);
