@@ -49,7 +49,7 @@ class PerformanceCatalogSchemaIntegrationTest {
     @Test
     @Order(1)
     void migrationCreatesV13WithoutOperationalSeedData() {
-        assertThat(latestMigrationVersion()).isEqualTo("13");
+        assertThat(successfulPerformanceCatalogMigrationCount()).isEqualTo(1);
         assertThat(count("artists")).isZero();
         assertThat(count("performances")).isZero();
         assertThat(count("performance_artists")).isZero();
@@ -537,11 +537,11 @@ class PerformanceCatalogSchemaIntegrationTest {
         return result == null ? 0 : result;
     }
 
-    private String latestMigrationVersion() {
+    private long successfulPerformanceCatalogMigrationCount() {
         return jdbc.queryForObject(
-            "SELECT version FROM flyway_schema_history WHERE success ORDER BY installed_rank DESC LIMIT 1",
+            "SELECT count(*) FROM flyway_schema_history WHERE version = '13' AND success",
             Map.of(),
-            String.class
+            Long.class
         );
     }
 
