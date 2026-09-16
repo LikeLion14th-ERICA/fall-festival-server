@@ -58,7 +58,52 @@ class CatalogSnapshotStoreIntegrationTest {
         assertThat(snapshot.maps()).isEmpty();
         assertThat(snapshot.places()).isEmpty();
         assertThat(snapshot.ticketGuideConfig()).isNotNull();
+        assertThat(snapshot.ticketGuideConfig().hasSchedule()).isFalse();
+        assertThat(snapshot.ticketGuideConfig().dailyTransferOpenTime()).isNull();
         assertThat(snapshot.ticketMapTarget()).isNull();
+    }
+
+    @Test
+    @Transactional
+    void rejectsARevisionMissingItsStampGuide() {
+        UUID revisionId = publishedRevisionId();
+        jdbc.update(
+            "DELETE FROM stamp_guide_revisions WHERE festival_revision_id = :revisionId",
+            parameters(revisionId)
+        );
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("missing its stamp guide");
+    }
+
+    @Test
+    @Transactional
+    void rejectsARevisionMissingItsTicketGuide() {
+        UUID revisionId = publishedRevisionId();
+        jdbc.update(
+            "DELETE FROM ticket_guide_revisions WHERE festival_revision_id = :revisionId",
+            parameters(revisionId)
+        );
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("missing its ticket guide");
+    }
+
+    @Test
+    @Transactional
+    void rejectsBlankOptionalStampGuideContent() {
+        UUID revisionId = publishedRevisionId();
+        jdbc.update("""
+            UPDATE stamp_guide_revisions
+            SET reward_location_text = ' '
+            WHERE festival_revision_id = :revisionId AND id = 1
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("StampGuide.reward.locationText");
     }
 
     @Test
@@ -116,11 +161,44 @@ class CatalogSnapshotStoreIntegrationTest {
         });
         assertThat(snapshot.pinsFor("map-area", "map-v1")).singleElement().satisfies(pin -> {
             assertThat(pin.target()).isEqualTo(new CatalogSnapshot.PinTarget("PLACE", "place-test"));
+            assertThat(pin.filterGroup()).isEqualTo("EXPERIENCE");
+            assertThat(pin.filterGroupLabel()).isEqualTo("체험");
         });
+        assertThat(snapshot.filtersFor("map-area", "map-v1"))
+            .containsExactly(new CatalogSnapshot.PinFilter("EXPERIENCE", "체험"));
         assertThat(snapshot.ticketGuideConfig()).isNotNull();
         assertThat(snapshot.ticketMapTarget()).isEqualTo(new CatalogSnapshot.MapTarget(
             "map-area", "place-test", "pin-test", "map-v1"
         ));
+    }
+
+    @Test
+    @Transactional
+    void rejectsARevisionWithOnlyPartiallyConfiguredPlacePinFilterGroups() {
+        UUID revisionId = publishedRevisionId();
+        insertCatalogFixture(revisionId);
+        jdbc.update("""
+            INSERT INTO places (festival_revision_id, id, kind, space_id)
+            VALUES (:revisionId, 'place-incomplete', 'FACILITY', NULL)
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO place_translations (festival_revision_id, place_id, locale, name)
+            VALUES (:revisionId, 'place-incomplete', 'ko', '필터 누락 장소')
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO map_pins (
+                festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id
+            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-incomplete', 'facility', 0.25, 0.75, 'place-incomplete', NULL)
+            """, parameters(revisionId));
+        jdbc.update("""
+            INSERT INTO map_pin_translations (
+                festival_revision_id, map_id, map_version, pin_id, locale, label
+            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-incomplete', 'ko', '필터 누락 장소')
+            """, parameters(revisionId));
+
+        assertThatThrownBy(store::loadPublished)
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("supported filter group");
     }
 
     @Test
@@ -220,7 +298,7 @@ class CatalogSnapshotStoreIntegrationTest {
         insertCatalogFixture(revisionId);
         insertOverviewPlacePin(revisionId, "pin-overview");
         jdbc.update("""
-            UPDATE ticket_guide
+            UPDATE ticket_guide_revisions
             SET map_id = 'map-overview', place_id = 'place-test', pin_id = 'pin-overview', map_version = 'overview-v1'
             WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters(revisionId));
@@ -327,7 +405,7 @@ class CatalogSnapshotStoreIntegrationTest {
         UUID revisionId = publishedRevisionId();
         insertCatalogFixture(revisionId);
         jdbc.update("""
-            UPDATE ticket_guide
+            UPDATE ticket_guide_revisions
             SET transfer_link_label = '송금', transfer_link_url = 'https://example.org/문의'
             WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters(revisionId));
@@ -416,7 +494,7 @@ class CatalogSnapshotStoreIntegrationTest {
         insertAreaPin(revisionId, "area-pin");
 
         assertThatThrownBy(() -> jdbc.update("""
-            UPDATE ticket_guide
+            UPDATE ticket_guide_revisions
             SET pin_id = 'area-pin'
             WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters(revisionId)))
@@ -430,7 +508,7 @@ class CatalogSnapshotStoreIntegrationTest {
         insertCatalogFixture(revisionId);
         insertMapVersion(revisionId, "map-v2");
         jdbc.update("DELETE FROM space_map_targets WHERE festival_revision_id = :revisionId", parameters(revisionId));
-        jdbc.update("UPDATE ticket_guide SET map_id = NULL, place_id = NULL, pin_id = NULL, map_version = NULL WHERE id = 1", Map.of());
+        jdbc.update("UPDATE ticket_guide_revisions SET map_id = NULL, place_id = NULL, pin_id = NULL, map_version = NULL WHERE id = 1 AND festival_revision_id = :revisionId", parameters(revisionId));
         jdbc.update("""
             UPDATE maps SET current_version = 'map-v2'
             WHERE festival_revision_id = :revisionId AND id = 'map-area'
@@ -451,14 +529,14 @@ class CatalogSnapshotStoreIntegrationTest {
         insertCatalogFixture(revisionId);
         insertMapVersion(revisionId, "map-v2");
         jdbc.update("DELETE FROM space_map_targets WHERE festival_revision_id = :revisionId", parameters(revisionId));
-        jdbc.update("UPDATE ticket_guide SET map_id = NULL, place_id = NULL, pin_id = NULL, map_version = NULL WHERE id = 1", Map.of());
+        jdbc.update("UPDATE ticket_guide_revisions SET map_id = NULL, place_id = NULL, pin_id = NULL, map_version = NULL WHERE id = 1 AND festival_revision_id = :revisionId", parameters(revisionId));
         jdbc.update("""
             UPDATE maps SET current_version = 'map-v2'
             WHERE festival_revision_id = :revisionId AND id = 'map-area'
             """, parameters(revisionId));
 
         assertThatThrownBy(() -> jdbc.update("""
-            UPDATE ticket_guide
+            UPDATE ticket_guide_revisions
             SET map_id = 'map-area', place_id = 'place-test', pin_id = 'pin-test', map_version = 'map-v1'
             WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters(revisionId)))
@@ -505,9 +583,9 @@ class CatalogSnapshotStoreIntegrationTest {
             """, parameters(revisionId));
 
         assertThatThrownBy(() -> jdbc.update("""
-            UPDATE ticket_guide
+            UPDATE ticket_guide_revisions
             SET place_id = 'place-other'
-            WHERE id = 1
+            WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters(revisionId))).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -736,8 +814,8 @@ class CatalogSnapshotStoreIntegrationTest {
             """, parameters);
         jdbc.update("""
             INSERT INTO map_pins (
-                festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id
-            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-test', 'booth', 0.5, 0.25, 'place-test', NULL)
+                festival_revision_id, map_id, map_version, id, category, filter_group, x, y, place_id, area_id
+            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-test', 'booth', 'EXPERIENCE', 0.5, 0.25, 'place-test', NULL)
             """, parameters);
         jdbc.update("""
             INSERT INTO map_pin_translations (
@@ -745,14 +823,19 @@ class CatalogSnapshotStoreIntegrationTest {
             ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-test', 'ko', '테스트 부스')
             """, parameters);
         jdbc.update("""
+            INSERT INTO map_pin_filter_group_translations (
+                festival_revision_id, filter_group, locale, label
+            ) VALUES (:revisionId, 'EXPERIENCE', 'ko', '체험')
+            """, parameters);
+        jdbc.update("""
             INSERT INTO space_map_targets (
                 festival_revision_id, space_id, map_id, map_version, pin_id, place_id
             ) VALUES (:revisionId, 'space-test', 'map-area', 'map-v1', 'pin-test', 'place-test')
             """, parameters);
         jdbc.update("""
-            UPDATE ticket_guide
+            UPDATE ticket_guide_revisions
             SET map_id = 'map-area', place_id = 'place-test', pin_id = 'pin-test', map_version = 'map-v1'
-            WHERE id = 1
+            WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters);
     }
 
@@ -761,8 +844,8 @@ class CatalogSnapshotStoreIntegrationTest {
             .addValue("pinId", pinId);
         jdbc.update("""
             INSERT INTO map_pins (
-                festival_revision_id, map_id, map_version, id, category, x, y, place_id, area_id
-            ) VALUES (:revisionId, 'map-overview', 'overview-v1', :pinId, 'booth', 0.5, 0.25, 'place-test', NULL)
+                festival_revision_id, map_id, map_version, id, category, filter_group, x, y, place_id, area_id
+            ) VALUES (:revisionId, 'map-overview', 'overview-v1', :pinId, 'booth', 'EXPERIENCE', 0.5, 0.25, 'place-test', NULL)
             """, parameters);
         jdbc.update("""
             INSERT INTO map_pin_translations (

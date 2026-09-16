@@ -49,13 +49,16 @@ public final class CatalogResponses {
     public record Pin(
         String id,
         String category,
+        String filterGroup,
         String label,
         BigDecimal x,
         BigDecimal y,
         PinTarget target
     ) {}
 
-    public record Pins(String mapId, String mapVersion, List<Pin> items) {}
+    public record PinFilter(String id, String label) {}
+
+    public record Pins(String mapId, String mapVersion, List<PinFilter> filters, List<Pin> items) {}
 
     public record Place(
         String id,

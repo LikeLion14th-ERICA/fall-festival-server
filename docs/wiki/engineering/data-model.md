@@ -4,20 +4,20 @@
 
 ## 목적과 적용 기준
 
-이 문서는 최신 Product v5와 화면 연동용 API v2 draft.3을 바탕으로 한 논리 데이터 모델과
+이 문서는 최신 Product v5와 화면 연동용 API v2를 바탕으로 한 논리 데이터 모델과
 구현된 저장 경계를 함께 기록한다. 아래에 명시하지 않은 모델은 현재 운영 DB schema·JPA
 Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL 기본값으로 고정하지 않는다.
 
-우선순위는 최신 사용자 결정, Product 문서, 승인 운영 자료, Figma 의도, 기존 API v1 순이다.
-API v1은 기존 계약 기록이고, 새 화면 연동의 초안은 API v2다. 구현한 경로 외의 적용 버전과
-v1 호환 전략은 결정 기록으로 관리한다.
+우선순위는 최신 사용자 결정, Product 문서, 승인 운영 자료, Figma 의도, 확정된 API v2 계약
+순이다. 구현한 경로 외의 운영 전환 범위는 결정 기록으로 관리한다.
 
 ## 현재 구현 경계
 
-- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V8), 티켓,
+- 루트 Spring Boot 프로젝트에는 JDBC·PostgreSQL·Flyway 기반의 축제 core(V2~V11), 티켓,
   스탬프·혼잡도와 published revision의 부스·장소·지도 카탈로그 공개 조회가 있다. V8은
-  revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를 만들지만,
-  승인된 운영 부스·지도·좌표·티켓존 자료는 seed하지 않는다. 상세 물리 모델과 완료 기준은
+  revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를, V10은 지도
+  filter group을, V11은 revision-scoped guide·게시 CLI·감사 이력을 만든다. 승인된 운영
+  부스·지도·좌표·티켓존 자료는 seed하지 않는다. 상세 물리 모델과 완료 기준은
   [부스·지도 공개 카탈로그](spaces-map-backend.md)를 따른다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
   함께 준비한 뒤에만 운영 DB를 연결한다.
@@ -28,15 +28,15 @@ v1 호환 전략은 결정 기록으로 관리한다.
 
 - 운영 대상은 루트 Spring Boot 서비스이고 `test/`는 별도 실기기 검증 환경이다. 두 영역의
   schema·사용자 상태·인증 결정을 섞지 않는다.
-- API v1은 기존 계약 기록이며 새 화면의 목·연동 계약은 API v2 draft.3이다. 공개 카탈로그와
-  관리자 인증은 서버에 구현됐고, 나머지 화면 연동의 v1 호환·운영 전환 전략은 계속 결정한다.
+- API v2는 제품의 유일한 계약이다. 공개 카탈로그와 관리자 인증은 서버에 구현됐고,
+  나머지 화면 연동의 운영 전환 범위는 계속 결정한다.
 - 공개 조회는 로그인 없이 유지한다. 관리자 쓰기는 username 로그인, 단일 `ADMIN`, 짧은 JWT와
   refresh cookie 회전·회수 모델로 서버에서 검증한다. 세부 RBAC와 감사 이력 보관 정책은 남은
   결정이다.
 - 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
-  다만 `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`와 canonical map target의
-  현재 물리 schema는 V8에 있다. 나머지 모델의 컬럼·인덱스·삭제 방식은 migration 설계에서
-  확정한다.
+  `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`·filter group·canonical map
+  target과 revision-scoped ticket/stamp guide·catalog audit의 현재 물리 schema는 V8~V11에
+  있다. 나머지 모델의 컬럼·인덱스·삭제 방식은 migration 설계에서 확정한다.
 
 ## 논리 모델과 관계
 
@@ -46,15 +46,15 @@ v1 호환 전략은 결정 기록으로 관리한다.
 
 | 영역 | 후보 모델 | 핵심 관계와 불변식 |
 |---|---|---|
-| 회차·게시·운영일 | `Festival`, `FestivalRevision`, `FestivalDay`, `CrowdingState` | Festival 1:N Revision, Revision 1:N 운영 콘텐츠, FestivalDay 1:0..1 CrowdingState. 공개 서비스는 승인된 `published` revision만 읽는다. 혼잡도는 운영자 저장 단계와 수정 시각을 보관하고 KST 자정에 전날 값을 이월하지 않는다. |
+| 회차·게시·운영일 | `Festival`, `FestivalRevision`, `FestivalDay`, `CatalogRevisionAudit`, `CrowdingState` | Festival 1:N Revision, Revision 1:N 운영 콘텐츠, FestivalDay 1:0..1 CrowdingState. 공개 서비스는 정확히 하나의 `published` revision만 읽는다. 개발자 CLI는 complete draft만 import·validate·publish하며 archived revision을 새 revision으로 rollback한다. 혼잡도는 revision 밖의 운영 상태이고, 운영 시간 밖 저장을 허용하며 KST 자정에 전날 값을 이월하지 않는다. 같은 상태 저장은 수정 시각을 바꾸지 않는다. |
 | 공지 | `Notice`, `NoticeTranslation`, `NoticeLink`, `NoticeTemplate`, `NoticeTemplateTranslation` | Notice 1:N Translation/Link. `(notice_id, locale)`은 고유하며 한국어는 READY·본문 필수다. 외국어 READY/PENDING/FAILED와 사용자 노출은 분리한다. 공지의 물리 삭제·soft delete·보존 기간은 아직 결정하지 않았다. |
-| 굿즈 | `Goods`, `GoodsImage`, `GoodsColor`, `GoodsSize`, `GoodsOption`, `PaymentGuide`, `BankAccount` | 실제 제공 조합만 `GoodsOption`으로 만든다. `(goods_id, color_id, size_id)`는 고유하고 `availability`는 `ON_SALE` 또는 `SOLD_OUT`이며 `updated_at`을 남긴다. `allSoldOut`은 실제 조합이 하나 이상이고 모두 품절일 때의 파생값이다. 수량, 자동 품절, 입금 확인, 지급 완료는 저장하지 않는다. |
-| 공연 | `Artist`, `ArtistLink`, `ArtistSong`, `Performance`, `PerformanceArtist`, `ProhibitedItem` | 공연과 출연진은 `PerformanceArtist`로 연결해 여러 출연진과 표시 순서를 표현한다. Performance는 FestivalDay에 속한다. 여러 무대 지원용 `Stage` 후보는 공통 API 요구이지만 현재 Performance 계약 필드가 없어 확정 게이트로 남긴다. |
-| 부스·지도 | `Space`, `SpaceEvent`, `SpaceMenu`, `Place`, `Map`, `MapAssetVersion`, `MapPin`, `MapArea` | Space는 선택적으로 Place에 연결한다. MapAssetVersion 1:N MapPin으로 이미지와 좌표의 버전을 묶는다. MapPin은 `place_id` 또는 `area_id` 중 정확히 하나만 가진다. Place의 종류와 핀 target 종류를 같은 enum으로 합치지 않는다. |
-| 안내 설정 | `TicketGuide`, `StampGuide`, `StampReward`, `FestivalLink`, `BankAccount` | 축제/운영일에 귀속한 안내 콘텐츠만 저장한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 수령 인증 코드는 서버 비밀 설정에서만 검증하고 콘텐츠·사용자 이력 모델로 저장하지 않는다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
+| 굿즈 | `Goods`, `GoodsImage`, `GoodsColor`, `GoodsSize`, `GoodsOption`, `PaymentGuide`, `BankAccount` | 실제 제공 조합만 `GoodsOption`으로 만든다. `(goods_id, color_id, size_id)`는 고유하고 `availability`는 `ON_SALE` 또는 `SOLD_OUT`이며 `updated_at`을 남긴다. 신규 상품·조합은 `ON_SALE`로 시작한다. 색상·사이즈·조합 삭제 시 그 상태를 제거하고 남은 조합 상태를 보존한다. `allSoldOut`은 실제 조합이 하나 이상이고 모두 품절일 때의 파생값이다. 수량, 자동 품절, 입금 확인, 지급 완료는 저장하지 않는다. |
+| 공연 | `Artist`, `ArtistLink`, `ArtistSong`, `Performance`, `PerformanceArtist`, `ProhibitedItem` | 공연과 출연진은 `PerformanceArtist`로 연결해 여러 출연진과 표시 순서를 표현한다. Performance는 FestivalDay에 속하며 단일 무대만 사용한다. `Stage` aggregate와 stage field는 만들지 않는다. |
+| 부스·지도 | `Space`, `SpaceEvent`, `SpaceMenu`, `Place`, `Map`, `MapAssetVersion`, `MapPin`, `MapArea`, `MapPinFilterGroupTranslation` | Space는 선택적으로 Place에 연결한다. MapAssetVersion 1:N MapPin으로 이미지와 좌표의 버전을 묶는다. MapPin은 `place_id` 또는 `area_id` 중 정확히 하나만 가진다. `PLACE` 핀은 대분류 filter group 하나, `AREA` 핀은 null이며 항상 노출한다. Place의 종류와 핀 target 종류를 같은 enum으로 합치지 않는다. |
+| 안내 설정 | `TicketGuideRevision`, `StampGuideRevision`, `StampReward`, `FestivalLink`, `BankAccount` | 축제 revision에 귀속한 안내 콘텐츠만 snapshot으로 읽는다. 티켓 수령 부스와 외부인 티켓존은 한 Place로 모델링한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 수령 인증 코드는 서버 비밀 설정에서만 검증하고 콘텐츠·사용자 이력 모델로 저장하지 않는다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
 
-관리자 쓰기는 서버 권한 검증과 감사 이력이 필요하다. 다만 계정·역할·세션·권한 회수 모델은
-아직 확정되지 않았으므로 `AdminAuditEvent`의 actor 참조와 보관 정책은 인증 결정과 함께 설계한다.
+관리자 쓰기는 서버 권한 검증과 감사 이력이 필요하며 현재 관리자 인증은 구현되어 있다.
+계정·역할·세션·권한 회수와 `AdminAuditEvent`의 actor 참조·보관 정책은 현재 구현 경계를 따른다.
 비밀값과 개인정보는 콘텐츠 테이블, API 응답, 로그에 저장하지 않는다.
 
 ## ERD
@@ -79,24 +79,18 @@ v1 호환 전략은 결정 기록으로 관리한다.
 다음은 DDL 또는 API 동시성에 영향을 주므로 결정 전에는 기본값으로 추측하지 않는다.
 
 1. 세부 관리자 역할·감사 이력 보관과 긴급 권한 회수 운영
-2. 콘텐츠 revision 저장 단위, 캐시 무효화, 새로고침 없는 반영 방식과 최대 지연
-3. 공지 원문 변경 뒤 번역 무효화·재검토, 번역 엔진과 게시 이력
-4. 동일 혼잡도 재선택의 저장·수정 시각, 운영 시간 밖 저장 정책
-5. 굿즈 신규 옵션 최초 상태, 이미지 업로드 방식, 옵션 삭제 정책과 표시 순서
-6. 여러 무대의 식별자·지도 연결과 API v2 `Performance` stage field 추가 여부
-7. 지도 좌표·필터 분류, map version과 핀 target의 XOR 무결성 방식
-8. 실제 일정·계좌·가격·지도 자산·공식 번역 등 운영 자료
+2. 공지 원문 변경 뒤 번역 무효화·재검토, 번역 엔진과 게시 이력
+3. 굿즈 이미지 업로드 방식, 옵션 없는 상품 입력 방식과 표시 순서
+4. 실제 일정·계좌·가격·지도 자산·공식 번역 등 운영 자료
 
 상세 질문은 [Product 결정 대기](../product/decisions.md)와 [API v2 결정 대기](../../../api-v2/DECISIONS.md)에서
 추적한다.
 
 ## migration 착수 순서
 
-1. 적용 API 버전과 v1 호환 전략, 관리자 인증 경계를 확정한다.
-2. 완료된 V8 카탈로그에는 승인 콘텐츠를 별도 개발자 작업으로 넣고, 공개 전 번역·정렬·asset·핀·target 검증을 통과시킨다.
-3. 공지·번역, 굿즈·실제 제공 조합과 공연은 해당 제품·계약 결정이 난 뒤 Flyway migration으로 만든다. DB 제약으로 `(notice_id, locale)` 및 `(goods_id, color_id, size_id)` 중복을 막고, 수량·결제·사용자 참여 테이블을 추가하지 않는다.
-4. PerformanceArtist의 표시 순서와 아직 결정되지 않은 지도 필터 분류를 설계한 뒤 나머지 콘텐츠 migration을 추가한다.
-5. migration마다 rollback 또는 복구 방법, API 계약·예시·통합 테스트를 같은 변경에서 갱신한다.
+1. 승인 콘텐츠는 개발자 CLI manifest로 import하고, 공개 전 번역·locale별 정렬·asset·핀·filter group·target·guide 검증을 통과시킨다.
+2. 공지·번역, 굿즈·실제 제공 조합과 공연은 해당 제품·계약 결정이 난 뒤 Flyway migration으로 만든다. DB 제약으로 `(notice_id, locale)` 및 `(goods_id, color_id, size_id)` 중복을 막고, 수량·결제·사용자 참여 테이블을 추가하지 않는다.
+3. migration마다 운영 DB 보존, rollback 또는 복구 방법, API 계약·예시·통합 테스트를 같은 변경에서 갱신한다.
 
 ## 검증
 
@@ -105,5 +99,5 @@ v1 호환 전략은 결정 기록으로 관리한다.
 - 같은 날 생성된 다섯 HTML은 Chrome에서 1440×900, 1600×1000, 1920×1080,
   2048×1320 해상도의 light/dark 화면으로 확인했다. 가로·세로 overflow와 Viewer 겹침이 없고,
   1440×900 light 스크린샷을 시각 검토했다.
-- 부스·지도 실제 구현은 V8과 [부스·지도 공개 카탈로그](spaces-map-backend.md)에 기록한다.
+- 부스·지도 실제 구현은 V8~V11과 [부스·지도 공개 카탈로그](spaces-map-backend.md)에 기록한다.
   이 문서의 나머지 모델은 계속 설계 검토 대상이며 운영 자료·DB 연결 값은 포함하지 않는다.

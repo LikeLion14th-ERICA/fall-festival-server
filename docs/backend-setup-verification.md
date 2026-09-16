@@ -8,7 +8,7 @@
 - 시작 시 로컬 `main`과 원격 `chore/import-festival-project`는 모두
   `38ce23b2439de0b6bc96cd49d3ddb8958a092acd`였다.
 - 로컬에 원격이 없어 지정 저장소를 `origin`으로 연결하고 fetch했다.
-- 작업 전 `핵심 기능 API 명세서 v1.md`에 미커밋 수정이 있었다. 이 작업의 수정과
+- 작업 전 당시 레거시 API 계약 문서에 미커밋 수정이 있었다. 이 작업의 수정과
   커밋에서 제외했다.
 - 작업 브랜치: `build/spring-boot-setup`.
 - 사용자 요청에 따라 위 커밋을 원격 `main`으로 push했다. 코드나 이력을 덮어쓰지 않았다.

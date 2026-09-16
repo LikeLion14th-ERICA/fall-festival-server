@@ -13,6 +13,7 @@ import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.domain.StampGuide;
 import dev.espero.festival.domain.TicketGuideConfig;
 import dev.espero.festival.domain.PublishedFestivalContext;
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.context.annotation.Profile;
@@ -44,46 +46,80 @@ import org.springframework.transaction.annotation.Transactional;
 public class CatalogSnapshotStore {
 
     public static final String PUBLIC_LOCALE = "ko";
+    private static final Set<String> FILTER_GROUPS = Set.of(
+        "STUDENT_COUNCIL",
+        "EXPERIENCE",
+        "CONVENIENCE",
+        "FOOD_AND_BEVERAGE",
+        "PERFORMANCE"
+    );
     private static final Pattern API_ID_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
 
     private final NamedParameterJdbcTemplate jdbc;
     private final TicketGuideStore ticketGuideStore;
+    private final StampGuideStore stampGuideStore;
     private final FestivalContextStore festivalContextStore;
     private final FestivalProperties festivalProperties;
 
     public CatalogSnapshotStore(
         NamedParameterJdbcTemplate jdbc,
         TicketGuideStore ticketGuideStore,
+        StampGuideStore stampGuideStore,
         FestivalContextStore festivalContextStore,
         FestivalProperties festivalProperties
     ) {
         this.jdbc = jdbc;
         this.ticketGuideStore = ticketGuideStore;
+        this.stampGuideStore = stampGuideStore;
         this.festivalContextStore = festivalContextStore;
         this.festivalProperties = festivalProperties;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public CatalogSnapshot loadPublished() {
-        FestivalContext context = loadPublishedContext();
+        return loadRevision(loadPublishedContext().revisionId());
+    }
+
+    /**
+     * Loads and validates any revision, including a draft. The caller can use
+     * this method before publication so a malformed manifest never becomes
+     * visible. The revision state itself is deliberately not restricted here;
+     * loadPublished() is the only public-read entry point that requires the
+     * published pointer.
+     */
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public CatalogSnapshot loadRevision(UUID revisionId) {
+        FestivalContext context = loadRevisionContext(revisionId);
+        return load(context);
+    }
+
+    private CatalogSnapshot load(FestivalContext context) {
         List<CatalogMap> maps = loadMaps(context);
         List<Place> places = loadPlaces(context);
         Map<String, List<String>> events = loadEvents(context);
         Map<String, List<Money>> menus = loadMenus(context);
         List<Space> spaces = loadSpaces(context, events, menus);
         Map<PinKey, List<Pin>> pins = loadPins(context, maps);
-        TicketGuideConfig ticketGuideConfig = ticketGuideStore.find(context.revisionId()).orElse(null);
+        TicketGuideConfig ticketGuideConfig = ticketGuideStore.find(context.revisionId()).orElseThrow(
+            () -> new CatalogIntegrityException("Catalog revision is missing its ticket guide.")
+        );
+        StampGuide stampGuide = stampGuideStore.find(context.revisionId()).orElseThrow(
+            () -> new CatalogIntegrityException("Catalog revision is missing its stamp guide.")
+        );
         MapTarget ticketMapTarget = loadTicketMapTarget(context);
 
         verifySingleOverview(maps);
         verifySpaceContent(spaces);
         verifyPinTargets(maps, places, pins);
+        verifyPinFilterGroups(pins);
         verifySpaceTargets(spaces, maps, places, pins);
         verifyTicketTarget(ticketMapTarget, maps, places, pins);
-        verifyPublicContract(context, spaces, maps, places, pins, ticketMapTarget, ticketGuideConfig);
+        verifyPublicContract(context, spaces, maps, places, pins, ticketMapTarget, ticketGuideConfig, stampGuide);
         verifyVersionHistory(context);
 
-        return new CatalogSnapshot(context, spaces, maps, places, pins, ticketGuideConfig, ticketMapTarget);
+        return new CatalogSnapshot(
+            context, spaces, maps, places, pins, ticketGuideConfig, stampGuide, ticketMapTarget
+        );
     }
 
     private FestivalContext loadPublishedContext() {
@@ -98,6 +134,29 @@ public class CatalogSnapshotStore {
             context.revisionNumber(),
             context.timezone()
         );
+    }
+
+    private FestivalContext loadRevisionContext(UUID revisionId) {
+        if (revisionId == null) {
+            throw new CatalogIntegrityException("A revision id is required.");
+        }
+        List<FestivalContext> contexts = jdbc.query("""
+            SELECT f.id AS festival_id, f.timezone, r.id AS revision_id, r.revision_number
+            FROM festival_revisions r
+            JOIN festivals f ON f.id = r.festival_id
+            WHERE r.id = :revisionId
+            """, new MapSqlParameterSource("revisionId", revisionId), (resultSet, rowNumber) ->
+            new FestivalContext(
+                resultSet.getObject("festival_id", UUID.class).toString(),
+                resultSet.getObject("revision_id", UUID.class),
+                resultSet.getLong("revision_number"),
+                java.time.ZoneId.of(resultSet.getString("timezone"))
+            )
+        );
+        if (contexts.size() != 1) {
+            throw new CatalogIntegrityException("The requested festival revision does not exist.");
+        }
+        return contexts.getFirst();
     }
 
     private List<CatalogMap> loadMaps(FestivalContext context) {
@@ -255,8 +314,8 @@ public class CatalogSnapshotStore {
             .collect(java.util.stream.Collectors.toMap(CatalogMap::id, map -> map));
         Map<PinKey, List<Pin>> pins = new LinkedHashMap<>();
         jdbc.query("""
-            SELECT p.map_id, p.map_version, p.id, p.category, p.x, p.y,
-                   p.place_id, p.area_id, pt.label, a.target_map_id
+            SELECT p.map_id, p.map_version, p.id, p.category, p.filter_group, p.x, p.y,
+                   p.place_id, p.area_id, pt.label, fgt.label AS filter_group_label, a.target_map_id
             FROM map_pins p
             JOIN maps m
               ON m.festival_revision_id = p.festival_revision_id
@@ -268,6 +327,10 @@ public class CatalogSnapshotStore {
              AND pt.map_version = p.map_version
              AND pt.pin_id = p.id
              AND pt.locale = :locale
+            LEFT JOIN map_pin_filter_group_translations fgt
+              ON fgt.festival_revision_id = p.festival_revision_id
+             AND fgt.filter_group = p.filter_group
+             AND fgt.locale = :locale
             LEFT JOIN map_areas a
               ON a.festival_revision_id = p.festival_revision_id
              AND a.id = p.area_id
@@ -276,6 +339,17 @@ public class CatalogSnapshotStore {
             """, parameters(context), resultSet -> {
             require(resultSet.getString("label") != null, "Published map pin is missing a Korean label.");
             String placeId = resultSet.getString("place_id");
+            String filterGroup = resultSet.getString("filter_group");
+            String filterGroupLabel = resultSet.getString("filter_group_label");
+            if (placeId == null) {
+                require(filterGroup == null,
+                    "Published AREA pin must not have a filter group.");
+                require(filterGroupLabel == null,
+                    "Published AREA pin must not have a filter group label.");
+            } else if (filterGroup != null) {
+                require(filterGroupLabel != null,
+                    "Published PLACE pin filter group is missing a Korean label.");
+            }
             PinTarget target = placeId != null
                 ? new PinTarget("PLACE", placeId)
                 : new PinTarget("AREA", resultSet.getString("target_map_id"));
@@ -289,6 +363,8 @@ public class CatalogSnapshotStore {
             pins.computeIfAbsent(key, ignored -> new ArrayList<>()).add(new Pin(
                 resultSet.getString("id"),
                 resultSet.getString("category"),
+                filterGroup,
+                filterGroupLabel,
                 resultSet.getString("label"),
                 resultSet.getBigDecimal("x"),
                 resultSet.getBigDecimal("y"),
@@ -300,9 +376,9 @@ public class CatalogSnapshotStore {
 
     private MapTarget loadTicketMapTarget(FestivalContext context) {
         List<MapTarget> targets = jdbc.query("""
-            SELECT map_id, place_id, pin_id, map_version
-            FROM ticket_guide
-            WHERE id = 1 AND festival_revision_id = :revisionId
+            SELECT current.map_id, current.place_id, current.pin_id, current.map_version
+            FROM ticket_guide_revisions current
+            WHERE current.id = 1 AND current.festival_revision_id = :revisionId
             """, parameters(context), (resultSet, rowNumber) -> targetOrNull(resultSet));
         if (targets.isEmpty()) {
             return null;
@@ -345,6 +421,36 @@ public class CatalogSnapshotStore {
         }
     }
 
+    /**
+     * V10 is rolled out additively. A pre-V10 published revision has null for
+     * every filter group and remains readable; once a revision starts using
+     * the field, every PLACE pin must carry a supported group and its locale
+     * label. This prevents a partial new snapshot without breaking an
+     * already-running V8 catalog during the migration window.
+     */
+    private void verifyPinFilterGroups(Map<PinKey, List<Pin>> pins) {
+        List<Pin> allPins = pins.values().stream().flatMap(List::stream).toList();
+        boolean configured = allPins.stream().anyMatch(pin -> pin.filterGroup() != null);
+        if (!configured) {
+            return;
+        }
+        Map<String, String> labels = new HashMap<>();
+        for (Pin pin : allPins) {
+            if (pin.target().kind().equals("PLACE")) {
+                require(pin.filterGroup() != null && FILTER_GROUPS.contains(pin.filterGroup()),
+                    "Published PLACE pin must have a supported filter group.");
+                require(pin.filterGroupLabel() != null && !pin.filterGroupLabel().isBlank(),
+                    "Published PLACE pin filter group must have a Korean label.");
+                String previous = labels.putIfAbsent(pin.filterGroup(), pin.filterGroupLabel());
+                require(previous == null || previous.equals(pin.filterGroupLabel()),
+                    "A filter group must use one Korean label in a published revision.");
+            } else {
+                require(pin.filterGroup() == null && pin.filterGroupLabel() == null,
+                    "Published AREA pin must not have a filter group.");
+            }
+        }
+    }
+
     private void verifySpaceTargets(
         List<Space> spaces,
         List<CatalogMap> maps,
@@ -374,7 +480,8 @@ public class CatalogSnapshotStore {
         List<Place> places,
         Map<PinKey, List<Pin>> pins,
         MapTarget ticketMapTarget,
-        TicketGuideConfig ticketGuideConfig
+        TicketGuideConfig ticketGuideConfig,
+        StampGuide stampGuide
     ) {
         requireApiId(context.festivalId(), "Meta.festivalId");
         for (Space space : spaces) {
@@ -405,7 +512,8 @@ public class CatalogSnapshotStore {
             }
         }
         verifyMapTargetIds(ticketMapTarget, "TicketGuide.mapTarget");
-        verifyTicketTransferLink(ticketGuideConfig);
+        verifyTicketGuide(ticketGuideConfig);
+        verifyStampGuide(stampGuide);
     }
 
     private void verifyImage(Image image, String field) {
@@ -429,7 +537,7 @@ public class CatalogSnapshotStore {
     }
 
     private static void requireText(String value, String field) {
-        require(value != null && !value.isEmpty(), field + " must contain at least one character.");
+        require(value != null && !value.isBlank(), field + " must contain at least one character.");
     }
 
     private static void requireUriReference(String value, String field) {
@@ -448,14 +556,80 @@ public class CatalogSnapshotStore {
         require(value.startsWith("https://"), field + " must start with https://.");
     }
 
-    private static void verifyTicketTransferLink(TicketGuideConfig config) {
-        if (config == null || (config.transferLinkLabel() == null && config.transferLinkUrl() == null)) {
+    private static void verifyTicketGuide(TicketGuideConfig config) {
+        require(config != null, "TicketGuide is required.");
+        require(config.updatedAt() != null, "TicketGuide.updatedAt is required.");
+        require(config.unitPriceAmount() == null || config.unitPriceAmount() >= 0,
+            "TicketGuide.unitPrice must not be negative.");
+        requireAllText(config.instructions(), "TicketGuide.instructions");
+        requireTogether(
+            config.accountBankName(), config.accountNumber(), config.accountHolder(), "TicketGuide.account"
+        );
+        if (config.accountBankName() != null) {
+            requireText(config.accountBankName(), "TicketGuide.account.bankName");
+            requireText(config.accountNumber(), "TicketGuide.account.number");
+            requireText(config.accountHolder(), "TicketGuide.account.holder");
+        }
+        if (config.transferLinkLabel() == null && config.transferLinkUrl() == null) {
+            verifyTicketSchedule(config);
             return;
         }
         require(config.transferLinkLabel() != null && config.transferLinkUrl() != null,
             "TicketGuide.transferLink must contain both label and url.");
         requireText(config.transferLinkLabel(), "TicketGuide.transferLink.label");
         requireHttpsUri(config.transferLinkUrl(), "TicketGuide.transferLink.url");
+        verifyTicketSchedule(config);
+    }
+
+    private static void verifyTicketSchedule(TicketGuideConfig config) {
+        boolean anySchedule = config.festivalStartDate() != null || config.festivalEndDate() != null
+            || config.dailyTransferOpenTime() != null || config.dailyTransferCloseTime() != null
+            || config.dailyPickupOpenTime() != null || config.dailyPickupCloseTime() != null;
+        if (!anySchedule) {
+            return;
+        }
+        require(config.hasSchedule(), "TicketGuide schedule must be complete.");
+        require(!config.festivalStartDate().isAfter(config.festivalEndDate()),
+            "TicketGuide festival dates are reversed.");
+        require(config.dailyTransferOpenTime().isBefore(config.dailyTransferCloseTime()),
+            "TicketGuide transfer times are reversed.");
+        require(config.dailyPickupOpenTime().isBefore(config.dailyPickupCloseTime()),
+            "TicketGuide pickup times are reversed.");
+    }
+
+    private static void verifyStampGuide(StampGuide guide) {
+        require(guide != null, "StampGuide is required.");
+        require(guide.updatedAt() != null, "StampGuide.updatedAt is required.");
+        requireText(guide.title(), "StampGuide.title");
+        requireText(guide.rewardName(), "StampGuide.reward.name");
+        requireText(guide.rewardNotice(), "StampGuide.reward.notice");
+        requireOptionalText(guide.rewardLocationText(), "StampGuide.reward.locationText");
+        requireOptionalText(guide.rewardHoursText(), "StampGuide.reward.hoursText");
+        requireOptionalText(guide.qrValue(), "StampGuide.qrValue");
+        requireAllText(guide.instructions(), "StampGuide.instructions");
+        for (java.time.LocalDate date : guide.dates()) {
+            require(date != null, "StampGuide.dates must not contain null.");
+        }
+        require(new java.util.HashSet<>(guide.dates()).size() == guide.dates().size(),
+            "StampGuide.dates must not contain duplicates.");
+    }
+
+    private static void requireTogether(String first, String second, String third, String field) {
+        require((first == null) == (second == null) && (second == null) == (third == null),
+            field + " fields must be supplied together.");
+    }
+
+    private static void requireOptionalText(String value, String field) {
+        if (value != null) {
+            requireText(value, field);
+        }
+    }
+
+    private static void requireAllText(List<String> values, String field) {
+        require(values != null, field + " is required.");
+        for (String value : values) {
+            requireText(value, field);
+        }
     }
 
     private void verifyTicketTarget(
@@ -505,9 +679,12 @@ public class CatalogSnapshotStore {
                    a.image_url, a.image_width, a.image_height
             FROM map_asset_versions a
             JOIN festival_revisions r ON r.id = a.festival_revision_id
-            WHERE r.festival_id = :festivalId AND r.state IN ('published', 'archived')
+            WHERE r.festival_id = :festivalId
+              AND (r.state IN ('published', 'archived') OR r.id = :revisionId)
             ORDER BY a.map_id, a.version, a.festival_revision_id
-            """, new MapSqlParameterSource("festivalId", festivalId), resultSet -> {
+            """, new MapSqlParameterSource()
+                .addValue("festivalId", festivalId)
+                .addValue("revisionId", context.revisionId()), resultSet -> {
             RevisionVersionKey revisionVersion = new RevisionVersionKey(
                 resultSet.getObject("festival_revision_id", UUID.class),
                 resultSet.getString("map_id"),
@@ -532,9 +709,12 @@ public class CatalogSnapshotStore {
             LEFT JOIN map_areas area
               ON area.festival_revision_id = p.festival_revision_id
              AND area.id = p.area_id
-            WHERE r.festival_id = :festivalId AND r.state IN ('published', 'archived')
+            WHERE r.festival_id = :festivalId
+              AND (r.state IN ('published', 'archived') OR r.id = :revisionId)
             ORDER BY p.map_id, p.map_version, p.festival_revision_id, p.id
-            """, new MapSqlParameterSource("festivalId", festivalId), resultSet -> {
+            """, new MapSqlParameterSource()
+                .addValue("festivalId", festivalId)
+                .addValue("revisionId", context.revisionId()), resultSet -> {
             RevisionVersionKey key = new RevisionVersionKey(
                 resultSet.getObject("festival_revision_id", UUID.class),
                 resultSet.getString("map_id"),

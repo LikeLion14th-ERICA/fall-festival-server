@@ -1,5 +1,7 @@
+const NOTICE_TRANSLATION_LOCALES=['ko','en','zh-Hans','ja'];
+
 export function initializeAdmin(state){
-  state.languages=['ko','en'];state.inventory={};
+  state.languages=['ko'];state.translationLocales=NOTICE_TRANSLATION_LOCALES;state.inventory={};
   for(const g of state.goods){
     g.images=[g.image];g.colors=g.colorImages.map(c=>({id:c.colorId,name:c.colorName,images:[c.image]}));
     g.options=[{colorId:'color-a',sizeId:'size-m'},{colorId:'color-a',sizeId:'size-l'},{colorId:'color-b',sizeId:'size-m'}];
@@ -40,26 +42,25 @@ export function adminExecute(op,state,ctx){
       if(!body.images.length)failure(409,'IMAGE_CONFIGURATION_UNRESOLVED','상품 이미지 입력 구성은 합의 대기입니다.');
       for(const key of ['colors','sizes']){
         if(new Set(body[key].map(x=>x.id)).size!==body[key].length)failure(422,'DUPLICATE_OPTION','옵션 ID가 중복됩니다.');
-        if(old&&old[key].some(x=>!body[key].some(y=>y.id===x.id)))failure(409,'OPTION_DELETION_UNRESOLVED','옵션 삭제 정책은 합의 대기입니다.');
       }
       const stock=structuredClone(state.inventory[old?.id]||{updatedAt:null,statuses:{}});
       const keys=body.options.map(v=>`${v.colorId}/${v.sizeId}`);
       if(new Set(keys).size!==keys.length)failure(422,'DUPLICATE_OPTION','판매 조합이 중복됩니다.');
       if(body.options.some(v=>!body.colors.some(c=>c.id===v.colorId)||!body.sizes.some(z=>z.id===v.sizeId)))failure(422,'INVALID_OPTION','등록된 색상·사이즈만 조합할 수 있습니다.');
-      if(Object.keys(stock.statuses).some(k=>!keys.includes(k)))failure(409,'OPTION_DELETION_UNRESOLVED','옵션 삭제 정책은 미정입니다.');
+      const removed=Object.keys(stock.statuses).filter(key=>!keys.includes(key));
+      for(const key of removed)delete stock.statuses[key];
       const added=keys.filter(k=>!Object.hasOwn(stock.statuses,k));
-      const initial={'new-option-on-sale':'ON_SALE','new-option-sold-out':'SOLD_OUT'}[scenario];
-      if(added.length&&!initial)failure(409,'INITIAL_AVAILABILITY_UNRESOLVED','신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.');
-      for(const k of added)stock.statuses[k]=initial;
+      for(const key of added)stock.statuses[key]='ON_SALE';
       const goodsId=old?.id||`goods-created-${state.nextId++}`;
       const g={...structuredClone(body),id:goodsId,image:body.images[0]||null,colorImages:body.colors.flatMap(c=>c.images.map(image=>({colorId:c.id,colorName:c.name,image})))};
-      mutate();state.inventory[goodsId]=stock;if(old)state.goods[state.goods.indexOf(old)]=g;else state.goods.push(g);
+      const changedAt=mutate();if(added.length||removed.length)stock.updatedAt=changedAt;
+      state.inventory[goodsId]=stock;if(old)state.goods[state.goods.indexOf(old)]=g;else state.goods.push(g);
       return {data:g,status:old?200:201};
     }
     case 'previewNoticeTranslation':{
       if(!body.title.trim()||!body.body.trim())failure(422,'KOREAN_REQUIRED','한국어 제목과 본문이 필요합니다.');
       const translations={ko:{...body,status:'READY'}};
-      for(const locale of state.languages.filter(l=>l!=='ko')){
+      for(const locale of state.translationLocales.filter(l=>l!=='ko')){
         const failed=locale==='en'?scenario==='english-failed':scenario==='partial-translation';
         translations[locale]=failed?{title:null,body:null,status:'FAILED'}:{title:`[MOCK ${locale}] ${body.title}`,body:`[MOCK ${locale}] ${body.body}`,status:'READY'};
       }
@@ -77,5 +78,5 @@ export function validateNotice(body,state,{scenario,failure}){
     // Inactive translations may be prepared, but public locale selection remains gated.
     if(t.status==='READY'&&!ready(t))failure(422,'TRANSLATION_CONTENT_REQUIRED','완료 번역은 제목과 본문이 필요합니다.');
   }
-  for(const locale of new Set(['en',...state.languages]))if(!body.translations[locale])body.translations[locale]={title:null,body:null,status:'PENDING'};
+  for(const locale of state.translationLocales)if(!body.translations[locale])body.translations[locale]={title:null,body:null,status:'PENDING'};
 }

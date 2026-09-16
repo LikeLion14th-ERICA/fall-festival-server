@@ -1,6 +1,7 @@
 package dev.espero.festival.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -170,5 +171,23 @@ class TicketGuideControllerTest {
         ));
         assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
         assertThat(response.meta().revision()).isEqualTo(7);
+    }
+
+    @Test
+    void distinguishesAnUnreadyKnownLocaleFromAnUnknownLocale() {
+        TicketGuideController controller = controllerAt("2030-10-01T09:00:00Z", scheduledConfig());
+        HttpServletRequest knownButUnready = mock(HttpServletRequest.class);
+        HttpServletRequest unknown = mock(HttpServletRequest.class);
+        when(knownButUnready.getParameterMap()).thenReturn(Map.of("locale", new String[] {"en"}));
+        when(unknown.getParameterMap()).thenReturn(Map.of("locale", new String[] {"xx"}));
+        when(knownButUnready.getParameter("locale")).thenReturn("en");
+        when(unknown.getParameter("locale")).thenReturn("xx");
+
+        assertThatThrownBy(() -> controller.getTicketGuide(knownButUnready))
+            .isInstanceOf(ApiException.class)
+            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("LOCALE_NOT_READY"));
+        assertThatThrownBy(() -> controller.getTicketGuide(unknown))
+            .isInstanceOf(ApiException.class)
+            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("INVALID_QUERY"));
     }
 }

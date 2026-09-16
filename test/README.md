@@ -10,7 +10,7 @@ Next.js PWA와 Spring Boot API를 동일한 HTTPS origin으로 서비스하는 �
 휴대전화 HTTPS
       |
     Caddy :80/:443
-      |-- /api/* --> Spring Boot :8080 --> PostgreSQL :5432
+	  |-- /test-api/* --> Spring Boot :8080 --> PostgreSQL :5432
       `-- 그 외 ----> Next.js :3000
 
 Spring Boot --> 브라우저별 Web Push endpoint (HTTPS outbound)

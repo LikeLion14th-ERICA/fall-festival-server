@@ -5,6 +5,27 @@ export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
 const MOCK_STAMP_RECEIPT_CODE = 'MOCK-RECEIPT-CODE';
 const MAP_VERSION = 'mock-map-1';
+const PIN_FILTER_GROUP_ORDER = ['STUDENT_COUNCIL','EXPERIENCE','CONVENIENCE','FOOD_AND_BEVERAGE','PERFORMANCE'];
+const PIN_FILTER_GROUP_LABELS = {
+  ko:{STUDENT_COUNCIL:'총학생회 관련',EXPERIENCE:'체험',CONVENIENCE:'편의 시설',FOOD_AND_BEVERAGE:'F&B',PERFORMANCE:'공연'},
+  en:{STUDENT_COUNCIL:'Student Council',EXPERIENCE:'Experience',CONVENIENCE:'Convenience',FOOD_AND_BEVERAGE:'Food & Beverage',PERFORMANCE:'Performance'},
+  'zh-Hans':{STUDENT_COUNCIL:'学生会相关',EXPERIENCE:'体验',CONVENIENCE:'便利设施',FOOD_AND_BEVERAGE:'餐饮',PERFORMANCE:'演出'},
+  ja:{STUDENT_COUNCIL:'学生会関連',EXPERIENCE:'体験',CONVENIENCE:'便利施設',FOOD_AND_BEVERAGE:'飲食',PERFORMANCE:'公演'},
+};
+const pinFilterGroup = (pin) => {
+  if (pin.target.kind === 'AREA') return null;
+  return ({
+    booth:'EXPERIENCE',pub:'EXPERIENCE',market:'EXPERIENCE',
+    information:'STUDENT_COUNCIL',toilet:'CONVENIENCE',smoking:'CONVENIENCE',
+    stage:'PERFORMANCE',gate:'PERFORMANCE','student-zone':'PERFORMANCE','visitor-zone':'PERFORMANCE',
+    'food-truck':'FOOD_AND_BEVERAGE','photo-booth':'EXPERIENCE',ticket:'PERFORMANCE',
+  }[pin.category] || 'EXPERIENCE');
+};
+const pinFilterLabel = (group,locale) => {
+  const label=PIN_FILTER_GROUP_LABELS[locale]?.[group];
+  if(!label)throw new Error(`Missing approved mock filter label for ${locale}/${group}`);
+  return label;
+};
 const image = (alt=IMAGE.alt,variant='default') => ({...structuredClone(IMAGE),url:variant==='default'?IMAGE.url:`${IMAGE.url}?variant=${encodeURIComponent(variant)}`,alt});
 const mockImage = (kind,id,name) => image(`개발용 가상 ${kind} ${name} 이미지 · 실제 축제 자료 아님`,`${kind}-${id}`);
 const money = amount => ({ amount, currency: 'KRW' });
@@ -177,6 +198,7 @@ export class ApiFailure extends Error {
   constructor(status,code,message,details=[]) { super(message);Object.assign(this,{status,code,details}); }
 }
 export function failure(status,code,message,details=[]) { throw new ApiFailure(status,code,message,details); }
+const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
 function find(items,id) { const item=items.find(x=>x.id===id);if(!item)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');return structuredClone(item); }
 const defaultDate = date => date < DATES[0] ? DATES[0] : date > DATES.at(-1) ? DATES.at(-1) : date;
 function crowdInfo(state,now,scenario,locale='ko') {
@@ -188,15 +210,15 @@ function crowdInfo(state,now,scenario,locale='ko') {
   const stored=scenario==='unmodified'||today!==operatingDay?null:state.crowding[operatingDay];
   const status=+new Date(now)<+new Date(opensAt)?'BEFORE_OPEN':+new Date(now)>=+new Date(closesAt)?'CLOSED':stored?.level||'RELAXED';
   const colors={RELAXED:'green',MODERATE:'orange',CROWDED:'red',FULL:'black'};
-  const messages={BEFORE_OPEN:'오늘 재학생존 입장은 12:00에 시작해요',RELAXED:'재학생존의 공간이 많이 남았어요.',MODERATE:'재학생존의 공간이 절반 이상 찼어요.',CROWDED:'재학생존이 많이 혼잡해요.',FULL:'재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.',CLOSED:'오늘 재학생존 운영이 종료됐어요'};
+  const messages={BEFORE_OPEN:'오늘 재학생존 입장은 12:00에 시작해요',RELAXED:'재학생존의 공간이 많이 남았어요.',MODERATE:'재학생존의 공간이 절반 정도 찼어요.',CROWDED:'재학생존이 많이 혼잡해요.',FULL:'재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.',CLOSED:'오늘 재학생존 운영이 종료됐어요'};
   const active=!!colors[status];
   messages.BEFORE_OPEN=`오늘 재학생존 입장은 ${hours.opensAt}에 시작해요`;
-  return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:locale==='ko'?messages[status]:`Mock crowd status: ${status}`,updatedAt:stored?.updatedAt||null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
+  return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:locale==='ko'?messages[status]:`Mock crowd status: ${status}`,updatedAt:active?stored?.updatedAt||null:null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
 }
 export function scenarioTime(scenario,now) {
   return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00',overnight:'2030-10-02T01:00:00+09:00'})[scenario]||now;
 }
-// Same locale policy in the mock: ko/en are ready; non-notice translation failure never silently falls back.
+// Korean is the only ready default. Controlled mock scenarios can enable complete fictional translations.
 function localize(value,locale) {
   if(locale==='ko')return value;
   const translatable=new Set(['name','title','label','description','operator','hoursText','locationText','experience','usage','alt','message','notice','introduction','colorName']);
@@ -209,8 +231,9 @@ function localize(value,locale) {
 }
 export function execute(op,state,{params={},query={},body,scenario='normal',now=MOCK_NOW}={}) {
   now=scenarioTime(scenario,now);
+  if(scenario==='all-languages'||scenario==='partial-translation')state.languages=['ko','en','zh-Hans','ja'];
   const locale=query.locale||'ko';
-  if(!state.languages.includes(locale))failure(400,'LOCALE_NOT_READY','준비 완료 언어만 요청할 수 있습니다.');
+  if(!state.languages.includes(locale))failure(400,KNOWN_LOCALES.has(locale)?'LOCALE_NOT_READY':'INVALID_QUERY',KNOWN_LOCALES.has(locale)?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
   if(scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
   if(scenario==='not-found')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
   if(scenario==='already-deleted')failure(409,'ALREADY_DELETED','이미 삭제된 공지입니다.');
@@ -219,7 +242,6 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   const date=dayKst(now);
   let data,status=200;
   const mutate=()=>{state.revision++;now=isoKst(+new Date(now)+state.revision);return now;};
-  if(scenario==='all-languages'||scenario==='partial-translation')state.languages=['ko','en','zh-Hans','ja'];
   const getAvailability=goodsId=>inventoryFor(state,goodsId,{failure,sold});
   const extra=adminExecute(op,state,{params,body,scenario,mutate,failure,DATES});
   if(extra)return {status:extra.status||200,data:extra.data,now,locale};
@@ -227,10 +249,9 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getConfig':data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:DATES,defaultDate:empty?null:defaultDate(date)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}],welcomeDay:scenario==='welcome-ready'?link('에리카 웰컴 데이'):null}};break;
     case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale);break;
     case 'putAdminCrowding':{
-      const before=crowdInfo(state,now,scenario);
       if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');
-      if(['BEFORE_OPEN','CLOSED'].includes(before.status))failure(409,'OUTSIDE_OPERATING_HOURS','운영 시간 밖 변경 정책은 미정입니다.');
-      if(before.status!==body.level)state.crowding[before.operatingDay]={level:body.level,updatedAt:mutate()};
+      const savedDay=dayKst(now),stored=state.crowding[savedDay];
+      if(stored?.level!==body.level)state.crowding[savedDay]={level:body.level,updatedAt:mutate()};
       data=crowdInfo(state,now,scenario);break;
     }
     case 'getNotices':{
@@ -271,7 +292,15 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getSpace':data=find(state.spaces,params.spaceId);if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null});break;
     case 'getMaps':data={items:empty?[]:structuredClone(state.maps),overviewId:empty?null:'map-overview'};break;
     case 'getMap':data=find(state.maps,params.mapId);break;
-    case 'getPins':{const m=find(state.maps,params.mapId);if(query.mapVersion!==m.version)failure(409,'MAP_VERSION_MISMATCH','지도 이미지 버전이 다릅니다.');data={mapId:m.id,mapVersion:m.version,items:empty?[]:structuredClone(state.pins[m.id])};break;}
+    case 'getPins':{
+      const m=find(state.maps,params.mapId);
+      if(query.mapVersion!==m.version)failure(409,'MAP_VERSION_MISMATCH','지도 이미지 버전이 다릅니다.');
+      const items=empty?[]:structuredClone(state.pins[m.id]).map(pin=>({...pin,filterGroup:pinFilterGroup(pin)}));
+      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE').map(pin=>pin.filterGroup))]
+        .sort((a,b)=>PIN_FILTER_GROUP_ORDER.indexOf(a)-PIN_FILTER_GROUP_ORDER.indexOf(b));
+      data={mapId:m.id,mapVersion:m.version,filters:groups.map(id=>({id,label:pinFilterLabel(id,locale)})),items};
+      break;
+    }
     case 'getPlace':data=find(state.places,params.placeId);if(missing)Object.assign(data,{hoursText:null,description:null,usage:null});break;
     case 'getTicketGuide':{
       const unconfigured=scenario==='unconfigured';

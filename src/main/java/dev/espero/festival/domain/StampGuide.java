@@ -14,4 +14,10 @@ public record StampGuide(
     String rewardNotice,
     String qrValue,
     Instant updatedAt
-) {}
+) {
+
+    public StampGuide {
+        dates = List.copyOf(dates);
+        instructions = List.copyOf(instructions);
+    }
+}

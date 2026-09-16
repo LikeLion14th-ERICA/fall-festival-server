@@ -30,15 +30,16 @@ public class StampGuideStore {
         this.jdbc = jdbc;
     }
 
+    /** Loads the immutable guide row belonging to one revision. */
     public Optional<StampGuide> find(UUID festivalRevisionId) {
         return jdbc.query("""
-            SELECT title, dates, instructions, reward_name, reward_location_text,
-                   reward_hours_text, reward_notice, qr_value, updated_at
-            FROM stamp_guide
-            WHERE id = 1
-              AND festival_revision_id = :festivalRevisionId
-            """,
-            new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
+            SELECT current.title, current.dates, current.instructions,
+                   current.reward_name, current.reward_location_text,
+                   current.reward_hours_text, current.reward_notice,
+                   current.qr_value, current.updated_at
+            FROM stamp_guide_revisions current
+            WHERE current.id = 1 AND current.festival_revision_id = :festivalRevisionId
+            """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
             (resultSet, rowNumber) -> map(resultSet)
         ).stream().findFirst();
     }

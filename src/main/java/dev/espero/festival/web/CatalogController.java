@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v2")
 public class CatalogController {
 
-    private static final String LOCALE = "ko";
+    private static final String LOCALE = PublicContentLocale.KOREAN;
 
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
@@ -99,7 +99,10 @@ public class CatalogController {
         List<CatalogResponses.Pin> items = snapshot.pinsFor(mapId, requestedVersion).stream()
             .map(CatalogController::pinResponse)
             .toList();
-        return new ApiResponse<>(new CatalogResponses.Pins(mapId, requestedVersion, items), meta(snapshot, request));
+        List<CatalogResponses.PinFilter> filters = snapshot.filtersFor(mapId, requestedVersion).stream()
+            .map(filter -> new CatalogResponses.PinFilter(filter.id(), filter.label()))
+            .toList();
+        return new ApiResponse<>(new CatalogResponses.Pins(mapId, requestedVersion, filters, items), meta(snapshot, request));
     }
 
     @GetMapping("/places/{placeId}")
@@ -138,10 +141,7 @@ public class CatalogController {
                 throw invalidQuery();
             }
         }
-        String locale = request.getParameter("locale");
-        if (locale != null && !locale.equals(LOCALE)) {
-            throw invalidQuery();
-        }
+        PublicContentLocale.requirePublishedLocale(request);
     }
 
     private String requiredValue(HttpServletRequest request, String name) {
@@ -164,7 +164,7 @@ public class CatalogController {
     }
 
     private ApiException invalidQuery() {
-        return new ApiException(HttpStatus.BAD_REQUEST, "INVALID_QUERY", "요청 파라미터를 확인해 주세요.", false);
+        return PublicContentLocale.invalidQuery();
     }
 
     private ApiException notFound() {
@@ -215,6 +215,8 @@ public class CatalogController {
         CatalogResponses.PinTarget target = pin.target().kind().equals("PLACE")
             ? new CatalogResponses.PlacePinTarget("PLACE", pin.target().id())
             : new CatalogResponses.AreaPinTarget("AREA", pin.target().id());
-        return new CatalogResponses.Pin(pin.id(), pin.category(), pin.label(), pin.x(), pin.y(), target);
+        return new CatalogResponses.Pin(
+            pin.id(), pin.category(), pin.filterGroup(), pin.label(), pin.x(), pin.y(), target
+        );
     }
 }

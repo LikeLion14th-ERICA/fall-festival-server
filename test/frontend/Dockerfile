@@ -6,7 +6,7 @@ RUN npm ci
 FROM node:24-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-ARG NEXT_PUBLIC_API_BASE_PATH=/api/v1
+ARG NEXT_PUBLIC_API_BASE_PATH=/test-api
 ENV NEXT_PUBLIC_API_BASE_PATH=${NEXT_PUBLIC_API_BASE_PATH}
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .

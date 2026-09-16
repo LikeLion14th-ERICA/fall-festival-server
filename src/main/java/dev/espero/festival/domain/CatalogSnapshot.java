@@ -19,8 +19,21 @@ public record CatalogSnapshot(
     List<Place> places,
     Map<PinKey, List<Pin>> pinsByMapVersion,
     TicketGuideConfig ticketGuideConfig,
+    StampGuide stampGuide,
     MapTarget ticketMapTarget
 ) {
+
+    /**
+     * The public map filter order is part of the v2 response contract. It is
+     * deliberately independent of database insertion order or map sort rank.
+     */
+    private static final List<String> FILTER_GROUP_ORDER = List.of(
+        "STUDENT_COUNCIL",
+        "EXPERIENCE",
+        "CONVENIENCE",
+        "FOOD_AND_BEVERAGE",
+        "PERFORMANCE"
+    );
 
     public CatalogSnapshot(
         FestivalContext context,
@@ -30,7 +43,20 @@ public record CatalogSnapshot(
         Map<PinKey, List<Pin>> pinsByMapVersion,
         MapTarget ticketMapTarget
     ) {
-        this(context, spaces, maps, places, pinsByMapVersion, null, ticketMapTarget);
+        this(context, spaces, maps, places, pinsByMapVersion, null, null, ticketMapTarget);
+    }
+
+    /** Compatibility constructor for callers that only supplied ticket data. */
+    public CatalogSnapshot(
+        FestivalContext context,
+        List<Space> spaces,
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pinsByMapVersion,
+        TicketGuideConfig ticketGuideConfig,
+        MapTarget ticketMapTarget
+    ) {
+        this(context, spaces, maps, places, pinsByMapVersion, ticketGuideConfig, null, ticketMapTarget);
     }
 
     public CatalogSnapshot {
@@ -56,6 +82,25 @@ public record CatalogSnapshot(
 
     public List<Pin> pinsFor(String mapId, String mapVersion) {
         return pinsByMapVersion.getOrDefault(new PinKey(mapId, mapVersion), List.of());
+    }
+
+    /**
+     * Returns only filter groups represented by PLACE pins for this exact
+     * map/version. AREA pins are navigation affordances and are intentionally
+     * excluded from the filter list so the client can keep them visible.
+     */
+    public List<PinFilter> filtersFor(String mapId, String mapVersion) {
+        Map<String, String> labels = new LinkedHashMap<>();
+        for (Pin pin : pinsFor(mapId, mapVersion)) {
+            if (!"PLACE".equals(pin.target().kind()) || pin.filterGroup() == null) {
+                continue;
+            }
+            labels.putIfAbsent(pin.filterGroup(), pin.filterGroupLabel());
+        }
+        return FILTER_GROUP_ORDER.stream()
+            .filter(labels::containsKey)
+            .map(group -> new PinFilter(group, labels.get(group)))
+            .toList();
     }
 
     public Optional<String> overviewId() {
@@ -117,11 +162,15 @@ public record CatalogSnapshot(
     public record Pin(
         String id,
         String category,
+        String filterGroup,
+        String filterGroupLabel,
         String label,
         BigDecimal x,
         BigDecimal y,
         PinTarget target
     ) {}
+
+    public record PinFilter(String id, String label) {}
 
     public record PinTarget(String kind, String id) {}
 

@@ -45,18 +45,20 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 | 홈 | config normal / faq-ready / missing-optional / empty, crowd before-open / closed / unmodified, notices empty / error |
 | 목록·상세 | 목록 empty, 상세 missing-optional / not-found / error. 선택 정보가 없는 영역은 제목까지 숨김 |
 | 굿즈 | goods 정상 + goods-availability error, availability sold-out, payment-guide missing-optional. 품절과 조회 실패를 구분 |
-| 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, locale=en의 번역 대기 제외 |
+| 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, all-languages를 적용한 목 세션의 locale=en 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
-| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도 동일 상태 재선택의 저장·시각 처리는 결정 대기 |
+| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도 동일 상태 재선택은 성공하고 저장 시각을 유지 |
 | 스탬프 | guide missing-optional, 수령 인증 normal / invalid-code / error, 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·코드 오류·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
 
-혼잡도(홈만)·공지·굿즈 판매 상태는 새로고침 없이 반영합니다. 통신 방식과 최대 지연은
-합의 대기이며 5초 SLA를 확정 계약으로 사용하지 않습니다. 화면 재활성화 시 조회하고,
-같은 데이터의 이전 revision 또는 먼저 시작한 요청의 늦은 응답이 최신 화면을 덮지 않게 합니다.
-목은 HTTP 재조회 동작만 제공하며 운영 환경의 실시간 전송·지연을 검증하지 않습니다.
+혼잡도(홈만)·공지·굿즈 판매 상태는 화면이 보이는 동안 15초 HTTP polling으로 갱신합니다.
+진입·재활성화·온라인 복귀 때 즉시 조회하고, 숨김·오프라인이면 중단합니다. 요청을 겹치게
+보내지 않고 실패는 30초, 60초 순으로 backoff하며 마지막 정상값을 유지합니다. 먼저 시작한
+요청의 늦은 응답이 최신 화면을 덮지 않게 generation을 비교해 폐기합니다. `meta.revision`이
+같아도 동적 운영 상태 응답을 버리지 않습니다. 목은 HTTP 재조회 동작만 제공하며 운영 환경의
+실제 부하·지연을 검증하지 않습니다.
 
 공지 조회 성공 시 현재 카드 중 `visibleIds`에 없는 ID를 즉시 제거합니다. 기존 ID의 내용은 최신 응답으로 갱신하고 새로운 ID는 대기 목록에 넣어 ‘새 공지’ 버튼을 누를 때 추가합니다. 삭제된 ID는 대기 목록에서도 제거합니다. 최초 조회는 items 전체를 표시합니다. 삭제 API 성공 후 재조회가 실패해도 삭제한 카드를 되살리지 않습니다.
 
@@ -71,10 +73,10 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 [관리자 변경 내역](ADMIN-CHANGES.md)의 draft.3 경로와 필드를 사용합니다. 수량 및 운영 시간 편집 요청은 제거했습니다.
 
 - 굿즈 상태는 실제 제공 조합에 `PUT /admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability`, 본문 `{ "status": "SOLD_OUT" }`로 저장합니다. quantity는 422입니다.
-- 신규 상품·옵션 초기 상태는 제품 미정입니다. 기본 생성은 409 INITIAL_AVAILABILITY_UNRESOLVED이며 자동 상태를 가정하지 않습니다. 생성 성공 화면은 new-option-on-sale 또는 new-option-sold-out 시나리오와 [예제 본문](examples.json)을 사용합니다. 이 헤더를 실제 서버 정책으로 이식하지 않습니다.
+- 신규 상품·옵션 조합은 ON_SALE로 생성합니다. 색상·사이즈·조합 삭제도 허용하며, 삭제한 조합의 판매 상태는 제거하고 유지 조합의 상태는 그대로 둡니다.
 - 상품명·가격·실제 제공 색상·사이즈·조합은 비어 있지 않아야 합니다. 빈 구성은 422로 거절하며 저장 전후 상품과 판매 상태를 바꾸지 않습니다. 이미지 개수·배치·업로드 방식과 옵션 없는 상품 입력 방식은 미정이고, 이미지 없는 저장은 409 IMAGE_CONFIGURATION_UNRESOLVED로 공개 상태 반영을 막습니다.
 - 영어 PENDING/FAILED에서도 한국어 저장은 성공합니다. 미리보기 canSave는 한국어 필수값 기준입니다. 템플릿 원문을 바꾸면 게시 전 기존 번역을 READY로 재사용하지 말고 변경 원문 기준으로 준비합니다. 늦은 미리보기 응답은 source와 현재 입력을 비교해 폐기합니다.
-- all-languages는 목 세션의 준비 언어를 바꾸고 partial-translation은 중·일 실패를 재현합니다. english-failed는 영어 실패와 한국어 게시를 함께 확인합니다.
+- 현재 공개 언어는 한국어뿐입니다. all-languages는 프런트 검증용 목 세션의 준비 언어를 바꾸며 partial-translation은 중·일 실패를 재현합니다. english-failed는 영어 실패와 한국어 게시를 함께 확인합니다. 실제 공개 전에는 모든 필수 콘텐츠·정렬·필터 label이 완결돼야 하며 한국어 fallback은 없습니다.
 - /prohibited-items의 items·message는 상시 안내입니다. 기존 /performance-alert를 교체하세요.
 
 ## 계약 검증

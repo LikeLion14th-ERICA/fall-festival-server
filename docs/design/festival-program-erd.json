@@ -13,8 +13,8 @@
       {
         "id": "timetable",
         "label": "타임테이블",
-        "focus": ["festival_revision", "festival_day", "performance", "stage"],
-        "note": "운영일의 공연 순서와 여러 무대 동시 공연을 표현할 준비를 합니다."
+        "focus": ["festival_revision", "festival_day", "performance"],
+        "note": "단일 무대에서 운영일별 공연 순서와 출연진 연결을 표현합니다."
       },
       {
         "id": "artist-detail",
@@ -72,28 +72,14 @@
       "id": "performance",
       "type": "database",
       "label": "Performance",
-      "sublabel": "PK performance_id · FK day_id · stage_id?",
+      "sublabel": "PK performance_id · FK day_id",
       "tag": "title · starts_at · ends_at · order",
       "row": 0,
       "col": 2,
       "size": [218, 72],
       "sources": [
         { "path": "api-v2/contract-source.mjs", "line": 40, "label": "공연 정보" },
-        { "path": "docs/wiki/engineering/api.md", "line": 30, "label": "여러 무대" }
-      ]
-    },
-    {
-      "id": "stage",
-      "type": "database",
-      "label": "Stage",
-      "sublabel": "PK stage_id · FK revision_id · name · map_place_id?",
-      "tag": "API field 확정 전 후보",
-      "row": 1,
-      "col": 1,
-      "size": [218, 72],
-      "sources": [
-        { "path": "docs/wiki/engineering/api.md", "line": 30, "label": "동시 공연 요구" },
-        { "path": "api-v2/contract-source.mjs", "line": 40, "label": "현재 Performance 계약" }
+        { "path": "docs/wiki/engineering/api.md", "line": 29, "label": "단일 무대" }
       ]
     },
     {
@@ -185,10 +171,10 @@
     },
     {
       "dot": "amber",
-      "title": "무대 모델 게이트",
+      "title": "단일 무대",
       "items": [
-        "여러 무대의 동시 공연은 공통 API 요구지만 현재 Performance 응답에 stage field는 없습니다.",
-        "점선 Stage 관계는 API·운영 자료를 확정할 때만 migration과 함께 활성화할 후보입니다."
+        "Performance는 FestivalDay에 속하며 단일 무대에서 시간순으로 표시합니다.",
+        "Stage entity와 stage_id field는 만들지 않습니다."
       ]
     },
     {

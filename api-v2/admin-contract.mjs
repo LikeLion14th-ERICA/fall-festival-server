@@ -21,7 +21,7 @@ export function applyAdminContract(s,ops){
   s.Availability.properties.variants=arr(variant,'색상×사이즈별 공개 상태. 수량 필드 없음.');s.Availability.required.push('variants');
   s.Availability.properties.allSoldOut.description='실제 제공 조합이 1개 이상이고 모두 SOLD_OUT일 때 true.';
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
-  s.ProductInput=obj({name:str('필수 상품명'),price:ref('Money'),images:arr(ref('Image'),'복수 이미지. 개수·크기·배치·업로드 방식은 미정.'),colors:s.Goods.properties.colors,sizes:{...s.Goods.properties.sizes,minItems:1},options:s.Goods.properties.options,description:nullable(str('상품 소개'),'선택 소개')},'상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 기존 판매 상태를 보존하고 신규 조합 초기 상태와 삭제는 별도 계약을 따른다.');
+  s.ProductInput=obj({name:str('필수 상품명'),price:ref('Money'),images:arr(ref('Image'),'복수 이미지. 개수·크기·배치·업로드 방식은 미정.'),colors:s.Goods.properties.colors,sizes:{...s.Goods.properties.sizes,minItems:1},options:s.Goods.properties.options,description:nullable(str('상품 소개'),'선택 소개')},'상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
   s.Translation.properties.title=nullable(str('번역 제목'),'PENDING/FAILED이면 null 허용');
   s.Translation.properties.body=nullable(str('번역 본문'),'PENDING/FAILED이면 null 허용');
   s.Translation.properties.status=en(['READY','PENDING','FAILED'],'완료 / 준비 중 / 실패. READY만 사용자 노출.');
@@ -50,8 +50,8 @@ export function applyAdminContract(s,ops){
   add('putAdminAvailability','PUT','/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability','Availability','옵션 판매 상태 저장',['ADM-GOODS'],'AvailabilityInput',['normal','sold-out','not-found','error']);
   add('getAdminProducts','GET','/admin/products','GoodsList','관리자 상품 목록',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','empty','error']);
   add('getAdminProduct','GET','/admin/products/{goodsId}','Goods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','missing-optional','not-found','error']);
-  add('postAdminProduct','POST','/admin/products','Goods','상품 등록·초기 판매 상태 미정',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option-on-sale','new-option-sold-out','missing-optional','empty-configuration','error'],true);
-  add('putAdminProduct','PUT','/admin/products/{goodsId}','Goods','상품 수정·기존 조합 판매 상태 유지',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','new-option-on-sale','new-option-sold-out','option-removal','empty-configuration','not-found','error'],true);
+  add('postAdminProduct','POST','/admin/products','Goods','상품 등록·신규 옵션은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','missing-optional','empty-configuration','error'],true);
+  add('putAdminProduct','PUT','/admin/products/{goodsId}','Goods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','empty-configuration','not-found','error'],true);
   add('previewNoticeTranslation','POST','/admin/notice-translations','NoticeTranslationPreview','공지 번역 생성·재시도',['ADM-NOTICE-EDIT','ADM-NOTICE-TEMPLATE'],'NoticeTranslationInput',['normal','english-failed','partial-translation','error'],true);
   find('previewNoticeTranslation').successStatus=200;
   ops.push(

@@ -34,7 +34,10 @@ for(const op of operations){
     if(op.operationId==='putAdminAvailability'&&scenario==='sold-out')body={status:'SOLD_OUT'};
     if(op.operationId==='verifyStampReceipt'&&scenario==='invalid-code')body={code:'MOCK-INVALID-RECEIPT-CODE'};
     if(op.operationId==='putAdminProduct'&&scenario.startsWith('new-option')){body.colors.push({id:'color-new',name:'새 예시 색상',images:[]});body.options.push({colorId:'color-new',sizeId:'size-m'});}
-    if(op.operationId==='putAdminProduct'&&scenario==='option-removal')body.colors.pop();
+    if(op.operationId==='putAdminProduct'&&scenario==='option-removal'){
+      const removedColor=body.colors.pop();
+      body.options=body.options.filter(option=>option.colorId!==removedColor.id);
+    }
     if(op.operationId==='postAdminProduct'&&scenario==='missing-optional')Object.assign(body,{images:[],description:null});
     if((op.operationId==='postAdminProduct'||op.operationId==='putAdminProduct')&&scenario==='empty-configuration')Object.assign(body,{images:[],colors:[],sizes:[],options:[]});
     if(body?.translations&&scenario==='english-incomplete')body.translations.en={title:null,body:null,status:'PENDING'};

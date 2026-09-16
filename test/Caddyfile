@@ -26,7 +26,7 @@
 	@nextStatic path /_next/static/*
 	header @nextStatic >Cache-Control "public, max-age=31536000, immutable"
 
-	@api path /api/*
+	@api path /test-api/*
 	handle @api {
 		reverse_proxy backend:8080
 	}

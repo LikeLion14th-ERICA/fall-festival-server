@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
  * home.md, not per-festival-day data — festival_days has no seeded rows yet.
  * Swap this for a real per-day lookup once that data exists.
  *
- * locale is intentionally not yet honored: only Korean content exists, so the
- * query parameter is accepted but ignored until translated content is stored.
+ * Only published, complete locales can be requested. Korean is the currently
+ * published locale; no Korean fallback is returned for another locale.
  */
 @RestController
 @RequestMapping("/api/v2")
@@ -37,7 +37,7 @@ public class CrowdingController {
     private static final ZoneId TIMEZONE = ZoneId.of("Asia/Seoul");
     private static final LocalTime OPENS_AT = LocalTime.of(13, 0);
     private static final LocalTime CLOSES_AT = LocalTime.of(22, 0);
-    private static final String CONTENT_LOCALE = "ko";
+    private static final String CONTENT_LOCALE = PublicContentLocale.KOREAN;
 
     private static final Map<String, String> COLOR_TOKENS = Map.of(
         "RELAXED", "green",
@@ -58,6 +58,7 @@ public class CrowdingController {
 
     @GetMapping("/crowding")
     public ApiResponse<CrowdingResponse> getCrowding(HttpServletRequest request) {
+        validateQuery(request);
         Instant now = clock.instant();
         LocalDate operatingDay = LocalDate.now(clock.withZone(TIMEZONE));
         OffsetDateTime opensAt = operatingDay.atTime(OPENS_AT).atZone(TIMEZONE).toOffsetDateTime();
@@ -85,7 +86,7 @@ public class CrowdingController {
             saved.map(CrowdingRecord::level).orElse(null),
             active ? COLOR_TOKENS.get(status.name()) : null,
             message(status, opensAt),
-            saved.map(record -> OffsetDateTime.ofInstant(record.updatedAt(), TIMEZONE)).orElse(null),
+            active ? saved.map(record -> OffsetDateTime.ofInstant(record.updatedAt(), TIMEZONE)).orElse(null) : null,
             active
                 ? (saved.isPresent() ? CrowdingResponse.TimeBasis.OPERATOR : CrowdingResponse.TimeBasis.OPENING)
                 : CrowdingResponse.TimeBasis.NONE
@@ -98,10 +99,19 @@ public class CrowdingController {
         return switch (status) {
             case BEFORE_OPEN -> "오늘 재학생존 입장은 %s에 시작해요".formatted(opensAt.toLocalTime());
             case RELAXED -> "재학생존의 공간이 많이 남았어요.";
-            case MODERATE -> "재학생존의 공간이 절반 이상 찼어요.";
+            case MODERATE -> "재학생존의 공간이 절반 정도 찼어요.";
             case CROWDED -> "재학생존이 많이 혼잡해요.";
             case FULL -> "재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.";
             case CLOSED -> "오늘 재학생존 운영이 종료됐어요";
         };
+    }
+
+    private void validateQuery(HttpServletRequest request) {
+        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            if (!entry.getKey().equals("locale") || entry.getValue().length != 1) {
+                throw PublicContentLocale.invalidQuery();
+            }
+        }
+        PublicContentLocale.requirePublishedLocale(request);
     }
 }

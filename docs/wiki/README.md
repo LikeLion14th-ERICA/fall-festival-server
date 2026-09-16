@@ -21,11 +21,11 @@
 | 굿즈·재고·현장 송금 | [굿즈샵](product/goods.md) | 계좌·운영값은 결정 대기 |
 | 외부인 티켓·현장 수령 | [외부인 티켓](product/ticket.md), [지도](product/map.md) | 계좌·운영값은 결정 대기 |
 | 공연·라인업 | [라인업](product/lineup.md) | 타임테이블은 해당 행도 적용 |
-| 타임테이블·현재 시각선·반입 금지 물품 안내 | [타임테이블](product/timetable.md), [라인업](product/lineup.md) | 구현 시 API 6·12절 계약 동기화 |
+| 타임테이블·현재 시각선·반입 금지 물품 안내 | [타임테이블](product/timetable.md), [라인업](product/lineup.md) | 구현 시 API v2 `getTimetable`, `getProhibitedItems` 계약 동기화 |
 | 부스·주점·플리마켓·메뉴 | [부스&마켓](product/spaces.md) | 위치 연결은 지도 |
 | 지도·좌표·필터 | [지도](product/map.md), [학교 용어](product/terminology.md) | 지도 API·자산 |
 | 학교 명칭·공식 번역 | [용어](product/terminology.md), [결정 대기](product/decisions.md) | 다국어 |
-| 스탬프·QR·경품 | [스탬프](product/stamp.md), [보안](engineering/security.md), [검증 서비스](engineering/test-service.md) | API 29절은 아래 경고 확인 |
+| 스탬프·QR·경품 | [스탬프](product/stamp.md), [보안](engineering/security.md), [검증 서비스](engineering/test-service.md) | API v2 `getStampGuide`, `verifyStampReceipt` 계약 동기화 |
 | PWA·푸시·익명 상태 복원 | [검증 서비스](engineering/test-service.md), [보안](engineering/security.md), [운영](engineering/operations.md) | 해당 test 구현·API 절 |
 | 사용자 화면·문자열·번역 | [다국어](engineering/i18n.md), [품질](engineering/quality.md) | 해당 화면 도메인 |
 | API·DB·schema·데이터 계약 | [API 규칙](engineering/api.md), [데이터 모델·ERD](engineering/data-model.md), [API 절 찾기](engineering/api-navigation.md) | 부스·지도 구현은 [부스·지도 공개 카탈로그](engineering/spaces-map-backend.md), 해당 도메인·계약 테스트 |
@@ -39,16 +39,11 @@
 | hotfix·release·tag | [릴리스](workflow/releases.md), [PR](workflow/pull-requests.md), [운영](engineering/operations.md) | 배포 runbook |
 | 위키·컨텍스트 문서 | [위키 관리](MAINTENANCE.md) | 변경하는 주제 페이지 |
 
-> **스탬프 API 계약 주의:** 현재 API 29절은 이전 스탬프 정책을 기준으로 작성되어
-> 최신 [`STAMP-001`](product/stamp.md)과 일치하지 않으므로 현재 구현 기준으로 사용하지
-> 않는다. 스탬프 기능 요구사항은 `STAMP-001`을 우선하고, API 계약은 백엔드 구현 전에
-> 최신 Product 명세에 맞춰 별도로 동기화한다.
-
 ## 원문과 목차
 
 - [제품 컨텍스트 목차](../PRODUCT_CONTEXT.md)
 - [협업 규칙 목차](../../CONTRIBUTING.md)
-- [API v1 원문](../../핵심%20기능%20API%20명세서%20v1.md)
+- [API v2 명세](../../핵심%20기능%20API%20명세서%20v2.md)
 - [검증 서비스 README](../../test/README.md)
 - [PR 템플릿](../../.github/PULL_REQUEST_TEMPLATE.md)
 

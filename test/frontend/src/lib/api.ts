@@ -13,7 +13,7 @@ import type {
 const configuredBasePath = process.env.NEXT_PUBLIC_API_BASE_PATH?.trim();
 export const API_BASE_PATH = configuredBasePath?.startsWith("/")
   ? configuredBasePath.replace(/\/$/, "")
-  : "/api/v1";
+  : "/test-api";
 
 type UnknownRecord = Record<string, unknown>;
 

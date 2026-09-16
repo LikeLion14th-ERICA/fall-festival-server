@@ -10,7 +10,7 @@ const SHELL_ASSETS = [
   "/icon.svg",
   "/icon-maskable.svg",
 ];
-const DEFAULT_ACK_URL = "/api/v1/me/notifications/ack";
+const DEFAULT_ACK_URL = "/test-api/me/notifications/ack";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -37,7 +37,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+  if (url.origin !== self.location.origin || url.pathname.startsWith("/test-api/")) return;
 
   if (request.mode === "navigate") {
     event.respondWith(

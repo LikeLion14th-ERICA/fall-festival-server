@@ -76,10 +76,6 @@
                           {
                             "code": "ko",
                             "label": "한국어"
-                          },
-                          {
-                            "code": "en",
-                            "label": "English"
                           }
                         ],
                         "links": {
@@ -126,10 +122,6 @@
                           {
                             "code": "ko",
                             "label": "한국어"
-                          },
-                          {
-                            "code": "en",
-                            "label": "English"
                           }
                         ],
                         "links": {
@@ -172,10 +164,6 @@
                           {
                             "code": "ko",
                             "label": "한국어"
-                          },
-                          {
-                            "code": "en",
-                            "label": "English"
                           }
                         ],
                         "links": {
@@ -214,10 +202,6 @@
                           {
                             "code": "ko",
                             "label": "한국어"
-                          },
-                          {
-                            "code": "en",
-                            "label": "English"
                           }
                         ],
                         "links": {
@@ -272,10 +256,6 @@
                           {
                             "code": "ko",
                             "label": "한국어"
-                          },
-                          {
-                            "code": "en",
-                            "label": "English"
                           }
                         ],
                         "links": {
@@ -674,7 +654,7 @@
                         "status": "MODERATE",
                         "savedLevel": "MODERATE",
                         "colorToken": "orange",
-                        "message": "재학생존의 공간이 절반 이상 찼어요.",
+                        "message": "재학생존의 공간이 절반 정도 찼어요.",
                         "updatedAt": "2030-10-01T17:00:00+09:00",
                         "timeBasis": "OPERATOR"
                       },
@@ -727,7 +707,7 @@
                         "savedLevel": "MODERATE",
                         "colorToken": null,
                         "message": "오늘 재학생존 운영이 종료됐어요",
-                        "updatedAt": "2030-10-01T17:00:00+09:00",
+                        "updatedAt": null,
                         "timeBasis": "NONE"
                       },
                       "meta": {
@@ -8876,6 +8856,16 @@
                       "data": {
                         "mapId": "map-area",
                         "mapVersion": "mock-map-1",
+                        "filters": [
+                          {
+                            "id": "EXPERIENCE",
+                            "label": "체험"
+                          },
+                          {
+                            "id": "CONVENIENCE",
+                            "label": "편의 시설"
+                          }
+                        ],
                         "items": [
                           {
                             "id": "pin-booth",
@@ -8886,7 +8876,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-02",
@@ -8897,7 +8888,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-02"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-03",
@@ -8908,7 +8900,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-03"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-04",
@@ -8919,7 +8912,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-04"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-05",
@@ -8930,7 +8924,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-05"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-06",
@@ -8941,7 +8936,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-06"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-07",
@@ -8952,7 +8948,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-07"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-08",
@@ -8963,7 +8960,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-08"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-09",
@@ -8974,7 +8972,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-09"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-10",
@@ -8985,7 +8984,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-10"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-11",
@@ -8996,7 +8996,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-11"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-booth-12",
@@ -9007,7 +9008,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-12"
-                            }
+                            },
+                            "filterGroup": "EXPERIENCE"
                           },
                           {
                             "id": "pin-toilet",
@@ -9018,7 +9020,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-toilet"
-                            }
+                            },
+                            "filterGroup": "CONVENIENCE"
                           },
                           {
                             "id": "pin-smoking",
@@ -9029,7 +9032,8 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-smoking"
-                            }
+                            },
+                            "filterGroup": "CONVENIENCE"
                           }
                         ]
                       },
@@ -9050,6 +9054,7 @@
                       "data": {
                         "mapId": "map-area",
                         "mapVersion": "mock-map-1",
+                        "filters": [],
                         "items": []
                       },
                       "meta": {
@@ -10982,7 +10987,7 @@
                         "status": "MODERATE",
                         "savedLevel": "MODERATE",
                         "colorToken": "orange",
-                        "message": "재학생존의 공간이 절반 이상 찼어요.",
+                        "message": "재학생존의 공간이 절반 정도 찼어요.",
                         "updatedAt": "2030-10-01T17:00:00+09:00",
                         "timeBasis": "OPERATOR"
                       },
@@ -11035,7 +11040,7 @@
                         "savedLevel": "MODERATE",
                         "colorToken": null,
                         "message": "오늘 재학생존 운영이 종료됐어요",
-                        "updatedAt": "2030-10-01T17:00:00+09:00",
+                        "updatedAt": null,
                         "timeBasis": "NONE"
                       },
                       "meta": {
@@ -11381,7 +11386,7 @@
       },
       "put": {
         "operationId": "putAdminCrowding",
-        "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안",
+        "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지",
         "description": "연결 화면: ADM-CROWD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -11410,7 +11415,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: normal",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: normal",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -11436,7 +11441,7 @@
                     }
                   },
                   "full": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: full",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: full",
                     "value": {
                       "data": {
                         "operatingDay": "2030-10-01",
@@ -11482,7 +11487,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: bad-request",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -11522,7 +11527,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: unauthorized",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -11562,7 +11567,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: forbidden",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -11723,7 +11728,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: rate-limited",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -11782,7 +11787,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "혼잡도 저장·동일 상태 재선택 처리는 기술 초안: error",
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -12455,6 +12460,16 @@
                             "title": "New mock notice",
                             "body": "Mock body",
                             "status": "READY"
+                          },
+                          "zh-Hans": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "ja": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
                           }
                         },
                         "links": [],
@@ -12486,6 +12501,16 @@
                             "status": "READY"
                           },
                           "en": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "zh-Hans": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "ja": {
                             "title": null,
                             "body": null,
                             "status": "PENDING"
@@ -12523,6 +12548,16 @@
                             "title": null,
                             "body": null,
                             "status": "FAILED"
+                          },
+                          "zh-Hans": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "ja": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
                           }
                         },
                         "links": [],
@@ -13431,6 +13466,16 @@
                             "title": "New mock notice",
                             "body": "Mock body",
                             "status": "READY"
+                          },
+                          "zh-Hans": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "ja": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
                           }
                         },
                         "links": [],
@@ -13462,6 +13507,16 @@
                             "status": "READY"
                           },
                           "en": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "zh-Hans": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "ja": {
                             "title": null,
                             "body": null,
                             "status": "PENDING"
@@ -13499,6 +13554,16 @@
                             "title": null,
                             "body": null,
                             "status": "FAILED"
+                          },
+                          "zh-Hans": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
+                          },
+                          "ja": {
+                            "title": null,
+                            "body": null,
+                            "status": "PENDING"
                           }
                         },
                         "links": [],
@@ -16579,7 +16644,7 @@
       },
       "post": {
         "operationId": "postAdminProduct",
-        "summary": "상품 등록·초기 판매 상태 미정",
+        "summary": "상품 등록·신규 옵션은 ON_SALE",
         "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 미정 기획을 위한 검토 필요 계약. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -16607,117 +16672,8 @@
                   "$ref": "#/components/schemas/GoodsResponse"
                 },
                 "examples": {
-                  "new-option-on-sale": {
-                    "summary": "상품 등록·초기 판매 상태 미정: new-option-on-sale",
-                    "value": {
-                      "data": {
-                        "name": "예시 의류",
-                        "price": {
-                          "amount": 1000,
-                          "currency": "KRW"
-                        },
-                        "images": [
-                          {
-                            "url": "/__mock/assets/sample.svg",
-                            "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                            "width": 800,
-                            "height": 600
-                          }
-                        ],
-                        "colors": [
-                          {
-                            "id": "color-a",
-                            "name": "예시 색상 A",
-                            "images": [
-                              {
-                                "url": "/__mock/assets/sample.svg",
-                                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                                "width": 800,
-                                "height": 600
-                              }
-                            ]
-                          },
-                          {
-                            "id": "color-b",
-                            "name": "예시 색상 B",
-                            "images": [
-                              {
-                                "url": "/__mock/assets/sample.svg",
-                                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                                "width": 800,
-                                "height": 600
-                              }
-                            ]
-                          }
-                        ],
-                        "sizes": [
-                          {
-                            "id": "size-m",
-                            "label": "M"
-                          },
-                          {
-                            "id": "size-l",
-                            "label": "L"
-                          }
-                        ],
-                        "options": [
-                          {
-                            "colorId": "color-a",
-                            "sizeId": "size-m"
-                          },
-                          {
-                            "colorId": "color-a",
-                            "sizeId": "size-l"
-                          },
-                          {
-                            "colorId": "color-b",
-                            "sizeId": "size-m"
-                          }
-                        ],
-                        "description": "실제 상품·가격이 아닙니다.",
-                        "id": "goods-created-1",
-                        "image": {
-                          "url": "/__mock/assets/sample.svg",
-                          "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                          "width": 800,
-                          "height": 600
-                        },
-                        "colorImages": [
-                          {
-                            "colorId": "color-a",
-                            "colorName": "예시 색상 A",
-                            "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                              "width": 800,
-                              "height": 600
-                            }
-                          },
-                          {
-                            "colorId": "color-b",
-                            "colorName": "예시 색상 B",
-                            "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                              "width": 800,
-                              "height": 600
-                            }
-                          }
-                        ]
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 2,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "new-option-sold-out": {
-                    "summary": "상품 등록·초기 판매 상태 미정: new-option-sold-out",
+                  "normal": {
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: normal",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -16846,7 +16802,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "상품 등록·초기 판매 상태 미정: bad-request",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -16886,7 +16842,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "상품 등록·초기 판매 상태 미정: unauthorized",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -16926,7 +16882,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "상품 등록·초기 판매 상태 미정: forbidden",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -17003,28 +16959,8 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
-                  "normal": {
-                    "summary": "상품 등록·초기 판매 상태 미정: normal",
-                    "value": {
-                      "error": {
-                        "code": "INITIAL_AVAILABILITY_UNRESOLVED",
-                        "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
                   "missing-optional": {
-                    "summary": "상품 등록·초기 판매 상태 미정: missing-optional",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: missing-optional",
                     "value": {
                       "error": {
                         "code": "IMAGE_CONFIGURATION_UNRESOLVED",
@@ -17102,7 +17038,7 @@
                 },
                 "examples": {
                   "empty-configuration": {
-                    "summary": "상품 등록·초기 판매 상태 미정: empty-configuration",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: empty-configuration",
                     "value": {
                       "error": {
                         "code": "VALIDATION_FAILED",
@@ -17162,7 +17098,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "상품 등록·초기 판매 상태 미정: rate-limited",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -17221,7 +17157,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "상품 등록·초기 판매 상태 미정: error",
+                    "summary": "상품 등록·신규 옵션은 ON_SALE: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -17251,8 +17187,6 @@
         "x-contract-status": "provisional",
         "x-mock-scenarios": [
           "normal",
-          "new-option-on-sale",
-          "new-option-sold-out",
           "missing-optional",
           "empty-configuration",
           "error",
@@ -17925,7 +17859,7 @@
       },
       "put": {
         "operationId": "putAdminProduct",
-        "summary": "상품 수정·기존 조합 판매 상태 유지",
+        "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용",
         "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 미정 기획을 위한 검토 필요 계약. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -17964,7 +17898,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: normal",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: normal",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -18072,8 +18006,8 @@
                       }
                     }
                   },
-                  "new-option-on-sale": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: new-option-on-sale",
+                  "new-option": {
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: new-option",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -18190,8 +18124,8 @@
                       }
                     }
                   },
-                  "new-option-sold-out": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: new-option-sold-out",
+                  "option-removal": {
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: option-removal",
                     "value": {
                       "data": {
                         "name": "예시 의류",
@@ -18219,23 +18153,6 @@
                                 "height": 600
                               }
                             ]
-                          },
-                          {
-                            "id": "color-b",
-                            "name": "예시 색상 B",
-                            "images": [
-                              {
-                                "url": "/__mock/assets/sample.svg",
-                                "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                                "width": 800,
-                                "height": 600
-                              }
-                            ]
-                          },
-                          {
-                            "id": "color-new",
-                            "name": "새 예시 색상",
-                            "images": []
                           }
                         ],
                         "sizes": [
@@ -18256,14 +18173,6 @@
                           {
                             "colorId": "color-a",
                             "sizeId": "size-l"
-                          },
-                          {
-                            "colorId": "color-b",
-                            "sizeId": "size-m"
-                          },
-                          {
-                            "colorId": "color-new",
-                            "sizeId": "size-m"
                           }
                         ],
                         "description": "실제 상품·가격이 아닙니다.",
@@ -18278,16 +18187,6 @@
                           {
                             "colorId": "color-a",
                             "colorName": "예시 색상 A",
-                            "image": {
-                              "url": "/__mock/assets/sample.svg",
-                              "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
-                              "width": 800,
-                              "height": 600
-                            }
-                          },
-                          {
-                            "colorId": "color-b",
-                            "colorName": "예시 색상 B",
                             "image": {
                               "url": "/__mock/assets/sample.svg",
                               "alt": "개발용 예시 이미지 · 실제 행사 자료 아님",
@@ -18329,7 +18228,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: bad-request",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -18369,7 +18268,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: unauthorized",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -18409,7 +18308,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: forbidden",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -18449,7 +18348,7 @@
                 },
                 "examples": {
                   "not-found": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: not-found",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: not-found",
                     "value": {
                       "error": {
                         "code": "NOT_FOUND",
@@ -18506,48 +18405,7 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {
-                  "new-option": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: new-option",
-                    "value": {
-                      "error": {
-                        "code": "INITIAL_AVAILABILITY_UNRESOLVED",
-                        "message": "신규 옵션 최초 상태는 미정입니다. 목 시나리오로 초기 상태를 명시하세요.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "option-removal": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: option-removal",
-                    "value": {
-                      "error": {
-                        "code": "OPTION_DELETION_UNRESOLVED",
-                        "message": "옵션 삭제 정책은 합의 대기입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
+                "examples": {}
               }
             }
           },
@@ -18606,7 +18464,7 @@
                 },
                 "examples": {
                   "empty-configuration": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: empty-configuration",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: empty-configuration",
                     "value": {
                       "error": {
                         "code": "VALIDATION_FAILED",
@@ -18666,7 +18524,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: rate-limited",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -18725,7 +18583,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "상품 수정·기존 조합 판매 상태 유지: error",
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -18756,8 +18614,6 @@
         "x-mock-scenarios": [
           "normal",
           "new-option",
-          "new-option-on-sale",
-          "new-option-sold-out",
           "option-removal",
           "empty-configuration",
           "not-found",
@@ -18895,6 +18751,16 @@
                             "title": "[MOCK en] 개발용 제목",
                             "body": "[MOCK en] 개발용 본문",
                             "status": "READY"
+                          },
+                          "zh-Hans": {
+                            "title": "[MOCK zh-Hans] 개발용 제목",
+                            "body": "[MOCK zh-Hans] 개발용 본문",
+                            "status": "READY"
+                          },
+                          "ja": {
+                            "title": "[MOCK ja] 개발용 제목",
+                            "body": "[MOCK ja] 개발용 본문",
+                            "status": "READY"
                           }
                         },
                         "canSave": true
@@ -18928,6 +18794,16 @@
                             "title": null,
                             "body": null,
                             "status": "FAILED"
+                          },
+                          "zh-Hans": {
+                            "title": "[MOCK zh-Hans] 개발용 제목",
+                            "body": "[MOCK zh-Hans] 개발용 본문",
+                            "status": "READY"
+                          },
+                          "ja": {
+                            "title": "[MOCK ja] 개발용 제목",
+                            "body": "[MOCK ja] 개발용 본문",
+                            "status": "READY"
                           }
                         },
                         "canSave": true
@@ -21501,7 +21377,7 @@
                   "CROWDED",
                   "FULL"
                 ],
-                "description": "관리자가 선택하는 4단계. 운영 전/종료는 저장값이 아님."
+                "description": "관리자가 선택하는 4단계. 운영 전·종료에도 당일 저장은 허용하지만 공개 상태는 시간 상태가 우선한다."
               },
               {
                 "type": "null"
@@ -21545,7 +21421,7 @@
                 "type": "null"
               }
             ],
-            "description": "실제 저장 성공 시각. 동일 상태 재선택 시 저장·시각을 갱신할지는 기술 초안·결정 대기."
+            "description": "운영 전·종료면 null. 같은 상태 재선택은 저장·시각을 갱신하지 않는다."
           },
           "timeBasis": {
             "type": "string",
@@ -22678,6 +22554,33 @@
         "additionalProperties": false,
         "description": ""
       },
+      "PinFilter": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "STUDENT_COUNCIL",
+              "EXPERIENCE",
+              "CONVENIENCE",
+              "FOOD_AND_BEVERAGE",
+              "PERFORMANCE"
+            ],
+            "description": "지도 핀 대분류 ID. PLACE 핀은 하나를 반드시 가지며 AREA 핀은 null."
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "현재 locale의 대분류 표시명"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "additionalProperties": false,
+        "description": "현재 지도에 실제 PLACE 핀이 있는 대분류만 반환."
+      },
       "Pin": {
         "type": "object",
         "properties": {
@@ -22691,6 +22594,25 @@
             "type": "string",
             "minLength": 1,
             "description": "핀 세부 종류 ID. 운영 목록에서 제공하며 명칭을 enum으로 고정하지 않음."
+          },
+          "filterGroup": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "STUDENT_COUNCIL",
+                  "EXPERIENCE",
+                  "CONVENIENCE",
+                  "FOOD_AND_BEVERAGE",
+                  "PERFORMANCE"
+                ],
+                "description": "지도 핀 대분류 ID. PLACE 핀은 하나를 반드시 가지며 AREA 핀은 null."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "PLACE 핀은 대분류를 반드시 가지며 AREA 핀은 null. AREA 핀은 필터 대상이 아니고 항상 표시."
           },
           "label": {
             "type": "string",
@@ -22719,7 +22641,7 @@
                     "enum": [
                       "PLACE"
                     ],
-                    "description": "장소 팝업"
+                    "description": "장소 팝업. filterGroup으로 대분류 필터링."
                   },
                   "placeId": {
                     "type": "string",
@@ -22743,7 +22665,7 @@
                     "enum": [
                       "AREA"
                     ],
-                    "description": "팝업 없이 구역 지도 이동"
+                    "description": "팝업 없이 구역 지도 이동. filterGroup은 null이며 필터와 무관하게 항상 표시."
                   },
                   "mapId": {
                     "type": "string",
@@ -22765,6 +22687,7 @@
         "required": [
           "id",
           "category",
+          "filterGroup",
           "label",
           "x",
           "y",
@@ -22787,17 +22710,25 @@
             "minLength": 1,
             "description": "요청한 이미지 버전과 동일"
           },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PinFilter"
+            },
+            "description": "현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 대분류만 반환. 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외."
+          },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Pin"
             },
-            "description": "핀 목록. UI 필터의 대/소분류 단위는 미정."
+            "description": "핀 목록. 서버 필터 query는 제공하지 않으며 클라이언트가 PLACE의 filterGroup으로 표시를 제어하고 AREA는 항상 표시."
           }
         },
         "required": [
           "mapId",
           "mapVersion",
+          "filters",
           "items"
         ],
         "additionalProperties": false,
@@ -23467,7 +23398,7 @@
               "CROWDED",
               "FULL"
             ],
-            "description": "관리자가 선택하는 4단계. 운영 전/종료는 저장값이 아님."
+            "description": "관리자가 선택하는 4단계. 운영 전·종료에도 당일 저장은 허용하지만 공개 상태는 시간 상태가 우선한다."
           },
           "confirmFull": {
             "type": "boolean",
@@ -23626,7 +23557,7 @@
           "description"
         ],
         "additionalProperties": false,
-        "description": "상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 기존 판매 상태를 보존하고 신규 조합 초기 상태와 삭제는 별도 계약을 따른다."
+        "description": "상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다."
       },
       "NoticeSource": {
         "type": "object",
