@@ -175,7 +175,7 @@ CADDY_IMAGE=caddy:2-alpine@sha256:CADDY_DIGEST
 ```powershell
 docker login ghcr.io -u ACCOUNT
 docker buildx build --platform linux/amd64 --pull --push -t ghcr.io/ACCOUNT/espero-pwa-backend:COMMIT_SHA ./backend
-docker buildx build --platform linux/amd64 --pull --push --build-arg NEXT_PUBLIC_API_BASE_PATH=/api/v1 -f ./frontend/Dockerfile.e2-micro -t ghcr.io/ACCOUNT/espero-pwa-frontend:COMMIT_SHA ./frontend
+docker buildx build --platform linux/amd64 --pull --push --build-arg NEXT_PUBLIC_API_BASE_PATH=/test-api -f ./frontend/Dockerfile.e2-micro -t ghcr.io/ACCOUNT/espero-pwa-frontend:COMMIT_SHA ./frontend
 docker buildx imagetools inspect postgres:16-alpine
 docker buildx imagetools inspect caddy:2-alpine
 ```

@@ -28,7 +28,7 @@ import tools.jackson.databind.ObjectMapper;
 public class ApiSecurityFilter extends OncePerRequestFilter {
 
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
-    private static final String ACK_PATH = "/api/v1/me/notifications/ack";
+    private static final String ACK_PATH = "/test-api/me/notifications/ack";
 
     private final SessionService sessions;
     private final SecurityProperties security;
@@ -52,7 +52,7 @@ public class ApiSecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v1");
+        return !request.getRequestURI().startsWith("/test-api");
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ApiSecurityFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (path.startsWith("/api/v1/me/") && !capabilityAck) {
+        if (path.startsWith("/test-api/me/") && !capabilityAck) {
             Optional<SessionRecord> session = sessions.resolveRequest(request);
             if (session.isEmpty()) {
                 writeError(response, request, HttpStatus.UNAUTHORIZED, "SESSION_REQUIRED", "A valid anonymous session is required.");

@@ -6,11 +6,21 @@
   콘텐츠로 관리한다.
 - 콘텐츠는 최소 `draft / scheduled / published / archived` 상태, revision, 작성자,
   승인·게시·수정 시각과 감사 이력을 갖는다.
-- 공개 서비스는 승인된 published revision만 읽는다. 운영자는 미리보기에서 locale,
-  시간대, 링크, 이미지, 필수 텍스트, 지도 좌표와 관련 객체 정합성을 검증한다.
-- 일정·지도처럼 서로 의존하는 변경은 부분 게시하지 않는다. 예약 게시의 시간대와
-  실패 처리, 중복 실행 안전성을 명시한다.
+- 공개 서비스는 승인된 published revision만 읽는다. 개발자 전용 CLI가 HTTP 쓰기 API 없이
+  `import → validate → publish / rollback`을 수행한다. 입력은 schema 검증 가능한 완전 revision
+  JSON이며 DB 비밀값·수령 인증 코드·원격 URL 다운로드를 포함하지 않는다. 자산은 사전 배포한
+  참조만 허용한다.
+- import는 모든 입력 검증 뒤 한 transaction으로 새 draft만 삽입한다. validate는 실제 공개
+  snapshot loader와 같은 규칙으로 locale, 정렬, 링크, 이미지, 지도 좌표, filter group,
+  canonical target과 revision 연결을 검증한다.
+- publish는 festival 행 잠금 뒤 target draft를 재검증하고, 현재 published보다 큰 revision 번호인
+  경우에만 기존 published를 archived로 바꾼 뒤 target을 published로 전환하며 감사 기록을 같은
+  transaction에 남긴다. 더 오래된 draft는 게시하지 않는다. 일정·지도처럼 서로 의존하는 변경은
+  부분 게시하지 않는다.
+- rollback은 archived revision을 새 증가 revision draft로 복제해 validate·publish를 다시 수행한다.
+  이미지·좌표·핀 target이 같으면 기존 `mapVersion`을 유지한다.
 - 긴급 공지는 일반 콘텐츠보다 우선해 즉시 게시·수정·회수할 수 있고, 게시 결과와 캐시
   반영 상태를 운영자가 확인할 수 있어야 한다.
 - 잘못 게시한 콘텐츠를 직전의 검증된 revision으로 빠르게 되돌리는 rollback 기능과
-  권한·절차를 둔다.
+  권한·절차를 둔다. rollback은 티켓·스탬프 안내와 축제일을 포함한 완전 revision을 복원하되,
+  실시간 혼잡도 저장값은 콘텐츠 rollback 대상으로 삼지 않는다.

@@ -1,38 +1,23 @@
-# API 명세에서 필요한 절 찾기
+# API 명세에서 필요한 계약 찾기
 
 [위키 홈](../README.md) · 읽는 때: API 구현·검토·문서 변경
 
-[API v1 원문](../../../핵심%20기능%20API%20명세서%20v1.md)을 복제하지 않는다.
-먼저 제목을 검색하고 해당 절과 그 절이 명시하는 공통 계약을 읽는다.
+제품 API의 단일 정본은 [API v2 명세](../../../api-v2/README.md)다. 생성물만 직접
+고치지 않고 `contract-source.mjs`와 `admin-contract.mjs`를 수정한 뒤 OpenAPI와 예제를
+생성한다.
 
-| 변경 영역 | 확인할 절 |
+| 변경 영역 | 확인할 자료 |
 |---|---|
-| 공통 HTTP·오류·버전 | 2~4, 27 |
-| locale·시간·pagination | 5~7 |
-| 공통 리소스·공개 경로 | 8~9 |
-| 축제·홈 | 10 |
-| 라인업·시간표·부스·지도 | 각각 11·12·13·14 |
-| 공지·외부 링크·챗봇 | 각각 15·16·17 |
-| 관리자 인증·권한 | 18, 21, 24 |
-| 관리자 콘텐츠·게시·revision | 19, 22, 25 |
-| 미디어 | 20, 22, 24 |
-| 캐시·남용 방지·보안·무결성·운영 | 22~26 중 관련 절 |
-| 출시 검증 | 28 |
-| 조건부 스탬프 | 29의 관련 하위 절 |
+| 공통 HTTP·오류·locale·시간 | [v2 명세](../../../api-v2/README.md) 공통 계약과 [OpenAPI](../../../api-v2/openapi.json) schema |
+| 공개 화면 경로·상태 | [경로·시나리오](../../../api-v2/ENDPOINTS.md), [화면별 데이터](../../../api-v2/SCREEN-DATA.md), [화면 상태](../../../api-v2/SCREEN-STATES.md) |
+| 관리자 인증·쓰기 | [관리자 변경](../../../api-v2/ADMIN-CHANGES.md), OpenAPI의 `/api/v2/admin/**` |
+| 목 동작·프런트 연동 | [프런트 안내](../../../api-v2/FRONTEND.md), `domain.mjs`, `admin-domain.mjs` |
+| 합의 전 기술·운영값 | [결정 대기](../../../api-v2/DECISIONS.md)와 해당 Product 문서 |
 
-저장소 루트에서 제목 위치를 찾는 명령:
+저장소 루트에서 경로나 schema 위치를 찾는 예시:
 
 ```powershell
-rg -n '^#{2,4} ' '핵심 기능 API 명세서 v1.md'
+rg -n 'getPins|/api/v2/maps|Pin' api-v2/contract-source.mjs api-v2/openapi.json
 ```
 
-원문의 절 번호가 바뀌면 이 표도 갱신한다. 다른 작업에서 추가된 절은 현재 checkout의
-원문 제목을 검색해 확인하며, 미병합 변경이 이미 존재한다고 가정하지 않는다.
-
-## API v2 탐색
-
-화면 데이터 기반 새 개발은 [v2 명세](../../../api-v2/README.md)에서 시작합니다.
-[경로·시나리오](../../../api-v2/ENDPOINTS.md)로 요청을 찾고
-[화면별 필드](../../../api-v2/SCREEN-DATA.md)와 [OpenAPI](../../../api-v2/openapi.json)를 읽습니다.
-목 서버는 [프런트 안내](../../../api-v2/FRONTEND.md), 합의 전 계약은
-[결정 대기](../../../api-v2/DECISIONS.md)를 확인합니다. 위 절 번호 표는 v1 전용입니다.
+계약 변경은 source·생성 OpenAPI·예시·consumer/provider 테스트를 같은 변경에서 갱신한다.

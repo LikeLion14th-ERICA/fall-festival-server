@@ -25,7 +25,7 @@ Web Push 전송 성공은 브라우저 push service의 접수를 뜻합니다. �
 | API | Spring Boot 4.1.1, Java 21, `web-push` 5.1.2 | 세션·CSRF, 진행도, 구독 검증, 예약·전송·ACK | Caddy 내부 `8080` |
 | DB | PostgreSQL 16 Alpine, Flyway | 모든 서버 상태와 전송 결과 영속화 | 내부 `5432` |
 
-Caddy는 `/api/*`를 prefix 그대로 `backend:8080`에 전달하고 나머지 경로를 `frontend:3000`에 전달합니다. 페이지, API, Service Worker와 쿠키가 모두 `https://APP_DOMAIN` 하나에 속합니다.
+Caddy는 `/test-api/*`를 prefix 그대로 `backend:8080`에 전달하고 나머지 경로를 `frontend:3000`에 전달합니다. 페이지, API, Service Worker와 쿠키가 모두 `https://APP_DOMAIN` 하나에 속합니다.
 
 Docker의 `data` network는 `internal: true`이며 PostgreSQL은 이 network에만 연결됩니다. 백엔드는 `data`로 PostgreSQL에 접근하고 `edge`로 Caddy 및 외부 FCM/Apple Web Push endpoint와 통신합니다. 호스트에는 3000, 8080, 5432를 publish하지 않습니다.
 
@@ -95,9 +95,9 @@ test/
 | `SPRING_DATASOURCE_MINIMUM_IDLE` | `1` | Hikari 최소 idle connection 수 |
 | `SPRING_PROFILES_ACTIVE` | Compose에서 `prod` | secure cookie와 비노출 health detail 설정 |
 | `SERVER_FORWARD_HEADERS_STRATEGY` | Compose에서 `framework` | Caddy의 forwarded HTTPS 정보 반영 |
-| `NEXT_PUBLIC_API_BASE_PATH` | build 시 `/api/v1` | 프런트 동일-origin API prefix. 절대 URL은 허용하지 않음 |
+| `NEXT_PUBLIC_API_BASE_PATH` | build 시 `/test-api` | 프런트 동일-origin API prefix. 절대 URL은 허용하지 않음 |
 
-Compose는 `NEXT_PUBLIC_API_BASE_PATH=/api/v1`을 frontend image의 build argument로 넘기고 Dockerfile은 builder stage의 환경 값으로 설정합니다. 이는 Next.js client bundle에 compile되는 공개 경로이므로 비밀값을 넣지 않습니다. 양쪽 `.dockerignore`는 local build output, log와 `.env*`를 build context에서 제외하며 frontend만 비밀이 없는 `.env.example`을 다시 허용합니다. 실제 `.env`가 image layer로 복사되지 않게 하는 설정입니다.
+Compose는 `NEXT_PUBLIC_API_BASE_PATH=/test-api`을 frontend image의 build argument로 넘기고 Dockerfile은 builder stage의 환경 값으로 설정합니다. 이는 Next.js client bundle에 compile되는 공개 경로이므로 비밀값을 넣지 않습니다. 양쪽 `.dockerignore`는 local build output, log와 `.env*`를 build context에서 제외하며 frontend만 비밀이 없는 `.env.example`을 다시 허용합니다. 실제 `.env`가 image layer로 복사되지 않게 하는 설정입니다.
 
 `ACK_TOKEN`은 환경 변수가 아닙니다. 서버가 메시지마다 아래 값으로 결정적으로 계산하고 DB에는 raw ACK token을 저장하지 않습니다.
 
@@ -116,11 +116,11 @@ ACK 수신 시 서버는 같은 값을 다시 계산해 `MessageDigest.isEqual`�
 ```text
 설치 앱 시작
   -> IndexedDB cache 확인
-  -> POST /api/v1/session {} + 기존 HttpOnly cookie
+  -> POST /test-api/session {} + 기존 HttpOnly cookie
      -> 유효한 고정 수명 세션: state, csrfToken, ownerKey 반환
      -> 유효 세션 없음: 403 후 접근 코드 화면
   -> 사용자가 TEST_ACCESS_CODE 제출
-  -> POST /api/v1/session {accessCode}
+  -> POST /test-api/session {accessCode}
   -> 서버가 participant/counter/session 생성, cookie 설정
   -> ownerKey가 같은 IndexedDB outbox만 복원·전송
 ```
@@ -140,8 +140,8 @@ ACK 수신 시 서버는 같은 값을 다시 계산해 `MessageDigest.isEqual`�
 
 - 모든 API 응답은 `Cache-Control: no-store`입니다.
 - `POST`, `PUT`, `DELETE`는 ACK 예외를 제외하고 요청 `Origin`이 `APP_ALLOWED_ORIGINS`의 정확한 문자열과 일치해야 합니다.
-- `/api/v1/me/**`는 ACK 예외를 제외하고 유효 세션 쿠키가 필요합니다.
-- `/api/v1/me/**`의 상태 변경 요청은 bootstrap 응답의 `csrfToken`을 `X-CSRF-Token`에 넣습니다.
+- `/test-api/me/**`는 ACK 예외를 제외하고 유효 세션 쿠키가 필요합니다.
+- `/test-api/me/**`의 상태 변경 요청은 bootstrap 응답의 `csrfToken`을 `X-CSRF-Token`에 넣습니다.
 - ACK endpoint는 Service Worker가 cookie 없이 호출할 수 있도록 세션·Origin·CSRF 대신 메시지 capability token과 IP rate limit을 사용합니다.
 - 신규 접근 코드 오입력 제한은 기본 IP당 15분에 5회입니다. 코드가 빠진 최초 bootstrap은 `403 ACCESS_CODE_REQUIRED`를 반환하되 실패 횟수를 소비하지 않습니다. 제한 상태와 값은 메모리에 있으므로 단일 backend replica용 방어입니다.
 - ACK 제한은 기본 IP당 1분에 60회입니다.
@@ -155,7 +155,7 @@ ACK 수신 시 서버는 같은 값을 다시 계산해 `MessageDigest.isEqual`�
     "message": "The CSRF token is missing or invalid.",
     "details": [],
     "timestamp": "2026-09-05T00:00:00+09:00",
-    "path": "/api/v1/me/counter-operations"
+    "path": "/test-api/me/counter-operations"
   }
 }
 ```
@@ -164,7 +164,7 @@ validation 오류의 `details`는 `{ "field": "...", "message": "..." }` 배열�
 
 ## API 계약
 
-공통 prefix는 `/api/v1`입니다. 아래 응답은 `data` wrapper 없이 JSON 객체로 반환됩니다.
+공통 prefix는 `/test-api`입니다. 아래 응답은 `data` wrapper 없이 JSON 객체로 반환됩니다.
 
 | 기능 | method/path | 요청 body | 응답 |
 |---|---|---|---|
@@ -444,7 +444,7 @@ Service Worker cache `espero-pwa-shell-v2`의 정책은 다음과 같습니다.
 - install에서 shell URL과 icon을 best-effort precache합니다.
 - navigation은 network-first이고 실패하면 해당 cache 또는 `/` shell로 fallback합니다.
 - same-origin style/script/image/font는 cache hit을 즉시 반환하고 background network refresh를 best-effort로 시도합니다.
-- `/api/*`와 non-GET, cross-origin 요청은 가로채거나 cache하지 않습니다.
+- `/test-api/*`와 non-GET, cross-origin 요청은 가로채거나 cache하지 않습니다.
 - activate에서 이전 이름의 shell cache를 삭제하고 client를 claim합니다.
 
 검증된 session을 얻은 뒤 `navigator.storage.persist()`를 best-effort 요청합니다. 영속 저장 승인은 브라우저 정책이 결정하며 사이트 데이터 삭제를 막아 주지는 않습니다.
@@ -471,7 +471,7 @@ Flyway `V1__create_stamp_push_schema.sql`이 시작 시 schema를 생성합니�
 일반 `docker-compose.yml`은 개발·충분한 메모리의 호스트에서 이미지를 빌드할 수 있는 구성입니다. `docker-compose.e2-micro.yml`은 Tokyo에서 A1을 선택할 수 없고 1 GB `VM.Standard.E2.1.Micro`만 Always Free인 상황을 위한 별도 runtime 계약입니다.
 
 - E2 서버에는 Maven/Next build context가 없고, 외부에서 만든 `linux/amd64` frontend/backend image와 공식 PostgreSQL/Caddy image를 모두 digest로 pull합니다. 네 서비스 모두 Compose에서 `platform: linux/amd64`를 고정해 ARM image를 잘못 배포하지 않게 합니다.
-- E2 frontend build는 같은 Next.js 소스를 [공식 static export 방식](https://nextjs.org/docs/app/guides/static-exports)으로 만들고 최종 image에는 non-root BusyBox `httpd`만 둡니다. 브라우저가 동일 origin `/api/v1`을 호출하므로 SSR이나 Node runtime이 필요하지 않습니다. 일반 개발 profile의 Next standalone image는 그대로 유지합니다.
+- E2 frontend build는 같은 Next.js 소스를 [공식 static export 방식](https://nextjs.org/docs/app/guides/static-exports)으로 만들고 최종 image에는 non-root BusyBox `httpd`만 둡니다. 브라우저가 동일 origin `/test-api`을 호출하므로 SSR이나 Node runtime이 필요하지 않습니다. 일반 개발 profile의 Next standalone image는 그대로 유지합니다.
 - `mem_limit` 합계는 backend 416 MiB, PostgreSQL 160 MiB, 정적 frontend 32 MiB, Caddy 96 MiB의 총 704 MiB입니다. 나머지 약 320 MiB는 Ubuntu, Docker daemon과 page cache를 위해 남깁니다.
 - 각 컨테이너는 `memswap_limit`과 `pids_limit`도 가지며 호스트에는 2 GB swap을 별도로 준비합니다. swap은 순간 OOM 방지용이고 지속 부하를 감당하는 RAM이 아닙니다.
 - Java는 192 MiB heap, 96 MiB metaspace, Serial GC와 제한된 code/direct memory를 사용합니다. 416 MiB container 상한 안에 JVM native 영역 여유를 두고 Tomcat 16 threads, Hikari 4 connections로 동시성 상한을 낮춥니다.

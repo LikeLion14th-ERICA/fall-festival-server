@@ -10,6 +10,45 @@ interface PushEventFixture {
 }
 
 describe("service worker push payload", () => {
+  it("does not treat a test API response as a navigable shell request", () => {
+    const listeners: Record<string, (event: unknown) => void> = {};
+    const worker = {
+      addEventListener(type: string, listener: (event: unknown) => void) {
+        listeners[type] = listener;
+      },
+      crypto: { randomUUID: () => "random-id" },
+      location: { origin: "https://example.test" },
+      registration: { showNotification: vi.fn() },
+      skipWaiting: vi.fn(),
+    };
+    const source = readFileSync(resolve(process.cwd(), "public/sw.js"), "utf8");
+    runInNewContext(source, {
+      Date,
+      Intl,
+      JSON,
+      Math,
+      Promise,
+      Response,
+      URL,
+      caches: {},
+      clients: {},
+      fetch: vi.fn(),
+      self: worker,
+    });
+
+    const respondWith = vi.fn();
+    listeners.fetch({
+      request: {
+        method: "GET",
+        mode: "navigate",
+        url: "https://example.test/test-api/me/state",
+      },
+      respondWith,
+    });
+
+    expect(respondWith).not.toHaveBeenCalled();
+  });
+
   it("shows a conventional nested notification and sends the token-only ACK", async () => {
     const listeners: Record<string, (event: unknown) => void> = {};
     const showNotification = vi.fn().mockResolvedValue(undefined);
@@ -72,7 +111,7 @@ describe("service worker push payload", () => {
     );
     expect(showNotification.mock.calls[0][1].data).not.toHaveProperty("ackToken");
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/v1/me/notifications/ack",
+      "/test-api/me/notifications/ack",
       expect.objectContaining({
         credentials: "omit",
         body: expect.any(String),

@@ -1,6 +1,6 @@
 # 가을 축제 논리 ERD
 
-이 디렉터리의 ERD는 최신 Product v5와 API v2 draft.3을 근거로 만든 **구현 전 논리 모델**이다.
+이 디렉터리의 ERD는 최신 Product v5와 API v2를 근거로 만든 **구현 전 논리 모델**이다.
 현재 Spring Boot scaffold에 Entity·Flyway migration·운영 DB schema가 구현되어 있다는 뜻이 아니다.
 구현을 시작할 때는 [데이터 모델·ERD 설계 검토](../wiki/engineering/data-model.md)의 결정 게이트와
 관계 제약을 먼저 확인한다.
@@ -26,5 +26,6 @@ Chrome visual-check를 다시 실행한다. 생성 Viewer의 고정 UI는 영어
 - 스탬프 수령 인증 코드의 실제 값과 사용자별 인증 이력. 코드는 서버 비밀 설정에서만
   검증하며 ERD Entity·API 응답·클라이언트 저장값으로 만들지 않는다.
 
-관리자 인증·권한·감사 actor 모델은 필요하지만 아직 Product 수준에서 확정되지 않았다. 이를
-추측해 Entity나 migration으로 만들지 않는다.
+관리자 인증은 현재 구현되어 있으며 서버에서 권한을 검증한다. 관리자 계정·역할·세션·권한
+회수와 감사 actor의 세부 저장 정책은 현재 구현 경계를 따르며, 이를 문서 밖에서 추측해
+Entity나 migration으로 확장하지 않는다.

@@ -35,7 +35,7 @@ class FallFestivalServerApplicationTests {
     void startsWithoutExternalServicesAndDoesNotExposeUnimplementedApi() throws Exception {
         try (var client = HttpClient.newHttpClient()) {
             var request = HttpRequest.newBuilder(
-                    URI.create("http://127.0.0.1:" + port + "/api/v1/festivals")).build();
+                    URI.create("http://127.0.0.1:" + port + "/api/v2/unknown-resource")).build();
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             assertThat(response.statusCode()).isEqualTo(404);

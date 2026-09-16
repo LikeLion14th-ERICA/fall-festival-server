@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url';
 import { createState,execute,ApiFailure,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
 import { validate } from './validate.mjs';
 
+const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
+
 export async function createMockServer({origins=['http://localhost:3000','http://127.0.0.1:3000','http://localhost:5173','http://127.0.0.1:5173']}={}) {
   const spec=JSON.parse(await readFile(new URL('./openapi.json',import.meta.url),'utf8'));
   const examples=JSON.parse(await readFile(new URL('./examples.json',import.meta.url),'utf8'));
@@ -52,10 +54,14 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const query={};
       for(const [key,v]of url.searchParams){if(Object.hasOwn(query,key))failure(400,'INVALID_QUERY','중복 쿼리 파라미터입니다.');if(key!=='__scenario'&&!route.definition.parameters.some(p=>p.in==='query'&&p.name===key))failure(400,'INVALID_QUERY','정의되지 않은 쿼리 파라미터입니다.');query[key]=v;}
       for(const p of route.definition.parameters){const value=p.in==='path'?params[p.name]:query[p.name];if(value===undefined){if(p.required)failure(400,'INVALID_QUERY','필수 파라미터가 없습니다.',[{field:p.name,reason:'필수 값입니다.'}]);}else{const issues=validate(p.schema,value,spec,p.name);if(issues.length)failure(400,'INVALID_QUERY','파라미터 형식이 잘못되었습니다.',issues);}}
-      locale=query.locale||'ko';
-      if(!state.languages.includes(locale)){locale='ko';failure(400,'LOCALE_NOT_READY','준비 완료 언어만 요청할 수 있습니다.');}
       scenario=req.headers['x-mock-scenario']||query.__scenario||'normal';delete query.__scenario;
       if(!route.scenarios.includes(scenario))failure(400,'UNKNOWN_SCENARIO','이 요청에서 지원하지 않는 시나리오입니다.');
+      if(['all-languages','partial-translation'].includes(scenario))state.languages=['ko','en','zh-Hans','ja'];
+      locale=query.locale||'ko';
+      if(!state.languages.includes(locale)){
+        const known=KNOWN_LOCALES.has(locale);locale='ko';
+        failure(400,known?'LOCALE_NOT_READY':'INVALID_QUERY',known?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
+      }
       if(req.headers['x-mock-time']){const time=req.headers['x-mock-time'];const issues=validate(spec.components.schemas.Timestamp,time,spec);if(issues.length)failure(400,'INVALID_MOCK_TIME','유효한 KST RFC 3339 시각이 필요합니다.');now=time;}
       now=scenarioTime(scenario,now);
       let body;

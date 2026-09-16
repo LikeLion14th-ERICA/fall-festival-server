@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -38,6 +40,9 @@ class StampGuideStoreIntegrationTest {
     @Autowired
     private StampGuideStore store;
 
+    @Autowired
+    private NamedParameterJdbcTemplate jdbc;
+
     @Test
     void migrationSeedsTheGuideRowAndArrayColumnsMapCorrectly() {
         Optional<StampGuide> guide = store.find();
@@ -55,5 +60,28 @@ class StampGuideStoreIntegrationTest {
         assertThat(guide.get().rewardHoursText()).isNull();
         assertThat(guide.get().qrValue()).isNull();
         assertThat(guide.get().updatedAt()).isNotNull();
+    }
+
+    @Test
+    @Transactional
+    void revisionScopedValuesTakePrecedenceOverTheLegacySingletonMirror() {
+        jdbc.update("""
+            UPDATE stamp_guide
+            SET title = '오래된 미러 값', reward_location_text = '오래된 위치',
+                reward_hours_text = '오래된 시간', qr_value = 'OLD-PUBLIC-QR'
+            WHERE id = 1
+            """, java.util.Map.of());
+        java.util.UUID publishedRevisionId = jdbc.queryForObject(
+            "SELECT id FROM festival_revisions WHERE state = 'published'",
+            java.util.Map.of(), java.util.UUID.class
+        );
+
+        Optional<StampGuide> guide = store.find(publishedRevisionId);
+
+        assertThat(guide).isPresent();
+        assertThat(guide.get().title()).isEqualTo("스탬프투어");
+        assertThat(guide.get().rewardLocationText()).isNull();
+        assertThat(guide.get().rewardHoursText()).isNull();
+        assertThat(guide.get().qrValue()).isNull();
     }
 }

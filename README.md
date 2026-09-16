@@ -6,7 +6,7 @@
 - GitHub: [LikeLion14th-ERICA/fall-festival-server](https://github.com/LikeLion14th-ERICA/fall-festival-server)
 - 제품 범위: [기능 범위](docs/wiki/product/scope.md)
 - 새 화면 연동 계약 초안: [API v2](api-v2/README.md)
-- 기존 API v1 기록: [핵심 기능 API 명세서 v1](핵심%20기능%20API%20명세서%20v1.md)
+- 제품 API 계약: [핵심 기능 API 명세서 v2](핵심%20기능%20API%20명세서%20v2.md)
 - 논리 데이터 모델·ERD: [설계 검토](docs/wiki/engineering/data-model.md)
 - 작업 시작: [AGENTS.md](AGENTS.md) · [기여 안내](CONTRIBUTING.md)
 

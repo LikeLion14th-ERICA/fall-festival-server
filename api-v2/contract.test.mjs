@@ -17,6 +17,11 @@ let server,base;
 before(async()=>{server=await createMockServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;});
 after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));});
 async function call(path,{method='GET',body,headers={},session='test'}={}){const response=await fetch(base+path,{method,headers:{'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},...(body!==undefined?{body:typeof body==='string'?body:JSON.stringify(body)}:{})});const json=await response.json();return {status:response.status,body:json,headers:response.headers};}
+async function enableAllMockLocales(session){
+  const response=await call('/api/v2/config',{session,headers:{'X-Mock-Scenario':'all-languages'}});
+  assert.equal(response.status,200);
+  assert.deepEqual(response.body.data.languages.map(language=>language.code),['ko','en','zh-Hans','ja']);
+}
 const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
@@ -127,9 +132,18 @@ test('Crowding no-op, FULL confirmation, day boundary, restoration, shared read 
   const full=await call('/api/v2/admin/crowding',{...opts,method:'PUT',body:{level:'FULL',confirmFull:true}});assert.equal(full.status,200);
   assert.equal((await call('/api/v2/crowding',{session})).body.data.status,'FULL');
   assert.equal((await call('/api/v2/crowding',{session:'separate-client'})).body.data.status,'MODERATE');
-  const closed=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});assert.equal(closed.body.data.status,'CLOSED');assert.equal(closed.body.data.timeBasis,'NONE');
+  const closed=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});assert.equal(closed.body.data.status,'CLOSED');assert.equal(closed.body.data.timeBasis,'NONE');assert.equal(closed.body.data.updatedAt,null);
+  const closedSave=await call('/api/v2/admin/crowding',{...opts,method:'PUT',headers:{...admin,'X-Mock-Time':'2030-10-01T23:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(closedSave.status,200);assert.equal(closedSave.body.data.status,'CLOSED');assert.equal(closedSave.body.data.savedLevel,'CROWDED');assert.equal(closedSave.body.data.updatedAt,null);
+  const closedNoop=await call('/api/v2/admin/crowding',{...opts,method:'PUT',headers:{...admin,'X-Mock-Time':'2030-10-01T23:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(closedNoop.body.meta.revision,closedSave.body.meta.revision);assert.equal(closedNoop.body.data.updatedAt,null);
+  const reopened=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T21:00:00+09:00'}});assert.equal(reopened.body.data.status,'CROWDED');assert.ok(reopened.body.data.updatedAt);
   const midnight=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T00:00:00+09:00'}});assert.equal(midnight.body.data.savedLevel,null);assert.equal(midnight.body.data.updatedAt,null);
   const next=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T13:00:00+09:00'}});assert.equal(next.body.data.status,'RELAXED');assert.equal(next.body.data.timeBasis,'OPENING');assert.equal(next.body.data.savedLevel,null);
+  const outsideSession='crowding-outside-festival-day';
+  await call('/api/v2/admin/crowding',{session:outsideSession,method:'PUT',headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'},body:{level:'CROWDED'}});
+  const festivalOpening=await call('/api/v2/crowding',{session:outsideSession,headers:{'X-Mock-Time':'2030-10-01T14:00:00+09:00'}});
+  assert.equal(festivalOpening.body.data.status,'MODERATE');
 });
 test('Goods save changes only one size and derives sold-out; failed writes do not mutate',async()=>{
   const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability';
@@ -144,6 +158,7 @@ test('Goods save changes only one size and derives sold-out; failed writes do no
 });
 test('Notice create/edit/delete synchronizes public list, language visibility and immutable template',async()=>{
   const session='notice-flow';
+  await enableAllMockLocales(session);
   const template=(await call('/api/v2/admin/notice-templates/template-1',{session,headers:admin})).body.data;
   const body={...examples.postAdminNotice.scenarios.normal.request.body,templateId:'template-1'};
   const created=await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body});assert.equal(created.status,201);assert.ok(created.headers.get('location'));
@@ -197,6 +212,18 @@ test('MapTarget is a canonical current PLACE pin and null means unlinked',async(
   assert.equal((await call('/api/v2/ticket-guide',{session,headers:{'X-Mock-Scenario':'unconfigured'}})).body.data.mapTarget,null);
   assert.equal((await call('/api/v2/spaces/space-booth',{session,headers:{'X-Mock-Scenario':'missing-optional'}})).body.data.mapTarget,null);
 });
+test('Map pin filters contain only current PLACE groups in stable order and AREA pins stay visible',async()=>{
+  const expectedOrder=['STUDENT_COUNCIL','EXPERIENCE','CONVENIENCE','FOOD_AND_BEVERAGE','PERFORMANCE'];
+  for(const map of (await call('/api/v2/maps')).body.data.items){
+    const data=(await call(`/api/v2/maps/${map.id}/pins?mapVersion=${map.version}`)).body.data;
+    const placeGroups=data.items.filter(pin=>pin.target.kind==='PLACE').map(pin=>pin.filterGroup);
+    const expected=[...new Set(placeGroups)].sort((a,b)=>expectedOrder.indexOf(a)-expectedOrder.indexOf(b));
+    assert.deepEqual(data.filters.map(filter=>filter.id),expected);
+    assert.ok(data.items.filter(pin=>pin.target.kind==='AREA').every(pin=>pin.filterGroup===null));
+    assert.ok(data.items.filter(pin=>pin.target.kind==='PLACE').every(pin=>pin.filterGroup!==null));
+    assert.ok(data.filters.every(filter=>expectedOrder.includes(filter.id)&&typeof filter.label==='string'&&filter.label.length>0));
+  }
+});
 test('CORS preflight and response metadata support frontend dev origins only',async()=>{
   const catalog=await call('/__mock/catalog');assert.equal(catalog.body.baseUrl,base);
   const ok=await fetch(base+'/api/v2/config',{method:'OPTIONS',headers:{Origin:'http://localhost:5173','Access-Control-Request-Method':'GET'}});assert.equal(ok.status,204);assert.equal(ok.headers.get('access-control-allow-origin'),'http://localhost:5173');
@@ -246,35 +273,32 @@ test('Empty product configurations are rejected before state mutation',async()=>
   assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
 });
 
-test('New options require an explicit mock policy; existing states survive product edits',async()=>{
+test('New product and option combinations start on sale while existing states survive edits',async()=>{
   const session='products-v5',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
   const opts={session,headers:admin,method:'POST',body};
-  const blocked=await call('/api/v2/admin/products',opts);assert.equal(blocked.status,409);assert.equal(blocked.body.error.code,'INITIAL_AVAILABILITY_UNRESOLVED');
-  assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,1);
-  const created=await call('/api/v2/admin/products',{...opts,headers:{...admin,'X-Mock-Scenario':'new-option-on-sale'}});assert.equal(created.status,201);
+  const created=await call('/api/v2/admin/products',opts);assert.equal(created.status,201);
   const id=created.body.data.id;
+  assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,2);
   body.name='수정 상품';body.price.amount=3000;
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,200);
   assert.ok((await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants.every(v=>v.status==='ON_SALE'));
   body.options.push({colorId:'color-b',sizeId:'size-l'});
-  const pendingInitial=await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body});
-  assert.equal(pendingInitial.status,409);assert.equal(pendingInitial.body.error.code,'INITIAL_AVAILABILITY_UNRESOLVED');
-  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'X-Mock-Scenario':'new-option-sold-out'},method:'PUT',body})).status,200);
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,200);
   const variants=(await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants;
-  assert.equal(variants.length,4);assert.equal(variants.filter(v=>v.status==='ON_SALE').length,3);
+  assert.equal(variants.length,4);assert.equal(variants.filter(v=>v.status==='ON_SALE').length,4);
   const invalid=structuredClone(body);invalid.options.push({colorId:'unknown',sizeId:'size-m'});
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body:invalid})).status,422);
 });
 
-test('Option deletion remains blocked while its policy is unresolved',async()=>{
+test('Color, size, and option deletion removes obsolete availability and preserves retained states',async()=>{
   const session='products-option-deletion';
-  const goodsBefore=(await call('/api/v2/goods',{session})).body.data;
   const availabilityBefore=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
   const body=structuredClone(examples.putAdminProduct.scenarios['option-removal'].request.body);
   const response=await call('/api/v2/admin/products/goods-shirt',{session,headers:admin,method:'PUT',body});
-  assert.equal(response.status,409);assert.equal(response.body.error.code,'OPTION_DELETION_UNRESOLVED');
-  assert.deepEqual((await call('/api/v2/goods',{session})).body.data,goodsBefore);
-  assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
+  assert.equal(response.status,200);
+  const availabilityAfter=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  assert.deepEqual(availabilityAfter.variants.map(variant=>`${variant.colorId}/${variant.sizeId}`),['color-a/size-m','color-a/size-l']);
+  assert.deepEqual(availabilityAfter.variants.map(variant=>variant.status),availabilityBefore.variants.filter(variant=>variant.colorId==='color-a').map(variant=>variant.status));
 });
 
 test('Korean notice publishes despite failed English; retry enables only READY languages',async()=>{
@@ -285,6 +309,7 @@ test('Korean notice publishes despite failed English; retry enables only READY l
   const saved=await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body});assert.equal(saved.status,201);
   const id=saved.body.data.id;
   assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
+  await enableAllMockLocales(session);
   assert.ok(!(await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
   const retry=(await call('/api/v2/admin/notice-translations',{session,headers:admin,method:'POST',body:source})).body.data;
   body.translations=retry.translations;
@@ -299,6 +324,7 @@ test('Korean notice publishes despite failed English; retry enables only READY l
 test('Fixed prohibited-items guidance is available outside performance hours',async()=>{
   for(const time of ['2030-09-30T08:00:00+09:00','2030-10-01T18:00:00+09:00','2030-10-04T00:00:00+09:00'])assert.ok((await call('/api/v2/prohibited-items',{headers:{'X-Mock-Time':time}})).body.data.items.length);
   assert.equal((await call('/api/v2/timetable')).body.data.axis.endTime,'22:00');
-  const english=(await call('/api/v2/prohibited-items?locale=en')).body.data;
+  const session='prohibited-items-locales';await enableAllMockLocales(session);
+  const english=(await call('/api/v2/prohibited-items?locale=en',{session})).body.data;
   assert.doesNotMatch(JSON.stringify(english),/[가-힣]/);
 });

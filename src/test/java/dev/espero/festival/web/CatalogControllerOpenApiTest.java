@@ -243,11 +243,11 @@ class CatalogControllerOpenApiTest {
             "place-booth", "SPACE", "테스트 부스", "학생회관 앞", "12:00~18:00", "설명", "체험", "space-booth"
         );
         Pin placePin = new Pin(
-            "pin-booth", "booth", "테스트 부스", new java.math.BigDecimal("0.125"), new java.math.BigDecimal("0.875"),
+            "pin-booth", "booth", "EXPERIENCE", "체험", "테스트 부스", new java.math.BigDecimal("0.125"), new java.math.BigDecimal("0.875"),
             new PinTarget("PLACE", "place-booth")
         );
         Pin areaPin = new Pin(
-            "pin-area", "area", "구역 이동", new java.math.BigDecimal("0.75"), new java.math.BigDecimal("0.25"),
+            "pin-area", "area", null, null, "구역 이동", new java.math.BigDecimal("0.75"), new java.math.BigDecimal("0.25"),
             new PinTarget("AREA", "map-area")
         );
         return new CatalogSnapshot(

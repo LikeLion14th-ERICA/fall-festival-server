@@ -36,12 +36,15 @@ public class TicketGuideStore {
      */
     public Optional<TicketGuideConfig> find(UUID festivalRevisionId) {
         return jdbc.query("""
-            SELECT unit_price_amount, account_bank_name, account_number, account_holder,
-                   transfer_link_label, transfer_link_url, instructions, festival_start_date, festival_end_date,
-                   daily_transfer_open_time, daily_transfer_close_time,
-                   daily_pickup_open_time, daily_pickup_close_time, updated_at
-            FROM ticket_guide
-            WHERE id = 1 AND festival_revision_id = :festivalRevisionId
+            SELECT current.unit_price_amount, current.account_bank_name,
+                   current.account_number, current.account_holder,
+                   current.transfer_link_label, current.transfer_link_url,
+                   current.instructions, current.festival_start_date,
+                   current.festival_end_date, current.daily_transfer_open_time,
+                   current.daily_transfer_close_time, current.daily_pickup_open_time,
+                   current.daily_pickup_close_time, current.updated_at
+            FROM ticket_guide_revisions current
+            WHERE current.id = 1 AND current.festival_revision_id = :festivalRevisionId
             """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
             (resultSet, rowNumber) -> map(resultSet)
         ).stream().findFirst();

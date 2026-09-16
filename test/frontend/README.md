@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-기본 API 경로는 동일 origin의 `/api/v1`입니다. 필요할 때만 빌드 시 `NEXT_PUBLIC_API_BASE_PATH`로 다른 path를 지정할 수 있으며, cross-origin URL은 의도적으로 허용하지 않습니다.
+기본 API 경로는 동일 origin의 `/test-api`입니다. 필요할 때만 빌드 시 `NEXT_PUBLIC_API_BASE_PATH`로 다른 path를 지정할 수 있으며, cross-origin URL은 의도적으로 허용하지 않습니다.
 
 전체 정적 검증은 다음 명령으로 실행합니다.
 
@@ -23,8 +23,8 @@ npm run check
 
 ## 세션 및 API 계약
 
-- 최초 standalone bootstrap: `POST /api/v1/session` body `{}`. 유효한 HttpOnly 세션 쿠키가 없어서 401/403이면 참여 코드 화면을 표시합니다.
-- 참여: `POST /api/v1/session` body `{ "accessCode": "..." }`.
+- 최초 standalone bootstrap: `POST /test-api/session` body `{}`. 유효한 HttpOnly 세션 쿠키가 없어서 401/403이면 참여 코드 화면을 표시합니다.
+- 참여: `POST /test-api/session` body `{ "accessCode": "..." }`.
 - 성공 응답: `{ "data": { "csrfToken": "...", "ownerKey": "...", "state": { ... } } }` 또는 같은 내용의 비포장 객체.
 - 이후 상태 변경 요청은 `X-CSRF-Token`을 포함하며 쿠키는 `credentials: include`로 전송합니다.
 - 카운터: `POST /me/counter-operations` body `{ operationId, delta }`.

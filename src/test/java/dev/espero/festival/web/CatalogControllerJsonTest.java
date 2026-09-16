@@ -90,11 +90,11 @@ class CatalogControllerJsonTest {
     @Test
     void serializesMapPinsEnvelopeCoordinatesAndPlaceOrAreaTargets() throws Exception {
         Pin placePin = new Pin(
-            "pin-place", "booth", "부스", new BigDecimal("0.1250"), new BigDecimal("0.8750"),
+            "pin-place", "booth", "EXPERIENCE", "체험", "부스", new BigDecimal("0.1250"), new BigDecimal("0.8750"),
             new PinTarget("PLACE", "place-booth")
         );
         Pin areaPin = new Pin(
-            "pin-area", "zone", "구역", new BigDecimal("0.5"), new BigDecimal("0.25"),
+            "pin-area", "zone", null, null, "구역", new BigDecimal("0.5"), new BigDecimal("0.25"),
             new PinTarget("AREA", "map-detail")
         );
         CatalogMap map = new CatalogMap(
@@ -110,15 +110,19 @@ class CatalogControllerJsonTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.mapId").value("map-overview"))
             .andExpect(jsonPath("$.data.mapVersion").value("map-v1"))
+            .andExpect(jsonPath("$.data.filters[0].id").value("EXPERIENCE"))
+            .andExpect(jsonPath("$.data.filters[0].label").value("체험"))
             .andExpect(jsonPath("$.data.items[0].x").value(0.125))
             .andExpect(jsonPath("$.data.items[0].y").value(0.875))
             .andExpect(jsonPath("$.data.items[0].target.kind").value("PLACE"))
             .andExpect(jsonPath("$.data.items[0].target.placeId").value("place-booth"))
+            .andExpect(jsonPath("$.data.items[0].filterGroup").value("EXPERIENCE"))
             .andExpect(jsonPath("$.data.items[0].target.mapId").doesNotExist())
             .andExpect(jsonPath("$.data.items[1].x").value(0.5))
             .andExpect(jsonPath("$.data.items[1].y").value(0.25))
             .andExpect(jsonPath("$.data.items[1].target.kind").value("AREA"))
             .andExpect(jsonPath("$.data.items[1].target.mapId").value("map-detail"))
+            .andExpect(jsonPath("$.data.items[1].filterGroup").value(Matchers.nullValue()))
             .andExpect(jsonPath("$.data.items[1].target.placeId").doesNotExist())
             .andExpect(jsonPath("$.meta.requestId").value("pins-json-test"));
     }

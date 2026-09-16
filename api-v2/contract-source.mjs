@@ -14,7 +14,11 @@ const timestamp = text('RFC 3339. 응답은 +09:00 offset을 포함하며 밀리
 const optionalText = nullable(text('등록된 표시 텍스트'), 'null이면 제목과 영역을 함께 숨김. 빈 문자열로 대체하지 않음.');
 const locale = enumeration(['ko', 'en', 'zh-Hans', 'ja'], '준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.');
 const availability = enumeration(['ON_SALE', 'SOLD_OUT'], '수량이 아닌 관리자 저장 판매 상태.');
-const crowd = enumeration(['RELAXED', 'MODERATE', 'CROWDED', 'FULL'], '관리자가 선택하는 4단계. 운영 전/종료는 저장값이 아님.');
+const crowd = enumeration(['RELAXED', 'MODERATE', 'CROWDED', 'FULL'], '관리자가 선택하는 4단계. 운영 전·종료에도 당일 저장은 허용하지만 공개 상태는 시간 상태가 우선한다.');
+const pinFilterGroup = enumeration(
+  ['STUDENT_COUNCIL', 'EXPERIENCE', 'CONVENIENCE', 'FOOD_AND_BEVERAGE', 'PERFORMANCE'],
+  '지도 핀 대분류 ID. PLACE 핀은 하나를 반드시 가지며 AREA 핀은 null.'
+);
 const mapTargetDescription = '같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태.';
 export const schemas = {
   Id: id, Date: date, Timestamp: timestamp, Locale: locale,
@@ -26,7 +30,7 @@ export const schemas = {
   Channel: object({ id, label: text('공식 채널 표시명'), url: text('확인된 공식 채널 HTTPS 주소', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭'), iconKey: text('프런트 아이콘 사전 키. URL이나 공식 명칭에서 추측하지 않음.') }),
   MapTarget: object({ mapId: id, placeId: id, pinId: id, mapVersion: text('좌표와 이미지 버전이 일치해야 함') }, undefined, mapTargetDescription),
   Config: object({ festival: object({ id, title: text('행사 표시명'), dates: array(date, '행사 날짜 오름차순. 자료 미확보 시 [].', { uniqueItems: true }), defaultDate: nullable(date, '축제 전 첫날·기간중 오늘·종료 후 마지막날. 날짜 미확보 시 null.') }), languages: array(object({ code: locale, label: text('원어 언어명') }), '준비 완료 언어만 순서대로 제공', { minItems: 1 }), links: object({ universityNotices: nullable(ref('Link'), '자료 미확보 시 null'), faq: nullable(ref('Link'), 'FAQ 외부 새 탭 연결. 승인 URL 미확보 시 null.'), officialChannels: array(ref('Channel'), '선정·준비 완료 채널만 제공'), welcomeDay: nullable(ref('Link'), '외부 새 탭 연결. 자료·공개 확인 전 null.') }) }),
-  Crowding: object({ operatingDay: date, opensAt: timestamp, closesAt: timestamp, status: enumeration(['BEFORE_OPEN', 'RELAXED', 'MODERATE', 'CROWDED', 'FULL', 'CLOSED'], '운영 시간과 마지막 저장 상태를 결합한 최종 상태'), savedLevel: nullable(crowd, '해당 운영일에 아직 저장하지 않았으면 null'), colorToken: nullable(enumeration(['green', 'orange', 'red', 'black'], '색상 의미 토큰. 정확한 디자인 HEX는 미정.'), '운영 전/종료면 null'), message: text('선택한 상태의 안내 문구'), updatedAt: nullable(timestamp, '실제 저장 성공 시각. 동일 상태 재선택 시 저장·시각을 갱신할지는 기술 초안·결정 대기.'), timeBasis: enumeration(['NONE', 'OPENING', 'OPERATOR'], '시각 숨김 / 운영 시작 기준 / 관리자 수정시각') }),
+  Crowding: object({ operatingDay: date, opensAt: timestamp, closesAt: timestamp, status: enumeration(['BEFORE_OPEN', 'RELAXED', 'MODERATE', 'CROWDED', 'FULL', 'CLOSED'], '운영 시간과 마지막 저장 상태를 결합한 최종 상태'), savedLevel: nullable(crowd, '해당 운영일에 아직 저장하지 않았으면 null'), colorToken: nullable(enumeration(['green', 'orange', 'red', 'black'], '색상 의미 토큰. 정확한 디자인 HEX는 미정.'), '운영 전/종료면 null'), message: text('선택한 상태의 안내 문구'), updatedAt: nullable(timestamp, '운영 전·종료면 null. 같은 상태 재선택은 저장·시각을 갱신하지 않는다.'), timeBasis: enumeration(['NONE', 'OPENING', 'OPERATOR'], '시각 숨김 / 운영 시작 기준 / 관리자 수정시각') }),
   Notice: object({ id, type: enumeration(['GENERAL', 'LOST_FOUND'], '일반은 당일 등록분, 분실물은 날짜와 무관'), title: text('전체 제목'), body: text('전체 본문, plain text. HTML 실행 금지.'), links: array(ref('Link'), '본문 외부 링크. 이미지를 직접 표시하는 필드 없음.'), createdAt: timestamp }),
   Notices: object({ items: array(ref('Notice'), '현재 날짜·언어에 노출 가능한 공지 전체. createdAt 내림차순, 동률 id 오름차순.'), visibleIds: array(id, '이 snapshot에서 노출 가능한 ID 전체. 삭제·날짜 만료·번역 미완료를 즉시 제거할 때 사용.', { uniqueItems: true }), asOfDate: date }),
   Size: object({ id, label: text('등록된 사이즈명. S/M/L/XL/2XL을 고정 enum으로 두지 않음.') }),
@@ -45,8 +49,9 @@ export const schemas = {
   Spaces: object({ items: array(ref('Space'), '선택 분류 목록. 검색·날짜·페이지 파라미터 없음. 별 우선 정렬은 브라우저.') }),
   Map: object({ id, name: text('지도명'), kind: enumeration(['OVERVIEW', 'AREA'], '전체/구역 지도'), version: text('불변 이미지·좌표 버전'), image: ref('Image') }),
   Maps: object({ items: array(ref('Map'), '등록 지도. overviewId와 id로 연결.'), overviewId: nullable(id, '등록 지도 없으면 null') }),
-  Pin: object({ id, category: text('핀 세부 종류 ID. 운영 목록에서 제공하며 명칭을 enum으로 고정하지 않음.'), label: text('선택 언어 표시명'), x: { type: 'number', minimum: 0, maximum: 1, description: '이미지 왼쪽 기준 가로 비율. 지도 조작과 무관.' }, y: { type: 'number', minimum: 0, maximum: 1, description: '이미지 위쪽 기준 세로 비율.' }, target: { oneOf: [object({ kind: enumeration(['PLACE'], '장소 팝업'), placeId: id }), object({ kind: enumeration(['AREA'], '팝업 없이 구역 지도 이동'), mapId: id })] } }),
-  Pins: object({ mapId: id, mapVersion: text('요청한 이미지 버전과 동일'), items: array(ref('Pin'), '핀 목록. UI 필터의 대/소분류 단위는 미정.') }),
+  PinFilter: object({ id: pinFilterGroup, label: text('현재 locale의 대분류 표시명') }, undefined, '현재 지도에 실제 PLACE 핀이 있는 대분류만 반환.'),
+  Pin: object({ id, category: text('핀 세부 종류 ID. 운영 목록에서 제공하며 명칭을 enum으로 고정하지 않음.'), filterGroup: nullable(pinFilterGroup, 'PLACE 핀은 대분류를 반드시 가지며 AREA 핀은 null. AREA 핀은 필터 대상이 아니고 항상 표시.'), label: text('선택 언어 표시명'), x: { type: 'number', minimum: 0, maximum: 1, description: '이미지 왼쪽 기준 가로 비율. 지도 조작과 무관.' }, y: { type: 'number', minimum: 0, maximum: 1, description: '이미지 위쪽 기준 세로 비율.' }, target: { oneOf: [object({ kind: enumeration(['PLACE'], '장소 팝업. filterGroup으로 대분류 필터링.'), placeId: id }), object({ kind: enumeration(['AREA'], '팝업 없이 구역 지도 이동. filterGroup은 null이며 필터와 무관하게 항상 표시.'), mapId: id })] } }),
+  Pins: object({ mapId: id, mapVersion: text('요청한 이미지 버전과 동일'), filters: array(ref('PinFilter'), '현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 대분류만 반환. 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외.'), items: array(ref('Pin'), '핀 목록. 서버 필터 query는 제공하지 않으며 클라이언트가 PLACE의 filterGroup으로 표시를 제어하고 AREA는 항상 표시.') }),
   Place: object({ id, kind: enumeration(['SPACE', 'FACILITY', 'LANDMARK'], '유형별 팝업 구성'), name: optionalText, locationText: optionalText, hoursText: optionalText, description: optionalText, usage: optionalText, spaceId: nullable(id, 'SPACE 유형만 상세 연결. 나머지는 null.') }),
   TicketGuide: object({ date, status: enumeration(['BEFORE_FESTIVAL', 'TRANSFER_OPEN', 'DAILY_CLOSED', 'FESTIVAL_ENDED', 'UNCONFIGURED'], '시간별 송금 안내 상태. 미설정은 확정 전 목용 안전 표현.'), unitPrice: nullable(ref('Money'), '가격 자료 대기 시 null. 0원과 다름.'), transferOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), transferClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), account: nullable(ref('BankAccount'), '송금 제공 시간 밖·미설정이면 null. 계좌번호 숨김.'), transferLink: nullable(ref('Link'), '미확정 또는 송금시간 밖이면 null'), mapTarget: nullable(ref('MapTarget'), mapTargetDescription), instructions: array(text('안내'), '승인된 현장 안내. 목에서 환불 정책을 임의로 확정하지 않음.') }),
   StampGuide: object({ title: text('행사 제목'), dates: array(date, '실제 행사 기간'), instructions: array(text('참여·상품 안내'), '없으면 []'), reward: object({ name: text('경품명'), locationText: optionalText, hoursText: optionalText, notice: text('당일 1회·소진 시 현장 안내') }), dailyLimit: enumeration([4], '당일 최대 적립'), timezone: enumeration(['Asia/Seoul'], '자정 초기화'), qrValue: nullable(text('공통 QR 비교값. 비밀키가 아님.'), '배포 방식·책임 미합의 시 null. 서명·부스별 고유값 없음.') }),
@@ -92,7 +97,7 @@ export const operations = [
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
   ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','error'],'StampReceiptVerificationInput'],
   ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','error']],
-  ['putAdminCrowding','PUT','/admin/crowding','Crowding','혼잡도 저장·동일 상태 재선택 처리는 기술 초안',['ADM-CROWD'],[],['normal','full','error'],'CrowdingInput'],
+  ['putAdminCrowding','PUT','/admin/crowding','Crowding','혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지',['ADM-CROWD'],[],['normal','full','error'],'CrowdingInput'],
   ['getAdminNotices','GET','/admin/notices','AdminNotices','관리자 공지 목록',['ADM-NOTICE-LIST'],[],['normal','empty','error']],
   ['postAdminNotice','POST','/admin/notices','AdminNotice','공지 등록(검토 필요)',['ADM-NOTICE-EDIT'],[],['normal','error'],'NoticeInput'],
   ['getAdminNotice','GET','/admin/notices/{noticeId}','AdminNotice','공지 수정 초기값',['ADM-NOTICE-EDIT'],[],['normal','missing-optional','not-found','error']],

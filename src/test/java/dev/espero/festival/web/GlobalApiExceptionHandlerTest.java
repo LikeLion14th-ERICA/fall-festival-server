@@ -36,7 +36,7 @@ class GlobalApiExceptionHandlerTest {
     @Test
     void mapsUnmappedPathTo404() {
         NoResourceFoundException exception = new NoResourceFoundException(
-            org.springframework.http.HttpMethod.GET, "/api/v1/festivals", "not found"
+            org.springframework.http.HttpMethod.GET, "/api/v2/unknown-resource", "not found"
         );
 
         ResponseEntity<ApiErrorResponse> response = handler.handleNoResourceFound(exception, request);

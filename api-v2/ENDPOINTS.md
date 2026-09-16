@@ -27,7 +27,7 @@
 | GET | `/api/v2/stamp-guide` | 스탬프 안내·공통 QR | STAMP-START, STAMP-COLLECT, STAMP-REWARD | normal, missing-optional, error, bad-request, rate-limited |
 | POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, error, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/crowding` | 혼잡도 저장·동일 상태 재선택 처리는 기술 초안 | ADM-CROWD | normal, full, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/crowding` | 혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지 | ADM-CROWD | normal, full, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, english-incomplete, english-failed, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices/{noticeId}` | 공지 수정 초기값 | ADM-NOTICE-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
@@ -39,8 +39,8 @@
 | PUT | `/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability` | 옵션 판매 상태 저장 | ADM-GOODS | normal, sold-out, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products` | 관리자 상품 목록 | ADM-GOODS-PRODUCT-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/products` | 상품 등록·초기 판매 상태 미정 | ADM-GOODS-PRODUCT-EDIT | normal, new-option-on-sale, new-option-sold-out, missing-optional, empty-configuration, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·기존 조합 판매 상태 유지 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, new-option-on-sale, new-option-sold-out, option-removal, empty-configuration, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/products` | 상품 등록·신규 옵션은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, empty-configuration, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, empty-configuration, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notice-translations` | 공지 번역 생성·재시도 | ADM-NOTICE-EDIT, ADM-NOTICE-TEMPLATE | normal, english-failed, partial-translation, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/sessions` | 관리자 로그인 |  | normal, invalid-credentials, disabled, invalid-origin, error, bad-request, rate-limited |
 | POST | `/api/v2/admin/sessions/refresh` | 관리자 세션 갱신·refresh rotation |  | normal, expired, revoked, unknown, disabled, invalid-origin, error, bad-request, rate-limited |

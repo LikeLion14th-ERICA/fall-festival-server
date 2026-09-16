@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TicketGuideController {
 
     private static final ZoneId TIMEZONE = ZoneId.of("Asia/Seoul");
-    private static final String CONTENT_LOCALE = "ko";
+    private static final String CONTENT_LOCALE = PublicContentLocale.KOREAN;
 
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
@@ -148,16 +148,11 @@ public class TicketGuideController {
 
     private void validateQuery(HttpServletRequest request) {
         for (java.util.Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-            if (!entry.getKey().equals("locale") || entry.getValue().length != 1
-                || !CONTENT_LOCALE.equals(entry.getValue()[0])) {
-                throw new ApiException(
-                    org.springframework.http.HttpStatus.BAD_REQUEST,
-                    "INVALID_QUERY",
-                    "요청 파라미터를 확인해 주세요.",
-                    false
-                );
+            if (!entry.getKey().equals("locale") || entry.getValue().length != 1) {
+                throw PublicContentLocale.invalidQuery();
             }
         }
+        PublicContentLocale.requirePublishedLocale(request);
     }
 
     private OffsetDateTime atSeoul(LocalDate date, LocalTime time) {

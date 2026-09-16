@@ -12,7 +12,7 @@
 - [현재 Figma 와이어프레임 인덱스](../design/README.md)
 - [저충실도 와이어프레임 — Figma Design, node `86:2`](https://www.figma.com/design/07TGnBzcBOboiHOUWadmGC/%EC%B6%95%EC%A0%9C-%EC%96%B4%ED%94%8C-%EA%B8%B0%ED%9A%8D?node-id=86-2)
 - [서비스 IA — FigJam, node `34:398`](https://www.figma.com/board/ucSFwArHy5NxGkYsp5Zyc0/%EC%B6%95%EC%A0%9C-%EC%96%B4%ED%94%8C-%EA%B8%B0%ED%9A%8D?node-id=34-398)
-- [`핵심 기능 API 명세서 v1`](../../../핵심%20기능%20API%20명세서%20v1.md)
+- [`핵심 기능 API 명세서 v2`](../../../핵심%20기능%20API%20명세서%20v2.md)
 - 총학생회·학교가 제공하거나 승인한 최신 공식 자료
 
 ## 결정 우선순위
@@ -21,7 +21,7 @@
 2. 사용자가 제공한 최신 기능 명세서
 3. 총학생회·학교가 제공하거나 승인한 최신 공식 자료
 4. Figma IA·와이어프레임의 화면 의도
-5. API v1 계약
+5. API v2 계약
 
 최신 기능 명세서는 제품 동작의 기준이지만 `임시 기준`, `확인 필요`, `미정`, `후속
 작업`을 확정값으로 바꾸지 않는다. 이후 사용자의 명시적 결정이나 승인 자료가 나오면

@@ -79,6 +79,22 @@ class CatalogControllerTest {
     }
 
     @Test
+    void distinguishesKnownLocalesThatAreNotReadyFromUnknownLocales() {
+        when(snapshots.required()).thenReturn(emptySnapshot());
+        HttpServletRequest knownButUnready = request(Map.of("locale", new String[] {"en"}));
+        HttpServletRequest unknown = request(Map.of("locale", new String[] {"xx"}));
+        when(knownButUnready.getParameter("locale")).thenReturn("en");
+        when(unknown.getParameter("locale")).thenReturn("xx");
+
+        assertThatThrownBy(() -> controller.getMaps(knownButUnready))
+            .isInstanceOf(ApiException.class)
+            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("LOCALE_NOT_READY"));
+        assertThatThrownBy(() -> controller.getMaps(unknown))
+            .isInstanceOf(ApiException.class)
+            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("INVALID_QUERY"));
+    }
+
+    @Test
     void returnsVersionConflictOnlyForAnExistingMapWithAnOldVersion() {
         when(snapshots.required()).thenReturn(snapshotWithMap());
         HttpServletRequest oldVersion = request(Map.of("mapVersion", new String[] {"old-version"}));
@@ -125,7 +141,7 @@ class CatalogControllerTest {
         );
         Place place = new Place("place-test", "SPACE", "테스트 부스", null, null, null, null, "space-test");
         Pin pin = new Pin(
-            "pin-test", "booth", "테스트 부스", new BigDecimal("0.5"), new BigDecimal("0.25"),
+            "pin-test", "booth", "EXPERIENCE", "체험", "테스트 부스", new BigDecimal("0.5"), new BigDecimal("0.25"),
             new PinTarget("PLACE", "place-test")
         );
         return new CatalogSnapshot(
@@ -142,6 +158,19 @@ class CatalogControllerTest {
         return new CatalogSnapshot.FestivalContext(
             "festival-catalog", UUID.fromString("00000000-0000-0000-0000-000000000003"), 3
         );
+    }
+
+    @Test
+    void returnsOnlyPlacePinGroupsInTheStableContractOrder() {
+        when(snapshots.required()).thenReturn(snapshotWithMap());
+        HttpServletRequest request = request(Map.of("mapVersion", new String[] {"map-v1"}));
+        when(request.getParameter("mapVersion")).thenReturn("map-v1");
+
+        ApiResponse<CatalogResponses.Pins> response = controller.getPins("map-area", request);
+
+        assertThat(response.data().filters())
+            .extracting(CatalogResponses.PinFilter::id, CatalogResponses.PinFilter::label)
+            .containsExactly(org.assertj.core.groups.Tuple.tuple("EXPERIENCE", "체험"));
     }
 
     private HttpServletRequest request(Map<String, String[]> parameters) {

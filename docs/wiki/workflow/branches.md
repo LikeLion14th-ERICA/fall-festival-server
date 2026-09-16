@@ -61,7 +61,7 @@
 ```text
 feat/42-map-category-filter
 fix/87-timetable-end-boundary
-docs/api-v1-contract
+docs/api-v2-contract
 hotfix/103-public-api-auth-regression
 release/v1.2.0
 ```
