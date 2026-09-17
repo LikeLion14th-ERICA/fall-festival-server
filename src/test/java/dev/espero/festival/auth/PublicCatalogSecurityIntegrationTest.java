@@ -88,6 +88,48 @@ class PublicCatalogSecurityIntegrationTest {
             ) VALUES (:revisionId, 'security-artist', 'ko', '보안 테스트', '보안 테스트 이미지')
             ON CONFLICT (festival_revision_id, artist_id, locale) DO NOTHING
             """, Map.of("revisionId", revisionId));
+        jdbc.update("""
+            INSERT INTO timetable_configs (festival_revision_id, axis_start_time, axis_end_time)
+            VALUES (:revisionId, '17:00', '22:00')
+            ON CONFLICT (festival_revision_id) DO NOTHING
+            """, Map.of("revisionId", revisionId));
+        jdbc.update("""
+            INSERT INTO performances (
+                festival_revision_id, id, festival_date, starts_at, ends_at
+            ) VALUES (
+                :revisionId, 'security-performance', :festivalDate, :startsAt, :endsAt
+            ) ON CONFLICT (festival_revision_id, id) DO NOTHING
+            """, Map.of(
+            "revisionId", revisionId,
+            "festivalDate", festivalDate,
+            "startsAt", OffsetDateTime.parse("2030-10-01T18:00:00+09:00"),
+            "endsAt", OffsetDateTime.parse("2030-10-01T18:30:00+09:00")
+        ));
+        jdbc.update("""
+            INSERT INTO performance_translations (
+                festival_revision_id, performance_id, locale, title, description
+            ) VALUES (
+                :revisionId, 'security-performance', 'ko', '보안 테스트 공연', NULL
+            ) ON CONFLICT (festival_revision_id, performance_id, locale) DO NOTHING
+            """, Map.of("revisionId", revisionId));
+        jdbc.update("""
+            INSERT INTO performance_artists (
+                festival_revision_id, performance_id, artist_id, display_order
+            ) VALUES (
+                :revisionId, 'security-performance', 'security-artist', 1
+            ) ON CONFLICT (festival_revision_id, performance_id, artist_id) DO NOTHING
+            """, Map.of("revisionId", revisionId));
+        jdbc.update("""
+            INSERT INTO prohibited_items (festival_revision_id, id, sort_order)
+            VALUES (:revisionId, 'security-item', 1)
+            ON CONFLICT (festival_revision_id, id) DO NOTHING
+            """, Map.of("revisionId", revisionId));
+        jdbc.update("""
+            INSERT INTO prohibited_item_translations (
+                festival_revision_id, item_id, locale, label
+            ) VALUES (:revisionId, 'security-item', 'ko', '보안 테스트 물품')
+            ON CONFLICT (festival_revision_id, item_id, locale) DO NOTHING
+            """, Map.of("revisionId", revisionId));
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
     }
 
@@ -113,6 +155,18 @@ class PublicCatalogSecurityIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.id", is("security-artist")));
 
+        mockMvc.perform(get("/api/v2/timetable"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items").isArray());
+
+        mockMvc.perform(get("/api/v2/performances/security-performance"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.id", is("security-performance")));
+
+        mockMvc.perform(get("/api/v2/prohibited-items"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items").isArray());
+
         mockMvc.perform(get("/readyz"))
             .andExpect(status().isOk())
             .andExpect(content().json("{\"status\":\"ready\"}"));
@@ -121,6 +175,21 @@ class PublicCatalogSecurityIntegrationTest {
     @Test
     void ignoresAnInvalidBearerHeaderOnPublicCatalogRoutes() throws Exception {
         mockMvc.perform(get("/api/v2/spaces").header(HttpHeaders.AUTHORIZATION, "Bearer definitely-invalid"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items").isArray());
+
+        mockMvc.perform(get("/api/v2/timetable")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer definitely-invalid"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items").isArray());
+
+        mockMvc.perform(get("/api/v2/performances/security-performance")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer definitely-invalid"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.id", is("security-performance")));
+
+        mockMvc.perform(get("/api/v2/prohibited-items")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer definitely-invalid"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.items").isArray());
     }

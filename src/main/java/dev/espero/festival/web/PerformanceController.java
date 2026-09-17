@@ -4,11 +4,13 @@ import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.persistence.CatalogIntegrityException;
 import dev.espero.festival.persistence.PerformanceCatalogReadStore;
 import dev.espero.festival.persistence.PerformanceCatalogReadStore.Artist;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.PerformanceItem;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,8 @@ public class PerformanceController {
 
     private static final String DEFAULT_CATEGORY = "ARTIST";
     private static final Set<String> CATEGORIES = Set.of("ARTIST", "CONTEST");
-    private static final Pattern ARTIST_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
+    private static final Pattern PUBLIC_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
+    private static final DateTimeFormatter AXIS_TIME = DateTimeFormatter.ofPattern("HH:mm");
 
     private final CatalogSnapshotProvider snapshots;
     private final PerformanceCatalogReadStore store;
@@ -84,7 +87,7 @@ public class PerformanceController {
     ) {
         CatalogSnapshot snapshot = snapshot(request);
         String locale = validateQuery(request, Set.of("locale"));
-        if (!ARTIST_ID.matcher(artistId).matches()) {
+        if (!PUBLIC_ID.matcher(artistId).matches()) {
             throw invalidQuery();
         }
 
@@ -93,6 +96,66 @@ public class PerformanceController {
                 .orElseThrow(this::notFound);
             return new ApiResponse<>(
                 artistResponse(artist, snapshot),
+                metaSupport.meta(request, snapshot.context(), locale)
+            );
+        } catch (TransientDataAccessException | DataAccessResourceFailureException exception) {
+            throw serviceUnavailable();
+        }
+    }
+
+    @GetMapping("/timetable")
+    public ApiResponse<PerformanceResponses.Timetable> getTimetable(HttpServletRequest request) {
+        CatalogSnapshot snapshot = snapshot(request);
+        String locale = validateQuery(request, Set.of("locale"));
+
+        try {
+            PerformanceCatalogReadStore.Timetable timetable = store.timetable(
+                snapshot.context().revisionId(), locale
+            );
+            return new ApiResponse<>(
+                timetableResponse(timetable, snapshot),
+                metaSupport.meta(request, snapshot.context(), locale)
+            );
+        } catch (TransientDataAccessException | DataAccessResourceFailureException exception) {
+            throw serviceUnavailable();
+        }
+    }
+
+    @GetMapping("/performances/{performanceId}")
+    public ApiResponse<PerformanceResponses.PerformanceItem> getPerformance(
+        @PathVariable String performanceId,
+        HttpServletRequest request
+    ) {
+        CatalogSnapshot snapshot = snapshot(request);
+        String locale = validateQuery(request, Set.of("locale"));
+        if (!PUBLIC_ID.matcher(performanceId).matches()) {
+            throw invalidQuery();
+        }
+
+        try {
+            PerformanceItem performance = store.findPerformance(
+                snapshot.context().revisionId(), performanceId, locale
+            ).orElseThrow(this::notFound);
+            return new ApiResponse<>(
+                performanceResponse(performance, snapshot),
+                metaSupport.meta(request, snapshot.context(), locale)
+            );
+        } catch (TransientDataAccessException | DataAccessResourceFailureException exception) {
+            throw serviceUnavailable();
+        }
+    }
+
+    @GetMapping("/prohibited-items")
+    public ApiResponse<PerformanceResponses.ProhibitedItems> getProhibitedItems(HttpServletRequest request) {
+        CatalogSnapshot snapshot = snapshot(request);
+        String locale = validateQuery(request, Set.of("locale"));
+
+        try {
+            PerformanceCatalogReadStore.ProhibitedItems content = store.prohibitedItems(
+                snapshot.context().revisionId(), locale
+            );
+            return new ApiResponse<>(
+                new PerformanceResponses.ProhibitedItems(content.items(), content.message()),
                 metaSupport.meta(request, snapshot.context(), locale)
             );
         } catch (TransientDataAccessException | DataAccessResourceFailureException exception) {
@@ -164,8 +227,8 @@ public class PerformanceController {
         List<PerformanceResponses.Link> songs = artist.songs().stream()
             .map(song -> new PerformanceResponses.Link(song.label(), song.url(), "_blank"))
             .toList();
-        List<PerformanceResponses.Performance> performances = artist.performances().stream()
-            .map(performance -> new PerformanceResponses.Performance(
+        List<PerformanceResponses.ArtistPerformance> performances = artist.performances().stream()
+            .map(performance -> new PerformanceResponses.ArtistPerformance(
                 performance.id(),
                 performance.date(),
                 inFestivalTimezone(performance.startsAt(), snapshot),
@@ -181,6 +244,39 @@ public class PerformanceController {
             socialLinks,
             songs,
             performances
+        );
+    }
+
+    private PerformanceResponses.Timetable timetableResponse(
+        PerformanceCatalogReadStore.Timetable timetable,
+        CatalogSnapshot snapshot
+    ) {
+        return new PerformanceResponses.Timetable(
+            timetable.dates(),
+            new PerformanceResponses.TimetableAxis(
+                AXIS_TIME.format(timetable.axis().startTime()),
+                AXIS_TIME.format(timetable.axis().endTime())
+            ),
+            timetable.items().stream()
+                .map(item -> performanceResponse(item, snapshot))
+                .toList()
+        );
+    }
+
+    private PerformanceResponses.PerformanceItem performanceResponse(
+        PerformanceItem performance,
+        CatalogSnapshot snapshot
+    ) {
+        return new PerformanceResponses.PerformanceItem(
+            performance.id(),
+            performance.date(),
+            performance.title(),
+            performance.artists().stream()
+                .map(artist -> new PerformanceResponses.PerformanceArtist(artist.id(), artist.name()))
+                .toList(),
+            inFestivalTimezone(performance.startsAt(), snapshot),
+            inFestivalTimezone(performance.endsAt(), snapshot),
+            performance.description()
         );
     }
 

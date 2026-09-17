@@ -3,8 +3,12 @@ package dev.espero.festival.persistence;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
@@ -68,6 +72,113 @@ public class PerformanceCatalogReadStore {
                 .addValue("locale", locale),
             (resultSet, rowNumber) -> mapLineupItem(resultSet)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Timetable timetable(UUID festivalRevisionId, String locale) {
+        List<LocalDate> dates = festivalDates(festivalRevisionId);
+        if (dates.isEmpty()) {
+            throw new CatalogIntegrityException("Published timetable has no FestivalDay.");
+        }
+
+        List<TimetableAxis> axes = jdbc.query("""
+            SELECT axis_start_time, axis_end_time
+            FROM timetable_configs
+            WHERE festival_revision_id = :festivalRevisionId
+            """, parameters(festivalRevisionId),
+            (resultSet, rowNumber) -> new TimetableAxis(
+                resultSet.getObject("axis_start_time", LocalTime.class),
+                resultSet.getObject("axis_end_time", LocalTime.class)
+            )
+        );
+        if (axes.size() != 1) {
+            throw new CatalogIntegrityException("Published timetable must have exactly one configuration.");
+        }
+
+        List<PerformanceHeader> headers = jdbc.query("""
+            SELECT performance.id, performance.festival_date,
+                   performance.starts_at, performance.ends_at,
+                   translation.locale AS translation_locale,
+                   translation.title, translation.description
+            FROM performances performance
+            LEFT JOIN performance_translations translation
+              ON translation.festival_revision_id = performance.festival_revision_id
+             AND translation.performance_id = performance.id
+             AND translation.locale = :locale
+            WHERE performance.festival_revision_id = :festivalRevisionId
+            ORDER BY performance.festival_date, performance.starts_at, performance.id
+            """, parameters(festivalRevisionId).addValue("locale", locale),
+            (resultSet, rowNumber) -> mapPerformanceHeader(resultSet)
+        );
+        Map<String, List<PerformanceArtist>> artists = loadAllPerformanceArtists(festivalRevisionId, locale);
+        return new Timetable(
+            dates,
+            axes.getFirst(),
+            headers.stream().map(header -> performance(header, artists.getOrDefault(header.id(), List.of()))).toList()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PerformanceItem> findPerformance(
+        UUID festivalRevisionId,
+        String performanceId,
+        String locale
+    ) {
+        List<PerformanceHeader> headers = jdbc.query("""
+            SELECT performance.id, performance.festival_date,
+                   performance.starts_at, performance.ends_at,
+                   translation.locale AS translation_locale,
+                   translation.title, translation.description
+            FROM performances performance
+            LEFT JOIN performance_translations translation
+              ON translation.festival_revision_id = performance.festival_revision_id
+             AND translation.performance_id = performance.id
+             AND translation.locale = :locale
+            WHERE performance.festival_revision_id = :festivalRevisionId
+              AND performance.id = :performanceId
+            """, parameters(festivalRevisionId)
+                .addValue("performanceId", performanceId)
+                .addValue("locale", locale),
+            (resultSet, rowNumber) -> mapPerformanceHeader(resultSet)
+        );
+        if (headers.isEmpty()) {
+            return Optional.empty();
+        }
+        List<PerformanceArtist> artists = loadPerformanceArtists(
+            festivalRevisionId, performanceId, locale
+        );
+        return Optional.of(performance(headers.getFirst(), artists));
+    }
+
+    @Transactional(readOnly = true)
+    public ProhibitedItems prohibitedItems(UUID festivalRevisionId, String locale) {
+        List<String> items = jdbc.query("""
+            SELECT item.id, translation.locale AS translation_locale, translation.label
+            FROM prohibited_items item
+            LEFT JOIN prohibited_item_translations translation
+              ON translation.festival_revision_id = item.festival_revision_id
+             AND translation.item_id = item.id
+             AND translation.locale = :locale
+            WHERE item.festival_revision_id = :festivalRevisionId
+            ORDER BY item.sort_order, item.id
+            """, parameters(festivalRevisionId).addValue("locale", locale),
+            (resultSet, rowNumber) -> {
+                requireTranslation(resultSet, "Published prohibited item is missing its requested translation.");
+                return resultSet.getString("label");
+            }
+        );
+        List<String> messages = jdbc.query("""
+            SELECT message
+            FROM prohibited_messages
+            WHERE festival_revision_id = :festivalRevisionId
+              AND locale = :locale
+            """, parameters(festivalRevisionId).addValue("locale", locale),
+            (resultSet, rowNumber) -> resultSet.getString("message")
+        );
+        if (messages.size() > 1) {
+            throw new CatalogIntegrityException("Published prohibited content has duplicate locale messages.");
+        }
+        return new ProhibitedItems(items, messages.isEmpty() ? null : messages.getFirst());
     }
 
     @Transactional(readOnly = true)
@@ -149,7 +260,7 @@ public class PerformanceCatalogReadStore {
         );
     }
 
-    private List<Performance> loadPerformances(UUID festivalRevisionId, String artistId) {
+    private List<ArtistPerformance> loadPerformances(UUID festivalRevisionId, String artistId) {
         return jdbc.query("""
             SELECT performance.id, performance.festival_date,
                    performance.starts_at, performance.ends_at
@@ -161,12 +272,101 @@ public class PerformanceCatalogReadStore {
               AND relation.artist_id = :artistId
             ORDER BY performance.festival_date, performance.starts_at, performance.id
             """, parameters(festivalRevisionId).addValue("artistId", artistId),
-            (resultSet, rowNumber) -> new Performance(
+            (resultSet, rowNumber) -> new ArtistPerformance(
                 resultSet.getString("id"),
                 resultSet.getObject("festival_date", LocalDate.class),
                 resultSet.getObject("starts_at", OffsetDateTime.class),
                 resultSet.getObject("ends_at", OffsetDateTime.class)
             )
+        );
+    }
+
+    private Map<String, List<PerformanceArtist>> loadAllPerformanceArtists(
+        UUID festivalRevisionId,
+        String locale
+    ) {
+        List<PerformanceArtistRow> rows = queryPerformanceArtists("""
+            SELECT relation.performance_id, artist.id AS artist_id,
+                   translation.locale AS translation_locale, translation.name
+            FROM performance_artists relation
+            JOIN artists artist
+              ON artist.festival_revision_id = relation.festival_revision_id
+             AND artist.id = relation.artist_id
+            LEFT JOIN artist_translations translation
+              ON translation.festival_revision_id = artist.festival_revision_id
+             AND translation.artist_id = artist.id
+             AND translation.locale = :locale
+            WHERE relation.festival_revision_id = :festivalRevisionId
+            ORDER BY relation.performance_id, relation.display_order, artist.id
+            """, parameters(festivalRevisionId).addValue("locale", locale));
+        Map<String, List<PerformanceArtist>> byPerformance = new LinkedHashMap<>();
+        for (PerformanceArtistRow row : rows) {
+            byPerformance.computeIfAbsent(row.performanceId(), ignored -> new ArrayList<>())
+                .add(row.artist());
+        }
+        return byPerformance;
+    }
+
+    private List<PerformanceArtist> loadPerformanceArtists(
+        UUID festivalRevisionId,
+        String performanceId,
+        String locale
+    ) {
+        return queryPerformanceArtists("""
+            SELECT relation.performance_id, artist.id AS artist_id,
+                   translation.locale AS translation_locale, translation.name
+            FROM performance_artists relation
+            JOIN artists artist
+              ON artist.festival_revision_id = relation.festival_revision_id
+             AND artist.id = relation.artist_id
+            LEFT JOIN artist_translations translation
+              ON translation.festival_revision_id = artist.festival_revision_id
+             AND translation.artist_id = artist.id
+             AND translation.locale = :locale
+            WHERE relation.festival_revision_id = :festivalRevisionId
+              AND relation.performance_id = :performanceId
+            ORDER BY relation.display_order, artist.id
+            """, parameters(festivalRevisionId)
+                .addValue("performanceId", performanceId)
+                .addValue("locale", locale)).stream()
+            .map(PerformanceArtistRow::artist)
+            .toList();
+    }
+
+    private List<PerformanceArtistRow> queryPerformanceArtists(
+        String sql,
+        MapSqlParameterSource parameters
+    ) {
+        return jdbc.query(sql, parameters, (resultSet, rowNumber) -> {
+            requireTranslation(resultSet, "Published performance artist is missing its requested translation.");
+            return new PerformanceArtistRow(
+                resultSet.getString("performance_id"),
+                new PerformanceArtist(resultSet.getString("artist_id"), resultSet.getString("name"))
+            );
+        });
+    }
+
+    private PerformanceHeader mapPerformanceHeader(ResultSet resultSet) throws SQLException {
+        requireTranslation(resultSet, "Published performance is missing its requested translation.");
+        return new PerformanceHeader(
+            resultSet.getString("id"),
+            resultSet.getObject("festival_date", LocalDate.class),
+            resultSet.getString("title"),
+            resultSet.getObject("starts_at", OffsetDateTime.class),
+            resultSet.getObject("ends_at", OffsetDateTime.class),
+            resultSet.getString("description")
+        );
+    }
+
+    private PerformanceItem performance(PerformanceHeader header, List<PerformanceArtist> artists) {
+        return new PerformanceItem(
+            header.id(),
+            header.date(),
+            header.title(),
+            artists,
+            header.startsAt(),
+            header.endsAt(),
+            header.description()
         );
     }
 
@@ -217,7 +417,38 @@ public class PerformanceCatalogReadStore {
 
     public record Link(String label, String url) {}
 
-    public record Performance(String id, LocalDate date, OffsetDateTime startsAt, OffsetDateTime endsAt) {}
+    public record ArtistPerformance(String id, LocalDate date, OffsetDateTime startsAt, OffsetDateTime endsAt) {}
+
+    public record TimetableAxis(LocalTime startTime, LocalTime endTime) {}
+
+    public record PerformanceArtist(String id, String name) {}
+
+    public record PerformanceItem(
+        String id,
+        LocalDate date,
+        String title,
+        List<PerformanceArtist> artists,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt,
+        String description
+    ) {
+        public PerformanceItem {
+            artists = List.copyOf(artists);
+        }
+    }
+
+    public record Timetable(List<LocalDate> dates, TimetableAxis axis, List<PerformanceItem> items) {
+        public Timetable {
+            dates = List.copyOf(dates);
+            items = List.copyOf(items);
+        }
+    }
+
+    public record ProhibitedItems(List<String> items, String message) {
+        public ProhibitedItems {
+            items = List.copyOf(items);
+        }
+    }
 
     public record Artist(
         String id,
@@ -227,7 +458,7 @@ public class PerformanceCatalogReadStore {
         String introduction,
         List<Link> socialLinks,
         List<Link> songs,
-        List<Performance> performances
+        List<ArtistPerformance> performances
     ) {
         public Artist {
             socialLinks = List.copyOf(socialLinks);
@@ -243,4 +474,15 @@ public class PerformanceCatalogReadStore {
         Image image,
         String introduction
     ) {}
+
+    private record PerformanceHeader(
+        String id,
+        LocalDate date,
+        String title,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt,
+        String description
+    ) {}
+
+    private record PerformanceArtistRow(String performanceId, PerformanceArtist artist) {}
 }

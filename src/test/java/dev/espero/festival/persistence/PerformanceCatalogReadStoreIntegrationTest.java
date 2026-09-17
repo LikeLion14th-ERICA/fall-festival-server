@@ -18,6 +18,7 @@ import dev.espero.festival.web.PerformanceController;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -185,7 +186,7 @@ class PerformanceCatalogReadStoreIntegrationTest {
             .containsExactly("첫 번째", "두 번째");
         assertThat(artist.songs()).extracting(PerformanceCatalogReadStore.Link::label)
             .containsExactly("대표곡 1", "대표곡 2", "대표곡 3");
-        assertThat(artist.performances()).extracting(PerformanceCatalogReadStore.Performance::id)
+        assertThat(artist.performances()).extracting(PerformanceCatalogReadStore.ArtistPerformance::id)
             .containsExactly("performance-a", "performance-b", "performance-c");
     }
 
@@ -239,6 +240,219 @@ class PerformanceCatalogReadStoreIntegrationTest {
         assertThatThrownBy(() -> store.findArtist(revisionId, "artist-a", "ko"))
             .isInstanceOf(CatalogIntegrityException.class)
             .hasMessageContaining("Published artist");
+    }
+
+    @Test
+    void returnsTimetableWithDatabaseAxisAndDeterministicPerformanceAndArtistOrdering() {
+        UUID revisionId = publishedRevisionId();
+        insertDay(revisionId, DAY_TWO);
+        insertDay(revisionId, DAY_ONE);
+        insertTimetableConfig(revisionId, "16:30", "23:30");
+        insertArtist(revisionId, "artist-a", "ARTIST", "아티스트 A", null);
+        insertArtist(revisionId, "artist-b", "ARTIST", "아티스트 B", null);
+        insertPerformanceWithEnd(
+            revisionId, "performance-b", DAY_ONE,
+            "2030-10-01T18:00:00+09:00", "2030-10-01T18:30:00+09:00", "공연 B", null
+        );
+        insertPerformanceWithEnd(
+            revisionId, "performance-a", DAY_ONE,
+            "2030-10-01T18:00:00+09:00", "2030-10-01T18:30:00+09:00", "공연 A", "안내 A"
+        );
+        insertPerformanceWithEnd(
+            revisionId, "overnight", DAY_TWO,
+            "2030-10-02T23:30:00+09:00", "2030-10-03T00:30:00+09:00", "심야 공연", null
+        );
+        relate(revisionId, "performance-a", "artist-b", 2);
+        relate(revisionId, "performance-a", "artist-a", 1);
+
+        PerformanceCatalogReadStore.Timetable timetable = store.timetable(revisionId, "ko");
+
+        assertThat(timetable.dates()).containsExactly(DAY_ONE, DAY_TWO);
+        assertThat(timetable.axis().startTime()).isEqualTo(LocalTime.parse("16:30"));
+        assertThat(timetable.axis().endTime()).isEqualTo(LocalTime.parse("23:30"));
+        assertThat(timetable.items()).extracting(PerformanceCatalogReadStore.PerformanceItem::id)
+            .containsExactly("performance-a", "performance-b", "overnight");
+        assertThat(timetable.items().getFirst().artists())
+            .extracting(PerformanceCatalogReadStore.PerformanceArtist::id)
+            .containsExactly("artist-a", "artist-b");
+        assertThat(timetable.items().getFirst().description()).isEqualTo("안내 A");
+        assertThat(timetable.items().get(1).description()).isNull();
+        assertThat(timetable.items().getLast().endsAt())
+            .isEqualTo(OffsetDateTime.parse("2030-10-03T00:30:00+09:00"));
+    }
+
+    @Test
+    void returnsAnEmptyTimetableWhenDatesAndConfigExistWithoutPerformances() {
+        UUID revisionId = publishedRevisionId();
+        insertDay(revisionId, DAY_ONE);
+        insertTimetableConfig(revisionId, "17:00", "22:00");
+
+        assertThat(store.timetable(revisionId, "ko").items()).isEmpty();
+    }
+
+    @Test
+    void rejectsTimetableWithoutFestivalDaysOrConfiguration() {
+        UUID withoutDays = insertRevision("draft", 2);
+        assertThatThrownBy(() -> store.timetable(withoutDays, "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("FestivalDay");
+
+        UUID withoutConfig = insertRevision("draft", 3);
+        insertDay(withoutConfig, DAY_ONE);
+        assertThatThrownBy(() -> store.timetable(withoutConfig, "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("configuration");
+    }
+
+    @Test
+    void rejectsMissingTimetablePerformanceAndArtistTranslations() {
+        UUID revisionId = publishedRevisionId();
+        insertDay(revisionId, DAY_ONE);
+        insertTimetableConfig(revisionId, "17:00", "22:00");
+        insertPerformance(revisionId, "performance-a", DAY_ONE, "2030-10-01T18:00:00+09:00");
+
+        assertThatThrownBy(() -> store.timetable(revisionId, "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Published performance");
+
+        insertPerformanceTranslation(revisionId, "performance-a", "공연 A", null);
+        insertArtistWithoutTranslation(revisionId, "artist-a", "ARTIST");
+        relate(revisionId, "performance-a", "artist-a", 1);
+
+        assertThatThrownBy(() -> store.timetable(revisionId, "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("performance artist");
+    }
+
+    @Test
+    void keepsTimetableRowsAndJoinsInsideTheRequestedRevision() {
+        UUID published = publishedRevisionId();
+        UUID archived = insertRevision("archived", 2);
+        for (UUID revisionId : new UUID[] {published, archived}) {
+            insertDay(revisionId, DAY_ONE);
+            insertTimetableConfig(revisionId, "17:00", "22:00");
+            insertArtist(revisionId, "same-artist", "ARTIST", "이름-" + revisionId, null);
+            insertPerformanceWithEnd(
+                revisionId, "same-performance", DAY_ONE,
+                "2030-10-01T18:00:00+09:00", "2030-10-01T18:30:00+09:00",
+                "제목-" + revisionId, null
+            );
+            relate(revisionId, "same-performance", "same-artist", 1);
+        }
+
+        assertThat(store.timetable(published, "ko").items())
+            .singleElement()
+            .satisfies(performance -> {
+                assertThat(performance.title()).isEqualTo("제목-" + published);
+                assertThat(performance.artists())
+                    .singleElement()
+                    .satisfies(artist -> assertThat(artist.name()).isEqualTo("이름-" + published));
+            });
+    }
+
+    @Test
+    void findsPerformanceInOnlyTheRequestedRevisionAndAllowsNoArtists() {
+        UUID published = publishedRevisionId();
+        UUID archived = insertRevision("archived", 2);
+        for (UUID revisionId : new UUID[] {published, archived}) {
+            insertDay(revisionId, DAY_ONE);
+            insertPerformanceWithEnd(
+                revisionId, "same-performance", DAY_ONE,
+                "2030-10-01T23:30:00+09:00", "2030-10-02T00:30:00+09:00",
+                "제목-" + revisionId, null
+            );
+        }
+        insertPerformanceWithEnd(
+            archived, "archived-only", DAY_ONE,
+            "2030-10-01T20:00:00+09:00", "2030-10-01T20:30:00+09:00",
+            "보관 전용 공연", null
+        );
+
+        assertThat(store.findPerformance(published, "same-performance", "ko"))
+            .hasValueSatisfying(performance -> {
+                assertThat(performance.title()).isEqualTo("제목-" + published);
+                assertThat(performance.artists()).isEmpty();
+                assertThat(performance.description()).isNull();
+                assertThat(performance.endsAt())
+                    .isEqualTo(OffsetDateTime.parse("2030-10-02T00:30:00+09:00"));
+            });
+        assertThat(store.findPerformance(published, "archived-only", "ko")).isEmpty();
+    }
+
+    @Test
+    void ordersPerformanceDetailArtistsAndRejectsMissingTranslations() {
+        UUID revisionId = publishedRevisionId();
+        insertDay(revisionId, DAY_ONE);
+        insertPerformanceWithEnd(
+            revisionId, "performance-a", DAY_ONE,
+            "2030-10-01T18:00:00+09:00", "2030-10-01T19:00:00+09:00", "공연 A", null
+        );
+        insertArtist(revisionId, "artist-b", "ARTIST", "아티스트 B", null);
+        insertArtist(revisionId, "artist-a", "ARTIST", "아티스트 A", null);
+        relate(revisionId, "performance-a", "artist-b", 2);
+        relate(revisionId, "performance-a", "artist-a", 1);
+
+        assertThat(store.findPerformance(revisionId, "performance-a", "ko").orElseThrow().artists())
+            .extracting(PerformanceCatalogReadStore.PerformanceArtist::id)
+            .containsExactly("artist-a", "artist-b");
+
+        jdbc.update("DELETE FROM artist_translations WHERE festival_revision_id = :revisionId AND artist_id = 'artist-b'",
+            params(revisionId));
+        assertThatThrownBy(() -> store.findPerformance(revisionId, "performance-a", "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("performance artist");
+    }
+
+    @Test
+    void rejectsPerformanceDetailWithoutItsRequestedTranslation() {
+        UUID revisionId = publishedRevisionId();
+        insertDay(revisionId, DAY_ONE);
+        insertPerformance(revisionId, "performance-a", DAY_ONE, "2030-10-01T18:00:00+09:00");
+
+        assertThatThrownBy(() -> store.findPerformance(revisionId, "performance-a", "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("Published performance");
+    }
+
+    @Test
+    void returnsProhibitedItemsInOrderWithOptionalMessageAndRevisionIsolation() {
+        UUID published = publishedRevisionId();
+        UUID archived = insertRevision("archived", 2);
+        insertProhibitedItem(published, "item-b", 2, "물품 B");
+        insertProhibitedItem(published, "item-a", 1, "물품 A");
+        insertProhibitedMessage(published, "안내 문구");
+        insertProhibitedItem(archived, "item-a", 1, "보관 물품");
+        insertProhibitedMessage(archived, "보관 안내");
+
+        PerformanceCatalogReadStore.ProhibitedItems content = store.prohibitedItems(published, "ko");
+        assertThat(content.items()).containsExactly("물품 A", "물품 B");
+        assertThat(content.message()).isEqualTo("안내 문구");
+
+        UUID emptyRevision = insertRevision("draft", 3);
+        assertThat(store.prohibitedItems(emptyRevision, "ko"))
+            .satisfies(empty -> {
+                assertThat(empty.items()).isEmpty();
+                assertThat(empty.message()).isNull();
+            });
+        insertProhibitedMessage(emptyRevision, "메시지만 존재");
+        assertThat(store.prohibitedItems(emptyRevision, "ko"))
+            .satisfies(messageOnly -> {
+                assertThat(messageOnly.items()).isEmpty();
+                assertThat(messageOnly.message()).isEqualTo("메시지만 존재");
+            });
+    }
+
+    @Test
+    void rejectsAProhibitedItemWithoutItsRequestedTranslation() {
+        UUID revisionId = publishedRevisionId();
+        jdbc.update("""
+            INSERT INTO prohibited_items (festival_revision_id, id, sort_order)
+            VALUES (:revisionId, 'item-a', 1)
+            """, params(revisionId));
+
+        assertThatThrownBy(() -> store.prohibitedItems(revisionId, "ko"))
+            .isInstanceOf(CatalogIntegrityException.class)
+            .hasMessageContaining("prohibited item");
     }
 
     private UUID publishedRevisionId() {
@@ -351,6 +565,70 @@ class PerformanceCatalogReadStoreIntegrationTest {
             .addValue("date", date)
             .addValue("startsAt", start)
             .addValue("endsAt", start.plusMinutes(30)));
+    }
+
+    private void insertPerformanceWithEnd(
+        UUID revisionId,
+        String performanceId,
+        LocalDate date,
+        String startsAt,
+        String endsAt,
+        String title,
+        String description
+    ) {
+        jdbc.update("""
+            INSERT INTO performances (
+                festival_revision_id, id, festival_date, starts_at, ends_at
+            ) VALUES (:revisionId, :performanceId, :date, :startsAt, :endsAt)
+            """, params(revisionId)
+            .addValue("performanceId", performanceId)
+            .addValue("date", date)
+            .addValue("startsAt", OffsetDateTime.parse(startsAt))
+            .addValue("endsAt", OffsetDateTime.parse(endsAt)));
+        insertPerformanceTranslation(revisionId, performanceId, title, description);
+    }
+
+    private void insertPerformanceTranslation(
+        UUID revisionId,
+        String performanceId,
+        String title,
+        String description
+    ) {
+        jdbc.update("""
+            INSERT INTO performance_translations (
+                festival_revision_id, performance_id, locale, title, description
+            ) VALUES (:revisionId, :performanceId, 'ko', :title, :description)
+            """, params(revisionId)
+            .addValue("performanceId", performanceId)
+            .addValue("title", title)
+            .addValue("description", description));
+    }
+
+    private void insertTimetableConfig(UUID revisionId, String startTime, String endTime) {
+        jdbc.update("""
+            INSERT INTO timetable_configs (festival_revision_id, axis_start_time, axis_end_time)
+            VALUES (:revisionId, :startTime, :endTime)
+            """, params(revisionId)
+            .addValue("startTime", LocalTime.parse(startTime))
+            .addValue("endTime", LocalTime.parse(endTime)));
+    }
+
+    private void insertProhibitedItem(UUID revisionId, String itemId, int sortOrder, String label) {
+        jdbc.update("""
+            INSERT INTO prohibited_items (festival_revision_id, id, sort_order)
+            VALUES (:revisionId, :itemId, :sortOrder)
+            """, params(revisionId).addValue("itemId", itemId).addValue("sortOrder", sortOrder));
+        jdbc.update("""
+            INSERT INTO prohibited_item_translations (festival_revision_id, item_id, locale, label)
+            VALUES (:revisionId, :itemId, 'ko', :label)
+            """, params(revisionId).addValue("itemId", itemId).addValue("label", label));
+    }
+
+    private void insertProhibitedMessage(UUID revisionId, String message) {
+        jdbc.update("""
+            INSERT INTO prohibited_messages (festival_revision_id, locale, message)
+            VALUES (:revisionId, 'ko', :message)
+            """, params(revisionId).addValue("message", message));
     }
 
     private void relate(UUID revisionId, String performanceId, String artistId, int displayOrder) {
