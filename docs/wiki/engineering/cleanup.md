@@ -9,6 +9,8 @@
 ## 현재 target
 
 - `admin_audit_events`에서 현재 시각 기준 1년보다 오래된 행을 정리한다.
+- `admin_idempotency_records`에서는 `COMPLETED` 상태이고 완료 시각에서 24시간이 지난
+  replay 응답만 정리한다. `IN_PROGRESS` lease는 만료됐어도 이 작업이 삭제하지 않는다.
 - 한 번의 run은 최대 500행을 처리한다. `festival.cleanup.batch-size`는 1~500만 허용하며
   기본값은 500이다. 남은 행은 다음 scheduler run에서 처리해 한 transaction이 오래
   유지되지 않게 한다.

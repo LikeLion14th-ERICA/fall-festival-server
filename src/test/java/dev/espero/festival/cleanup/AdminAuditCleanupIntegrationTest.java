@@ -95,7 +95,7 @@ class AdminAuditCleanupIntegrationTest {
         assertThat(result.mode()).isEqualTo(CleanupMode.DRY_RUN);
         assertThat(result.eligibleCount()).isEqualTo(1_001);
         assertThat(result.deletedCount()).isZero();
-        assertThat(result.targets()).singleElement().satisfies(target -> {
+        assertThat(auditTarget(result)).satisfies(target -> {
             assertThat(target.target()).isEqualTo("admin_audit_events");
             assertThat(target.batches()).isEqualTo(3);
         });
@@ -113,7 +113,7 @@ class AdminAuditCleanupIntegrationTest {
         assertThat(result.mode()).isEqualTo(CleanupMode.DELETE);
         assertThat(result.eligibleCount()).isEqualTo(1_001);
         assertThat(result.deletedCount()).isEqualTo(500);
-        assertThat(result.targets()).singleElement()
+        assertThat(auditTarget(result))
             .extracting(CleanupTargetResult::batches)
             .isEqualTo(1);
         assertThat(auditCount()).isEqualTo(502);
@@ -194,6 +194,13 @@ class AdminAuditCleanupIntegrationTest {
                 )
                 """, rows);
         }
+    }
+
+    private CleanupTargetResult auditTarget(CleanupRunResult result) {
+        return result.targets().stream()
+            .filter(target -> target.target().equals("admin_audit_events"))
+            .findFirst()
+            .orElseThrow();
     }
 
     private long auditCount() {
