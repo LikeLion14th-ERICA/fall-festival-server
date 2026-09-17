@@ -14,12 +14,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.UUID;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -45,10 +50,44 @@ class PublicCatalogSecurityIntegrationTest {
     @Autowired
     private WebApplicationContext context;
 
+    @Autowired
+    private NamedParameterJdbcTemplate jdbc;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
+        UUID revisionId = jdbc.queryForObject(
+            "SELECT id FROM festival_revisions WHERE state = 'published'",
+            Map.of(),
+            UUID.class
+        );
+        LocalDate festivalDate = LocalDate.parse("2030-10-01");
+        jdbc.update("""
+            INSERT INTO festival_days (
+                id, festival_revision_id, festival_date, opens_at, closes_at, created_at, updated_at
+            ) VALUES (
+                :id, :revisionId, :festivalDate, :opensAt, :closesAt, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            ) ON CONFLICT (festival_revision_id, festival_date) DO NOTHING
+            """, Map.of(
+            "id", UUID.randomUUID(),
+            "revisionId", revisionId,
+            "festivalDate", festivalDate,
+            "opensAt", OffsetDateTime.parse("2030-10-01T09:00:00+09:00"),
+            "closesAt", OffsetDateTime.parse("2030-10-01T23:00:00+09:00")
+        ));
+        jdbc.update("""
+            INSERT INTO artists (
+                festival_revision_id, id, category, image_url, image_width, image_height
+            ) VALUES (:revisionId, 'security-artist', 'ARTIST', '/assets/security.png', 100, 100)
+            ON CONFLICT (festival_revision_id, id) DO NOTHING
+            """, Map.of("revisionId", revisionId));
+        jdbc.update("""
+            INSERT INTO artist_translations (
+                festival_revision_id, artist_id, locale, name, image_alt
+            ) VALUES (:revisionId, 'security-artist', 'ko', '보안 테스트', '보안 테스트 이미지')
+            ON CONFLICT (festival_revision_id, artist_id, locale) DO NOTHING
+            """, Map.of("revisionId", revisionId));
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
     }
 
@@ -65,6 +104,14 @@ class PublicCatalogSecurityIntegrationTest {
         mockMvc.perform(get("/api/v2/ticket-guide"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data", notNullValue()));
+
+        mockMvc.perform(get("/api/v2/lineup").param("date", "2030-10-01"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items").isArray());
+
+        mockMvc.perform(get("/api/v2/artists/security-artist"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.id", is("security-artist")));
 
         mockMvc.perform(get("/readyz"))
             .andExpect(status().isOk())
