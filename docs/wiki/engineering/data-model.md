@@ -34,8 +34,9 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
   나머지 화면 연동의 운영 전환 범위는 계속 결정한다.
 - 공개 조회는 로그인 없이 유지한다. 관리자 쓰기는 username 로그인, 단일 `ADMIN`, 짧은 JWT와
   refresh cookie 회전·회수 모델로 서버에서 검증한다. 세부 RBAC는 현재 Product 범위가
-  아니다. 운영 관리자 감사 이력은 1년 보관하되 자동 retention enforcement는 후속 운영
-  작업으로 남긴다.
+  아니다. 운영 관리자 감사 이력은 1년 보관하며 cleanup target은 기본 dry-run·scheduler
+  비활성 상태에서 전용 datasource와 역할을 지정한 경우에만 삭제를 수행한다. 설정은
+  [데이터 정리](cleanup.md)를 따른다.
 - 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
   `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`·filter group·canonical map
   target과 revision-scoped ticket/stamp guide·catalog audit의 현재 물리 schema는 V8~V11에,

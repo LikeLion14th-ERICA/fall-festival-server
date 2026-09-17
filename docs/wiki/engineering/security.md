@@ -47,8 +47,9 @@
 - 관리자 감사 이력은 append-only이고 해당 운영 데이터 변경과 같은 DB transaction에서
   기록한다. 감사 저장이 실패하면 운영 데이터 변경도 rollback하고, 운영 변경이
   rollback되면 감사 이력도 남기지 않는다.
-- `AdminAuditEvent`는 1년간 보관한다. V12는 보관 정책만 확정하며 자동 삭제·archive·
-  scheduler를 구현하지 않는다. 실제 retention enforcement는 별도 운영 작업으로 처리한다.
+- `AdminAuditEvent`는 1년간 보관한다. cleanup framework의 audit target은 기본 dry-run·
+  scheduler 비활성 상태이며, 전용 cleanup datasource와 역할을 별도로 지정한 경우에만
+  파괴적 scheduler를 활성화한다. 운영 설정과 결과 형식은 [데이터 정리](cleanup.md)를 따른다.
 - 감사 event에는 비밀번호, access/refresh token, cookie, Authorization header, request/response
   body, IP, User-Agent, 원문 개인정보, 예외·SQL message와 임의 metadata를 저장하지 않는다.
 - login·refresh·logout·인증 실패 감사는 현재 `AdminAuditEvent` 범위가 아니며 후속

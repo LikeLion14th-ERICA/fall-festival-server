@@ -31,6 +31,7 @@
 | API·DB·schema·데이터 계약 | [API 규칙](engineering/api.md), [데이터 모델·ERD](engineering/data-model.md), [API 절 찾기](engineering/api-navigation.md) | 부스·지도 구현은 [부스·지도 공개 카탈로그](engineering/spaces-map-backend.md), 해당 도메인·계약 테스트 |
 | 원격 DB 최초 연결·migration·catalog import/publish 전 | [DB 읽기 전용 사전 점검](engineering/database-preflight.md), [운영](engineering/operations.md) | [원격 개발 환경 결정](../dev-deployment-decision.md) |
 | 관리자·인증·공개 쓰기·저장·로그·업로드 | [보안](engineering/security.md) | 관리자·미디어 API |
+| 데이터 정리·보관 기간 enforcement | [데이터 정리](engineering/cleanup.md), [보안](engineering/security.md) | 실제 대상 추가 시 해당 schema·운영 runbook |
 | 콘텐츠·번역 게시·예약·revision | [게시](engineering/publishing.md), [운영](engineering/operations.md) | 관리자 콘텐츠 API |
 | 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md) | 변경 대상 runbook |
 | branch·worktree·동기화·push | [작업 절차](workflow/task.md), [브랜치](workflow/branches.md) | PR 규칙 |
