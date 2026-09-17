@@ -175,7 +175,13 @@ class DatabasePreflightIntegrationTest {
     }
 
     private void migrate() {
-        Flyway.configure().dataSource(url, POSTGRES.getUsername(), POSTGRES.getPassword()).load().migrate();
+        Flyway.configure()
+            .dataSource(url, POSTGRES.getUsername(), POSTGRES.getPassword())
+            // An empty festival id is the supported value for a database
+            // without legacy crowding rows, which is the case here.
+            .placeholders(Map.of("festivalId", ""))
+            .load()
+            .migrate();
     }
 
     private DatabasePreflight.Report inspect() throws Exception {

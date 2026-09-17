@@ -282,6 +282,9 @@ class OperationalAccountSettingsIntegrationTest {
                 .schemas(schema)
                 .defaultSchema(schema)
                 .locations("classpath:db/migration")
+                // An empty festival id is the supported value for a database
+                // without legacy crowding rows, which is the case here.
+                .placeholders(Map.of("festivalId", ""))
                 .load()
                 .migrate();
             try (Connection connection = connection(); Statement statement = connection.createStatement()) {
