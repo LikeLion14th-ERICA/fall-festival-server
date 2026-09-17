@@ -6,7 +6,7 @@
 |---|---|---|
 | 실제 로컬 Spring Boot | `http://127.0.0.1:8080/api/v2` | 구현 완료 API와 DB의 published revision 연동 |
 | 로컬 runtime mock | `http://127.0.0.1:4010/api/v2` | 미구현 계약, 오류·빈 상태와 UI 시나리오 개발 |
-| 원격 개발 서버 | TBD — 아직 provision되지 않음 | 배포 토폴로지 확정 후 문서화 |
+| 원격 개발 서버 | TBD — 아직 provision되지 않음 | `/api/v2` same-origin proxy 기본안; [배포 결정](../docs/dev-deployment-decision.md) 참고 |
 
 기계 판독 계약은 [openapi.json](openapi.json)입니다. runtime springdoc/Swagger UI는 없으며 정적
 OpenAPI 3.1 문서를 source of truth로 사용합니다. 현재 실제 서버에 구현된 공연 조회는 lineup,
@@ -20,10 +20,12 @@ festival의 published catalog 준비 상태를 나타냅니다. `/readyz`가 200
 locale은 생략하면 `ko`이며 현재 실제 공개 언어도 `ko`입니다. 성공은 `{ data, meta }`, 오류는
 `{ error, meta }`이고 응답 `X-Request-Id`와 `meta.requestId`로 요청을 추적합니다.
 
-현재 실제 서버의 CORS 설정은 관리자 경로에만 명시되어 있습니다. 프런트와 API를 같은 origin
-또는 reverse proxy로 제공하면 공개 GET에 browser CORS가 필요하지 않습니다. 서로 다른 origin을
-사용하는 원격 연동에는 별도 public CORS 정책이 필요할 수 있으므로 배포 토폴로지 확정 전 이를
-해결된 것으로 가정하지 않습니다.
+현재 실제 서버의 CORS 설정은 관리자 경로에만 명시되어 있습니다. 초기 원격 개발 환경은 browser가
+상대 경로 `/api/v2`를 호출하고 Next.js가 backend로 rewrite하는 same-origin proxy를 기본안으로
+사용하므로 public GET의 browser CORS를 추가하지 않습니다. Remote frontend host가 rewrite를
+지원하지 않거나 browser가 backend를 직접 cross-origin 호출하게 되면 정확한 frontend origin
+allowlist를 별도로 검토합니다. 자세한 조건은 [배포 결정](../docs/dev-deployment-decision.md)을
+따릅니다.
 
 ### Runtime mock 실행
 
