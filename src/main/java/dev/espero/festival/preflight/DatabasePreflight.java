@@ -17,7 +17,8 @@ final class DatabasePreflight {
     private static final int MAX_ROWS = 500;
     private static final Set<String> NON_CATALOG_TABLES = Set.of(
         "flyway_schema_history", "admin_accounts", "admin_refresh_sessions", "admin_audit_events",
-        "catalog_revision_audit", "crowding_state", "festivals", "festival_revisions");
+        "admin_idempotency_records", "catalog_revision_audit", "crowding_state", "festivals",
+        "festival_revisions", "operational_account_settings", "operational_account_setting_history");
     private final MigrationInventory inventory;
 
     DatabasePreflight(MigrationInventory inventory) {

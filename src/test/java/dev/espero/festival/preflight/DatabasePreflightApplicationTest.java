@@ -84,10 +84,13 @@ class DatabasePreflightApplicationTest {
     @Test
     void migrationInventoryIsReadFromActualBundledSql() throws Exception {
         var inventory = MigrationInventory.load();
-        assertThat(inventory.byVersion()).containsKeys(1, 2, 6, 11, 12, 13);
+        assertThat(inventory.byVersion()).containsKeys(1, 2, 6, 11, 12, 13, 14, 15);
         assertThat(inventory.tablesThrough(2)).contains("stamp_guide", "festivals", "festival_revisions", "festival_days")
             .doesNotContain("admin_accounts");
         assertThat(inventory.tablesThrough(13)).contains("catalog_revision_audit", "admin_audit_events", "performances");
+        assertThat(inventory.tablesThrough(15)).contains(
+            "admin_idempotency_records", "operational_account_settings", "operational_account_setting_history"
+        );
     }
 
     static Map<String, String> environment() {

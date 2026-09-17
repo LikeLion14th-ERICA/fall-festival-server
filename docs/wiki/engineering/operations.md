@@ -47,3 +47,6 @@
   백업 존재 여부가 아니라 실제 복원 훈련으로 검증한다.
 - 배포·스키마 변경·대량 콘텐츠 게시에는 롤백 절차와 담당자를 두고, 이전의 일관된
   revision으로 복구할 수 있어야 한다.
+- `TICKET`·`GOODS` 계좌는 catalog revision 밖의 versioned 운영 설정이다. 변경은 HTTP가
+  아닌 별도 DB role의 dry-run CLI로 수행하며, migration·role provisioning·복구·retention은
+  [계좌 운영 설정](operational-account-settings.md)을 따른다.

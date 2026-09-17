@@ -33,6 +33,10 @@ festival:
     allowed-origin: ${ADMIN_ALLOWED_ORIGIN:}
     bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}
     bootstrap-password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+  operational-account:
+    # A configured transfer link must use HTTPS and exactly one of these hosts.
+    # Leave this empty until the operator has an approved transfer destination.
+    transfer-link-allowed-hosts: ${ACCOUNT_TRANSFER_LINK_ALLOWED_HOSTS:}
 
 ---
 # Activate with SPRING_PROFILES_ACTIVE=db once SPRING_DATASOURCE_* variables are
