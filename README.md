@@ -12,13 +12,21 @@
 
 ## 현재 구현 상태
 
-루트 프로젝트는 JDBC·PostgreSQL·Flyway를 사용해 축제 회차, 티켓·스탬프·혼잡도와
-published revision의 부스·지도 카탈로그 조회를 구현합니다. `db` profile에서는
-`/api/v2/spaces`, `/maps`, `/places`, `/ticket-guide` 등을 공개 조회로 제공하며, 카탈로그는
-시작 시 검증한 published snapshot만 읽습니다. 실제 부스·지도·좌표·티켓존 운영 자료는
-승인 전이므로 migration에 seed하지 않았습니다. `/api/v2/admin/**`는 단일 `ADMIN`의 JWT와
-회전되는 refresh cookie로 보호하며, 공개 카탈로그 조회는 인증 없이 유지합니다. API v2는
-프런트 연동용 draft.3이며, 명세의 모든 기능이 구현되거나 공개 승인된 상태는 아닙니다.
+루트 프로젝트는 JDBC·PostgreSQL·Flyway를 사용해 축제 회차와 published revision의 공개
+카탈로그를 제공합니다. `db` profile에서 현재 구현된 공개 조회는 다음과 같습니다.
+
+- 공연: `GET /api/v2/lineup`, `/artists/{artistId}`, `/timetable`,
+  `/performances/{performanceId}`, `/prohibited-items`
+- 공간·지도: `GET /api/v2/spaces`, `/spaces/{spaceId}`, `/maps`, `/maps/{mapId}`,
+  `/maps/{mapId}/pins`, `/places/{placeId}`
+- 안내·운영 상태: `GET /api/v2/ticket-guide`, `/stamp-guide`, `/crowding`
+
+카탈로그 API는 시작 시 검증한 published snapshot만 읽습니다. 실제 행사 운영 자료는 승인
+전이므로 migration에 임의로 seed하지 않습니다. 공개 GET은 인증 없이 접근할 수 있습니다.
+`/api/v2/admin/**`에는 login, access JWT, 회전되는 refresh cookie, logout, `/admin/me`와
+서버 측 `ADMIN` 권한 검사가 구현되어 있습니다. 관리자 웹 UI와 콘텐츠별 관리자 CRUD가
+구현됐다는 뜻은 아닙니다. API v2는 프런트 연동용 draft.3이며, 명세의 모든 기능이 구현되거나
+공개 승인된 상태는 아닙니다.
 
 일반 사용자는 설치·로그인·회원가입 없이 공개 정보를 조회합니다. 구현 대상은
 라인업, 타임테이블, 부스 & 마켓, 지도, 공지 등이며, 관리자 권한은 서버에서 검증해야
@@ -80,17 +88,22 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 [.env.example](.env.example)은 변수 참고 파일입니다. Spring Boot가 `.env`를 자동으로
 읽지는 않으므로 셸 또는 IDE 실행 설정에 환경변수를 지정하세요.
 
-| 변수 | 기본값 | 용도 |
-|---|---|---|
-| `SERVER_ADDRESS` | `127.0.0.1` | 로컬 접속 주소 |
-| `SERVER_PORT` | `8080` | HTTP 포트 |
-| `SPRING_PROFILES_ACTIVE` | (없음) | `db`로 설정해야 아래 DB 변수가 적용됨 |
-| `SPRING_DATASOURCE_URL` | (없음) | `jdbc:postgresql://host:5432/db` 형식. `db` profile에서만 사용 |
-| `SPRING_DATASOURCE_USERNAME` | (없음) | DB 계정 |
-| `SPRING_DATASOURCE_PASSWORD` | (없음) | DB 비밀번호 |
-| `SPRING_FLYWAY_ENABLED` | `true` | `db` profile에서 Flyway migration 실행 여부 |
-| `ADMIN_JWT_SIGNING_SECRET` | (없음) | UTF-8 32바이트 이상인 관리자 access token 서명 비밀 |
-| `ADMIN_ALLOWED_ORIGIN` | (없음) | refresh cookie를 허용할 관리자 프런트엔드의 단일 HTTP(S) origin |
+| 변수 | 필요 여부 | 기본값 | profile | 용도·검증 |
+|---|---|---|---|---|
+| `SERVER_ADDRESS` | 선택 | `127.0.0.1` | 전체 | 서버 bind 주소 |
+| `SERVER_PORT` | 선택 | `8080` | 전체 | HTTP 포트 |
+| `SERVER_TOMCAT_ACCEPT_COUNT` | 선택 | `1024` | 전체 | Tomcat 연결 대기열 상한 |
+| `SERVER_TOMCAT_MAX_KEEP_ALIVE_REQUESTS` | 선택 | `10000` | 전체 | 연결당 허용할 HTTP/1.1 요청 상한 |
+| `SPRING_PROFILES_ACTIVE` | 선택 | (없음) | 전체 | `db`로 설정하면 DB·Flyway·카탈로그·관리자 인증 bean 활성화 |
+| `SPRING_DATASOURCE_URL` | 필수 | (없음) | `db` | `jdbc:postgresql://host:5432/db` 형식의 접속 URL |
+| `SPRING_DATASOURCE_USERNAME` | 필수 | (없음) | `db` | DB 계정 |
+| `SPRING_DATASOURCE_PASSWORD` | 필수 | (없음) | `db` | DB 비밀번호 |
+| `SPRING_FLYWAY_ENABLED` | 선택 | `true` | `db` | 시작 시 migration 적용 여부 |
+| `FESTIVAL_ID` | 필수 | (없음) | `db` | 제공할 `festivals.id`; 공백 또는 UUID 형식이 아니면 startup 실패 |
+| `ADMIN_JWT_SIGNING_SECRET` | 필수 | (없음) | `db` | access JWT 서명 비밀; UTF-8 32바이트 미만이면 startup 실패 |
+| `ADMIN_ALLOWED_ORIGIN` | 필수 | (없음) | `db` | 관리자 credential 요청용 단일 HTTP(S) origin; wildcard·경로·query 불가 |
+| `ADMIN_BOOTSTRAP_USERNAME` | 선택 | (없음) | `db` | 최초 관리자 username; 양쪽 값이 있을 때 공백 제거 후 100자 이하 |
+| `ADMIN_BOOTSTRAP_PASSWORD` | 선택 | (없음) | `db` | 최초 관리자 비밀번호; 양쪽 값이 있을 때 UTF-8 72바이트 이하 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
 
@@ -99,26 +112,104 @@ $env:SERVER_PORT = '8081'
 .\mvnw.cmd spring-boot:run
 ```
 
-`SPRING_PROFILES_ACTIVE`를 지정하지 않으면 DB 없이 실행됩니다. 공유 DB에 연결하려면
-아래처럼 `db` profile과 세 DB 변수를 함께 지정합니다. 팀이 공유한 접속 정보가
-`postgres://사용자:비밀번호@호스트:5432/db명` 형식이면 `SPRING_DATASOURCE_URL`에는
-`jdbc:postgresql://호스트:5432/db명`만 넣고 사용자·비밀번호는 별도 변수로 분리합니다.
+`SPRING_PROFILES_ACTIVE`를 지정하지 않으면 DB 없이 실행됩니다. `.env.example`과 로컬
+`.env`는 참고용이며 Spring Boot가 자동으로 읽지 않습니다. 환경변수는 실행할 shell,
+IDE run configuration 또는 deployment platform에서 주입해야 합니다.
+
+`db` profile에는 PostgreSQL 접속정보, 축제 UUID와 관리자 인증 설정이 모두 필요합니다.
+팀이 공유한 접속 정보가 `postgres://사용자:비밀번호@호스트:5432/db명` 형식이면 datasource
+URL에는 `jdbc:postgresql://호스트:5432/db명`만 넣고 사용자·비밀번호를 별도 변수로 분리합니다.
+아래 값은 형식만 보여 주는 placeholder입니다.
 
 ```powershell
 $env:SPRING_PROFILES_ACTIVE = 'db'
 $env:SPRING_DATASOURCE_URL = 'jdbc:postgresql://<host>:5432/<db>'
 $env:SPRING_DATASOURCE_USERNAME = '<user>'
 $env:SPRING_DATASOURCE_PASSWORD = '<password>'
+$env:FESTIVAL_ID = '<festival-uuid>'
 $env:ADMIN_JWT_SIGNING_SECRET = '<at-least-32-utf8-byte-secret>'
-$env:ADMIN_ALLOWED_ORIGIN = 'https://admin.example.invalid'
+$env:ADMIN_ALLOWED_ORIGIN = '<admin-origin>'
 .\mvnw.cmd spring-boot:run
 ```
 
-`db` profile은 JWT signing secret과 명시적 관리자 origin이 없으면 시작하지 않습니다. DB 접속
-정보와 JWT secret은 절대 저장소나 커밋 메시지, PR, 이슈에 붙여넣지 않습니다. 비밀값은
-`.env`(gitignore 대상) 또는 셸·IDE 실행 설정에만 둡니다. 관련 구현을 추가할 때
-[보안 규칙](docs/wiki/engineering/security.md)을 먼저 확인합니다. 운영 배포 절차는
-추후 인프라와 인증·관측성 구성을 확정하면서 작성합니다.
+macOS / Linux:
+
+```bash
+export SPRING_PROFILES_ACTIVE='db'
+export SPRING_DATASOURCE_URL='jdbc:postgresql://<host>:5432/<db>'
+export SPRING_DATASOURCE_USERNAME='<user>'
+export SPRING_DATASOURCE_PASSWORD='<password>'
+export FESTIVAL_ID='<festival-uuid>'
+export ADMIN_JWT_SIGNING_SECRET='<at-least-32-utf8-byte-secret>'
+export ADMIN_ALLOWED_ORIGIN='<admin-origin>'
+sh ./mvnw spring-boot:run
+```
+
+`FESTIVAL_ID`는 `festival.id`에 바인딩되는 `festivals.id` UUID입니다. `db` profile에서
+누락·공백·잘못된 UUID이면 startup이 실패하며, DB의 최신 festival을 자동 선택하지 않습니다.
+설정한 festival에 published revision이 있어야 `/readyz`와 공개 카탈로그가 준비 상태가 됩니다.
+환경별 UUID는 팀에서 제공받거나 해당 환경 DB에서 확인하며, 특정 원격 DB의 값을 문서 기본값으로
+사용하지 않습니다.
+
+이 저장소는 PostgreSQL에 연결할 수 있지만 루트 Docker Compose 등으로 PostgreSQL 인스턴스를
+생성하거나 기동하지는 않습니다. 기존 PostgreSQL, 팀 공유 DB 또는 직접 준비한 로컬 PostgreSQL
+중 하나가 필요합니다. 새 DB에서는 기본값인 `SPRING_FLYWAY_ENABLED=true`로 V1~V13 migration을
+적용합니다. Flyway clean은 비활성화되어 있습니다. `false`는 migration이 이미 별도로 관리되는
+schema를 의도적으로 사용할 때만 선택하며 일반 개발 기본값으로 사용하지 않습니다.
+
+### 최초 관리자 bootstrap
+
+관리자 계정이 하나도 없는 DB에서만 두 값을 함께 설정해 최초 `ADMIN`을 만들 수 있습니다.
+
+```text
+ADMIN_BOOTSTRAP_USERNAME=<bootstrap-username>
+ADMIN_BOOTSTRAP_PASSWORD=<bootstrap-password>
+```
+
+둘 중 하나라도 누락되거나 공백이면 bootstrap을 건너뜁니다. 둘 다 있더라도 기존 관리자 계정이
+하나라도 있으면 아무것도 변경하지 않습니다. username은 공백 제거 후 100자 이하, password는
+BCrypt 입력 한계인 UTF-8 72바이트 이하여야 합니다. 로그인과 `GET /api/v2/admin/me`로 생성을
+확인한 뒤 runtime 환경에서 두 bootstrap credential을 제거하고 서버를 다시 시작합니다.
+
+### 기동 확인과 API 호출
+
+1. 로그에서 `Started FallFestivalServerApplication`을 확인합니다.
+2. `GET /healthz`가 `200 {"status":"ok"}`인지 확인합니다.
+3. `db` profile이면 `GET /readyz`가 `200 {"status":"ready"}`인지 확인합니다.
+4. 공개 API를 하나 호출하고 응답 `meta.revision`이 기대한 published revision인지 확인합니다.
+
+`/healthz`는 프로세스 liveness만 나타냅니다. `/readyz`는 `db` profile에서만 등록되며, DB에서
+설정된 festival의 published snapshot을 불러오면 200, 아직 준비되지 않으면 503을 반환합니다.
+DB 없는 기본 profile에서는 `/readyz`가 등록되지 않아 404입니다.
+
+```powershell
+Invoke-RestMethod 'http://127.0.0.1:8080/api/v2/lineup?locale=ko'
+Invoke-RestMethod 'http://127.0.0.1:8080/api/v2/timetable?locale=ko'
+```
+
+```bash
+curl --fail-with-body 'http://127.0.0.1:8080/api/v2/lineup?locale=ko'
+curl --fail-with-body 'http://127.0.0.1:8080/api/v2/timetable?locale=ko'
+```
+
+공개 GET에는 인증이 필요하지 않습니다. 관리자 login과 refresh만 익명 진입을 허용하고,
+그 밖의 `/api/v2/admin/**` 요청에는 `ADMIN` access JWT가 필요합니다. 전체 경로·응답 계약은
+[정적 OpenAPI 3.1 문서](api-v2/openapi.json), 실제 서버와 목 서버의 구분은
+[프런트 연동 안내](api-v2/FRONTEND.md)를 따릅니다.
+
+DB 접속정보, JWT secret과 bootstrap password는 저장소, 커밋 메시지, PR 또는 이슈에 넣지
+않습니다. 관련 구현을 추가할 때 [보안 규칙](docs/wiki/engineering/security.md)을 먼저 확인합니다.
+
+Docker image는 루트에서 다음과 같이 빌드할 수 있습니다.
+
+```bash
+docker build --tag fall-festival-server:local .
+```
+
+이미지는 `0.0.0.0:8080`으로 bind하지만 DB와 runtime 환경변수를 자체 provision하지 않습니다.
+로컬 실행과 Docker image build는 지원하지만 원격 개발 서버는 아직 provision되지 않았고 운영
+배포 절차도 확정되지 않았습니다. 인프라와 인증·관측성 구성이 정해진 뒤 별도 runbook으로
+작성합니다.
 
 ## 디렉터리
 

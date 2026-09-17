@@ -1,13 +1,44 @@
 # 프런트 연동 안내
 
-Node.js 22 이상에서 저장소 루트 기준으로 실행합니다. 서버 실행에는 외부 패키지 설치나 DB가 필요하지 않습니다.
+## 실제 서버와 목 서버
+
+| 대상 | API base URL | 용도 |
+|---|---|---|
+| 실제 로컬 Spring Boot | `http://127.0.0.1:8080/api/v2` | 구현 완료 API와 DB의 published revision 연동 |
+| 로컬 runtime mock | `http://127.0.0.1:4010/api/v2` | 미구현 계약, 오류·빈 상태와 UI 시나리오 개발 |
+| 원격 개발 서버 | TBD — 아직 provision되지 않음 | 배포 토폴로지 확정 후 문서화 |
+
+기계 판독 계약은 [openapi.json](openapi.json)입니다. runtime springdoc/Swagger UI는 없으며 정적
+OpenAPI 3.1 문서를 source of truth로 사용합니다. 현재 실제 서버에 구현된 공연 조회는 lineup,
+artist detail, timetable, performance detail, prohibited items입니다. 공개 GET은 인증 없이
+호출합니다. 실제 서버의 `/api/v2/admin/**`는 login과 refresh 진입을 제외하면 `ADMIN` access
+JWT가 필요하며, refresh token은 브라우저가 관리하는 Secure·HttpOnly cookie입니다.
+
+실제 서버는 `/healthz`로 process liveness를 확인합니다. `db` profile에서는 `/readyz`가 설정한
+festival의 published catalog 준비 상태를 나타냅니다. `/readyz`가 200인 뒤 실제 공개 API를
+호출하고 응답의 `meta.revision`을 확인하세요. DB 없는 profile에는 `/readyz`가 등록되지 않습니다.
+locale은 생략하면 `ko`이며 현재 실제 공개 언어도 `ko`입니다. 성공은 `{ data, meta }`, 오류는
+`{ error, meta }`이고 응답 `X-Request-Id`와 `meta.requestId`로 요청을 추적합니다.
+
+현재 실제 서버의 CORS 설정은 관리자 경로에만 명시되어 있습니다. 프런트와 API를 같은 origin
+또는 reverse proxy로 제공하면 공개 GET에 browser CORS가 필요하지 않습니다. 서로 다른 origin을
+사용하는 원격 연동에는 별도 public CORS 정책이 필요할 수 있으므로 배포 토폴로지 확정 전 이를
+해결된 것으로 가정하지 않습니다.
+
+### Runtime mock 실행
+
+Node.js 22 이상에서 저장소 루트 기준으로 실행합니다. 목 서버 실행에는 외부 package 설치나
+DB가 필요하지 않습니다.
 
 ```powershell
 cd api-v2
 npm start
 ```
 
-목 서버 주소는 **http://127.0.0.1:4010**, API base URL은 **http://127.0.0.1:4010/api/v2**입니다. 루트 주소의 콘솔에서 API와 시나리오를 선택하고 요청을 실행할 수 있습니다. Ctrl+C로 종료합니다. 원격 배포 서버가 아닌 로컬 개발 서버입니다.
+목 서버 주소는 **http://127.0.0.1:4010**, API base URL은
+**http://127.0.0.1:4010/api/v2**입니다. 루트 주소의 콘솔에서 API와 시나리오를 선택하고 요청을
+실행할 수 있습니다. Ctrl+C로 종료합니다. 원격 배포 서버가 아닌 로컬 개발 서버입니다. 실제
+백엔드에 구현된 공연 API의 정상 연동에는 목 대신 `http://127.0.0.1:8080/api/v2`를 권장합니다.
 
 포트 변경은 PowerShell에서 `$env:MOCK_PORT='4011'`로 설정 후 실행합니다. 기본 CORS 허용 origin은 localhost와 127.0.0.1의 3000·5173 포트입니다. 다른 프런트 주소는 `$env:MOCK_CORS_ORIGINS='http://localhost:3001,http://127.0.0.1:3001'`처럼 지정합니다. 서버는 127.0.0.1에만 바인딩하므로 휴대폰에서 직접 접근하는 환경은 별도 구성해야 합니다.
 
