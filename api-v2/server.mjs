@@ -1,11 +1,22 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { createState,execute,ApiFailure,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
+import { createState,execute,ApiFailure,dayKst,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
 import { validate } from './validate.mjs';
 
 const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
+const noBodyStatuses=new Set([204,304]);
+const stableJson=value=>{
+  if(Array.isArray(value))return `[${value.map(stableJson).join(',')}]`;
+  if(value&&typeof value==='object')return `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
+  return JSON.stringify(value);
+};
+const strongEtag=value=>`"${createHash('sha256').update(stableJson(value)).digest('hex')}"`;
+const matchesEtag=(header,current)=>Boolean(header&&header.split(',').some(candidate=>{
+  const normalized=candidate.trim();
+  return normalized==='*'||(normalized.startsWith('W/')?normalized.slice(2).trim():normalized)===current;
+}));
 
 export async function createMockServer({origins=['http://localhost:3000','http://127.0.0.1:3000','http://localhost:5173','http://127.0.0.1:5173']}={}) {
   const spec=JSON.parse(await readFile(new URL('./openapi.json',import.meta.url),'utf8'));
@@ -20,7 +31,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const server=http.createServer(async(req,res)=>{
     let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
     const meta=revision=>({requestId,serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale,mock:true});
-    const send=(status,value,extra={})=>{res.writeHead(status,{...headers,'X-Request-Id':requestId,...extra});res.end(JSON.stringify(value));};
+    const send=(status,value,extra={})=>{res.writeHead(status,{...headers,'X-Request-Id':requestId,...extra});res.end(noBodyStatuses.has(status)?undefined:JSON.stringify(value));};
     try{
       const origin=req.headers.origin;
       const url=new URL(req.url,'http://127.0.0.1');
@@ -29,8 +40,8 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         if(csrfRoute)failure(403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.');
         failure(403,'ORIGIN_NOT_ALLOWED','이 개발 서버에 허용되지 않은 origin입니다.');
       }
-      if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location');}
-      if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, X-Mock-Session, X-Mock-Scenario, X-Mock-Time, X-Mock-Delay','Access-Control-Max-Age':'600'});return res.end();}
+      if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location, ETag');}
+      if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, If-Match, Idempotency-Key, If-None-Match, X-Mock-Session, X-Mock-Scenario, X-Mock-Time, X-Mock-Delay','Access-Control-Max-Age':'600'});return res.end();}
       const session=req.headers['x-mock-session']||'default';
       if(!/^[a-zA-Z0-9_-]{1,64}$/.test(session))failure(400,'INVALID_MOCK_SESSION','목 세션은 영숫자·밑줄·하이픈 1~64자입니다.');
       const wall=Date.now();for(const [key,item]of sessions)if(wall-item.used>3600000)sessions.delete(key);
@@ -57,7 +68,19 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const params=Object.fromEntries(route.keys.map((key,i)=>[key,route.regex.exec(url.pathname)[i+1]]));
       const query={};
       for(const [key,v]of url.searchParams){if(Object.hasOwn(query,key))failure(400,'INVALID_QUERY','중복 쿼리 파라미터입니다.');if(key!=='__scenario'&&!route.definition.parameters.some(p=>p.in==='query'&&p.name===key))failure(400,'INVALID_QUERY','정의되지 않은 쿼리 파라미터입니다.');query[key]=v;}
-      for(const p of route.definition.parameters){const value=p.in==='path'?params[p.name]:query[p.name];if(value===undefined){if(p.required)failure(400,'INVALID_QUERY','필수 파라미터가 없습니다.',[{field:p.name,reason:'필수 값입니다.'}]);}else{const issues=validate(p.schema,value,spec,p.name);if(issues.length)failure(400,'INVALID_QUERY','파라미터 형식이 잘못되었습니다.',issues);}}
+      for(const p of route.definition.parameters){
+        const value=p.in==='path'?params[p.name]:p.in==='query'?query[p.name]:req.headers[p.name.toLowerCase()];
+        if(value===undefined){
+          if(p.required){
+            if(p.name==='If-Match')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
+            if(p.name==='Idempotency-Key')failure(428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.');
+            failure(400,p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','필수 요청 값이 없습니다.',[{field:p.name,reason:'필수 값입니다.'}]);
+          }
+        }else{
+          const issues=validate(p.schema,value,spec,p.name);
+          if(issues.length)failure(400,p.name==='If-Match'?'INVALID_IF_MATCH':p.name==='Idempotency-Key'?'INVALID_IDEMPOTENCY_KEY':p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','요청 값 형식이 잘못되었습니다.',issues);
+        }
+      }
       scenario=req.headers['x-mock-scenario']||query.__scenario||'normal';delete query.__scenario;
       if(!route.scenarios.includes(scenario))failure(400,'UNKNOWN_SCENARIO','이 요청에서 지원하지 않는 시나리오입니다.');
       if(['all-languages','partial-translation'].includes(scenario))state.languages=['ko','en','zh-Hans','ja'];
@@ -76,14 +99,48 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='unauthorized')failure(401,'UNAUTHORIZED','관리자 인증이 필요합니다.');
       if(scenario==='forbidden')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');
       if(scenario==='rate-limited')failure(429,'RATE_LIMITED','잠시 후 다시 요청해 주세요.');
-      const result=execute(route,state,{params,query,body,scenario,now});now=result.now;
-      const response={data:result.data,meta:meta(unscopedOperations.has(route.operationId)?0:state.revision)};
-      const responseSchema=route.definition.responses[result.status].content['application/json'].schema;
-      const issues=validate(responseSchema,response,spec);if(issues.length)throw new Error('Response contract mismatch: '+JSON.stringify(issues));
+      if(scenario==='precondition-required')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
+      if(scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
+      if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
+      let result;
+      if(route.operationId==='putAdminCrowding'){
+        const key=req.headers['idempotency-key'];
+        const fingerprint=stableJson({
+          operatingDay:dayKst(now),
+          payload:{level:body.level,confirmFull:body.confirmFull===true},
+        });
+        const prior=state.idempotency[key];
+        if(prior){
+          if(prior.fingerprint!==fingerprint)failure(409,'IDEMPOTENCY_KEY_REUSED','같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.');
+          result={status:prior.status,data:null,now,locale};
+        }else{
+          result=execute(route,state,{params,query,body,scenario,now});
+          if(result.status>=200&&result.status<300)state.idempotency[key]={fingerprint,status:result.status};
+        }
+      }else{
+        result=execute(route,state,{params,query,body,scenario,now});
+      }
+      now=result.now;
+      const responseMeta=route.definition['x-conditional']
+        ? {timezone:'Asia/Seoul',festivalId:'festival-mock',revision:0,locale,mock:true}
+        : meta(unscopedOperations.has(route.operationId)?0:state.revision);
+      const response=noBodyStatuses.has(result.status)?null:{data:result.data,meta:responseMeta};
+      let responseStatus=result.status;
       const extra=result.status===201?{Location:`/api/v2/admin/${route.operationId==='postAdminProduct'?'products':'notices'}/${result.data.id}`}:{ };
+      if(route.definition.parameters.some(parameter=>parameter.name==='If-None-Match')&&result.status===200){
+        const etag=strongEtag({data:response.data,meta:{timezone:response.meta.timezone,festivalId:response.meta.festivalId,revision:response.meta.revision,locale:response.meta.locale,mock:response.meta.mock}});
+        extra.ETag=etag;
+        extra['X-Server-Time']=meta(0).serverTime;
+        if(matchesEtag(req.headers['if-none-match'],etag))responseStatus=304;
+      }
+      const responseDefinition=route.definition.responses[responseStatus];
+      if(responseDefinition?.content){
+        const responseSchema=responseDefinition.content['application/json'].schema;
+        const issues=validate(responseSchema,response,spec);if(issues.length)throw new Error('Response contract mismatch: '+JSON.stringify(issues));
+      }
       if(['createAdminSession','refreshAdminSession'].includes(route.operationId))extra['Set-Cookie']='__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN; Path=/; Secure; HttpOnly; SameSite=Strict';
       if(route.operationId==='deleteCurrentAdminSession')extra['Set-Cookie']='__Host-festival-admin-refresh=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict';
-      return send(result.status,response,extra);
+      return send(responseStatus,responseStatus===304?null:response,extra);
     }catch(error){
       const known=error instanceof ApiFailure;
       const status=known?error.status:500;

@@ -88,7 +88,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of(allowedOrigin));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of(
-            "Authorization", "Content-Type", "X-Request-Id", "If-Match", "Idempotency-Key"
+            "Authorization", "Content-Type", "X-Request-Id", "If-Match", "If-None-Match", "Idempotency-Key"
         ));
         configuration.setExposedHeaders(List.of("ETag", "X-Request-Id", "X-Server-Time"));
         configuration.setAllowCredentials(true);

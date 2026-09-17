@@ -5,63 +5,92 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import dev.espero.festival.context.FestivalContextService;
 import dev.espero.festival.domain.CrowdingRecord;
+import dev.espero.festival.domain.CrowdingSchedule;
 import dev.espero.festival.persistence.CrowdingStore;
 import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 class CrowdingControllerTest {
 
     private final CrowdingStore store = mock(CrowdingStore.class);
-    private final HttpServletRequest request = request(Map.of());
+    private final FestivalContextService contextService = mock(FestivalContextService.class);
+    private final HttpServletRequest request = mock(HttpServletRequest.class);
 
-    private CrowdingController controllerAt(String instant) {
+    private CrowdingViewService serviceAt(String instant) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-        return new CrowdingController(store, ApiMetaTestFixtures.contentMetaSupport(clock), clock);
+        when(contextService.currentPublished()).thenReturn(ApiMetaTestFixtures.PUBLISHED_CONTEXT);
+        return new CrowdingViewService(
+            store,
+            contextService,
+            ApiMetaTestFixtures.contentMetaSupport(clock),
+            new ConditionalResponseSupport(new ObjectMapper()),
+            clock
+        );
+    }
+
+    private void schedule() {
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(
+                java.time.LocalDate.parse("2030-10-01"),
+                OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
+                OffsetDateTime.parse("2030-10-01T22:00:00+09:00")
+            ),
+            new CrowdingSchedule(
+                java.time.LocalDate.parse("2030-10-03"),
+                OffsetDateTime.parse("2030-10-03T12:00:00+09:00"),
+                OffsetDateTime.parse("2030-10-03T21:00:00+09:00")
+            )
+        ));
     }
 
     @Test
-    void returnsBeforeOpenAheadOfOpeningTime() {
-        when(store.findFor(LocalDate.parse("2030-10-01"))).thenReturn(Optional.empty());
+    void returnsBeforeOpenAheadOfOpeningTimeAndUsesPublishedSchedule() {
+        schedule();
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-01")))
+            .thenReturn(Optional.empty());
 
-        CrowdingResponse data = controllerAt("2030-10-01T02:00:00Z").getCrowding(request).data();
+        CrowdingResponse data = serviceAt("2030-10-01T02:00:00Z").current(request).response();
 
+        assertThat(data.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.BEFORE_OPEN);
         assertThat(data.status()).isEqualTo(CrowdingResponse.Status.BEFORE_OPEN);
-        assertThat(data.colorToken()).isNull();
-        assertThat(data.savedLevel()).isNull();
-        assertThat(data.timeBasis()).isEqualTo(CrowdingResponse.TimeBasis.NONE);
-        assertThat(data.updatedAt()).isNull();
+        assertThat(data.opensAt().toString()).isEqualTo("2030-10-01T13:00+09:00");
         assertThat(data.message()).contains("13:00");
     }
 
     @Test
     void returnsRelaxedDefaultDuringOperatingHoursWhenNothingSaved() {
-        when(store.findFor(LocalDate.parse("2030-10-01"))).thenReturn(Optional.empty());
+        schedule();
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-01")))
+            .thenReturn(Optional.empty());
 
-        ApiResponse<CrowdingResponse> response = controllerAt("2030-10-01T05:00:00Z").getCrowding(request);
-        CrowdingResponse data = response.data();
+        CrowdingViewService.CrowdingSnapshot snapshot = serviceAt("2030-10-01T05:00:00Z").current(request);
+        CrowdingResponse data = snapshot.response();
 
+        assertThat(data.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
         assertThat(data.status()).isEqualTo(CrowdingResponse.Status.RELAXED);
         assertThat(data.colorToken()).isEqualTo("green");
-        assertThat(data.savedLevel()).isNull();
         assertThat(data.timeBasis()).isEqualTo(CrowdingResponse.TimeBasis.OPENING);
-        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
-        assertThat(response.meta().revision()).isZero();
+        assertThat(snapshot.meta().revision()).isZero();
     }
 
     @Test
     void returnsSavedLevelDuringOperatingHours() {
-        when(store.findFor(LocalDate.parse("2030-10-01")))
+        schedule();
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-01")))
             .thenReturn(Optional.of(new CrowdingRecord("FULL", Instant.parse("2030-10-01T06:30:00Z"))));
 
-        CrowdingResponse data = controllerAt("2030-10-01T07:00:00Z").getCrowding(request).data();
+        CrowdingResponse data = serviceAt("2030-10-01T07:00:00Z").current(request).response();
 
         assertThat(data.status()).isEqualTo(CrowdingResponse.Status.FULL);
         assertThat(data.colorToken()).isEqualTo("black");
@@ -71,41 +100,32 @@ class CrowdingControllerTest {
     }
 
     @Test
-    void returnsClosedAtOrAfterClosingTimeAndIgnoresSavedLevel() {
-        when(store.findFor(LocalDate.parse("2030-10-01")))
-            .thenReturn(Optional.of(new CrowdingRecord("CROWDED", Instant.parse("2030-10-01T10:00:00Z"))));
+    void returnsClosedOnTheFinalDateAndBeforeOpenInAnInterDayGap() {
+        schedule();
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-03")))
+            .thenReturn(Optional.empty());
 
-        CrowdingResponse data = controllerAt("2030-10-01T13:00:00Z").getCrowding(request).data();
+        CrowdingResponse gap = serviceAt("2030-10-02T05:00:00Z").current(request).response();
+        assertThat(gap.operatingDay()).isEqualTo(java.time.LocalDate.parse("2030-10-03"));
+        assertThat(gap.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.BEFORE_OPEN);
 
-        assertThat(data.status()).isEqualTo(CrowdingResponse.Status.CLOSED);
-        assertThat(data.colorToken()).isNull();
-        assertThat(data.timeBasis()).isEqualTo(CrowdingResponse.TimeBasis.NONE);
-        assertThat(data.updatedAt()).isNull();
+        CrowdingResponse ended = serviceAt("2030-10-04T05:00:00Z").current(request).response();
+        assertThat(ended.operatingDay()).isEqualTo(java.time.LocalDate.parse("2030-10-03"));
+        assertThat(ended.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.CLOSED);
+        assertThat(ended.status()).isEqualTo(CrowdingResponse.Status.CLOSED);
     }
 
     @Test
-    void distinguishesUnreadyKnownLocaleFromInvalidLocaleAndQuery() {
-        when(store.findFor(LocalDate.parse("2030-10-01"))).thenReturn(Optional.empty());
-        HttpServletRequest knownButUnready = request(Map.of("locale", new String[] {"en"}));
-        HttpServletRequest unknown = request(Map.of("locale", new String[] {"xx"}));
-        HttpServletRequest duplicate = request(Map.of("locale", new String[] {"ko", "ko"}));
-        when(knownButUnready.getParameter("locale")).thenReturn("en");
-        when(unknown.getParameter("locale")).thenReturn("xx");
+    void rejectsAnUnconfiguredSchedule() {
+        when(contextService.currentPublished()).thenReturn(ApiMetaTestFixtures.PUBLISHED_CONTEXT);
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of());
 
-        assertThatThrownBy(() -> controllerAt("2030-10-01T05:00:00Z").getCrowding(knownButUnready))
+        assertThatThrownBy(() -> serviceAt("2030-10-01T05:00:00Z").current(request))
             .isInstanceOf(ApiException.class)
-            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("LOCALE_NOT_READY"));
-        assertThatThrownBy(() -> controllerAt("2030-10-01T05:00:00Z").getCrowding(unknown))
-            .isInstanceOf(ApiException.class)
-            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("INVALID_QUERY"));
-        assertThatThrownBy(() -> controllerAt("2030-10-01T05:00:00Z").getCrowding(duplicate))
-            .isInstanceOf(ApiException.class)
-            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("INVALID_QUERY"));
-    }
-
-    private HttpServletRequest request(Map<String, String[]> parameters) {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getParameterMap()).thenReturn(parameters);
-        return request;
+            .satisfies(exception -> {
+                ApiException api = (ApiException) exception;
+                assertThat(api.status().value()).isEqualTo(503);
+                assertThat(api.code()).isEqualTo("CROWDING_SCHEDULE_UNCONFIGURED");
+            });
     }
 }

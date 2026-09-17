@@ -9,6 +9,8 @@ main `21eb76dacd78b3ad79ed4d9589dd341fbc25b883`(PR #6 병합 완료) Product Con
 | 혼잡도 | 홈·지도 표시 | 홈만 표시, 지도 핀·색상 연동 없음 |
 | 운영 시간 | 관리자 GET/PUT | 개발자 등록, 관리자 시간 편집 경로 제거 |
 | 날짜 | 운영일 이력 | KST 00:00 전날 상태·수정 시각 초기화 |
+| 관리자 혼잡도 저장 | 응답 본문 성공 | `If-Match`와 `Idempotency-Key` 필수, 성공·재시도는 204, 같은 단계는 시각·감사 이력 유지 |
+| 혼잡도 일정·상태 | 고정 운영 시각·revision 귀속 후보 | published FestivalDay 일정, `(festival_id, operating_date)` revision-independent 상태, meta revision 0 |
 | 굿즈 상태 | 정수 수량에서 자동 판정 | 실제 조합별 ON_SALE/SOLD_OUT 직접 저장. 관리자도 수량 미관리 |
 | 상품 옵션 | 전체 색상×사이즈 곱집합 | Goods.options에 등록된 실제 조합만 |
 | 신규 옵션 | 자동 0개·품절 | 신규 상품·조합은 ON_SALE |

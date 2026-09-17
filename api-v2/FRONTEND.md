@@ -75,13 +75,13 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 
 | 개발할 화면 | 확인할 조합 |
 |---|---|
-| 홈 | config normal / faq-ready / missing-optional / empty, crowd before-open / closed / unmodified, notices empty / error |
+| 홈 | config normal / faq-ready / missing-optional / empty, crowd before-open / closed / unmodified / unconfigured, notices empty / error |
 | 목록·상세 | 목록 empty, 상세 missing-optional / not-found / error. 선택 정보가 없는 영역은 제목까지 숨김 |
 | 굿즈 | goods 정상 + goods-availability error, availability sold-out, payment-guide missing-optional. 품절과 조회 실패를 구분 |
 | 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, all-languages를 적용한 목 세션의 locale=en 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
-| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도 동일 상태 재선택은 성공하고 저장 시각을 유지 |
+| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도는 `If-Match`·`Idempotency-Key`를 사용하며 동일 상태 재선택은 204로 성공하고 저장 시각을 유지 |
 | 스탬프 | guide missing-optional, 수령 인증 normal / invalid-code / error, 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·코드 오류·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임

@@ -87,6 +87,8 @@ API v2는 공개 앱과 관리자 운영 도구가 공유하는 단일 HTTP 계�
 - 특정 published FestivalRevision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용한다.
   관리자 인증·시스템·오류 응답뿐 아니라 아직 FestivalDay 연결이 완료되지 않은 혼잡도 응답도
   여기에 포함한다. 0은 published content revision의 대체값이 아니다.
-- 혼잡도는 실제 FestivalDay 일정과 `crowding_state.festival_day_id`를 연결한 뒤 같은
-  published revision으로 데이터를 제한하고 revision 1 이상으로 전환한다.
+- 혼잡도 일정은 현재 `published FestivalRevision`의 `FestivalDay` snapshot에서 읽는다.
+  운영자 상태는 revision과 독립된 `(festival_id, operating_date)` 키의
+  `crowding_state_dynamic`에 저장하며 혼잡도 응답 meta의 revision은 항상 0이다.
+  게시 snapshot이나 유효한 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`를 반환한다.
 - 보안·인프라 오류 meta는 추가 DB 조회 없이 만들어 원래 장애를 가리지 않는다.
