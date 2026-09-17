@@ -46,17 +46,17 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 
 | 순서 | 목표 | 상태 | 다음 확인 |
 |---|---|---|---|
-| 1 | 공통 동시성 기반 | 통합 중 | request ID·conditional response·CORS·idempotency·If-Match 기반은 `a3cc13e`까지 통합했다. crowding 계약 사용처와 전체 검증이 남았다. |
+| 1 | 공통 동시성 기반 | 통합 완료 | request ID·conditional response·CORS·idempotency·If-Match 기반을 통합했고 `PUT /admin/crowding`이 첫 사용처다. |
 | 2 | 정리 작업 틀 | 통합 완료 | `admin_audit_events` 1년, `COMPLETED` idempotency 24시간 retention과 재사용 target 경계를 통합했다. 전용 cleanup role과 연결 없이는 삭제하지 않는다. |
-| 3 | 관리자 혼잡도 백엔드 | 병렬 구현 중 | 독립 branch `codex/admin-crowding-backend`가 V14 기반으로 구현 중이다. 운영 일정 승인 전에는 원격 DB 검증을 주장하지 않는다. |
-| 4 | 계좌 운영 설정 | 대기 | DB provider role 발급·provisioning 절차를 먼저 확정한다. |
+| 3 | 관리자 혼잡도 백엔드 | 통합 완료 | FestivalDay 일정 기반 GET/PUT과 `crowding_state_dynamic`을 통합했다. migration은 병합 시 V16으로 재배정했고 원격 DB에는 적용하지 않았다. |
+| 4 | 계좌 운영 설정 | 구현 통합, provisioning 대기 | CLI·V15 설정/이력 schema·history retention을 통합했다. DB provider의 role 발급과 provisioning script 실행은 남아 있다. |
 | 5 | 티켓 계좌 분리와 polling | 대기 | 계좌 설정 배포·등록 확인 뒤에 static catalog 읽기를 전환한다. |
 | 6 | catalog export·게시 보호 | 대기 | `base_revision_id`와 legacy validation report를 구현한다. |
 | 7 | 로컬 catalog workbench | 대기 | export/publish 보호와 role 분리 뒤에 구현한다. |
 
-현재 통합 branch는 `codex/goal-ops-catalog`이고 마지막 통합 commit은 `ca2a2d1`다.
-독립 작업 branch는 통합 전까지 각각 전용 worktree에서 유지한다. 이 표는 각 통합
-commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
+현재 통합 branch는 `feat/ops-foundation`이고 마지막 통합 commit은 `586be92`다.
+이전 통합 branch `codex/goal-ops-catalog`와 개별 작업 branch의 내용은 모두 이 branch에
+들어왔다. 이 표는 각 통합 commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
 
 ### 이미 통합한 변경
 
@@ -76,12 +76,21 @@ commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
 - `792e51c`: 500행 이하 단일 transaction batch, advisory lock, dry-run, 전용 cleanup
   datasource/role 검증과 1년 감사 retention을 추가했다.
 - `ca2a2d1`: `COMPLETED` idempotency response만 24시간 뒤 정리하는 target을 추가했다.
+- `7b17aeb`: `TICKET`·`GOODS` 계좌 현재 설정 V15, trigger 소유 immutable history와
+  dry-run 기본 CLI를 추가했다.
+- `5a0b4f3`: 계좌 이력을 cleanup 틀에 등록하고 현재 version·최신 복원 가능 상태를
+  retention 이후에도 보존한다.
+- `8601903`: 혼잡도를 `(festival_id, operating_date)` 키와 published FestivalDay 일정으로
+  옮기고 V5 legacy 표는 보존한다.
+- `586be92`: 위 두 갈래를 병합했다. preflight의 non-catalog 표 목록을 합치고, 계좌
+  migration이 V15를 쓰고 있어 혼잡도 migration을 V16으로 재배정했다.
 
 ### 현재 병렬 작업
 
-| branch | 범위 | 통합 전 확인 |
-|---|---|---|
-| `codex/admin-crowding-backend` | FestivalDay 기반 crowding GET/PUT·새 dynamic table·계약·테스트 | V14 이후 migration 번호, CORS/conditional/idempotency 사용, API generated artifact를 재생성한다. |
+없다. `codex/goal-ops-catalog`, `codex/admin-crowding-backend`,
+`codex/account-operational-settings`, `codex/cleanup-framework`,
+`codex/conditional-foundation`, `codex/preflight-safety`의 내용은 모두
+`feat/ops-foundation`에 포함됐다. 다음 작업은 이 branch에서 이어간다.
 
 ## 고정 안전 규칙
 
@@ -126,6 +135,10 @@ commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
 | 2026-09-18 | idempotency·precondition focused suite | unit + PostgreSQL Testcontainers 19개 통과 | cleanup/crowding 통합 뒤 전체 `verify`를 실행한다. |
 | 2026-09-18 | cleanup framework + completed idempotency target | PostgreSQL Testcontainers focused suite 10개 통과 | crowding 통합 뒤 전체 `verify`를 다시 실행한다. |
 | 2026-09-18 | 원격 DB 상태 | 실행하지 않음 | 구현 중·병합 전에는 remote DB mutation을 금지한다. |
+| 2026-09-18 | crowding branch를 통합 branch에 병합 | 충돌 1건(`DatabasePreflight` 표 목록)을 합집합으로 해결하고 crowding migration을 V16으로 재배정 | 아래 두 검증을 실행했다. |
+| 2026-09-18 | `api-v2` 재생성과 계약 검증 | `node generate.mjs` 결과가 병합본과 동일, `npm run check` 324개 통과 | 생성물을 손으로 고치지 않았다. |
+| 2026-09-18 | 전체 `mvnw.cmd verify` | 첫 실행은 직접 Flyway를 구성하는 계좌·preflight 통합 테스트 4건이 `${festivalId}` placeholder 누락으로 실패 | 두 호출부에 빈 placeholder를 전달해 수정했다. |
+| 2026-09-18 | 전체 `mvnw.cmd verify` 재실행 | Docker 사용 가능 상태에서 312개 통과, 실패·오류·건너뜀 0 | PR 5 티켓 계좌 분리를 시작한다. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
 않고 원인과 후속 조치를 기록한다.
