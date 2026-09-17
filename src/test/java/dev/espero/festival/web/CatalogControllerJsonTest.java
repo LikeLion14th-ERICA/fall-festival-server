@@ -66,7 +66,7 @@ class CatalogControllerJsonTest {
             .andExpect(jsonPath("$.data.items[0].mapTarget.mapVersion").value("map-v1"))
             .andExpect(jsonPath("$.data.items[1].experience").value(Matchers.nullValue()))
             .andExpect(jsonPath("$.data.items[1].mapTarget").value(Matchers.nullValue()))
-            .andExpect(jsonPath("$.meta.requestId").value("catalog-json-test"))
+            .andExpect(jsonPath("$.meta.requestId").value(Matchers.matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.meta.serverTime").value("2030-10-01T18:00:00+09:00"))
             .andExpect(jsonPath("$.meta.timezone").value("Asia/Seoul"))
             .andExpect(jsonPath("$.meta.festivalId").value("festival-catalog"))
@@ -125,7 +125,7 @@ class CatalogControllerJsonTest {
             .andExpect(jsonPath("$.data.items[1].target.mapId").value("map-detail"))
             .andExpect(jsonPath("$.data.items[1].filterGroup").value(Matchers.nullValue()))
             .andExpect(jsonPath("$.data.items[1].target.placeId").doesNotExist())
-            .andExpect(jsonPath("$.meta.requestId").value("pins-json-test"));
+            .andExpect(jsonPath("$.meta.requestId").value(Matchers.matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")));
     }
 
     private CatalogSnapshot snapshot(

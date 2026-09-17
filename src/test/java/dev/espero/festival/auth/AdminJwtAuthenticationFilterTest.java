@@ -92,10 +92,12 @@ class AdminJwtAuthenticationFilterTest {
         filter(tokens, store).doFilter(request, response, new MockFilterChain());
 
         assertThat(response.getStatus()).isEqualTo(503);
-        assertThat(response.getHeader("X-Request-Id")).isEqualTo("auth-db-unavailable-request");
+        assertThat(response.getHeader("X-Request-Id"))
+            .matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+            .isNotEqualTo("auth-db-unavailable-request");
         assertThat(response.getContentAsString())
             .contains(
-                "SERVICE_UNAVAILABLE", "auth-db-unavailable-request", "\"error\"", "\"meta\"",
+                "SERVICE_UNAVAILABLE", "\"error\"", "\"meta\"",
                 "\"retryable\":true"
             )
             .doesNotContain("sensitive SQL connection detail", "Bearer ", "stackTrace");

@@ -24,7 +24,7 @@ class ApiMetaSupportTest {
     private final ApiMetaSupport metaSupport = new ApiMetaSupport(clock, properties);
 
     @Test
-    void retainsAValidClientRequestIdInCatalogMeta() {
+    void ignoresAClientRequestIdAndUsesAServerGeneratedValue() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v2/maps");
         request.addHeader("X-Request-Id", "catalog-42.trace");
 
@@ -32,7 +32,9 @@ class ApiMetaSupportTest {
             FESTIVAL_ID.toString(), REVISION_ID, 2
         ), "ko");
 
-        assertThat(meta.requestId()).isEqualTo("catalog-42.trace");
+        assertThat(meta.requestId())
+            .matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+            .isNotEqualTo("catalog-42.trace");
         assertThat(meta.festivalId()).isEqualTo(FESTIVAL_ID.toString());
         assertThat(meta.revision()).isEqualTo(2);
     }
@@ -53,7 +55,7 @@ class ApiMetaSupportTest {
     }
 
     @Test
-    void replacesInvalidClientRequestIdAndWritesTheSameHeader() throws Exception {
+    void ignoresInvalidClientRequestIdAndWritesTheSameServerHeader() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v2/maps");
         request.addHeader("X-Request-Id", "not allowed because it has spaces");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -61,7 +63,9 @@ class ApiMetaSupportTest {
         new RequestIdFilter().doFilter(request, response, new MockFilterChain());
 
         String requestId = response.getHeader("X-Request-Id");
-        assertThat(requestId).matches("[A-Za-z0-9][A-Za-z0-9._-]{0,127}");
+        assertThat(requestId)
+            .matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+            .isNotEqualTo("not allowed because it has spaces");
         assertThat(metaSupport.metaForError(request).requestId()).isEqualTo(requestId);
         assertThat(metaSupport.metaForError(request).festivalId()).isEqualTo(FESTIVAL_ID.toString());
         assertThat(metaSupport.metaForError(request).revision()).isZero();
@@ -81,7 +85,7 @@ class ApiMetaSupportTest {
         assertThat(meta.festivalId()).isEqualTo(FESTIVAL_ID.toString());
         assertThat(meta.revision()).isEqualTo(9);
         assertThat(meta.timezone()).isEqualTo("Asia/Seoul");
-        assertThat(meta.requestId()).isEqualTo("festival-context-request");
+        assertThat(meta.requestId()).matches("[0-9a-f-]{36}").isNotEqualTo("festival-context-request");
         assertThat(meta.locale()).isEqualTo("en");
         assertThat(errorMeta).isEqualTo(meta);
     }
