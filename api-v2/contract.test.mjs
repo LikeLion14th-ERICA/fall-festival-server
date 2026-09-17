@@ -16,7 +16,7 @@ function standardValidate(schema,value){const key=JSON.stringify(schema);if(!com
 let server,base;
 before(async()=>{server=await createMockServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;});
 after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));});
-async function call(path,{method='GET',body,headers={},session='test'}={}){const response=await fetch(base+path,{method,headers:{'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},...(body!==undefined?{body:typeof body==='string'?body:JSON.stringify(body)}:{})});const json=await response.json();return {status:response.status,body:json,headers:response.headers};}
+async function call(path,{method='GET',body,headers={},session='test'}={}){const response=await fetch(base+path,{method,headers:{'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},...(body!==undefined?{body:typeof body==='string'?body:JSON.stringify(body)}:{})});const json=[204,304].includes(response.status)?null:await response.json();return {status:response.status,body:json,headers:response.headers};}
 async function enableAllMockLocales(session){
   const response=await call('/api/v2/config',{session,headers:{'X-Mock-Scenario':'all-languages'}});
   assert.equal(response.status,200);
@@ -37,8 +37,8 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
     'getCrowding','getAdminCrowding','putAdminCrowding'
   ]);
   for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
-    if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response.meta.revision,0,operationId);
-    else assert.ok(example.response.meta.revision>=1,operationId);
+    if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response?.meta?.revision??0,0,operationId);
+    else if(example.response)assert.ok(example.response.meta.revision>=1,operationId);
   }
   assert.ok(examples.getStampGuide.scenarios.normal.response.meta.revision>=1);
   assert.ok(examples.getTicketGuide.scenarios.normal.response.meta.revision>=1);
@@ -108,15 +108,24 @@ for(const [opId,group]of Object.entries(examples))for(const [scenario,example]of
     const req=example.request;
     const got=await call(req.path,{method:req.method,body:req.body,headers:{...req.headers,'X-Mock-Session':opId+'-'+scenario}});
     assert.equal(got.status,example.status,JSON.stringify(got.body));
-    standardValidate(operation(opId).responses[got.status].content['application/json'].schema,got.body);
-    standardValidate(operation(opId).responses[example.status].content['application/json'].schema,example.response);
-    assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
-    assert.equal(got.body.meta.mock,true);
-    assert.deepEqual({...got.body,meta:{...got.body.meta,requestId:'mock-example-request'}},example.response);
+    if(got.status===204||got.status===304)assert.equal(got.body,null);
+    else standardValidate(operation(opId).responses[got.status].content['application/json'].schema,got.body);
+    if(example.status===204||example.status===304)assert.equal(example.response,null);
+    else standardValidate(operation(opId).responses[example.status].content['application/json'].schema,example.response);
+    if(got.body && !operation(opId)['x-conditional'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
+    if(got.body){
+      assert.equal(got.body.meta.mock,true);
+      if(operation(opId)['x-conditional']&&got.status===200){
+        assert.match(got.headers.get('x-request-id'),/^[0-9a-f-]{36}$/);
+        assert.ok(got.headers.get('x-server-time'));
+        assert.deepEqual(got.body,example.response);
+      }else assert.deepEqual({...got.body,meta:{...got.body.meta,requestId:'mock-example-request'}},example.response);
+    }
   });
 }
 test('Invalid input is rejected, not reflected into a success fixture',async()=>{
-  const cases=[['/api/v2/lineup?date=2030-02-30',{},400],['/api/v2/lineup?category=INVALID',{},400],['/api/v2/spaces?search=x',{},400],['/api/v2/spaces?category=PUB&category=BOOTH',{},400],['/api/v2/maps/map-area/pins',{},400],['/api/v2/maps/map-area/pins?mapVersion=old',{},409],['/api/v2/goods/unknown',{},404],['/api/v2/config?locale=ja',{},400],['/api/v2/config?locale=zh-Hans',{},400],['/api/v2/config?__scenario=unknown',{},400],['/api/v2/admin/crowding',{method:'PUT',body:{level:'BOGUS'},headers:admin},422],['/api/v2/admin/crowding',{method:'PUT',body:{level:'FULL'},headers:admin},422],['/api/v2/admin/crowding',{method:'PUT',body:{level:'CROWDED',extra:true},headers:admin},422],['/api/v2/admin/crowding',{method:'PUT',body:'{bad',headers:admin},400],['/api/v2/admin/crowding',{method:'PUT',body:{level:'CROWDED'},headers:{...admin,'Content-Type':'text/plain'}},415],['/api/v2/config',{headers:{'X-Mock-Delay':'3001'}},400]];
+  const crowdingHeaders={...admin,'If-Match':'"'+'0'.repeat(64)+'"','Idempotency-Key':'invalid-input'};
+  const cases=[['/api/v2/lineup?date=2030-02-30',{},400],['/api/v2/lineup?category=INVALID',{},400],['/api/v2/spaces?search=x',{},400],['/api/v2/spaces?category=PUB&category=BOOTH',{},400],['/api/v2/maps/map-area/pins',{},400],['/api/v2/maps/map-area/pins?mapVersion=old',{},409],['/api/v2/goods/unknown',{},404],['/api/v2/config?locale=ja',{},400],['/api/v2/config?locale=zh-Hans',{},400],['/api/v2/config?__scenario=unknown',{},400],['/api/v2/admin/crowding',{method:'PUT',body:{level:'BOGUS'},headers:crowdingHeaders},422],['/api/v2/admin/crowding',{method:'PUT',body:{level:'FULL'},headers:crowdingHeaders},422],['/api/v2/admin/crowding',{method:'PUT',body:{level:'CROWDED',extra:true},headers:crowdingHeaders},422],['/api/v2/admin/crowding',{method:'PUT',body:'{bad',headers:crowdingHeaders},400],['/api/v2/admin/crowding',{method:'PUT',body:{level:'CROWDED'},headers:{...crowdingHeaders,'Content-Type':'text/plain'}},415],['/api/v2/config',{headers:{'X-Mock-Delay':'3001'}},400]];
   for(const [path,opts,status]of cases){const got=await call(path,opts);assert.equal(got.status,status,path);standardValidate({$ref:'#/components/schemas/Error'},got.body);}
 });
 test('Mock administrator authorization is checked server-side for every admin method',async()=>{
@@ -142,26 +151,41 @@ test('Admin cookie endpoints use the CSRF error contract and logout stays idempo
   assert.deepEqual(operation('deleteCurrentAdminSession').security,[{AdminBearer:[]}]);
 });
 test('Crowding no-op, FULL confirmation, day boundary, restoration, shared read and session isolation',async()=>{
-  const session='crowding-flow',opts={session,headers:admin};
-  const initial=await call('/api/v2/crowding',{session});
-  const noop=await call('/api/v2/admin/crowding',{...opts,method:'PUT',body:{level:'MODERATE'}});
-  assert.equal(noop.body.data.updatedAt,initial.body.data.updatedAt);assert.equal(noop.body.meta.revision,initial.body.meta.revision);
-  assert.equal((await call('/api/v2/admin/crowding',{...opts,method:'PUT',body:{level:'FULL'}})).status,422);
-  const full=await call('/api/v2/admin/crowding',{...opts,method:'PUT',body:{level:'FULL',confirmFull:true}});assert.equal(full.status,200);
+  const session='crowding-flow',initial=await call('/api/v2/crowding',{session});
+  const current=await call('/api/v2/admin/crowding',{session,headers:admin});
+  const write=(body,extra={})=>call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':current.headers.get('etag'),'Idempotency-Key':`crowding-${Math.random()}`,...extra},body});
+  const noop=await write({level:'MODERATE'});
+  assert.equal(noop.status,204);
+  assert.equal((await call('/api/v2/crowding',{session})).body.data.updatedAt,initial.body.data.updatedAt);
+  assert.equal((await write({level:'FULL'})).status,422);
+  const freshAdmin=await call('/api/v2/admin/crowding',{session,headers:admin});
+  const full=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':freshAdmin.headers.get('etag'),'Idempotency-Key':'crowding-full'},body:{level:'FULL',confirmFull:true}});assert.equal(full.status,204);
+  const replay=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':'"'+'f'.repeat(64)+'"','Idempotency-Key':'crowding-full'},body:{level:'FULL',confirmFull:true}});assert.equal(replay.status,204);
   assert.equal((await call('/api/v2/crowding',{session})).body.data.status,'FULL');
   assert.equal((await call('/api/v2/crowding',{session:'separate-client'})).body.data.status,'MODERATE');
   const closed=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});assert.equal(closed.body.data.status,'CLOSED');assert.equal(closed.body.data.timeBasis,'NONE');assert.equal(closed.body.data.updatedAt,null);
-  const closedSave=await call('/api/v2/admin/crowding',{...opts,method:'PUT',headers:{...admin,'X-Mock-Time':'2030-10-01T23:00:00+09:00'},body:{level:'CROWDED'}});
-  assert.equal(closedSave.status,200);assert.equal(closedSave.body.data.status,'CLOSED');assert.equal(closedSave.body.data.savedLevel,'CROWDED');assert.equal(closedSave.body.data.updatedAt,null);
-  const closedNoop=await call('/api/v2/admin/crowding',{...opts,method:'PUT',headers:{...admin,'X-Mock-Time':'2030-10-01T23:00:00+09:00'},body:{level:'CROWDED'}});
-  assert.equal(closedNoop.body.meta.revision,closedSave.body.meta.revision);assert.equal(closedNoop.body.data.updatedAt,null);
+  const closedAdmin=await call('/api/v2/admin/crowding',{session,headers:{...admin,'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});
+  const closedSave=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':closedAdmin.headers.get('etag'),'Idempotency-Key':'crowding-closed','X-Mock-Time':'2030-10-01T23:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(closedSave.status,204);
+  const closedState=await call('/api/v2/admin/crowding',{session,headers:{...admin,'X-Mock-Time':'2030-10-01T23:00:00+09:00'}});
+  assert.equal(closedState.body.data.status,'CLOSED');assert.equal(closedState.body.data.savedLevel,'CROWDED');assert.equal(closedState.body.data.updatedAt,null);
+  const closedNoop=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':closedState.headers.get('etag'),'Idempotency-Key':'crowding-closed-noop','X-Mock-Time':'2030-10-01T23:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(closedNoop.status,204);
   const reopened=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T21:00:00+09:00'}});assert.equal(reopened.body.data.status,'CROWDED');assert.ok(reopened.body.data.updatedAt);
   const midnight=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T00:00:00+09:00'}});assert.equal(midnight.body.data.savedLevel,null);assert.equal(midnight.body.data.updatedAt,null);
   const next=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T13:00:00+09:00'}});assert.equal(next.body.data.status,'RELAXED');assert.equal(next.body.data.timeBasis,'OPENING');assert.equal(next.body.data.savedLevel,null);
   const outsideSession='crowding-outside-festival-day';
-  await call('/api/v2/admin/crowding',{session:outsideSession,method:'PUT',headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'},body:{level:'CROWDED'}});
+  const outsideAdmin=await call('/api/v2/admin/crowding',{session:outsideSession,headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'}});
+  const outsideSave=await call('/api/v2/admin/crowding',{session:outsideSession,method:'PUT',headers:{...admin,'If-Match':outsideAdmin.headers.get('etag'),'Idempotency-Key':'crowding-outside','X-Mock-Time':'2030-09-30T10:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(outsideSave.status,409);assert.equal(outsideSave.body.error.code,'NOT_FESTIVAL_DAY');
   const festivalOpening=await call('/api/v2/crowding',{session:outsideSession,headers:{'X-Mock-Time':'2030-10-01T14:00:00+09:00'}});
   assert.equal(festivalOpening.body.data.status,'MODERATE');
+});
+test('Crowding conditional reads return an ETag and 304 without a body',async()=>{
+  const first=await call('/api/v2/crowding',{session:'crowding-conditional'});
+  assert.match(first.headers.get('etag'),/^"[0-9a-f]{64}"$/);
+  const second=await call('/api/v2/crowding',{session:'crowding-conditional',headers:{'If-None-Match':first.headers.get('etag')}});
+  assert.equal(second.status,304);assert.equal(second.body,null);assert.equal(second.headers.get('etag'),first.headers.get('etag'));
 });
 test('Goods save changes only one size and derives sold-out; failed writes do not mutate',async()=>{
   const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability';

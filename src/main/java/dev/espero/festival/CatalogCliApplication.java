@@ -32,6 +32,7 @@ public class CatalogCliApplication {
         try {
             context = new SpringApplicationBuilder(CatalogCliApplication.class)
                 .profiles("db", "catalog-cli")
+                .properties("spring.flyway.enabled=false")
                 .web(WebApplicationType.NONE)
                 .run(args);
             org.springframework.boot.SpringApplication.exit(context, () -> 0);

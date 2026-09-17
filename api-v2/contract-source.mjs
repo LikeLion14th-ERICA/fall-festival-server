@@ -23,6 +23,7 @@ const mapTargetDescription = '같은 published FestivalRevision의 현재 map ve
 export const schemas = {
   Id: id, Date: date, Timestamp: timestamp, Locale: locale,
   Meta: object({ requestId: text('요청 추적 ID. 개인정보와 무관한 값.'), serverTime: timestamp, timezone: enumeration(['Asia/Seoul'], '축제 시간대'), festivalId: id, revision: integer('0은 특정 published FestivalRevision에 안전하게 귀속되지 않는 응답. 1 이상은 응답 데이터가 실제로 귀속된 FestivalRevision.revision_number.', 0), locale, mock: bool('목 서버는 항상 true. 운영 데이터와 구분.') }),
+  ConditionalMeta: object({ timezone: enumeration(['Asia/Seoul'], '축제 시간대'), festivalId: id, revision: integer('혼잡도는 revision-independent라 항상 0.', 0), locale, mock: bool('목 서버는 항상 true. 운영 데이터와 구분.') }, undefined, '조건부 응답의 안정 메타. requestId와 serverTime은 응답 헤더로 제공한다.'),
   Error: object({ error: object({ code: text('프런트가 분기할 안정적인 오류 코드'), message: text('안전한 진단 문구. 화면별 오류 문구는 프런트 번역에서 선택.'), details: array(object({ field: text('요청 내 필드 또는 파라미터'), reason: text('검증 실패 이유') }), '추가 정보가 없으면 []'), retryable: bool('같은 요청 재시도 가능성. 화면 버튼 노출 요구와는 별개.') }), meta: ref('Meta') }),
   Money: object({ amount: integer('대한민국 원(KRW) 정수. 소수점·문자열·센트 단위 없음.', 0, { maximum: 9007199254740991 }), currency: enumeration(['KRW'], '금액 단위') }),
   Image: object({ url: text('HTTPS 또는 origin 기준 상대 URL. 목 자산은 /__mock/assets/ 아래.', { format: 'uri-reference' }), alt: text('이미지 대체 텍스트'), width: integer('원본 너비(px)', 1), height: integer('원본 높이(px)', 1) }),
@@ -30,7 +31,7 @@ export const schemas = {
   Channel: object({ id, label: text('공식 채널 표시명'), url: text('확인된 공식 채널 HTTPS 주소', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭'), iconKey: text('프런트 아이콘 사전 키. URL이나 공식 명칭에서 추측하지 않음.') }),
   MapTarget: object({ mapId: id, placeId: id, pinId: id, mapVersion: text('좌표와 이미지 버전이 일치해야 함') }, undefined, mapTargetDescription),
   Config: object({ festival: object({ id, title: text('행사 표시명'), dates: array(date, '행사 날짜 오름차순. 자료 미확보 시 [].', { uniqueItems: true }), defaultDate: nullable(date, '축제 전 첫날·기간중 오늘·종료 후 마지막날. 날짜 미확보 시 null.') }), languages: array(object({ code: locale, label: text('원어 언어명') }), '준비 완료 언어만 순서대로 제공', { minItems: 1 }), links: object({ universityNotices: nullable(ref('Link'), '자료 미확보 시 null'), faq: nullable(ref('Link'), 'FAQ 외부 새 탭 연결. 승인 URL 미확보 시 null.'), officialChannels: array(ref('Channel'), '선정·준비 완료 채널만 제공'), welcomeDay: nullable(ref('Link'), '외부 새 탭 연결. 자료·공개 확인 전 null.') }) }),
-  Crowding: object({ operatingDay: date, opensAt: timestamp, closesAt: timestamp, status: enumeration(['BEFORE_OPEN', 'RELAXED', 'MODERATE', 'CROWDED', 'FULL', 'CLOSED'], '운영 시간과 마지막 저장 상태를 결합한 최종 상태'), savedLevel: nullable(crowd, '해당 운영일에 아직 저장하지 않았으면 null'), colorToken: nullable(enumeration(['green', 'orange', 'red', 'black'], '색상 의미 토큰. 정확한 디자인 HEX는 미정.'), '운영 전/종료면 null'), message: text('선택한 상태의 안내 문구'), updatedAt: nullable(timestamp, '운영 전·종료면 null. 같은 상태 재선택은 저장·시각을 갱신하지 않는다.'), timeBasis: enumeration(['NONE', 'OPENING', 'OPERATOR'], '시각 숨김 / 운영 시작 기준 / 관리자 수정시각') }),
+  Crowding: object({ operatingDay: date, opensAt: timestamp, closesAt: timestamp, operatingStatus: enumeration(['BEFORE_OPEN', 'OPEN', 'CLOSED'], '게시된 FestivalDay 운영 일정으로 계산한 실제 운영 상태'), status: enumeration(['BEFORE_OPEN', 'RELAXED', 'MODERATE', 'CROWDED', 'FULL', 'CLOSED'], '운영 시간과 마지막 저장 상태를 결합한 최종 표시 상태'), savedLevel: nullable(crowd, '해당 운영일에 아직 저장하지 않았으면 null'), colorToken: nullable(enumeration(['green', 'orange', 'red', 'black'], '색상 의미 토큰. 정확한 디자인 HEX는 미정.'), '운영 전/종료면 null'), message: text('선택한 상태의 안내 문구'), updatedAt: nullable(timestamp, '운영 전·종료면 null. 같은 상태 재선택은 저장·시각을 갱신하지 않는다.'), timeBasis: enumeration(['NONE', 'OPENING', 'OPERATOR'], '시각 숨김 / 운영 시작 기준 / 관리자 수정시각') }),
   Notice: object({ id, type: enumeration(['GENERAL', 'LOST_FOUND'], '일반은 당일 등록분, 분실물은 날짜와 무관'), title: text('전체 제목'), body: text('전체 본문, plain text. HTML 실행 금지.'), links: array(ref('Link'), '본문 외부 링크. 이미지를 직접 표시하는 필드 없음.'), createdAt: timestamp }),
   Notices: object({ items: array(ref('Notice'), '현재 날짜·언어에 노출 가능한 공지 전체. createdAt 내림차순, 동률 id 오름차순.'), visibleIds: array(id, '이 snapshot에서 노출 가능한 ID 전체. 삭제·날짜 만료·번역 미완료를 즉시 제거할 때 사용.', { uniqueItems: true }), asOfDate: date }),
   Size: object({ id, label: text('등록된 사이즈명. S/M/L/XL/2XL을 고정 enum으로 두지 않음.') }),
@@ -75,7 +76,7 @@ const pathParam = name => ({ name, in: 'path', required: true, schema: id, descr
 // status = 계약 근거 상태, schema/URI 설계 자체는 이 v2에서 처음 제안한 프런트 연동 계약.
 export const operations = [
   ['getConfig','GET','/config','Config','홈 공통 설정',['HOME'],[],['normal','empty','missing-optional','faq-ready','welcome-ready','error']],
-  ['getCrowding','GET','/crowding','Crowding','홈 혼잡도',['HOME'],[],['normal','before-open','closed','unmodified','error']],
+  ['getCrowding','GET','/crowding','Crowding','홈 혼잡도',['HOME'],[],['normal','before-open','closed','unmodified','unconfigured','error']],
   ['getNotices','GET','/notices','Notices','사용자 공지 전체',['HOME','NOTICE-LIST'],[],['normal','empty','missing-optional','new-notice','deleted','error']],
   ['getGoods','GET','/goods','GoodsList','상품 목록',['GOODS-LIST'],[],['normal','empty','error']],
   ['getGoodsAvailability','GET','/goods-availability','AvailabilityList','상품 목록의 판매 상태',['GOODS-LIST'],[],['normal','empty','sold-out','error']],
@@ -96,7 +97,7 @@ export const operations = [
   ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 안내',['TICKET'],[],['normal','before-open','closed','ended','unconfigured','error']],
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
   ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','error'],'StampReceiptVerificationInput'],
-  ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','error']],
+  ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','unconfigured','error']],
   ['putAdminCrowding','PUT','/admin/crowding','Crowding','혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지',['ADM-CROWD'],[],['normal','full','error'],'CrowdingInput'],
   ['getAdminNotices','GET','/admin/notices','AdminNotices','관리자 공지 목록',['ADM-NOTICE-LIST'],[],['normal','empty','error']],
   ['postAdminNotice','POST','/admin/notices','AdminNotice','공지 등록(검토 필요)',['ADM-NOTICE-EDIT'],[],['normal','error'],'NoticeInput'],
@@ -111,4 +112,4 @@ export const operations = [
 operations.find(operation=>operation.operationId==='verifyStampReceipt').successStatus=200;
 
 applyAdminContract(schemas,operations);
-export const envelopeSchema = name => object({ data: ref(name), meta: ref('Meta') });
+export const envelopeSchema = (name, metaName = 'Meta') => object({ data: ref(name), meta: ref(metaName) });

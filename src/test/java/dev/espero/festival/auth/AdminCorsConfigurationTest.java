@@ -17,7 +17,7 @@ class AdminCorsConfigurationTest {
 
         assertThat(cors).isNotNull();
         assertThat(cors.getAllowedHeaders()).containsExactly(
-            "Authorization", "Content-Type", "X-Request-Id", "If-Match", "Idempotency-Key"
+            "Authorization", "Content-Type", "X-Request-Id", "If-Match", "If-None-Match", "Idempotency-Key"
         );
         assertThat(cors.getExposedHeaders()).containsExactly("ETag", "X-Request-Id", "X-Server-Time");
         assertThat(cors.getAllowedOrigins()).containsExactly("http://localhost:3001");
