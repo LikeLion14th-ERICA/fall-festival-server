@@ -209,7 +209,8 @@ docker build --tag fall-festival-server:local .
 이미지는 `0.0.0.0:8080`으로 bind하지만 DB와 runtime 환경변수를 자체 provision하지 않습니다.
 로컬 실행과 Docker image build는 지원하지만 원격 개발 서버는 아직 provision되지 않았고 운영
 배포 절차도 확정되지 않았습니다. 인프라와 인증·관측성 구성이 정해진 뒤 별도 runbook으로
-작성합니다.
+작성합니다. 배포 전 검토할 development provider와 same-origin proxy 기본안은
+[원격 개발 환경 배포 결정](docs/dev-deployment-decision.md)에 기록되어 있습니다.
 
 ## 디렉터리
 
