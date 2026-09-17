@@ -29,17 +29,37 @@
 
 | 순서 | 목표 | 상태 | 다음 확인 |
 |---|---|---|---|
-| 1 | 공통 동시성 기반 | 진행 중 | preflight, request ID/conditional response, idempotency 결과를 통합하고 API 계약·CORS·테스트를 완성한다. |
-| 2 | 정리 작업 틀 | 대기 | PR 1의 idempotency 테이블과 AdminAuditEvent retention을 사용한다. |
-| 3 | 관리자 혼잡도 백엔드 | 대기 | 운영 일정 승인 전에는 원격 DB 검증을 주장하지 않는다. |
+| 1 | 공통 동시성 기반 | 통합 중 | request ID·conditional response·CORS·idempotency·If-Match 기반은 `a3cc13e`까지 통합했다. crowding 계약 사용처와 전체 검증이 남았다. |
+| 2 | 정리 작업 틀 | 병렬 구현 중 | 독립 branch `codex/cleanup-framework`가 AdminAuditEvent retention 확장점을 구현 중이다. 완료된 idempotency 24시간 대상은 V14 통합 뒤 추가한다. |
+| 3 | 관리자 혼잡도 백엔드 | 병렬 구현 중 | 독립 branch `codex/admin-crowding-backend`가 V14 기반으로 구현 중이다. 운영 일정 승인 전에는 원격 DB 검증을 주장하지 않는다. |
 | 4 | 계좌 운영 설정 | 대기 | DB provider role 발급·provisioning 절차를 먼저 확정한다. |
 | 5 | 티켓 계좌 분리와 polling | 대기 | 계좌 설정 배포·등록 확인 뒤에 static catalog 읽기를 전환한다. |
 | 6 | catalog export·게시 보호 | 대기 | `base_revision_id`와 legacy validation report를 구현한다. |
 | 7 | 로컬 catalog workbench | 대기 | export/publish 보호와 role 분리 뒤에 구현한다. |
 
-현재 통합 branch는 `codex/goal-ops-catalog`이다. 독립 작업 branch는 통합 전까지
-각각 전용 worktree에서 유지한다. 이 표는 각 통합 commit, 실패, 외부 의존성 변화 뒤에
-반드시 갱신한다.
+현재 통합 branch는 `codex/goal-ops-catalog`이고 마지막 통합 commit은 `a3cc13e`다.
+독립 작업 branch는 통합 전까지 각각 전용 worktree에서 유지한다. 이 표는 각 통합
+commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
+
+### 이미 통합한 변경
+
+- `f884ce1`: 이 인수인계 문서와 읽기 표를 추가했다.
+- `495decd`: Windows의 일반 Maven 사용자 홈에서 wrapper가 시작 전에 실패하던 문제를
+  수정하고, 관리자 CORS에 `If-Match`·`Idempotency-Key`와 `ETag`·서버 시각 헤더를 추가했다.
+- `282c84a`: 서버 생성 request ID, 안정 conditional envelope, SHA-256 strong ETag,
+  `If-None-Match` 304 지원 유틸리티를 추가했다. 아직 개별 공개 경로의 전면 전환은 하지 않았다.
+- `ebe763f`: Spring·Flyway·scheduler·catalog audit 없이 JDBC 읽기만 하는
+  `DatabasePreflightApplication`과 runbook을 추가했다.
+- `a3cc13e`: hashed idempotency record V14, 2분 lease, 동일 키 replay, 처리 중 409,
+  typed `If-Match` 정책·428/409 도구를 추가했다. V14는 **원격 DB에 적용하지 않은
+  provisional 번호**다.
+
+### 현재 병렬 작업
+
+| branch | 범위 | 통합 전 확인 |
+|---|---|---|
+| `codex/cleanup-framework` | cleanup scheduler·advisory lock·dry-run·500행 batch·AdminAuditEvent retention | V14 idempotency target을 합친 뒤 migration/설정을 재검토한다. |
+| `codex/admin-crowding-backend` | FestivalDay 기반 crowding GET/PUT·새 dynamic table·계약·테스트 | V14 이후 migration 번호, CORS/conditional/idempotency 사용, API generated artifact를 재생성한다. |
 
 ## 고정 안전 규칙
 
@@ -49,6 +69,8 @@
   `npm run generate`, `npm run check`로 재생성한다.
 - 모든 catalog/account CLI는 `spring.flyway.enabled=false`로 실행한다. preflight는
   별도 plain JDBC 도구이며 catalog audit을 남기지 않는다.
+- Windows에서는 `cmd /d /c "mvnw.cmd ..."`로 wrapper를 실행한다. wrapper 자체의
+  null symlink target 처리는 `495decd`에서 수정했고, PowerShell에서 직접 실행하지 않는다.
 - DB role 이름·GRANT는 Flyway migration에 넣지 않는다. 환경별 provisioning script를
   사용한다. 운영에서는 preflight, migration, runtime, cleanup, account operator,
   catalog export, catalog publish 역할을 분리한다.
@@ -76,6 +98,10 @@
 | 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
 |---|---|---|---|
 | 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |
+| 2026-09-18 | CORS·Maven wrapper focused test | `AdminCorsConfigurationTest` 1개 통과 | 전체 suite는 통합 뒤 실행한다. |
+| 2026-09-18 | conditional response subtask | agent branch에서 Maven 261개 통과 | `282c84a`로 통합했다. |
+| 2026-09-18 | standalone preflight subtask | agent branch에서 Maven 269개 통과, local refused-connection smoke 통과 | `ebe763f`로 통합했다. 원격 DB 연결은 하지 않았다. |
+| 2026-09-18 | idempotency·precondition focused suite | unit + PostgreSQL Testcontainers 19개 통과 | cleanup/crowding 통합 뒤 전체 `verify`를 실행한다. |
 | 2026-09-18 | 원격 DB 상태 | 실행하지 않음 | 구현 중·병합 전에는 remote DB mutation을 금지한다. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
