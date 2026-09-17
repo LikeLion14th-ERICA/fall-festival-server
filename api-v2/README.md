@@ -2,9 +2,9 @@
 
 상태: **2.0.0-draft.3 — 프런트 개발에 사용할 수 있는 초안**. 백엔드 구현·운영 배포·미정 기능 승인을 의미하지 않습니다.
 
-[Product Context](../docs/PRODUCT_CONTEXT.md)와 2026-09-14 사용자 결정에 따라 관리자 규칙은
-[v5](../docs/wiki/product/admin/README.md)로 통일했습니다. main 21eb76dacd78b3ad79ed4d9589dd341fbc25b883에 PR #6까지
-병합된 상태를 기준으로 동기화했습니다. 이전 화면 원문은 비교용 스냅샷으로 보존하며 현재
+[Product Context](../docs/PRODUCT_CONTEXT.md)와 승인된 사용자 결정에 따라 관리자 규칙은
+[v5](../docs/wiki/product/admin/README.md)로 통일했습니다. 특정 과거 commit이 아니라 현재
+branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 비교용 스냅샷으로 보존하며 현재
 요구는 [화면 데이터 표](SCREEN-DATA.md)와 [화면 상태](SCREEN-STATES.md)를 사용합니다.
 실제 행사 날짜·가격·계좌·사진은 운영 자료로 확정해야 하며 예제는 가상 데이터입니다.
 
@@ -19,6 +19,15 @@
 | [client-state-examples.json](client-state-examples.json) | 스탬프 등 HTTP 응답으로 만들지 않는 로컬 상태 |
 | [source-screen-requirements.json](source-screen-requirements.json) | 출처 8개 탭의 원문 스냅샷 |
 | [VERIFICATION.md](VERIFICATION.md) | 실제 검증 결과와 범위 |
+
+`openapi.json`이 API 계약의 기계 판독 source of truth입니다. 이 저장소에는 runtime
+springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 검증을 사용합니다. 스키마와
+예제는 source module에서 생성되므로 생성 JSON만 직접 수정하지 않습니다.
+
+현재 Spring Boot 서버에는 공개 공연 조회인 `GET /api/v2/lineup`,
+`/artists/{artistId}`, `/timetable`, `/performances/{performanceId}`,
+`/prohibited-items`가 구현되어 있습니다. 다른 계약 경로는 각 구현 상태를 별도로 확인해야 하며,
+계약에 있다는 사실만으로 실제 서버 구현이나 공개 승인을 의미하지 않습니다.
 
 ## 공통 계약
 
@@ -83,7 +92,12 @@
 
 스키마·경로는 `contract-source.mjs`와 `admin-contract.mjs`, 동작·가상 자료는 `domain.mjs`와 `admin-domain.mjs`, 화면 연결은 `screen-coverage.mjs`에서 수정합니다. `npm run generate`로 산출물을 갱신하고 `npm run check`를 통과시킵니다. 생성 JSON만 수동 수정하면 검증이 실패합니다.
 
-백엔드는 [결정 대기](DECISIONS.md)의 남은 기술·운영 자료를 확정한 뒤 같은 OpenAPI에 맞춰 구현합니다. 프런트는 API origin을 실제 서버로 전환하고 목 전용 헤더·쿼리·토큰을 제거합니다. 번역 엔진·이미지 업로드는 별도 연동이 필요합니다. 번역 생성·검토·실패·저장 계약은 목으로 제공합니다. 실제 서버에도 계약·화면 소비자 검증을 실행한 뒤 전환합니다.
+백엔드는 [결정 대기](DECISIONS.md)의 남은 기술·운영 자료를 확정한 뒤 같은 OpenAPI에 맞춰
+구현합니다. 구현 완료된 공연 API는 실제 Spring Boot 서버로 연동하고, 아직 미구현된 화면과
+계약 상태 개발에는 목 서버를 사용할 수 있습니다. 실제 서버로 전환할 때 목 전용
+헤더·쿼리·토큰을 제거합니다. 번역 엔진·이미지 업로드는 별도 연동이 필요합니다. 번역
+생성·검토·실패·저장 계약은 목으로 제공합니다. 실제 서버에도 계약·화면 소비자 검증을 실행한
+뒤 전환합니다.
 
 ## 관리자 인증 연동
 
@@ -92,5 +106,7 @@
 - refresh token은 7일 유효한 `Secure; HttpOnly; SameSite=Strict` cookie이므로 브라우저 코드에서 읽거나 별도 저장하지 않습니다. refresh 성공 시 기존 token은 폐기되고 cookie가 교체됩니다.
 - 로그인·refresh·logout 요청은 배포 환경에 설정된 관리자 origin에서만 받습니다. 프런트는 credentials를 포함해 요청하고 브라우저가 보내는 정확한 `Origin` 헤더를 변경하거나 제거하지 않습니다.
 - 일반 공개 API는 인증 없이 유지됩니다. 공개 회원가입과 세부 역할별 RBAC는 현재 범위에 없습니다.
+- 이 인증·권한 기반은 관리자 웹 UI나 공지·굿즈·혼잡도 등 콘텐츠별 관리자 CRUD의 구현 완료를
+  의미하지 않습니다.
 
 기계 판독 문서 형식은 [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0.html)을 사용합니다.
