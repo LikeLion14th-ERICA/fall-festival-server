@@ -261,6 +261,11 @@ class OperationalAccountSettingsIntegrationTest {
             executeAs(connection, CLEANUP_ROLE,
                 "SELECT festival_id, purpose, version FROM operational_account_settings");
             assertPermissionDenied(connection, CLEANUP_ROLE, "SELECT account_number FROM operational_account_settings");
+            executeAs(connection, CLEANUP_ROLE,
+                "SELECT id, festival_id, purpose, version, after_state, occurred_at"
+                    + " FROM operational_account_setting_history");
+            assertPermissionDenied(connection, CLEANUP_ROLE,
+                "SELECT after_account_number FROM operational_account_setting_history");
             executeAs(connection, CLEANUP_ROLE, "DELETE FROM operational_account_setting_history WHERE false");
         }
     }
