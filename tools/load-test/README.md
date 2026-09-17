@@ -76,12 +76,14 @@ because a process can remain alive after snapshot loading fails.
 
 ## Observed local run
 
-The latest full run completed on 2026-09-16 with Zulu Java 25.0.2 and Docker Desktop
-PostgreSQL 16.15. Every 100/200/500 VU stage completed with zero non-2xx responses,
-timeouts and transport errors. The stages ran for 30.015 / 30.017 / 30.028 seconds and
-completed 924,496 / 424,867 / 515,011 requests. Maximum endpoint p95 values were
-13.499 / 31.849 / 212.467 ms. Response bytes were 6,702,827,829 / 3,081,199,992 /
-3,734,945,780. jstat reported peak Java heap used of 213,986.5 / 218,935.1 /
-228,576.0 KB, with 131 / 61 / 75 GC cycles and 0.148 / 0.118 / 0.122 seconds of GC
-time. These are machine-specific localhost observations and have no production SLA
-meaning.
+The three most recent full runs completed on 2026-09-16 with Zulu Java 25.0.2 and Docker
+Desktop PostgreSQL 16.15. All completed every 100/200/500 VU stage with zero non-2xx
+responses, timeouts and transport errors. In the latest run, the stages ran for 30.009 /
+30.010 / 30.021 seconds and completed 1,627,367 / 1,404,601 / 915,826 requests. Maximum
+endpoint p95 values were 3.746 / 9.472 / 124.248 ms. Response bytes were
+11,798,847,838 / 10,184,137,959 / 6,641,194,441. jstat reported peak Java heap used of
+290,035.1 / 284,433.9 / 298,359.5 KB, with 136 / 116 / 77 GC cycles and
+0.140 / 0.131 / 0.093 seconds of GC time. The two immediately preceding runs also
+completed their 500-VU stages with 1,011,491 / 999,795 requests, 113.255 / 104.007 ms
+maximum endpoint p95 values, and zero non-2xx responses, timeouts and transport errors.
+These are machine-specific localhost observations and have no production SLA meaning.
