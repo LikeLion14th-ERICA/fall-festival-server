@@ -33,6 +33,7 @@
 | 콘텐츠·번역 게시·예약·revision | [게시](engineering/publishing.md), [운영](engineering/operations.md) | 관리자 콘텐츠 API |
 | 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md) | 변경 대상 runbook |
 | branch·worktree·동기화·push | [작업 절차](workflow/task.md), [브랜치](workflow/branches.md) | PR 규칙 |
+| 운영·카탈로그 장기 구현 이어받기 | [운영·카탈로그 구현 인수인계](workflow/ops-catalog-handoff.md) | 현재 미완료 단계와 검증 기록 |
 | commit·squash 메시지 | [커밋](workflow/commits.md) | breaking change 계약 |
 | 검증·완료 보고 | [검증](workflow/validation.md), [완료 조건](workflow/done.md) | 해당 항목만 적용 |
 | PR·리뷰·병합 | [PR](workflow/pull-requests.md), [완료 조건](workflow/done.md) | PR 템플릿 |
