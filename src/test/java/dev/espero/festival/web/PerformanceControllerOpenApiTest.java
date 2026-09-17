@@ -21,7 +21,12 @@ import dev.espero.festival.persistence.PerformanceCatalogReadStore.Artist;
 import dev.espero.festival.persistence.PerformanceCatalogReadStore.Image;
 import dev.espero.festival.persistence.PerformanceCatalogReadStore.LineupItem;
 import dev.espero.festival.persistence.PerformanceCatalogReadStore.Link;
-import dev.espero.festival.persistence.PerformanceCatalogReadStore.Performance;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.ArtistPerformance;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.PerformanceArtist;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.PerformanceItem;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.ProhibitedItems;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.Timetable;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore.TimetableAxis;
 import dev.espero.festival.support.ApiMetaTestFixtures;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,7 +101,7 @@ class PerformanceControllerOpenApiTest {
             "소개",
             List.of(new Link("공식 채널", "https://example.com/artist")),
             List.of(new Link("대표곡", "https://example.com/song")),
-            List.of(new Performance(
+            List.of(new ArtistPerformance(
                 "performance-a",
                 FESTIVAL_DATE,
                 OffsetDateTime.parse("2030-10-01T09:20:00.123456Z"),
@@ -139,6 +144,82 @@ class PerformanceControllerOpenApiTest {
 
         assertMatches("/api/v2/lineup", "503", get("/api/v2/lineup"), 503);
         assertMatches("/api/v2/artists/{artistId}", "503", get("/api/v2/artists/artist-a"), 503);
+        assertMatches("/api/v2/timetable", "503", get("/api/v2/timetable"), 503);
+        assertMatches(
+            "/api/v2/performances/{performanceId}", "503",
+            get("/api/v2/performances/performance-a"), 503
+        );
+        assertMatches("/api/v2/prohibited-items", "503", get("/api/v2/prohibited-items"), 503);
+    }
+
+    @Test
+    void validatesTimetableNormalAndEmptyResponses() throws Exception {
+        when(store.timetable(REVISION_ID, "ko"))
+            .thenReturn(new Timetable(
+                List.of(FESTIVAL_DATE),
+                new TimetableAxis(java.time.LocalTime.of(17, 0), java.time.LocalTime.of(22, 0)),
+                List.of(fullPerformance("공연 안내", List.of(new PerformanceArtist("artist-a", "아티스트 A"))))
+            ))
+            .thenReturn(new Timetable(
+                List.of(FESTIVAL_DATE),
+                new TimetableAxis(java.time.LocalTime.of(17, 0), java.time.LocalTime.of(22, 0)),
+                List.of()
+            ));
+
+        assertMatches("/api/v2/timetable", "200", get("/api/v2/timetable"), 200);
+        assertMatches("/api/v2/timetable", "200", get("/api/v2/timetable"), 200);
+        assertMatches(
+            "/api/v2/timetable", "400",
+            get("/api/v2/timetable").param("date", FESTIVAL_DATE.toString()), 400
+        );
+    }
+
+    @Test
+    void validatesPerformanceNormalNullableEmptyAndErrorResponses() throws Exception {
+        when(store.findPerformance(REVISION_ID, "performance-a", "ko"))
+            .thenReturn(Optional.of(fullPerformance(
+                "공연 안내", List.of(new PerformanceArtist("artist-a", "아티스트 A"))
+            )));
+        when(store.findPerformance(REVISION_ID, "performance-empty", "ko"))
+            .thenReturn(Optional.of(new PerformanceItem(
+                "performance-empty", FESTIVAL_DATE, "빈 공연", List.of(),
+                OffsetDateTime.parse("2030-10-01T18:20:00+09:00"),
+                OffsetDateTime.parse("2030-10-01T18:50:00+09:00"),
+                null
+            )));
+        when(store.findPerformance(REVISION_ID, "missing-performance", "ko"))
+            .thenReturn(Optional.empty());
+
+        assertMatches(
+            "/api/v2/performances/{performanceId}", "200",
+            get("/api/v2/performances/performance-a"), 200
+        );
+        assertMatches(
+            "/api/v2/performances/{performanceId}", "200",
+            get("/api/v2/performances/performance-empty"), 200
+        );
+        assertMatches(
+            "/api/v2/performances/{performanceId}", "400",
+            get("/api/v2/performances/Performance-A"), 400
+        );
+        assertMatches(
+            "/api/v2/performances/{performanceId}", "404",
+            get("/api/v2/performances/missing-performance"), 404
+        );
+    }
+
+    @Test
+    void validatesProhibitedNormalEmptyAndBadRequestResponses() throws Exception {
+        when(store.prohibitedItems(REVISION_ID, "ko"))
+            .thenReturn(new ProhibitedItems(List.of("물품 A"), "안내 문구"))
+            .thenReturn(new ProhibitedItems(List.of(), null));
+
+        assertMatches("/api/v2/prohibited-items", "200", get("/api/v2/prohibited-items"), 200);
+        assertMatches("/api/v2/prohibited-items", "200", get("/api/v2/prohibited-items"), 200);
+        assertMatches(
+            "/api/v2/prohibited-items", "400",
+            get("/api/v2/prohibited-items").param("unknown", "value"), 400
+        );
     }
 
     private void assertMatches(
@@ -195,6 +276,18 @@ class PerformanceControllerOpenApiTest {
 
     private Image image() {
         return new Image("/assets/artist.png", "아티스트 A", 800, 600);
+    }
+
+    private PerformanceItem fullPerformance(String description, List<PerformanceArtist> artists) {
+        return new PerformanceItem(
+            "performance-a",
+            FESTIVAL_DATE,
+            "공연 A",
+            artists,
+            OffsetDateTime.parse("2030-10-01T18:20:00+09:00"),
+            OffsetDateTime.parse("2030-10-01T18:50:00+09:00"),
+            description
+        );
     }
 
     private CatalogSnapshot snapshot() {

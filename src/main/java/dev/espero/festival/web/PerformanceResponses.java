@@ -23,12 +23,34 @@ public final class PerformanceResponses {
 
     public record Lineup(LocalDate date, String category, List<LineupItem> items) {}
 
-    public record Performance(
+    public record ArtistPerformance(
         String id,
         LocalDate date,
         OffsetDateTime startsAt,
         OffsetDateTime endsAt
     ) {}
+
+    public record PerformanceArtist(String id, String name) {}
+
+    public record PerformanceItem(
+        String id,
+        LocalDate date,
+        String title,
+        List<PerformanceArtist> artists,
+        OffsetDateTime startsAt,
+        OffsetDateTime endsAt,
+        String description
+    ) {}
+
+    public record TimetableAxis(String startTime, String endTime) {}
+
+    public record Timetable(
+        List<LocalDate> dates,
+        TimetableAxis axis,
+        List<PerformanceItem> items
+    ) {}
+
+    public record ProhibitedItems(List<String> items, String message) {}
 
     public record Artist(
         String id,
@@ -38,6 +60,6 @@ public final class PerformanceResponses {
         String introduction,
         List<Link> socialLinks,
         List<Link> songs,
-        List<Performance> performances
+        List<ArtistPerformance> performances
     ) {}
 }
