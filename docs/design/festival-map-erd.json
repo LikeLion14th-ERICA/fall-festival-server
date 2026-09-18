@@ -59,7 +59,7 @@
       "type": "database",
       "label": "Space",
       "sublabel": "PK space_id · FK revision_id · category",
-      "tag": "name · location · hours? · BOOTH | PUB | FLEA_MARKET",
+      "tag": "name · location · hours? · 6 design categories",
       "row": 0,
       "col": 1,
       "size": [218, 72],

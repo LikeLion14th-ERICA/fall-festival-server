@@ -17,7 +17,7 @@
 | GET | `/api/v2/timetable` | 3일 타임테이블 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/performances/{performanceId}` | 공연 정보 팝업 | SHOW-POPUP | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/prohibited-items` | 고정 반입 금지 물품 안내 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
-| GET | `/api/v2/spaces` | 부스·주점·플리마켓 목록 | BOOTH-LIST | normal, empty, error, bad-request, rate-limited |
+| GET | `/api/v2/spaces` | 부스&마켓 목록 | BOOTH-LIST | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/spaces/{spaceId}` | 부스·주점·플리마켓 상세 | BOOTH-DETAIL | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/maps` | 지도 목록 | MAP-OVERVIEW, MAP-AREA | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/maps/{mapId}` | 지도 이미지·버전 | MAP-OVERVIEW, MAP-AREA | normal, not-found, error, bad-request, rate-limited |

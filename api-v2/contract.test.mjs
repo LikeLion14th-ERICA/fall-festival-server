@@ -76,14 +76,17 @@ test('Fictional fixtures provide dense, linked data for frontend list and detail
     assert.equal(day.filter(performance=>artistById.get(performance.artists[0].id).category==='ARTIST').length,5);
     assert.equal(day.filter(performance=>artistById.get(performance.artists[0].id).category==='CONTEST').length,3);
   }
-  assert.equal(state.spaces.length,30);
+  assert.equal(state.spaces.length,34);
   assert.equal(state.spaces.filter(space=>space.category==='BOOTH').length,12);
   assert.equal(state.spaces.filter(space=>space.category==='PUB').length,10);
   assert.equal(state.spaces.filter(space=>space.category==='FLEA_MARKET').length,8);
-  assert.equal(state.spaces.flatMap(space=>space.menu).length,50);
+  assert.equal(state.spaces.filter(space=>space.category==='FOOD_TRUCK').length,2);
+  assert.equal(state.spaces.filter(space=>space.category==='STUDENT_COUNCIL_BOOTH').length,1);
+  assert.equal(state.spaces.filter(space=>space.category==='PROMOTION_BOOTH').length,1);
+  assert.equal(state.spaces.flatMap(space=>space.menu).length,56);
   assert.equal(state.maps.length,7);
-  assert.equal(Object.values(state.pins).flat().length,49);
-  assert.equal(state.places.length,43);
+  assert.equal(Object.values(state.pins).flat().length,53);
+  assert.equal(state.places.length,47);
   assert.equal(state.notices.length,10);
 });
 

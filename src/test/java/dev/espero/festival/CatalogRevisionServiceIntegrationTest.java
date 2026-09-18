@@ -253,6 +253,65 @@ class CatalogRevisionServiceIntegrationTest {
     }
 
     @Test
+    void publishesAFoodTruckWithAMenuAndAPromotionBoothWithEvents() throws IOException {
+        String base = manifestJson("qr-categories", "/assets/maps/overview-v1.png", currentPublishedRevision());
+        String foodTruck = base
+            .replace("\"category\": \"BOOTH\"", "\"category\": \"FOOD_TRUCK\"")
+            .replace("\"spaceMenuItems\": []", """
+                "spaceMenuItems": [
+                  {"spaceId": "space-booth", "locale": "ko", "sortOrder": 1, "name": "닭꼬치", "priceAmount": 5000}
+                ]""");
+        UUID foodTruckRevision = importJson(foodTruck);
+        revisions.publish(foodTruckRevision, "release-bot");
+        assertThat(snapshots.loadPublished().findSpace("space-booth")).hasValueSatisfying(space -> {
+            assertThat(space.category()).isEqualTo("FOOD_TRUCK");
+            assertThat(space.menu()).hasSize(1);
+        });
+
+        String promotion = manifestJson("qr-categories-2", "/assets/maps/overview-v1.png", currentPublishedRevision())
+            .replace("\"category\": \"BOOTH\"", "\"category\": \"PROMOTION_BOOTH\"")
+            .replace("\"spaceEvents\": []", """
+                "spaceEvents": [
+                  {"spaceId": "space-booth", "locale": "ko", "sortOrder": 1, "content": "경품 추첨"}
+                ]""");
+        UUID promotionRevision = importJson(promotion);
+        revisions.publish(promotionRevision, "release-bot");
+        assertThat(snapshots.loadPublished().findSpace("space-booth")).hasValueSatisfying(space -> {
+            assertThat(space.category()).isEqualTo("PROMOTION_BOOTH");
+            assertThat(space.events()).containsExactly("경품 추첨");
+        });
+    }
+
+    @Test
+    void rejectsEventsOnAFleaMarketAndAMenuOnAStudentCouncilBooth() throws IOException {
+        String fleaMarket = manifestJson("qr-flea", "/assets/maps/overview-v1.png", currentPublishedRevision())
+            .replace("\"category\": \"BOOTH\"", "\"category\": \"FLEA_MARKET\"")
+            .replace("\"spaceEvents\": []", """
+                "spaceEvents": [
+                  {"spaceId": "space-booth", "locale": "ko", "sortOrder": 1, "content": "이벤트"}
+                ]""");
+        String studentCouncil = manifestJson("qr-council", "/assets/maps/overview-v1.png", currentPublishedRevision())
+            .replace("\"category\": \"BOOTH\"", "\"category\": \"STUDENT_COUNCIL_BOOTH\"")
+            .replace("\"spaceMenuItems\": []", """
+                "spaceMenuItems": [
+                  {"spaceId": "space-booth", "locale": "ko", "sortOrder": 1, "name": "음료", "priceAmount": 1000}
+                ]""");
+
+        assertThatThrownBy(() -> importJson(fleaMarket))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("Only booth-type spaces can contain events");
+        assertThatThrownBy(() -> importJson(studentCouncil))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("Only PUB and FOOD_TRUCK spaces can contain menu items");
+    }
+
+    private UUID importJson(String json) throws IOException {
+        Path manifest = tempDir.resolve(UUID.randomUUID() + ".json");
+        Files.writeString(manifest, json);
+        return revisions.importManifest(manifest, "release-bot");
+    }
+
+    @Test
     void reportsAndBlocksALegacyRevisionWithAPartialTicketSchedule() throws IOException {
         UUID revisionId = importManifest("qr-legacy-ticket", "/assets/maps/overview-v1.png");
         jdbc.update("""

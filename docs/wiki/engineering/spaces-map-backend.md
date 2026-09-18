@@ -53,7 +53,9 @@ FestivalRevision (published)
  └─ CatalogRevisionAudit
 ```
 
-- `Space`는 `BOOTH | PUB | FLEA_MARKET`이고, `SpaceSortOrder`는 `(revision, locale,
+- `Space`는 `PUB | BOOTH | FLEA_MARKET | FOOD_TRUCK | STUDENT_COUNCIL_BOOTH | PROMOTION_BOOTH`
+  (V20)다. 이벤트는 부스형(`BOOTH`, `STUDENT_COUNCIL_BOOTH`, `PROMOTION_BOOTH`), 메뉴는
+  `PUB`·`FOOD_TRUCK`만 가진다. 허용 목록은 `SpaceCategories` 하나에 둔다. `SpaceSortOrder`는 `(revision, locale,
   space)`마다 하나의 순위를 저장한다. 한국어·영어 이름을 같은 정렬 값으로 재사용하지
   않는다.
 - `Place.kind`는 `SPACE | FACILITY | LANDMARK`이며 `SPACE`일 때만 `space_id`를 가진다.
@@ -116,7 +118,7 @@ revision을 새 증가 번호의 draft로 복사한 뒤 같은 validate·publish
 
 `/maps/{mapId}/pins`는 존재하지 않는 지도에 404, 현재 `Map.version`과 다른
 `mapVersion`에 `409 MAP_VERSION_MISMATCH`, 맞는 version에 그 version의 핀만 반환한다.
-`/spaces`의 `category`는 `ALL | BOOTH | PUB | FLEA_MARKET`만 받고 알 수 없거나 중복된
+`/spaces`의 `category`는 `ALL`과 여섯 유형만 받고 알 수 없거나 중복된
 query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 유지한다.
 
 응답 meta에는 snapshot의 실제 festival ID와 revision을 넣는다. `X-Request-Id`는

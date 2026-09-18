@@ -6120,7 +6120,7 @@
     "/api/v2/spaces": {
       "get": {
         "operationId": "getSpaces",
-        "summary": "부스·주점·플리마켓 목록",
+        "summary": "부스&마켓 목록",
         "description": "연결 화면: BOOTH-LIST. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -6152,9 +6152,12 @@
               "type": "string",
               "enum": [
                 "ALL",
-                "BOOTH",
                 "PUB",
-                "FLEA_MARKET"
+                "BOOTH",
+                "FLEA_MARKET",
+                "FOOD_TRUCK",
+                "STUDENT_COUNCIL_BOOTH",
+                "PROMOTION_BOOTH"
               ],
               "description": "생략하면 ALL"
             },
@@ -6179,7 +6182,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "부스·주점·플리마켓 목록: normal",
+                    "summary": "부스&마켓 목록: normal",
                     "value": {
                       "data": {
                         "items": [
@@ -6404,6 +6407,53 @@
                               "mapId": "map-pub",
                               "placeId": "place-pub",
                               "pinId": "pin-pub",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-food-truck-02",
+                            "category": "FOOD_TRUCK",
+                            "name": "목 달콤트럭",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-food-truck-02",
+                              "alt": "개발용 가상 space 목 달콤트럭 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 푸드트럭 구역 F-02",
+                            "operator": "목 개발 푸드트럭 02",
+                            "hoursText": "개발용 12:00~24:00",
+                            "description": "목 달콤트럭의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "목 크로플",
+                                "price": {
+                                  "amount": 5000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 츄러스",
+                                "price": {
+                                  "amount": 4000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 딸기 스무디",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-food",
+                              "placeId": "place-food-truck-02",
+                              "pinId": "pin-food-truck-02",
                               "mapVersion": "mock-map-1"
                             }
                           },
@@ -6701,6 +6751,53 @@
                               "mapId": "map-area",
                               "placeId": "place-booth",
                               "pinId": "pin-booth",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-food-truck",
+                            "category": "FOOD_TRUCK",
+                            "name": "목 불맛트럭",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-food-truck",
+                              "alt": "개발용 가상 space 목 불맛트럭 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 푸드트럭 구역 F-01",
+                            "operator": "목 개발 푸드트럭 01",
+                            "hoursText": "개발용 12:00~24:00",
+                            "description": "목 불맛트럭의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": null,
+                            "events": [],
+                            "menu": [
+                              {
+                                "name": "목 불닭 타코",
+                                "price": {
+                                  "amount": 6000,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 치즈 핫도그",
+                                "price": {
+                                  "amount": 4500,
+                                  "currency": "KRW"
+                                }
+                              },
+                              {
+                                "name": "목 레몬 에이드",
+                                "price": {
+                                  "amount": 3500,
+                                  "currency": "KRW"
+                                }
+                              }
+                            ],
+                            "mapTarget": {
+                              "mapId": "map-food",
+                              "placeId": "place-food-truck",
+                              "pinId": "pin-food-truck",
                               "mapVersion": "mock-map-1"
                             }
                           },
@@ -7105,6 +7202,37 @@
                             }
                           },
                           {
+                            "id": "space-student-council",
+                            "category": "STUDENT_COUNCIL_BOOTH",
+                            "name": "목 총학생회 부스",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-student-council",
+                              "alt": "개발용 가상 space 목 총학생회 부스 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 S-01",
+                            "operator": "목 총학생회",
+                            "hoursText": "개발용 12:00~21:00",
+                            "description": "가상 총학생회 부스 안내입니다. 실제 운영 정보가 아닙니다.",
+                            "contact": {
+                              "label": "개발용 문의",
+                              "url": "https://example.invalid/mock-contact/student-council",
+                              "target": "_blank"
+                            },
+                            "experience": "가상 축제 안내와 굿즈 수령 확인",
+                            "events": [
+                              "목 축제 퀴즈"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-student-council",
+                              "pinId": "pin-student-council",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
                             "id": "space-booth-10",
                             "category": "BOOTH",
                             "name": "목 캠퍼스 라디오",
@@ -7253,6 +7381,33 @@
                               "mapId": "map-area",
                               "placeId": "place-booth-06",
                               "pinId": "pin-booth-06",
+                              "mapVersion": "mock-map-1"
+                            }
+                          },
+                          {
+                            "id": "space-promotion",
+                            "category": "PROMOTION_BOOTH",
+                            "name": "목 프로모션 부스",
+                            "image": {
+                              "url": "/__mock/assets/sample.svg?variant=space-space-promotion",
+                              "alt": "개발용 가상 space 목 프로모션 부스 이미지 · 실제 축제 자료 아님",
+                              "width": 800,
+                              "height": 600
+                            },
+                            "locationText": "목 부스 구역 R-01",
+                            "operator": "목 협찬사",
+                            "hoursText": "개발용 13:00~20:00",
+                            "description": "가상 프로모션 부스 안내입니다. 실제 협찬 정보가 아닙니다.",
+                            "contact": null,
+                            "experience": "가상 제품 체험",
+                            "events": [
+                              "목 경품 추첨"
+                            ],
+                            "menu": [],
+                            "mapTarget": {
+                              "mapId": "map-area",
+                              "placeId": "place-promotion",
+                              "pinId": "pin-promotion",
                               "mapVersion": "mock-map-1"
                             }
                           },
@@ -7424,7 +7579,7 @@
                     }
                   },
                   "empty": {
-                    "summary": "부스·주점·플리마켓 목록: empty",
+                    "summary": "부스&마켓 목록: empty",
                     "value": {
                       "data": {
                         "items": []
@@ -7461,7 +7616,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "부스·주점·플리마켓 목록: bad-request",
+                    "summary": "부스&마켓 목록: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -7584,7 +7739,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "부스·주점·플리마켓 목록: rate-limited",
+                    "summary": "부스&마켓 목록: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -7643,7 +7798,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "부스·주점·플리마켓 목록: error",
+                    "summary": "부스&마켓 목록: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -9061,6 +9216,30 @@
                             "target": {
                               "kind": "PLACE",
                               "placeId": "place-booth-12"
+                            },
+                            "filterGroup": null
+                          },
+                          {
+                            "id": "pin-student-council",
+                            "category": "student-council-booth",
+                            "label": "목 총학생회 부스",
+                            "x": 0.14,
+                            "y": 0.8700000000000001,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-student-council"
+                            },
+                            "filterGroup": null
+                          },
+                          {
+                            "id": "pin-promotion",
+                            "category": "promotion-booth",
+                            "label": "목 프로모션 부스",
+                            "x": 0.37,
+                            "y": 0.8700000000000001,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-promotion"
                             },
                             "filterGroup": null
                           },
@@ -22567,11 +22746,14 @@
           "category": {
             "type": "string",
             "enum": [
-              "BOOTH",
               "PUB",
-              "FLEA_MARKET"
+              "BOOTH",
+              "FLEA_MARKET",
+              "FOOD_TRUCK",
+              "STUDENT_COUNCIL_BOOTH",
+              "PROMOTION_BOOTH"
             ],
-            "description": "부스/주점/플리마켓"
+            "description": "주점/부스/플리마켓/푸드트럭/총학생회 부스/프로모션 부스"
           },
           "name": {
             "type": "string",
@@ -22656,7 +22838,7 @@
               "minLength": 1,
               "description": "부스 이벤트"
             },
-            "description": "부스만, 없으면 []"
+            "description": "부스·총학생회 부스·프로모션 부스만, 없으면 []"
           },
           "menu": {
             "type": "array",
@@ -22679,7 +22861,7 @@
               "additionalProperties": false,
               "description": ""
             },
-            "description": "주점만. 미확정 가격 메뉴의 노출 정책은 별도 결정."
+            "description": "주점·푸드트럭만. 미확정 가격 메뉴의 노출 정책은 별도 결정."
           },
           "mapTarget": {
             "anyOf": [

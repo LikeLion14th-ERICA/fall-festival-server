@@ -13,6 +13,7 @@ import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.domain.SpaceCategories;
 import dev.espero.festival.domain.StampGuide;
 import dev.espero.festival.domain.TicketGuideConfig;
 import dev.espero.festival.domain.PublishedFestivalContext;
@@ -396,10 +397,12 @@ public class CatalogSnapshotStore {
 
     private void verifySpaceContent(List<Space> spaces) {
         for (Space space : spaces) {
-            require(space.category().equals("BOOTH") || space.events().isEmpty(),
-                "Only BOOTH spaces can publish events.");
-            require(space.category().equals("PUB") || space.menu().isEmpty(),
-                "Only PUB spaces can publish menus.");
+            require(SpaceCategories.ALL.contains(space.category()),
+                "Published space has an unsupported category.");
+            require(SpaceCategories.WITH_EVENTS.contains(space.category()) || space.events().isEmpty(),
+                "Only booth-type spaces can publish events.");
+            require(SpaceCategories.WITH_MENU.contains(space.category()) || space.menu().isEmpty(),
+                "Only PUB and FOOD_TRUCK spaces can publish menus.");
         }
     }
 
