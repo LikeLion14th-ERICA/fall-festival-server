@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,6 +73,31 @@ public class GoodsStore {
             (resultSet, rowNumber) -> mapHeader(resultSet)
         );
         return hydrate(headers).stream().findFirst();
+    }
+
+    /** Updates one combination only when the complete festival/goods ownership chain matches. */
+    public boolean updateAvailability(
+        UUID festivalId,
+        UUID goodsId,
+        UUID combinationId,
+        GoodsAvailability availability,
+        Instant updatedAt
+    ) {
+        int updated = jdbc.update("""
+            UPDATE goods_combinations AS combination
+            SET availability = :availability, updated_at = :updatedAt
+            FROM goods AS goods
+            WHERE combination.id = :combinationId
+              AND combination.goods_id = :goodsId
+              AND goods.id = combination.goods_id
+              AND goods.festival_id = :festivalId
+            """, new MapSqlParameterSource()
+            .addValue("festivalId", festivalId)
+            .addValue("goodsId", goodsId)
+            .addValue("combinationId", combinationId)
+            .addValue("availability", availability.name())
+            .addValue("updatedAt", OffsetDateTime.ofInstant(updatedAt, ZoneOffset.UTC)));
+        return updated == 1;
     }
 
     private List<Goods> hydrate(List<GoodsHeader> headers) {
