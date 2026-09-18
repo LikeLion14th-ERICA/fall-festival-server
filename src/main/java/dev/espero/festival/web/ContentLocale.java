@@ -1,20 +1,19 @@
 package dev.espero.festival.web;
 
-import dev.espero.festival.domain.NoticeTranslation;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Notice resolves its own per-item content locale instead of using the
- * site-wide "language not launched yet" gate {@link PublicContentLocale}
+ * Notice and goods each resolve their own per-item content locale instead of
+ * using the site-wide "language not launched yet" gate {@link PublicContentLocale}
  * enforces for the rest of the catalog (map/booth/performance).
  */
-final class NoticeContentLocale {
+final class ContentLocale {
 
     private static final Set<String> KNOWN_LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
 
-    private NoticeContentLocale() {}
+    private ContentLocale() {}
 
     static String requestedLocale(HttpServletRequest request) {
         String locale = request.getParameter("locale");
@@ -28,13 +27,12 @@ final class NoticeContentLocale {
     }
 
     /**
-     * ko always resolves to ko. en falls back to ko for legacy notices saved
+     * ko always resolves to ko. en falls back to ko for a legacy entry saved
      * before English became required. zh-Hans/ja use their own translation
-     * only when this notice has one, otherwise en, then ko. No per-field
-     * mixed fallback: title, body and link labels always come from the same
-     * resolved locale.
+     * only when this entry has one, otherwise en, then ko. No per-field mixed
+     * fallback: every resolved field comes from the same locale.
      */
-    static String resolve(Map<String, NoticeTranslation> translations, String requested) {
+    static <T> String resolve(Map<String, T> translations, String requested) {
         if ("ko".equals(requested)) {
             return "ko";
         }

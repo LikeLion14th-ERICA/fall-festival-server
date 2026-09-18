@@ -40,7 +40,7 @@ public class NoticeViewService {
     }
 
     public NoticeListSnapshot list(HttpServletRequest request) {
-        String requestedLocale = NoticeContentLocale.requestedLocale(request);
+        String requestedLocale = ContentLocale.requestedLocale(request);
         UUID festivalId = properties.configuredFestivalId();
         LocalDate today = LocalDate.now(clock.withZone(TIMEZONE));
         ZonedDateTime windowStart = today.atStartOfDay(TIMEZONE);
@@ -56,7 +56,7 @@ public class NoticeViewService {
     }
 
     private NoticeResponse toResponse(Notice notice, String requestedLocale) {
-        String contentLocale = NoticeContentLocale.resolve(notice.translations(), requestedLocale);
+        String contentLocale = ContentLocale.resolve(notice.translations(), requestedLocale);
         NoticeTranslation translation = notice.translations().get(contentLocale);
         List<NoticeLinkResponse> links = notice.links().stream()
             .map(link -> new NoticeLinkResponse(link.url(), link.labels().get(contentLocale), "_blank"))
