@@ -56,14 +56,39 @@ public class CatalogRevisionService {
     /** Reads, validates and atomically inserts a new draft revision. */
     @Transactional
     public UUID importManifest(java.nio.file.Path manifestPath, String actor) {
-        CatalogManifestReader.ManifestDocument document = manifests.read(manifestPath);
+        return importManifest(manifestPath, actor, null);
+    }
+
+    /** Reads, validates and atomically inserts a new draft revision for an explicit festival. */
+    @Transactional
+    public UUID importManifest(java.nio.file.Path manifestPath, String actor, UUID festivalIdOverride) {
+        return importManifest(manifestPath, actor, festivalIdOverride, null);
+    }
+
+    /**
+     * Imports with an operator-stated baseline. A shared manifest that does not
+     * name an environment's published revision gets it from the command line;
+     * a manifest that does name one must agree with the override.
+     */
+    @Transactional
+    public UUID importManifest(
+        java.nio.file.Path manifestPath,
+        String actor,
+        UUID festivalIdOverride,
+        BaselineOverride baselineOverride
+    ) {
+        CatalogManifestReader.ManifestDocument document = manifests.read(manifestPath, festivalIdOverride);
         CatalogManifest manifest = document.manifest();
         String safeActor = actor(actor);
-        UUID festivalId = manifest.festivalId();
+        UUID festivalId = document.festivalId();
+        UUID expectedBaseline = manifest.baselineRevisionId();
+        if (baselineOverride != null) {
+            require(expectedBaseline == null || expectedBaseline.equals(baselineOverride.revisionId()),
+                "Manifest baselineRevisionId does not match --baseline-revision.");
+            expectedBaseline = baselineOverride.revisionId();
+        }
         lockFestival(festivalId);
-        UUID baselineRevisionId = requireExpectedPublished(
-            festivalId, manifest.baselineRevisionId(), "import"
-        );
+        UUID baselineRevisionId = requireExpectedPublished(festivalId, expectedBaseline, "import");
 
         Instant now = clock.instant();
         UUID revisionId = UUID.randomUUID();
@@ -950,6 +975,12 @@ public class CatalogRevisionService {
             throw new CatalogCliException(message);
         }
     }
+
+    /**
+     * An operator-stated baseline for an import. A null revision id means the
+     * operator expects the festival to have no published revision.
+     */
+    public record BaselineOverride(UUID revisionId) {}
 
     private record Revision(
         UUID id,

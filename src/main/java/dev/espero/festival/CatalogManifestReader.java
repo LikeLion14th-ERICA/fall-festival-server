@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 
@@ -30,6 +31,10 @@ public class CatalogManifestReader {
     }
 
     public ManifestDocument read(Path path) {
+        return read(path, null);
+    }
+
+    public ManifestDocument read(Path path, UUID festivalIdOverride) {
         if (path == null) {
             throw new CatalogCliException("A manifest path is required.");
         }
@@ -43,17 +48,34 @@ public class CatalogManifestReader {
             }
             byte[] bytes = Files.readAllBytes(path);
             CatalogManifest manifest = mapper.readValue(bytes, CatalogManifest.class);
+            if (manifest == null) {
+                IllegalArgumentException exception = new IllegalArgumentException("manifest is required");
+                throw new CatalogCliException("Manifest validation failed: manifest is required", exception);
+            }
+            UUID festivalId = resolveFestivalId(manifest.festivalId(), festivalIdOverride);
             try {
-                validator.validate(manifest);
+                validator.validate(manifest, festivalId);
             } catch (IllegalArgumentException exception) {
                 throw new CatalogCliException("Manifest validation failed: " + exception.getMessage(), exception);
             }
-            return new ManifestDocument(manifest, sha256(bytes));
+            return new ManifestDocument(manifest, festivalId, sha256(bytes));
         } catch (JacksonException exception) {
             throw new CatalogCliException("Manifest could not be read as valid JSON.", exception);
         } catch (IOException exception) {
             throw new CatalogCliException("Manifest could not be read as valid JSON.", exception);
         }
+    }
+
+    private UUID resolveFestivalId(UUID manifestFestivalId, UUID festivalIdOverride) {
+        if (manifestFestivalId == null && festivalIdOverride == null) {
+            throw new CatalogCliException("Festival ID is required in the manifest or --festival-id.");
+        }
+        if (manifestFestivalId != null
+            && festivalIdOverride != null
+            && !manifestFestivalId.equals(festivalIdOverride)) {
+            throw new CatalogCliException("Manifest festivalId does not match --festival-id.");
+        }
+        return festivalIdOverride != null ? festivalIdOverride : manifestFestivalId;
     }
 
     private String sha256(byte[] bytes) {
@@ -64,5 +86,5 @@ public class CatalogManifestReader {
         }
     }
 
-    public record ManifestDocument(CatalogManifest manifest, String sha256) {}
+    public record ManifestDocument(CatalogManifest manifest, UUID festivalId, String sha256) {}
 }

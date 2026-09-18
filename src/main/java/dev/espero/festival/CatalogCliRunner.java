@@ -33,7 +33,23 @@ public class CatalogCliRunner implements ApplicationRunner {
         switch (command) {
             case "import" -> {
                 Path manifest = Path.of(value(arguments, "manifest", commands, 1, "manifest"));
-                UUID revision = revisions.importManifest(manifest, actor);
+                UUID revision;
+                if (arguments.containsOption("baseline-revision")) {
+                    // A shared manifest such as the development catalog does not
+                    // hard-code an environment's published revision, so the
+                    // operator states it here instead.
+                    UUID festivalId = arguments.containsOption("festival-id")
+                        ? uuidOption(arguments, "festival-id")
+                        : null;
+                    revision = revisions.importManifest(
+                        manifest, actor, festivalId, baselineOverride(arguments)
+                    );
+                } else if (arguments.containsOption("festival-id")) {
+                    UUID festivalId = uuidOption(arguments, "festival-id");
+                    revision = revisions.importManifest(manifest, actor, festivalId);
+                } else {
+                    revision = revisions.importManifest(manifest, actor);
+                }
                 System.out.println("draft revision: " + revision);
             }
             case "export" -> {
@@ -123,6 +139,23 @@ public class CatalogCliRunner implements ApplicationRunner {
         return values.getFirst();
     }
 
+    private CatalogRevisionService.BaselineOverride baselineOverride(ApplicationArguments arguments) {
+        String value = option(arguments, "baseline-revision", null);
+        if ("none".equals(value)) {
+            return new CatalogRevisionService.BaselineOverride(null);
+        }
+        return new CatalogRevisionService.BaselineOverride(uuidOption(arguments, "baseline-revision"));
+    }
+
+    private UUID uuidOption(ApplicationArguments arguments, String name) {
+        String value = option(arguments, name, null);
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException exception) {
+            throw new CatalogCliException("Option --" + name + " must be a valid UUID.", exception);
+        }
+    }
+
     private String value(
         ApplicationArguments arguments,
         String optionName,
@@ -146,7 +179,9 @@ public class CatalogCliRunner implements ApplicationRunner {
     private void usage() {
         System.out.println("Usage: CatalogCliApplication <import|validate|publish|rollback> [options]");
         System.out.println("  export <revision-uuid> --out=<manifest.json>");
-        System.out.println("  import <manifest.json> [--actor=name]");
+        System.out.println(
+            "  import <manifest.json> [--festival-id=uuid] [--baseline-revision=uuid|none] [--actor=name]"
+        );
         System.out.println("  validate <revision-uuid> [--actor=name]");
         System.out.println("  publish <revision-uuid> [--actor=name]");
         System.out.println("  rollback <archived-revision-uuid> --expected-current=<uuid|none> [--actor=name]");

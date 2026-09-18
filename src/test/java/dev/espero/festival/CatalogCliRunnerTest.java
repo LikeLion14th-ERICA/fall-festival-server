@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Files;
@@ -30,6 +31,52 @@ class CatalogCliRunnerTest {
         ));
 
         verify(revisions).importManifest(Path.of("C:/catalog/revision.json"), "release-bot");
+    }
+
+    @Test
+    void acceptsFestivalIdOverrideForImport() {
+        UUID festivalId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+        runner.run(new DefaultApplicationArguments(
+            "import", "C:/catalog/revision.json", "--festival-id=" + festivalId
+        ));
+
+        verify(revisions).importManifest(Path.of("C:/catalog/revision.json"), "catalog-cli", festivalId);
+    }
+
+    @Test
+    void passesAnOperatorStatedBaselineIncludingAnExplicitNone() {
+        UUID festivalId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        UUID baseline = UUID.fromString("44444444-4444-4444-4444-444444444444");
+
+        runner.run(new DefaultApplicationArguments(
+            "import", "C:/catalog/revision.json", "--festival-id=" + festivalId,
+            "--baseline-revision=" + baseline
+        ));
+        runner.run(new DefaultApplicationArguments(
+            "import", "C:/catalog/revision.json", "--baseline-revision=none"
+        ));
+
+        verify(revisions).importManifest(
+            Path.of("C:/catalog/revision.json"), "catalog-cli", festivalId,
+            new CatalogRevisionService.BaselineOverride(baseline)
+        );
+        verify(revisions).importManifest(
+            Path.of("C:/catalog/revision.json"), "catalog-cli", null,
+            new CatalogRevisionService.BaselineOverride(null)
+        );
+    }
+
+    @Test
+    void rejectsInvalidFestivalIdBeforeCallingTheService() {
+        DefaultApplicationArguments arguments = new DefaultApplicationArguments(
+            "import", "C:/catalog/revision.json", "--festival-id=abc"
+        );
+
+        assertThatThrownBy(() -> runner.run(arguments))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessage("Option --festival-id must be a valid UUID.");
+        verifyNoInteractions(revisions);
     }
 
     @Test
@@ -110,5 +157,16 @@ class CatalogCliRunnerTest {
                 "스탬프투어", List.of(), List.of(), "기념품", null, null, "수량 소진 시 종료", null
             )
         );
+    }
+
+    @Test
+    void keepsPublishCommandBehavior() {
+        UUID revision = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+        runner.run(new DefaultApplicationArguments(
+            "publish", "--revision=" + revision, "--actor=release-bot"
+        ));
+
+        verify(revisions).publish(revision, "release-bot");
     }
 }
