@@ -16,7 +16,7 @@ const noBodyStatuses=new Set([204,304]);
 const strongEtagHeader={schema:{type:'string',pattern:'^\"[0-9a-f]{64}\"$'},description:'현재 조건부 응답 표현의 strong ETag'};
 const unscopedOperations=new Set([
   'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-  'getCrowding','getAdminCrowding','putAdminCrowding'
+  'getCrowding','getAdminCrowding','putAdminCrowding','getNotices','getAdminNotice'
 ]);
 for(const op of operations){
   const responseName=`${op.schema}${op.conditional?'Conditional':''}Response`;spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');

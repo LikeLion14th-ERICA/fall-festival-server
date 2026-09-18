@@ -26,7 +26,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin, X-Mock-Session, X-Mock-Scenario, X-Mock-Time'};
   const unscopedOperations=new Set([
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-    'getCrowding','getAdminCrowding','putAdminCrowding'
+    'getCrowding','getAdminCrowding','putAdminCrowding','getNotices','getAdminNotice'
   ]);
   const server=http.createServer(async(req,res)=>{
     let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
