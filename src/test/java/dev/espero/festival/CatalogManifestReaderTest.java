@@ -48,6 +48,41 @@ class CatalogManifestReaderTest {
     }
 
     @Test
+    void rejectsTicketAccountFieldsThatNowBelongToOperationalSettings() throws Exception {
+        Path file = Files.createTempFile("catalog-manifest-account-", ".json");
+        try {
+            Files.writeString(file, """
+                {
+                  "festivalId": "ec00912b-763f-4f8f-8f57-4bdfc389ccbf",
+                  "festivalDays": [], "spaces": [], "spaceTranslations": [],
+                  "spaceSortOrders": [], "spaceEvents": [], "spaceMenuItems": [],
+                  "places": [], "placeTranslations": [], "maps": [], "mapTranslations": [],
+                  "mapAssets": [], "mapAreas": [], "mapPins": [], "mapPinTranslations": [],
+                  "mapPinFilterGroupTranslations": [], "spaceMapTargets": [],
+                  "artists": [], "artistTranslations": [], "artistLinks": [],
+                  "artistLinkTranslations": [], "artistSongs": [], "artistSongTranslations": [],
+                  "performances": [], "performanceTranslations": [], "performanceArtists": [],
+                  "prohibitedItems": [], "prohibitedItemTranslations": [], "prohibitedMessages": [],
+                  "ticketGuide": {
+                    "instructions": [], "accountBankName": "은행",
+                    "accountNumber": "000-0000", "accountHolder": "예금주"
+                  },
+                  "stampGuide": {
+                    "title": "스탬프투어", "instructions": [], "rewardName": "기념품",
+                    "rewardNotice": "수량 소진 시 종료"
+                  }
+                }
+                """);
+
+            assertThatThrownBy(() -> new CatalogManifestReader(new CatalogManifestValidator()).read(file))
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessageContaining("valid JSON");
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
     void rejectsReceiptCodeFieldsInsteadOfPersistingThem() throws Exception {
         Path file = Files.createTempFile("catalog-manifest-secret-", ".json");
         try {

@@ -47,6 +47,20 @@ public class ConditionalResponseSupport {
         T data,
         ApiMeta meta
     ) {
+        return respond(request, data, meta, null);
+    }
+
+    /**
+     * Same as {@link #respond(HttpServletRequest, Object, ApiMeta)} with an
+     * explicit Cache-Control value. The value is also sent on 304 responses so
+     * a revalidating cache keeps the same directives.
+     */
+    public <T> ResponseEntity<ConditionalApiResponse<T>> respond(
+        HttpServletRequest request,
+        T data,
+        ApiMeta meta,
+        String cacheControl
+    ) {
         if (request == null) {
             throw new IllegalArgumentException("HTTP request is required");
         }
@@ -61,6 +75,9 @@ public class ConditionalResponseSupport {
         String etag = strongEtag(representation);
         HttpHeaders headers = headers(request, meta);
         headers.set(ETAG_HEADER, etag);
+        if (cacheControl != null && !cacheControl.isBlank()) {
+            headers.set(HttpHeaders.CACHE_CONTROL, cacheControl);
+        }
         if (matches(request.getHeader(IF_NONE_MATCH_HEADER), etag)) {
             return new ResponseEntity<>(null, headers, HttpStatus.NOT_MODIFIED);
         }

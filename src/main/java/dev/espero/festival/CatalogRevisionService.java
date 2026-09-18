@@ -497,14 +497,12 @@ public class CatalogRevisionService {
     private void insertTicketGuide(UUID revisionId, CatalogManifest.TicketGuide guide, Instant now) {
         batch("""
             INSERT INTO ticket_guide_revisions (
-                festival_revision_id, id, unit_price_amount, account_bank_name,
-                account_number, account_holder, transfer_link_label, transfer_link_url,
+                festival_revision_id, id, unit_price_amount,
                 map_id, place_id, pin_id, map_version, instructions,
                 festival_start_date, festival_end_date, daily_transfer_open_time,
                 daily_transfer_close_time, daily_pickup_open_time, daily_pickup_close_time, updated_at
             ) VALUES (
-                :revisionId, 1, :unitPriceAmount, :accountBankName,
-                :accountNumber, :accountHolder, :transferLinkLabel, :transferLinkUrl,
+                :revisionId, 1, :unitPriceAmount,
                 :mapId, :placeId, :pinId, :mapVersion, :instructions,
                 :festivalStartDate, :festivalEndDate, :dailyTransferOpenTime,
                 :dailyTransferCloseTime, :dailyPickupOpenTime, :dailyPickupCloseTime, :updatedAt
@@ -512,11 +510,6 @@ public class CatalogRevisionService {
             """, List.of(new MapSqlParameterSource()
             .addValue("revisionId", revisionId)
             .addValue("unitPriceAmount", guide.unitPriceAmount())
-            .addValue("accountBankName", guide.accountBankName())
-            .addValue("accountNumber", guide.accountNumber())
-            .addValue("accountHolder", guide.accountHolder())
-            .addValue("transferLinkLabel", guide.transferLinkLabel())
-            .addValue("transferLinkUrl", guide.transferLinkUrl())
             .addValue("mapId", guide.mapId())
             .addValue("placeId", guide.placeId())
             .addValue("pinId", guide.pinId())
@@ -642,15 +635,16 @@ public class CatalogRevisionService {
             ) SELECT :newRevisionId, space_id, map_id, map_version, pin_id, place_id
               FROM space_map_targets WHERE festival_revision_id = :sourceRevisionId
             """, sourceRevisionId, newRevisionId);
+        // A rollback restores catalog content only. Legacy account and
+        // transfer-link columns are left out so a restored revision never
+        // resurrects an account that the operational settings now own.
         copy("""
             INSERT INTO ticket_guide_revisions (
-                festival_revision_id, id, unit_price_amount, account_bank_name, account_number,
-                account_holder, transfer_link_label, transfer_link_url, map_id, place_id, pin_id,
+                festival_revision_id, id, unit_price_amount, map_id, place_id, pin_id,
                 map_version, instructions, festival_start_date, festival_end_date,
                 daily_transfer_open_time, daily_transfer_close_time, daily_pickup_open_time,
                 daily_pickup_close_time, updated_at
-            ) SELECT :newRevisionId, id, unit_price_amount, account_bank_name, account_number,
-                     account_holder, transfer_link_label, transfer_link_url, map_id, place_id, pin_id,
+            ) SELECT :newRevisionId, id, unit_price_amount, map_id, place_id, pin_id,
                      map_version, instructions, festival_start_date, festival_end_date,
                      daily_transfer_open_time, daily_transfer_close_time, daily_pickup_open_time,
                      daily_pickup_close_time, updated_at

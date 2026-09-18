@@ -562,22 +562,8 @@ public class CatalogSnapshotStore {
         require(config.unitPriceAmount() == null || config.unitPriceAmount() >= 0,
             "TicketGuide.unitPrice must not be negative.");
         requireAllText(config.instructions(), "TicketGuide.instructions");
-        requireTogether(
-            config.accountBankName(), config.accountNumber(), config.accountHolder(), "TicketGuide.account"
-        );
-        if (config.accountBankName() != null) {
-            requireText(config.accountBankName(), "TicketGuide.account.bankName");
-            requireText(config.accountNumber(), "TicketGuide.account.number");
-            requireText(config.accountHolder(), "TicketGuide.account.holder");
-        }
-        if (config.transferLinkLabel() == null && config.transferLinkUrl() == null) {
-            verifyTicketSchedule(config);
-            return;
-        }
-        require(config.transferLinkLabel() != null && config.transferLinkUrl() != null,
-            "TicketGuide.transferLink must contain both label and url.");
-        requireText(config.transferLinkLabel(), "TicketGuide.transferLink.label");
-        requireHttpsUri(config.transferLinkUrl(), "TicketGuide.transferLink.url");
+        // The account and transfer link are operational settings outside the
+        // catalog, so a revision carries no value to validate here.
         verifyTicketSchedule(config);
     }
 
@@ -612,11 +598,6 @@ public class CatalogSnapshotStore {
         }
         require(new java.util.HashSet<>(guide.dates()).size() == guide.dates().size(),
             "StampGuide.dates must not contain duplicates.");
-    }
-
-    private static void requireTogether(String first, String second, String third, String field) {
-        require((first == null) == (second == null) && (second == null) == (third == null),
-            field + " fields must be supplied together.");
     }
 
     private static void requireOptionalText(String value, String field) {

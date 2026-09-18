@@ -89,9 +89,7 @@ class TicketGuideStoreIntegrationTest {
         assertThat(config.instructions()).hasSize(2);
         assertThat(config.festivalStartDate()).isNull();
         assertThat(config.festivalEndDate()).isNull();
-        assertThat(config.accountBankName()).isNull();
         assertThat(config.hasSchedule()).isFalse();
-        assertThat(config.hasAccount()).isFalse();
         assertThat(config.updatedAt()).isNotNull();
     }
 
@@ -112,7 +110,34 @@ class TicketGuideStoreIntegrationTest {
 
         assertThat(guide).isPresent();
         assertThat(guide.get().unitPriceAmount()).isEqualTo(15000);
-        assertThat(guide.get().accountBankName()).isNull();
+    }
+
+    /**
+     * The legacy account columns stay in the table for history. A revision read
+     * must never select them, so filling them in changes nothing that the
+     * public ticket guide can serve.
+     */
+    @Test
+    @Transactional
+    void ignoresLegacyAccountColumnsOnTheRevisionRow() {
+        UUID publishedRevisionId = jdbc.queryForObject(
+            "SELECT id FROM festival_revisions WHERE state = 'published'", Map.of(), UUID.class
+        );
+        jdbc.update("""
+            UPDATE ticket_guide_revisions
+            SET account_bank_name = '레거시 은행', account_number = '000-0000',
+                account_holder = '레거시 예금주', transfer_link_label = '송금',
+                transfer_link_url = 'https://toss.example.invalid/send'
+            WHERE festival_revision_id = :revisionId AND id = 1
+            """, Map.of("revisionId", publishedRevisionId));
+
+        Optional<TicketGuideConfig> guide = store.find(publishedRevisionId);
+
+        assertThat(guide).isPresent();
+        assertThat(guide.get().unitPriceAmount()).isEqualTo(15000);
+        assertThat(TicketGuideConfig.class.getRecordComponents())
+            .extracting(java.lang.reflect.RecordComponent::getName)
+            .doesNotContain("accountBankName", "accountNumber", "accountHolder", "transferLinkUrl");
     }
 
     @Test

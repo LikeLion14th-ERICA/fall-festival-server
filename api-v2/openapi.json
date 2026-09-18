@@ -652,6 +652,13 @@
                   "pattern": "^\"[0-9a-f]{64}\"$"
                 },
                 "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
               }
             },
             "content": {
@@ -9788,6 +9795,16 @@
               "default": "ko"
             },
             "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
           }
         ],
         "responses": {
@@ -9799,12 +9816,35 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "private, no-cache"
+                  ]
+                },
+                "description": "공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다."
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TicketGuideResponse"
+                  "$ref": "#/components/schemas/TicketGuideConditionalResponse"
                 },
                 "examples": {
                   "normal": {
@@ -9827,6 +9867,7 @@
                           "holder": "개발용 예금주"
                         },
                         "transferLink": null,
+                        "paymentSettingsVersion": 1,
                         "mapTarget": {
                           "mapId": "map-overview",
                           "placeId": "place-ticket",
@@ -9839,8 +9880,6 @@
                         ]
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 1,
@@ -9865,6 +9904,7 @@
                         "pickupClosesAt": "2030-10-01T21:00:00+09:00",
                         "account": null,
                         "transferLink": null,
+                        "paymentSettingsVersion": 1,
                         "mapTarget": {
                           "mapId": "map-overview",
                           "placeId": "place-ticket",
@@ -9877,8 +9917,6 @@
                         ]
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-09-30T10:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 1,
@@ -9903,6 +9941,7 @@
                         "pickupClosesAt": "2030-10-01T21:00:00+09:00",
                         "account": null,
                         "transferLink": null,
+                        "paymentSettingsVersion": 1,
                         "mapTarget": {
                           "mapId": "map-overview",
                           "placeId": "place-ticket",
@@ -9915,8 +9954,6 @@
                         ]
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 1,
@@ -9941,6 +9978,7 @@
                         "pickupClosesAt": "2030-10-03T21:00:00+09:00",
                         "account": null,
                         "transferLink": null,
+                        "paymentSettingsVersion": 1,
                         "mapTarget": {
                           "mapId": "map-overview",
                           "placeId": "place-ticket",
@@ -9953,8 +9991,6 @@
                         ]
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-04T00:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 1,
@@ -9976,6 +10012,7 @@
                         "pickupClosesAt": null,
                         "account": null,
                         "transferLink": null,
+                        "paymentSettingsVersion": null,
                         "mapTarget": null,
                         "instructions": [
                           "실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.",
@@ -9983,8 +10020,6 @@
                         ]
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 1,
@@ -9994,6 +10029,17 @@
                     }
                   }
                 }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
               }
             }
           },
@@ -10233,7 +10279,8 @@
           "error",
           "bad-request",
           "rate-limited"
-        ]
+        ],
+        "x-conditional": true
       }
     },
     "/api/v2/stamp-guide": {
@@ -11028,6 +11075,13 @@
                   "pattern": "^\"[0-9a-f]{64}\"$"
                 },
                 "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
               }
             },
             "content": {
@@ -21102,7 +21156,7 @@
           "revision": {
             "type": "integer",
             "minimum": 0,
-            "description": "혼잡도는 revision-independent라 항상 0."
+            "description": "revision에 귀속된 응답은 published FestivalRevision 번호(1 이상), 혼잡도처럼 revision-independent한 응답은 0."
           },
           "locale": {
             "type": "string",
@@ -21127,7 +21181,7 @@
           "mock"
         ],
         "additionalProperties": false,
-        "description": "조건부 응답의 안정 메타. requestId와 serverTime은 응답 헤더로 제공한다."
+        "description": "조건부 응답의 안정 메타. requestId와 serverTime은 매 요청 달라지므로 응답 헤더로만 제공하며 ETag 계산에 넣지 않는다."
       },
       "Error": {
         "type": "object",
@@ -23040,7 +23094,7 @@
               "FESTIVAL_ENDED",
               "UNCONFIGURED"
             ],
-            "description": "시간별 송금 안내 상태. 미설정은 확정 전 목용 안전 표현."
+            "description": "시간별 송금 안내 상태. 일정이 없거나 TICKET 계좌 설정이 없으면 UNCONFIGURED다."
           },
           "unitPrice": {
             "anyOf": [
@@ -23122,7 +23176,7 @@
                 "type": "null"
               }
             ],
-            "description": "송금 제공 시간 밖·미설정이면 null. 계좌번호 숨김."
+            "description": "catalog revision 밖의 TICKET 계좌 설정에서 제공. 계좌 설정이 없거나 송금 제공 시간 밖이면 null."
           },
           "transferLink": {
             "anyOf": [
@@ -23133,7 +23187,20 @@
                 "type": "null"
               }
             ],
-            "description": "미확정 또는 송금시간 밖이면 null"
+            "description": "링크 표시명 출처가 정해지기 전까지 항상 null. 계좌 설정은 URL만 보관한다."
+          },
+          "paymentSettingsVersion": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "description": "현재 TICKET 계좌 설정의 version. 값이 바뀌면 계좌 설정이 바뀐 것이며 응답 ETag도 함께 바뀐다."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "계좌를 한 번도 설정하지 않았으면 null. 설정을 해제한 뒤에도 version은 남는다."
           },
           "mapTarget": {
             "anyOf": [
@@ -23166,6 +23233,7 @@
           "pickupClosesAt",
           "account",
           "transferLink",
+          "paymentSettingsVersion",
           "mapTarget",
           "instructions"
         ],
@@ -24200,14 +24268,14 @@
         "additionalProperties": false,
         "description": ""
       },
-      "TicketGuideResponse": {
+      "TicketGuideConditionalResponse": {
         "type": "object",
         "properties": {
           "data": {
             "$ref": "#/components/schemas/TicketGuide"
           },
           "meta": {
-            "$ref": "#/components/schemas/Meta"
+            "$ref": "#/components/schemas/ConditionalMeta"
           }
         },
         "required": [

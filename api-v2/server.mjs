@@ -40,7 +40,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         if(csrfRoute)failure(403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.');
         failure(403,'ORIGIN_NOT_ALLOWED','이 개발 서버에 허용되지 않은 origin입니다.');
       }
-      if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location, ETag');}
+      if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location, ETag, X-Server-Time');}
       if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, If-Match, Idempotency-Key, If-None-Match, X-Mock-Session, X-Mock-Scenario, X-Mock-Time, X-Mock-Delay','Access-Control-Max-Age':'600'});return res.end();}
       const session=req.headers['x-mock-session']||'default';
       if(!/^[a-zA-Z0-9_-]{1,64}$/.test(session))failure(400,'INVALID_MOCK_SESSION','목 세션은 영숫자·밑줄·하이픈 1~64자입니다.');
@@ -121,9 +121,10 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         result=execute(route,state,{params,query,body,scenario,now});
       }
       now=result.now;
+      const responseRevision=unscopedOperations.has(route.operationId)?0:state.revision;
       const responseMeta=route.definition['x-conditional']
-        ? {timezone:'Asia/Seoul',festivalId:'festival-mock',revision:0,locale,mock:true}
-        : meta(unscopedOperations.has(route.operationId)?0:state.revision);
+        ? {timezone:'Asia/Seoul',festivalId:'festival-mock',revision:responseRevision,locale,mock:true}
+        : meta(responseRevision);
       const response=noBodyStatuses.has(result.status)?null:{data:result.data,meta:responseMeta};
       let responseStatus=result.status;
       const extra=result.status===201?{Location:`/api/v2/admin/${route.operationId==='postAdminProduct'?'products':'notices'}/${result.data.id}`}:{ };
@@ -131,6 +132,8 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         const etag=strongEtag({data:response.data,meta:{timezone:response.meta.timezone,festivalId:response.meta.festivalId,revision:response.meta.revision,locale:response.meta.locale,mock:response.meta.mock}});
         extra.ETag=etag;
         extra['X-Server-Time']=meta(0).serverTime;
+        const declaredCacheControl=route.definition.responses['200']?.headers?.['Cache-Control']?.schema?.enum?.[0];
+        if(declaredCacheControl)extra['Cache-Control']=declaredCacheControl;
         if(matchesEtag(req.headers['if-none-match'],etag))responseStatus=304;
       }
       const responseDefinition=route.definition.responses[responseStatus];

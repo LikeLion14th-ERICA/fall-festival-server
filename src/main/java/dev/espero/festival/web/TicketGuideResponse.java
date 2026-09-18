@@ -14,6 +14,7 @@ public record TicketGuideResponse(
     OffsetDateTime pickupClosesAt,
     BankAccount account,
     Link transferLink,
+    Long paymentSettingsVersion,
     MapTarget mapTarget,
     List<String> instructions
 ) {

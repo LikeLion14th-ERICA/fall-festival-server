@@ -461,12 +461,6 @@ public final class CatalogManifestValidator {
         require(guide != null, "ticketGuide is required");
         require(guide.unitPriceAmount() == null || guide.unitPriceAmount() >= 0,
             "ticketGuide.unitPriceAmount must be non-negative");
-        together(guide.accountBankName(), guide.accountNumber(), guide.accountHolder(),
-            "ticketGuide account fields");
-        together(guide.transferLinkLabel(), guide.transferLinkUrl(), "ticketGuide transfer link");
-        if (guide.transferLinkUrl() != null) {
-            https(guide.transferLinkUrl(), "ticketGuide.transferLinkUrl");
-        }
         for (String instruction : guide.instructions()) {
             text(instruction, "ticketGuide.instructions");
         }
@@ -620,24 +614,6 @@ public final class CatalogManifestValidator {
     private void optionalText(String value, String field) {
         if (value != null) {
             text(value, field);
-        }
-    }
-
-    private void together(String first, String second, String field) {
-        require((first == null) == (second == null), field + " fields must be supplied together");
-        if (first != null) {
-            text(first, field);
-            text(second, field);
-        }
-    }
-
-    private void together(String first, String second, String third, String field) {
-        require((first == null) == (second == null) && (second == null) == (third == null),
-            field + " fields must be supplied together");
-        if (first != null) {
-            text(first, field);
-            text(second, field);
-            text(third, field);
         }
     }
 

@@ -182,7 +182,7 @@ class CatalogManifestValidatorTest {
     @Test
     void rejectsPartialTicketScheduleBeforeItCanBecomeADraft() {
         CatalogManifest.TicketGuide partialSchedule = new CatalogManifest.TicketGuide(
-            null, null, null, null, null, null, null, null, null, null, List.of(),
+            null, null, null, null, null, List.of(),
             LocalDate.of(2030, 10, 1), null, null, null, null, null
         );
         CatalogManifest manifest = emptyManifest(partialSchedule, stampGuide());
@@ -229,7 +229,7 @@ class CatalogManifestValidatorTest {
 
     private CatalogManifest.TicketGuide ticketGuide() {
         return new CatalogManifest.TicketGuide(
-            15000, null, null, null, null, null, null, null, null, null,
+            15000, null, null, null, null,
             List.of("안내"), null, null, null, null, null, null
         );
     }

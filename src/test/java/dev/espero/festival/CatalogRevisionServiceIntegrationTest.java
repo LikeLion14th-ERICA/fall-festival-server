@@ -537,11 +537,6 @@ class CatalogRevisionServiceIntegrationTest {
               ],
               "ticketGuide": {
                 "unitPriceAmount": null,
-                "accountBankName": null,
-                "accountNumber": null,
-                "accountHolder": null,
-                "transferLinkLabel": null,
-                "transferLinkUrl": null,
                 "mapId": null,
                 "placeId": null,
                 "pinId": null,
