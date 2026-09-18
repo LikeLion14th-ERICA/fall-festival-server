@@ -196,7 +196,7 @@ public class CrowdingViewService {
             status,
             saved.map(CrowdingRecord::level).orElse(null),
             active ? color(status) : null,
-            message(status, opensAt),
+            CrowdingMessages.message(status, opensAt.toLocalTime(), CONTENT_LOCALE),
             active ? saved.map(record -> OffsetDateTime.ofInstant(record.updatedAt(), timezone)).orElse(null) : null,
             active
                 ? saved.map(record -> CrowdingResponse.TimeBasis.OPERATOR)
@@ -212,17 +212,6 @@ public class CrowdingViewService {
             case CROWDED -> "red";
             case FULL -> "black";
             case BEFORE_OPEN, CLOSED -> null;
-        };
-    }
-
-    private String message(CrowdingResponse.Status status, OffsetDateTime opensAt) {
-        return switch (status) {
-            case BEFORE_OPEN -> "오늘 재학생존 입장은 %s에 시작해요".formatted(opensAt.toLocalTime());
-            case RELAXED -> "재학생존의 공간이 많이 남았어요.";
-            case MODERATE -> "재학생존의 공간이 절반 정도 찼어요.";
-            case CROWDED -> "재학생존이 많이 혼잡해요.";
-            case FULL -> "재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.";
-            case CLOSED -> "오늘 재학생존 운영이 종료됐어요";
         };
     }
 
