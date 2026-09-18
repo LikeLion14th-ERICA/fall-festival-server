@@ -81,6 +81,7 @@ class CatalogControllerOpenApiTest {
             )));
         mvc = MockMvcBuilders.standaloneSetup(
             new CatalogController(snapshots, metaSupport),
+            new ConfigController(snapshots, metaSupport, clock),
             new TicketGuideController(
                 snapshots,
                 accountSettings,
@@ -106,6 +107,25 @@ class CatalogControllerOpenApiTest {
         );
         assertMatchesSchema("/api/v2/places/{placeId}", get("/api/v2/places/place-booth"));
         assertMatchesSchema("/api/v2/ticket-guide", get("/api/v2/ticket-guide"));
+    }
+
+    @Test
+    void validatesTheConfigPayloadAgainstOpenApi() throws Exception {
+        CatalogSnapshot base = snapshot();
+        when(snapshots.required()).thenReturn(new CatalogSnapshot(
+            base.context(), base.spaces(), base.maps(), base.places(), base.pinsByMapVersion(),
+            base.ticketGuideConfig(), base.stampGuide(), base.ticketMapTarget(),
+            new CatalogSnapshot.FestivalHome(
+                "한양문화제 동심",
+                List.of(java.time.LocalDate.parse("2030-10-01"), java.time.LocalDate.parse("2030-10-02")),
+                List.of(
+                    new CatalogSnapshot.HomeLink("notices", "UNIVERSITY_NOTICES", "공지사항", "https://example.test/notices", null, 1),
+                    new CatalogSnapshot.HomeLink("instagram", "OFFICIAL_CHANNEL", "Instagram", "https://example.test/ig", "instagram", 1)
+                )
+            )
+        ));
+
+        assertMatchesSchema("/api/v2/config", get("/api/v2/config"));
     }
 
     @Test
