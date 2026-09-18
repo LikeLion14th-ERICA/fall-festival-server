@@ -156,9 +156,26 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 | 2026-09-18 | catalog role의 legacy 티켓 열 차단 | provisioning script를 실행하는 Testcontainers 검증에서 export/publish role의 `SELECT *`와 계좌 열 조회가 권한 거부 | 원격 DB에는 아직 적용하지 않았다. |
 | 2026-09-18 | cleanup post-commit 파일 작업 | `CleanupPostCommitIntegrationTest` 4개 통과(commit 뒤에만 실행, 일시 실패 재시도, 재시도 한도 초과 보고, rollback·dry-run 시 미실행). `clean verify` 347개 통과 | 파일을 소유하는 target이 생기면 `afterCommit`으로 등록한다. |
 | 2026-09-18 | 혼잡도 흐름·V5 이관 | `CrowdingFlowIntegrationTest` 7개(축제 전·공백일·축제 후 `NOT_FESTIVAL_DAY`, 운영일 없음·게시본 없음 503, `If-Match` 누락 428, 저장 뒤 새 ETag·304, 완료 요청 replay, 지문 재사용·stale 409, publish·rollback 뒤 상태 보존)와 `CrowdingStateMigrationIntegrationTest` 5개(빈 V5, 행 있을 때 `FESTIVAL_ID` 필수, 다른 축제·날짜 불일치 중단, 일치 행 복사) 통과. `clean verify` 359개 통과 | 원격 DB에는 V16을 적용하지 않았다. |
+| 2026-09-18 | 티켓 계좌 흐름·last-four | `TicketGuideAccountFlowIntegrationTest` 2개(계좌 등록·변경·해제가 시각 변화 없이 다음 요청에 반영, 옛 ETag 200·새 ETag 304와 `private, no-cache`, 송금 마감 시 계좌 숨김·ETag 변경)와 last-four 불일치·형식 오류 거절 통과. `clean verify` 362개 통과 | 아래 완료 조건 대응표에 반영했다. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
 않고 원인과 후속 조치를 기록한다.
+
+## 완료 조건 대응표
+
+인수인계 완료 조건별로 근거가 되는 자동 검증이다. 모두 `mvnw clean verify`에 포함된다.
+
+| 완료 조건 | 근거 테스트 |
+| --- | --- |
+| preflight: SELECT만, Flyway·catalog audit 미시작, 불명확한 DB에서 `STOP_AND_REVIEW` | `DatabasePreflightIntegrationTest`(SELECT 외 statement 거부, `flyway_schema_history`·`catalog_revision_audit`·`admin_audit_events` 무변경, 빈 schema에서 migration 미실행, checksum·미지 table·다른 schema·다른 session·축제 누락 시 중단), `DatabasePreflightApplicationTest`(설정 오류·연결 실패 시 `STOP_AND_REVIEW`, read-only 연결 강제), `DatabasePreflightPostgresql17IntegrationTest` |
+| idempotency: 동시 중복·지문 재사용 409, lease 만료 뒤 이중 적용 없음, 원자성 | `AdminIdempotencyServiceIntegrationTest`, `CrowdingFlowIntegrationTest`(HTTP replay·`IDEMPOTENCY_KEY_REUSED`) |
+| ETag: 304, CORS 노출, 428, stale 409, PUT 후 재조회, 정책 선언 예외 | `CrowdingFlowIntegrationTest`, `CrowdingControllerOpenApiTest`, `AdminCorsConfigurationTest`, `AdminMutationPreconditionsTest` |
+| cleanup: advisory lock, dry-run 무변경, 500행 batch, 파일 post-commit 재시도 | `AdminAuditCleanupIntegrationTest` 외 cleanup suite, `CleanupPostCommitIntegrationTest` |
+| 혼잡도: 축제 전·공백일·축제 후 거절, snapshot·운영 시각 없음, V5 행 유무, publish/rollback 뒤 보존 | `CrowdingFlowIntegrationTest`, `CrowdingStateMigrationIntegrationTest`, `CrowdingControllerTest`, `CrowdingStoreIntegrationTest`. 운영 시각은 `festival_days`에서 NOT NULL이므로 누락은 운영일 없는 게시본으로 검증한다. |
+| 계좌: trigger·direct SQL 이력, history 변경 차단, dry-run, last-four·version 거절, restore/clear, role 차단, 민감값 로그 부재 | `OperationalAccountSettingsIntegrationTest`, `AccountSettingsCliRunnerTest` |
+| 티켓: `UNCONFIGURED`, 송금 경계 ETag 변경, 304 흐름, 계좌 수정 뒤 15초 안 반영, legacy 열 미접근 | `TicketGuideAccountFlowIntegrationTest`, `TicketGuideControllerTest`, `TicketGuideStoreIntegrationTest`, provisioning role 검증(`OperationalAccountSettingsIntegrationTest`) |
+| export/publish: 끼어든 게시·rollback 충돌 차단, semantic round-trip, legacy 차단, 최신 공연 catalog 보존 | `CatalogRevisionServiceIntegrationTest` |
+| 67 RPS 부하와 지표 기록 | `tools/load-test/run.ps1`의 `rate-67` 단계. 결과와 heap·GC·DB 지표는 `tools/load-test/README.md`에 있다. 로컬 결과이며 원격 용량은 확정하지 않았다. |
 
 ## 외부 의존성
 

@@ -180,6 +180,27 @@ class OperationalAccountSettingsIntegrationTest {
     }
 
     @Test
+    void rejectsAMissingOrMismatchedLastFourWithoutWriting() {
+        assertThatThrownBy(() -> settings.set(
+            FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0, configured("110-0000-1234"), "5678", audit()
+        ))
+            .isInstanceOf(OperationalAccountException.class)
+            .extracting(exception -> ((OperationalAccountException) exception).code())
+            .isEqualTo("ACCOUNT_LAST_FOUR_MISMATCH");
+        assertThatThrownBy(() -> settings.previewSet(
+            FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0, configured("110-0000-1234"), "12a4"
+        ))
+            .isInstanceOf(OperationalAccountException.class)
+            .extracting(exception -> ((OperationalAccountException) exception).code())
+            .isEqualTo("ACCOUNT_LAST_FOUR_INVALID");
+
+        assertThat(settings.findCurrent(FESTIVAL_ID, OperationalAccountPurpose.TICKET)).isEmpty();
+        assertThat(jdbc.queryForObject(
+            "SELECT count(*) FROM operational_account_setting_history", Map.of(), Long.class
+        )).isZero();
+    }
+
+    @Test
     void rejectsStaleExpectedVersionsAndDirectVersionJumps() {
         settings.set(
             FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0, configured("110-0000-1234"), "1234", audit()
