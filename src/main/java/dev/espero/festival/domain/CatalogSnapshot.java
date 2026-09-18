@@ -20,7 +20,8 @@ public record CatalogSnapshot(
     Map<PinKey, List<Pin>> pinsByMapVersion,
     TicketGuideConfig ticketGuideConfig,
     StampGuide stampGuide,
-    MapTarget ticketMapTarget
+    MapTarget ticketMapTarget,
+    FestivalHome home
 ) {
 
     /**
@@ -58,7 +59,23 @@ public record CatalogSnapshot(
         this(context, spaces, maps, places, pinsByMapVersion, ticketGuideConfig, null, ticketMapTarget);
     }
 
+    /** Snapshot without home settings; the home part is empty. */
+    public CatalogSnapshot(
+        FestivalContext context,
+        List<Space> spaces,
+        List<CatalogMap> maps,
+        List<Place> places,
+        Map<PinKey, List<Pin>> pinsByMapVersion,
+        TicketGuideConfig ticketGuideConfig,
+        StampGuide stampGuide,
+        MapTarget ticketMapTarget
+    ) {
+        this(context, spaces, maps, places, pinsByMapVersion, ticketGuideConfig, stampGuide, ticketMapTarget,
+            FestivalHome.EMPTY);
+    }
+
     public CatalogSnapshot {
+        home = home == null ? FestivalHome.EMPTY : home;
         spaces = List.copyOf(spaces);
         maps = List.copyOf(maps);
         places = List.copyOf(places);
@@ -115,6 +132,22 @@ public record CatalogSnapshot(
             this(festivalId, revisionId, revision, ZoneId.of("Asia/Seoul"));
         }
     }
+
+    /**
+     * Home settings of the published revision: the festival title, its days
+     * in order and the external home links with their Korean labels.
+     */
+    public record FestivalHome(String title, List<java.time.LocalDate> dates, List<HomeLink> links) {
+
+        public static final FestivalHome EMPTY = new FestivalHome(null, List.of(), List.of());
+
+        public FestivalHome {
+            dates = List.copyOf(dates);
+            links = List.copyOf(links);
+        }
+    }
+
+    public record HomeLink(String id, String kind, String label, String url, String iconKey, int sortOrder) {}
 
     public record Image(String url, String alt, int width, int height) {}
 

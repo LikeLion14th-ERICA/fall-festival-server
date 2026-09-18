@@ -342,6 +342,8 @@ class CrowdingFlowIntegrationTest {
             "space_sort_orders",
             "space_translations",
             "spaces",
+            "festival_link_translations",
+            "festival_links",
             "festival_days"
         }) {
             jdbc.update("DELETE FROM " + table + " WHERE festival_revision_id <> :initialRevisionId", parameters);

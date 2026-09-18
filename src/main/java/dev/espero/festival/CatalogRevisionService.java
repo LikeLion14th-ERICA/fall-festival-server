@@ -387,6 +387,30 @@ public class CatalogRevisionService {
         insertTicketGuide(revisionId, manifest.ticketGuide(), now);
         insertStampGuide(revisionId, manifest.stampGuide(), now);
         insertPerformanceCatalog(revisionId, manifest);
+        insertFestivalLinks(revisionId, manifest);
+    }
+
+    private void insertFestivalLinks(UUID revisionId, CatalogManifest manifest) {
+        batch("""
+            INSERT INTO festival_links (festival_revision_id, id, kind, url, icon_key, sort_order)
+            VALUES (:revisionId, :id, :kind, :url, :iconKey, :sortOrder)
+            """, manifest.festivalLinks().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("id", row.id())
+            .addValue("kind", row.kind())
+            .addValue("url", row.url())
+            .addValue("iconKey", row.iconKey())
+            .addValue("sortOrder", row.sortOrder())
+        ).toList());
+        batch("""
+            INSERT INTO festival_link_translations (festival_revision_id, link_id, locale, label)
+            VALUES (:revisionId, :linkId, :locale, :label)
+            """, manifest.festivalLinkTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("linkId", row.linkId())
+            .addValue("locale", row.locale())
+            .addValue("label", row.label())
+        ).toList());
     }
 
     private void insertPerformanceCatalog(UUID revisionId, CatalogManifest manifest) {
@@ -776,6 +800,16 @@ public class CatalogRevisionService {
             INSERT INTO prohibited_messages (festival_revision_id, locale, message)
             SELECT :newRevisionId, locale, message
             FROM prohibited_messages WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO festival_links (festival_revision_id, id, kind, url, icon_key, sort_order)
+            SELECT :newRevisionId, id, kind, url, icon_key, sort_order
+            FROM festival_links WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO festival_link_translations (festival_revision_id, link_id, locale, label)
+            SELECT :newRevisionId, link_id, locale, label
+            FROM festival_link_translations WHERE festival_revision_id = :sourceRevisionId
             """, sourceRevisionId, newRevisionId);
     }
 

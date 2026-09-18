@@ -16,6 +16,11 @@ catalog manifest입니다. 실제 행사 운영 정보나 승인된 production c
 사용하지 않습니다. 이 manifest에는 실제 festival UUID, 계좌 정보, 가격, 송금 링크,
 QR, 지도, 부스 또는 반입 금지 정책이 들어 있지 않습니다.
 
+예외로 `festivalLinks`에는 [HOME-008](../../docs/wiki/product/home.md)에서 확정한 총학생회
+공식 채널(Instagram, YouTube, 총학생회 홈페이지)의 공개 주소를 넣었습니다. 공지사항·FAQ·
+에리카 웰컴 데이 링크는 URL이 확정되지 않아 넣지 않았고, `/api/v2/config`는 이들을 `null`로
+반환합니다.
+
 ## Festival binding
 
 manifest는 환경에 독립적이어야 하므로 `festivalId`를 포함하지 않습니다. 실제 개발

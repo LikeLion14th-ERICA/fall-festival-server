@@ -137,5 +137,45 @@
     "rewardHoursText": null,
     "rewardNotice": "개발 환경 API 검증을 위한 가상 데이터입니다.",
     "qrValue": null
-  }
+  },
+  "festivalLinks": [
+    {
+      "id": "instagram",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://www.instagram.com/hanyang_erica_stu/",
+      "iconKey": "instagram",
+      "sortOrder": 1
+    },
+    {
+      "id": "youtube",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://www.youtube.com/@hanyang_erica_stu",
+      "iconKey": "youtube",
+      "sortOrder": 2
+    },
+    {
+      "id": "student-council",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://ericastu.hanyang.ac.kr/ko/act",
+      "iconKey": "website",
+      "sortOrder": 3
+    }
+  ],
+  "festivalLinkTranslations": [
+    {
+      "linkId": "instagram",
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "linkId": "youtube",
+      "locale": "ko",
+      "label": "YouTube"
+    },
+    {
+      "linkId": "student-council",
+      "locale": "ko",
+      "label": "총학생회 홈페이지"
+    }
+  ]
 }

@@ -24,6 +24,10 @@ public final class CatalogManifestValidator {
     private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
     private static final Set<String> PLACE_KINDS = Set.of("SPACE", "FACILITY", "LANDMARK");
     private static final Set<String> MAP_KINDS = Set.of("OVERVIEW", "AREA");
+    private static final Set<String> FESTIVAL_LINK_KINDS = Set.of(
+        "UNIVERSITY_NOTICES", "FAQ", "OFFICIAL_CHANNEL", "WELCOME_DAY"
+    );
+    private static final Pattern ICON_KEY = Pattern.compile("^[a-z0-9][a-z0-9-]{0,31}$");
     private static final Set<String> FILTER_GROUPS = Set.of(
         "RESTROOM", "PHOTO_BOOTH", "SMOKING_AREA", "TRASH_BIN"
     );
@@ -35,6 +39,7 @@ public final class CatalogManifestValidator {
     void validate(CatalogManifest manifest, UUID festivalId) {
         require(manifest != null, "manifest is required");
         require(festivalId != null, "festivalId is required");
+        validateFestivalLinks(manifest);
 
         Map<String, CatalogManifest.Space> spaces = unique(
             "spaces", manifest.spaces(), CatalogManifest.Space::id
@@ -526,6 +531,47 @@ public final class CatalogManifestValidator {
         require(currentVersions.get(mapId).equals(mapVersion), field + " must use the current map version");
         CatalogManifest.MapPin pin = pins.get(key(mapId, mapVersion, pinId));
         require(pin != null && placeId.equals(pin.placeId()), field + " must point to a matching PLACE pin");
+    }
+
+    /**
+     * Home links are external HTTPS pages opened in a new tab. Single-purpose
+     * kinds appear at most once; official channels carry an icon key and a
+     * unique sort order. Every link needs a Korean label.
+     */
+    private void validateFestivalLinks(CatalogManifest manifest) {
+        Map<String, CatalogManifest.FestivalLink> links = unique(
+            "festivalLinks", manifest.festivalLinks(), CatalogManifest.FestivalLink::id
+        );
+        Set<String> singleKinds = new HashSet<>();
+        Set<Integer> channelOrders = new HashSet<>();
+        for (CatalogManifest.FestivalLink link : links.values()) {
+            id(link.id(), "festivalLinks.id");
+            require(FESTIVAL_LINK_KINDS.contains(link.kind()), "Unsupported festivalLinks.kind: " + link.kind());
+            https(link.url(), "festivalLinks.url");
+            require(link.sortOrder() > 0, "festivalLinks.sortOrder must be positive");
+            if (link.kind().equals("OFFICIAL_CHANNEL")) {
+                require(link.iconKey() != null && ICON_KEY.matcher(link.iconKey()).matches(),
+                    "festivalLinks.iconKey is required for OFFICIAL_CHANNEL");
+                require(channelOrders.add(link.sortOrder()), "Duplicate OFFICIAL_CHANNEL sortOrder");
+            } else {
+                require(link.iconKey() == null, "festivalLinks.iconKey is only for OFFICIAL_CHANNEL");
+                require(singleKinds.add(link.kind()), "Only one festivalLinks row is allowed for " + link.kind());
+            }
+        }
+        Set<String> keys = new HashSet<>();
+        Set<String> korean = new HashSet<>();
+        for (CatalogManifest.FestivalLinkTranslation translation : manifest.festivalLinkTranslations()) {
+            require(translation != null && links.containsKey(translation.linkId()),
+                "festivalLinkTranslations references an unknown link");
+            locale(translation.locale());
+            text(translation.label(), "festivalLinkTranslations.label");
+            require(keys.add(key(translation.linkId(), translation.locale())),
+                "Duplicate festivalLinkTranslations row");
+            if (translation.locale().equals("ko")) {
+                korean.add(translation.linkId());
+            }
+        }
+        require(korean.equals(links.keySet()), "Every festival link needs a Korean festivalLinkTranslations row");
     }
 
     private <T> void requireTranslations(
