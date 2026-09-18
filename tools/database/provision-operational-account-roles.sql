@@ -77,4 +77,20 @@ REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_publish_role";
 
+-- Goods are operated outside the catalog as well (V21).
+REVOKE ALL ON TABLE :"schema".goods FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_colors FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_colors FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_color_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_color_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_sizes FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_sizes FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_size_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_size_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_combinations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_combinations FROM :"catalog_publish_role";
+
 COMMIT;
