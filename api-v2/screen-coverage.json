@@ -28,7 +28,9 @@
         "getGoods",
         "getGoodsAvailability"
       ],
-      "browserData": [],
+      "browserData": [
+        "GOODS-LIST-D01"
+      ],
       "legacySource": {
         "pendingIds": "GOODS-LIST-Q01, GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03, ADM-GOODS-Q04"
       }
@@ -41,6 +43,7 @@
         "getGoodAvailability"
       ],
       "browserData": [
+        "GOODS-DETAIL-D01",
         "GOODS-DETAIL-D07"
       ],
       "legacySource": {
@@ -327,9 +330,12 @@
       "id": "ADM-GOODS-PRODUCT-LIST",
       "name": "관리자 굿즈 상품 목록",
       "operations": [
-        "getAdminProducts"
+        "getAdminProducts",
+        "deleteAdminProduct"
       ],
-      "browserData": [],
+      "browserData": [
+        "ADM-GOODS-PRODUCT-LIST-D04"
+      ],
       "legacySource": {
         "pendingIds": "GOODS-LIST-Q01, ADM-GOODS-Q03"
       }
@@ -343,6 +349,7 @@
         "putAdminProduct"
       ],
       "browserData": [
+        "ADM-GOODS-PRODUCT-EDIT-D04",
         "ADM-GOODS-PRODUCT-EDIT-D07"
       ],
       "legacySource": {
@@ -1533,8 +1540,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "Goods.image",
+      "owner": "보류",
+      "target": "보류: 이미지 필드는 별도 마이그레이션",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/goods.md"
@@ -1624,7 +1631,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "Availability.variants",
+      "target": "Availability.combinations",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/goods.md"
@@ -1641,8 +1648,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "Goods.colorImages",
+      "owner": "보류",
+      "target": "보류: 이미지 필드는 별도 마이그레이션",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/goods.md"
@@ -1732,7 +1739,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "Availability.variants",
+      "target": "Availability.combinations",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/goods.md"
@@ -3118,7 +3125,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "Availability.variants[].colorId + Availability.variants[].sizeId",
+      "target": "AdminGoodsCombination.colorId + AdminGoodsCombination.sizeId",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/admin/goods.md"
@@ -3136,7 +3143,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "Availability.variants[].status",
+      "target": "AdminGoodsCombination.status",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/admin/goods.md"
@@ -3477,8 +3484,8 @@
         "pendingIds": "",
         "requiredInScreen": "조건부"
       },
-      "owner": "API",
-      "target": "Goods.images",
+      "owner": "보류",
+      "target": "보류: 이미지 필드는 별도 마이그레이션",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/admin/goods.md"
@@ -3585,8 +3592,8 @@
         "pendingIds": "",
         "requiredInScreen": "조건부"
       },
-      "owner": "API",
-      "target": "Goods.images",
+      "owner": "보류",
+      "target": "보류: 이미지 필드는 별도 마이그레이션",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/admin/goods.md"
@@ -3649,7 +3656,7 @@
       "id": "GOODS-DETAIL-D08",
       "screenId": "GOODS-DETAIL",
       "label": "실제 제공 조합",
-      "target": "Goods.options",
+      "target": "Availability.combinations",
       "owner": "API",
       "wikiSource": "../docs/wiki/product/goods.md",
       "requiredInScreen": "필수",
@@ -3661,7 +3668,7 @@
       "id": "ADM-GOODS-PRODUCT-EDIT-D08",
       "screenId": "ADM-GOODS-PRODUCT-EDIT",
       "label": "실제 제공 조합",
-      "target": "Goods.options",
+      "target": "ProductInput.options",
       "owner": "API",
       "wikiSource": "../docs/wiki/product/admin/goods.md",
       "requiredInScreen": "필수",

@@ -69,18 +69,18 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | NOTICE-LIST-D05 | 공지 유형 | API | Notice.type | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D06 | 언어별 번역 완료 여부 | API | 서버: Notice.contentLocale 대체 해석 후 Notices.items 반환 | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D07 | 새 공지 존재 여부 | 브라우저 | 브라우저: Notices.visibleIds와 현재 목록 차이 비교 | [위키](../docs/wiki/product/notice.md) |
-| GOODS-LIST-D01 | 상품 이미지 | API | Goods.image | [위키](../docs/wiki/product/goods.md) |
+| GOODS-LIST-D01 | 상품 이미지 | 보류 | 보류: 이미지 필드는 별도 마이그레이션 | [위키](../docs/wiki/product/goods.md) |
 | GOODS-LIST-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/goods.md) |
 | GOODS-LIST-D03 | 가격 | API | Goods.price | [위키](../docs/wiki/product/goods.md) |
 | GOODS-LIST-D04 | 색상 | API | Goods.colors | [위키](../docs/wiki/product/goods.md) |
 | GOODS-LIST-D05 | 사이즈 | API | Goods.sizes | [위키](../docs/wiki/product/goods.md) |
-| GOODS-LIST-D06 | 색상×사이즈별 구매 가능 여부 | API | Availability.variants | [위키](../docs/wiki/product/goods.md) |
-| GOODS-DETAIL-D01 | 상품 이미지 | API | Goods.colorImages | [위키](../docs/wiki/product/goods.md) |
+| GOODS-LIST-D06 | 색상×사이즈별 구매 가능 여부 | API | Availability.combinations | [위키](../docs/wiki/product/goods.md) |
+| GOODS-DETAIL-D01 | 상품 이미지 | 보류 | 보류: 이미지 필드는 별도 마이그레이션 | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D03 | 가격 | API | Goods.price | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D04 | 색상 | API | Goods.colors | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D05 | 사이즈 | API | Goods.sizes | [위키](../docs/wiki/product/goods.md) |
-| GOODS-DETAIL-D06 | 색상×사이즈별 구매 가능 여부 | API | Availability.variants | [위키](../docs/wiki/product/goods.md) |
+| GOODS-DETAIL-D06 | 색상×사이즈별 구매 가능 여부 | API | Availability.combinations | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D07 | 현장 확인·수령 안내 | 프런트 | 프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내 | [위키](../docs/wiki/product/goods.md) |
 | GOODS-PAYMENT-D01 | 상품명 | API | PaymentGuide.name | [위키](../docs/wiki/product/goods.md) |
 | GOODS-PAYMENT-D02 | 상품 가격 | API | PaymentGuide.price | [위키](../docs/wiki/product/goods.md) |
@@ -157,8 +157,8 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | ADM-NOTICE-TEMPLATE-D04 | 언어별 번역문 | API | Template.translations | [위키](../docs/wiki/product/admin/notice.md) |
 | ADM-GOODS-D01 | 상품 식별 정보 | API | Availability.goodsId | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-D02 | 상품명 | API | Availability.name | [위키](../docs/wiki/product/admin/goods.md) |
-| ADM-GOODS-D03 | 색상×사이즈 조합 | API | Availability.variants[].colorId + Availability.variants[].sizeId | [위키](../docs/wiki/product/admin/goods.md) |
-| ADM-GOODS-D04 | 판매 상태 | API | Availability.variants[].status | [위키](../docs/wiki/product/admin/goods.md) |
+| ADM-GOODS-D03 | 색상×사이즈 조합 | API | AdminGoodsCombination.colorId + AdminGoodsCombination.sizeId | [위키](../docs/wiki/product/admin/goods.md) |
+| ADM-GOODS-D04 | 판매 상태 | API | AdminGoodsCombination.status | [위키](../docs/wiki/product/admin/goods.md) |
 | MAP-OVERVIEW-D09 | 혼잡도 최종 상태 | 제외 | 제외: 지도 혼잡도 표시 없음 | [위키](../docs/wiki/product/map.md) |
 | MAP-OVERVIEW-D10 | 혼잡도 색상 | 제외 | 제외: 지도 혼잡도 색상 없음 | [위키](../docs/wiki/product/map.md) |
 | MAP-OVERVIEW-D11 | 혼잡도 안내 문구 | 제외 | 제외: 지도 혼잡도 안내 없음 | [위키](../docs/wiki/product/map.md) |
@@ -177,17 +177,17 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | ADM-GOODS-PRODUCT-LIST-D01 | 상품 ID | API | Goods.id | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-LIST-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-LIST-D03 | 가격 | API | Goods.price | [위키](../docs/wiki/product/admin/goods.md) |
-| ADM-GOODS-PRODUCT-LIST-D04 | 상품 이미지 | API | Goods.images | [위키](../docs/wiki/product/admin/goods.md) |
+| ADM-GOODS-PRODUCT-LIST-D04 | 상품 이미지 | 보류 | 보류: 이미지 필드는 별도 마이그레이션 | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-LIST-D05 | 색상 | API | Goods.colors | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-LIST-D06 | 사이즈 | API | Goods.sizes | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D01 | 상품 ID | API | Goods.id | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D03 | 가격 | API | Goods.price | [위키](../docs/wiki/product/admin/goods.md) |
-| ADM-GOODS-PRODUCT-EDIT-D04 | 상품 이미지 | API | Goods.images | [위키](../docs/wiki/product/admin/goods.md) |
+| ADM-GOODS-PRODUCT-EDIT-D04 | 상품 이미지 | 보류 | 보류: 이미지 필드는 별도 마이그레이션 | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D05 | 색상 | API | Goods.colors | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D06 | 사이즈 | API | Goods.sizes | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-EDIT-D07 | 작성 중 입력값 | 브라우저 | 브라우저: 상품 작성 중 입력값 | [위키](../docs/wiki/product/admin/goods.md) |
-| GOODS-DETAIL-D08 | 실제 제공 조합 | API | Goods.options | [위키](../docs/wiki/product/goods.md) |
-| ADM-GOODS-PRODUCT-EDIT-D08 | 실제 제공 조합 | API | Goods.options | [위키](../docs/wiki/product/admin/goods.md) |
+| GOODS-DETAIL-D08 | 실제 제공 조합 | API | Availability.combinations | [위키](../docs/wiki/product/goods.md) |
+| ADM-GOODS-PRODUCT-EDIT-D08 | 실제 제공 조합 | API | ProductInput.options | [위키](../docs/wiki/product/admin/goods.md) |
 | SHOW-TIMETABLE-D07 | 반입 금지 물품 목록 | API | ProhibitedItems.items | [위키](../docs/wiki/product/timetable.md) |
 | STAMP-REWARD-D02 | 수령 인증 결과 | API | StampReceiptVerificationInput.code → StampReceiptVerification.verified | [위키](../docs/wiki/product/stamp.md) |
