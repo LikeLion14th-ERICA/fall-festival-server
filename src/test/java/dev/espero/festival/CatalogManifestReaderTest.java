@@ -5,10 +5,53 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CatalogManifestReaderTest {
+
+    private static final UUID DEVELOPMENT_FIXTURE_FESTIVAL_ID = UUID.fromString(
+        "00000000-0000-4000-8000-000000000001"
+    );
+
+    @Test
+    void readsDevelopmentCatalogWithExplicitFestivalIdOverride() {
+        Path manifestPath = Path.of("dev", "catalog", "development-catalog.json");
+
+        CatalogManifestReader.ManifestDocument document = reader().read(
+            manifestPath, DEVELOPMENT_FIXTURE_FESTIVAL_ID
+        );
+        CatalogManifest manifest = document.manifest();
+
+        assertThat(manifest.festivalId()).isNull();
+        assertThat(document.festivalId()).isEqualTo(DEVELOPMENT_FIXTURE_FESTIVAL_ID);
+        assertThat(manifest.festivalDays())
+            .extracting(CatalogManifest.FestivalDay::festivalDate)
+            .containsExactly(
+                LocalDate.of(2026, 9, 29),
+                LocalDate.of(2026, 9, 30),
+                LocalDate.of(2026, 10, 1)
+            );
+        assertThat(manifest.artists()).hasSize(2);
+        assertThat(manifest.performances()).hasSize(2);
+        assertThat(manifest.performances())
+            .extracting(CatalogManifest.Performance::festivalDate)
+            .containsExactly(LocalDate.of(2026, 9, 29), LocalDate.of(2026, 10, 1))
+            .doesNotContain(LocalDate.of(2026, 9, 30));
+        assertThat(manifest.timetableConfig().axisStartTime()).isEqualTo(LocalTime.of(18, 0));
+        assertThat(manifest.timetableConfig().axisEndTime()).isEqualTo(LocalTime.of(23, 0));
+
+        CatalogManifest.TicketGuide ticketGuide = manifest.ticketGuide();
+        assertThat(ticketGuide.accountBankName()).isNull();
+        assertThat(ticketGuide.accountNumber()).isNull();
+        assertThat(ticketGuide.accountHolder()).isNull();
+        assertThat(ticketGuide.transferLinkLabel()).isNull();
+        assertThat(ticketGuide.transferLinkUrl()).isNull();
+        assertThat(ticketGuide.unitPriceAmount()).isNull();
+        assertThat(manifest.stampGuide().qrValue()).isNull();
+    }
 
     @Test
     void readsLocalManifestAndReturnsItsAuditDigest() throws Exception {

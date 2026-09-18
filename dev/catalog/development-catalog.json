@@ -1,0 +1,146 @@
+{
+  "festivalDays": [
+    {
+      "festivalDate": "2026-09-29",
+      "opensAt": "2026-09-29T09:00:00+09:00",
+      "closesAt": "2026-09-29T23:00:00+09:00"
+    },
+    {
+      "festivalDate": "2026-09-30",
+      "opensAt": "2026-09-30T09:00:00+09:00",
+      "closesAt": "2026-09-30T23:00:00+09:00"
+    },
+    {
+      "festivalDate": "2026-10-01",
+      "opensAt": "2026-10-01T09:00:00+09:00",
+      "closesAt": "2026-10-01T23:00:00+09:00"
+    }
+  ],
+  "spaces": [],
+  "spaceTranslations": [],
+  "spaceSortOrders": [],
+  "spaceEvents": [],
+  "spaceMenuItems": [],
+  "places": [],
+  "placeTranslations": [],
+  "maps": [],
+  "mapTranslations": [],
+  "mapAssets": [],
+  "mapAreas": [],
+  "mapPins": [],
+  "mapPinTranslations": [],
+  "mapPinFilterGroupTranslations": [],
+  "spaceMapTargets": [],
+  "artists": [
+    {
+      "id": "dev-artist-a",
+      "category": "ARTIST",
+      "imageUrl": "https://example.invalid/dev/artist-a.png",
+      "imageWidth": 1000,
+      "imageHeight": 1000
+    },
+    {
+      "id": "dev-artist-b",
+      "category": "ARTIST",
+      "imageUrl": "https://example.invalid/dev/artist-b.png",
+      "imageWidth": 1000,
+      "imageHeight": 1000
+    }
+  ],
+  "artistTranslations": [
+    {
+      "artistId": "dev-artist-a",
+      "locale": "ko",
+      "name": "개발용 아티스트 A",
+      "imageAlt": "개발용 아티스트 A 가상 이미지",
+      "introduction": "개발 환경 API 확인을 위한 가상 아티스트입니다."
+    },
+    {
+      "artistId": "dev-artist-b",
+      "locale": "ko",
+      "name": "개발용 아티스트 B",
+      "imageAlt": "개발용 아티스트 B 가상 이미지",
+      "introduction": "개발 환경 API 확인을 위한 가상 아티스트입니다."
+    }
+  ],
+  "artistLinks": [],
+  "artistLinkTranslations": [],
+  "artistSongs": [],
+  "artistSongTranslations": [],
+  "performances": [
+    {
+      "id": "dev-performance-a",
+      "festivalDate": "2026-09-29",
+      "startsAt": "2026-09-29T19:00:00+09:00",
+      "endsAt": "2026-09-29T19:30:00+09:00"
+    },
+    {
+      "id": "dev-performance-b",
+      "festivalDate": "2026-10-01",
+      "startsAt": "2026-10-01T20:00:00+09:00",
+      "endsAt": "2026-10-01T20:30:00+09:00"
+    }
+  ],
+  "performanceTranslations": [
+    {
+      "performanceId": "dev-performance-a",
+      "locale": "ko",
+      "title": "개발용 공연 A",
+      "description": "개발 환경 API 검증을 위한 가상 공연입니다."
+    },
+    {
+      "performanceId": "dev-performance-b",
+      "locale": "ko",
+      "title": "개발용 공연 B",
+      "description": "개발 환경 API 검증을 위한 가상 공연입니다."
+    }
+  ],
+  "performanceArtists": [
+    {
+      "performanceId": "dev-performance-a",
+      "artistId": "dev-artist-a",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "dev-performance-b",
+      "artistId": "dev-artist-b",
+      "displayOrder": 1
+    }
+  ],
+  "timetableConfig": {
+    "axisStartTime": "18:00:00",
+    "axisEndTime": "23:00:00"
+  },
+  "prohibitedItems": [],
+  "prohibitedItemTranslations": [],
+  "prohibitedMessages": [],
+  "ticketGuide": {
+    "unitPriceAmount": null,
+    "accountBankName": null,
+    "accountNumber": null,
+    "accountHolder": null,
+    "transferLinkLabel": null,
+    "transferLinkUrl": null,
+    "mapId": null,
+    "placeId": null,
+    "pinId": null,
+    "mapVersion": null,
+    "instructions": [],
+    "festivalStartDate": null,
+    "festivalEndDate": null,
+    "dailyTransferOpenTime": null,
+    "dailyTransferCloseTime": null,
+    "dailyPickupOpenTime": null,
+    "dailyPickupCloseTime": null
+  },
+  "stampGuide": {
+    "title": "개발용 스탬프 안내",
+    "dates": [],
+    "instructions": [],
+    "rewardName": "개발용 리워드",
+    "rewardLocationText": null,
+    "rewardHoursText": null,
+    "rewardNotice": "개발 환경 API 검증을 위한 가상 데이터입니다.",
+    "qrValue": null
+  }
+}
