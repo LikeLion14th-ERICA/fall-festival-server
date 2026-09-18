@@ -12,8 +12,10 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /** Builds the administrator goods representation with every supported locale. */
@@ -28,11 +30,18 @@ public class AdminGoodsViewService {
     private final GoodsStore store;
     private final FestivalProperties properties;
     private final ApiMetaSupport metaSupport;
+    private final ConditionalResponseSupport conditionalResponses;
 
-    public AdminGoodsViewService(GoodsStore store, FestivalProperties properties, ApiMetaSupport metaSupport) {
+    public AdminGoodsViewService(
+        GoodsStore store,
+        FestivalProperties properties,
+        ApiMetaSupport metaSupport,
+        ConditionalResponseSupport conditionalResponses
+    ) {
         this.store = store;
         this.properties = properties;
         this.metaSupport = metaSupport;
+        this.conditionalResponses = conditionalResponses;
     }
 
     public AdminGoodsListSnapshot list(HttpServletRequest request) {
@@ -43,6 +52,21 @@ public class AdminGoodsViewService {
             new AdminGoodsListResponse(items),
             metaSupport.unscopedMeta(request, "ko")
         );
+    }
+
+    public AdminGoodsSnapshot find(HttpServletRequest request, UUID goodsId) {
+        Goods goods = store.findById(properties.configuredFestivalId(), goodsId)
+            .orElseThrow(AdminGoodsViewService::notFound);
+        return snapshot(request, goods);
+    }
+
+    public AdminGoodsSnapshot snapshot(HttpServletRequest request, Goods goods) {
+        AdminGoodsResponse response = toResponse(goods);
+        ApiMeta meta = metaSupport.unscopedMeta(request, "ko");
+        String etag = conditionalResponses.strongEtag(
+            new ConditionalApiResponse<>(response, ConditionalApiMeta.from(meta))
+        );
+        return new AdminGoodsSnapshot(goods, response, meta, etag);
     }
 
     private static AdminGoodsResponse toResponse(Goods goods) {
@@ -97,5 +121,11 @@ public class AdminGoodsViewService {
         return full;
     }
 
+    private static ApiException notFound() {
+        return new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "요청한 정보를 찾을 수 없습니다.", false);
+    }
+
     public record AdminGoodsListSnapshot(AdminGoodsListResponse response, ApiMeta meta) {}
+
+    public record AdminGoodsSnapshot(Goods goods, AdminGoodsResponse response, ApiMeta meta, String etag) {}
 }

@@ -44,6 +44,7 @@ public class AdminGoodsController {
     private final GoodsStore store;
     private final GoodsViewService views;
     private final AdminGoodsViewService adminViews;
+    private final ConditionalResponseSupport conditionalResponses;
     private final FestivalProperties properties;
     private final AdminIdempotencyService idempotency;
     private final AdminAuditService audit;
@@ -55,6 +56,7 @@ public class AdminGoodsController {
         GoodsStore store,
         GoodsViewService views,
         AdminGoodsViewService adminViews,
+        ConditionalResponseSupport conditionalResponses,
         FestivalProperties properties,
         AdminIdempotencyService idempotency,
         AdminAuditService audit,
@@ -65,6 +67,7 @@ public class AdminGoodsController {
         this.store = store;
         this.views = views;
         this.adminViews = adminViews;
+        this.conditionalResponses = conditionalResponses;
         this.properties = properties;
         this.idempotency = idempotency;
         this.audit = audit;
@@ -85,6 +88,16 @@ public class AdminGoodsController {
         validateQuery(request);
         AdminGoodsViewService.AdminGoodsListSnapshot snapshot = adminViews.list(request);
         return ResponseEntity.ok(new ApiResponse<>(snapshot.response(), snapshot.meta()));
+    }
+
+    @GetMapping("/admin/products/{goodsId}")
+    public ResponseEntity<ConditionalApiResponse<AdminGoodsResponse>> getAdminProduct(
+        HttpServletRequest request,
+        @PathVariable UUID goodsId
+    ) {
+        validateQuery(request);
+        AdminGoodsViewService.AdminGoodsSnapshot snapshot = adminViews.find(request, goodsId);
+        return conditionalResponses.respond(request, snapshot.response(), snapshot.meta());
     }
 
     @PutMapping("/admin/goods/{goodsId}/combinations/{combinationId}/availability")

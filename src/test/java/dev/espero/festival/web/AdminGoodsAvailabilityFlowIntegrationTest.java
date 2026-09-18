@@ -286,6 +286,121 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
     }
 
     @Test
+    void getsAdminProductDetailWithStableStrongEtagAndConditionalRevalidation() throws Exception {
+        GoodsFixture goods = insertAdminOptionsGoods(
+            FESTIVAL_ID,
+            OffsetDateTime.parse("2030-09-30T10:00:00+09:00"),
+            OffsetDateTime.parse("2030-10-01T11:00:00+09:00")
+        );
+
+        MvcResult first = mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.id").value(goods.goodsId().toString()))
+            .andExpect(jsonPath("$.data.optionMode").value("OPTIONS"))
+            .andExpect(jsonPath("$.data.translations.ko.name").value("관리자 상품"))
+            .andExpect(jsonPath("$.data.translations.en.name").value("Admin Goods"))
+            .andExpect(jsonPath("$.data.translations.zh-Hans.name").value("管理员商品"))
+            .andExpect(jsonPath("$.data.translations.ja").value(org.hamcrest.Matchers.nullValue()))
+            .andExpect(jsonPath("$.data.price.amount").value(15000))
+            .andExpect(jsonPath("$.data.price.currency").value("KRW"))
+            .andExpect(jsonPath("$.data.colors", org.hamcrest.Matchers.hasSize(2)))
+            .andExpect(jsonPath("$.data.sizes", org.hamcrest.Matchers.hasSize(2)))
+            .andExpect(jsonPath("$.data.combinations", org.hamcrest.Matchers.hasSize(2)))
+            .andExpect(jsonPath("$.data.createdAt").value("2030-09-30T10:00:00+09:00"))
+            .andExpect(jsonPath("$.data.updatedAt").value("2030-10-01T11:00:00+09:00"))
+            .andExpect(jsonPath("$.meta.revision").value(0))
+            .andExpect(jsonPath("$.meta.locale").value("ko"))
+            .andExpect(jsonPath("$.meta.requestId").doesNotExist())
+            .andExpect(jsonPath("$.meta.serverTime").doesNotExist())
+            .andReturn();
+
+        String firstEtag = first.getResponse().getHeader("ETag");
+        String firstRequestId = first.getResponse().getHeader("X-Request-Id");
+        String firstServerTime = first.getResponse().getHeader("X-Server-Time");
+        assertThat(firstEtag).matches("\"[0-9a-f]{64}\"");
+        assertThat(firstRequestId).isNotBlank();
+        assertThat(firstServerTime).isEqualTo("2030-10-01T12:00:00+09:00");
+
+        clock.set("2030-10-01T12:01:00+09:00");
+        MvcResult second = mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))))
+            .andExpect(status().isOk())
+            .andReturn();
+        assertThat(second.getResponse().getHeader("ETag")).isEqualTo(firstEtag);
+        assertThat(second.getResponse().getHeader("X-Request-Id")).isNotEqualTo(firstRequestId);
+        assertThat(second.getResponse().getHeader("X-Server-Time")).isNotEqualTo(firstServerTime);
+
+        mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))).header("If-None-Match", firstEtag))
+            .andExpect(status().isNotModified())
+            .andExpect(result -> assertThat(result.getResponse().getContentAsString()).isEmpty());
+    }
+
+    @Test
+    void changesAdminProductDetailEtagAfterAvailabilityMutation() throws Exception {
+        GoodsFixture goods = insertOptionsGoods(FESTIVAL_ID, "ON_SALE", "SOLD_OUT");
+        UUID combinationId = goods.combinationIds().getFirst();
+        String before = mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getHeader("ETag");
+
+        putAvailability(goods.goodsId(), combinationId, "SOLD_OUT", nextKey())
+            .andExpect(status().isOk());
+
+        MvcResult afterResult = mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(
+                "$.data.combinations[?(@.combinationId == '" + combinationId + "')].status"
+            ).value(org.hamcrest.Matchers.contains("SOLD_OUT")))
+            .andReturn();
+        assertThat(afterResult.getResponse().getHeader("ETag")).isNotEqualTo(before);
+    }
+
+    @Test
+    void getsSingleAdminProductDetailWithOneOpaqueCombination() throws Exception {
+        GoodsFixture single = insertSingleGoods(FESTIVAL_ID, "ON_SALE");
+
+        mvc.perform(asAdmin(get(adminProductRoute(single.goodsId()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.optionMode").value("SINGLE"))
+            .andExpect(jsonPath("$.data.colors", org.hamcrest.Matchers.empty()))
+            .andExpect(jsonPath("$.data.sizes", org.hamcrest.Matchers.empty()))
+            .andExpect(jsonPath("$.data.combinations", org.hamcrest.Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.data.combinations[0].combinationId")
+                .value(single.combinationIds().getFirst().toString()))
+            .andExpect(jsonPath("$.data.combinations[0].colorId").value(org.hamcrest.Matchers.nullValue()))
+            .andExpect(jsonPath("$.data.combinations[0].sizeId").value(org.hamcrest.Matchers.nullValue()));
+    }
+
+    @Test
+    void hidesMissingAndCrossFestivalAdminProductDetailsBehindNotFound() throws Exception {
+        GoodsFixture otherFestival = insertSingleGoods(OTHER_FESTIVAL_ID, "ON_SALE");
+
+        mvc.perform(asAdmin(get(adminProductRoute(UUID.randomUUID()))))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+        mvc.perform(asAdmin(get(adminProductRoute(otherFestival.goodsId()))))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void rejectsAdminProductDetailQueriesAndRequiresAdministratorAuthentication() throws Exception {
+        GoodsFixture goods = insertSingleGoods(FESTIVAL_ID, "ON_SALE");
+
+        mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))).queryParam("locale", "ko"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+        mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))).queryParam("foo", "bar"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+
+        mvc.perform(get(adminProductRoute(goods.goodsId())))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
     void updatesOnlyTheOwnedCombinationWithoutIfMatchAndReturnsTheCurrentAvailability() throws Exception {
         GoodsFixture goods = insertOptionsGoods(FESTIVAL_ID, "ON_SALE", "ON_SALE");
         OffsetDateTime goodsUpdatedAt = goodsTimestamp(goods.goodsId());
@@ -475,6 +590,10 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
 
     private String route(UUID goodsId, UUID combinationId) {
         return "/api/v2/admin/goods/" + goodsId + "/combinations/" + combinationId + "/availability";
+    }
+
+    private String adminProductRoute(UUID goodsId) {
+        return "/api/v2/admin/products/" + goodsId;
     }
 
     private String nextKey() {
