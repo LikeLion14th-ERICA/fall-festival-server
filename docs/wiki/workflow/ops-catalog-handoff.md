@@ -157,6 +157,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 | 2026-09-18 | cleanup post-commit 파일 작업 | `CleanupPostCommitIntegrationTest` 4개 통과(commit 뒤에만 실행, 일시 실패 재시도, 재시도 한도 초과 보고, rollback·dry-run 시 미실행). `clean verify` 347개 통과 | 파일을 소유하는 target이 생기면 `afterCommit`으로 등록한다. |
 | 2026-09-18 | 혼잡도 흐름·V5 이관 | `CrowdingFlowIntegrationTest` 7개(축제 전·공백일·축제 후 `NOT_FESTIVAL_DAY`, 운영일 없음·게시본 없음 503, `If-Match` 누락 428, 저장 뒤 새 ETag·304, 완료 요청 replay, 지문 재사용·stale 409, publish·rollback 뒤 상태 보존)와 `CrowdingStateMigrationIntegrationTest` 5개(빈 V5, 행 있을 때 `FESTIVAL_ID` 필수, 다른 축제·날짜 불일치 중단, 일치 행 복사) 통과. `clean verify` 359개 통과 | 원격 DB에는 V16을 적용하지 않았다. |
 | 2026-09-18 | 티켓 계좌 흐름·last-four | `TicketGuideAccountFlowIntegrationTest` 2개(계좌 등록·변경·해제가 시각 변화 없이 다음 요청에 반영, 옛 ETag 200·새 ETag 304와 `private, no-cache`, 송금 마감 시 계좌 숨김·ETag 변경)와 last-four 불일치·형식 오류 거절 통과. `clean verify` 362개 통과 | 아래 완료 조건 대응표에 반영했다. |
+| 2026-09-18 | 디자인 정렬(지도 필터·푸드트럭 구역·부스 분류 6개) | V19·V20, `SpaceCategories`, 계약·목 서버 갱신. `clean verify` 371개, `npm run check` 325개 통과 | #40이 첫 커밋만 병합되어 필터 커밋을 다시 올렸다. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
 않고 원인과 후속 조치를 기록한다.
