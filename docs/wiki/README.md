@@ -34,6 +34,7 @@
 | 관리자·인증·공개 쓰기·저장·로그·업로드 | [보안](engineering/security.md) | 관리자·미디어 API |
 | 데이터 정리·보관 기간 enforcement | [데이터 정리](engineering/cleanup.md), [보안](engineering/security.md) | 실제 대상 추가 시 해당 schema·운영 runbook |
 | 콘텐츠·번역 게시·예약·revision | [게시](engineering/publishing.md), [운영](engineering/operations.md) | 관리자 콘텐츠 API |
+| 로컬 워크벤치로 catalog export·검증·비교·게시 | [로컬 카탈로그 워크벤치](engineering/catalog-workbench.md), [게시](engineering/publishing.md), [DB 읽기 전용 사전 점검](engineering/database-preflight.md) | role provisioning은 [계좌 운영 설정](engineering/operational-account-settings.md) |
 | 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md) | 변경 대상 runbook |
 | branch·worktree·동기화·push | [작업 절차](workflow/task.md), [브랜치](workflow/branches.md) | PR 규칙 |
 | 운영·카탈로그 장기 구현 이어받기 | [운영·카탈로그 구현 인수인계](workflow/ops-catalog-handoff.md) | 현재 미완료 단계와 검증 기록 |

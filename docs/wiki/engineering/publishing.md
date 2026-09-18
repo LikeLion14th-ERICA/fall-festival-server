@@ -7,7 +7,8 @@
 - 콘텐츠는 최소 `draft / scheduled / published / archived` 상태, revision, 작성자,
   승인·게시·수정 시각과 감사 이력을 갖는다.
 - 공개 서비스는 승인된 published revision만 읽는다. 개발자 전용 CLI가 HTTP 쓰기 API 없이
-  `import → validate → publish / rollback`을 수행한다. 입력은 schema 검증 가능한 완전 revision
+  `import → validate → publish / rollback`을 수행한다. 릴리스 운영자는 같은 서비스를 쓰는
+  [로컬 카탈로그 워크벤치](catalog-workbench.md)로 export·검증·비교·가져오기·게시를 할 수 있다. 입력은 schema 검증 가능한 완전 revision
   JSON이며 DB 비밀값·수령 인증 코드·원격 URL 다운로드를 포함하지 않는다. 자산은 사전 배포한
   참조만 허용한다.
 - import는 모든 입력 검증 뒤 한 transaction으로 새 draft만 삽입한다. validate는 실제 공개

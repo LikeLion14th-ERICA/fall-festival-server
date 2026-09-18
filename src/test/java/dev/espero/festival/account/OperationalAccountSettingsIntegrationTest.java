@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.flywaydb.core.Flyway;
@@ -303,6 +304,17 @@ class OperationalAccountSettingsIntegrationTest {
             assertPermissionDenied(connection, PUBLISH_ROLE,
                 "SELECT account_holder FROM ticket_guide_revisions");
             assertPermissionDenied(connection, EXPORT_ROLE, "SELECT count(*) FROM ticket_guide");
+
+            // Crowding and notices stay outside every catalog role.
+            for (String role : List.of(EXPORT_ROLE, PUBLISH_ROLE)) {
+                for (String table : List.of(
+                    "crowding_state", "crowding_state_dynamic", "notices", "notice_translations",
+                    "notice_links", "notice_link_translations"
+                )) {
+                    assertPermissionDenied(connection, role, "SELECT count(*) FROM " + table);
+                }
+            }
+            executeAs(connection, EXPORT_ROLE, "SELECT count(*) FROM festival_revisions");
         }
     }
 
@@ -394,6 +406,12 @@ class OperationalAccountSettingsIntegrationTest {
         try (Connection connection = connection(); Statement statement = connection.createStatement()) {
             for (String role : roles()) {
                 statement.execute("CREATE ROLE " + role + " NOLOGIN");
+            }
+            // A provider may grant the catalog roles the whole schema first;
+            // the script must still take the non-catalog tables away.
+            for (String role : List.of(EXPORT_ROLE, PUBLISH_ROLE)) {
+                statement.execute("GRANT USAGE ON SCHEMA public TO " + role);
+                statement.execute("GRANT SELECT ON ALL TABLES IN SCHEMA public TO " + role);
             }
             try {
                 ScriptUtils.executeSqlScript(connection, new ByteArrayResource(provisioningScript().getBytes(StandardCharsets.UTF_8)));
