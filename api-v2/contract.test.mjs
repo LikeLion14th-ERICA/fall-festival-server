@@ -76,14 +76,17 @@ test('Fictional fixtures provide dense, linked data for frontend list and detail
     assert.equal(day.filter(performance=>artistById.get(performance.artists[0].id).category==='ARTIST').length,5);
     assert.equal(day.filter(performance=>artistById.get(performance.artists[0].id).category==='CONTEST').length,3);
   }
-  assert.equal(state.spaces.length,30);
+  assert.equal(state.spaces.length,34);
   assert.equal(state.spaces.filter(space=>space.category==='BOOTH').length,12);
   assert.equal(state.spaces.filter(space=>space.category==='PUB').length,10);
   assert.equal(state.spaces.filter(space=>space.category==='FLEA_MARKET').length,8);
-  assert.equal(state.spaces.flatMap(space=>space.menu).length,50);
+  assert.equal(state.spaces.filter(space=>space.category==='FOOD_TRUCK').length,2);
+  assert.equal(state.spaces.filter(space=>space.category==='STUDENT_COUNCIL_BOOTH').length,1);
+  assert.equal(state.spaces.filter(space=>space.category==='PROMOTION_BOOTH').length,1);
+  assert.equal(state.spaces.flatMap(space=>space.menu).length,56);
   assert.equal(state.maps.length,7);
-  assert.equal(Object.values(state.pins).flat().length,48);
-  assert.equal(state.places.length,42);
+  assert.equal(Object.values(state.pins).flat().length,53);
+  assert.equal(state.places.length,47);
   assert.equal(state.notices.length,10);
 });
 
@@ -275,15 +278,15 @@ test('MapTarget is a canonical current PLACE pin and null means unlinked',async(
   assert.equal((await call('/api/v2/ticket-guide',{session,headers:{'X-Mock-Scenario':'unconfigured'}})).body.data.mapTarget,null);
   assert.equal((await call('/api/v2/spaces/space-booth',{session,headers:{'X-Mock-Scenario':'missing-optional'}})).body.data.mapTarget,null);
 });
-test('Map pin filters contain only current PLACE groups in stable order and AREA pins stay visible',async()=>{
-  const expectedOrder=['STUDENT_COUNCIL','EXPERIENCE','CONVENIENCE','FOOD_AND_BEVERAGE','PERFORMANCE'];
+test('Map pin filters follow the design chips in stable order and AREA pins stay visible',async()=>{
+  const expectedOrder=['RESTROOM','PHOTO_BOOTH','SMOKING_AREA','TRASH_BIN'];
   for(const map of (await call('/api/v2/maps')).body.data.items){
     const data=(await call(`/api/v2/maps/${map.id}/pins?mapVersion=${map.version}`)).body.data;
-    const placeGroups=data.items.filter(pin=>pin.target.kind==='PLACE').map(pin=>pin.filterGroup);
+    const placeGroups=data.items.filter(pin=>pin.target.kind==='PLACE'&&pin.filterGroup!==null).map(pin=>pin.filterGroup);
     const expected=[...new Set(placeGroups)].sort((a,b)=>expectedOrder.indexOf(a)-expectedOrder.indexOf(b));
     assert.deepEqual(data.filters.map(filter=>filter.id),expected);
     assert.ok(data.items.filter(pin=>pin.target.kind==='AREA').every(pin=>pin.filterGroup===null));
-    assert.ok(data.items.filter(pin=>pin.target.kind==='PLACE').every(pin=>pin.filterGroup!==null));
+    assert.ok(data.items.filter(pin=>pin.target.kind==='PLACE').every(pin=>pin.filterGroup===null||expectedOrder.includes(pin.filterGroup)));
     assert.ok(data.filters.every(filter=>expectedOrder.includes(filter.id)&&typeof filter.label==='string'&&filter.label.length>0));
   }
 });

@@ -5,21 +5,18 @@ export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
 const MOCK_STAMP_RECEIPT_CODE = 'MOCK-RECEIPT-CODE';
 const MAP_VERSION = 'mock-map-1';
-const PIN_FILTER_GROUP_ORDER = ['STUDENT_COUNCIL','EXPERIENCE','CONVENIENCE','FOOD_AND_BEVERAGE','PERFORMANCE'];
+// Design filter chips (docs/wiki/product/translations.md). Japanese labels are mock-only until approved.
+const PIN_FILTER_GROUP_ORDER = ['RESTROOM','PHOTO_BOOTH','SMOKING_AREA','TRASH_BIN'];
 const PIN_FILTER_GROUP_LABELS = {
-  ko:{STUDENT_COUNCIL:'총학생회 관련',EXPERIENCE:'체험',CONVENIENCE:'편의 시설',FOOD_AND_BEVERAGE:'F&B',PERFORMANCE:'공연'},
-  en:{STUDENT_COUNCIL:'Student Council',EXPERIENCE:'Experience',CONVENIENCE:'Convenience',FOOD_AND_BEVERAGE:'Food & Beverage',PERFORMANCE:'Performance'},
-  'zh-Hans':{STUDENT_COUNCIL:'学生会相关',EXPERIENCE:'体验',CONVENIENCE:'便利设施',FOOD_AND_BEVERAGE:'餐饮',PERFORMANCE:'演出'},
-  ja:{STUDENT_COUNCIL:'学生会関連',EXPERIENCE:'体験',CONVENIENCE:'便利施設',FOOD_AND_BEVERAGE:'飲食',PERFORMANCE:'公演'},
+  ko:{RESTROOM:'화장실',PHOTO_BOOTH:'포토부스',SMOKING_AREA:'흡연구역',TRASH_BIN:'쓰레기통'},
+  en:{RESTROOM:'Restrooms',PHOTO_BOOTH:'Photo Booth',SMOKING_AREA:'Smoking Area',TRASH_BIN:'Trash Bins'},
+  'zh-Hans':{RESTROOM:'洗手间',PHOTO_BOOTH:'拍照亭',SMOKING_AREA:'吸烟区',TRASH_BIN:'垃圾桶'},
+  ja:{RESTROOM:'トイレ',PHOTO_BOOTH:'フォトブース',SMOKING_AREA:'喫煙所',TRASH_BIN:'ゴミ箱'},
 };
+// Only facility pins that match a design chip carry a group; other PLACE pins appear under "all" only.
 const pinFilterGroup = (pin) => {
   if (pin.target.kind === 'AREA') return null;
-  return ({
-    booth:'EXPERIENCE',pub:'EXPERIENCE',market:'EXPERIENCE',
-    information:'STUDENT_COUNCIL',toilet:'CONVENIENCE',smoking:'CONVENIENCE',
-    stage:'PERFORMANCE',gate:'PERFORMANCE','student-zone':'PERFORMANCE','visitor-zone':'PERFORMANCE',
-    'food-truck':'FOOD_AND_BEVERAGE','photo-booth':'EXPERIENCE',ticket:'PERFORMANCE',
-  }[pin.category] || 'EXPERIENCE');
+  return ({toilet:'RESTROOM','photo-booth':'PHOTO_BOOTH',smoking:'SMOKING_AREA',trash:'TRASH_BIN'}[pin.category] || null);
 };
 const pinFilterLabel = (group,locale) => {
   const label=PIN_FILTER_GROUP_LABELS[locale]?.[group];
@@ -96,15 +93,17 @@ const performanceFixtures = DATES.flatMap((date,dayIndex) => {
   ];
 });
 
-const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market'};
+const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market',FOOD_TRUCK:'map-food',STUDENT_COUNCIL_BOOTH:'map-area',PROMOTION_BOOTH:'map-area'};
+const EVENT_CATEGORIES = new Set(['BOOTH','STUDENT_COUNCIL_BOOTH','PROMOTION_BOOTH']);
+const MENU_CATEGORIES = new Set(['PUB','FOOD_TRUCK']);
 const space = ({id,category,name,locationText,operator,hoursText,description,contact,experience,events,menu}) => {
   const key=id.replace(/^space-/,'');
   const mapId=mapForCategory[category];
   return {
     id,category,name,image:mockImage('space',id,name),locationText,operator,hoursText,description,contact,
-    experience:category==='BOOTH'?experience:null,
-    events:category==='BOOTH'?events:[],
-    menu:category==='PUB'?menu:[],
+    experience:EVENT_CATEGORIES.has(category)?experience:null,
+    events:EVENT_CATEGORIES.has(category)?events:[],
+    menu:MENU_CATEGORIES.has(category)?menu:[],
     mapTarget:{mapId,placeId:`place-${key}`,pinId:`pin-${key}`,mapVersion:MAP_VERSION},
   };
 };
@@ -137,9 +136,16 @@ const marketDefinitions = [
   ['market','목 필름마켓'],['market-02','목 레코드마켓'],['market-03','목 그래픽마켓'],['market-04','목 빈티지서랍'],
   ['market-05','목 작은책방'],['market-06','목 손편지상점'],['market-07','목 리빙마켓'],['market-08','목 주말공방'],
 ];
+const foodTruckDefinitions = [
+  ['food-truck','목 불맛트럭',[['목 불닭 타코',6000],['목 치즈 핫도그',4500],['목 레몬 에이드',3500]]],
+  ['food-truck-02','목 달콤트럭',[['목 크로플',5000],['목 츄러스',4000],['목 딸기 스무디',4500]]],
+];
 const spaceFixtures = [
   ...boothDefinitions.map(([key,name,experience,events],index)=>space({id:`space-${key}`,category:'BOOTH',name,locationText:`목 부스 구역 A-${String(index+1).padStart(2,'0')}`,operator:`목 개발 운영팀 ${String(index+1).padStart(2,'0')}`,hoursText:index===7?null:'개발용 15:00~22:00',description:`${name}의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.`,contact:index===4||index===9?null:link('개발용 문의',`mock-contact/${key}`),experience,events})),
   ...pubDefinitions.map(([key,name,theme],index)=>space({id:`space-${key}`,category:'PUB',name,locationText:`목 주점 구역 P-${String(index+1).padStart(2,'0')}`,operator:`목 개발 운영팀 P${String(index+1).padStart(2,'0')}`,hoursText:index===6?null:'개발용 17:00~23:00',description:`${name}의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.`,contact:index===3?null:link('개발용 문의',`mock-contact/${key}`),menu:pubMenu(theme,index)})),
+  ...foodTruckDefinitions.map(([key,name,items],index)=>space({id:`space-${key}`,category:'FOOD_TRUCK',name,locationText:`목 푸드트럭 구역 F-${String(index+1).padStart(2,'0')}`,operator:`목 개발 푸드트럭 ${String(index+1).padStart(2,'0')}`,hoursText:'개발용 12:00~24:00',description:`${name}의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.`,contact:null,menu:items.map(([name,price])=>({name,price:money(price)}))})),
+  space({id:'space-student-council',category:'STUDENT_COUNCIL_BOOTH',name:'목 총학생회 부스',locationText:'목 부스 구역 S-01',operator:'목 총학생회',hoursText:'개발용 12:00~21:00',description:'가상 총학생회 부스 안내입니다. 실제 운영 정보가 아닙니다.',contact:link('개발용 문의','mock-contact/student-council'),experience:'가상 축제 안내와 굿즈 수령 확인',events:['목 축제 퀴즈']}),
+  space({id:'space-promotion',category:'PROMOTION_BOOTH',name:'목 프로모션 부스',locationText:'목 부스 구역 R-01',operator:'목 협찬사',hoursText:'개발용 13:00~20:00',description:'가상 프로모션 부스 안내입니다. 실제 협찬 정보가 아닙니다.',contact:null,experience:'가상 제품 체험',events:['목 경품 추첨']}),
   ...marketDefinitions.map(([key,name],index)=>space({id:`space-${key}`,category:'FLEA_MARKET',name,locationText:`목 플리마켓 구역 M-${String(index+1).padStart(2,'0')}`,operator:index===5?null:`목 개발 셀러 ${String(index+1).padStart(2,'0')}`,hoursText:index===2?null:'개발용 14:00~21:00',description:`${name}의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.`,contact:index===1||index===6?null:link('개발용 문의',`mock-contact/${key}`)})),
 ];
 
@@ -175,12 +181,13 @@ export function createState() {
   for(const space of spaceFixtures){
     const mapId=space.mapTarget.mapId,index=mapIndexes[mapId]||0;
     mapIndexes[mapId]=index+1;
-    pins[mapId].push({id:space.mapTarget.pinId,category:{BOOTH:'booth',PUB:'pub',FLEA_MARKET:'market'}[space.category],label:space.name,...coordinate(index),target:{kind:'PLACE',placeId:space.mapTarget.placeId}});
+    pins[mapId].push({id:space.mapTarget.pinId,category:{BOOTH:'booth',PUB:'pub',FLEA_MARKET:'market',FOOD_TRUCK:'food-truck',STUDENT_COUNCIL_BOOTH:'student-council-booth',PROMOTION_BOOTH:'promotion-booth'}[space.category],label:space.name,...coordinate(index),target:{kind:'PLACE',placeId:space.mapTarget.placeId}});
   }
   const places=spaceFixtures.map(space=>({id:space.mapTarget.placeId,kind:'SPACE',name:space.name,locationText:space.locationText,hoursText:space.hoursText,description:space.description,usage:null,spaceId:space.id}));
   const landmarks = [
     {id:'place-toilet',mapId:'map-area',pinId:'pin-toilet',category:'toilet',label:'목 화장실',x:0.88,y:0.78,kind:'FACILITY',name:'목 화장실',locationText:'목 부스 구역 동쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-smoking',mapId:'map-area',pinId:'pin-smoking',category:'smoking',label:'목 흡연구역',x:0.08,y:0.78,kind:'FACILITY',name:'목 흡연구역',locationText:'목 부스 구역 서쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
+    {id:'place-trash',mapId:'map-area',pinId:'pin-trash',category:'trash',label:'목 쓰레기통',x:0.48,y:0.88,kind:'FACILITY',name:'목 쓰레기통',locationText:'목 부스 구역 남쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-information',mapId:'map-market',pinId:'pin-information',category:'information',label:'목 인포메이션',x:0.88,y:0.78,kind:'LANDMARK',name:'목 인포메이션',locationText:'목 플리마켓 구역 입구',hoursText:'개발용 14:00~21:00',description:'가상 안내 데스크입니다.',usage:'실제 안내소가 아닙니다.'},
     {id:'place-toilet-pub',mapId:'map-pub',pinId:'pin-toilet-pub',category:'toilet',label:'목 화장실',x:0.88,y:0.78,kind:'FACILITY',name:'목 화장실',locationText:'목 주점 구역 동쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-smoking-pub',mapId:'map-pub',pinId:'pin-smoking-pub',category:'smoking',label:'목 흡연구역',x:0.08,y:0.78,kind:'FACILITY',name:'목 흡연구역',locationText:'목 주점 구역 서쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
@@ -329,7 +336,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const m=find(state.maps,params.mapId);
       if(query.mapVersion!==m.version)failure(409,'MAP_VERSION_MISMATCH','지도 이미지 버전이 다릅니다.');
       const items=empty?[]:structuredClone(state.pins[m.id]).map(pin=>({...pin,filterGroup:pinFilterGroup(pin)}));
-      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE').map(pin=>pin.filterGroup))]
+      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE'&&pin.filterGroup).map(pin=>pin.filterGroup))]
         .sort((a,b)=>PIN_FILTER_GROUP_ORDER.indexOf(a)-PIN_FILTER_GROUP_ORDER.indexOf(b));
       data={mapId:m.id,mapVersion:m.version,filters:groups.map(id=>({id,label:pinFilterLabel(id,locale)})),items};
       break;

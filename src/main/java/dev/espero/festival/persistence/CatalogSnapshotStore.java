@@ -13,6 +13,7 @@ import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.domain.SpaceCategories;
 import dev.espero.festival.domain.StampGuide;
 import dev.espero.festival.domain.TicketGuideConfig;
 import dev.espero.festival.domain.PublishedFestivalContext;
@@ -47,11 +48,10 @@ public class CatalogSnapshotStore {
 
     public static final String PUBLIC_LOCALE = "ko";
     private static final Set<String> FILTER_GROUPS = Set.of(
-        "STUDENT_COUNCIL",
-        "EXPERIENCE",
-        "CONVENIENCE",
-        "FOOD_AND_BEVERAGE",
-        "PERFORMANCE"
+        "RESTROOM",
+        "PHOTO_BOOTH",
+        "SMOKING_AREA",
+        "TRASH_BIN"
     );
     private static final Pattern API_ID_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
 
@@ -397,10 +397,12 @@ public class CatalogSnapshotStore {
 
     private void verifySpaceContent(List<Space> spaces) {
         for (Space space : spaces) {
-            require(space.category().equals("BOOTH") || space.events().isEmpty(),
-                "Only BOOTH spaces can publish events.");
-            require(space.category().equals("PUB") || space.menu().isEmpty(),
-                "Only PUB spaces can publish menus.");
+            require(SpaceCategories.ALL.contains(space.category()),
+                "Published space has an unsupported category.");
+            require(SpaceCategories.WITH_EVENTS.contains(space.category()) || space.events().isEmpty(),
+                "Only booth-type spaces can publish events.");
+            require(SpaceCategories.WITH_MENU.contains(space.category()) || space.menu().isEmpty(),
+                "Only PUB and FOOD_TRUCK spaces can publish menus.");
         }
     }
 
@@ -422,22 +424,22 @@ public class CatalogSnapshotStore {
     }
 
     /**
-     * V10 is rolled out additively. A pre-V10 published revision has null for
-     * every filter group and remains readable; once a revision starts using
-     * the field, every PLACE pin must carry a supported group and its locale
-     * label. This prevents a partial new snapshot without breaking an
-     * already-running V8 catalog during the migration window.
+     * Only facility pins that match a design filter (restroom, photo booth,
+     * smoking area, trash bin) carry a filter group. Other PLACE pins have
+     * none and are shown only under the client's "all" filter. A group in use
+     * must have one Korean label.
      */
     private void verifyPinFilterGroups(Map<PinKey, List<Pin>> pins) {
         List<Pin> allPins = pins.values().stream().flatMap(List::stream).toList();
-        boolean configured = allPins.stream().anyMatch(pin -> pin.filterGroup() != null);
-        if (!configured) {
-            return;
-        }
         Map<String, String> labels = new HashMap<>();
         for (Pin pin : allPins) {
             if (pin.target().kind().equals("PLACE")) {
-                require(pin.filterGroup() != null && FILTER_GROUPS.contains(pin.filterGroup()),
+                if (pin.filterGroup() == null) {
+                    require(pin.filterGroupLabel() == null,
+                        "Published PLACE pin without a filter group must not have a filter label.");
+                    continue;
+                }
+                require(FILTER_GROUPS.contains(pin.filterGroup()),
                     "Published PLACE pin must have a supported filter group.");
                 require(pin.filterGroupLabel() != null && !pin.filterGroupLabel().isBlank(),
                     "Published PLACE pin filter group must have a Korean label.");

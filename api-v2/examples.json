@@ -4070,6 +4070,53 @@
                 }
               },
               {
+                "id": "space-food-truck-02",
+                "category": "FOOD_TRUCK",
+                "name": "목 달콤트럭",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-food-truck-02",
+                  "alt": "개발용 가상 space 목 달콤트럭 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 푸드트럭 구역 F-02",
+                "operator": "목 개발 푸드트럭 02",
+                "hoursText": "개발용 12:00~24:00",
+                "description": "목 달콤트럭의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.",
+                "contact": null,
+                "experience": null,
+                "events": [],
+                "menu": [
+                  {
+                    "name": "목 크로플",
+                    "price": {
+                      "amount": 5000,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 츄러스",
+                    "price": {
+                      "amount": 4000,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 딸기 스무디",
+                    "price": {
+                      "amount": 4500,
+                      "currency": "KRW"
+                    }
+                  }
+                ],
+                "mapTarget": {
+                  "mapId": "map-food",
+                  "placeId": "place-food-truck-02",
+                  "pinId": "pin-food-truck-02",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
                 "id": "space-booth-12",
                 "category": "BOOTH",
                 "name": "목 드로잉 살롱",
@@ -4363,6 +4410,53 @@
                   "mapId": "map-area",
                   "placeId": "place-booth",
                   "pinId": "pin-booth",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
+                "id": "space-food-truck",
+                "category": "FOOD_TRUCK",
+                "name": "목 불맛트럭",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-food-truck",
+                  "alt": "개발용 가상 space 목 불맛트럭 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 푸드트럭 구역 F-01",
+                "operator": "목 개발 푸드트럭 01",
+                "hoursText": "개발용 12:00~24:00",
+                "description": "목 불맛트럭의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.",
+                "contact": null,
+                "experience": null,
+                "events": [],
+                "menu": [
+                  {
+                    "name": "목 불닭 타코",
+                    "price": {
+                      "amount": 6000,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 치즈 핫도그",
+                    "price": {
+                      "amount": 4500,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 레몬 에이드",
+                    "price": {
+                      "amount": 3500,
+                      "currency": "KRW"
+                    }
+                  }
+                ],
+                "mapTarget": {
+                  "mapId": "map-food",
+                  "placeId": "place-food-truck",
+                  "pinId": "pin-food-truck",
                   "mapVersion": "mock-map-1"
                 }
               },
@@ -4767,6 +4861,37 @@
                 }
               },
               {
+                "id": "space-student-council",
+                "category": "STUDENT_COUNCIL_BOOTH",
+                "name": "목 총학생회 부스",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-student-council",
+                  "alt": "개발용 가상 space 목 총학생회 부스 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 부스 구역 S-01",
+                "operator": "목 총학생회",
+                "hoursText": "개발용 12:00~21:00",
+                "description": "가상 총학생회 부스 안내입니다. 실제 운영 정보가 아닙니다.",
+                "contact": {
+                  "label": "개발용 문의",
+                  "url": "https://example.invalid/mock-contact/student-council",
+                  "target": "_blank"
+                },
+                "experience": "가상 축제 안내와 굿즈 수령 확인",
+                "events": [
+                  "목 축제 퀴즈"
+                ],
+                "menu": [],
+                "mapTarget": {
+                  "mapId": "map-area",
+                  "placeId": "place-student-council",
+                  "pinId": "pin-student-council",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
                 "id": "space-booth-10",
                 "category": "BOOTH",
                 "name": "목 캠퍼스 라디오",
@@ -4915,6 +5040,33 @@
                   "mapId": "map-area",
                   "placeId": "place-booth-06",
                   "pinId": "pin-booth-06",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
+                "id": "space-promotion",
+                "category": "PROMOTION_BOOTH",
+                "name": "목 프로모션 부스",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-promotion",
+                  "alt": "개발용 가상 space 목 프로모션 부스 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 부스 구역 R-01",
+                "operator": "목 협찬사",
+                "hoursText": "개발용 13:00~20:00",
+                "description": "가상 프로모션 부스 안내입니다. 실제 협찬 정보가 아닙니다.",
+                "contact": null,
+                "experience": "가상 제품 체험",
+                "events": [
+                  "목 경품 추첨"
+                ],
+                "menu": [],
+                "mapTarget": {
+                  "mapId": "map-area",
+                  "placeId": "place-promotion",
+                  "pinId": "pin-promotion",
                   "mapVersion": "mock-map-1"
                 }
               },
@@ -5824,12 +5976,16 @@
             "mapVersion": "mock-map-1",
             "filters": [
               {
-                "id": "EXPERIENCE",
-                "label": "체험"
+                "id": "RESTROOM",
+                "label": "화장실"
               },
               {
-                "id": "CONVENIENCE",
-                "label": "편의 시설"
+                "id": "SMOKING_AREA",
+                "label": "흡연구역"
+              },
+              {
+                "id": "TRASH_BIN",
+                "label": "쓰레기통"
               }
             ],
             "items": [
@@ -5843,7 +5999,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-02",
@@ -5855,7 +6011,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-02"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-03",
@@ -5867,7 +6023,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-03"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-04",
@@ -5879,7 +6035,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-04"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-05",
@@ -5891,7 +6047,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-05"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-06",
@@ -5903,7 +6059,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-06"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-07",
@@ -5915,7 +6071,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-07"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-08",
@@ -5927,7 +6083,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-08"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-09",
@@ -5939,7 +6095,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-09"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-10",
@@ -5951,7 +6107,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-10"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-11",
@@ -5963,7 +6119,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-11"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-12",
@@ -5975,7 +6131,31 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-12"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
+              },
+              {
+                "id": "pin-student-council",
+                "category": "student-council-booth",
+                "label": "목 총학생회 부스",
+                "x": 0.14,
+                "y": 0.8700000000000001,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-student-council"
+                },
+                "filterGroup": null
+              },
+              {
+                "id": "pin-promotion",
+                "category": "promotion-booth",
+                "label": "목 프로모션 부스",
+                "x": 0.37,
+                "y": 0.8700000000000001,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-promotion"
+                },
+                "filterGroup": null
               },
               {
                 "id": "pin-toilet",
@@ -5987,7 +6167,7 @@
                   "kind": "PLACE",
                   "placeId": "place-toilet"
                 },
-                "filterGroup": "CONVENIENCE"
+                "filterGroup": "RESTROOM"
               },
               {
                 "id": "pin-smoking",
@@ -5999,7 +6179,19 @@
                   "kind": "PLACE",
                   "placeId": "place-smoking"
                 },
-                "filterGroup": "CONVENIENCE"
+                "filterGroup": "SMOKING_AREA"
+              },
+              {
+                "id": "pin-trash",
+                "category": "trash",
+                "label": "목 쓰레기통",
+                "x": 0.48,
+                "y": 0.88,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-trash"
+                },
+                "filterGroup": "TRASH_BIN"
               }
             ]
           },

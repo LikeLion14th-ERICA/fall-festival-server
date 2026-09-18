@@ -68,6 +68,24 @@ class CatalogControllerTest {
     }
 
     @Test
+    void acceptsEveryDesignCategoryAndRejectsAnUnknownOne() {
+        when(snapshots.required()).thenReturn(emptySnapshot());
+        for (String category : new String[] {
+            "ALL", "PUB", "BOOTH", "FLEA_MARKET", "FOOD_TRUCK", "STUDENT_COUNCIL_BOOTH", "PROMOTION_BOOTH"
+        }) {
+            HttpServletRequest request = request(Map.of("category", new String[] {category}));
+            when(request.getParameter("category")).thenReturn(category);
+            assertThat(controller.getSpaces(request).data().items()).as(category).isEmpty();
+        }
+        HttpServletRequest unknown = request(Map.of("category", new String[] {"STAGE"}));
+        when(unknown.getParameter("category")).thenReturn("STAGE");
+
+        assertThatThrownBy(() -> controller.getSpaces(unknown))
+            .isInstanceOf(ApiException.class)
+            .satisfies(exception -> assertThat(((ApiException) exception).code()).isEqualTo("INVALID_QUERY"));
+    }
+
+    @Test
     void rejectsUnknownAndDuplicateQueries() {
         when(snapshots.required()).thenReturn(emptySnapshot());
         HttpServletRequest unknown = request(Map.of("revision", new String[] {"3"}));
@@ -144,7 +162,7 @@ class CatalogControllerTest {
         );
         Place place = new Place("place-test", "SPACE", "테스트 부스", null, null, null, null, "space-test");
         Pin pin = new Pin(
-            "pin-test", "booth", "EXPERIENCE", "체험", "테스트 부스", new BigDecimal("0.5"), new BigDecimal("0.25"),
+            "pin-test", "booth", "PHOTO_BOOTH", "포토부스", "테스트 부스", new BigDecimal("0.5"), new BigDecimal("0.25"),
             new PinTarget("PLACE", "place-test")
         );
         return new CatalogSnapshot(
@@ -173,7 +191,7 @@ class CatalogControllerTest {
 
         assertThat(response.data().filters())
             .extracting(CatalogResponses.PinFilter::id, CatalogResponses.PinFilter::label)
-            .containsExactly(org.assertj.core.groups.Tuple.tuple("EXPERIENCE", "체험"));
+            .containsExactly(org.assertj.core.groups.Tuple.tuple("PHOTO_BOOTH", "포토부스"));
     }
 
     private HttpServletRequest request(Map<String, String[]> parameters) {
