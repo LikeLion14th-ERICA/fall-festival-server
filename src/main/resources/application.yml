@@ -31,6 +31,11 @@ server:
 
 festival:
   id: ${FESTIVAL_ID:}
+  # Per-client limits on /api/v2. trusted-proxy-hops is the number of proxies in
+  # front of the server that append X-Forwarded-For (0 = the socket address).
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    trusted-proxy-hops: ${RATE_LIMIT_TRUSTED_PROXY_HOPS:0}
   # Swagger UI at /docs for local and development servers. Keep it off in production.
   api-docs:
     enabled: ${API_DOCS_ENABLED:false}

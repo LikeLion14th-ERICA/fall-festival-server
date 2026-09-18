@@ -96,6 +96,8 @@ try {
         $serverInfo.EnvironmentVariables['SPRING_FLYWAY_LOCATIONS'] = "classpath:db/migration,filesystem:$fixtureDirectory"
         $serverInfo.EnvironmentVariables['ADMIN_JWT_SIGNING_SECRET'] = $adminSigningSecret
         $serverInfo.EnvironmentVariables['ADMIN_ALLOWED_ORIGIN'] = $adminAllowedOrigin
+        # Every virtual user shares one loopback address; this measures server capacity, not the per-client limit.
+        $serverInfo.EnvironmentVariables['RATE_LIMIT_ENABLED'] = 'false'
         $serverInfo.EnvironmentVariables['FESTIVAL_ID'] = $fixtureFestivalId
         $serverInfo.EnvironmentVariables['SERVER_PORT'] = "$port"
         $serverInfo.EnvironmentVariables['SERVER_ADDRESS'] = '127.0.0.1'
