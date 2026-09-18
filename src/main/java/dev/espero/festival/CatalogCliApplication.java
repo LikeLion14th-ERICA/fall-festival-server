@@ -4,6 +4,7 @@ import dev.espero.festival.context.FestivalProperties;
 import java.time.Clock;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.Profile;
 /** Non-web Spring entry point for the developer catalog workflow. */
 @Configuration(proxyBeanMethods = false)
 @Profile("catalog-cli")
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = FlywayAutoConfiguration.class)
 @EnableConfigurationProperties(FestivalProperties.class)
 @ComponentScan(basePackages = "dev.espero.festival.persistence")
 @Import({
@@ -32,6 +33,7 @@ public class CatalogCliApplication {
         try {
             context = new SpringApplicationBuilder(CatalogCliApplication.class)
                 .profiles("db", "catalog-cli")
+                .properties("spring.flyway.enabled=false")
                 .web(WebApplicationType.NONE)
                 .run(args);
             org.springframework.boot.SpringApplication.exit(context, () -> 0);

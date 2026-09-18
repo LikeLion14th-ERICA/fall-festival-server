@@ -23,6 +23,10 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 실행과 환경변수는 [루트 README](../../../README.md)를 따른다.
 초기 구성의 실제 결과와 미실행 항목은 [개발 준비 기록](../../backend-setup-verification.md)에 있다.
 
+원격 DB 조사에는 웹 앱·catalog CLI 대신 독립된 `DatabasePreflightApplication`을 사용한다.
+실행 명령, 읽기 전용 환경변수, 중단 판정과 로컬 PostgreSQL 검증 명령은
+[DB 사전 점검 runbook](../engineering/database-preflight.md)에 있다.
+
 ## 기존 실기기 검증 환경
 
 기존 실행 코드는 `test/frontend`의 Next.js 애플리케이션, `test/backend`의

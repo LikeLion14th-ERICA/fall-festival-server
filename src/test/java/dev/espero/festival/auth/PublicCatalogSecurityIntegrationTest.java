@@ -1,6 +1,7 @@
 package dev.espero.festival.auth;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,7 +36,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers(disabledWithoutDocker = true)
 class PublicCatalogSecurityIntegrationTest {
 
-    private static final String REQUEST_ID = "security-regression";
+    private static final String CLIENT_REQUEST_ID = "security-regression";
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -197,13 +198,13 @@ class PublicCatalogSecurityIntegrationTest {
     @Test
     void returnsAnApiEnvelopeForUnauthenticatedAdminRequests() throws Exception {
         mockMvc.perform(get("/api/v2/admin/security-regression")
-                .header("X-Request-Id", REQUEST_ID))
+                .header("X-Request-Id", CLIENT_REQUEST_ID))
             .andExpect(status().isUnauthorized())
             .andExpect(content().contentTypeCompatibleWith("application/json"))
             .andExpect(jsonPath("$.error.code", is("UNAUTHORIZED")))
-            .andExpect(jsonPath("$.meta.requestId", is(REQUEST_ID)))
+            .andExpect(jsonPath("$.meta.requestId", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.meta.revision", is(0)))
             .andExpect(jsonPath("$.meta", notNullValue()))
-            .andExpect(header().string("X-Request-Id", REQUEST_ID));
+            .andExpect(header().string("X-Request-Id", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")));
     }
 }

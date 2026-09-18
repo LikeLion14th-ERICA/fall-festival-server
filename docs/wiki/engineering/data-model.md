@@ -18,7 +18,8 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
   revision-scoped 공간·번역·locale별 정렬·장소·지도 자산/핀·대표 target 구조를, V10은 지도
   filter group을, V11은 revision-scoped guide·게시 CLI·카탈로그 감사 이력을, V12는
   운영 관리자 감사 이력을, V13은 revision-scoped 공연·출연진·번역·링크·대표곡·타임테이블
-  설정·반입 금지 안내의 물리 schema를 만든다. 승인된 운영 부스·지도·좌표·티켓존·공연 자료는
+  설정·반입 금지 안내의 물리 schema를 만들고, V14는 관리자 idempotency 기록, V15는 revision 밖
+  `TICKET`·`GOODS` 계좌 현재 설정과 trigger-owned immutable history를 만든다. 승인된 운영 부스·지도·좌표·티켓존·공연 자료는
   seed하지 않는다. 부스·지도 상세 물리 모델과 완료 기준은
   [부스·지도 공개 카탈로그](spaces-map-backend.md)를 따른다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
@@ -34,8 +35,9 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
   나머지 화면 연동의 운영 전환 범위는 계속 결정한다.
 - 공개 조회는 로그인 없이 유지한다. 관리자 쓰기는 username 로그인, 단일 `ADMIN`, 짧은 JWT와
   refresh cookie 회전·회수 모델로 서버에서 검증한다. 세부 RBAC는 현재 Product 범위가
-  아니다. 운영 관리자 감사 이력은 1년 보관하되 자동 retention enforcement는 후속 운영
-  작업으로 남긴다.
+  아니다. 운영 관리자 감사 이력은 1년 보관하며 cleanup target은 기본 dry-run·scheduler
+  비활성 상태에서 전용 datasource와 역할을 지정한 경우에만 삭제를 수행한다. 설정은
+  [데이터 정리](cleanup.md)를 따른다.
 - 이 문서의 하위 모델은 API·Product 문서를 구현 가능한 저장 구조로 해석한 **논리 후보**다.
   `Space`·`Place`·`Map`·`MapAssetVersion`·`MapPin`·`MapArea`·filter group·canonical map
   target과 revision-scoped ticket/stamp guide·catalog audit의 현재 물리 schema는 V8~V11에,
@@ -50,12 +52,12 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 
 | 영역 | 후보 모델 | 핵심 관계와 불변식 |
 |---|---|---|
-| 회차·게시·운영일 | `Festival`, `FestivalRevision`, `FestivalDay`, `CatalogRevisionAudit`, `CrowdingState` | Festival 1:N Revision, Revision 1:N 운영 콘텐츠, FestivalDay 1:0..1 CrowdingState. 공개 서비스는 정확히 하나의 `published` revision만 읽는다. 개발자 CLI는 complete draft만 import·validate·publish하며 archived revision을 새 revision으로 rollback한다. 혼잡도는 revision 밖의 운영 상태이고, 운영 시간 밖 저장을 허용하며 KST 자정에 전날 값을 이월하지 않는다. 같은 상태 저장은 수정 시각을 바꾸지 않는다. |
+| 회차·게시·운영일 | `Festival`, `FestivalRevision`, `FestivalDay`, `CatalogRevisionAudit`, `CrowdingState` | Festival 1:N Revision, Revision 1:N 운영 콘텐츠. 공개 혼잡도 일정은 정확히 하나의 `published` revision의 FestivalDay에서 읽고, 운영자 상태는 revision과 독립된 `(festival_id, operating_date)` `crowding_state_dynamic`에 둔다. V5 `crowding_state`는 호환 이력으로 보존한다. 운영 시간 밖 저장을 허용하며 KST 자정에 전날 값을 이월하지 않는다. 같은 상태 저장은 수정 시각을 바꾸지 않는다. |
 | 공지 | `Notice`, `NoticeTranslation`, `NoticeLink`, `NoticeTemplate`, `NoticeTemplateTranslation` | Notice 1:N Translation/Link. `(notice_id, locale)`은 고유하며 한국어는 READY·본문 필수다. 외국어 READY/PENDING/FAILED와 사용자 노출은 분리한다. 공지의 물리 삭제·soft delete·보존 기간은 아직 결정하지 않았다. |
-| 굿즈 | `Goods`, `GoodsImage`, `GoodsColor`, `GoodsSize`, `GoodsOption`, `PaymentGuide`, `BankAccount` | 실제 제공 조합만 `GoodsOption`으로 만든다. `(goods_id, color_id, size_id)`는 고유하고 `availability`는 `ON_SALE` 또는 `SOLD_OUT`이며 `updated_at`을 남긴다. 신규 상품·조합은 `ON_SALE`로 시작한다. 색상·사이즈·조합 삭제 시 그 상태를 제거하고 남은 조합 상태를 보존한다. `allSoldOut`은 실제 조합이 하나 이상이고 모두 품절일 때의 파생값이다. 수량, 자동 품절, 입금 확인, 지급 완료는 저장하지 않는다. |
+| 굿즈 | `Goods`, `GoodsImage`, `GoodsColor`, `GoodsSize`, `GoodsOption`, `PaymentGuide`, `OperationalAccountSetting` | 실제 제공 조합만 `GoodsOption`으로 만든다. `(goods_id, color_id, size_id)`는 고유하고 `availability`는 `ON_SALE` 또는 `SOLD_OUT`이며 `updated_at`을 남긴다. 신규 상품·조합은 `ON_SALE`로 시작한다. 색상·사이즈·조합 삭제 시 그 상태를 제거하고 남은 조합 상태를 보존한다. `allSoldOut`은 실제 조합이 하나 이상이고 모두 품절일 때의 파생값이다. 수량, 자동 품절, 입금 확인, 지급 완료는 저장하지 않는다. `GOODS` 계좌 현재값은 catalog revision과 분리한다. |
 | 공연 | `Artist`, `ArtistTranslation`, `ArtistLink`, `ArtistLinkTranslation`, `ArtistSong`, `ArtistSongTranslation`, `Performance`, `PerformanceTranslation`, `PerformanceArtist`, `TimetableConfig`, `ProhibitedItem`, `ProhibitedItemTranslation`, `ProhibitedMessage` | V13 물리 schema다. Artist와 Performance는 revision-scoped 복합 키를 사용하고 `PerformanceArtist` N:M 관계로 여러 출연진과 공연별 표시 순서를 표현한다. Performance는 `(festival_revision_id, festival_date)` 복합 FK로 같은 revision의 FestivalDay에 속한다. 번역·링크·대표곡과 반입 금지 항목/문구는 별도 테이블이며 locale fallback을 저장 구조에서 만들지 않는다. 타임테이블 축은 revision별 설정이고 FestivalDay 운영 시간과 분리한다. 단일 무대만 사용하므로 `Stage` aggregate와 stage field는 없으며 운영 seed도 없다. |
 | 부스·지도 | `Space`, `SpaceEvent`, `SpaceMenu`, `Place`, `Map`, `MapAssetVersion`, `MapPin`, `MapArea`, `MapPinFilterGroupTranslation` | Space는 선택적으로 Place에 연결한다. MapAssetVersion 1:N MapPin으로 이미지와 좌표의 버전을 묶는다. MapPin은 `place_id` 또는 `area_id` 중 정확히 하나만 가진다. `PLACE` 핀은 대분류 filter group 하나, `AREA` 핀은 null이며 항상 노출한다. Place의 종류와 핀 target 종류를 같은 enum으로 합치지 않는다. |
-| 안내 설정 | `TicketGuideRevision`, `StampGuideRevision`, `StampReward`, `FestivalLink`, `BankAccount` | 축제 revision에 귀속한 안내 콘텐츠만 snapshot으로 읽는다. 티켓 수령 부스와 외부인 티켓존은 한 Place로 모델링한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 수령 인증 코드는 서버 비밀 설정에서만 검증하고 콘텐츠·사용자 이력 모델로 저장하지 않는다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
+| 안내 설정 | `TicketGuideRevision`, `StampGuideRevision`, `StampReward`, `FestivalLink`, `OperationalAccountSetting`, `OperationalAccountSettingHistory` | 축제 revision에 귀속한 안내 콘텐츠만 snapshot으로 읽는다. `TICKET` 계좌 현재값과 immutable history는 revision 밖의 운영 설정이며 catalog export/publish는 읽지 않는다. 티켓 수령 부스와 외부인 티켓존은 한 Place로 모델링한다. 티켓 주문·입금·팔찌 지급, 스탬프 참여 누적·중복 차단·상품 재고는 현재 제품 범위가 아니다. 수령 인증 코드는 서버 비밀 설정에서만 검증하고 콘텐츠·사용자 이력 모델로 저장하지 않는다. 공식 채널·웰컴 데이는 검증된 외부 HTTPS 링크만 둔다. |
 
 관리자 쓰기는 서버 권한 검증과 감사 이력이 필요하며 현재 관리자 인증은 구현되어 있다.
 `CatalogRevisionAudit`는 개발자 CLI의 revision lifecycle을 actor 문자열로 기록하고,

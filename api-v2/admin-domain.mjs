@@ -2,6 +2,7 @@ const NOTICE_TRANSLATION_LOCALES=['ko','en','zh-Hans','ja'];
 
 export function initializeAdmin(state){
   state.languages=['ko'];state.translationLocales=NOTICE_TRANSLATION_LOCALES;state.inventory={};
+  state.idempotency??={};
   for(const g of state.goods){
     g.images=[g.image];g.colors=g.colorImages.map(c=>({id:c.colorId,name:c.colorName,images:[c.image]}));
     g.options=[{colorId:'color-a',sizeId:'size-m'},{colorId:'color-a',sizeId:'size-l'},{colorId:'color-b',sizeId:'size-m'}];
@@ -10,7 +11,11 @@ export function initializeAdmin(state){
   for(const n of state.notices)delete n.image;
   return state;
 }
-export function hoursFor(state,operatingDay){return {operatingDay,opensAt:'13:00',closesAt:'22:00'};}
+export function hoursFor(state,operatingDay){
+  const day=state.festivalDays?.find(item=>item.operatingDay===operatingDay);
+  if(!day)throw new Error(`Missing mock FestivalDay for ${operatingDay}`);
+  return day;
+}
 export function inventoryFor(state,goodsId,{admin=false,sold=false,failure}={}){
   const g=state.goods.find(g=>g.id===goodsId);if(!g)failure(404,'NOT_FOUND','상품이 없습니다.');
   const stock=state.inventory[goodsId];

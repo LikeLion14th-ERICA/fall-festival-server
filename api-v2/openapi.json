@@ -624,6 +624,16 @@
               "default": "ko"
             },
             "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
           }
         ],
         "responses": {
@@ -635,12 +645,19 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CrowdingResponse"
+                  "$ref": "#/components/schemas/CrowdingConditionalResponse"
                 },
                 "examples": {
                   "normal": {
@@ -659,8 +676,6 @@
                         "timeBasis": "OPERATOR"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -685,8 +700,6 @@
                         "timeBasis": "NONE"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-09-30T10:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -711,8 +724,6 @@
                         "timeBasis": "NONE"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -737,8 +748,6 @@
                         "timeBasis": "OPENING"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -748,6 +757,17 @@
                     }
                   }
                 }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
               }
             }
           },
@@ -949,6 +969,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "unconfigured": {
+                    "summary": "홈 재학생존 혼잡도: unconfigured",
+                    "value": {
+                      "error": {
+                        "code": "CROWDING_SCHEDULE_UNCONFIGURED",
+                        "message": "재학생존 운영 일정이 아직 등록되지 않았습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "error": {
                     "summary": "홈 재학생존 혼잡도: error",
                     "value": {
@@ -983,10 +1023,12 @@
           "before-open",
           "closed",
           "unmodified",
+          "unconfigured",
           "error",
           "bad-request",
           "rate-limited"
-        ]
+        ],
+        "x-conditional": true
       }
     },
     "/api/v2/notices": {
@@ -10958,7 +11000,18 @@
             "AdminBearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
+          }
+        ],
         "responses": {
           "200": {
             "description": "성공",
@@ -10968,12 +11021,19 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CrowdingResponse"
+                  "$ref": "#/components/schemas/CrowdingConditionalResponse"
                 },
                 "examples": {
                   "normal": {
@@ -10992,8 +11052,6 @@
                         "timeBasis": "OPERATOR"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -11018,8 +11076,6 @@
                         "timeBasis": "NONE"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-09-30T10:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -11044,8 +11100,6 @@
                         "timeBasis": "NONE"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -11070,8 +11124,6 @@
                         "timeBasis": "OPENING"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -11081,6 +11133,17 @@
                     }
                   }
                 }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
               }
             }
           },
@@ -11343,6 +11406,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "unconfigured": {
+                    "summary": "관리자 혼잡도: unconfigured",
+                    "value": {
+                      "error": {
+                        "code": "CROWDING_SCHEDULE_UNCONFIGURED",
+                        "message": "재학생존 운영 일정이 아직 등록되지 않았습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "error": {
                     "summary": "관리자 혼잡도: error",
                     "value": {
@@ -11377,12 +11460,14 @@
           "before-open",
           "closed",
           "unmodified",
+          "unconfigured",
           "error",
           "bad-request",
           "rate-limited",
           "unauthorized",
           "forbidden"
-        ]
+        ],
+        "x-conditional": true
       },
       "put": {
         "operationId": "putAdminCrowding",
@@ -11396,9 +11481,32 @@
             "AdminBearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "현재 표현의 strong ETag. 누락 시 428, 불일치 시 409."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
+          }
+        ],
         "responses": {
-          "200": {
+          "204": {
             "description": "성공",
             "headers": {
               "X-Request-Id": {
@@ -11406,67 +11514,6 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CrowdingResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: normal",
-                    "value": {
-                      "data": {
-                        "operatingDay": "2030-10-01",
-                        "opensAt": "2030-10-01T13:00:00+09:00",
-                        "closesAt": "2030-10-01T22:00:00+09:00",
-                        "operatingStatus": "OPEN",
-                        "status": "CROWDED",
-                        "savedLevel": "CROWDED",
-                        "colorToken": "red",
-                        "message": "재학생존이 많이 혼잡해요.",
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00",
-                        "timeBasis": "OPERATOR"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "full": {
-                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: full",
-                    "value": {
-                      "data": {
-                        "operatingDay": "2030-10-01",
-                        "opensAt": "2030-10-01T13:00:00+09:00",
-                        "closesAt": "2030-10-01T22:00:00+09:00",
-                        "operatingStatus": "OPEN",
-                        "status": "FULL",
-                        "savedLevel": "FULL",
-                        "colorToken": "black",
-                        "message": "재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.",
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00",
-                        "timeBasis": "OPERATOR"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
               }
             }
           },
@@ -11643,7 +11690,48 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "not-festival-day": {
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: not-festival-day",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FESTIVAL_DAY",
+                        "message": "현재 날짜는 축제 운영일이 아닙니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "edit-conflict": {
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: edit-conflict",
+                    "value": {
+                      "error": {
+                        "code": "EDIT_CONFLICT",
+                        "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -11701,6 +11789,46 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {}
+              }
+            }
+          },
+          "428": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "precondition-required": {
+                    "summary": "혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지: precondition-required",
+                    "value": {
+                      "error": {
+                        "code": "PRECONDITION_REQUIRED",
+                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -11819,6 +11947,9 @@
           "normal",
           "full",
           "error",
+          "precondition-required",
+          "not-festival-day",
+          "edit-conflict",
           "bad-request",
           "rate-limited",
           "unauthorized",
@@ -20952,6 +21083,52 @@
         "additionalProperties": false,
         "description": ""
       },
+      "ConditionalMeta": {
+        "type": "object",
+        "properties": {
+          "timezone": {
+            "type": "string",
+            "enum": [
+              "Asia/Seoul"
+            ],
+            "description": "축제 시간대"
+          },
+          "festivalId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "혼잡도는 revision-independent라 항상 0."
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "ko",
+              "en",
+              "zh-Hans",
+              "ja"
+            ],
+            "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음."
+          },
+          "mock": {
+            "type": "boolean",
+            "description": "목 서버는 항상 true. 운영 데이터와 구분."
+          }
+        },
+        "required": [
+          "timezone",
+          "festivalId",
+          "revision",
+          "locale",
+          "mock"
+        ],
+        "additionalProperties": false,
+        "description": "조건부 응답의 안정 메타. requestId와 serverTime은 응답 헤더로 제공한다."
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -21355,6 +21532,15 @@
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
           },
+          "operatingStatus": {
+            "type": "string",
+            "enum": [
+              "BEFORE_OPEN",
+              "OPEN",
+              "CLOSED"
+            ],
+            "description": "게시된 FestivalDay 운영 일정으로 계산한 실제 운영 상태"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -21365,7 +21551,7 @@
               "FULL",
               "CLOSED"
             ],
-            "description": "운영 시간과 마지막 저장 상태를 결합한 최종 상태"
+            "description": "운영 시간과 마지막 저장 상태를 결합한 최종 표시 상태"
           },
           "savedLevel": {
             "anyOf": [
@@ -21431,28 +21617,19 @@
               "OPERATOR"
             ],
             "description": "시각 숨김 / 운영 시작 기준 / 관리자 수정시각"
-          },
-          "operatingStatus": {
-            "type": "string",
-            "enum": [
-              "BEFORE_OPEN",
-              "OPEN",
-              "CLOSED"
-            ],
-            "description": "개발자 등록 일정 기준. 관리자 운영 시간 편집 없음."
           }
         },
         "required": [
           "operatingDay",
           "opensAt",
           "closesAt",
+          "operatingStatus",
           "status",
           "savedLevel",
           "colorToken",
           "message",
           "updatedAt",
-          "timeBasis",
-          "operatingStatus"
+          "timeBasis"
         ],
         "additionalProperties": false,
         "description": ""
@@ -23717,14 +23894,14 @@
         "additionalProperties": false,
         "description": ""
       },
-      "CrowdingResponse": {
+      "CrowdingConditionalResponse": {
         "type": "object",
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Crowding"
           },
           "meta": {
-            "$ref": "#/components/schemas/Meta"
+            "$ref": "#/components/schemas/ConditionalMeta"
           }
         },
         "required": [
@@ -24062,6 +24239,23 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/StampReceiptVerification"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "CrowdingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Crowding"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

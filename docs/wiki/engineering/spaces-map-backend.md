@@ -119,9 +119,10 @@ revision을 새 증가 번호의 draft로 복사한 뒤 같은 validate·publish
 `/spaces`의 `category`는 `ALL | BOOTH | PUB | FLEA_MARKET`만 받고 알 수 없거나 중복된
 query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 유지한다.
 
-응답 meta에는 snapshot의 실제 festival ID와 revision을 넣는다. `X-Request-Id`는 길이와
-문자 집합을 검증한 값만 반사하고, 나머지는 새 UUID로 바꾼 뒤 응답 헤더와 body meta에
-같은 값을 쓴다.
+응답 meta에는 snapshot의 실제 festival ID와 revision을 넣는다. `X-Request-Id`는
+클라이언트 값을 반사하지 않고 서버가 요청마다 UUID로 만든다. conditional response를 쓰는
+경로는 request ID와 server time을 `X-Request-Id`, `X-Server-Time` 헤더에만 두고, 안정
+본문 전체의 SHA-256 strong ETag를 `ETag`로 보낸다.
 
 ## 위험과 대응
 
@@ -130,7 +131,7 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 | 부분 게시로 이미지와 핀 좌표가 어긋남 | 현재 version FK, 복합 target FK, 시작 시 snapshot 검증, version mismatch 409을 함께 쓴다. CLI import·publish는 전체 revision transaction이라 부분 콘텐츠를 publish하지 않는다. |
 | 다른 회차/미게시 자료 노출 | 모든 카탈로그 query를 published revision으로 제한하고 cross-revision FK를 둔다. |
 | 번역을 한국어로 조용히 대체 | fallback하지 않는다. 알려졌지만 미준비 locale은 `LOCALE_NOT_READY`, 알 수 없는 locale은 `INVALID_QUERY`다. 필수 한국어 행 누락은 snapshot 실패다. |
-| 잘못된 request ID 반사 | 형식·길이 제한과 서버 생성 fallback으로 header injection·로그 오염을 막는다. |
+| 잘못된 request ID 반사 | 클라이언트 request ID를 쓰지 않고 서버가 생성한 UUID만 응답·감사에 사용해 header injection·로그 오염을 막는다. |
 | 작은 데이터에 과도한 캐시·전파 구조 | 초기 전체 자료를 메모리에 올리고 재시작 반영을 사용한다. 다중 인스턴스/실제 CDN 전에는 Outbox·purge를 만들지 않는다. |
 | 피크 트래픽 | 카탈로그 조회는 DB 왕복 없이 immutable snapshot을 읽는다. 동적 홈·공지·굿즈 상태는 화면이 보이는 동안 15초 polling으로 조회한다. 초기 기준은 동시 500명, 약 67 RPS와 그 1·2·5배에서 p95·오류율·heap·GC를 기록하고 실제 예상치가 나오면 갱신한다. |
 

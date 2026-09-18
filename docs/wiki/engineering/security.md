@@ -47,9 +47,24 @@
 - 관리자 감사 이력은 append-only이고 해당 운영 데이터 변경과 같은 DB transaction에서
   기록한다. 감사 저장이 실패하면 운영 데이터 변경도 rollback하고, 운영 변경이
   rollback되면 감사 이력도 남기지 않는다.
-- `AdminAuditEvent`는 1년간 보관한다. V12는 보관 정책만 확정하며 자동 삭제·archive·
-  scheduler를 구현하지 않는다. 실제 retention enforcement는 별도 운영 작업으로 처리한다.
+- `AdminAuditEvent`는 1년간 보관한다. cleanup framework의 audit target은 기본 dry-run·
+  scheduler 비활성 상태이며, 전용 cleanup datasource와 역할을 별도로 지정한 경우에만
+  파괴적 scheduler를 활성화한다. 운영 설정과 결과 형식은 [데이터 정리](cleanup.md)를 따른다.
 - 감사 event에는 비밀번호, access/refresh token, cookie, Authorization header, request/response
   body, IP, User-Agent, 원문 개인정보, 예외·SQL message와 임의 metadata를 저장하지 않는다.
 - login·refresh·logout·인증 실패 감사는 현재 `AdminAuditEvent` 범위가 아니며 후속
   auth lifecycle 작업에서 다룬다.
+
+## 계좌 운영 설정 이력
+
+- 계좌 현재값과 append-only `OperationalAccountSettingHistory`는 `AdminAuditEvent`와
+  `CatalogRevisionAudit`와 별도 보안 경계다. account operator CLI의 변경은 DB trigger가
+  current 값 변경과 같은 transaction에서 이력을 만들고, trigger가 실제 login role인
+  `session_user`를 기록한다.
+- 은행명·계좌번호·예금주·송금 링크 원문은 계좌 table과 제한된 history에만 둔다. 관리자
+  감사·catalog audit·application log·metric·CLI output에는 purpose, version, 시각과 끝 네
+  자리 외의 원문을 넣지 않는다.
+- runtime은 current 설정을 SELECT만 할 수 있고, account operator·cleanup·catalog
+  export/publish role을 분리한다. history UPDATE/DELETE는 cleanup role 외에 grant하지
+  않으며, DB owner/superuser의 break-glass 접근은 별도로 기록한다. 자세한 role provisioning과
+  one-person CLI 위험은 [계좌 운영 설정](operational-account-settings.md)을 따른다.

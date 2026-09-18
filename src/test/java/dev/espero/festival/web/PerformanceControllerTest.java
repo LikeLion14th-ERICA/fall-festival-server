@@ -2,6 +2,7 @@ package dev.espero.festival.web;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -81,7 +82,7 @@ class PerformanceControllerTest {
 
         mvc.perform(get("/api/v2/lineup").header("X-Request-Id", "lineup-request"))
             .andExpect(status().isOk())
-            .andExpect(header().string("X-Request-Id", "lineup-request"))
+            .andExpect(header().string("X-Request-Id", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.data.date", is("2030-10-02")))
             .andExpect(jsonPath("$.data.category", is("ARTIST")))
             .andExpect(jsonPath("$.data.items", hasSize(2)))
@@ -89,7 +90,7 @@ class PerformanceControllerTest {
             .andExpect(jsonPath("$.data.items[0].order", is(1)))
             .andExpect(jsonPath("$.data.items[1].performanceId", is("performance-b")))
             .andExpect(jsonPath("$.data.items[1].order", is(2)))
-            .andExpect(jsonPath("$.meta.requestId", is("lineup-request")))
+            .andExpect(jsonPath("$.meta.requestId", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.meta.timezone", is("Asia/Seoul")))
             .andExpect(jsonPath("$.meta.revision", is(7)))
             .andExpect(jsonPath("$.meta.locale", is("ko")))
@@ -155,14 +156,14 @@ class PerformanceControllerTest {
 
         mvc.perform(get("/api/v2/artists/artist-a").header("X-Request-Id", "artist-request"))
             .andExpect(status().isOk())
-            .andExpect(header().string("X-Request-Id", "artist-request"))
+            .andExpect(header().string("X-Request-Id", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.data.id", is("artist-a")))
             .andExpect(jsonPath("$.data.introduction").value(org.hamcrest.Matchers.nullValue()))
             .andExpect(jsonPath("$.data.socialLinks").isEmpty())
             .andExpect(jsonPath("$.data.songs").isEmpty())
             .andExpect(jsonPath("$.data.performances[0].startsAt", is("2030-10-01T18:20:00.123+09:00")))
             .andExpect(jsonPath("$.data.performances[0].endsAt", is("2030-10-01T18:50:00.987+09:00")))
-            .andExpect(jsonPath("$.meta.requestId", is("artist-request")))
+            .andExpect(jsonPath("$.meta.requestId", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.meta.revision", is(7)));
 
         verify(snapshots, times(1)).required();
@@ -259,7 +260,7 @@ class PerformanceControllerTest {
 
         mvc.perform(get("/api/v2/timetable").header("X-Request-Id", "timetable-request"))
             .andExpect(status().isOk())
-            .andExpect(header().string("X-Request-Id", "timetable-request"))
+            .andExpect(header().string("X-Request-Id", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.data.dates", hasSize(3)))
             .andExpect(jsonPath("$.data.axis.startTime", is("16:30")))
             .andExpect(jsonPath("$.data.axis.endTime", is("23:30")))
@@ -268,7 +269,7 @@ class PerformanceControllerTest {
             .andExpect(jsonPath("$.data.items[0].startsAt", is("2030-10-01T18:20:00.123+09:00")))
             .andExpect(jsonPath("$.data.items[0].endsAt", is("2030-10-02T00:30:00.987+09:00")))
             .andExpect(jsonPath("$.data.items[0].description").value(org.hamcrest.Matchers.nullValue()))
-            .andExpect(jsonPath("$.meta.requestId", is("timetable-request")))
+            .andExpect(jsonPath("$.meta.requestId", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.meta.revision", is(7)));
 
         verify(snapshots, times(1)).required();
@@ -312,7 +313,7 @@ class PerformanceControllerTest {
 
         mvc.perform(get("/api/v2/performances/performance-a").header("X-Request-Id", "performance-request"))
             .andExpect(status().isOk())
-            .andExpect(header().string("X-Request-Id", "performance-request"))
+            .andExpect(header().string("X-Request-Id", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.data.id", is("performance-a")))
             .andExpect(jsonPath("$.data.artists").isEmpty())
             .andExpect(jsonPath("$.data.description").value(org.hamcrest.Matchers.nullValue()))
@@ -345,7 +346,7 @@ class PerformanceControllerTest {
 
         mvc.perform(get("/api/v2/prohibited-items").header("X-Request-Id", "prohibited-request"))
             .andExpect(status().isOk())
-            .andExpect(header().string("X-Request-Id", "prohibited-request"))
+            .andExpect(header().string("X-Request-Id", matchesPattern("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")))
             .andExpect(jsonPath("$.data.items", hasSize(2)))
             .andExpect(jsonPath("$.data.message", is("안내 문구")))
             .andExpect(jsonPath("$.meta.revision", is(7)));

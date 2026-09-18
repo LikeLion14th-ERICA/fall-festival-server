@@ -33,7 +33,7 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 
 기본 경로는 `/api/v2`입니다. 공개 GET 요청은 인증이 없습니다. `/admin/` 요청은 서버에서 관리자 권한을 확인합니다. 목의 고정 토큰은 실제 인증 규격이 아닙니다. API v2가 제품의 유일한 계약이며, 실제 Spring Boot 적용 범위는 경로별 구현 상태와 함께 관리합니다.
 
-성공은 `{ data, meta }`, 오류는 `{ error, meta }`입니다. `meta`는 `requestId`, `serverTime`, `timezone`, `festivalId`, `revision`, `locale`, `mock`을 포함합니다. `X-Request-Id`도 같은 요청 ID입니다. 특정 published `FestivalRevision`에 귀속된 콘텐츠의 `revision`은 실제 `FestivalRevision.revision_number`인 1 이상입니다. 인증·시스템·오류와 같이 특정 published revision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용합니다. 혼잡도는 실제 FestivalDay 연결 전까지 0을 사용하는 임시 예외이며, 스탬프·티켓 안내는 해당 revision ID로 조회하므로 1 이상을 사용합니다. 오류 `code`로 분기하고 `message`는 진단에 사용합니다. 화면 문구는 프런트 번역에서 선택합니다.
+성공은 `{ data, meta }`, 오류는 `{ error, meta }`입니다. 일반 `meta`는 `requestId`, `serverTime`, `timezone`, `festivalId`, `revision`, `locale`, `mock`을 포함합니다. `X-Request-Id`도 같은 요청 ID입니다. 특정 published `FestivalRevision`에 귀속된 콘텐츠의 `revision`은 실제 `FestivalRevision.revision_number`인 1 이상입니다. 인증·시스템·오류와 같이 특정 published revision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용합니다. 혼잡도는 published FestivalDay 일정과 revision-independent 상태를 조합하므로 `revision: 0`을 사용하며, 조건부 성공 응답은 ETag 안정성을 위해 `requestId`·`serverTime`을 본문 meta에서 제외하고 응답 헤더로 제공합니다. 스탬프·티켓 안내는 해당 revision ID로 조회하므로 1 이상을 사용합니다. 오류 `code`로 분기하고 `message`는 진단에 사용합니다. 화면 문구는 프런트 번역에서 선택합니다.
 
 ```json
 {
@@ -62,7 +62,7 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 | 언어 | `locale` 쿼리, 생략 시 `ko`. 현재 공개 언어는 `ko`뿐이다. `config.languages`에 준비된 언어만 사용하며, 알려졌지만 준비되지 않은 언어는 `LOCALE_NOT_READY`, 알 수 없는 값은 `INVALID_QUERY`다. 공지·카탈로그 모두 한국어로 대신 노출하지 않는다. `all-languages`는 프런트 검증용 목 세션 제어값이다. |
 | 이미지·링크 | 이미지 URL은 절대 또는 origin 기준 상대 경로. 상대 경로는 API origin으로 해석. 외부 링크는 HTTPS·새 탭. 목 자산은 개발용 SVG이며 외부 예제 주소는 연결 불가 |
 | 목록 | 화면에서 필요한 전체 목록, 별도 pagination 없음. 정렬은 개별 스키마 설명에 명시. 부스 즐겨찾기 정렬은 브라우저 책임 |
-| 캐시·버전 | 목은 `Cache-Control: no-store`. `revision` 1 이상은 응답 데이터가 실제로 귀속된 published FestivalRevision 번호이며 응답 완료 순서가 아님. `0`은 특정 published FestivalRevision에 안전하게 귀속되지 않음을 뜻함. 혼잡도는 FestivalDay 연결 전까지 0. 실제 캐시·배포 환경 계약은 추가 합의 필요 |
+| 캐시·버전 | 목은 `Cache-Control: no-store`. `revision` 1 이상은 응답 데이터가 실제로 귀속된 published FestivalRevision 번호이며 응답 완료 순서가 아님. `0`은 특정 published FestivalRevision에 안전하게 귀속되지 않음을 뜻함. 혼잡도는 published FestivalDay 일정과 `(festival_id, operating_date)` 상태를 사용해 항상 0이며 `ETag`·`If-None-Match`로 304를 지원함 |
 
 | HTTP | 의미 |
 |---|---|
@@ -77,7 +77,7 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 
 ## 화면 계약의 주요 결정
 
-- 혼잡도는 사용자 홈과 관리자가 공유합니다. 지도에는 표시하지 않습니다. 운영 시간은 개발자 등록이며 관리자 편집 경로는 없습니다. KST 00:00에 전날 상태·수정 시각을 초기화합니다. 운영 시간 밖 저장도 허용하지만 공개 홈은 시간 상태를 우선하고 저장 시각을 숨깁니다. 같은 단계를 다시 저장하면 성공으로 응답하되 수정 시각은 바꾸지 않습니다.
+- 혼잡도는 사용자 홈과 관리자가 공유합니다. 지도에는 표시하지 않습니다. 운영 시간은 published FestivalDay에서 읽고 관리자 편집 경로는 없습니다. KST 00:00에 전날 상태·수정 시각을 초기화합니다. 운영 시간 밖 저장도 허용하지만 공개 홈은 시간 상태를 우선하고 저장 시각을 숨깁니다. 관리자 저장은 `If-Match`와 `Idempotency-Key`가 필요하며 성공·재시도는 204입니다. 같은 단계를 다시 저장하면 성공으로 응답하되 수정 시각과 감사 이력을 바꾸지 않습니다. 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`, 축제 운영일이 아니면 `409 NOT_FESTIVAL_DAY`입니다.
 - 굿즈는 Goods.options에 등록된 실제 색상×사이즈 조합만 표시합니다. 관리자가 ON_SALE(구매 가능)/SOLD_OUT(품절)을 선택하며 수량 입력·저장은 없습니다. 상품 정보와 판매 상태를 독립 조회하고 전체 품절이어도 상품과 계좌 안내 진입을 유지합니다. 신규 상품·조합은 ON_SALE로 시작하고 색상·사이즈·조합 삭제는 허용합니다. 삭제한 조합의 판매 상태를 제거하고 유지 조합 상태는 보존합니다.
 - 한국어 공지는 먼저 저장·게시하며 영어가 PENDING/FAILED여도 막지 않습니다. 선택 언어의 READY 번역만 노출합니다. 직접 이미지 첨부와 공개 공지 상세 API는 없습니다.
 - 타임테이블은 고정 반입 금지 물품 목록·안내를 /prohibited-items로 조회합니다. 공연 진행 여부에 따라 숨기지 않으며 현재 시각선은 축제 당일 17:00~22:00에만 표시합니다.

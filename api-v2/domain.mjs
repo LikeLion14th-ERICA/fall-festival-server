@@ -188,7 +188,11 @@ export function createState() {
     places.push({id:landmark.id,kind:landmark.kind,name:landmark.name,locationText:landmark.locationText,hoursText:landmark.hoursText,description:landmark.description,usage:landmark.usage,spaceId:null});
   }
   return initializeAdmin({
-    revision:1,nextId:1,artists:structuredClone(artistFixtures),performances:structuredClone(performanceFixtures),notices,deleted:new Set(),crowding:{'2030-10-01':{level:'MODERATE',updatedAt:'2030-10-01T17:00:00+09:00'}},
+    revision:1,nextId:1,festivalDays:[
+      {operatingDay:'2030-10-01',opensAt:'13:00',closesAt:'22:00'},
+      {operatingDay:'2030-10-02',opensAt:'12:00',closesAt:'21:00'},
+      {operatingDay:'2030-10-03',opensAt:'14:00',closesAt:'20:00'},
+    ],artists:structuredClone(artistFixtures),performances:structuredClone(performanceFixtures),notices,deleted:new Set(),crowding:{'2030-10-01':{level:'MODERATE',updatedAt:'2030-10-01T17:00:00+09:00'}},
     goods:[{id:'goods-shirt',name:'예시 의류',price:money(1000),image:image(),colorImages:[{colorId:'color-a',colorName:'예시 색상 A',image:image()},{colorId:'color-b',colorName:'예시 색상 B',image:image()}],sizes:[{id:'size-m',label:'M'},{id:'size-l',label:'L'}],description:'실제 상품·가격이 아닙니다.'}],
     spaces:structuredClone(spaceFixtures),maps,pins,places,
     templates:[{id:'template-1',name:'예시 일반 공지',translations:{ko:translation('예시 제목','예시 본문'),en:translation('Sample title','Sample body')}}],
@@ -235,6 +239,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   const locale=query.locale||'ko';
   if(!state.languages.includes(locale))failure(400,KNOWN_LOCALES.has(locale)?'LOCALE_NOT_READY':'INVALID_QUERY',KNOWN_LOCALES.has(locale)?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
   if(scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
+  if(scenario==='unconfigured'&&['getCrowding','getAdminCrowding'].includes(op.operationId))failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
   if(scenario==='not-found')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
   if(scenario==='already-deleted')failure(409,'ALREADY_DELETED','이미 삭제된 공지입니다.');
   if(scenario==='version-conflict')failure(409,'MAP_VERSION_MISMATCH','지도 이미지를 다시 조회해 주세요.');
@@ -250,9 +255,11 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale);break;
     case 'putAdminCrowding':{
       if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');
-      const savedDay=dayKst(now),stored=state.crowding[savedDay];
+      const savedDay=dayKst(now);
+      if(!DATES.includes(savedDay))failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
+      const stored=state.crowding[savedDay];
       if(stored?.level!==body.level)state.crowding[savedDay]={level:body.level,updatedAt:mutate()};
-      data=crowdInfo(state,now,scenario);break;
+      return {status:204,data:null,now,locale};
     }
     case 'getNotices':{
       let items=state.notices.filter(n=>!state.deleted.has(n.id)&&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)&&n.translations[locale]?.status==='READY').map(n=>({id:n.id,type:n.type,title:n.translations[locale].title,body:n.translations[locale].body,links:n.links,createdAt:n.createdAt}));

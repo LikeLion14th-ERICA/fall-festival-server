@@ -7,6 +7,7 @@ public record CrowdingResponse(
     LocalDate operatingDay,
     OffsetDateTime opensAt,
     OffsetDateTime closesAt,
+    OperatingStatus operatingStatus,
     Status status,
     String savedLevel,
     String colorToken,
@@ -14,6 +15,12 @@ public record CrowdingResponse(
     OffsetDateTime updatedAt,
     TimeBasis timeBasis
 ) {
+
+    public enum OperatingStatus {
+        BEFORE_OPEN,
+        OPEN,
+        CLOSED
+    }
 
     public enum Status {
         BEFORE_OPEN,

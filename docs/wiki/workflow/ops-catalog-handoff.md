@@ -1,0 +1,153 @@
+# 운영·카탈로그 구현 인수인계
+
+[위키 홈](../README.md) · 읽는 때: 이 장기 구현을 이어받거나 재개할 때
+
+## 목적과 기준
+
+이 문서는 PR #28 이후의 운영·카탈로그 백엔드 작업을 다른 에이전트나 개발자가
+안전하게 이어받도록 현재 상태와 다음 행동을 기록한다. 기준 commit은
+`d3a3e8e`이며, 최신 `origin/main`을 다시 확인한 뒤 작업을 시작한다.
+
+포함 범위는 공통 동시성 기반, 정리 작업 틀, 관리자 혼잡도 백엔드, `TICKET`·`GOODS`
+계좌 운영 설정, 티켓 계좌 분리, 카탈로그 export·게시 보호, 로컬 카탈로그
+워크벤치다. 공지·굿즈 콘텐츠 API/UI/미디어 작업과 관리자 SPA 자체는 다른 담당자
+범위다.
+
+## 이어받는 에이전트 프로필
+
+이 작업에는 적용된 Observatory 프로필의 다음 조합만 사용한다. 목적에 맞지 않는
+모델이나 추론 강도를 임의로 바꾸지 않는다.
+
+| 작업 성격 | 모델 · 추론 강도 |
+|---|---|
+| 메인 통합과 최종 판단 | `gpt-5.6-terra / ultra` |
+| 단순하고 경계가 분명한 구현 | `gpt-5.6-luna / medium` |
+| 상위 수준의 계획 | `gpt-5.6-sol / medium` |
+| 고맥락 검토와 계획 검토 | `gpt-6-astra / low` |
+| 난도가 높거나 해법이 불명확한 설계·문제 해결 | `gpt-6-astra / max` |
+| 복잡하지만 요구가 명확한 구현 | `gpt-5.6-luna / max` |
+
+병렬 구현을 맡길 때는 각 하위 작업의 성격과 위 행을 함께 기록한다. 현재 공통
+cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
+
+## 재개 절차
+
+1. `AGENTS.md`, 이 문서, 해당 단계의 작업별 위키·API 계약을 읽는다.
+2. 더티 루트 checkout을 사용하지 않는다. 최신 `origin/main`에서 전용 `codex/` branch와
+   linked worktree를 만들고, `git status --short --branch`가 깨끗한지 확인한다.
+3. migration, catalog import 또는 publish 전에 독립적인 읽기 전용 preflight를 실행한다.
+   이 단계에서는 웹 앱, Catalog CLI, Flyway, scheduler, catalog audit을 시작하지 않는다.
+4. preflight가 shared schema, 알 수 없는 Flyway history, 기존 catalog의 소유 불명확성을
+   보고하면 `STOP_AND_REVIEW`로 멈춘다. 원격 DB에 시험 migration을 적용하지 않는다.
+5. 가장 앞선 미완료 PR 하나만 통합하고, 검증·commit·이 문서의 상태를 갱신한 뒤 다음
+   PR로 진행한다.
+
+## 현재 상태 · 2026-09-18
+
+| 순서 | 목표 | 상태 | 다음 확인 |
+|---|---|---|---|
+| 1 | 공통 동시성 기반 | 통합 완료 | request ID·conditional response·CORS·idempotency·If-Match 기반을 통합했고 `PUT /admin/crowding`이 첫 사용처다. |
+| 2 | 정리 작업 틀 | 통합 완료 | `admin_audit_events` 1년, `COMPLETED` idempotency 24시간 retention과 재사용 target 경계를 통합했다. 전용 cleanup role과 연결 없이는 삭제하지 않는다. |
+| 3 | 관리자 혼잡도 백엔드 | 통합 완료 | FestivalDay 일정 기반 GET/PUT과 `crowding_state_dynamic`을 통합했다. migration은 병합 시 V16으로 재배정했고 원격 DB에는 적용하지 않았다. |
+| 4 | 계좌 운영 설정 | 구현 통합, provisioning 대기 | CLI·V15 설정/이력 schema·history retention을 통합했다. DB provider의 role 발급과 provisioning script 실행은 남아 있다. |
+| 5 | 티켓 계좌 분리와 polling | 대기 | 계좌 설정 배포·등록 확인 뒤에 static catalog 읽기를 전환한다. |
+| 6 | catalog export·게시 보호 | 대기 | `base_revision_id`와 legacy validation report를 구현한다. |
+| 7 | 로컬 catalog workbench | 대기 | export/publish 보호와 role 분리 뒤에 구현한다. |
+
+현재 통합 branch는 `feat/ops-foundation`이고 마지막 통합 commit은 `586be92`다.
+이전 통합 branch `codex/goal-ops-catalog`와 개별 작업 branch의 내용은 모두 이 branch에
+들어왔다. 이 표는 각 통합 commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
+
+### 이미 통합한 변경
+
+- `f884ce1`: 이 인수인계 문서와 읽기 표를 추가했다.
+- `495decd`: Windows의 일반 Maven 사용자 홈에서 wrapper가 시작 전에 실패하던 문제를
+  수정하고, 관리자 CORS에 `If-Match`·`Idempotency-Key`와 `ETag`·서버 시각 헤더를 추가했다.
+- `282c84a`: 서버 생성 request ID, 안정 conditional envelope, SHA-256 strong ETag,
+  `If-None-Match` 304 지원 유틸리티를 추가했다. 아직 개별 공개 경로의 전면 전환은 하지 않았다.
+- `ebe763f`: Spring·Flyway·scheduler·catalog audit 없이 JDBC 읽기만 하는
+  `DatabasePreflightApplication`과 runbook을 추가했다.
+- `a3cc13e`: hashed idempotency record V14, 2분 lease, 동일 키 replay, 처리 중 409,
+  typed `If-Match` 정책·428/409 도구를 추가했다. V14는 **원격 DB에 적용하지 않은
+  provisional 번호**다.
+- `b107026`: client supplied request ID를 반사하지 않는 conditional response 정책을
+  부스·지도 백엔드 문서에도 맞췄다.
+- `81ae54e`: 적용된 Observatory profile의 모델·추론 강도 배정을 이 문서에 남겼다.
+- `792e51c`: 500행 이하 단일 transaction batch, advisory lock, dry-run, 전용 cleanup
+  datasource/role 검증과 1년 감사 retention을 추가했다.
+- `ca2a2d1`: `COMPLETED` idempotency response만 24시간 뒤 정리하는 target을 추가했다.
+- `7b17aeb`: `TICKET`·`GOODS` 계좌 현재 설정 V15, trigger 소유 immutable history와
+  dry-run 기본 CLI를 추가했다.
+- `5a0b4f3`: 계좌 이력을 cleanup 틀에 등록하고 현재 version·최신 복원 가능 상태를
+  retention 이후에도 보존한다.
+- `8601903`: 혼잡도를 `(festival_id, operating_date)` 키와 published FestivalDay 일정으로
+  옮기고 V5 legacy 표는 보존한다.
+- `586be92`: 위 두 갈래를 병합했다. preflight의 non-catalog 표 목록을 합치고, 계좌
+  migration이 V15를 쓰고 있어 혼잡도 migration을 V16으로 재배정했다.
+
+### 현재 병렬 작업
+
+없다. `codex/goal-ops-catalog`, `codex/admin-crowding-backend`,
+`codex/account-operational-settings`, `codex/cleanup-framework`,
+`codex/conditional-foundation`, `codex/preflight-safety`의 내용은 모두
+`feat/ops-foundation`에 포함됐다. 다음 작업은 이 branch에서 이어간다.
+
+## 고정 안전 규칙
+
+- Flyway 번호는 병합 직전 최신 `main`의 다음 번호로 다시 정한다. 병합 전 공유 원격
+  개발 DB에는 적용하지 않는다.
+- OpenAPI 생성물은 손으로 병합하지 않는다. source 충돌을 해결한 뒤
+  `npm run generate`, `npm run check`로 재생성한다.
+- 모든 catalog/account CLI는 `spring.flyway.enabled=false`로 실행한다. preflight는
+  별도 plain JDBC 도구이며 catalog audit을 남기지 않는다.
+- Windows에서는 `cmd /d /c "mvnw.cmd ..."`로 wrapper를 실행한다. wrapper 자체의
+  null symlink target 처리는 `495decd`에서 수정했고, PowerShell에서 직접 실행하지 않는다.
+- DB role 이름·GRANT는 Flyway migration에 넣지 않는다. 환경별 provisioning script를
+  사용한다. 운영에서는 preflight, migration, runtime, cleanup, account operator,
+  catalog export, catalog publish 역할을 분리한다.
+- 비밀값·계좌번호·토큰·원격 DB 자격증명은 문서·로그·commit에 넣지 않는다.
+- 같은 checkout을 둘 이상의 에이전트가 수정하지 않는다. 병렬 작업은 각 branch와
+  worktree에서 검증·commit한 뒤 통합 worktree에 가져온다.
+
+## 설계 불변식
+
+- idempotency는 관리자·method·route·resource 범위와 hashed fingerprint를 사용한다.
+  lease 예약은 짧게 commit하고, 업무 변경과 `COMPLETED` 기록은 같은 transaction에서
+  commit한다.
+- conditional response의 strong ETag는 실제 안정 본문 전체를 해시한다. volatile
+  request ID/server time은 `X-Request-Id`, `X-Server-Time` 헤더에만 둔다.
+- 혼잡도는 `(festival_id, operating_date)` 동적 상태이고 `meta.revision`은 0이다.
+  published snapshot의 FestivalDay가 없으면 임시 운영 시간을 만들지 않고 503으로
+  실패한다.
+- 계좌 설정은 catalog revision 밖 데이터다. catalog export/publish role은 설정·이력과
+  legacy ticket 계좌 열을 읽지 못한다.
+- draft는 명시적인 baseline published revision을 저장한다. import·publish·rollback은
+  festival 행 잠금 안에서 이를 검증하며, 동적 혼잡도·계좌 설정을 rollback하지 않는다.
+
+## 검증 기록
+
+| 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
+|---|---|---|---|
+| 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |
+| 2026-09-18 | CORS·Maven wrapper focused test | `AdminCorsConfigurationTest` 1개 통과 | 전체 suite는 통합 뒤 실행한다. |
+| 2026-09-18 | conditional response subtask | agent branch에서 Maven 261개 통과 | `282c84a`로 통합했다. |
+| 2026-09-18 | standalone preflight subtask | agent branch에서 Maven 269개 통과, local refused-connection smoke 통과 | `ebe763f`로 통합했다. 원격 DB 연결은 하지 않았다. |
+| 2026-09-18 | idempotency·precondition focused suite | unit + PostgreSQL Testcontainers 19개 통과 | cleanup/crowding 통합 뒤 전체 `verify`를 실행한다. |
+| 2026-09-18 | cleanup framework + completed idempotency target | PostgreSQL Testcontainers focused suite 10개 통과 | crowding 통합 뒤 전체 `verify`를 다시 실행한다. |
+| 2026-09-18 | 원격 DB 상태 | 실행하지 않음 | 구현 중·병합 전에는 remote DB mutation을 금지한다. |
+| 2026-09-18 | crowding branch를 통합 branch에 병합 | 충돌 1건(`DatabasePreflight` 표 목록)을 합집합으로 해결하고 crowding migration을 V16으로 재배정 | 아래 두 검증을 실행했다. |
+| 2026-09-18 | `api-v2` 재생성과 계약 검증 | `node generate.mjs` 결과가 병합본과 동일, `npm run check` 324개 통과 | 생성물을 손으로 고치지 않았다. |
+| 2026-09-18 | 전체 `mvnw.cmd verify` | 첫 실행은 직접 Flyway를 구성하는 계좌·preflight 통합 테스트 4건이 `${festivalId}` placeholder 누락으로 실패 | 두 호출부에 빈 placeholder를 전달해 수정했다. |
+| 2026-09-18 | 전체 `mvnw.cmd verify` 재실행 | Docker 사용 가능 상태에서 312개 통과, 실패·오류·건너뜀 0 | PR 5 티켓 계좌 분리를 시작한다. |
+
+새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
+않고 원인과 후속 조치를 기록한다.
+
+## 외부 의존성
+
+- `fall-festival-admin`은 별도 프로젝트이며 로컬 포트 3001에서 기존 login/refresh/API
+  client를 공유한다. 원격 관리자 proxy와 refresh cookie E2E는 후속 범위다.
+- 팀 제공 PostgreSQL은 전용성이 보장되지 않았다. preflight 결과와 DB 제공자의 role
+  발급 결과 없이는 role 분리 또는 migration 안전성을 주장할 수 없다.
+- 실제 FestivalDay 운영 시각과 운영 자료는 승인 전이다. 코드의 local fixture 검증과
+  원격 운영 검증을 구분한다.

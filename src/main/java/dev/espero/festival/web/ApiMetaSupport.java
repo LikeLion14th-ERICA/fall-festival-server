@@ -79,10 +79,10 @@ public class ApiMetaSupport {
         if (stored instanceof String requestId) {
             return requestId;
         }
-        String provided = request.getHeader("X-Request-Id");
-        String requestId = RequestIdPolicy.isValid(provided)
-            ? provided
-            : UUID.randomUUID().toString();
+        // A client supplied request ID is untrusted input.  Generate the value
+        // once per request so the response header, JSON meta, and audit event
+        // all use the same server-owned identifier.
+        String requestId = UUID.randomUUID().toString();
         request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId);
         return requestId;
     }

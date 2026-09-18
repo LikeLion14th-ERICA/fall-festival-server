@@ -7,8 +7,6 @@ export function applyAdminContract(s,ops){
   const nullable=(schema,d)=>({anyOf:[schema,{type:'null'}],description:d});
   const en=(values,d)=>({type:'string',enum:values,description:d});
   const id=ref('Id');
-  s.Crowding.properties.operatingStatus=en(['BEFORE_OPEN','OPEN','CLOSED'],'개발자 등록 일정 기준. 관리자 운영 시간 편집 없음.');
-  s.Crowding.required.push('operatingStatus');
   s.Goods.properties.options={...arr(obj({colorId:id,sizeId:id}),'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.'),minItems:1};
   s.Goods.required.push('options');
   s.Goods.properties.images=arr(ref('Image'),'상품 복수 이미지. 배열 순서대로 보존, 실제 배치는 GOODS-001에서 정의.');
@@ -40,6 +38,12 @@ export function applyAdminContract(s,ops){
   const find=id=>ops.find(o=>o.operationId===id);
   find('getCrowding').scenarios=find('getCrowding').scenarios.filter(x=>x!=='overnight');
   find('getCrowding').screens=['HOME'];find('getCrowding').summary='홈 재학생존 혼잡도';
+  for(const operationId of ['getCrowding','getAdminCrowding'])find(operationId).conditional=true;
+  const crowdingPut=find('putAdminCrowding');
+  crowdingPut.successStatus=204;
+  crowdingPut.ifMatchRequired=true;
+  crowdingPut.idempotencyKeyRequired=true;
+  crowdingPut.scenarios.push('precondition-required','not-festival-day','edit-conflict');
   find('getConfig').scenarios.push('all-languages');
   find('getAdminGoods').summary='관리자 실제 제공 옵션별 판매 상태';
   const old=ops.findIndex(o=>o.operationId==='putAdminAvailability');ops.splice(old,1);
