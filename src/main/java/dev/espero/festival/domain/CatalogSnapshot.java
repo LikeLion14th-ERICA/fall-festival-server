@@ -28,11 +28,10 @@ public record CatalogSnapshot(
      * deliberately independent of database insertion order or map sort rank.
      */
     private static final List<String> FILTER_GROUP_ORDER = List.of(
-        "STUDENT_COUNCIL",
-        "EXPERIENCE",
-        "CONVENIENCE",
-        "FOOD_AND_BEVERAGE",
-        "PERFORMANCE"
+        "RESTROOM",
+        "PHOTO_BOOTH",
+        "SMOKING_AREA",
+        "TRASH_BIN"
     );
 
     public CatalogSnapshot(

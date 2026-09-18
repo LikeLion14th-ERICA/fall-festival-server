@@ -25,7 +25,7 @@ public final class CatalogManifestValidator {
     private static final Set<String> PLACE_KINDS = Set.of("SPACE", "FACILITY", "LANDMARK");
     private static final Set<String> MAP_KINDS = Set.of("OVERVIEW", "AREA");
     private static final Set<String> FILTER_GROUPS = Set.of(
-        "STUDENT_COUNCIL", "EXPERIENCE", "CONVENIENCE", "FOOD_AND_BEVERAGE", "PERFORMANCE"
+        "RESTROOM", "PHOTO_BOOTH", "SMOKING_AREA", "TRASH_BIN"
     );
 
     public void validate(CatalogManifest manifest) {
@@ -162,9 +162,9 @@ public final class CatalogManifestValidator {
                 "mapPins must have exactly one target");
             if (pin.placeId() != null) {
                 require(places.containsKey(pin.placeId()), "mapPins references an unknown place");
-                require(pin.filterGroup() != null && FILTER_GROUPS.contains(pin.filterGroup()),
-                    CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED
-                        + ": PLACE mapPins require a supported filterGroup");
+                // A PLACE pin without a design filter is shown only under "all".
+                require(pin.filterGroup() == null || FILTER_GROUPS.contains(pin.filterGroup()),
+                    "Unsupported map pin filter group");
             } else {
                 require(areas.containsKey(pin.areaId()), "mapPins references an unknown area");
                 require(pin.filterGroup() == null, "AREA mapPins must not have a filterGroup");

@@ -144,7 +144,7 @@ class CatalogControllerTest {
         );
         Place place = new Place("place-test", "SPACE", "테스트 부스", null, null, null, null, "space-test");
         Pin pin = new Pin(
-            "pin-test", "booth", "EXPERIENCE", "체험", "테스트 부스", new BigDecimal("0.5"), new BigDecimal("0.25"),
+            "pin-test", "booth", "PHOTO_BOOTH", "포토부스", "테스트 부스", new BigDecimal("0.5"), new BigDecimal("0.25"),
             new PinTarget("PLACE", "place-test")
         );
         return new CatalogSnapshot(
@@ -173,7 +173,7 @@ class CatalogControllerTest {
 
         assertThat(response.data().filters())
             .extracting(CatalogResponses.PinFilter::id, CatalogResponses.PinFilter::label)
-            .containsExactly(org.assertj.core.groups.Tuple.tuple("EXPERIENCE", "체험"));
+            .containsExactly(org.assertj.core.groups.Tuple.tuple("PHOTO_BOOTH", "포토부스"));
     }
 
     private HttpServletRequest request(Map<String, String[]> parameters) {

@@ -87,8 +87,8 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 - `586be92`: 위 두 갈래를 병합했다. preflight의 non-catalog 표 목록을 합치고, 계좌
   migration이 V15를 쓰고 있어 혼잡도 migration을 V16으로 재배정했다.
 - `PR6`: draft마다 편집 기준 published revision을 기록하고 import·publish·rollback이 잠금 안에서
-  이를 검증한다. `export` CLI는 revision을 직접 읽어 manifest로 되돌리고, legacy filter group과
-  부분 티켓 일정을 finding으로 보고하며 재import를 막는다.
+  이를 검증한다. `export` CLI는 revision을 직접 읽어 manifest로 되돌리고, 부분 티켓 일정을
+  finding으로 보고하며 재import를 막는다. filter group 없는 `PLACE` 핀은 V19 이후 정상이다.
 - `23f59d7`: 티켓 계좌를 catalog에서 분리했다. manifest는 계좌·링크 field를 unknown
   property로 거절하고, snapshot·copy·rollback은 legacy 열을 읽지 않으며,
   `/ticket-guide`가 현재 `TICKET` 설정과 `paymentSettingsVersion`을 합쳐 strong ETag와

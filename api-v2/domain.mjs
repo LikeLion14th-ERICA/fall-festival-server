@@ -5,21 +5,18 @@ export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
 const MOCK_STAMP_RECEIPT_CODE = 'MOCK-RECEIPT-CODE';
 const MAP_VERSION = 'mock-map-1';
-const PIN_FILTER_GROUP_ORDER = ['STUDENT_COUNCIL','EXPERIENCE','CONVENIENCE','FOOD_AND_BEVERAGE','PERFORMANCE'];
+// Design filter chips (docs/wiki/product/translations.md). Japanese labels are mock-only until approved.
+const PIN_FILTER_GROUP_ORDER = ['RESTROOM','PHOTO_BOOTH','SMOKING_AREA','TRASH_BIN'];
 const PIN_FILTER_GROUP_LABELS = {
-  ko:{STUDENT_COUNCIL:'총학생회 관련',EXPERIENCE:'체험',CONVENIENCE:'편의 시설',FOOD_AND_BEVERAGE:'F&B',PERFORMANCE:'공연'},
-  en:{STUDENT_COUNCIL:'Student Council',EXPERIENCE:'Experience',CONVENIENCE:'Convenience',FOOD_AND_BEVERAGE:'Food & Beverage',PERFORMANCE:'Performance'},
-  'zh-Hans':{STUDENT_COUNCIL:'学生会相关',EXPERIENCE:'体验',CONVENIENCE:'便利设施',FOOD_AND_BEVERAGE:'餐饮',PERFORMANCE:'演出'},
-  ja:{STUDENT_COUNCIL:'学生会関連',EXPERIENCE:'体験',CONVENIENCE:'便利施設',FOOD_AND_BEVERAGE:'飲食',PERFORMANCE:'公演'},
+  ko:{RESTROOM:'화장실',PHOTO_BOOTH:'포토부스',SMOKING_AREA:'흡연구역',TRASH_BIN:'쓰레기통'},
+  en:{RESTROOM:'Restrooms',PHOTO_BOOTH:'Photo Booth',SMOKING_AREA:'Smoking Area',TRASH_BIN:'Trash Bins'},
+  'zh-Hans':{RESTROOM:'洗手间',PHOTO_BOOTH:'拍照亭',SMOKING_AREA:'吸烟区',TRASH_BIN:'垃圾桶'},
+  ja:{RESTROOM:'トイレ',PHOTO_BOOTH:'フォトブース',SMOKING_AREA:'喫煙所',TRASH_BIN:'ゴミ箱'},
 };
+// Only facility pins that match a design chip carry a group; other PLACE pins appear under "all" only.
 const pinFilterGroup = (pin) => {
   if (pin.target.kind === 'AREA') return null;
-  return ({
-    booth:'EXPERIENCE',pub:'EXPERIENCE',market:'EXPERIENCE',
-    information:'STUDENT_COUNCIL',toilet:'CONVENIENCE',smoking:'CONVENIENCE',
-    stage:'PERFORMANCE',gate:'PERFORMANCE','student-zone':'PERFORMANCE','visitor-zone':'PERFORMANCE',
-    'food-truck':'FOOD_AND_BEVERAGE','photo-booth':'EXPERIENCE',ticket:'PERFORMANCE',
-  }[pin.category] || 'EXPERIENCE');
+  return ({toilet:'RESTROOM','photo-booth':'PHOTO_BOOTH',smoking:'SMOKING_AREA',trash:'TRASH_BIN'}[pin.category] || null);
 };
 const pinFilterLabel = (group,locale) => {
   const label=PIN_FILTER_GROUP_LABELS[locale]?.[group];
@@ -172,6 +169,7 @@ export function createState() {
   const landmarks = [
     {id:'place-toilet',mapId:'map-area',pinId:'pin-toilet',category:'toilet',label:'목 화장실',x:0.88,y:0.78,kind:'FACILITY',name:'목 화장실',locationText:'목 부스 구역 동쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-smoking',mapId:'map-area',pinId:'pin-smoking',category:'smoking',label:'목 흡연구역',x:0.08,y:0.78,kind:'FACILITY',name:'목 흡연구역',locationText:'목 부스 구역 서쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
+    {id:'place-trash',mapId:'map-area',pinId:'pin-trash',category:'trash',label:'목 쓰레기통',x:0.48,y:0.88,kind:'FACILITY',name:'목 쓰레기통',locationText:'목 부스 구역 남쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-information',mapId:'map-market',pinId:'pin-information',category:'information',label:'목 인포메이션',x:0.88,y:0.78,kind:'LANDMARK',name:'목 인포메이션',locationText:'목 플리마켓 구역 입구',hoursText:'개발용 14:00~21:00',description:'가상 안내 데스크입니다.',usage:'실제 안내소가 아닙니다.'},
     {id:'place-toilet-pub',mapId:'map-pub',pinId:'pin-toilet-pub',category:'toilet',label:'목 화장실',x:0.88,y:0.78,kind:'FACILITY',name:'목 화장실',locationText:'목 주점 구역 동쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-smoking-pub',mapId:'map-pub',pinId:'pin-smoking-pub',category:'smoking',label:'목 흡연구역',x:0.08,y:0.78,kind:'FACILITY',name:'목 흡연구역',locationText:'목 주점 구역 서쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
@@ -308,7 +306,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const m=find(state.maps,params.mapId);
       if(query.mapVersion!==m.version)failure(409,'MAP_VERSION_MISMATCH','지도 이미지 버전이 다릅니다.');
       const items=empty?[]:structuredClone(state.pins[m.id]).map(pin=>({...pin,filterGroup:pinFilterGroup(pin)}));
-      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE').map(pin=>pin.filterGroup))]
+      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE'&&pin.filterGroup).map(pin=>pin.filterGroup))]
         .sort((a,b)=>PIN_FILTER_GROUP_ORDER.indexOf(a)-PIN_FILTER_GROUP_ORDER.indexOf(b));
       data={mapId:m.id,mapVersion:m.version,filters:groups.map(id=>({id,label:pinFilterLabel(id,locale)})),items};
       break;

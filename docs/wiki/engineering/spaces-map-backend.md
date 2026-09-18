@@ -6,7 +6,7 @@
 
 이 문서는 API v2와 V8~V11 카탈로그 구현을 기준으로 한다. V2~V6의 `Festival`·
 `FestivalRevision`과 published revision 1건 위에 V8이 `Space`, `Place`, 지도 자산·핀 테이블과
-공개 조회 API를 추가했다. V10은 핀 대분류와 표시명 번역을, V11은 revision-scoped 티켓·스탬프
+공개 조회 API를 추가했다. V10은 핀 필터와 표시명 번역을(V19에서 디자인 필터로 교체), V11은 revision-scoped 티켓·스탬프
 안내와 개발자 전용 publish CLI·감사 이력을 추가했다. V3의 `ticket_guide`가 독립 nullable로
 두었던 map target 네 필드는 V8에서 전부 null 또는 전부 존재하도록 하고, 실제 현재 `PLACE`
 핀을 참조하게 만들었다.
@@ -61,12 +61,12 @@ FestivalRevision (published)
   `x`/`y`는 0~1 범위로 DB에서 막는다.
 - `MapArea.target_map_id`는 구역 이동의 목적 지도다. snapshot 검증기는 목적 지도가
   `AREA`인지 확인한다.
-- `MapPin.filter_group`은 `STUDENT_COUNCIL | EXPERIENCE | CONVENIENCE |
-  FOOD_AND_BEVERAGE | PERFORMANCE | null`이다. `PLACE` 핀은 유효한 대분류 하나를 갖고,
-  `AREA` 핀은 null이다. 응답 `filters`는 해당 지도 version의 실제 `PLACE` 그룹만 고정 순서로
-  내보내며 `AREA` 핀은 어떤 선택 필터에서도 계속 표시한다. 기존 V8 revision이 모든 그룹 null인
-  경우에는 읽을 수 있지만, 그룹을 하나라도 넣은 새 revision은 모든 `PLACE` 핀의 group과
-  한국어 group label을 완결해야 한다.
+- `MapPin.filter_group`은 디자인 필터 `RESTROOM | PHOTO_BOOTH | SMOKING_AREA | TRASH_BIN | null`이다
+  (V19). 네 시설의 `PLACE` 핀만 값을 갖고, 그 밖의 `PLACE` 핀과 `AREA` 핀은 null이다. 사용한
+  group은 한국어 label이 있어야 하며 revision 안에서 label이 하나여야 한다. 응답 `filters`는 해당
+  지도 version의 실제 group만 고정 순서로 내보내며 `AREA` 핀은 어떤 선택 필터에서도 계속
+  표시한다. V19는 이전 대분류(`STUDENT_COUNCIL` 등)를 새 필터로 추측하지 않고 null로 바꾸며
+  이전 label을 지운다.
 - `MapAssetVersion`은 이미지와 핀 좌표를 묶는다. `Map.current_version`은 존재하는 asset을
   참조한다. 이미지 URL·크기·좌표·핀 배치·target 연결이 바뀔 때만 `mapVersion`을 올린다.
   snapshot 검증기는 같은 festival/map/version이 published·archived revision과 이미지 URL·크기·
@@ -139,8 +139,8 @@ query는 400으로 거절한다. `mapTarget` 키는 미연결 때에도 null로 
 
 1. **V8 읽기 수직 절단:** JDBC snapshot loader, `/readyz`, spaces/maps/places controller와
    400·404·409·503 오류를 제공한다.
-2. **V10 지도 필터:** `Pin.filterGroup`과 지도별 `filters`를 제공하며, legacy revision의 전체
-   null 그룹을 읽을 수 있게 보존한다.
+2. **V10 지도 필터:** `Pin.filterGroup`과 지도별 `filters`를 제공한다. V19에서 디자인 필터
+   (화장실·포토부스·흡연구역·쓰레기통)로 바꿨다.
 3. **V11 게시 경로:** immutable guide revision, manifest 검증, CLI import·validate·publish·rollback,
    audit log를 제공한다. HTTP 콘텐츠 쓰기 경로는 만들지 않는다.
 4. **운영 자료 투입 gate:** 실제 asset·좌표·문구·번역·티켓존 자료는 manifest validation을
