@@ -3,6 +3,7 @@ package dev.espero.festival;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.persistence.CatalogSnapshotStore;
 import dev.espero.festival.persistence.PerformanceRevisionValidator;
 import java.io.IOException;
@@ -211,20 +212,44 @@ class CatalogRevisionServiceIntegrationTest {
     }
 
     @Test
-    void reportsAndBlocksALegacyRevisionWithoutFilterGroups() throws IOException {
-        UUID revisionId = importManifest("qr-legacy-filter", "/assets/maps/overview-v1.png");
+    void keepsAPlacePinOutsideTheDesignFiltersThroughExportAndPublish() throws IOException {
+        UUID revisionId = importManifest("qr-unfiltered-pin", "/assets/maps/overview-v1.png");
         jdbc.update("""
             UPDATE map_pins SET filter_group = NULL
             WHERE festival_revision_id = :revisionId AND place_id IS NOT NULL
             """, new MapSqlParameterSource("revisionId", revisionId));
+        jdbc.update(
+            "DELETE FROM map_pin_filter_group_translations WHERE festival_revision_id = :revisionId",
+            new MapSqlParameterSource("revisionId", revisionId)
+        );
+
+        revisions.publish(revisionId, "release-bot");
 
         CatalogExportService.ExportResult result = exports.export(revisionId);
+        UUID reimported = importExportedManifest(result.manifest());
+        revisions.publish(reimported, "release-bot");
 
-        assertThat(result.findings())
-            .anyMatch(finding -> finding.startsWith(CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED));
-        assertThatThrownBy(() -> importExportedManifest(result.manifest()))
+        assertThat(result.findings()).isEmpty();
+        assertThat(result.manifest().mapPins())
+            .filteredOn(pin -> pin.placeId() != null)
+            .isNotEmpty()
+            .allSatisfy(pin -> assertThat(pin.filterGroup()).isNull());
+        CatalogSnapshot published = snapshots.loadPublished();
+        for (CatalogManifest.MapPin pin : result.manifest().mapPins()) {
+            assertThat(published.filtersFor(pin.mapId(), pin.mapVersion())).isEmpty();
+        }
+    }
+
+    @Test
+    void rejectsAnImportThatUsesAFilterGroupOutsideTheDesign() throws IOException {
+        Path manifest = tempDir.resolve("old-filter.json");
+        String json = manifestJson("qr-old-filter", "/assets/maps/overview-v1.png", currentPublishedRevision());
+        assertThat(json).contains("\"PHOTO_BOOTH\"");
+        Files.writeString(manifest, json.replace("\"PHOTO_BOOTH\"", "\"EXPERIENCE\""));
+
+        assertThatThrownBy(() -> revisions.importManifest(manifest, "release-bot"))
             .isInstanceOf(CatalogCliException.class)
-            .hasMessageContaining(CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED);
+            .hasMessageContaining("Unsupported map pin filter group");
     }
 
     @Test
@@ -683,7 +708,7 @@ class CatalogRevisionServiceIntegrationTest {
                 },
                 {
                   "mapId": "map-area", "mapVersion": "area-v1", "id": "pin-booth",
-                  "category": "booth", "filterGroup": "EXPERIENCE", "x": 0.5, "y": 0.5,
+                  "category": "booth", "filterGroup": "PHOTO_BOOTH", "x": 0.5, "y": 0.5,
                   "placeId": "place-booth", "areaId": null
                 }
               ],
@@ -698,7 +723,7 @@ class CatalogRevisionServiceIntegrationTest {
                 }
               ],
               "mapPinFilterGroupTranslations": [
-                {"filterGroup": "EXPERIENCE", "locale": "ko", "label": "체험"}
+                {"filterGroup": "PHOTO_BOOTH", "locale": "ko", "label": "포토부스"}
               ],
               "spaceMapTargets": [
                 {

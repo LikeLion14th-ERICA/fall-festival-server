@@ -5798,12 +5798,16 @@
             "mapVersion": "mock-map-1",
             "filters": [
               {
-                "id": "EXPERIENCE",
-                "label": "체험"
+                "id": "RESTROOM",
+                "label": "화장실"
               },
               {
-                "id": "CONVENIENCE",
-                "label": "편의 시설"
+                "id": "SMOKING_AREA",
+                "label": "흡연구역"
+              },
+              {
+                "id": "TRASH_BIN",
+                "label": "쓰레기통"
               }
             ],
             "items": [
@@ -5817,7 +5821,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-02",
@@ -5829,7 +5833,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-02"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-03",
@@ -5841,7 +5845,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-03"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-04",
@@ -5853,7 +5857,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-04"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-05",
@@ -5865,7 +5869,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-05"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-06",
@@ -5877,7 +5881,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-06"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-07",
@@ -5889,7 +5893,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-07"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-08",
@@ -5901,7 +5905,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-08"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-09",
@@ -5913,7 +5917,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-09"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-10",
@@ -5925,7 +5929,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-10"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-11",
@@ -5937,7 +5941,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-11"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-12",
@@ -5949,7 +5953,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-12"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-toilet",
@@ -5961,7 +5965,7 @@
                   "kind": "PLACE",
                   "placeId": "place-toilet"
                 },
-                "filterGroup": "CONVENIENCE"
+                "filterGroup": "RESTROOM"
               },
               {
                 "id": "pin-smoking",
@@ -5973,7 +5977,19 @@
                   "kind": "PLACE",
                   "placeId": "place-smoking"
                 },
-                "filterGroup": "CONVENIENCE"
+                "filterGroup": "SMOKING_AREA"
+              },
+              {
+                "id": "pin-trash",
+                "category": "trash",
+                "label": "목 쓰레기통",
+                "x": 0.48,
+                "y": 0.88,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-trash"
+                },
+                "filterGroup": "TRASH_BIN"
               }
             ]
           },

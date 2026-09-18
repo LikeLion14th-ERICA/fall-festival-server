@@ -8907,12 +8907,16 @@
                         "mapVersion": "mock-map-1",
                         "filters": [
                           {
-                            "id": "EXPERIENCE",
-                            "label": "체험"
+                            "id": "RESTROOM",
+                            "label": "화장실"
                           },
                           {
-                            "id": "CONVENIENCE",
-                            "label": "편의 시설"
+                            "id": "SMOKING_AREA",
+                            "label": "흡연구역"
+                          },
+                          {
+                            "id": "TRASH_BIN",
+                            "label": "쓰레기통"
                           }
                         ],
                         "items": [
@@ -8926,7 +8930,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-02",
@@ -8938,7 +8942,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-02"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-03",
@@ -8950,7 +8954,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-03"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-04",
@@ -8962,7 +8966,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-04"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-05",
@@ -8974,7 +8978,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-05"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-06",
@@ -8986,7 +8990,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-06"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-07",
@@ -8998,7 +9002,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-07"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-08",
@@ -9010,7 +9014,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-08"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-09",
@@ -9022,7 +9026,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-09"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-10",
@@ -9034,7 +9038,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-10"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-11",
@@ -9046,7 +9050,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-11"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-booth-12",
@@ -9058,7 +9062,7 @@
                               "kind": "PLACE",
                               "placeId": "place-booth-12"
                             },
-                            "filterGroup": "EXPERIENCE"
+                            "filterGroup": null
                           },
                           {
                             "id": "pin-toilet",
@@ -9070,7 +9074,7 @@
                               "kind": "PLACE",
                               "placeId": "place-toilet"
                             },
-                            "filterGroup": "CONVENIENCE"
+                            "filterGroup": "RESTROOM"
                           },
                           {
                             "id": "pin-smoking",
@@ -9082,7 +9086,19 @@
                               "kind": "PLACE",
                               "placeId": "place-smoking"
                             },
-                            "filterGroup": "CONVENIENCE"
+                            "filterGroup": "SMOKING_AREA"
+                          },
+                          {
+                            "id": "pin-trash",
+                            "category": "trash",
+                            "label": "목 쓰레기통",
+                            "x": 0.48,
+                            "y": 0.88,
+                            "target": {
+                              "kind": "PLACE",
+                              "placeId": "place-trash"
+                            },
+                            "filterGroup": "TRASH_BIN"
                           }
                         ]
                       },
@@ -22791,18 +22807,17 @@
           "id": {
             "type": "string",
             "enum": [
-              "STUDENT_COUNCIL",
-              "EXPERIENCE",
-              "CONVENIENCE",
-              "FOOD_AND_BEVERAGE",
-              "PERFORMANCE"
+              "RESTROOM",
+              "PHOTO_BOOTH",
+              "SMOKING_AREA",
+              "TRASH_BIN"
             ],
-            "description": "지도 핀 대분류 ID. PLACE 핀은 하나를 반드시 가지며 AREA 핀은 null."
+            "description": "디자인의 지도 필터 칩 ID(화장실·포토부스·흡연구역·쓰레기통). 이 시설에 해당하는 PLACE 핀만 가지며 그 밖의 PLACE 핀과 AREA 핀은 null."
           },
           "label": {
             "type": "string",
             "minLength": 1,
-            "description": "현재 locale의 대분류 표시명"
+            "description": "현재 locale의 필터 표시명"
           }
         },
         "required": [
@@ -22810,7 +22825,7 @@
           "label"
         ],
         "additionalProperties": false,
-        "description": "현재 지도에 실제 PLACE 핀이 있는 대분류만 반환."
+        "description": "현재 지도에 실제 PLACE 핀이 있는 필터만 반환. `전체`는 클라이언트 기본값이라 포함하지 않음."
       },
       "Pin": {
         "type": "object",
@@ -22831,19 +22846,18 @@
               {
                 "type": "string",
                 "enum": [
-                  "STUDENT_COUNCIL",
-                  "EXPERIENCE",
-                  "CONVENIENCE",
-                  "FOOD_AND_BEVERAGE",
-                  "PERFORMANCE"
+                  "RESTROOM",
+                  "PHOTO_BOOTH",
+                  "SMOKING_AREA",
+                  "TRASH_BIN"
                 ],
-                "description": "지도 핀 대분류 ID. PLACE 핀은 하나를 반드시 가지며 AREA 핀은 null."
+                "description": "디자인의 지도 필터 칩 ID(화장실·포토부스·흡연구역·쓰레기통). 이 시설에 해당하는 PLACE 핀만 가지며 그 밖의 PLACE 핀과 AREA 핀은 null."
               },
               {
                 "type": "null"
               }
             ],
-            "description": "PLACE 핀은 대분류를 반드시 가지며 AREA 핀은 null. AREA 핀은 필터 대상이 아니고 항상 표시."
+            "description": "화장실·포토부스·흡연구역·쓰레기통 PLACE 핀만 값을 가짐. 그 밖의 PLACE 핀은 null이며 `전체`에서만 표시. AREA 핀은 null이며 필터와 무관하게 항상 표시."
           },
           "label": {
             "type": "string",
@@ -22872,7 +22886,7 @@
                     "enum": [
                       "PLACE"
                     ],
-                    "description": "장소 팝업. filterGroup으로 대분류 필터링."
+                    "description": "장소 팝업. filterGroup이 있으면 해당 필터에서, 없으면 `전체`에서만 표시."
                   },
                   "placeId": {
                     "type": "string",
@@ -22946,7 +22960,7 @@
             "items": {
               "$ref": "#/components/schemas/PinFilter"
             },
-            "description": "현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 대분류만 반환. 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외."
+            "description": "현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 필터만 반환. 화장실·포토부스·흡연구역·쓰레기통 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외."
           },
           "items": {
             "type": "array",

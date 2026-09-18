@@ -28,9 +28,10 @@
   `CatalogSnapshot`을 재사용하지 않고 revision-scoped 행을 직접 읽어 다른 locale, 현재가 아닌
   map asset version과 공개 API가 내보내지 않는 내용까지 보존한다. 계좌·혼잡도는 catalog 밖이므로
   포함하지 않는다.
-- export는 무손실이다. `PLACE` 핀의 filter group 누락과 부분 설정된 티켓 일정은 추측해 채우지
-  않고 각각 `LEGACY_FILTER_GROUPS_UNCONFIGURED`, `LEGACY_TICKET_SCHEDULE_UNCONFIGURED` finding으로
-  보고하며, 그 manifest의 import·publish는 승인된 값을 넣기 전까지 같은 코드로 실패한다.
+- export는 무손실이다. 부분 설정된 티켓 일정은 추측해 채우지 않고
+  `LEGACY_TICKET_SCHEDULE_UNCONFIGURED` finding으로 보고하며, 그 manifest의 import·publish는
+  승인된 값을 넣기 전까지 같은 코드로 실패한다. filter group이 없는 `PLACE` 핀은 디자인 필터
+  (화장실·포토부스·흡연구역·쓰레기통)에 속하지 않는 정상 핀이므로 finding이 아니다.
 - Current Festival은 서버 `FESTIVAL_ID` 환경변수로 선택한다. DB에서 현재 Festival을 자동
   추측하지 않으며, 설정된 회차에 published revision이 없으면 공개 콘텐츠를 가짜 revision으로
   제공하지 않는다.
