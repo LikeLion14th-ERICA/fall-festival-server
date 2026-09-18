@@ -370,3 +370,14 @@ test('Fixed prohibited-items guidance is available outside performance hours',as
   const english=(await call('/api/v2/prohibited-items?locale=en',{session})).body.data;
   assert.doesNotMatch(JSON.stringify(english),/[가-힣]/);
 });
+test('Crowd messages use the approved translation for each ready locale',async()=>{
+  const session='crowd-message-locales';await enableAllMockLocales(session);
+  const crowd=async locale=>(await call(`/api/v2/crowding?locale=${locale}`,{session})).body.data;
+  assert.equal((await crowd('ko')).status,'MODERATE');
+  assert.equal((await crowd('ko')).message,'재학생존의 공간이 절반 이상 찼어요.');
+  assert.equal((await crowd('en')).message,'At least half full');
+  assert.equal((await crowd('zh-Hans')).message,'已占用一半以上');
+  const beforeOpen=async locale=>(await call(`/api/v2/crowding?locale=${locale}`,{session,headers:{'X-Mock-Scenario':'before-open'}})).body.data.message;
+  assert.match(await beforeOpen('en'),/^Student Zone entry starts at \d{2}:\d{2} today$/);
+  assert.match(await beforeOpen('zh-Hans'),/^今日学生区\d{2}:\d{2}开放入场$/);
+});

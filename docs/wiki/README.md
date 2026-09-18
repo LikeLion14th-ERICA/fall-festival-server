@@ -24,10 +24,10 @@
 | 타임테이블·현재 시각선·반입 금지 물품 안내 | [타임테이블](product/timetable.md), [라인업](product/lineup.md) | 구현 시 API v2 `getTimetable`, `getProhibitedItems` 계약 동기화 |
 | 부스·주점·플리마켓·메뉴 | [부스&마켓](product/spaces.md) | 위치 연결은 지도 |
 | 지도·좌표·필터 | [지도](product/map.md), [학교 용어](product/terminology.md) | 지도 API·자산 |
-| 학교 명칭·공식 번역 | [용어](product/terminology.md), [결정 대기](product/decisions.md) | 다국어 |
+| 학교 명칭·공식 번역 | [용어](product/terminology.md), [승인 번역표](product/translations.md), [결정 대기](product/decisions.md) | 다국어 |
 | 스탬프·QR·경품 | [스탬프](product/stamp.md), [보안](engineering/security.md), [검증 서비스](engineering/test-service.md) | API v2 `getStampGuide`, `verifyStampReceipt` 계약 동기화 |
 | PWA·푸시·익명 상태 복원 | [검증 서비스](engineering/test-service.md), [보안](engineering/security.md), [운영](engineering/operations.md) | 해당 test 구현·API 절 |
-| 사용자 화면·문자열·번역 | [다국어](engineering/i18n.md), [품질](engineering/quality.md) | 해당 화면 도메인 |
+| 사용자 화면·문자열·번역 | [다국어](engineering/i18n.md), [승인 번역표](product/translations.md), [품질](engineering/quality.md) | 해당 화면 도메인 |
 | API·DB·schema·데이터 계약 | [API 규칙](engineering/api.md), [데이터 모델·ERD](engineering/data-model.md), [API 절 찾기](engineering/api-navigation.md) | 부스·지도 구현은 [부스·지도 공개 카탈로그](engineering/spaces-map-backend.md), 해당 도메인·계약 테스트 |
 | 원격 DB 최초 연결·migration·catalog import/publish 전 | [DB 읽기 전용 사전 점검](engineering/database-preflight.md), [운영](engineering/operations.md) | [원격 개발 환경 결정](../dev-deployment-decision.md) |
 | TICKET·GOODS 계좌 설정 CLI·역할 provisioning·retention | [계좌 운영 설정](engineering/operational-account-settings.md), [DB 읽기 전용 사전 점검](engineering/database-preflight.md), [보안](engineering/security.md) | 티켓 read 전환은 [외부인 티켓](product/ticket.md) |
