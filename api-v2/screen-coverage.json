@@ -279,8 +279,7 @@
       "operations": [
         "postAdminNotice",
         "getAdminNotice",
-        "putAdminNotice",
-        "previewNoticeTranslation"
+        "putAdminNotice"
       ],
       "browserData": [],
       "legacySource": {
@@ -303,8 +302,7 @@
       "name": "공지 템플릿 선택",
       "operations": [
         "getTemplates",
-        "getTemplate",
-        "previewNoticeTranslation"
+        "getTemplate"
       ],
       "browserData": [],
       "legacySource": {
@@ -1500,7 +1498,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "서버: Translations의 READY 필터 후 Notices.items 반환",
+      "target": "서버: Notice.contentLocale 대체 해석 후 Notices.items 반환",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/notice.md"
@@ -3264,7 +3262,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "AdminNotice.translations + NoticeTranslationPreview.canSave",
+      "target": "AdminNotice.translations (수동 ko·en 필수 입력, 자동 번역 없음)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/admin/notice.md"

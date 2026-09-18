@@ -85,7 +85,11 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(!route.scenarios.includes(scenario))failure(400,'UNKNOWN_SCENARIO','이 요청에서 지원하지 않는 시나리오입니다.');
       if(['all-languages','partial-translation'].includes(scenario))state.languages=['ko','en','zh-Hans','ja'];
       locale=query.locale||'ko';
-      if(!state.languages.includes(locale)){
+      // Notice resolves its own per-item contentLocale fallback instead of the
+      // site-wide "language not launched yet" gate the rest of the catalog uses.
+      if(route.operationId==='getNotices'){
+        if(!KNOWN_LOCALES.has(locale))failure(400,'INVALID_QUERY','요청 파라미터를 확인해 주세요.');
+      }else if(!state.languages.includes(locale)){
         const known=KNOWN_LOCALES.has(locale);locale='ko';
         failure(400,known?'LOCALE_NOT_READY':'INVALID_QUERY',known?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
       }
