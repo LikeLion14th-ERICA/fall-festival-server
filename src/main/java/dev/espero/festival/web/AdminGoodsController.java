@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,6 +68,13 @@ public class AdminGoodsController {
         this.adminContext = adminContext;
         this.clock = clock;
         this.objectMapper = objectMapper;
+    }
+
+    @GetMapping("/admin/goods")
+    public ResponseEntity<ApiResponse<GoodsAvailabilityListResponse>> getAdminGoods(HttpServletRequest request) {
+        validateQuery(request);
+        GoodsViewService.GoodsAvailabilityListSnapshot snapshot = views.availabilityList(request);
+        return ResponseEntity.ok(new ApiResponse<>(snapshot.response(), snapshot.meta()));
     }
 
     @PutMapping("/admin/goods/{goodsId}/combinations/{combinationId}/availability")

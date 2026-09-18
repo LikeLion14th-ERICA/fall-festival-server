@@ -3,6 +3,7 @@ package dev.espero.festival.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +40,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /** Exercises the administrator goods availability mutation against PostgreSQL. */
 @SpringBootTest(properties = "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf")
@@ -68,6 +71,9 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
 
     @Autowired
     private MutableClock clock;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MockMvc mvc;
     private int keySequence;
@@ -100,6 +106,70 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL
             )
             """, Map.of("id", ADMIN_ID));
+    }
+
+    @Test
+    void listsMixedAndSoldOutGoodsForAnAuthenticatedAdminWithUnscopedKoreanMeta() throws Exception {
+        GoodsFixture mixed = insertOptionsGoods(FESTIVAL_ID, "ON_SALE", "SOLD_OUT");
+        GoodsFixture soldOut = insertOptionsGoods(FESTIVAL_ID, "SOLD_OUT", "SOLD_OUT");
+
+        MvcResult result = mvc.perform(asAdmin(get("/api/v2/admin/goods")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(2)))
+            .andExpect(jsonPath("$.meta.revision").value(0))
+            .andExpect(jsonPath("$.meta.locale").value("ko"))
+            .andReturn();
+
+        JsonNode mixedItem = item(result, mixed.goodsId());
+        assertThat(statuses(mixedItem)).containsExactlyInAnyOrder("ON_SALE", "SOLD_OUT");
+        assertThat(mixedItem.path("allSoldOut").asBoolean()).isFalse();
+        assertThat(mixedItem.path("updatedAt").asString()).isNotBlank();
+
+        JsonNode soldOutItem = item(result, soldOut.goodsId());
+        assertThat(statuses(soldOutItem)).containsOnly("SOLD_OUT");
+        assertThat(soldOutItem.path("allSoldOut").asBoolean()).isTrue();
+        assertThat(auditCount()).isZero();
+        assertThat(idempotencyCount()).isZero();
+    }
+
+    @Test
+    void listsASingleGoodsWithItsOpaqueCombination() throws Exception {
+        GoodsFixture single = insertSingleGoods(FESTIVAL_ID, "ON_SALE");
+
+        MvcResult result = mvc.perform(asAdmin(get("/api/v2/admin/goods")))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JsonNode item = item(result, single.goodsId());
+        JsonNode combination = item.path("combinations").get(0);
+        assertThat(combination.path("combinationId").asString())
+            .isEqualTo(single.combinationIds().getFirst().toString());
+        assertThat(combination.has("colorId")).isTrue();
+        assertThat(combination.path("colorId").isNull()).isTrue();
+        assertThat(combination.has("sizeId")).isTrue();
+        assertThat(combination.path("sizeId").isNull()).isTrue();
+        assertThat(combination.path("status").asString()).isEqualTo("ON_SALE");
+        assertThat(item.path("allSoldOut").asBoolean()).isFalse();
+    }
+
+    @Test
+    void returnsAnEmptyListWhenNoGoodsExist() throws Exception {
+        mvc.perform(asAdmin(get("/api/v2/admin/goods")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.empty()))
+            .andExpect(jsonPath("$.meta.revision").value(0))
+            .andExpect(jsonPath("$.meta.locale").value("ko"));
+    }
+
+    @Test
+    void rejectsQueriesAndRequiresAdministratorAuthentication() throws Exception {
+        mvc.perform(asAdmin(get("/api/v2/admin/goods")).queryParam("locale", "ko"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+
+        mvc.perform(get("/api/v2/admin/goods"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
     }
 
     @Test
@@ -341,6 +411,45 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
         return new GoodsFixture(goodsId, combinationIds);
     }
 
+    private GoodsFixture insertSingleGoods(UUID festivalId, String status) {
+        UUID goodsId = UUID.randomUUID();
+        UUID combinationId = UUID.randomUUID();
+        jdbc.update("""
+            INSERT INTO goods (id, festival_id, option_mode, price_amount, created_at, updated_at)
+            VALUES (:id, :festivalId, 'SINGLE', 5000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """, Map.of("id", goodsId, "festivalId", festivalId));
+        jdbc.update("INSERT INTO goods_translations (goods_id, locale, name) VALUES (:id, 'ko', '단일 상품')",
+            Map.of("id", goodsId));
+        jdbc.update("INSERT INTO goods_translations (goods_id, locale, name) VALUES (:id, 'en', 'Single Goods')",
+            Map.of("id", goodsId));
+        jdbc.update("""
+            INSERT INTO goods_combinations (id, goods_id, color_id, size_id, availability, updated_at)
+            VALUES (:id, :goodsId, NULL, NULL, :availability, CURRENT_TIMESTAMP)
+            """, new MapSqlParameterSource()
+            .addValue("id", combinationId)
+            .addValue("goodsId", goodsId)
+            .addValue("availability", status));
+        return new GoodsFixture(goodsId, List.of(combinationId));
+    }
+
+    private JsonNode item(MvcResult result, UUID goodsId) throws Exception {
+        JsonNode items = objectMapper.readTree(result.getResponse().getContentAsString()).path("data").path("items");
+        for (JsonNode item : items) {
+            if (item.path("goodsId").asString().equals(goodsId.toString())) {
+                return item;
+            }
+        }
+        throw new AssertionError("Goods item was not returned: " + goodsId);
+    }
+
+    private List<String> statuses(JsonNode item) {
+        List<String> result = new ArrayList<>();
+        for (JsonNode combination : item.path("combinations")) {
+            result.add(combination.path("status").asString());
+        }
+        return result;
+    }
+
     private String combinationStatus(UUID combinationId) {
         return jdbc.queryForObject(
             "SELECT availability FROM goods_combinations WHERE id = :id",
@@ -371,6 +480,11 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
             Map.of("adminId", ADMIN_ID),
             Long.class
         );
+        return count == null ? 0 : count;
+    }
+
+    private long idempotencyCount() {
+        Long count = jdbc.queryForObject("SELECT count(*) FROM admin_idempotency_records", Map.of(), Long.class);
         return count == null ? 0 : count;
     }
 
