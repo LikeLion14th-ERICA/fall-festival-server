@@ -3,8 +3,8 @@
 ## Status
 
 - 상태: 개발 환경 DB 결정 갱신, 아직 backend를 provision하지 않음
-- 기준: `main` `840c5960155ba525824881fbc5a01e11948b216d`
-- Provider 정책 확인일: 2026-09-17
+- 기준: `main` `9357409` (2026-09-19, Flyway V1~V23)
+- Provider 정책 확인일: 2026-09-17 (provision 직전 재확인)
 - 범위: remote development only; production hosting 결정이 아님
 - 검증 게이트: `READ_ONLY_DATABASE_PREFLIGHT`, `DEPLOYMENT_VALIDATION_REQUIRED`
 
@@ -106,8 +106,10 @@ The team-provided PostgreSQL database is approved for remote development use. Re
 
 안전성 판정 전에는 `CREATE`, `ALTER`, `DROP`, `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, Flyway
 migrate, catalog import와 catalog publish를 실행하지 않는다. Flyway가 기본 활성화된 web/CLI
-process도 이 database를 대상으로 먼저 기동하지 않는다. Network access, database/schema 상태,
-migration history와 V1~V13 호환성을 확인한 뒤에만 mutation 단계로 진행한다. 공유 schema라면
+process도 이 database를 대상으로 먼저 기동하지 않는다. 이 점검은 저장소의 standalone
+`DatabasePreflightApplication`으로 수행한다(SELECT만 실행, 불명확하면 `STOP_AND_REVIEW`,
+[DB 읽기 전용 사전 점검](wiki/engineering/database-preflight.md)). Network access, database/schema 상태,
+migration history와 V1~V23 호환성을 확인한 뒤에만 mutation 단계로 진행한다. 공유 schema라면
 별도 database 또는 schema가 필요한지 다시 결정한다.
 
 팀에서 제공한 connection 정보는 다음 Spring 변수로 분리해 Render secret/environment settings에만
@@ -126,15 +128,16 @@ direct/pooled connection option은 read-only preflight와 제공 조건을 확�
 
 `FESTIVAL_ID`에는 read-only preflight와 이후 승인된 migration 결과로 이 development DB에 실제
 존재함을 확인한 `festivals.id`를 사용한다. 기존 festival이 있으면 그 사용 가능성을 먼저 검토하고,
-빈 호환 schema에 V1~V13을 적용한 경우에만 Flyway가 만든 development festival을 확인한다. V6 seed
+빈 호환 schema에 V1~V23을 적용한 경우에만 Flyway가 만든 development festival을 확인한다. V6 seed
 UUID를 무조건 가정하거나 production/shared 환경의 UUID를 추측해 사용하지 않는다. UUID literal은
 이 decision에 복제하지 않는다.
 
 ### Development catalog bootstrap
 
-Development catalog의 source는 향후 repository에 추가할 synthetic development manifest다.
-운영 DB dump, production/shared DB 복제, production credential과 승인되지 않은 실제 운영 데이터를
-사용하지 않는다. 실제 manifest 파일은 `chore/dev-server-deployment`에서 별도 review를 거쳐 만든다.
+Development catalog의 source는 저장소의 synthetic development manifest
+[`dev/catalog/development-catalog.json`](../dev/catalog/README.md)이다. 운영 DB dump,
+production/shared DB 복제, production credential과 승인되지 않은 실제 운영 데이터를 사용하지
+않는다. 예외로 HOME-008에서 확정한 총학생회 공식 채널 링크만 들어 있다.
 
 Database와 catalog lifecycle은 다음 gate를 따른다.
 
@@ -143,12 +146,12 @@ team-provided PostgreSQL development database
   -> READ_ONLY_DATABASE_PREFLIGHT (SELECT / metadata only)
   -> network, schema, flyway_schema_history와 기존 data 확인
   -> migration compatibility 판정
-  -> 안전할 때만 Flyway V1-V13 적용 또는 현재 migration 상태에서 continue
+  -> 안전할 때만 Flyway V1-V23 적용 또는 현재 migration 상태에서 continue
+  -> DB 제공자가 발급한 역할에 provisioning script 적용
   -> development DB의 실제 festivals.id를 FESTIVAL_ID로 결정
   -> 기존 festival/catalog data가 있으면 STOP_AND_REVIEW
-  -> CatalogCliApplication import <synthetic-manifest>
-  -> CatalogCliApplication validate <draft-revision>
-  -> CatalogCliApplication publish <draft-revision>
+  -> 로컬 catalog workbench 또는 CatalogCliApplication으로
+     import <synthetic-manifest> -> validate -> publish
   -> web backend 최초 시작 또는 실행 중인 backend의 controlled restart
   -> GET /readyz 확인
   -> public API smoke test
@@ -158,7 +161,9 @@ Database가 이미 festival 또는 catalog data를 포함하면 current revision
 festival ID와 기존 catalog 내용을 먼저 확인한다. 기존 데이터를 자동으로 덮어쓰거나 republish하지
 않으며 의도하지 않은 data가 있으면 `STOP_AND_REVIEW`한다.
 
-Migration compatibility가 확인된 뒤에만 `CatalogCliApplication`을 사용한다. 이 entry point는 web
+Migration compatibility가 확인된 뒤에만 `CatalogCliApplication` 또는
+[로컬 카탈로그 워크벤치](wiki/engineering/catalog-workbench.md)를 사용한다. 워크벤치는 loopback
+DB URL만 받으므로 원격 DB에는 승인된 SSH tunnel로 연결하고, export·publish 역할을 분리한다. 이 entry point는 web
 backend와 분리되어 있지만 startup에서 Flyway를 실행할 수 있으므로 preflight 전에는 대상 DB에
 연결하지 않는다. `import`는 manifest의 `festivalId`에 해당하는 기존 festival을 잠그고 새 draft
 revision을 만들며, `validate`와 `publish`는 import가 출력한 revision UUID를 받는다. 실제
@@ -173,6 +178,25 @@ Prohibited item/message는 계약과 validator가 empty/null을 허용하므로 
 같은 구조적 사실은 source of truth를 따르되, 미승인 실제 artist·booth·timetable, private URL과
 운영 DB 데이터를 복사하지 않는다. 특히 FestivalDay open/close 시각은 추측하지 않고 승인된
 development test-data 결정이 나온 뒤 manifest에 넣는다.
+
+### Migration 주의
+
+- V16은 기존 `crowding_state` 행이 있으면 `FESTIVAL_ID` placeholder를 요구하고, 축제·날짜가 맞지
+  않으면 중단한다.
+- V19는 기존 지도 핀의 이전 대분류 filter 값을 지우고 label을 삭제한다(디자인 필터로 교체).
+- V23은 운영 계좌 테이블의 key·제약·history trigger를 다시 만든다. 기존 TICKET·GOODS 값과 이력은
+  유지한다.
+- 계좌·role 관련 migration 뒤에는 역할 provisioning script를 다시 실행한다.
+
+### 역할 provisioning
+
+DB 제공자에게 migration, runtime, cleanup, account operator, catalog export, catalog publish,
+preflight 역할을 요청한다. migration 뒤 migration 역할로
+[`tools/database/provision-operational-account-roles.sql`](../tools/database/provision-operational-account-roles.sql)을
+`psql -v` 변수로 실행한다. 이 script는 계좌 테이블 권한을 나누고, provider가 schema 전체를
+grant했더라도 catalog 역할에서 계좌·혼잡도·공지·굿즈 테이블 권한을 회수한다. catalog 역할에는
+catalog 테이블(V22 `festival_links` 포함) 권한을 provider가 따로 준다. 단일 계정만 제공되면 역할
+분리를 강제할 수 없음을 기록하고 운영 배포는 진행하지 않는다.
 
 ## Networking / CORS
 
@@ -228,7 +252,11 @@ ADMIN_ALLOWED_ORIGIN=http://localhost:3001
 SERVER_ADDRESS=0.0.0.0
 PORT=10000
 SERVER_PORT=10000
+API_DOCS_ENABLED=true
 ```
+
+`API_DOCS_ENABLED=true`는 개발 서버에서만 켠다(`/docs` Swagger UI). 그 밖의 선택 설정은 README
+환경변수 표를 따른다.
 
 최초 관리자 생성에만 아래 두 값을 함께 사용할 수 있다. Login과 `/api/v2/admin/me`로 생성
 확인 후 두 값을 모두 제거하고 재시작한다.
@@ -244,15 +272,17 @@ ADMIN_BOOTSTRAP_PASSWORD=<bootstrap-password>
 ## Flyway
 
 기존 database가 비어 있다고 가정하지 않는다. 먼저 `READ_ONLY_DATABASE_PREFLIGHT`에서
-`flyway_schema_history`, schema와 기존 data를 확인하고 V1~V13 호환성을 판정한다. 안전하다고
-승인된 경우에만 빈 호환 schema에는 V1~V13을 적용하고, 기존 Flyway history가 있으면 확인된 현재
+`flyway_schema_history`, schema와 기존 data를 확인하고 V1~V23 호환성을 판정한다. 안전하다고
+승인된 경우에만 빈 호환 schema에는 V1~V23을 적용하고, 기존 Flyway history가 있으면 확인된 현재
 migration 상태에서 이어간다. 상태가 불명확하거나 공유 schema이면 migrate하지 않고
 `STOP_AND_REVIEW`한다. Production 또는 multi-instance 배포에서는 별도 migration gate를 다시
 결정한다.
 
 ## Known limitations
 
-- Render Free: 0.1 CPU, 512 MB RAM. Spring Boot가 이 한도에서 안정적으로 기동하는지는 미검증이다.
+- Render Free: 0.1 CPU, 512 MB RAM. 2026-09-19 로컬 Docker에서 같은 한도(`-m 512m --cpus 0.1`)로
+  기동하면 DB 없는 기본 profile 기준 약 41초, 메모리 123 MiB였다. `db` profile과 게시 catalog를
+  적재한 상태의 메모리·기동 시간은 배포 때 실측한다.
 - Idle: inbound traffic이 15분 없으면 sleep하므로 첫 요청과 wake-up이 느릴 수 있다.
 - Filesystem: restart, redeploy 또는 spin-down 뒤 유지되지 않으므로 영속 상태를 두지 않는다.
 - Database: Render에서의 network access, schema 상태, migration history와 공유 여부가 아직 미검증이다.
@@ -272,7 +302,8 @@ keep-alive hack은 추가하지 않는다. Render 무료 plan 수치와 lifecycl
 - [ ] 기존 table, `flyway_schema_history`, migration version과 festival table 확인
 - [ ] 현재 data와 동일 database/schema를 사용하는 다른 서비스·팀 여부 확인
 - [ ] Render에서 team-provided PostgreSQL로 network access 가능한지 확인
-- [ ] V1~V13 migration compatibility 검토와 mutation 승인 기록
+- [ ] V1~V23 migration compatibility 검토와 mutation 승인 기록
+- [ ] 역할 provisioning script 적용과 catalog 역할의 계좌·혼잡도·공지·굿즈 접근 거부 확인
 - [ ] 안전한 경우에만 Flyway 적용 또는 확인된 현재 migration 상태에서 continue
 - [ ] 실제 development festival/revision과 `FESTIVAL_ID` 확인
 - [ ] 기존 catalog data가 있으면 자동 변경 없이 `STOP_AND_REVIEW`
@@ -286,6 +317,8 @@ keep-alive hack은 추가하지 않는다. Render 무료 plan 수치와 lifecycl
 - [ ] Synthetic artist 하나의 `/api/v2/artists/{artistId}`가 200인지 확인
 - [ ] Synthetic performance 하나의 `/api/v2/performances/{performanceId}`가 200인지 확인
 - [ ] `/api/v2/prohibited-items`가 계약에 맞는 empty 또는 populated 응답인지 확인
+- [ ] `/api/v2/config`의 축제명·날짜·공식 채널 링크 확인
+- [ ] `/docs` Swagger UI에서 `[서버 미구현]` 표시가 기대와 같은지 확인
 - [ ] 모든 smoke response의 `meta.revision`이 published development revision인지 확인
 - [ ] heap 사용량과 OOM/restart 여부 확인
 - [ ] 위 public GET을 Next.js same-origin proxy 경로로도 확인
@@ -313,9 +346,8 @@ migration strategy를 다시 결정한다.
 
 ## Follow-ups
 
-다음 작업은 `chore/dev-server-deployment`에서 provider resource를 만들기 전에 account/plan과
-frontend rewrite 지원을 확인하고, synthetic development manifest를 review 가능한 repository
-artifact로 추가한다. 팀 제공 PostgreSQL에는 먼저 read-only preflight만 수행하고 compatibility와
+다음 작업은 provider resource를 만들기 전에 account/plan과 frontend rewrite 지원을 확인한다.
+synthetic development manifest는 이미 저장소에 있다. 팀 제공 PostgreSQL에는 먼저 read-only preflight만 수행하고 compatibility와
 mutation 승인을 확인한다. 그 뒤에만 필요한 Flyway migration과 non-web catalog CLI의 import,
 validate, publish를 수행하고 Render web backend를 시작해 validation checklist의 실측 결과를
 기록한다.
