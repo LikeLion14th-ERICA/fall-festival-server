@@ -23,6 +23,16 @@
 Spring bean으로 추가하며 controller, API 계약 또는 migration을 추가하지 않고도 같은
 lock·batch·결과 경계를 재사용한다.
 
+파일처럼 DB 밖의 부수 효과가 있는 target은 행을 지운 뒤 `context.afterCommit(action)`으로
+작업을 예약한다. 예약한 작업은 cleanup transaction이 **commit된 뒤에만** 실행되고,
+transaction이 rollback되면 실행되지 않는다. dry-run에서는 아무것도 예약하지 않는다. 실패한
+작업은 `FESTIVAL_CLEANUP_POST_COMMIT_MAX_ATTEMPTS`번까지 재시도하며, 끝내 실패해도 이미
+commit된 삭제를 되돌리지 않고 결과의 `postCommit`과 `post_commit_failed_count`로 보고한다.
+행은 이미 사라졌으므로 작업은 멱등이어야 한다. 파일 삭제는
+`CleanupPostCommitAction.deleteFile(target, path)`를 쓰며, 없는 파일은 이미 삭제된 것으로
+처리한다. 재시도 뒤에도 남은 파일은 소유 담당자가 별도 sweep으로 정리한다. 로그에는 예외
+종류만 남기고 파일 경로는 남기지 않는다.
+
 ## 운영 설정
 
 설정은 Spring relaxed binding을 사용한다. 아래 환경변수는 `db` profile과 실제 DB를
@@ -35,6 +45,8 @@ lock·batch·결과 경계를 재사용한다.
 | `FESTIVAL_CLEANUP_SCHEDULE_INTERVAL_MS` | `86400000` | scheduler fixed delay |
 | `FESTIVAL_CLEANUP_SCHEDULE_INITIAL_DELAY_MS` | `0` | 첫 실행 전 지연 |
 | `FESTIVAL_CLEANUP_BATCH_SIZE` | `500` | 1~500행 |
+| `FESTIVAL_CLEANUP_POST_COMMIT_MAX_ATTEMPTS` | `3` | commit 뒤 작업의 최대 시도 횟수(1~10) |
+| `FESTIVAL_CLEANUP_POST_COMMIT_RETRY_DELAY_MS` | `1000` | commit 뒤 작업 재시도 간격 |
 | `FESTIVAL_CLEANUP_DATASOURCE_URL` | 없음 | 전용 cleanup PostgreSQL URL |
 | `FESTIVAL_CLEANUP_DATASOURCE_USERNAME` | 없음 | 전용 cleanup DB 사용자 |
 | `FESTIVAL_CLEANUP_DATASOURCE_PASSWORD` | 없음 | 전용 cleanup DB 비밀값 |
@@ -52,7 +64,7 @@ grant provisioning은 운영 환경에서 관리한다. URL, 사용자, 비밀�
 이벤트를 metric label로 사용할 수 있다.
 
 ```text
-cleanup_run status=COMPLETED mode=DELETE target_count=1 eligible_count=42 deleted_count=42 duration_ms=...
+cleanup_run status=COMPLETED mode=DELETE target_count=1 eligible_count=42 deleted_count=42 post_commit_count=0 post_commit_failed_count=0 duration_ms=...
 cleanup_target target=admin_audit_events dry_run=false eligible_count=42 deleted_count=42 batch_count=1
 ```
 

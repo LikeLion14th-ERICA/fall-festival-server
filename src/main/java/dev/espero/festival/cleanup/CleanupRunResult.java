@@ -10,7 +10,8 @@ public record CleanupRunResult(
     CleanupMode mode,
     Instant startedAt,
     Instant finishedAt,
-    List<CleanupTargetResult> targets
+    List<CleanupTargetResult> targets,
+    List<CleanupPostCommitResult> postCommit
 ) {
 
     public CleanupRunResult {
@@ -19,6 +20,17 @@ public record CleanupRunResult(
         Objects.requireNonNull(startedAt, "Cleanup start time is required");
         Objects.requireNonNull(finishedAt, "Cleanup finish time is required");
         targets = List.copyOf(Objects.requireNonNull(targets, "Cleanup target results are required"));
+        postCommit = List.copyOf(Objects.requireNonNull(postCommit, "Post-commit results are required"));
+    }
+
+    public CleanupRunResult(
+        CleanupRunStatus status,
+        CleanupMode mode,
+        Instant startedAt,
+        Instant finishedAt,
+        List<CleanupTargetResult> targets
+    ) {
+        this(status, mode, startedAt, finishedAt, targets, List.of());
     }
 
     public long eligibleCount() {
@@ -31,5 +43,9 @@ public record CleanupRunResult(
 
     public long wouldDeleteCount() {
         return targets.stream().mapToLong(CleanupTargetResult::wouldDeleteCount).sum();
+    }
+
+    public long postCommitFailedCount() {
+        return postCommit.stream().filter(result -> !result.succeeded()).count();
     }
 }

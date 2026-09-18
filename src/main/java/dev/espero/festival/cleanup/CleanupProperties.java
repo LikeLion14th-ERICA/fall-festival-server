@@ -18,6 +18,8 @@ public class CleanupProperties {
     private long scheduleInitialDelayMs;
     private int batchSize = CleanupTargetContext.MAX_BATCH_SIZE;
     private long advisoryLockKey = 2_026_091_800_001L;
+    private int postCommitMaxAttempts = 3;
+    private long postCommitRetryDelayMs = 1_000L;
     private CleanupDataSourceProperties datasource = new CleanupDataSourceProperties();
 
     public boolean isScheduleEnabled() {
@@ -77,6 +79,28 @@ public class CleanupProperties {
 
     public void setAdvisoryLockKey(long advisoryLockKey) {
         this.advisoryLockKey = advisoryLockKey;
+    }
+
+    public int getPostCommitMaxAttempts() {
+        return postCommitMaxAttempts;
+    }
+
+    public void setPostCommitMaxAttempts(int postCommitMaxAttempts) {
+        if (postCommitMaxAttempts < 1 || postCommitMaxAttempts > 10) {
+            throw new IllegalArgumentException("Post-commit attempts must be between 1 and 10");
+        }
+        this.postCommitMaxAttempts = postCommitMaxAttempts;
+    }
+
+    public long getPostCommitRetryDelayMs() {
+        return postCommitRetryDelayMs;
+    }
+
+    public void setPostCommitRetryDelayMs(long postCommitRetryDelayMs) {
+        if (postCommitRetryDelayMs < 0) {
+            throw new IllegalArgumentException("Post-commit retry delay cannot be negative");
+        }
+        this.postCommitRetryDelayMs = postCommitRetryDelayMs;
     }
 
     public CleanupDataSourceProperties getDatasource() {
