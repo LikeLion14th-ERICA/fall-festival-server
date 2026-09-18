@@ -22,11 +22,16 @@ manifest는 환경에 독립적이어야 하므로 `festivalId`를 포함하지 
 환경에서 import할 때는 이미 존재하는 개발 festival UUID를 명시적으로 전달해야 합니다.
 
 ```text
-Catalog CLI import dev/catalog/development-catalog.json --festival-id=<existing-development-festival-uuid>
+Catalog CLI import dev/catalog/development-catalog.json --festival-id=<existing-development-festival-uuid> --baseline-revision=<current-published-revision-uuid|none>
 ```
 
 Catalog CLI는 `FESTIVAL_ID` 환경변수를 import 대상의 fallback으로 사용하지 않습니다.
-항상 `--festival-id`를 명시합니다. Catalog CLI는 Flyway도 실행하지 않으므로 대상 DB가
+항상 `--festival-id`를 명시합니다. 같은 이유로 manifest는 `baselineRevisionId`도 담지 않으며,
+import 직전 read-only preflight로 확인한 그 festival의 현재 published revision을
+`--baseline-revision`으로 전달합니다. published revision이 없으면 `none`을 씁니다. 준비하는
+동안 다른 게시가 끼어들면 import와 publish가 `BASE_REVISION_CONFLICT`로 멈춥니다.
+계좌는 catalog가 아닌 운영 계좌 설정이므로 이 manifest의 `ticketGuide`에는 계좌·송금 링크
+field가 없습니다. Catalog CLI는 Flyway도 실행하지 않으므로 대상 DB가
 필요한 schema version까지 먼저 migration되어 있어야 합니다.
 
 ## Operational sequence

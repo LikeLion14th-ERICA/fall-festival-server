@@ -28,6 +28,11 @@
 - 카탈로그 부하 도구의 500 VU 로컬 회귀 실행은 non-2xx 응답, timeout, transport error가
   모두 0건이어야 한다. 이는 synthetic fixture와 localhost 경로의 회귀 기준이며, 위 운영
   부하의 배포 환경 검증을 대신하지 않는다.
+- 같은 도구는 동적 polling을 고정 도착률로 재현하는 `rate-67` 단계를 함께 실행한다. 혼잡도
+  34 RPS와 티켓 안내 33 RPS를 60초 동안 제공하고, 경로별 p95 300ms·p99 1초 이하, 예상 밖
+  오류(transport·timeout·429 외 non-2xx) 0.1% 이하, 달성률 95% 이상을 요구한다. 결과에는
+  5xx·429 수, heap·GC, PostgreSQL 연결·active·lock 대기를 함께 남긴다. Render 512MB 같은
+  단일 환경 결과만으로 운영 용량을 확정하지 않는다.
 
 ## 구현 규칙
 

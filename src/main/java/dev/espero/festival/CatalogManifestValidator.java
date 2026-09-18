@@ -163,7 +163,8 @@ public final class CatalogManifestValidator {
             if (pin.placeId() != null) {
                 require(places.containsKey(pin.placeId()), "mapPins references an unknown place");
                 require(pin.filterGroup() != null && FILTER_GROUPS.contains(pin.filterGroup()),
-                    "PLACE mapPins require a supported filterGroup");
+                    CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED
+                        + ": PLACE mapPins require a supported filterGroup");
             } else {
                 require(areas.containsKey(pin.areaId()), "mapPins references an unknown area");
                 require(pin.filterGroup() == null, "AREA mapPins must not have a filterGroup");
@@ -466,12 +467,6 @@ public final class CatalogManifestValidator {
         require(guide != null, "ticketGuide is required");
         require(guide.unitPriceAmount() == null || guide.unitPriceAmount() >= 0,
             "ticketGuide.unitPriceAmount must be non-negative");
-        together(guide.accountBankName(), guide.accountNumber(), guide.accountHolder(),
-            "ticketGuide account fields");
-        together(guide.transferLinkLabel(), guide.transferLinkUrl(), "ticketGuide transfer link");
-        if (guide.transferLinkUrl() != null) {
-            https(guide.transferLinkUrl(), "ticketGuide.transferLinkUrl");
-        }
         for (String instruction : guide.instructions()) {
             text(instruction, "ticketGuide.instructions");
         }
@@ -481,7 +476,8 @@ public final class CatalogManifestValidator {
         boolean completeSchedule = guide.festivalStartDate() != null && guide.festivalEndDate() != null
             && guide.dailyTransferOpenTime() != null && guide.dailyTransferCloseTime() != null
             && guide.dailyPickupOpenTime() != null && guide.dailyPickupCloseTime() != null;
-        require(!schedule || completeSchedule, "ticketGuide schedule fields must be complete");
+        require(!schedule || completeSchedule, CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED
+            + ": ticketGuide schedule fields must be complete");
         if (completeSchedule) {
             require(!guide.festivalStartDate().isAfter(guide.festivalEndDate()),
                 "ticketGuide festival dates are reversed");
@@ -625,24 +621,6 @@ public final class CatalogManifestValidator {
     private void optionalText(String value, String field) {
         if (value != null) {
             text(value, field);
-        }
-    }
-
-    private void together(String first, String second, String field) {
-        require((first == null) == (second == null), field + " fields must be supplied together");
-        if (first != null) {
-            text(first, field);
-            text(second, field);
-        }
-    }
-
-    private void together(String first, String second, String third, String field) {
-        require((first == null) == (second == null) && (second == null) == (third == null),
-            field + " fields must be supplied together");
-        if (first != null) {
-            text(first, field);
-            text(second, field);
-            text(third, field);
         }
     }
 

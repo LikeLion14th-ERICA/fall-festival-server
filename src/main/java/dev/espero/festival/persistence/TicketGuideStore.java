@@ -33,12 +33,14 @@ public class TicketGuideStore {
      * A ticket guide is only read for the captured published revision. Its
      * map target is loaded by the same catalog snapshot, never as four
      * independently trusted strings from this query.
+     *
+     * <p>The legacy account and transfer-link columns stay in the table for
+     * history but are never selected here: the served account comes from the
+     * operational account settings instead.</p>
      */
     public Optional<TicketGuideConfig> find(UUID festivalRevisionId) {
         return jdbc.query("""
-            SELECT current.unit_price_amount, current.account_bank_name,
-                   current.account_number, current.account_holder,
-                   current.transfer_link_label, current.transfer_link_url,
+            SELECT current.unit_price_amount,
                    current.instructions, current.festival_start_date,
                    current.festival_end_date, current.daily_transfer_open_time,
                    current.daily_transfer_close_time, current.daily_pickup_open_time,
@@ -53,11 +55,6 @@ public class TicketGuideStore {
     private TicketGuideConfig map(ResultSet resultSet) throws SQLException {
         return new TicketGuideConfig(
             (Integer) resultSet.getObject("unit_price_amount"),
-            resultSet.getString("account_bank_name"),
-            resultSet.getString("account_number"),
-            resultSet.getString("account_holder"),
-            resultSet.getString("transfer_link_label"),
-            resultSet.getString("transfer_link_url"),
             readStrings(resultSet, "instructions"),
             resultSet.getObject("festival_start_date", LocalDate.class),
             resultSet.getObject("festival_end_date", LocalDate.class),

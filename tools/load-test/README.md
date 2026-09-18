@@ -3,12 +3,15 @@
 This is an opt-in, local-only harness for the public catalog. It creates a disposable
 PostgreSQL 16 Docker container, starts the packaged Spring JAR with the `db` profile,
 loads a synthetic repeatable Flyway fixture, verifies `/readyz` and the seven public
-catalog/ticket routes, then runs a dependency-free Java 21+ closed-loop load generator.
+catalog/ticket routes, then runs a dependency-free Java 21+ load generator: closed-loop
+virtual-user stages for the catalog and an open-loop fixed-rate stage for the polled
+dynamic resources.
 
 The fixture is generated at runtime and is never part of the normal migration path or
 production seed. It contains 100 spaces, one overview map, six area maps, 101 places,
-and 207 pins. The generator uses one outstanding request per virtual user and rotates
-these fixed endpoints:
+and 207 pins, plus one synthetic FestivalDay covering the run's KST date so the crowding
+endpoint serves its normal OPEN path. The virtual-user stages use one outstanding request
+per virtual user and rotate these fixed endpoints:
 
 ```text
 /api/v2/spaces
@@ -74,6 +77,34 @@ early. Server output is saved as `server.log` and `server-error.log`; generator 
 `load-generator.log` and `load-generator-error.log`. `/readyz` is a required gate
 because a process can remain alive after snapshot loading fails.
 
+## Dynamic polling stage (`rate-67`)
+
+After the virtual-user stages the generator offers a fixed arrival rate for
+`DynamicStageSeconds` (default 60): `/api/v2/crowding` at 34 RPS and
+`/api/v2/ticket-guide` at 33 RPS, 67 RPS in total. This models 500 visible clients that
+each poll two dynamic resources every 15 seconds. Each route is dispatched on an absolute
+schedule regardless of earlier responses, so a slow server shows up as latency and errors
+instead of silently lowering the offered load.
+
+The stage fails the run when any target is missed:
+
+| Target | Limit |
+|---|---|
+| p95 per route | 300 ms |
+| p99 per route | 1 s |
+| Unexpected errors (transport, timeout, non-2xx other than 429) | 0.1 % of requests |
+| Achieved rate per route | at least 95 % of the offered rate |
+
+`load-results.json` records p95, p99, 5xx and 429 counts for every stage and the offered
+rate, targets, violations and pass flag for `rate-67`. `db-samples.csv` samples the
+PostgreSQL side once per second: client connections, active, idle-in-transaction,
+ungranted locks and lock waits. The server exposes no metrics endpoint, so the Hikari pool
+(Spring Boot default maximum 10) is observed through `pg_stat_activity`;
+`environment-and-gc.json` summarizes per-stage peaks next to the jstat heap and GC data.
+
+These targets check this machine and fixture only. A 512 MB Render instance or any other
+single result does not establish production capacity.
+
 ## Observed local run
 
 The three most recent full runs completed on 2026-09-16 with Zulu Java 25.0.2 and Docker
@@ -87,3 +118,16 @@ endpoint p95 values were 3.746 / 9.472 / 124.248 ms. Response bytes were
 completed their 500-VU stages with 1,011,491 / 999,795 requests, 113.255 / 104.007 ms
 maximum endpoint p95 values, and zero non-2xx responses, timeouts and transport errors.
 These are machine-specific localhost observations and have no production SLA meaning.
+
+The first run with the dynamic stage completed on 2026-09-18 with the same toolchain. The
+100/200/500 VU stages completed 459,764 / 444,885 / 458,197 requests with zero non-2xx
+responses, timeouts and transport errors. `/api/v2/ticket-guide` now reads the current
+account setting on each request, so it is slower than the in-memory catalog routes under
+closed-loop saturation: its p95 was 77.090 / 171.541 / 205.083 ms and its p99
+108.376 / 245.121 / 311.194 ms, against 1.4 to 33.7 ms p95 for the other routes. The
+`rate-67` stage offered 34 + 33 RPS for 60 seconds, completed 4,022 requests at
+34.01 / 33.01 RPS and passed: crowding p95 5.137 ms and p99 6.380 ms, ticket guide p95
+3.548 ms and p99 4.231 ms, zero unexpected errors, 5xx and 429. PostgreSQL showed at most
+10 client connections, 1 active and 1 idle-in-transaction during `rate-67`, and no
+ungranted locks or lock waits in any stage. Peak heap used during `rate-67` was
+232,126.0 KB with 3 GC cycles and 0.006 seconds of GC time.

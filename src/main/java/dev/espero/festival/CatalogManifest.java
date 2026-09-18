@@ -11,9 +11,15 @@ import java.util.UUID;
  * A complete, typed catalog revision input. It intentionally contains no
  * datasource settings, receipt verification code, SQL, or remote download instruction.
  * Jackson rejects fields outside this shape in CatalogManifestReader.
+ *
+ * <p>{@code baselineRevisionId} is the published revision this content was
+ * edited from. Only the first catalog of a festival may leave it null, and an
+ * import whose baseline no longer matches the current published revision is
+ * refused.</p>
  */
 public record CatalogManifest(
     UUID festivalId,
+    UUID baselineRevisionId,
     List<FestivalDay> festivalDays,
     List<Space> spaces,
     List<SpaceTranslation> spaceTranslations,
@@ -300,13 +306,13 @@ public record CatalogManifest(
         String message
     ) {}
 
+    /**
+     * Ticket content for one revision. Account and transfer-link fields are
+     * intentionally absent, so a manifest that still carries them is rejected
+     * as an unknown property instead of silently importing an account.
+     */
     public record TicketGuide(
         Integer unitPriceAmount,
-        String accountBankName,
-        String accountNumber,
-        String accountHolder,
-        String transferLinkLabel,
-        String transferLinkUrl,
         String mapId,
         String placeId,
         String pinId,

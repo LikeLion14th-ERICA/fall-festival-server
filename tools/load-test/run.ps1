@@ -2,6 +2,7 @@
 param(
     [int]$WarmupSeconds = 10,
     [int]$StageSeconds = 30,
+    [int]$DynamicStageSeconds = 60,
     [int]$MaxSupportedVUs = 500,
     [string]$OutputDirectory = "$(Join-Path (Get-Location) 'target\load-test-results')"
 )
@@ -23,6 +24,7 @@ $resultPath = Join-Path $runDirectory 'load-results.json'
 $jstatPath = (Get-Command jstat -ErrorAction Stop).Source
 $server = $null
 $sampler = $null
+$dbSampler = $null
 $stdoutTask = $null
 $stderrTask = $null
 $serverLog = $null
@@ -107,19 +109,25 @@ try {
         $smokeReadyPath = Join-Path $runDirectory 'smoke-ready'
         Write-RunStatus 'server-started' @{ pid = $server.Id; port = $port }
         $samplerScript = Join-Path $root 'tools\load-test\jstat-sampler.ps1'
-        $samplerArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$samplerScript`" -ProcessId $($server.Id) -OutputPath `"$samplesPath`" -JstatPath `"$jstatPath`" -WarmupSeconds $WarmupSeconds -StageSeconds $StageSeconds -ReadyPath `"$smokeReadyPath`""
+        $samplerArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$samplerScript`" -ProcessId $($server.Id) -OutputPath `"$samplesPath`" -JstatPath `"$jstatPath`" -WarmupSeconds $WarmupSeconds -StageSeconds $StageSeconds -DynamicStageSeconds $DynamicStageSeconds -ReadyPath `"$smokeReadyPath`""
         $sampler = Start-Process powershell -WindowStyle Hidden -PassThru -ArgumentList $samplerArgs
+        $dbSamplesPath = Join-Path $runDirectory 'db-samples.csv'
+        $dbSamplerScript = Join-Path $root 'tools\load-test\db-sampler.ps1'
+        $dbSamplerArgs = "-NoProfile -ExecutionPolicy Bypass -File `"$dbSamplerScript`" -Container $container -Database espero_load -OutputPath `"$dbSamplesPath`" -WarmupSeconds $WarmupSeconds -StageSeconds $StageSeconds -DynamicStageSeconds $DynamicStageSeconds -ReadyPath `"$smokeReadyPath`""
+        $dbSampler = Start-Process powershell -WindowStyle Hidden -PassThru -ArgumentList $dbSamplerArgs
 
         Write-RunStatus 'load-running' @{ maxSupportedVUs = $MaxSupportedVUs }
-        & java tools/load-test/CatalogLoadGenerator.java --base-url "http://127.0.0.1:$port" --output $resultPath --status-file (Join-Path $runDirectory 'load-status.json') --smoke-ready-file $smokeReadyPath --warmup-ms ($WarmupSeconds * 1000) --stage-ms ($StageSeconds * 1000) --max-supported-vus $MaxSupportedVUs 1> $loadLog 2> $loadError
+        & java tools/load-test/CatalogLoadGenerator.java --base-url "http://127.0.0.1:$port" --output $resultPath --status-file (Join-Path $runDirectory 'load-status.json') --smoke-ready-file $smokeReadyPath --warmup-ms ($WarmupSeconds * 1000) --stage-ms ($StageSeconds * 1000) --dynamic-stage-ms ($DynamicStageSeconds * 1000) --max-supported-vus $MaxSupportedVUs 1> $loadLog 2> $loadError
         $loadExit = $LASTEXITCODE
         [pscustomobject]@{ exitCode = $loadExit; at = [DateTime]::UtcNow.ToString('o') } | ConvertTo-Json | Set-Content $loadExitPath
         if ($sampler -and -not $sampler.HasExited) { Wait-Process -Id $sampler.Id -Timeout 30 -ErrorAction SilentlyContinue }
         if ($sampler -and -not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
+        if ($dbSampler -and -not $dbSampler.HasExited) { Wait-Process -Id $dbSampler.Id -Timeout 30 -ErrorAction SilentlyContinue }
+        if ($dbSampler -and -not $dbSampler.HasExited) { Stop-Process -Id $dbSampler.Id -Force -ErrorAction SilentlyContinue }
 
         $samples = if (Test-Path $samplesPath) { @(Import-Csv $samplesPath) } else { @() }
         $previousSample = $null
-        $jstatSummary = foreach ($stageName in @('warmup', 'vus-100', 'vus-200', 'vus-500')) {
+        $jstatSummary = foreach ($stageName in @('warmup', 'vus-100', 'vus-200', 'vus-500', 'rate-67')) {
             $stageSamples = @($samples | Where-Object stage -eq $stageName)
             if ($stageSamples.Count -gt 0) {
                 $baselineSample = if ($previousSample) { $previousSample } else { $stageSamples[0] }
@@ -137,7 +145,22 @@ try {
                 $previousSample = $lastSample
             }
         }
-        [pscustomobject]@{ machine = [Environment]::MachineName; javaExecutable = (Get-Command java).Source; jstat = $jstatPath; fixture = 'synthetic:100 spaces, 7 maps, 101 places, 207 pins'; localhostOnly = $true; jstatStages = @($jstatSummary) } | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $runDirectory 'environment-and-gc.json')
+        $dbSamples = if (Test-Path $dbSamplesPath) { @(Import-Csv $dbSamplesPath) } else { @() }
+        $dbSummary = foreach ($stageName in @('warmup', 'vus-100', 'vus-200', 'vus-500', 'rate-67')) {
+            $stageSamples = @($dbSamples | Where-Object stage -eq $stageName)
+            if ($stageSamples.Count -gt 0) {
+                [pscustomobject]@{
+                    stage = $stageName
+                    samples = $stageSamples.Count
+                    peakConnections = [int](($stageSamples | Measure-Object connections -Maximum).Maximum)
+                    peakActive = [int](($stageSamples | Measure-Object active -Maximum).Maximum)
+                    peakIdleInTransaction = [int](($stageSamples | Measure-Object idleInTransaction -Maximum).Maximum)
+                    peakUngrantedLocks = [int](($stageSamples | Measure-Object ungrantedLocks -Maximum).Maximum)
+                    peakLockWaits = [int](($stageSamples | Measure-Object lockWaits -Maximum).Maximum)
+                }
+            }
+        }
+        [pscustomobject]@{ machine = [Environment]::MachineName; hikariMaximumPoolSize = 'Spring Boot default (10); pool usage is observed from pg_stat_activity'; database = @($dbSummary); javaExecutable = (Get-Command java).Source; jstat = $jstatPath; fixture = 'synthetic:100 spaces, 7 maps, 101 places, 207 pins'; localhostOnly = $true; jstatStages = @($jstatSummary) } | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $runDirectory 'environment-and-gc.json')
         if ($loadExit -ne 0) { throw "HTTP load generator failed with exit code $loadExit" }
         Write-RunStatus 'load-complete'
         Write-RunStatus 'complete'
@@ -146,6 +169,7 @@ try {
     finally {
         try {
             if ($sampler -and -not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
+            if ($dbSampler -and -not $dbSampler.HasExited) { Stop-Process -Id $dbSampler.Id -Force -ErrorAction SilentlyContinue }
             if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue }
             if ($stdoutTask) { [System.IO.File]::WriteAllText($serverLog, $stdoutTask.GetAwaiter().GetResult()) }
             if ($stderrTask) { [System.IO.File]::WriteAllText($serverError, $stderrTask.GetAwaiter().GetResult()) }

@@ -96,7 +96,10 @@ class DatabasePreflightPostgresql17IntegrationTest {
             .containsEntry("transactionIsolation", "repeatable read");
         assertThat(report.facts().get("postgresqlVersion")).startsWith("17.");
         assertThat(report.migrations()).hasSize(MigrationInventory.load().migrations().size());
-        assertThat(report.migrations()).last().extracting(migration -> migration.get("version")).isEqualTo("17");
+        String latestVersion = String.valueOf(MigrationInventory.load().migrations().stream()
+            .mapToInt(MigrationInventory.Migration::version).max().orElseThrow());
+        assertThat(report.migrations()).last().extracting(migration -> migration.get("version"))
+            .isEqualTo(latestVersion);
         assertThat(statements).isNotEmpty();
         assertThat(rolledBack[0]).isTrue();
         assertThat(scalar("SELECT count(*) FROM flyway_schema_history")).isEqualTo(migrationCount);

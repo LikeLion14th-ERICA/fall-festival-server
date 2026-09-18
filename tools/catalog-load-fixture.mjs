@@ -54,5 +54,11 @@ push(`INSERT INTO map_pins (festival_revision_id, map_id, map_version, id, categ
 push(`INSERT INTO map_pin_translations (festival_revision_id, map_id, map_version, pin_id, locale, label) VALUES (${q(revision)}, 'map-overview', 'overview-v1', 'pin-ticket-zone', 'ko', 'Synthetic ticket zone')`);
 push(`UPDATE ticket_guide_revisions SET map_id = 'map-overview', place_id = 'place-ticket-zone', pin_id = 'pin-ticket-zone', map_version = 'overview-v1' WHERE festival_revision_id = ${q(revision)} AND id = 1`);
 
+// The crowding endpoint reads the published FestivalDay schedule. One synthetic
+// day covering the whole KST date keeps it OPEN, so the dynamic load stage
+// exercises the saved-state lookup rather than a schedule error.
+const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+push(`INSERT INTO festival_days (id, festival_revision_id, festival_date, opens_at, closes_at, created_at, updated_at) VALUES (gen_random_uuid(), ${q(revision)}, DATE ${q(kstToday)}, TIMESTAMPTZ ${q(`${kstToday}T00:00:00+09:00`)}, TIMESTAMPTZ ${q(`${kstToday}T23:59:59+09:00`)}, now(), now())`);
+
 fs.writeFileSync(output, `${sql.join('\n')}\n`, 'utf8');
-console.log(JSON.stringify({ output, spaces: 100, maps: 7, places: 101, pins: 207, ticketZone: true }));
+console.log(JSON.stringify({ output, spaces: 100, maps: 7, places: 101, pins: 207, ticketZone: true, festivalDay: kstToday }));

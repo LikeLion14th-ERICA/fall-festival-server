@@ -62,16 +62,38 @@ public class CatalogRevisionService {
     /** Reads, validates and atomically inserts a new draft revision for an explicit festival. */
     @Transactional
     public UUID importManifest(java.nio.file.Path manifestPath, String actor, UUID festivalIdOverride) {
+        return importManifest(manifestPath, actor, festivalIdOverride, null);
+    }
+
+    /**
+     * Imports with an operator-stated baseline. A shared manifest that does not
+     * name an environment's published revision gets it from the command line;
+     * a manifest that does name one must agree with the override.
+     */
+    @Transactional
+    public UUID importManifest(
+        java.nio.file.Path manifestPath,
+        String actor,
+        UUID festivalIdOverride,
+        BaselineOverride baselineOverride
+    ) {
         CatalogManifestReader.ManifestDocument document = manifests.read(manifestPath, festivalIdOverride);
         CatalogManifest manifest = document.manifest();
         String safeActor = actor(actor);
         UUID festivalId = document.festivalId();
+        UUID expectedBaseline = manifest.baselineRevisionId();
+        if (baselineOverride != null) {
+            require(expectedBaseline == null || expectedBaseline.equals(baselineOverride.revisionId()),
+                "Manifest baselineRevisionId does not match --baseline-revision.");
+            expectedBaseline = baselineOverride.revisionId();
+        }
         lockFestival(festivalId);
+        UUID baselineRevisionId = requireExpectedPublished(festivalId, expectedBaseline, "import");
 
         Instant now = clock.instant();
         UUID revisionId = UUID.randomUUID();
         long revisionNumber = nextRevisionNumber(festivalId);
-        insertRevision(revisionId, festivalId, revisionNumber, now);
+        insertRevision(revisionId, festivalId, revisionNumber, baselineRevisionId, now);
         insertManifest(revisionId, manifest, now);
 
         // This is a draft validation. Any exception rolls back every inserted
@@ -101,30 +123,47 @@ public class CatalogRevisionService {
 
     /**
      * Copies an archived revision into a new revision, preserving map versions
-     * and excluding live crowding state, then publishes the copy atomically.
+     * and excluding live crowding state and account settings, then publishes
+     * the copy atomically.
+     *
+     * <p>The caller states which published revision it means to replace. The
+     * comparison happens inside the festival row lock, so a publication that
+     * landed between reading and rolling back is refused rather than
+     * overwritten. The new revision's baseline is that current published
+     * revision; the restored content comes from the archived source.</p>
      */
     @Transactional
-    public UUID rollback(UUID archivedRevisionId, String actor) {
+    public UUID rollback(UUID archivedRevisionId, UUID expectedCurrentRevisionId, String actor) {
         Revision source = requireRevision(archivedRevisionId);
         require("archived".equals(source.state()), "Rollback source must be archived.");
         lockFestival(source.festivalId());
+        UUID baselineRevisionId = requireExpectedPublished(
+            source.festivalId(), expectedCurrentRevisionId, "rollback"
+        );
 
         Instant now = clock.instant();
         UUID newRevisionId = UUID.randomUUID();
         long revisionNumber = nextRevisionNumber(source.festivalId());
-        insertRevision(newRevisionId, source.festivalId(), revisionNumber, now);
+        insertRevision(newRevisionId, source.festivalId(), revisionNumber, baselineRevisionId, now);
         copyRevision(source.id(), newRevisionId);
         validateStoredRevision(newRevisionId);
 
         String safeActor = actor(actor);
         audit(source.festivalId(), newRevisionId, "ROLLBACK", source.id(), safeActor, null, now);
-        publishLocked(new Revision(newRevisionId, source.festivalId(), revisionNumber, "draft"), safeActor, source.id());
+        publishLocked(
+            new Revision(newRevisionId, source.festivalId(), revisionNumber, "draft", baselineRevisionId),
+            safeActor,
+            source.id()
+        );
         return newRevisionId;
     }
 
     private void publishLocked(Revision revision, String actor, UUID sourceRevisionId) {
         require("draft".equals(revision.state()) || "scheduled".equals(revision.state()),
             "Only a draft or scheduled revision can be published.");
+        // The baseline is re-checked here, not only at import, because another
+        // publication can land between preparing and publishing a draft.
+        requireExpectedPublished(revision.festivalId(), revision.baseRevisionId(), "publish");
         Long publishedRevisionNumber = currentPublishedRevisionNumber(revision.festivalId());
         require(publishedRevisionNumber == null || revision.revisionNumber() > publishedRevisionNumber,
             "A revision older than the current published revision cannot be published.");
@@ -503,14 +542,12 @@ public class CatalogRevisionService {
     private void insertTicketGuide(UUID revisionId, CatalogManifest.TicketGuide guide, Instant now) {
         batch("""
             INSERT INTO ticket_guide_revisions (
-                festival_revision_id, id, unit_price_amount, account_bank_name,
-                account_number, account_holder, transfer_link_label, transfer_link_url,
+                festival_revision_id, id, unit_price_amount,
                 map_id, place_id, pin_id, map_version, instructions,
                 festival_start_date, festival_end_date, daily_transfer_open_time,
                 daily_transfer_close_time, daily_pickup_open_time, daily_pickup_close_time, updated_at
             ) VALUES (
-                :revisionId, 1, :unitPriceAmount, :accountBankName,
-                :accountNumber, :accountHolder, :transferLinkLabel, :transferLinkUrl,
+                :revisionId, 1, :unitPriceAmount,
                 :mapId, :placeId, :pinId, :mapVersion, :instructions,
                 :festivalStartDate, :festivalEndDate, :dailyTransferOpenTime,
                 :dailyTransferCloseTime, :dailyPickupOpenTime, :dailyPickupCloseTime, :updatedAt
@@ -518,11 +555,6 @@ public class CatalogRevisionService {
             """, List.of(new MapSqlParameterSource()
             .addValue("revisionId", revisionId)
             .addValue("unitPriceAmount", guide.unitPriceAmount())
-            .addValue("accountBankName", guide.accountBankName())
-            .addValue("accountNumber", guide.accountNumber())
-            .addValue("accountHolder", guide.accountHolder())
-            .addValue("transferLinkLabel", guide.transferLinkLabel())
-            .addValue("transferLinkUrl", guide.transferLinkUrl())
             .addValue("mapId", guide.mapId())
             .addValue("placeId", guide.placeId())
             .addValue("pinId", guide.pinId())
@@ -648,15 +680,16 @@ public class CatalogRevisionService {
             ) SELECT :newRevisionId, space_id, map_id, map_version, pin_id, place_id
               FROM space_map_targets WHERE festival_revision_id = :sourceRevisionId
             """, sourceRevisionId, newRevisionId);
+        // A rollback restores catalog content only. Legacy account and
+        // transfer-link columns are left out so a restored revision never
+        // resurrects an account that the operational settings now own.
         copy("""
             INSERT INTO ticket_guide_revisions (
-                festival_revision_id, id, unit_price_amount, account_bank_name, account_number,
-                account_holder, transfer_link_label, transfer_link_url, map_id, place_id, pin_id,
+                festival_revision_id, id, unit_price_amount, map_id, place_id, pin_id,
                 map_version, instructions, festival_start_date, festival_end_date,
                 daily_transfer_open_time, daily_transfer_close_time, daily_pickup_open_time,
                 daily_pickup_close_time, updated_at
-            ) SELECT :newRevisionId, id, unit_price_amount, account_bank_name, account_number,
-                     account_holder, transfer_link_label, transfer_link_url, map_id, place_id, pin_id,
+            ) SELECT :newRevisionId, id, unit_price_amount, map_id, place_id, pin_id,
                      map_version, instructions, festival_start_date, festival_end_date,
                      daily_transfer_open_time, daily_transfer_close_time, daily_pickup_open_time,
                      daily_pickup_close_time, updated_at
@@ -783,17 +816,59 @@ public class CatalogRevisionService {
         performanceRevisions.validate(revisionId);
     }
 
-    private void insertRevision(UUID id, UUID festivalId, long revisionNumber, Instant now) {
+    private void insertRevision(
+        UUID id,
+        UUID festivalId,
+        long revisionNumber,
+        UUID baseRevisionId,
+        Instant now
+    ) {
         jdbc.update("""
             INSERT INTO festival_revisions (
-                id, festival_id, revision_number, state, approved_at, scheduled_at,
-                published_at, created_at, updated_at
-            ) VALUES (:id, :festivalId, :revisionNumber, 'draft', NULL, NULL, NULL, :now, :now)
+                id, festival_id, revision_number, state, base_revision_id, approved_at,
+                scheduled_at, published_at, created_at, updated_at
+            ) VALUES (
+                :id, :festivalId, :revisionNumber, 'draft', :baseRevisionId, NULL,
+                NULL, NULL, :now, :now
+            )
             """, new MapSqlParameterSource()
             .addValue("id", id)
             .addValue("festivalId", festivalId)
             .addValue("revisionNumber", revisionNumber)
+            .addValue("baseRevisionId", baseRevisionId)
             .addValue("now", atUtc(now)));
+    }
+
+    /**
+     * Confirms that the caller's expected published revision is still the
+     * current one. The festival row must already be locked so the comparison
+     * and the later pointer swap are one serialized operation.
+     */
+    private UUID requireExpectedPublished(UUID festivalId, UUID expectedRevisionId, String operation) {
+        UUID currentPublishedId = currentPublishedRevisionId(festivalId);
+        if (java.util.Objects.equals(expectedRevisionId, currentPublishedId)) {
+            return currentPublishedId;
+        }
+        throw new CatalogCliException(
+            "BASE_REVISION_CONFLICT: " + operation + " expected published revision "
+                + describeRevision(expectedRevisionId) + " but the festival now publishes "
+                + describeRevision(currentPublishedId) + "."
+        );
+    }
+
+    private String describeRevision(UUID revisionId) {
+        return revisionId == null ? "none" : revisionId.toString();
+    }
+
+    private UUID currentPublishedRevisionId(UUID festivalId) {
+        List<UUID> ids = jdbc.query("""
+            SELECT id
+            FROM festival_revisions
+            WHERE festival_id = :festivalId AND state = 'published'
+            """, new MapSqlParameterSource("festivalId", festivalId),
+            (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class));
+        require(ids.size() <= 1, "A festival can have only one published revision.");
+        return ids.isEmpty() ? null : ids.getFirst();
     }
 
     private void audit(
@@ -855,14 +930,15 @@ public class CatalogRevisionService {
     private Revision requireRevision(UUID revisionId) {
         require(revisionId != null, "Revision id is required.");
         List<Revision> revisions = jdbc.query("""
-            SELECT id, festival_id, revision_number, state
+            SELECT id, festival_id, revision_number, state, base_revision_id
             FROM festival_revisions WHERE id = :revisionId
             """, new MapSqlParameterSource("revisionId", revisionId), (resultSet, rowNumber) ->
             new Revision(
                 resultSet.getObject("id", UUID.class),
                 resultSet.getObject("festival_id", UUID.class),
                 resultSet.getLong("revision_number"),
-                resultSet.getString("state")
+                resultSet.getString("state"),
+                resultSet.getObject("base_revision_id", UUID.class)
             )
         );
         require(revisions.size() == 1, "Revision does not exist: " + revisionId);
@@ -900,7 +976,19 @@ public class CatalogRevisionService {
         }
     }
 
-    private record Revision(UUID id, UUID festivalId, long revisionNumber, String state) {}
+    /**
+     * An operator-stated baseline for an import. A null revision id means the
+     * operator expects the festival to have no published revision.
+     */
+    public record BaselineOverride(UUID revisionId) {}
+
+    private record Revision(
+        UUID id,
+        UUID festivalId,
+        long revisionNumber,
+        String state,
+        UUID baseRevisionId
+    ) {}
 
     private record FestivalDayRow(
         java.time.LocalDate date,

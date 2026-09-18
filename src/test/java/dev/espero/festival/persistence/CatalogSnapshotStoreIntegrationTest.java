@@ -399,21 +399,28 @@ class CatalogSnapshotStoreIntegrationTest {
             .hasMessageContaining("ASCII URI characters");
     }
 
+    /**
+     * Accounts and transfer links are operational settings, not catalog
+     * content. A legacy row that still holds them loads normally and exposes
+     * nothing, so an old value cannot reach the public snapshot.
+     */
     @Test
     @Transactional
-    void rejectsATicketTransferUrlWithRawUnicodeAtSnapshotLoad() {
+    void ignoresLegacyTicketAccountAndTransferLinkColumnsAtSnapshotLoad() {
         UUID revisionId = publishedRevisionId();
         insertCatalogFixture(revisionId);
         jdbc.update("""
             UPDATE ticket_guide_revisions
-            SET transfer_link_label = '송금', transfer_link_url = 'https://example.org/문의'
+            SET account_bank_name = '레거시 은행', account_number = '000-0000',
+                account_holder = '레거시 예금주',
+                transfer_link_label = '송금', transfer_link_url = 'https://example.org/문의'
             WHERE id = 1 AND festival_revision_id = :revisionId
             """, parameters(revisionId));
 
-        assertThatThrownBy(store::loadPublished)
-            .isInstanceOf(CatalogIntegrityException.class)
-            .hasMessageContaining("TicketGuide.transferLink.url")
-            .hasMessageContaining("ASCII URI characters");
+        CatalogSnapshot snapshot = store.loadPublished();
+
+        assertThat(snapshot.ticketGuideConfig()).isNotNull();
+        assertThat(snapshot.ticketGuideConfig().instructions()).isNotNull();
     }
 
     @Test

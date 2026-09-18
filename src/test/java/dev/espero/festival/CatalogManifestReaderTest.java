@@ -43,13 +43,10 @@ class CatalogManifestReaderTest {
         assertThat(manifest.timetableConfig().axisStartTime()).isEqualTo(LocalTime.of(18, 0));
         assertThat(manifest.timetableConfig().axisEndTime()).isEqualTo(LocalTime.of(23, 0));
 
+        // Accounts are operational settings, so the development catalog carries none.
         CatalogManifest.TicketGuide ticketGuide = manifest.ticketGuide();
-        assertThat(ticketGuide.accountBankName()).isNull();
-        assertThat(ticketGuide.accountNumber()).isNull();
-        assertThat(ticketGuide.accountHolder()).isNull();
-        assertThat(ticketGuide.transferLinkLabel()).isNull();
-        assertThat(ticketGuide.transferLinkUrl()).isNull();
         assertThat(ticketGuide.unitPriceAmount()).isNull();
+        assertThat(manifest.baselineRevisionId()).isNull();
         assertThat(manifest.stampGuide().qrValue()).isNull();
     }
 
@@ -87,6 +84,41 @@ class CatalogManifestReaderTest {
             assertThat(document.manifest().timetableConfig()).isNull();
             assertThat(document.manifest().stampGuide().qrValue()).isEqualTo("PUBLIC-COMMON-QR");
             assertThat(document.sha256()).hasSize(64).matches("[0-9a-f]{64}");
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    void rejectsTicketAccountFieldsThatNowBelongToOperationalSettings() throws Exception {
+        Path file = Files.createTempFile("catalog-manifest-account-", ".json");
+        try {
+            Files.writeString(file, """
+                {
+                  "festivalId": "ec00912b-763f-4f8f-8f57-4bdfc389ccbf",
+                  "festivalDays": [], "spaces": [], "spaceTranslations": [],
+                  "spaceSortOrders": [], "spaceEvents": [], "spaceMenuItems": [],
+                  "places": [], "placeTranslations": [], "maps": [], "mapTranslations": [],
+                  "mapAssets": [], "mapAreas": [], "mapPins": [], "mapPinTranslations": [],
+                  "mapPinFilterGroupTranslations": [], "spaceMapTargets": [],
+                  "artists": [], "artistTranslations": [], "artistLinks": [],
+                  "artistLinkTranslations": [], "artistSongs": [], "artistSongTranslations": [],
+                  "performances": [], "performanceTranslations": [], "performanceArtists": [],
+                  "prohibitedItems": [], "prohibitedItemTranslations": [], "prohibitedMessages": [],
+                  "ticketGuide": {
+                    "instructions": [], "accountBankName": "은행",
+                    "accountNumber": "000-0000", "accountHolder": "예금주"
+                  },
+                  "stampGuide": {
+                    "title": "스탬프투어", "instructions": [], "rewardName": "기념품",
+                    "rewardNotice": "수량 소진 시 종료"
+                  }
+                }
+                """);
+
+            assertThatThrownBy(() -> new CatalogManifestReader(new CatalogManifestValidator()).read(file))
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessageContaining("valid JSON");
         } finally {
             Files.deleteIfExists(file);
         }

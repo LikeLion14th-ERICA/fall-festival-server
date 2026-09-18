@@ -67,6 +67,9 @@ class CatalogRevisionServiceIntegrationTest {
     private PerformanceRevisionValidator performanceRevisions;
 
     @Autowired
+    private CatalogExportService exports;
+
+    @Autowired
     private PlatformTransactionManager transactionManager;
 
     @TempDir
@@ -125,6 +128,138 @@ class CatalogRevisionServiceIntegrationTest {
         );
         jdbc.update(
             "UPDATE festival_revisions SET state = 'published' WHERE id = :initialRevisionId", parameters
+        );
+    }
+
+    @Test
+    void refusesAnImportWhoseBaselineIsNotTheCurrentPublishedRevision() {
+        UUID published = currentPublishedRevision();
+        assertThat(published).isNotNull();
+
+        assertThatThrownBy(() -> importManifest("qr-stale", "/assets/maps/overview-v1.png", UUID.randomUUID()))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThatThrownBy(() -> importManifest("qr-none", "/assets/maps/overview-v1.png", null))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThat(revisionCount()).isEqualTo(1);
+    }
+
+    @Test
+    void refusesToPublishADraftPreparedBeforeAnotherPublication() throws IOException {
+        UUID firstDraft = importManifest("qr-first", "/assets/maps/overview-v1.png");
+        UUID secondDraft = importManifest("qr-second", "/assets/maps/overview-v1.png");
+
+        revisions.publish(secondDraft, "release-bot");
+
+        assertThatThrownBy(() -> revisions.publish(firstDraft, "release-bot"))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThat(revisionState(secondDraft)).isEqualTo("published");
+        assertThat(revisionState(firstDraft)).isEqualTo("draft");
+    }
+
+    @Test
+    void refusesARollbackWhoseExpectedCurrentRevisionIsStale() throws IOException {
+        UUID source = importManifest("qr-source", "/assets/maps/overview-v1.png");
+        revisions.publish(source, "release-bot");
+        UUID replacement = importManifest("qr-replacement", "/assets/maps/overview-v1.png");
+        revisions.publish(replacement, "release-bot");
+
+        assertThatThrownBy(() -> revisions.rollback(source, source, "incident-bot"))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThat(revisionState(replacement)).isEqualTo("published");
+        assertThat(revisionState(source)).isEqualTo("archived");
+    }
+
+    @Test
+    void recordsTheReplacedPublicationAsTheBaselineOfARollbackRevision() throws IOException {
+        UUID source = importManifest("qr-base-source", "/assets/maps/overview-v1.png");
+        revisions.publish(source, "release-bot");
+        UUID replacement = importManifest("qr-base-replacement", "/assets/maps/overview-v1.png");
+        revisions.publish(replacement, "release-bot");
+
+        UUID rollback = revisions.rollback(source, replacement, "incident-bot");
+
+        assertThat(baseRevision(rollback)).isEqualTo(replacement);
+        assertThat(baseRevision(replacement)).isEqualTo(source);
+        assertThat(revisionState(rollback)).isEqualTo("published");
+    }
+
+    @Test
+    void exportsAStoredRevisionAndReimportsItWithoutSemanticLoss() throws IOException {
+        UUID published = importManifest("qr-roundtrip", "/assets/maps/overview-v1.png");
+        revisions.publish(published, "release-bot");
+
+        CatalogManifest exported = exports.export(published).manifest();
+        UUID reimported = importExportedManifest(exported);
+        CatalogManifest exportedAgain = exports.export(reimported).manifest();
+
+        assertThat(exportedAgain).isEqualTo(exported);
+        assertThat(exported.baselineRevisionId()).isEqualTo(published);
+        assertThat(exported.artists()).isNotEmpty();
+        assertThat(exported.performances()).isNotEmpty();
+        assertThat(exported.performanceArtists()).isNotEmpty();
+        assertThat(exported.timetableConfig()).isNotNull();
+        assertThat(exported.mapAssets()).isNotEmpty();
+        assertThat(exported.spaceMapTargets()).isNotEmpty();
+        assertThat(exported.stampGuide()).isNotNull();
+        for (String table : performanceTables()) {
+            assertThat(rowCount(table, reimported)).as(table).isEqualTo(rowCount(table, published));
+        }
+    }
+
+    @Test
+    void reportsAndBlocksALegacyRevisionWithoutFilterGroups() throws IOException {
+        UUID revisionId = importManifest("qr-legacy-filter", "/assets/maps/overview-v1.png");
+        jdbc.update("""
+            UPDATE map_pins SET filter_group = NULL
+            WHERE festival_revision_id = :revisionId AND place_id IS NOT NULL
+            """, new MapSqlParameterSource("revisionId", revisionId));
+
+        CatalogExportService.ExportResult result = exports.export(revisionId);
+
+        assertThat(result.findings())
+            .anyMatch(finding -> finding.startsWith(CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED));
+        assertThatThrownBy(() -> importExportedManifest(result.manifest()))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining(CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED);
+    }
+
+    @Test
+    void reportsAndBlocksALegacyRevisionWithAPartialTicketSchedule() throws IOException {
+        UUID revisionId = importManifest("qr-legacy-ticket", "/assets/maps/overview-v1.png");
+        jdbc.update("""
+            UPDATE ticket_guide_revisions
+            SET festival_start_date = DATE '2026-10-01', festival_end_date = NULL,
+                daily_transfer_open_time = NULL, daily_transfer_close_time = NULL,
+                daily_pickup_open_time = NULL, daily_pickup_close_time = NULL
+            WHERE festival_revision_id = :revisionId AND id = 1
+            """, new MapSqlParameterSource("revisionId", revisionId));
+
+        CatalogExportService.ExportResult result = exports.export(revisionId);
+
+        assertThat(result.findings())
+            .anyMatch(finding -> finding.startsWith(CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED));
+        assertThatThrownBy(() -> importExportedManifest(result.manifest()))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining(CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED);
+    }
+
+    private UUID importExportedManifest(CatalogManifest manifest) throws IOException {
+        Path file = tempDir.resolve(UUID.randomUUID() + ".json");
+        tools.jackson.databind.json.JsonMapper.builder()
+            .findAndAddModules()
+            .build()
+            .writeValue(file.toFile(), manifest);
+        return revisions.importManifest(file, "release-bot");
+    }
+
+    private UUID baseRevision(UUID revisionId) {
+        return jdbc.queryForObject(
+            "SELECT base_revision_id FROM festival_revisions WHERE id = :revisionId",
+            new MapSqlParameterSource("revisionId", revisionId), UUID.class
         );
     }
 
@@ -257,7 +392,7 @@ class CatalogRevisionServiceIntegrationTest {
         revisions.publish(replacement, "release-bot");
         RollbackCatalogSnapshot sourceBefore = rollbackCatalogSnapshot(source);
 
-        UUID rollback = revisions.rollback(source, "incident-bot");
+        UUID rollback = revisions.rollback(source, currentPublishedRevision(), "incident-bot");
         RollbackCatalogSnapshot sourceAfter = rollbackCatalogSnapshot(source);
         RollbackCatalogSnapshot target = rollbackCatalogSnapshot(rollback);
 
@@ -324,7 +459,7 @@ class CatalogRevisionServiceIntegrationTest {
         UUID newerRevision = importManifest("qr-b", "/assets/maps/overview-v1.png");
         revisions.publish(newerRevision, "release-bot");
 
-        UUID rollbackRevision = revisions.rollback(firstRevision, "incident-bot");
+        UUID rollbackRevision = revisions.rollback(firstRevision, currentPublishedRevision(), "incident-bot");
 
         assertThat(revisionState(rollbackRevision)).isEqualTo("published");
         assertThat(revisionState(firstRevision)).isEqualTo("archived");
@@ -397,9 +532,21 @@ class CatalogRevisionServiceIntegrationTest {
         assertThat(revisionState(publishedRevision)).isEqualTo("published");
     }
 
+    private UUID currentPublishedRevision() {
+        return jdbc.query(
+            "SELECT id FROM festival_revisions WHERE festival_id = :festivalId AND state = 'published'",
+            new MapSqlParameterSource("festivalId", FESTIVAL_ID),
+            (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class)
+        ).stream().findFirst().orElse(null);
+    }
+
     private UUID importManifest(String qrValue, String imageUrl) throws IOException {
+        return importManifest(qrValue, imageUrl, currentPublishedRevision());
+    }
+
+    private UUID importManifest(String qrValue, String imageUrl, UUID baseline) throws IOException {
         Path manifest = tempDir.resolve(UUID.randomUUID() + ".json");
-        Files.writeString(manifest, manifestJson(qrValue, imageUrl));
+        Files.writeString(manifest, manifestJson(qrValue, imageUrl, baseline));
         return revisions.importManifest(manifest, "release-bot");
     }
 
@@ -445,9 +592,14 @@ class CatalogRevisionServiceIntegrationTest {
     }
 
     private String manifestJson(String qrValue, String imageUrl) {
+        return manifestJson(qrValue, imageUrl, currentPublishedRevision());
+    }
+
+    private String manifestJson(String qrValue, String imageUrl, UUID baseline) {
         return """
             {
               "festivalId": "%s",
+              "baselineRevisionId": %s,
               "festivalDays": [
                 {
                   "festivalDate": "2026-10-01",
@@ -455,23 +607,52 @@ class CatalogRevisionServiceIntegrationTest {
                   "closesAt": "2026-10-01T18:00:00+09:00"
                 }
               ],
-              "spaces": [],
-              "spaceTranslations": [],
-              "spaceSortOrders": [],
+              "spaces": [
+                {
+                  "id": "space-booth", "category": "BOOTH",
+                  "imageUrl": "/assets/spaces/booth.png", "imageWidth": 800, "imageHeight": 600
+                }
+              ],
+              "spaceTranslations": [
+                {
+                  "spaceId": "space-booth", "locale": "ko", "name": "테스트 부스",
+                  "imageAlt": "부스 사진", "locationText": "학생회관 앞", "operatorText": null,
+                  "hoursText": null, "descriptionText": null, "experienceText": null,
+                  "contactLabel": null, "contactUrl": null
+                }
+              ],
+              "spaceSortOrders": [
+                {"locale": "ko", "spaceId": "space-booth", "sortRank": 1}
+              ],
               "spaceEvents": [],
               "spaceMenuItems": [],
-              "places": [],
-              "placeTranslations": [],
+              "places": [
+                {"id": "place-booth", "kind": "SPACE", "spaceId": "space-booth"}
+              ],
+              "placeTranslations": [
+                {
+                  "placeId": "place-booth", "locale": "ko", "name": "테스트 부스",
+                  "locationText": "학생회관 앞", "hoursText": null,
+                  "descriptionText": null, "usageText": null
+                }
+              ],
               "maps": [
                 {
                   "id": "map-overview",
                   "kind": "OVERVIEW",
                   "sortRank": 1,
                   "currentVersion": "overview-v1"
+                },
+                {
+                  "id": "map-area",
+                  "kind": "AREA",
+                  "sortRank": 2,
+                  "currentVersion": "area-v1"
                 }
               ],
               "mapTranslations": [
-                {"mapId": "map-overview", "locale": "ko", "name": "전체 지도"}
+                {"mapId": "map-overview", "locale": "ko", "name": "전체 지도"},
+                {"mapId": "map-area", "locale": "ko", "name": "구역 지도"}
               ],
               "mapAssets": [
                 {
@@ -481,13 +662,50 @@ class CatalogRevisionServiceIntegrationTest {
                   "imageAlt": "전체 지도",
                   "imageWidth": 1000,
                   "imageHeight": 600
+                },
+                {
+                  "mapId": "map-area",
+                  "version": "area-v1",
+                  "imageUrl": "/assets/maps/area-v1.png",
+                  "imageAlt": "구역 지도",
+                  "imageWidth": 1200,
+                  "imageHeight": 700
                 }
               ],
-              "mapAreas": [],
-              "mapPins": [],
-              "mapPinTranslations": [],
-              "mapPinFilterGroupTranslations": [],
-              "spaceMapTargets": [],
+              "mapAreas": [
+                {"id": "area-booths", "targetMapId": "map-area"}
+              ],
+              "mapPins": [
+                {
+                  "mapId": "map-overview", "mapVersion": "overview-v1", "id": "pin-area",
+                  "category": "area", "filterGroup": null, "x": 0.25, "y": 0.75,
+                  "placeId": null, "areaId": "area-booths"
+                },
+                {
+                  "mapId": "map-area", "mapVersion": "area-v1", "id": "pin-booth",
+                  "category": "booth", "filterGroup": "EXPERIENCE", "x": 0.5, "y": 0.5,
+                  "placeId": "place-booth", "areaId": null
+                }
+              ],
+              "mapPinTranslations": [
+                {
+                  "mapId": "map-overview", "mapVersion": "overview-v1", "pinId": "pin-area",
+                  "locale": "ko", "label": "부스 구역"
+                },
+                {
+                  "mapId": "map-area", "mapVersion": "area-v1", "pinId": "pin-booth",
+                  "locale": "ko", "label": "테스트 부스"
+                }
+              ],
+              "mapPinFilterGroupTranslations": [
+                {"filterGroup": "EXPERIENCE", "locale": "ko", "label": "체험"}
+              ],
+              "spaceMapTargets": [
+                {
+                  "spaceId": "space-booth", "mapId": "map-area", "mapVersion": "area-v1",
+                  "pinId": "pin-booth", "placeId": "place-booth"
+                }
+              ],
               "artists": [
                 {
                   "id": "artist-one", "category": "ARTIST",
@@ -537,11 +755,6 @@ class CatalogRevisionServiceIntegrationTest {
               ],
               "ticketGuide": {
                 "unitPriceAmount": null,
-                "accountBankName": null,
-                "accountNumber": null,
-                "accountHolder": null,
-                "transferLinkLabel": null,
-                "transferLinkUrl": null,
                 "mapId": null,
                 "placeId": null,
                 "pinId": null,
@@ -565,7 +778,7 @@ class CatalogRevisionServiceIntegrationTest {
                 "qrValue": "%s"
               }
             }
-            """.formatted(FESTIVAL_ID, imageUrl, qrValue);
+            """.formatted(FESTIVAL_ID, baseline == null ? "null" : "\"" + baseline + "\"", imageUrl, qrValue);
     }
 
     private void insertCrowdingState(UUID revisionId) {
