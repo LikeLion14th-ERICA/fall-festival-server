@@ -319,7 +319,8 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
         String firstServerTime = first.getResponse().getHeader("X-Server-Time");
         assertThat(firstEtag).matches("\"[0-9a-f]{64}\"");
         assertThat(firstRequestId).isNotBlank();
-        assertThat(firstServerTime).isEqualTo("2030-10-01T12:00:00+09:00");
+        assertThat(OffsetDateTime.parse(firstServerTime))
+            .isEqualTo(OffsetDateTime.parse("2030-10-01T12:00:00+09:00"));
 
         clock.set("2030-10-01T12:01:00+09:00");
         MvcResult second = mvc.perform(asAdmin(get(adminProductRoute(goods.goodsId()))))
