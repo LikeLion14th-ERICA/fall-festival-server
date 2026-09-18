@@ -27,3 +27,12 @@ jobs:
           cache-dependency-path: pom.xml
       - name: Verify backend
         run: sh ./mvnw --batch-mode --no-transfer-progress verify
+
+  docker-build:
+    name: docker-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build --pull -t fall-festival-server:ci .
