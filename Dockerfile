@@ -1,4 +1,10 @@
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM eclipse-temurin:21-jdk-alpine-3.24 AS build
+
+RUN apk add --no-cache libwebp-tools \
+    && command -v cwebp \
+    && command -v dwebp \
+    && cwebp -version \
+    && dwebp -version
 
 WORKDIR /workspace
 
@@ -10,11 +16,20 @@ RUN chmod +x mvnw \
 COPY src src
 # The API v2 contract is packaged for the opt-in /docs page.
 COPY api-v2/openapi.json api-v2/openapi.json
+RUN ./mvnw --batch-mode --no-transfer-progress \
+    -Dmedia.codec.external-tools.required=true \
+    -Dtest=ExternalWebpToolsCompatibilityTest \
+    test
 RUN ./mvnw --batch-mode --no-transfer-progress -DskipTests package
 
-FROM eclipse-temurin:21-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine-3.24 AS runtime
 
-RUN addgroup --system app \
+RUN apk add --no-cache libwebp-tools \
+    && command -v cwebp \
+    && command -v dwebp \
+    && cwebp -version \
+    && dwebp -version \
+    && addgroup --system app \
     && adduser --system --ingroup app app
 
 WORKDIR /app
