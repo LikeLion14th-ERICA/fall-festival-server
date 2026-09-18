@@ -300,13 +300,13 @@ public record CatalogManifest(
         String message
     ) {}
 
+    /**
+     * Ticket content for one revision. Account and transfer-link fields are
+     * intentionally absent, so a manifest that still carries them is rejected
+     * as an unknown property instead of silently importing an account.
+     */
     public record TicketGuide(
         Integer unitPriceAmount,
-        String accountBankName,
-        String accountNumber,
-        String accountHolder,
-        String transferLinkLabel,
-        String transferLinkUrl,
         String mapId,
         String placeId,
         String pinId,

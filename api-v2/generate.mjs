@@ -24,7 +24,8 @@ for(const op of operations){
   const successStatus=op.successStatus??(op.method==='POST'?201:200);
   const statuses=[...(successStatus===200?[200]:[]),400,403,404,405,409,429,500,503,...(op.input?[413,415,422]:[]),...(op.admin?[401]:[]),...(op.ifMatchRequired||op.idempotencyKeyRequired?[428]:[]),...(op.conditional?[304]:[]),successStatus].filter((status,index,array)=>array.indexOf(status)===index);
   const responses=Object.fromEntries(statuses.map(status=>{
-    const response={description:status<300?'성공':genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'},...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...(op.conditional&&status<300?{ETag:strongEtagHeader}:{})}};
+    const conditionalHeaders=op.conditional&&status<300?{ETag:strongEtagHeader,'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'},...(op.cacheControl?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{})}:{};
+    const response={description:status<300?'성공':genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'},...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders}};
     if(!noBodyStatuses.has(status))response.content={'application/json':{schema:{$ref:`#/components/schemas/${status<300?responseName:'Error'}`},examples:{}}};
     return [status,response];
   }));
@@ -62,7 +63,7 @@ for(const op of operations){
       const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure,'precondition-required':[428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.'],'not-festival-day':[409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.'],'edit-conflict':[409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.']}[scenario];
       if(special)throw new ApiFailure(...special);
       if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
-      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;response=noBodyStatuses.has(status)?null:{data:result.data,meta:op.conditional?conditionalMeta(0):meta(unscopedOperations.has(op.operationId)?0:state.revision)};
+      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)?null:{data:result.data,meta:op.conditional?conditionalMeta(responseRevision):meta(responseRevision)};
     }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;response={error:{code:e.code,message:e.message,details:e.details,retryable:[429,500,503].includes(status)},meta:meta(0)};}
     if(!responses[status])throw new Error(`Missing response ${op.operationId} ${status}`);
     if(responses[status].content)responses[status].content['application/json'].examples[scenario]={summary:`${op.summary}: ${scenario}`,value:response};

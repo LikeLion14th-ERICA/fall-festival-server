@@ -15,6 +15,11 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SchemaValidatorsConfig;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import dev.espero.festival.account.OperationalAccountPurpose;
+import dev.espero.festival.account.OperationalAccountSetting;
+import dev.espero.festival.account.OperationalAccountSettingsService;
+import dev.espero.festival.account.OperationalAccountState;
+import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
 import dev.espero.festival.domain.CatalogSnapshot.Image;
@@ -23,9 +28,9 @@ import dev.espero.festival.domain.CatalogSnapshot.Money;
 import dev.espero.festival.domain.CatalogSnapshot.Pin;
 import dev.espero.festival.domain.CatalogSnapshot.PinKey;
 import dev.espero.festival.domain.CatalogSnapshot.PinTarget;
-import dev.espero.festival.support.ApiMetaTestFixtures;
 import dev.espero.festival.domain.CatalogSnapshot.Place;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.support.ApiMetaTestFixtures;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -33,6 +38,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +57,8 @@ class CatalogControllerOpenApiTest {
 
     private final ObjectMapper json = new ObjectMapper();
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
+    private final OperationalAccountSettingsService accountSettings =
+        mock(OperationalAccountSettingsService.class);
     private JsonNode openApi;
     private MockMvc mvc;
 
@@ -59,9 +67,28 @@ class CatalogControllerOpenApiTest {
         openApi = json.readTree(Files.readString(OPENAPI_FILE));
         Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC);
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
+        when(accountSettings.findCurrent(ApiMetaTestFixtures.FESTIVAL_ID, OperationalAccountPurpose.TICKET))
+            .thenReturn(Optional.of(new OperationalAccountSetting(
+                ApiMetaTestFixtures.FESTIVAL_ID,
+                OperationalAccountPurpose.TICKET,
+                OperationalAccountState.CONFIGURED,
+                2,
+                "개발용 은행",
+                "MOCK-NOT-PAYABLE",
+                "개발용 예금주",
+                null,
+                Instant.parse("2030-09-01T00:00:00Z")
+            )));
         mvc = MockMvcBuilders.standaloneSetup(
             new CatalogController(snapshots, metaSupport),
-            new TicketGuideController(snapshots, metaSupport, clock)
+            new TicketGuideController(
+                snapshots,
+                accountSettings,
+                new ConditionalResponseSupport(new tools.jackson.databind.ObjectMapper()),
+                metaSupport,
+                new FestivalProperties(ApiMetaTestFixtures.FESTIVAL_ID.toString()),
+                clock
+            )
         ).setControllerAdvice(new GlobalApiExceptionHandler(metaSupport)).build();
     }
 

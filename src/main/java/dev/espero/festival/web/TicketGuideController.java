@@ -1,5 +1,9 @@
 package dev.espero.festival.web;
 
+import dev.espero.festival.account.OperationalAccountPurpose;
+import dev.espero.festival.account.OperationalAccountSetting;
+import dev.espero.festival.account.OperationalAccountSettingsService;
+import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.TicketGuideConfig;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +15,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,13 +26,19 @@ import org.springframework.web.bind.annotation.RestController;
  * are server-backed: no purchase, payment confirmation or wristband receipt
  * state exists anywhere (docs/wiki/product/ticket.md, TICKET-001).
  *
- * festival_start_date/festival_end_date are unconfirmed, so this currently
- * returns status=UNCONFIGURED in practice. Once 총학생회 confirms the dates,
- * update the approved ticket_guide row and restart the single application
- * instance after publication — no code change is needed.
+ * <p>The static price, schedule, instructions and map target come from the
+ * published catalog revision. The bank account comes from the revision
+ * independent {@code TICKET} operational setting, so changing an account never
+ * requires a catalog revision and never appears in a catalog rollback.</p>
  *
- * Only Korean is publicly ready. Other locale and unknown query parameters are
- * rejected instead of silently falling back to Korean.
+ * <p>The response is conditional: clients poll it and revalidate with
+ * If-None-Match. The ETag covers the served representation including the
+ * payment settings version, so an account change is visible on the next poll.
+ * {@code transferLink} stays null until the display-name source for the link
+ * is decided (docs/wiki/product/decisions.md).</p>
+ *
+ * <p>Only Korean is publicly ready. Other locale and unknown query parameters are
+ * rejected instead of silently falling back to Korean.</p>
  */
 @RestController
 @RequestMapping("/api/v2")
@@ -36,46 +47,77 @@ public class TicketGuideController {
 
     private static final ZoneId TIMEZONE = ZoneId.of("Asia/Seoul");
     private static final String CONTENT_LOCALE = PublicContentLocale.KOREAN;
+    private static final String CACHE_CONTROL = "private, no-cache";
 
     private final CatalogSnapshotProvider snapshots;
+    private final OperationalAccountSettingsService accountSettings;
+    private final ConditionalResponseSupport conditionalResponses;
     private final ApiMetaSupport metaSupport;
+    private final FestivalProperties festivalProperties;
     private final Clock clock;
 
     public TicketGuideController(
         CatalogSnapshotProvider snapshots,
+        OperationalAccountSettingsService accountSettings,
+        ConditionalResponseSupport conditionalResponses,
         ApiMetaSupport metaSupport,
+        FestivalProperties festivalProperties,
         Clock clock
     ) {
         this.snapshots = snapshots;
+        this.accountSettings = accountSettings;
+        this.conditionalResponses = conditionalResponses;
         this.metaSupport = metaSupport;
+        this.festivalProperties = festivalProperties;
         this.clock = clock;
     }
 
     @GetMapping("/ticket-guide")
-    public ApiResponse<TicketGuideResponse> getTicketGuide(HttpServletRequest request) {
+    public ResponseEntity<ConditionalApiResponse<TicketGuideResponse>> getTicketGuide(
+        HttpServletRequest request
+    ) {
         CatalogSnapshot snapshot = snapshots.required();
         metaSupport.setContext(request, snapshot.context(), CONTENT_LOCALE);
         validateQuery(request);
+
         Optional<TicketGuideConfig> config = Optional.ofNullable(snapshot.ticketGuideConfig());
+        // The configured festival UUID is the identity this process serves.
+        // The snapshot's public festivalId is an API id string and is not
+        // parsed back into a UUID here.
+        Optional<OperationalAccountSetting> setting = accountSettings.findCurrent(
+            festivalProperties.configuredFestivalId(),
+            OperationalAccountPurpose.TICKET
+        );
         LocalDate today = LocalDate.now(clock.withZone(TIMEZONE));
 
         TicketGuideResponse data = config.filter(TicketGuideConfig::hasSchedule)
-            .map(guide -> scheduled(guide, today, snapshot.ticketMapTarget()))
-            .orElseGet(() -> unconfigured(config, today, snapshot.ticketMapTarget()));
+            .map(guide -> scheduled(guide, setting, today, snapshot.ticketMapTarget()))
+            .orElseGet(() -> unconfigured(config, setting, today, snapshot.ticketMapTarget()));
 
-        return new ApiResponse<>(data, metaSupport.meta(request, snapshot.context(), CONTENT_LOCALE));
+        return conditionalResponses.respond(
+            request,
+            data,
+            metaSupport.meta(request, snapshot.context(), CONTENT_LOCALE),
+            CACHE_CONTROL
+        );
     }
 
     private TicketGuideResponse scheduled(
         TicketGuideConfig guide,
+        Optional<OperationalAccountSetting> setting,
         LocalDate today,
         CatalogSnapshot.MapTarget ticketMapTarget
     ) {
         LocalDate scheduleDate = clamp(today, guide.festivalStartDate(), guide.festivalEndDate());
         LocalTime now = LocalTime.now(clock.withZone(TIMEZONE));
+        boolean accountConfigured = setting.filter(OperationalAccountSetting::isConfigured).isPresent();
 
         TicketGuideResponse.Status status;
-        if (today.isBefore(guide.festivalStartDate())) {
+        if (!accountConfigured) {
+            // Transfers cannot be completed without an approved account, so the
+            // schedule alone is not a usable transfer state.
+            status = TicketGuideResponse.Status.UNCONFIGURED;
+        } else if (today.isBefore(guide.festivalStartDate())) {
             status = TicketGuideResponse.Status.BEFORE_FESTIVAL;
         } else if (today.isAfter(guide.festivalEndDate())) {
             status = TicketGuideResponse.Status.FESTIVAL_ENDED;
@@ -95,8 +137,9 @@ public class TicketGuideController {
             atSeoul(scheduleDate, guide.dailyTransferCloseTime()),
             atSeoul(scheduleDate, guide.dailyPickupOpenTime()),
             atSeoul(scheduleDate, guide.dailyPickupCloseTime()),
-            open ? account(guide) : null,
-            open ? transferLink(guide) : null,
+            open ? account(setting) : null,
+            null,
+            paymentSettingsVersion(setting),
             mapTarget(ticketMapTarget),
             guide.instructions()
         );
@@ -104,6 +147,7 @@ public class TicketGuideController {
 
     private TicketGuideResponse unconfigured(
         Optional<TicketGuideConfig> config,
+        Optional<OperationalAccountSetting> setting,
         LocalDate today,
         CatalogSnapshot.MapTarget ticketMapTarget
     ) {
@@ -117,6 +161,7 @@ public class TicketGuideController {
             null,
             null,
             null,
+            paymentSettingsVersion(setting),
             mapTarget(ticketMapTarget),
             config.map(TicketGuideConfig::instructions).orElse(List.of())
         );
@@ -128,16 +173,21 @@ public class TicketGuideController {
             : new TicketGuideResponse.Money(guide.unitPriceAmount(), "KRW");
     }
 
-    private TicketGuideResponse.BankAccount account(TicketGuideConfig guide) {
-        return guide.hasAccount()
-            ? new TicketGuideResponse.BankAccount(guide.accountBankName(), guide.accountNumber(), guide.accountHolder())
-            : null;
+    private TicketGuideResponse.BankAccount account(Optional<OperationalAccountSetting> setting) {
+        return setting.filter(OperationalAccountSetting::isConfigured)
+            .map(current -> new TicketGuideResponse.BankAccount(
+                current.bankName(), current.accountNumber(), current.accountHolder()
+            ))
+            .orElse(null);
     }
 
-    private TicketGuideResponse.Link transferLink(TicketGuideConfig guide) {
-        return guide.hasTransferLink()
-            ? new TicketGuideResponse.Link(guide.transferLinkLabel(), guide.transferLinkUrl(), "_blank")
-            : null;
+    /**
+     * The version of the current setting row, including a cleared one, so a
+     * client can tell a new account apart from an unchanged one. A festival
+     * whose account was never configured has no row and therefore no version.
+     */
+    private Long paymentSettingsVersion(Optional<OperationalAccountSetting> setting) {
+        return setting.map(OperationalAccountSetting::version).orElse(null);
     }
 
     private TicketGuideResponse.MapTarget mapTarget(CatalogSnapshot.MapTarget target) {

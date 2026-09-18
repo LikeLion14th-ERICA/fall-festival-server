@@ -40,7 +40,10 @@ append-only로 남긴다. 이력에는 실제 login DB role인 `session_user`, C
 runtime role은 current settings만 SELECT한다. account operator role은 current settings의
 SELECT/INSERT/UPDATE와 history SELECT만 가진다. cleanup role은 current settings의
 `festival_id/purpose/version`과 history SELECT/DELETE만 가진다. catalog export/publish role은
-두 table에 접근할 수 없다. history UPDATE/DELETE는 cleanup role 경로 외에 grant하지 않는다.
+두 table에 접근할 수 없고, `ticket_guide_revisions`에도 table 전체가 아니라 계좌·송금 링크를
+제외한 열 권한만 받는다. 그래서 legacy 계좌 열을 읽거나 `SELECT *`를 실행하면 권한 오류로
+멈춘다. legacy `ticket_guide` singleton table은 두 role 모두 접근할 수 없다.
+history UPDATE/DELETE는 cleanup role 경로 외에 grant하지 않는다.
 table/function owner와 DB superuser는 PostgreSQL 소유자 권한으로 이 제한을 우회할 수 있으므로
 별도 break-glass 접근으로 기록한다.
 
@@ -72,9 +75,29 @@ allowlist에서는 링크가 있는 설정을 저장할 수 없다.
 
 `restore-version`은 이전 값을 덮어쓰지 않고 현재 expected version을 확인한 뒤 새 version으로
 재적용한다. 두 CLI가 동시에 변경하면 하나는 expected version 불일치로 실패한다. catalog
-rollback은 계좌 값을 rollback하지 않는다. 티켓 read 전환은 별도 단계에서 “TICKET CLI 등록과
-민감값을 로그 없이 기존 값과 대조 → read 전환 배포” 순서를 따른다. 계좌 분리 이전 binary로의
-rollback은 금지한다.
+rollback은 계좌 값을 rollback하지 않는다.
+
+## 티켓 read 전환 runbook
+
+`/api/v2/ticket-guide`는 catalog의 가격·일정·안내·map target과 현재 `TICKET` 설정을 합쳐
+응답한다. 계좌를 등록하기 전에는 일정이 완전해도 `status: UNCONFIGURED`이고 `account`는
+null이므로, 아래 순서를 지켜야 사용자에게 빈 계좌가 노출되지 않는다.
+
+1. account operator role로 `set --purpose=TICKET`을 **dry-run**으로 실행해 state, version,
+   바뀔 field 이름과 끝 네 자리를 확인한다.
+2. `--confirm`과 `--last-four`, `--expected-version`, `--actor`, `--reason`, `--evidence-id`로
+   적용한다. 값 자체는 출력·로그에 남지 않는다.
+3. 기존 catalog revision의 legacy 계좌 열과 새 설정이 같은 계좌인지 **값을 출력하지 않고**
+   대조한다. 끝 네 자리와 은행 일치 여부만 운영자가 눈으로 확인하며, 다르면 전환을 멈춘다.
+4. read 전환 binary를 배포한다. 배포 뒤 `/api/v2/ticket-guide`가 송금 시간 안에서
+   `TRANSFER_OPEN`과 `account`, `paymentSettingsVersion`을 반환하는지 확인한다.
+5. 계좌 분리 이전 binary로의 rollback은 금지한다. 그 binary는 catalog의 legacy 열을 다시
+   읽으므로 설정에서 바꾼 계좌와 어긋난 값을 노출할 수 있다. 문제가 생기면 계좌 설정을
+   `clear`하거나 `restore-version`으로 되돌린다.
+
+계좌를 바꾸면 version이 올라가고 응답 본문의 `paymentSettingsVersion`이 바뀌므로 ETag도
+바뀐다. 프런트의 15초 polling은 다음 주기에 새 표현을 받는다. 서버는 응답을 캐시하지 않고
+`Cache-Control: private, no-cache`를 보낸다.
 
 통합 cleanup 단계는 history를 1년 뒤 batch 삭제하되, 각 `(festival_id, purpose)`의 최신 event를
 남긴다. 이는 현재 설정의 근거이면서 직접 SQL DELETE 뒤에도 version을 재사용하지 않는

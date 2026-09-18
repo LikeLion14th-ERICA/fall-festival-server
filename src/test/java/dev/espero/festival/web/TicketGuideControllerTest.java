@@ -5,6 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import dev.espero.festival.account.OperationalAccountPurpose;
+import dev.espero.festival.account.OperationalAccountSetting;
+import dev.espero.festival.account.OperationalAccountSettingsService;
+import dev.espero.festival.account.OperationalAccountState;
+import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.TicketGuideConfig;
 import dev.espero.festival.support.ApiMetaTestFixtures;
@@ -16,27 +21,45 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import tools.jackson.databind.ObjectMapper;
 
 class TicketGuideControllerTest {
 
+    private static final String CACHE_CONTROL = "private, no-cache";
+
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
+    private final OperationalAccountSettingsService accountSettings =
+        mock(OperationalAccountSettingsService.class);
     private final HttpServletRequest request = mock(HttpServletRequest.class);
 
     private TicketGuideController controllerAt(String instant, TicketGuideConfig config) {
-        return controllerAt(instant, config, null);
+        return controllerAt(instant, config, null, configuredAccount(1));
     }
 
     private TicketGuideController controllerAt(
         String instant,
         TicketGuideConfig config,
-        CatalogSnapshot.MapTarget ticketMapTarget
+        CatalogSnapshot.MapTarget ticketMapTarget,
+        Optional<OperationalAccountSetting> setting
     ) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
         when(request.getParameterMap()).thenReturn(Map.of());
         when(snapshots.required()).thenReturn(snapshot(config, ticketMapTarget));
-        return new TicketGuideController(snapshots, ApiMetaTestFixtures.contentMetaSupport(clock), clock);
+        when(accountSettings.findCurrent(ApiMetaTestFixtures.FESTIVAL_ID, OperationalAccountPurpose.TICKET))
+            .thenReturn(setting);
+        return new TicketGuideController(
+            snapshots,
+            accountSettings,
+            new ConditionalResponseSupport(new ObjectMapper()),
+            ApiMetaTestFixtures.contentMetaSupport(clock),
+            new FestivalProperties(ApiMetaTestFixtures.FESTIVAL_ID.toString()),
+            clock
+        );
     }
 
     private CatalogSnapshot snapshot(TicketGuideConfig config, CatalogSnapshot.MapTarget ticketMapTarget) {
@@ -58,11 +81,6 @@ class TicketGuideControllerTest {
     private TicketGuideConfig scheduledConfig() {
         return new TicketGuideConfig(
             15000,
-            "개발용 은행",
-            "MOCK-NOT-PAYABLE",
-            "개발용 예금주",
-            null,
-            null,
             List.of("안내1", "안내2"),
             LocalDate.parse("2030-10-01"),
             LocalDate.parse("2030-10-03"),
@@ -74,25 +92,62 @@ class TicketGuideControllerTest {
         );
     }
 
+    private Optional<OperationalAccountSetting> configuredAccount(long version) {
+        return configuredAccount(version, "MOCK-NOT-PAYABLE");
+    }
+
+    private Optional<OperationalAccountSetting> configuredAccount(long version, String accountNumber) {
+        return Optional.of(new OperationalAccountSetting(
+            ApiMetaTestFixtures.FESTIVAL_ID,
+            OperationalAccountPurpose.TICKET,
+            OperationalAccountState.CONFIGURED,
+            version,
+            "개발용 은행",
+            accountNumber,
+            "개발용 예금주",
+            null,
+            Instant.parse("2030-09-01T00:00:00Z")
+        ));
+    }
+
+    private Optional<OperationalAccountSetting> clearedAccount(long version) {
+        return Optional.of(new OperationalAccountSetting(
+            ApiMetaTestFixtures.FESTIVAL_ID,
+            OperationalAccountPurpose.TICKET,
+            OperationalAccountState.UNCONFIGURED,
+            version,
+            null,
+            null,
+            null,
+            null,
+            Instant.parse("2030-09-02T00:00:00Z")
+        ));
+    }
+
+    private TicketGuideResponse body(ResponseEntity<ConditionalApiResponse<TicketGuideResponse>> response) {
+        return response.getBody().data();
+    }
+
     @Test
     void returnsUnconfiguredWhenTheSnapshotHasNoTicketGuide() {
-        ApiResponse<TicketGuideResponse> response = controllerAt("2030-10-01T09:00:00Z", null)
-            .getTicketGuide(request);
-        TicketGuideResponse data = response.data();
+        ResponseEntity<ConditionalApiResponse<TicketGuideResponse>> response =
+            controllerAt("2030-10-01T09:00:00Z", null).getTicketGuide(request);
+        TicketGuideResponse data = body(response);
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
         assertThat(data.unitPrice()).isNull();
         assertThat(data.account()).isNull();
         assertThat(data.mapTarget()).isNull();
         assertThat(data.instructions()).isEmpty();
-        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
-        assertThat(response.meta().revision()).isEqualTo(7);
+        assertThat(response.getBody().meta().festivalId())
+            .isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
+        assertThat(response.getBody().meta().revision()).isEqualTo(7);
     }
 
     @Test
     void returnsUnconfiguredWithKnownPriceWhenDatesAreMissing() {
         TicketGuideConfig partial = new TicketGuideConfig(
-            15000, null, null, null, null, null,
+            15000,
             List.of("안내1"), null, null,
             LocalTime.parse("00:00"), LocalTime.parse("21:00"),
             LocalTime.parse("13:00"), LocalTime.parse("21:00"),
@@ -102,9 +157,10 @@ class TicketGuideControllerTest {
         CatalogSnapshot.MapTarget target = new CatalogSnapshot.MapTarget(
             "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
         );
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", partial, target)
-            .getTicketGuide(request)
-            .data();
+        TicketGuideResponse data = body(
+            controllerAt("2030-10-01T09:00:00Z", partial, target, configuredAccount(1))
+                .getTicketGuide(request)
+        );
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
         assertThat(data.unitPrice().amount()).isEqualTo(15000);
@@ -115,8 +171,32 @@ class TicketGuideControllerTest {
     }
 
     @Test
+    void returnsUnconfiguredWhileTheAccountSettingIsMissingOrCleared() {
+        TicketGuideResponse never = body(
+            controllerAt("2030-10-01T09:00:00Z", scheduledConfig(), null, Optional.empty())
+                .getTicketGuide(request)
+        );
+
+        assertThat(never.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
+        assertThat(never.account()).isNull();
+        assertThat(never.paymentSettingsVersion()).isNull();
+        assertThat(never.transferOpensAt()).isNotNull();
+
+        TicketGuideResponse cleared = body(
+            controllerAt("2030-10-01T09:00:00Z", scheduledConfig(), null, clearedAccount(4))
+                .getTicketGuide(request)
+        );
+
+        assertThat(cleared.status()).isEqualTo(TicketGuideResponse.Status.UNCONFIGURED);
+        assertThat(cleared.account()).isNull();
+        assertThat(cleared.paymentSettingsVersion()).isEqualTo(4);
+    }
+
+    @Test
     void returnsBeforeFestivalAheadOfTheFirstDay() {
-        TicketGuideResponse data = controllerAt("2030-09-30T09:00:00Z", scheduledConfig()).getTicketGuide(request).data();
+        TicketGuideResponse data = body(
+            controllerAt("2030-09-30T09:00:00Z", scheduledConfig()).getTicketGuide(request)
+        );
 
         assertThat(data.date()).isEqualTo(LocalDate.parse("2030-09-30"));
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.BEFORE_FESTIVAL);
@@ -126,24 +206,33 @@ class TicketGuideControllerTest {
 
     @Test
     void returnsTransferOpenDuringTheDayBeforeCloseTime() {
-        TicketGuideResponse data = controllerAt("2030-10-01T09:00:00Z", scheduledConfig()).getTicketGuide(request).data();
+        TicketGuideResponse data = body(
+            controllerAt("2030-10-01T09:00:00Z", scheduledConfig()).getTicketGuide(request)
+        );
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.TRANSFER_OPEN);
         assertThat(data.account()).isNotNull();
         assertThat(data.account().bankName()).isEqualTo("개발용 은행");
+        assertThat(data.transferLink()).isNull();
+        assertThat(data.paymentSettingsVersion()).isEqualTo(1);
     }
 
     @Test
     void returnsDailyClosedAtOrAfterCloseTimeAndHidesAccount() {
-        TicketGuideResponse data = controllerAt("2030-10-01T12:00:00Z", scheduledConfig()).getTicketGuide(request).data();
+        TicketGuideResponse data = body(
+            controllerAt("2030-10-01T12:00:00Z", scheduledConfig()).getTicketGuide(request)
+        );
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.DAILY_CLOSED);
         assertThat(data.account()).isNull();
+        assertThat(data.paymentSettingsVersion()).isEqualTo(1);
     }
 
     @Test
     void returnsFestivalEndedAfterTheLastDayAndClampsScheduleDate() {
-        TicketGuideResponse data = controllerAt("2030-10-05T09:00:00Z", scheduledConfig()).getTicketGuide(request).data();
+        TicketGuideResponse data = body(
+            controllerAt("2030-10-05T09:00:00Z", scheduledConfig()).getTicketGuide(request)
+        );
 
         assertThat(data.status()).isEqualTo(TicketGuideResponse.Status.FESTIVAL_ENDED);
         assertThat(data.account()).isNull();
@@ -151,26 +240,62 @@ class TicketGuideControllerTest {
     }
 
     @Test
-    void returnsOnlyTheTicketGuideAndMapTargetCapturedInTheSameSnapshot() {
-        Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC);
-        CatalogSnapshot.MapTarget target = new CatalogSnapshot.MapTarget(
-            "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
-        );
-        when(request.getParameterMap()).thenReturn(Map.of());
-        when(snapshots.required()).thenReturn(snapshot(scheduledConfig(), target));
-        TicketGuideController controller = new TicketGuideController(
-            snapshots,
-            ApiMetaTestFixtures.contentMetaSupport(clock),
-            clock
-        );
+    void sendsAStrongEtagAndPrivateNoCacheOnEveryRepresentation() {
+        ResponseEntity<ConditionalApiResponse<TicketGuideResponse>> response =
+            controllerAt("2030-10-01T09:00:00Z", scheduledConfig()).getTicketGuide(request);
 
-        ApiResponse<TicketGuideResponse> response = controller.getTicketGuide(request);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL)).isEqualTo(CACHE_CONTROL);
+        assertThat(response.getHeaders().getFirst(ConditionalResponseSupport.ETAG_HEADER))
+            .matches("\"[0-9a-f]{64}\"");
+        assertThat(response.getHeaders().getFirst(ConditionalResponseSupport.SERVER_TIME_HEADER)).isNotBlank();
+    }
 
-        assertThat(response.data().mapTarget()).isEqualTo(new TicketGuideResponse.MapTarget(
-            "map-overview", "place-ticket-zone", "pin-ticket-zone", "asset-2026-01"
-        ));
-        assertThat(response.meta().festivalId()).isEqualTo(ApiMetaTestFixtures.FESTIVAL_ID.toString());
-        assertThat(response.meta().revision()).isEqualTo(7);
+    @Test
+    void returnsNotModifiedForAMatchingEtagAndKeepsTheCacheDirectives() {
+        String etag = controllerAt("2030-10-01T09:00:00Z", scheduledConfig())
+            .getTicketGuide(request)
+            .getHeaders()
+            .getFirst(ConditionalResponseSupport.ETAG_HEADER);
+
+        HttpServletRequest revalidation = mock(HttpServletRequest.class);
+        when(revalidation.getParameterMap()).thenReturn(Map.of());
+        when(revalidation.getHeader(ConditionalResponseSupport.IF_NONE_MATCH_HEADER)).thenReturn(etag);
+
+        ResponseEntity<ConditionalApiResponse<TicketGuideResponse>> response =
+            controllerAt("2030-10-01T09:00:00Z", scheduledConfig()).getTicketGuide(revalidation);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+        assertThat(response.getBody()).isNull();
+        assertThat(response.getHeaders().getFirst(ConditionalResponseSupport.ETAG_HEADER)).isEqualTo(etag);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL)).isEqualTo(CACHE_CONTROL);
+    }
+
+    @Test
+    void changesTheEtagAtTheTransferBoundaryAndAfterAnAccountChange() {
+        String open = etagAt("2030-10-01T09:00:00Z", configuredAccount(1));
+        String closed = etagAt("2030-10-01T12:00:00Z", configuredAccount(1));
+        String reconfigured = etagAt("2030-10-01T09:00:00Z", configuredAccount(2, "MOCK-NOT-PAYABLE-2"));
+        String clearedSetting = etagAt("2030-10-01T09:00:00Z", clearedAccount(3));
+
+        assertThat(open).isNotEqualTo(closed);
+        assertThat(open).isNotEqualTo(reconfigured);
+        assertThat(reconfigured).isNotEqualTo(clearedSetting);
+    }
+
+    @Test
+    void keepsTheEtagStableWhileNothingAboutTheRepresentationChanges() {
+        assertThat(etagAt("2030-10-01T09:00:00Z", configuredAccount(1)))
+            .isEqualTo(etagAt("2030-10-01T09:30:00Z", configuredAccount(1)));
+    }
+
+    private String etagAt(String instant, Optional<OperationalAccountSetting> setting) {
+        HttpServletRequest poll = mock(HttpServletRequest.class);
+        when(poll.getParameterMap()).thenReturn(Map.of());
+        return controllerAt(instant, scheduledConfig(), null, setting)
+            .getTicketGuide(poll)
+            .getHeaders()
+            .getFirst(ConditionalResponseSupport.ETAG_HEADER);
     }
 
     @Test

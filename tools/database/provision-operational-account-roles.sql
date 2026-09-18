@@ -30,4 +30,33 @@ REVOKE ALL ON TABLE :"schema".operational_account_setting_history FROM :"catalog
 REVOKE ALL ON TABLE :"schema".operational_account_settings FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".operational_account_setting_history FROM :"catalog_publish_role";
 
+-- The legacy ticket account and transfer-link columns stay in place for
+-- history. Catalog roles read and copy the ticket guide by explicit column
+-- list, so they receive column privileges and never table-wide SELECT. A
+-- later SELECT * or an added account column therefore fails instead of
+-- exporting an account.
+REVOKE ALL ON TABLE :"schema".ticket_guide FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".ticket_guide FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".ticket_guide_revisions FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".ticket_guide_revisions FROM :"catalog_publish_role";
+
+GRANT SELECT (
+        festival_revision_id, id, unit_price_amount, map_id, place_id, pin_id,
+        map_version, instructions, festival_start_date, festival_end_date,
+        daily_transfer_open_time, daily_transfer_close_time,
+        daily_pickup_open_time, daily_pickup_close_time, updated_at
+    ) ON TABLE :"schema".ticket_guide_revisions TO :"catalog_export_role";
+
+GRANT SELECT (
+        festival_revision_id, id, unit_price_amount, map_id, place_id, pin_id,
+        map_version, instructions, festival_start_date, festival_end_date,
+        daily_transfer_open_time, daily_transfer_close_time,
+        daily_pickup_open_time, daily_pickup_close_time, updated_at
+    ), INSERT (
+        festival_revision_id, id, unit_price_amount, map_id, place_id, pin_id,
+        map_version, instructions, festival_start_date, festival_end_date,
+        daily_transfer_open_time, daily_transfer_close_time,
+        daily_pickup_open_time, daily_pickup_close_time, updated_at
+    ) ON TABLE :"schema".ticket_guide_revisions TO :"catalog_publish_role";
+
 COMMIT;
