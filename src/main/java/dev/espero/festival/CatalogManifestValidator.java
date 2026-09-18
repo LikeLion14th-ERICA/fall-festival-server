@@ -158,7 +158,8 @@ public final class CatalogManifestValidator {
             if (pin.placeId() != null) {
                 require(places.containsKey(pin.placeId()), "mapPins references an unknown place");
                 require(pin.filterGroup() != null && FILTER_GROUPS.contains(pin.filterGroup()),
-                    "PLACE mapPins require a supported filterGroup");
+                    CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED
+                        + ": PLACE mapPins require a supported filterGroup");
             } else {
                 require(areas.containsKey(pin.areaId()), "mapPins references an unknown area");
                 require(pin.filterGroup() == null, "AREA mapPins must not have a filterGroup");
@@ -470,7 +471,8 @@ public final class CatalogManifestValidator {
         boolean completeSchedule = guide.festivalStartDate() != null && guide.festivalEndDate() != null
             && guide.dailyTransferOpenTime() != null && guide.dailyTransferCloseTime() != null
             && guide.dailyPickupOpenTime() != null && guide.dailyPickupCloseTime() != null;
-        require(!schedule || completeSchedule, "ticketGuide schedule fields must be complete");
+        require(!schedule || completeSchedule, CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED
+            + ": ticketGuide schedule fields must be complete");
         if (completeSchedule) {
             require(!guide.festivalStartDate().isAfter(guide.festivalEndDate()),
                 "ticketGuide festival dates are reversed");

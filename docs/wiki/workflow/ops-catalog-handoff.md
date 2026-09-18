@@ -51,7 +51,7 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 | 3 | 관리자 혼잡도 백엔드 | 통합 완료 | FestivalDay 일정 기반 GET/PUT과 `crowding_state_dynamic`을 통합했다. migration은 병합 시 V16으로 재배정했고 원격 DB에는 적용하지 않았다. |
 | 4 | 계좌 운영 설정 | 구현 통합, provisioning 대기 | CLI·V15 설정/이력 schema·history retention을 통합했다. DB provider의 role 발급과 provisioning script 실행은 남아 있다. |
 | 5 | 티켓 계좌 분리와 polling | 통합 완료 | catalog에서 계좌·송금 링크를 제거하고 `/ticket-guide`가 현재 `TICKET` 설정과 합쳐 조건부 응답을 낸다. 실제 계좌 등록과 read 전환 배포는 [계좌 운영 설정](../engineering/operational-account-settings.md)의 runbook을 따른다. |
-| 6 | catalog export·게시 보호 | 대기 | `base_revision_id`와 legacy validation report를 구현한다. |
+| 6 | catalog export·게시 보호 | 통합 완료 | `base_revision_id` 기반 `BASE_REVISION_CONFLICT`, 명시적 rollback 기대값, revision 직접 읽기 exporter와 legacy finding을 구현했다. 로컬 workbench(7)는 아직 시작하지 않았다. |
 | 7 | 로컬 catalog workbench | 대기 | export/publish 보호와 role 분리 뒤에 구현한다. |
 
 현재 통합 branch는 `feat/ops-foundation`이고 마지막 통합 commit은 `586be92`다.
@@ -84,6 +84,9 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
   옮기고 V5 legacy 표는 보존한다.
 - `586be92`: 위 두 갈래를 병합했다. preflight의 non-catalog 표 목록을 합치고, 계좌
   migration이 V15를 쓰고 있어 혼잡도 migration을 V16으로 재배정했다.
+- `PR6`: draft마다 편집 기준 published revision을 기록하고 import·publish·rollback이 잠금 안에서
+  이를 검증한다. `export` CLI는 revision을 직접 읽어 manifest로 되돌리고, legacy filter group과
+  부분 티켓 일정을 finding으로 보고하며 재import를 막는다.
 - `23f59d7`: 티켓 계좌를 catalog에서 분리했다. manifest는 계좌·링크 field를 unknown
   property로 거절하고, snapshot·copy·rollback은 legacy 열을 읽지 않으며,
   `/ticket-guide`가 현재 `TICKET` 설정과 `paymentSettingsVersion`을 합쳐 strong ETag와
@@ -145,6 +148,7 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 | 2026-09-18 | 전체 `mvnw.cmd verify` 재실행 | Docker 사용 가능 상태에서 312개 통과, 실패·오류·건너뜀 0 | PR 5 티켓 계좌 분리를 시작한다. |
 | 2026-09-18 | PR 5 티켓 계좌 분리 후 `mvnw.cmd clean verify` | 318개 통과, 실패·오류·건너뜀 0 | 계좌 등록 전에는 `UNCONFIGURED`가 정상 응답이다. |
 | 2026-09-18 | PR 5 `api-v2` 재생성과 `npm run check` | 324개 통과. `paymentSettingsVersion`, 조건부 envelope, `Cache-Control`·`X-Server-Time` 헤더 선언을 반영 | 생성물은 source 수정 뒤 재생성했다. |
+| 2026-09-18 | PR 6 게시 보호·export | `CatalogRevisionServiceIntegrationTest` 21개 통과. 끼어든 게시·stale rollback 차단, export→import→export 동일성, legacy finding과 import 차단을 포함 | 로컬 workbench와 부하 시나리오는 남아 있다. |
 | 2026-09-18 | catalog role의 legacy 티켓 열 차단 | provisioning script를 실행하는 Testcontainers 검증에서 export/publish role의 `SELECT *`와 계좌 열 조회가 권한 거부 | 원격 DB에는 아직 적용하지 않았다. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
