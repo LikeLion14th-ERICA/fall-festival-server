@@ -8,8 +8,21 @@ public record OperationalAccountChange(
     String bankName,
     String accountNumber,
     String accountHolder,
-    String transferLinkUrl
+    String transferLinkUrl,
+    String bankCode,
+    boolean tossLinkEnabled
 ) {
+
+    /** A TICKET or GOODS change, which has no bank code or Toss shortcut. */
+    public OperationalAccountChange(
+        OperationalAccountState state,
+        String bankName,
+        String accountNumber,
+        String accountHolder,
+        String transferLinkUrl
+    ) {
+        this(state, bankName, accountNumber, accountHolder, transferLinkUrl, null, false);
+    }
 
     public OperationalAccountChange {
         Objects.requireNonNull(state, "Operational account state is required");
@@ -17,8 +30,8 @@ public record OperationalAccountChange(
         if (configured != (bankName != null && accountNumber != null && accountHolder != null)) {
             throw new IllegalArgumentException("Operational account state and values do not agree");
         }
-        if (!configured && transferLinkUrl != null) {
-            throw new IllegalArgumentException("An unconfigured account cannot have a transfer link");
+        if (!configured && (transferLinkUrl != null || bankCode != null || tossLinkEnabled)) {
+            throw new IllegalArgumentException("An unconfigured account cannot have transfer details");
         }
     }
 

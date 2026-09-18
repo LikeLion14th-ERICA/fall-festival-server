@@ -4,8 +4,11 @@
 
 ## 범위와 모델
 
-`operational_account_settings`는 `(festival_id, purpose)` 현재값과 증가하는 `version`을
-저장한다. `purpose`는 `TICKET` 또는 `GOODS`이고, 상태는 공개 가능한 `CONFIGURED`와 표시를
+`operational_account_settings`는 `(festival_id, purpose, scope_id)` 현재값과 증가하는 `version`을
+저장한다. `purpose`는 축제 단위의 `TICKET`·`GOODS`와 부스 단위의 `SPACE`(V23)이며, `SPACE`의
+`scope_id`는 부스 API id, 나머지는 빈 문자열이다. `SPACE`는 서비스 내부 은행 식별자
+`bank_code`와 토스 연결 노출 여부 `toss_link_enabled`를 가지며 송금 링크는 가질 수 없다. 공개
+조회는 [부스 상세](../product/spaces.md#부스-계좌-송금-안내)의 `bankTransfer`다. 상태는 공개 가능한 `CONFIGURED`와 표시를
 중단하는 `UNCONFIGURED`다. 은행명·계좌번호·예금주·선택 송금 링크는 catalog revision 밖의
 운영 설정이다. 이 PR은 HTTP 관리자 쓰기와 공개 조회를 만들지 않는다.
 
@@ -59,7 +62,17 @@ table/function owner와 DB superuser는 PostgreSQL 소유자 권한으로 이 �
 java '-Dloader.main=dev.espero.festival.AccountSettingsCliApplication' -cp target/fall-festival-server-0.0.1-SNAPSHOT.jar org.springframework.boot.loader.launch.PropertiesLauncher set --festival-id=<uuid> --purpose=TICKET --expected-version=<current-version> --input-file=<secure-local-json> --last-four=<four-digits>
 ```
 
-input JSON은 `bankName`, `accountNumber`, `accountHolder`, `transferLinkUrl`만 받는다. 파일은
+부스 계좌는 `--purpose=SPACE --space-id=<부스 API id>`로 지정한다. 부스마다 version이 따로
+증가한다.
+
+```powershell
+java '-Dloader.main=dev.espero.festival.AccountSettingsCliApplication' -cp target/fall-festival-server-0.0.1-SNAPSHOT.jar org.springframework.boot.loader.launch.PropertiesLauncher set --festival-id=<uuid> --purpose=SPACE --space-id=<space-id> --expected-version=<current-version> --input-file=<secure-local-json> --last-four=<four-digits>
+```
+
+input JSON은 `bankName`, `accountNumber`, `accountHolder`, `transferLinkUrl`, `bankId`,
+`tossLinkEnabled`만 받는다. `SPACE`는 `bankId`(소문자·숫자·하이픈)가 필수이고
+`transferLinkUrl`을 쓸 수 없으며, `TICKET`·`GOODS`는 `bankId`와 `tossLinkEnabled`를 쓸 수 없다.
+`bankName`은 공개 응답의 `bankDisplayName`, `accountHolder`는 `accountHolderName`이 된다. 파일은
 regular file·16 KiB 이하·unknown field 없음이어야 하며 symlink는 거절한다. 사용 뒤 운영자가
 승인된 비밀 관리 절차로 파일을 제거한다. 링크는 선택 사항이지만 HTTPS, 기본 포트, userinfo와
 fragment 없음, `ACCOUNT_TRANSFER_LINK_ALLOWED_HOSTS`의 정확한 host 중 하나여야 한다. 빈

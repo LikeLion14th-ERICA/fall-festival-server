@@ -63,10 +63,8 @@ public class AccountSettingsCliRunner {
         OperationalAccountChange change = readInput(value(arguments, "input-file"));
         String lastFour = value(arguments, "last-four");
         return confirmed
-            ? settings.set(
-                common.festivalId(), common.purpose(), common.expectedVersion(), change, lastFour, audit(arguments)
-            )
-            : settings.previewSet(common.festivalId(), common.purpose(), common.expectedVersion(), change, lastFour);
+            ? settings.set(common.target(), common.expectedVersion(), change, lastFour, audit(arguments))
+            : settings.previewSet(common.target(), common.expectedVersion(), change, lastFour);
     }
 
     private OperationalAccountChangeResult restore(
@@ -77,10 +75,8 @@ public class AccountSettingsCliRunner {
         long sourceVersion = positiveLong(value(arguments, "source-version"), "ACCOUNT_HISTORY_VERSION_INVALID");
         String lastFour = optionalValue(arguments, "last-four");
         return confirmed
-            ? settings.restore(
-                common.festivalId(), common.purpose(), common.expectedVersion(), sourceVersion, lastFour, audit(arguments)
-            )
-            : settings.previewRestore(common.festivalId(), common.purpose(), common.expectedVersion(), sourceVersion, lastFour);
+            ? settings.restore(common.target(), common.expectedVersion(), sourceVersion, lastFour, audit(arguments))
+            : settings.previewRestore(common.target(), common.expectedVersion(), sourceVersion, lastFour);
     }
 
     private OperationalAccountChangeResult clear(
@@ -89,8 +85,8 @@ public class AccountSettingsCliRunner {
         boolean confirmed
     ) {
         return confirmed
-            ? settings.clear(common.festivalId(), common.purpose(), common.expectedVersion(), audit(arguments))
-            : settings.previewClear(common.festivalId(), common.purpose(), common.expectedVersion());
+            ? settings.clear(common.target(), common.expectedVersion(), audit(arguments))
+            : settings.previewClear(common.target(), common.expectedVersion());
     }
 
     private Common common(org.springframework.boot.ApplicationArguments arguments) {
@@ -101,8 +97,11 @@ public class AccountSettingsCliRunner {
             throw new OperationalAccountException("ACCOUNT_FESTIVAL_ID_INVALID");
         }
         return new Common(
-            festivalId,
-            OperationalAccountPurpose.parse(value(arguments, "purpose")),
+            new OperationalAccountTarget(
+                festivalId,
+                OperationalAccountPurpose.parse(value(arguments, "purpose")),
+                optionalValue(arguments, "space-id")
+            ),
             nonNegativeLong(value(arguments, "expected-version"), "ACCOUNT_EXPECTED_VERSION_MISMATCH")
         );
     }
@@ -193,8 +192,11 @@ public class AccountSettingsCliRunner {
         OperationalAccountSetting setting = result.setting();
         output.println("mode=" + (confirmed ? "APPLIED" : "DRY_RUN"));
         output.println("action=" + command);
-        output.println("festivalId=" + common.festivalId());
+        output.println("festivalId=" + common.target().festivalId());
         output.println("purpose=" + setting.purpose());
+        if (setting.spaceId() != null) {
+            output.println("spaceId=" + setting.spaceId());
+        }
         output.println("expectedVersion=" + common.expectedVersion());
         output.println("resultVersion=" + setting.version());
         output.println("changed=" + result.changed());
@@ -206,6 +208,10 @@ public class AccountSettingsCliRunner {
         output.println("state=" + setting.state());
         output.println("accountLastFour=" + lastFour(setting));
         output.println("transferLinkConfigured=" + (setting.transferLinkUrl() != null));
+        if (setting.purpose() == OperationalAccountPurpose.SPACE) {
+            output.println("bankId=" + (setting.bankCode() == null ? "none" : setting.bankCode()));
+            output.println("tossLinkEnabled=" + setting.tossLinkEnabled());
+        }
     }
 
     private String changedFields(OperationalAccountChangeResult result) {
@@ -214,7 +220,9 @@ public class AccountSettingsCliRunner {
         }
         OperationalAccountSetting before = result.before();
         if (before == null) {
-            return "state,bankName,accountNumber,accountHolder,transferLinkUrl";
+            return result.setting().purpose() == OperationalAccountPurpose.SPACE
+                ? "state,bankName,accountNumber,accountHolder,bankId,tossLinkEnabled"
+                : "state,bankName,accountNumber,accountHolder,transferLinkUrl";
         }
         List<String> fields = new ArrayList<>();
         if (before.state() != result.setting().state()) {
@@ -232,6 +240,12 @@ public class AccountSettingsCliRunner {
         if (!Objects.equals(before.transferLinkUrl(), result.setting().transferLinkUrl())) {
             fields.add("transferLinkUrl");
         }
+        if (!Objects.equals(before.bankCode(), result.setting().bankCode())) {
+            fields.add("bankId");
+        }
+        if (before.tossLinkEnabled() != result.setting().tossLinkEnabled()) {
+            fields.add("tossLinkEnabled");
+        }
         return String.join(",", fields);
     }
 
@@ -241,12 +255,13 @@ public class AccountSettingsCliRunner {
 
     private void usage(PrintStream output) {
         output.println("Usage: AccountSettingsCliApplication <set|restore-version|clear> [options]");
-        output.println("Required for every command: --festival-id=<uuid> --purpose=<TICKET|GOODS> --expected-version=<n>");
+        output.println("Required for every command: --festival-id=<uuid> --purpose=<TICKET|GOODS|SPACE> --expected-version=<n>");
+        output.println("SPACE only: --space-id=<booth-api-id>");
         output.println("set: --input-file=<local-json> --last-four=<four-digits>");
         output.println("restore-version: --source-version=<n> [--last-four=<four-digits>]");
         output.println("Apply only: --confirm --actor=<display-name> --reason=<reason> --evidence-id=<reference>");
         output.println("Without --confirm, the command is a read-only dry run.");
     }
 
-    private record Common(UUID festivalId, OperationalAccountPurpose purpose, long expectedVersion) {}
+    private record Common(OperationalAccountTarget target, long expectedVersion) {}
 }

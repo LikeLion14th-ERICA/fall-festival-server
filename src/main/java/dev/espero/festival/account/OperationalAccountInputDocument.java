@@ -5,7 +5,9 @@ record OperationalAccountInputDocument(
     String bankName,
     String accountNumber,
     String accountHolder,
-    String transferLinkUrl
+    String transferLinkUrl,
+    String bankId,
+    Boolean tossLinkEnabled
 ) {
 
     OperationalAccountChange asChange() {
@@ -14,7 +16,9 @@ record OperationalAccountInputDocument(
             bankName,
             accountNumber,
             accountHolder,
-            transferLinkUrl
+            transferLinkUrl,
+            bankId,
+            Boolean.TRUE.equals(tossLinkEnabled)
         );
     }
 

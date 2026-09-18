@@ -16,8 +16,27 @@ public record OperationalAccountSetting(
     String accountNumber,
     String accountHolder,
     String transferLinkUrl,
-    Instant updatedAt
+    Instant updatedAt,
+    String spaceId,
+    String bankCode,
+    boolean tossLinkEnabled
 ) {
+
+    /** A festival-wide TICKET or GOODS setting. */
+    public OperationalAccountSetting(
+        UUID festivalId,
+        OperationalAccountPurpose purpose,
+        OperationalAccountState state,
+        long version,
+        String bankName,
+        String accountNumber,
+        String accountHolder,
+        String transferLinkUrl,
+        Instant updatedAt
+    ) {
+        this(festivalId, purpose, state, version, bankName, accountNumber, accountHolder, transferLinkUrl,
+            updatedAt, null, null, false);
+    }
 
     public OperationalAccountSetting {
         if (festivalId == null || purpose == null || state == null || version < 1 || updatedAt == null) {
@@ -27,9 +46,16 @@ public record OperationalAccountSetting(
         if (configured != (bankName != null && accountNumber != null && accountHolder != null)) {
             throw new IllegalArgumentException("Operational account state and values do not agree");
         }
-        if (!configured && transferLinkUrl != null) {
-            throw new IllegalArgumentException("An unconfigured account cannot have a transfer link");
+        if (!configured && (transferLinkUrl != null || bankCode != null || tossLinkEnabled)) {
+            throw new IllegalArgumentException("An unconfigured account cannot have transfer details");
         }
+        if ((purpose == OperationalAccountPurpose.SPACE) != (spaceId != null)) {
+            throw new IllegalArgumentException("Only a SPACE account belongs to a booth");
+        }
+    }
+
+    public OperationalAccountTarget target() {
+        return new OperationalAccountTarget(festivalId, purpose, spaceId);
     }
 
     public boolean isConfigured() {
@@ -47,7 +73,7 @@ public record OperationalAccountSetting(
     @Override
     public String toString() {
         return "OperationalAccountSetting[festivalId=" + festivalId + ", purpose=" + purpose
-            + ", state=" + state + ", version=" + version + ", values=[REDACTED], updatedAt="
+            + ", spaceId=" + spaceId + ", state=" + state + ", version=" + version + ", values=[REDACTED], updatedAt="
             + updatedAt + "]";
     }
 }
