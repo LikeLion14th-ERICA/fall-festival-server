@@ -61,7 +61,7 @@ exit code **2**, `status=STOP_AND_REVIEW`는 다음 경우에 반환한다.
 - 다른 DB client session, 다른 user schema, 결과 상한 초과로 공유 여부나 전체 상태가 불명확함
 - 실패·누락·중복·알 수 없는 Flyway 이력, script/checksum 불일치, 이력과 table 목록 불일치
 - 기존 festival/revision/catalog 데이터, 선택한 festival 부재 또는 중복 published revision
-- 현재 통합 테스트가 검증한 PostgreSQL major 16 이외 버전
+- 현재 통합 테스트가 검증한 PostgreSQL major 16·17 이외 버전
 - 환경설정 오류, 연결 실패, SQL resource inventory를 읽을 수 없음
 
 빈 호환 schema 등 자동 차단 항목이 없으면 exit code **0**,
@@ -92,10 +92,12 @@ JDBC URL·credential·서버 예외 메시지·stack trace를 출력하지 않�
 ## 로컬 검증
 
 ```powershell
-.\mvnw.cmd --batch-mode --no-transfer-progress '-Dtest=DatabasePreflightApplicationTest,DatabasePreflightIntegrationTest' test
+.\mvnw.cmd --batch-mode --no-transfer-progress '-Dtest=DatabasePreflightApplicationTest,DatabasePreflightIntegrationTest,DatabasePreflightPostgresql17IntegrationTest' test
 ```
 
-통합 검증은 별도 `postgres:16-alpine` Testcontainers DB만 생성한다. 빈 DB에 Flyway/bootstrap가
-생기지 않는지, 실제 migration checksum 대조, 손상된 이력·공유 흔적 중단, 읽기 전용 SELECT와
-rollback, 감사 이력 무변경, JDK+JDBC만 있는 별도 JVM 실행을 확인한다. Docker가 없으면 통합
-검증이 skip되므로 실행 결과의 skipped 개수를 반드시 보고한다.
+기존 전체 통합 검증은 별도 `postgres:16-alpine` Testcontainers DB를 사용한다. 추가된
+`postgres:17-alpine` 검증은 빈 schema에서 preflight가 mutation 없이 완료되는지와 현재 포함된
+V1–V17 migration 적용 후 실제 checksum 대조, 읽기 전용 SELECT·rollback, 감사·카탈로그·공지
+table 무변경을 확인한다. 지원 major는 정확히 16과 17이며 다른 major는 계속
+`POSTGRESQL_VERSION_REQUIRES_REVIEW`로 중단한다. Docker가 없으면 통합 검증이 skip되므로 실행
+결과의 skipped 개수를 반드시 보고한다.
