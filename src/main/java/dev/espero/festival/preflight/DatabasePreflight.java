@@ -15,6 +15,7 @@ import java.util.UUID;
 /** Bounded metadata/SELECT inspection in one transaction that is always rolled back. */
 final class DatabasePreflight {
     private static final int MAX_ROWS = 500;
+    private static final Set<Integer> SUPPORTED_POSTGRESQL_MAJORS = Set.of(16, 17);
     private static final Set<String> NON_CATALOG_TABLES = Set.of(
         "flyway_schema_history", "admin_accounts", "admin_refresh_sessions", "admin_audit_events",
         "admin_idempotency_records", "catalog_revision_audit", "crowding_state",
@@ -57,8 +58,7 @@ final class DatabasePreflight {
                             || !"repeatable read".equals(rows.getString("isolation"))) {
                         throw new SQLException("Read-only transaction could not be established.");
                     }
-                    // The repository's PostgreSQL integration matrix currently proves major version 16 only.
-                    if (rows.getInt("server_version_num") / 10000 != 16) {
+                    if (!supportsPostgresqlMajor(rows.getInt("server_version_num") / 10000)) {
                         findings.add("POSTGRESQL_VERSION_REQUIRES_REVIEW");
                     }
                 });
@@ -222,6 +222,10 @@ final class DatabasePreflight {
             result.put(column, rows.getString(column));
         }
         return result;
+    }
+
+    static boolean supportsPostgresqlMajor(int major) {
+        return SUPPORTED_POSTGRESQL_MAJORS.contains(major);
     }
 
     private static String qualified(String schema, String table) {
