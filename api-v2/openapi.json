@@ -1064,6 +1064,16 @@
               "default": "ko"
             },
             "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
           }
         ],
         "responses": {
@@ -1075,12 +1085,19 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoticesResponse"
+                  "$ref": "#/components/schemas/NoticesConditionalResponse"
                 },
                 "examples": {
                   "normal": {
@@ -1091,12 +1108,13 @@
                           {
                             "id": "notice-safety",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 안전 안내",
                             "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                             "links": [
                               {
-                                "label": "개발용 안내 링크",
                                 "url": "https://example.invalid/mock-notice/safety",
+                                "label": "개발용 안내 링크",
                                 "target": "_blank"
                               }
                             ],
@@ -1105,6 +1123,7 @@
                           {
                             "id": "notice-weather",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 날씨 대비 안내",
                             "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                             "links": [],
@@ -1113,6 +1132,7 @@
                           {
                             "id": "notice-stage",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 공연 대기 안내",
                             "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                             "links": [],
@@ -1121,28 +1141,31 @@
                           {
                             "id": "notice-route",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 구역 이동 안내",
                             "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:10:00+09:00"
                           },
                           {
-                            "id": "notice-pending",
+                            "id": "notice-ko-only",
                             "type": "GENERAL",
-                            "title": "번역 대기 예시",
-                            "body": "한국어에는 표시합니다.",
+                            "contentLocale": "ko",
+                            "title": "영어 미번역 예시",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
                             "id": "notice-1",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "예시 공지",
                             "body": "개발용 공지 본문입니다.",
                             "links": [
                               {
+                                "url": "https://example.invalid/mock-notice-link",
                                 "label": "예시 안내",
-                                "url": "https://example.invalid/mock-link",
                                 "target": "_blank"
                               }
                             ],
@@ -1151,6 +1174,7 @@
                           {
                             "id": "notice-lost",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "예시 분실물",
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
@@ -1159,6 +1183,7 @@
                           {
                             "id": "notice-lost-card",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 카드지갑",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1167,6 +1192,7 @@
                           {
                             "id": "notice-lost-earbuds",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 이어폰 케이스",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1178,7 +1204,7 @@
                           "notice-weather",
                           "notice-stage",
                           "notice-route",
-                          "notice-pending",
+                          "notice-ko-only",
                           "notice-1",
                           "notice-lost",
                           "notice-lost-card",
@@ -1187,11 +1213,9 @@
                         "asOfDate": "2030-10-01"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1206,11 +1230,9 @@
                         "asOfDate": "2030-10-01"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1224,6 +1246,7 @@
                           {
                             "id": "notice-safety",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 안전 안내",
                             "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                             "links": [],
@@ -1232,6 +1255,7 @@
                           {
                             "id": "notice-weather",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 날씨 대비 안내",
                             "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                             "links": [],
@@ -1240,6 +1264,7 @@
                           {
                             "id": "notice-stage",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 공연 대기 안내",
                             "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                             "links": [],
@@ -1248,22 +1273,25 @@
                           {
                             "id": "notice-route",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 구역 이동 안내",
                             "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:10:00+09:00"
                           },
                           {
-                            "id": "notice-pending",
+                            "id": "notice-ko-only",
                             "type": "GENERAL",
-                            "title": "번역 대기 예시",
-                            "body": "한국어에는 표시합니다.",
+                            "contentLocale": "ko",
+                            "title": "영어 미번역 예시",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
                             "id": "notice-1",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "예시 공지",
                             "body": "개발용 공지 본문입니다.",
                             "links": [],
@@ -1272,6 +1300,7 @@
                           {
                             "id": "notice-lost",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "예시 분실물",
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
@@ -1280,6 +1309,7 @@
                           {
                             "id": "notice-lost-card",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 카드지갑",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1288,6 +1318,7 @@
                           {
                             "id": "notice-lost-earbuds",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 이어폰 케이스",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1299,7 +1330,7 @@
                           "notice-weather",
                           "notice-stage",
                           "notice-route",
-                          "notice-pending",
+                          "notice-ko-only",
                           "notice-1",
                           "notice-lost",
                           "notice-lost-card",
@@ -1308,11 +1339,9 @@
                         "asOfDate": "2030-10-01"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1326,6 +1355,7 @@
                           {
                             "id": "notice-new",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "추가 예시 공지",
                             "body": "새 공지 버튼 검증용",
                             "links": [],
@@ -1334,12 +1364,13 @@
                           {
                             "id": "notice-safety",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 안전 안내",
                             "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                             "links": [
                               {
-                                "label": "개발용 안내 링크",
                                 "url": "https://example.invalid/mock-notice/safety",
+                                "label": "개발용 안내 링크",
                                 "target": "_blank"
                               }
                             ],
@@ -1348,6 +1379,7 @@
                           {
                             "id": "notice-weather",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 날씨 대비 안내",
                             "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                             "links": [],
@@ -1356,6 +1388,7 @@
                           {
                             "id": "notice-stage",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 공연 대기 안내",
                             "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                             "links": [],
@@ -1364,28 +1397,31 @@
                           {
                             "id": "notice-route",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 구역 이동 안내",
                             "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:10:00+09:00"
                           },
                           {
-                            "id": "notice-pending",
+                            "id": "notice-ko-only",
                             "type": "GENERAL",
-                            "title": "번역 대기 예시",
-                            "body": "한국어에는 표시합니다.",
+                            "contentLocale": "ko",
+                            "title": "영어 미번역 예시",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
                             "id": "notice-1",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "예시 공지",
                             "body": "개발용 공지 본문입니다.",
                             "links": [
                               {
+                                "url": "https://example.invalid/mock-notice-link",
                                 "label": "예시 안내",
-                                "url": "https://example.invalid/mock-link",
                                 "target": "_blank"
                               }
                             ],
@@ -1394,6 +1430,7 @@
                           {
                             "id": "notice-lost",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "예시 분실물",
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
@@ -1402,6 +1439,7 @@
                           {
                             "id": "notice-lost-card",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 카드지갑",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1410,6 +1448,7 @@
                           {
                             "id": "notice-lost-earbuds",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 이어폰 케이스",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1422,7 +1461,7 @@
                           "notice-weather",
                           "notice-stage",
                           "notice-route",
-                          "notice-pending",
+                          "notice-ko-only",
                           "notice-1",
                           "notice-lost",
                           "notice-lost-card",
@@ -1431,11 +1470,9 @@
                         "asOfDate": "2030-10-01"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -1449,12 +1486,13 @@
                           {
                             "id": "notice-safety",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 안전 안내",
                             "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                             "links": [
                               {
-                                "label": "개발용 안내 링크",
                                 "url": "https://example.invalid/mock-notice/safety",
+                                "label": "개발용 안내 링크",
                                 "target": "_blank"
                               }
                             ],
@@ -1463,6 +1501,7 @@
                           {
                             "id": "notice-weather",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 날씨 대비 안내",
                             "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                             "links": [],
@@ -1471,6 +1510,7 @@
                           {
                             "id": "notice-stage",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 공연 대기 안내",
                             "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                             "links": [],
@@ -1479,22 +1519,25 @@
                           {
                             "id": "notice-route",
                             "type": "GENERAL",
+                            "contentLocale": "ko",
                             "title": "목 구역 이동 안내",
                             "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:10:00+09:00"
                           },
                           {
-                            "id": "notice-pending",
+                            "id": "notice-ko-only",
                             "type": "GENERAL",
-                            "title": "번역 대기 예시",
-                            "body": "한국어에는 표시합니다.",
+                            "contentLocale": "ko",
+                            "title": "영어 미번역 예시",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
                             "id": "notice-lost",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "예시 분실물",
                             "body": "실제 분실물이 아닙니다.",
                             "links": [],
@@ -1503,6 +1546,7 @@
                           {
                             "id": "notice-lost-card",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 카드지갑",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1511,6 +1555,7 @@
                           {
                             "id": "notice-lost-earbuds",
                             "type": "LOST_FOUND",
+                            "contentLocale": "ko",
                             "title": "목 분실물 안내: 이어폰 케이스",
                             "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                             "links": [],
@@ -1522,7 +1567,7 @@
                           "notice-weather",
                           "notice-stage",
                           "notice-route",
-                          "notice-pending",
+                          "notice-ko-only",
                           "notice-lost",
                           "notice-lost-card",
                           "notice-lost-earbuds"
@@ -1530,17 +1575,26 @@
                         "asOfDate": "2030-10-01"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
                     }
                   }
                 }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
               }
             }
           },
@@ -1781,7 +1835,8 @@
           "error",
           "bad-request",
           "rate-limited"
-        ]
+        ],
+        "x-conditional": true
       }
     },
     "/api/v2/goods": {
@@ -12067,20 +12122,22 @@
                             "translations": {
                               "ko": {
                                 "title": "목 안전 안내",
-                                "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
-                                "status": "READY"
+                                "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다."
                               },
                               "en": {
                                 "title": "Mock safety notice",
-                                "body": "A fictional safety notice for frontend work.",
-                                "status": "READY"
+                                "body": "A fictional safety notice for frontend work."
                               }
                             },
                             "links": [
                               {
-                                "label": "개발용 안내 링크",
                                 "url": "https://example.invalid/mock-notice/safety",
-                                "target": "_blank"
+                                "labels": {
+                                  "ko": "개발용 안내 링크",
+                                  "en": "Mock guidance link",
+                                  "zh-Hans": null,
+                                  "ja": null
+                                }
                               }
                             ],
                             "templateId": null,
@@ -12093,13 +12150,11 @@
                             "translations": {
                               "ko": {
                                 "title": "목 날씨 대비 안내",
-                                "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
-                                "status": "READY"
+                                "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다."
                               },
                               "en": {
                                 "title": "Mock weather notice",
-                                "body": "A fictional weather notice for frontend work.",
-                                "status": "READY"
+                                "body": "A fictional weather notice for frontend work."
                               }
                             },
                             "links": [],
@@ -12113,13 +12168,11 @@
                             "translations": {
                               "ko": {
                                 "title": "목 공연 대기 안내",
-                                "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
-                                "status": "READY"
+                                "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다."
                               },
                               "en": {
                                 "title": "Mock stage notice",
-                                "body": "A fictional stage notice for frontend work.",
-                                "status": "READY"
+                                "body": "A fictional stage notice for frontend work."
                               }
                             },
                             "links": [],
@@ -12133,13 +12186,11 @@
                             "translations": {
                               "ko": {
                                 "title": "목 구역 이동 안내",
-                                "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
-                                "status": "READY"
+                                "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다."
                               },
                               "en": {
                                 "title": "Mock route notice",
-                                "body": "A fictional route notice for frontend work.",
-                                "status": "READY"
+                                "body": "A fictional route notice for frontend work."
                               }
                             },
                             "links": [],
@@ -12148,33 +12199,12 @@
                             "updatedAt": "2030-10-01T17:10:00+09:00"
                           },
                           {
-                            "id": "notice-old",
+                            "id": "notice-ko-only",
                             "type": "GENERAL",
                             "translations": {
                               "ko": {
-                                "title": "지난 예시 공지",
-                                "body": "사용자 목록에서는 제외합니다.",
-                                "status": "READY"
-                              }
-                            },
-                            "links": [],
-                            "templateId": null,
-                            "createdAt": "2030-09-30T18:00:00+09:00",
-                            "updatedAt": "2030-10-01T17:00:00+09:00"
-                          },
-                          {
-                            "id": "notice-pending",
-                            "type": "GENERAL",
-                            "translations": {
-                              "ko": {
-                                "title": "번역 대기 예시",
-                                "body": "한국어에는 표시합니다.",
-                                "status": "READY"
-                              },
-                              "en": {
-                                "title": "Pending",
-                                "body": "Not visible in English.",
-                                "status": "PENDING"
+                                "title": "영어 미번역 예시",
+                                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다."
                               }
                             },
                             "links": [],
@@ -12183,25 +12213,45 @@
                             "updatedAt": "2030-10-01T17:00:00+09:00"
                           },
                           {
+                            "id": "notice-old",
+                            "type": "GENERAL",
+                            "translations": {
+                              "ko": {
+                                "title": "지난 예시 공지",
+                                "body": "사용자 목록에서는 제외합니다."
+                              },
+                              "en": {
+                                "title": "Past sample notice",
+                                "body": "Excluded from the user list."
+                              }
+                            },
+                            "links": [],
+                            "templateId": null,
+                            "createdAt": "2030-09-30T18:00:00+09:00",
+                            "updatedAt": "2030-10-01T17:00:00+09:00"
+                          },
+                          {
                             "id": "notice-1",
                             "type": "GENERAL",
                             "translations": {
                               "ko": {
                                 "title": "예시 공지",
-                                "body": "개발용 공지 본문입니다.",
-                                "status": "READY"
+                                "body": "개발용 공지 본문입니다."
                               },
                               "en": {
                                 "title": "Sample notice",
-                                "body": "Mock content only.",
-                                "status": "READY"
+                                "body": "Mock content only."
                               }
                             },
                             "links": [
                               {
-                                "label": "예시 안내",
-                                "url": "https://example.invalid/mock-link",
-                                "target": "_blank"
+                                "url": "https://example.invalid/mock-notice-link",
+                                "labels": {
+                                  "ko": "예시 안내",
+                                  "en": "Sample link",
+                                  "zh-Hans": null,
+                                  "ja": null
+                                }
                               }
                             ],
                             "templateId": null,
@@ -12214,13 +12264,11 @@
                             "translations": {
                               "ko": {
                                 "title": "목 분실물 안내: 카드지갑",
-                                "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
-                                "status": "READY"
+                                "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다."
                               },
                               "en": {
                                 "title": "Mock lost card holder",
-                                "body": "This is a fictional lost-item example.",
-                                "status": "READY"
+                                "body": "This is a fictional lost-item example."
                               }
                             },
                             "links": [],
@@ -12234,13 +12282,11 @@
                             "translations": {
                               "ko": {
                                 "title": "목 분실물 안내: 이어폰 케이스",
-                                "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
-                                "status": "READY"
+                                "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다."
                               },
                               "en": {
                                 "title": "Mock lost earbuds case",
-                                "body": "This is a fictional lost-item example.",
-                                "status": "READY"
+                                "body": "This is a fictional lost-item example."
                               }
                             },
                             "links": [],
@@ -12254,13 +12300,11 @@
                             "translations": {
                               "ko": {
                                 "title": "예시 분실물",
-                                "body": "실제 분실물이 아닙니다.",
-                                "status": "READY"
+                                "body": "실제 분실물이 아닙니다."
                               },
                               "en": {
                                 "title": "Sample lost item",
-                                "body": "Mock item, not a real report.",
-                                "status": "READY"
+                                "body": "Mock item, not a real report."
                               }
                             },
                             "links": [],
@@ -12612,7 +12656,20 @@
             "AdminBearer": []
           }
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
+          }
+        ],
         "responses": {
           "201": {
             "description": "성공",
@@ -12638,114 +12695,24 @@
                         "translations": {
                           "ko": {
                             "title": "개발용 새 공지",
-                            "body": "개발용 본문",
-                            "status": "READY"
+                            "body": "개발용 본문"
                           },
                           "en": {
                             "title": "New mock notice",
-                            "body": "Mock body",
-                            "status": "READY"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
+                            "body": "Mock body"
                           }
                         },
-                        "links": [],
-                        "templateId": null,
-                        "id": "notice-created-1",
-                        "createdAt": "2030-10-01T18:00:00.002+09:00",
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 2,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "english-incomplete": {
-                    "summary": "공지 등록: english-incomplete",
-                    "value": {
-                      "data": {
-                        "type": "GENERAL",
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 새 공지",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
+                        "links": [
+                          {
+                            "url": "https://example.invalid/mock-notice-link",
+                            "labels": {
+                              "ko": "예시 링크",
+                              "en": "Sample link",
+                              "zh-Hans": null,
+                              "ja": null
+                            }
                           }
-                        },
-                        "links": [],
-                        "templateId": null,
-                        "id": "notice-created-1",
-                        "createdAt": "2030-10-01T18:00:00.002+09:00",
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 2,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "english-failed": {
-                    "summary": "공지 등록: english-failed",
-                    "value": {
-                      "data": {
-                        "type": "GENERAL",
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 새 공지",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": null,
-                            "body": null,
-                            "status": "FAILED"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          }
-                        },
-                        "links": [],
+                        ],
                         "templateId": null,
                         "id": "notice-created-1",
                         "createdAt": "2030-10-01T18:00:00.002+09:00",
@@ -12996,6 +12963,51 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
+                "examples": {
+                  "validation-failed": {
+                    "summary": "공지 등록: validation-failed",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "요청 필드를 확인해 주세요.",
+                        "details": [
+                          {
+                            "field": "$.translations.en",
+                            "reason": "필수 필드입니다."
+                          }
+                        ],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
                 "examples": {}
               }
             }
@@ -13114,8 +13126,7 @@
         "x-mock-scenarios": [
           "normal",
           "error",
-          "english-incomplete",
-          "english-failed",
+          "validation-failed",
           "bad-request",
           "rate-limited",
           "unauthorized",
@@ -13134,16 +13145,24 @@
                 "translations": {
                   "ko": {
                     "title": "개발용 새 공지",
-                    "body": "개발용 본문",
-                    "status": "READY"
+                    "body": "개발용 본문"
                   },
                   "en": {
                     "title": "New mock notice",
-                    "body": "Mock body",
-                    "status": "READY"
+                    "body": "Mock body"
                   }
                 },
-                "links": [],
+                "links": [
+                  {
+                    "url": "https://example.invalid/mock-notice-link",
+                    "labels": {
+                      "ko": "예시 링크",
+                      "en": "Sample link",
+                      "zh-Hans": null,
+                      "ja": null
+                    }
+                  }
+                ],
                 "templateId": null
               }
             }
@@ -13176,6 +13195,16 @@
               "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
             },
             "description": "목의 실제 ID는 /__mock/catalog 또는 examples.json 참고."
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
           }
         ],
         "responses": {
@@ -13187,12 +13216,19 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
               }
             },
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminNoticeResponse"
+                  "$ref": "#/components/schemas/AdminNoticeConditionalResponse"
                 },
                 "examples": {
                   "normal": {
@@ -13204,20 +13240,22 @@
                         "translations": {
                           "ko": {
                             "title": "예시 공지",
-                            "body": "개발용 공지 본문입니다.",
-                            "status": "READY"
+                            "body": "개발용 공지 본문입니다."
                           },
                           "en": {
                             "title": "Sample notice",
-                            "body": "Mock content only.",
-                            "status": "READY"
+                            "body": "Mock content only."
                           }
                         },
                         "links": [
                           {
-                            "label": "예시 안내",
-                            "url": "https://example.invalid/mock-link",
-                            "target": "_blank"
+                            "url": "https://example.invalid/mock-notice-link",
+                            "labels": {
+                              "ko": "예시 안내",
+                              "en": "Sample link",
+                              "zh-Hans": null,
+                              "ja": null
+                            }
                           }
                         ],
                         "templateId": null,
@@ -13225,11 +13263,9 @@
                         "updatedAt": "2030-10-01T16:00:00+09:00"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
@@ -13244,13 +13280,11 @@
                         "translations": {
                           "ko": {
                             "title": "예시 공지",
-                            "body": "개발용 공지 본문입니다.",
-                            "status": "READY"
+                            "body": "개발용 공지 본문입니다."
                           },
                           "en": {
                             "title": "Sample notice",
-                            "body": "Mock content only.",
-                            "status": "READY"
+                            "body": "Mock content only."
                           }
                         },
                         "links": [],
@@ -13259,17 +13293,26 @@
                         "updatedAt": "2030-10-01T16:00:00+09:00"
                       },
                       "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
-                        "revision": 1,
+                        "revision": 0,
                         "locale": "ko",
                         "mock": true
                       }
                     }
                   }
                 }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
               }
             }
           },
@@ -13591,7 +13634,8 @@
           "rate-limited",
           "unauthorized",
           "forbidden"
-        ]
+        ],
+        "x-conditional": true
       },
       "put": {
         "operationId": "putAdminNotice",
@@ -13617,6 +13661,28 @@
               "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
             },
             "description": "목의 실제 ID는 /__mock/catalog 또는 examples.json 참고."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "현재 표현의 strong ETag. 누락 시 428, 불일치 시 409."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
           }
         ],
         "responses": {
@@ -13644,114 +13710,24 @@
                         "translations": {
                           "ko": {
                             "title": "개발용 새 공지",
-                            "body": "개발용 본문",
-                            "status": "READY"
+                            "body": "개발용 본문"
                           },
                           "en": {
                             "title": "New mock notice",
-                            "body": "Mock body",
-                            "status": "READY"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
+                            "body": "Mock body"
                           }
                         },
-                        "links": [],
-                        "templateId": null,
-                        "id": "notice-1",
-                        "createdAt": "2030-10-01T16:00:00+09:00",
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 2,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "english-incomplete": {
-                    "summary": "공지 수정: english-incomplete",
-                    "value": {
-                      "data": {
-                        "type": "GENERAL",
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 새 공지",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
+                        "links": [
+                          {
+                            "url": "https://example.invalid/mock-notice-link",
+                            "labels": {
+                              "ko": "예시 링크",
+                              "en": "Sample link",
+                              "zh-Hans": null,
+                              "ja": null
+                            }
                           }
-                        },
-                        "links": [],
-                        "templateId": null,
-                        "id": "notice-1",
-                        "createdAt": "2030-10-01T16:00:00+09:00",
-                        "updatedAt": "2030-10-01T18:00:00.002+09:00"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.002+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 2,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "english-failed": {
-                    "summary": "공지 수정: english-failed",
-                    "value": {
-                      "data": {
-                        "type": "GENERAL",
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 새 공지",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": null,
-                            "body": null,
-                            "status": "FAILED"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
-                          }
-                        },
-                        "links": [],
+                        ],
                         "templateId": null,
                         "id": "notice-1",
                         "createdAt": "2030-10-01T16:00:00+09:00",
@@ -13966,7 +13942,28 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "edit-conflict": {
+                    "summary": "공지 수정: edit-conflict",
+                    "value": {
+                      "error": {
+                        "code": "EDIT_CONFLICT",
+                        "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -14023,7 +14020,73 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "validation-failed": {
+                    "summary": "공지 수정: validation-failed",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "요청 필드를 확인해 주세요.",
+                        "details": [
+                          {
+                            "field": "$.translations.en",
+                            "reason": "필수 필드입니다."
+                          }
+                        ],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "precondition-required": {
+                    "summary": "공지 수정: precondition-required",
+                    "value": {
+                      "error": {
+                        "code": "PRECONDITION_REQUIRED",
+                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -14142,8 +14205,9 @@
           "normal",
           "not-found",
           "error",
-          "english-incomplete",
-          "english-failed",
+          "precondition-required",
+          "edit-conflict",
+          "validation-failed",
           "bad-request",
           "rate-limited",
           "unauthorized",
@@ -14162,16 +14226,24 @@
                 "translations": {
                   "ko": {
                     "title": "개발용 새 공지",
-                    "body": "개발용 본문",
-                    "status": "READY"
+                    "body": "개발용 본문"
                   },
                   "en": {
                     "title": "New mock notice",
-                    "body": "Mock body",
-                    "status": "READY"
+                    "body": "Mock body"
                   }
                 },
-                "links": [],
+                "links": [
+                  {
+                    "url": "https://example.invalid/mock-notice-link",
+                    "labels": {
+                      "ko": "예시 링크",
+                      "en": "Sample link",
+                      "zh-Hans": null,
+                      "ja": null
+                    }
+                  }
+                ],
                 "templateId": null
               }
             }
@@ -14202,6 +14274,28 @@
               "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
             },
             "description": "목의 실제 ID는 /__mock/catalog 또는 examples.json 참고."
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "현재 표현의 strong ETag. 누락 시 428, 불일치 시 409."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
           }
         ],
         "responses": {
@@ -14436,6 +14530,66 @@
                         "mock": true
                       }
                     }
+                  },
+                  "edit-conflict": {
+                    "summary": "공지 삭제: edit-conflict",
+                    "value": {
+                      "error": {
+                        "code": "EDIT_CONFLICT",
+                        "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "precondition-required": {
+                    "summary": "공지 삭제: precondition-required",
+                    "value": {
+                      "error": {
+                        "code": "PRECONDITION_REQUIRED",
+                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
                   }
                 }
               }
@@ -14556,6 +14710,8 @@
           "normal",
           "already-deleted",
           "error",
+          "precondition-required",
+          "edit-conflict",
           "bad-request",
           "rate-limited",
           "unauthorized",
@@ -14605,13 +14761,11 @@
                             "translations": {
                               "ko": {
                                 "title": "예시 제목",
-                                "body": "예시 본문",
-                                "status": "READY"
+                                "body": "예시 본문"
                               },
                               "en": {
                                 "title": "Sample title",
-                                "body": "Sample body",
-                                "status": "READY"
+                                "body": "Sample body"
                               }
                             }
                           }
@@ -15001,13 +15155,11 @@
                         "translations": {
                           "ko": {
                             "title": "예시 제목",
-                            "body": "예시 본문",
-                            "status": "READY"
+                            "body": "예시 본문"
                           },
                           "en": {
                             "title": "Sample title",
-                            "body": "Sample body",
-                            "status": "READY"
+                            "body": "Sample body"
                           }
                         }
                       },
@@ -15031,13 +15183,7 @@
                         "translations": {
                           "ko": {
                             "title": "예시 제목",
-                            "body": "예시 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": null,
-                            "body": null,
-                            "status": "PENDING"
+                            "body": "예시 본문"
                           }
                         }
                       },
@@ -18887,543 +19033,6 @@
         }
       }
     },
-    "/api/v2/admin/notice-translations": {
-      "post": {
-        "operationId": "previewNoticeTranslation",
-        "summary": "공지 번역 생성·재시도",
-        "description": "연결 화면: ADM-NOTICE-EDIT, ADM-NOTICE-TEMPLATE. 미정 기획을 위한 검토 필요 계약. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
-        "tags": [
-          "관리자"
-        ],
-        "security": [
-          {
-            "AdminBearer": []
-          }
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NoticeTranslationPreviewResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "공지 번역 생성·재시도: normal",
-                    "value": {
-                      "data": {
-                        "source": {
-                          "title": "개발용 제목",
-                          "body": "개발용 본문"
-                        },
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 제목",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": "[MOCK en] 개발용 제목",
-                            "body": "[MOCK en] 개발용 본문",
-                            "status": "READY"
-                          },
-                          "zh-Hans": {
-                            "title": "[MOCK zh-Hans] 개발용 제목",
-                            "body": "[MOCK zh-Hans] 개발용 본문",
-                            "status": "READY"
-                          },
-                          "ja": {
-                            "title": "[MOCK ja] 개발용 제목",
-                            "body": "[MOCK ja] 개발용 본문",
-                            "status": "READY"
-                          }
-                        },
-                        "canSave": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "english-failed": {
-                    "summary": "공지 번역 생성·재시도: english-failed",
-                    "value": {
-                      "data": {
-                        "source": {
-                          "title": "개발용 제목",
-                          "body": "개발용 본문"
-                        },
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 제목",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": null,
-                            "body": null,
-                            "status": "FAILED"
-                          },
-                          "zh-Hans": {
-                            "title": "[MOCK zh-Hans] 개발용 제목",
-                            "body": "[MOCK zh-Hans] 개발용 본문",
-                            "status": "READY"
-                          },
-                          "ja": {
-                            "title": "[MOCK ja] 개발용 제목",
-                            "body": "[MOCK ja] 개발용 본문",
-                            "status": "READY"
-                          }
-                        },
-                        "canSave": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "partial-translation": {
-                    "summary": "공지 번역 생성·재시도: partial-translation",
-                    "value": {
-                      "data": {
-                        "source": {
-                          "title": "개발용 제목",
-                          "body": "개발용 본문"
-                        },
-                        "translations": {
-                          "ko": {
-                            "title": "개발용 제목",
-                            "body": "개발용 본문",
-                            "status": "READY"
-                          },
-                          "en": {
-                            "title": "[MOCK en] 개발용 제목",
-                            "body": "[MOCK en] 개발용 본문",
-                            "status": "READY"
-                          },
-                          "zh-Hans": {
-                            "title": null,
-                            "body": null,
-                            "status": "FAILED"
-                          },
-                          "ja": {
-                            "title": null,
-                            "body": null,
-                            "status": "FAILED"
-                          }
-                        },
-                        "canSave": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 예시입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "bad-request": {
-                    "summary": "공지 번역 생성·재시도: bad-request",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_QUERY",
-                        "message": "잘못된 요청 예시입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "관리자 인증이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "unauthorized": {
-                    "summary": "공지 번역 생성·재시도: unauthorized",
-                    "value": {
-                      "error": {
-                        "code": "UNAUTHORIZED",
-                        "message": "관리자 인증이 필요합니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "관리자 권한이 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "forbidden": {
-                    "summary": "공지 번역 생성·재시도: forbidden",
-                    "value": {
-                      "error": {
-                        "code": "FORBIDDEN",
-                        "message": "관리자 권한이 없습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "요청한 정보를 찾을 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "405": {
-            "description": "지원하지 않는 메서드입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "409": {
-            "description": "요청 상태가 충돌합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "413": {
-            "description": "요청 본문은 64KiB 이하입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "415": {
-            "description": "application/json 요청이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "422": {
-            "description": "요청 필드를 확인해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "429": {
-            "description": "잠시 후 다시 요청해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Retry-After": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "description": "재시도 전 대기 초"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate-limited": {
-                    "summary": "공지 번역 생성·재시도: rate-limited",
-                    "value": {
-                      "error": {
-                        "code": "RATE_LIMITED",
-                        "message": "잠시 후 다시 요청해 주세요.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "목 서버 처리 중 오류가 발생했습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "공지 번역 생성·재시도: error",
-                    "value": {
-                      "error": {
-                        "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-screen-ids": [
-          "ADM-NOTICE-EDIT",
-          "ADM-NOTICE-TEMPLATE"
-        ],
-        "x-contract-status": "provisional",
-        "x-mock-scenarios": [
-          "normal",
-          "english-failed",
-          "partial-translation",
-          "error",
-          "bad-request",
-          "rate-limited",
-          "unauthorized",
-          "forbidden"
-        ],
-        "requestBody": {
-          "required": true,
-          "description": "목 연동용 입력 초안. 기획 합의 전 운영 구현 금지.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NoticeTranslationInput"
-              },
-              "example": {
-                "title": "개발용 제목",
-                "body": "개발용 본문"
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/admin/sessions": {
       "post": {
         "operationId": "createAdminSession",
@@ -21705,6 +21314,16 @@
             ],
             "description": "일반은 당일 등록분, 분실물은 날짜와 무관"
           },
+          "contentLocale": {
+            "type": "string",
+            "enum": [
+              "ko",
+              "en",
+              "zh-Hans",
+              "ja"
+            ],
+            "description": "실제 응답에 쓰인 언어. ko→ko. en→en, 과거 자료에 en 번역이 없으면 ko. zh-Hans·ja→이 공지에 해당 번역이 있을 때만 사용, 없으면 en, 그다음 ko. 필드별 혼합 대체는 하지 않음."
+          },
           "title": {
             "type": "string",
             "minLength": 1,
@@ -21720,7 +21339,7 @@
             "items": {
               "$ref": "#/components/schemas/Link"
             },
-            "description": "본문 외부 링크. 이미지를 직접 표시하는 필드 없음."
+            "description": "본문 외부 링크. label은 응답의 contentLocale과 같은 언어. 이미지를 직접 표시하는 필드 없음."
           },
           "createdAt": {
             "type": "string",
@@ -21733,6 +21352,7 @@
         "required": [
           "id",
           "type",
+          "contentLocale",
           "title",
           "body",
           "links",
@@ -23394,45 +23014,21 @@
         "type": "object",
         "properties": {
           "title": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "번역 제목"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "PENDING/FAILED이면 null 허용"
+            "type": "string",
+            "minLength": 1,
+            "description": "제목. 200자는 목 입력 검증 제안.",
+            "maxLength": 200
           },
           "body": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "번역 본문"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "PENDING/FAILED이면 null 허용"
-          },
-          "status": {
             "type": "string",
-            "enum": [
-              "READY",
-              "PENDING",
-              "FAILED"
-            ],
-            "description": "완료 / 준비 중 / 실패. READY만 사용자 노출."
+            "minLength": 1,
+            "description": "본문. 10000자는 목 입력 검증 제안.",
+            "maxLength": 10000
           }
         },
         "required": [
           "title",
-          "body",
-          "status"
+          "body"
         ],
         "additionalProperties": false,
         "description": ""
@@ -23457,7 +23053,97 @@
           "ko"
         ],
         "additionalProperties": false,
-        "description": "없는 언어는 property 생략. public은 선택 언어 READY만 반환."
+        "description": "ko는 필수. 나머지 언어는 준비된 경우만 property로 포함하고 없으면 생략한다."
+      },
+      "NoticeTranslations": {
+        "type": "object",
+        "properties": {
+          "ko": {
+            "$ref": "#/components/schemas/Translation"
+          },
+          "en": {
+            "$ref": "#/components/schemas/Translation"
+          },
+          "zh-Hans": {
+            "$ref": "#/components/schemas/Translation"
+          },
+          "ja": {
+            "$ref": "#/components/schemas/Translation"
+          }
+        },
+        "required": [
+          "ko",
+          "en"
+        ],
+        "additionalProperties": false,
+        "description": "공지는 ko·en 필수 수동 입력. 자동 번역 없음. zh-Hans·ja는 준비된 경우만 property로 포함하고 없으면 생략한다."
+      },
+      "NoticeLinkInput": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "외부 HTTPS 주소. 언어 공통.",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "labels": {
+            "type": "object",
+            "properties": {
+              "ko": {
+                "type": "string",
+                "minLength": 1,
+                "description": "한국어 label"
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "description": "영어 label"
+              },
+              "zh-Hans": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "중국어 간체 label"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "이 공지에 zh-Hans 번역이 없으면 null"
+              },
+              "ja": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "일본어 label"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "이 공지에 ja 번역이 없으면 null"
+              }
+            },
+            "required": [
+              "ko",
+              "en",
+              "zh-Hans",
+              "ja"
+            ],
+            "additionalProperties": false,
+            "description": "본문이 있는 언어는 label 필수, 본문이 없는 언어는 반드시 null."
+          }
+        },
+        "required": [
+          "url",
+          "labels"
+        ],
+        "additionalProperties": false,
+        "description": "공지 링크는 언어 공통 URL 하나에 언어별 label을 붙인다."
       },
       "NoticeInput": {
         "type": "object",
@@ -23471,12 +23157,12 @@
             "description": "공지 유형"
           },
           "translations": {
-            "$ref": "#/components/schemas/Translations"
+            "$ref": "#/components/schemas/NoticeTranslations"
           },
           "links": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Link"
+              "$ref": "#/components/schemas/NoticeLinkInput"
             },
             "description": "외부 링크"
           },
@@ -23502,7 +23188,7 @@
           "templateId"
         ],
         "additionalProperties": false,
-        "description": "한국어 제목·본문 READY 필수. 외국어 PENDING/FAILED는 한국어 저장을 막지 않음. 게시 후 상세 재번역 절차는 미정."
+        "description": "한국어·영어 제목·본문 필수 수동 입력. 자동 번역 없음. 중국어 간체·일본어는 준비된 경우만 포함. 링크는 본문이 있는 언어마다 label 필수, 없는 언어는 null."
       },
       "AdminNotice": {
         "type": "object",
@@ -23527,7 +23213,7 @@
           "links": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Link"
+              "$ref": "#/components/schemas/NoticeLinkInput"
             },
             "description": "외부 링크"
           },
@@ -23570,7 +23256,7 @@
           "updatedAt"
         ],
         "additionalProperties": false,
-        "description": ""
+        "description": "translations의 ko·en 필수는 신규 저장(NoticeInput)에만 적용한다. en이 없는 기존 공지도 조회는 가능하다."
       },
       "AdminNotices": {
         "type": "object",
@@ -23804,52 +23490,6 @@
         "additionalProperties": false,
         "description": "상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다."
       },
-      "NoticeSource": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "minLength": 1,
-            "description": "현재 한국어 제목"
-          },
-          "body": {
-            "type": "string",
-            "minLength": 1,
-            "description": "현재 한국어 본문"
-          }
-        },
-        "required": [
-          "title",
-          "body"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "NoticeTranslationInput": {
-        "$ref": "#/components/schemas/NoticeSource"
-      },
-      "NoticeTranslationPreview": {
-        "type": "object",
-        "properties": {
-          "source": {
-            "$ref": "#/components/schemas/NoticeSource"
-          },
-          "translations": {
-            "$ref": "#/components/schemas/Translations"
-          },
-          "canSave": {
-            "type": "boolean",
-            "description": "한국어 입력 조건 충족 여부. 영어 실패도 한국어 저장 가능"
-          }
-        },
-        "required": [
-          "source",
-          "translations",
-          "canSave"
-        ],
-        "additionalProperties": false,
-        "description": "저장 전 번역 미리보기. 실제 번역 엔진 없이 목 문구 반환. 실패 언어는 FAILED."
-      },
       "AdminIdentity": {
         "type": "object",
         "properties": {
@@ -23979,14 +23619,14 @@
         "additionalProperties": false,
         "description": ""
       },
-      "NoticesResponse": {
+      "NoticesConditionalResponse": {
         "type": "object",
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Notices"
           },
           "meta": {
-            "$ref": "#/components/schemas/Meta"
+            "$ref": "#/components/schemas/ConditionalMeta"
           }
         },
         "required": [
@@ -24370,6 +24010,23 @@
         "additionalProperties": false,
         "description": ""
       },
+      "AdminNoticeConditionalResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminNotice"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ConditionalMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
       "DeletedResponse": {
         "type": "object",
         "properties": {
@@ -24409,23 +24066,6 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Template"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "NoticeTranslationPreviewResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/NoticeTranslationPreview"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

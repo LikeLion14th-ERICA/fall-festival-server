@@ -34,7 +34,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.equal(validateNegative({...baseMeta,revision:-1}),false);
   const unscopedOperations=new Set([
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-    'getCrowding','getAdminCrowding','putAdminCrowding'
+    'getCrowding','getAdminCrowding','putAdminCrowding','getNotices','getAdminNotice'
   ]);
   for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
     if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response?.meta?.revision??0,0,operationId);
@@ -198,29 +198,50 @@ test('Goods save changes only one size and derives sold-out; failed writes do no
   assert.ok((await call('/api/v2/goods/goods-shirt/payment-guide',{session})).body.data.account);
   await call(path,{method:'PUT',session,headers:admin,body:{status:'ON_SALE'}});assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
 });
-test('Notice create/edit/delete synchronizes public list, language visibility and immutable template',async()=>{
+test('Notice create/edit/delete synchronizes public list, contentLocale fallback and immutable template',async()=>{
   const session='notice-flow';
-  await enableAllMockLocales(session);
   const template=(await call('/api/v2/admin/notice-templates/template-1',{session,headers:admin})).body.data;
   const body={...examples.postAdminNotice.scenarios.normal.request.body,templateId:'template-1'};
-  const created=await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body});assert.equal(created.status,201);assert.ok(created.headers.get('location'));
+  const created=await call('/api/v2/admin/notices',{session,headers:{...admin,'Idempotency-Key':'notice-create'},method:'POST',body});
+  assert.equal(created.status,201);assert.ok(created.headers.get('location'));
   const id=created.body.data.id;
   assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
-  body.translations.en.status='PENDING';
-  assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body})).status,200);
-  assert.ok(!(await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
-  assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
+  const enView=(await call('/api/v2/notices?locale=en',{session})).body.data.items.find(n=>n.id===id);
+  assert.equal(enView.contentLocale,'en');assert.equal(enView.title,body.translations.en.title);
+  const zhBefore=(await call('/api/v2/notices?locale=zh-Hans',{session})).body.data.items.find(n=>n.id===id);
+  assert.equal(zhBefore.contentLocale,'en');
+  const current=await call('/api/v2/admin/notices/'+id,{session,headers:admin});
+  const updatedBody={
+    ...body,
+    translations:{...body.translations,'zh-Hans':{title:'模拟标题',body:'模拟正文'}},
+    links:body.links.map(l=>({...l,labels:{...l.labels,'zh-Hans':'示例链接'}})),
+  };
+  const updated=await call('/api/v2/admin/notices/'+id,{session,method:'PUT',headers:{...admin,'If-Match':current.headers.get('etag'),'Idempotency-Key':'notice-update'},body:updatedBody});
+  assert.equal(updated.status,200);
+  const zhAfter=(await call('/api/v2/notices?locale=zh-Hans',{session})).body.data.items.find(n=>n.id===id);
+  assert.equal(zhAfter.contentLocale,'zh-Hans');assert.equal(zhAfter.title,'模拟标题');
   assert.deepEqual((await call('/api/v2/admin/notice-templates/template-1',{session,headers:admin})).body.data,template);
-  assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'DELETE'})).status,200);
+  const beforeDelete=await call('/api/v2/admin/notices/'+id,{session,headers:admin});
+  const deleted=await call('/api/v2/admin/notices/'+id,{session,method:'DELETE',headers:{...admin,'If-Match':beforeDelete.headers.get('etag'),'Idempotency-Key':'notice-delete'}});
+  assert.equal(deleted.status,200);
   assert.ok(!(await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
   assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin})).status,404);
-  assert.equal((await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'DELETE'})).body.error.code,'ALREADY_DELETED');
+  const alreadyDeleted=await call('/api/v2/admin/notices/'+id,{session,method:'DELETE',headers:{...admin,'If-Match':beforeDelete.headers.get('etag'),'Idempotency-Key':'notice-delete-2'}});
+  assert.equal(alreadyDeleted.body.error.code,'ALREADY_DELETED');
 });
 test('Notice KST midnight hides old general notices but retains lost items and admin history',async()=>{
   const headers={'X-Mock-Time':'2030-10-02T00:00:00+09:00'};
   const publicList=(await call('/api/v2/notices',{headers})).body.data.items;
   assert.ok(publicList.length>0);assert.ok(publicList.every(n=>n.type==='LOST_FOUND'));
   assert.ok((await call('/api/v2/admin/notices',{headers:{...headers,...admin}})).body.data.items.some(n=>n.type==='GENERAL'));
+});
+test('Notice with no English translation falls back to Korean for every requested locale',async()=>{
+  const koOnly=(await call('/api/v2/notices?locale=en')).body.data.items.find(n=>n.id==='notice-ko-only');
+  assert.equal(koOnly.contentLocale,'ko');
+  const koOnlyJa=(await call('/api/v2/notices?locale=ja')).body.data.items.find(n=>n.id==='notice-ko-only');
+  assert.equal(koOnlyJa.contentLocale,'ko');
+  const adminView=await call('/api/v2/admin/notices/notice-ko-only',{headers:admin});
+  assert.equal(adminView.status,200);assert.equal(Object.hasOwn(adminView.body.data.translations,'en'),false);
 });
 test('Ticket close boundary hides account; next day reopens; price uses integer KRW',async()=>{
   for(const [now,expected]of [['2030-10-01T20:59:59+09:00','TRANSFER_OPEN'],['2030-10-01T21:00:00+09:00','DAILY_CLOSED'],['2030-10-02T00:00:00+09:00','TRANSFER_OPEN'],['2030-10-04T00:00:00+09:00','FESTIVAL_ENDED']]){
@@ -343,24 +364,30 @@ test('Color, size, and option deletion removes obsolete availability and preserv
   assert.deepEqual(availabilityAfter.variants.map(variant=>variant.status),availabilityBefore.variants.filter(variant=>variant.colorId==='color-a').map(variant=>variant.status));
 });
 
-test('Korean notice publishes despite failed English; retry enables only READY languages',async()=>{
-  const session='notice-v5',source={title:'한국어 제목',body:'첫 줄\n다음 줄'};
-  const preview=(await call('/api/v2/admin/notice-translations',{session,headers:{...admin,'X-Mock-Scenario':'english-failed'},method:'POST',body:source})).body.data;
-  assert.equal(preview.canSave,true);assert.equal(preview.translations.en.status,'FAILED');
-  const body={type:'GENERAL',translations:preview.translations,links:[],templateId:null};
-  const saved=await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body});assert.equal(saved.status,201);
-  const id=saved.body.data.id;
-  assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
-  await enableAllMockLocales(session);
-  assert.ok(!(await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
-  const retry=(await call('/api/v2/admin/notice-translations',{session,headers:admin,method:'POST',body:source})).body.data;
-  body.translations=retry.translations;
-  const updated=await call('/api/v2/admin/notices/'+id,{session,headers:admin,method:'PUT',body});
-  assert.equal(updated.status,200);assert.equal(updated.body.data.createdAt,saved.body.data.createdAt);
-  assert.ok((await call('/api/v2/notices?locale=en',{session})).body.data.visibleIds.includes(id));
-  assert.equal(updated.body.data.translations.ko.body,source.body);
-  assert.equal((await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body:{...body,translations:{ko:{title:' ',body:' ',status:'READY'}}}})).status,422);
-  assert.equal((await call('/api/v2/admin/notices',{session,headers:admin,method:'POST',body:{...body,image:null}})).status,422);
+test('Notice requires manual ko·en input and rejects link labels that do not match the notice languages',async()=>{
+  const session='notice-validation';
+  const base=structuredClone(examples.postAdminNotice.scenarios.normal.request.body);
+  const post=(body,key)=>call('/api/v2/admin/notices',{session,headers:{...admin,'Idempotency-Key':key},method:'POST',body});
+
+  // English is required now that translation is manual; Korean alone is not enough.
+  const koOnly=await post({...base,translations:{ko:base.translations.ko}},'notice-validation-ko-only');
+  assert.equal(koOnly.status,422);
+
+  // Blank required text still fails minLength.
+  const blank=await post({...base,translations:{ko:{title:' ',body:' '},en:base.translations.en}},'notice-validation-blank');
+  assert.equal(blank.status,422);
+
+  // image is no longer part of the contract; an unknown property is rejected.
+  const withImage=await post({...base,image:null},'notice-validation-image');
+  assert.equal(withImage.status,422);
+
+  // A link label present for a language the notice doesn't have is rejected.
+  const extraLabel=await post({...base,links:[{...base.links[0],labels:{...base.links[0].labels,'zh-Hans':'不应该出现'}}]},'notice-validation-extra-label');
+  assert.equal(extraLabel.status,422);assert.equal(extraLabel.body.error.code,'LINK_LABEL_UNEXPECTED');
+
+  // A link missing a label for a language the notice does have is rejected.
+  const missingLabel=await post({...base,translations:{...base.translations,'zh-Hans':{title:'标题',body:'正文'}}},'notice-validation-missing-label');
+  assert.equal(missingLabel.status,422);assert.equal(missingLabel.body.error.code,'LINK_LABEL_REQUIRED');
 });
 
 test('Fixed prohibited-items guidance is available outside performance hours',async()=>{
