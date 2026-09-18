@@ -36,6 +36,7 @@ export function applyAdminContract(s,ops){
   crowdingPut.scenarios.push('precondition-required','not-festival-day','edit-conflict');
   find('getConfig').scenarios.push('all-languages');
   find('getNotices').conditional=true;
+  find('getNotices').cacheControl='private, no-cache, must-revalidate';
   find('getAdminNotice').conditional=true;
   const noticePost=find('postAdminNotice');
   noticePost.idempotencyKeyRequired=true;

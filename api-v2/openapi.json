@@ -1099,6 +1099,15 @@
                   "format": "date-time"
                 },
                 "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "private, no-cache, must-revalidate"
+                  ]
+                },
+                "description": "공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다."
               }
             },
             "content": {
