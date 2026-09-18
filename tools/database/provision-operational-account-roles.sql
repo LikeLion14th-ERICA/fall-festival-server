@@ -2,6 +2,8 @@
 -- Example variables are intentionally omitted: role and schema names are supplied by each DB provider.
 -- Required psql variables: schema, runtime_role, cleanup_role, account_operator_role,
 -- catalog_export_role, catalog_publish_role.
+-- Rerun after every migration that adds a table outside the catalog, so a
+-- provider-wide catalog grant never reaches it.
 -- The migration role owns the tables and SECURITY DEFINER trigger functions; do not run this as runtime.
 
 BEGIN;
@@ -58,5 +60,21 @@ GRANT SELECT (
         daily_transfer_open_time, daily_transfer_close_time,
         daily_pickup_open_time, daily_pickup_close_time, updated_at
     ) ON TABLE :"schema".ticket_guide_revisions TO :"catalog_publish_role";
+
+-- Crowding and notices are operated outside the catalog. The local catalog
+-- workbench connects with these catalog roles, so they get no access to
+-- those tables even when the provider granted the whole schema.
+REVOKE ALL ON TABLE :"schema".crowding_state FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".crowding_state FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".crowding_state_dynamic FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".crowding_state_dynamic FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".notices FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".notices FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".notice_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".notice_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_publish_role";
 
 COMMIT;

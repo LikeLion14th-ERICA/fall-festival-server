@@ -52,7 +52,7 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 | 4 | 계좌 운영 설정 | 구현 통합, provisioning 대기 | CLI·V15 설정/이력 schema·history retention을 통합했다. DB provider의 role 발급과 provisioning script 실행은 남아 있다. |
 | 5 | 티켓 계좌 분리와 polling | 통합 완료 | catalog에서 계좌·송금 링크를 제거하고 `/ticket-guide`가 현재 `TICKET` 설정과 합쳐 조건부 응답을 낸다. 실제 계좌 등록과 read 전환 배포는 [계좌 운영 설정](../engineering/operational-account-settings.md)의 runbook을 따른다. |
 | 6 | catalog export·게시 보호 | 통합 완료 | `base_revision_id` 기반 `BASE_REVISION_CONFLICT`, 명시적 rollback 기대값, revision 직접 읽기 exporter와 legacy finding을 구현했다. 로컬 workbench(7)는 아직 시작하지 않았다. |
-| 7 | 로컬 catalog workbench | 대기 | export/publish 보호와 role 분리 뒤에 구현한다. |
+| 7 | 로컬 catalog workbench | 구현 완료 | `127.0.0.1` 전용 companion·UI, 세션 token, Host·Origin 검증, loopback(SSH tunnel) DB URL 강제, export·publish role 분리 context, 검증·diff·가져오기·게시·게시 후 확인. [runbook](../engineering/catalog-workbench.md). |
 
 현재 통합 branch는 `feat/ops-foundation`이고 마지막 `main` 병합 commit은 `05f8f68`(PR #35까지)다.
 PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합돼 `main`에 반영되지 않았으므로,
@@ -158,6 +158,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 | 2026-09-18 | 혼잡도 흐름·V5 이관 | `CrowdingFlowIntegrationTest` 7개(축제 전·공백일·축제 후 `NOT_FESTIVAL_DAY`, 운영일 없음·게시본 없음 503, `If-Match` 누락 428, 저장 뒤 새 ETag·304, 완료 요청 replay, 지문 재사용·stale 409, publish·rollback 뒤 상태 보존)와 `CrowdingStateMigrationIntegrationTest` 5개(빈 V5, 행 있을 때 `FESTIVAL_ID` 필수, 다른 축제·날짜 불일치 중단, 일치 행 복사) 통과. `clean verify` 359개 통과 | 원격 DB에는 V16을 적용하지 않았다. |
 | 2026-09-18 | 티켓 계좌 흐름·last-four | `TicketGuideAccountFlowIntegrationTest` 2개(계좌 등록·변경·해제가 시각 변화 없이 다음 요청에 반영, 옛 ETag 200·새 ETag 304와 `private, no-cache`, 송금 마감 시 계좌 숨김·ETag 변경)와 last-four 불일치·형식 오류 거절 통과. `clean verify` 362개 통과 | 아래 완료 조건 대응표에 반영했다. |
 | 2026-09-18 | 디자인 정렬(지도 필터·푸드트럭 구역·부스 분류 6개) | V19·V20, `SpaceCategories`, 계약·목 서버 갱신. `clean verify` 371개, `npm run check` 325개 통과 | #40이 첫 커밋만 병합되어 필터 커밋을 다시 올렸다. |
+| 2026-09-18 | PR 7 로컬 catalog workbench | `WorkbenchUnitTest` 4개, `CatalogWorkbenchIntegrationTest` 4개, catalog role의 혼잡도·공지 테이블 차단 검증 통과. 임시 로컬 PostgreSQL로 브라우저에서 검증·비교·가져오기·게시·지도 URI 편집을 확인했고 console 오류 없음 | 원격 DB·SSH tunnel로는 실행하지 않았다. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
 않고 원인과 후속 조치를 기록한다.

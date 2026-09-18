@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>카탈로그 워크벤치</title>
+  <link rel="stylesheet" href="/workbench.css">
+  <script src="/workbench.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>카탈로그 워크벤치</h1>
+    <p class="note">이 화면은 이 컴퓨터(127.0.0.1)에서만 열립니다. DB 비밀값은 브라우저로 보내지 않습니다.</p>
+  </header>
+
+  <main>
+    <section aria-labelledby="status-title">
+      <h2 id="status-title">상태</h2>
+      <dl id="status" class="status"></dl>
+      <div class="row">
+        <label for="actor">운영자 이름</label>
+        <input id="actor" type="text" maxlength="100" autocomplete="off" placeholder="감사 기록에 남습니다">
+        <button id="refresh" type="button">새로고침</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="revisions-title">
+      <h2 id="revisions-title">Revision</h2>
+      <table>
+        <thead>
+          <tr><th>번호</th><th>상태</th><th>ID</th><th>기준 revision</th><th>작업</th></tr>
+        </thead>
+        <tbody id="revisions"></tbody>
+      </table>
+    </section>
+
+    <section aria-labelledby="manifest-title">
+      <h2 id="manifest-title">Manifest</h2>
+      <div class="row">
+        <label for="manifest-file">로컬 파일 불러오기</label>
+        <input id="manifest-file" type="file" accept="application/json,.json">
+        <button id="download" type="button">JSON 저장</button>
+      </div>
+      <textarea id="manifest" spellcheck="false" aria-label="manifest JSON"></textarea>
+
+      <h3>지도 자산 URI</h3>
+      <p class="note">이미지 파일 업로드는 지원하지 않습니다. 이미 배포한 자산의 URI만 고칩니다.</p>
+      <table>
+        <thead><tr><th>지도</th><th>버전</th><th>이미지 URI</th></tr></thead>
+        <tbody id="map-assets"></tbody>
+      </table>
+
+      <div class="row">
+        <label for="baseline">기준 revision</label>
+        <select id="baseline">
+          <option value="manifest">manifest 값 사용</option>
+          <option value="published">현재 게시본</option>
+          <option value="none">없음(첫 게시)</option>
+        </select>
+      </div>
+      <div class="row actions">
+        <button id="validate" type="button">검증</button>
+        <button id="diff" type="button">현재 게시본과 비교</button>
+        <button id="import" type="button" class="write">초안으로 가져오기</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="result-title">
+      <h2 id="result-title">결과</h2>
+      <div id="result" role="status" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="release-title">
+      <h2 id="release-title">게시 후 확인</h2>
+      <ol class="note">
+        <li>정해진 시간에 백엔드를 재시작합니다.</li>
+        <li><code>/readyz</code>가 200인지 확인합니다.</li>
+        <li>공개 API의 <code>meta.revision</code>이 게시한 revision 번호와 같은지 확인합니다.</li>
+      </ol>
+      <button id="post-publish-check" type="button">백엔드 확인</button>
+    </section>
+  </main>
+</body>
+</html>
