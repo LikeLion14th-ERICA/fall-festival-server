@@ -113,13 +113,14 @@ public class AdminGoodsController {
         String idempotencyKey = requireIdempotencyKey(request);
         AdminPrincipal principal = adminContext.requireCurrent();
         UUID festivalId = properties.configuredFestivalId();
-        String resourceId = goodsId + "/" + combinationId;
+        String auditResourceId = goodsId + "/" + combinationId;
+        String idempotencyResourceId = availabilityIdempotencyResourceId(festivalId, goodsId, combinationId);
 
         IdempotencyRequest idempotencyRequest = new IdempotencyRequest(
             principal.adminId(),
             "PUT",
             AVAILABILITY_ROUTE,
-            resourceId,
+            idempotencyResourceId,
             idempotencyKey,
             CanonicalPayload.from(Map.of("status", availability.name()))
         );
@@ -139,7 +140,7 @@ public class AdminGoodsController {
             audit.record(
                 AdminAuditAction.GOODS_AVAILABILITY_UPDATED,
                 AdminAuditResourceType.GOODS,
-                resourceId,
+                auditResourceId,
                 ApiMetaSupport.resolveRequestId(request)
             );
             String json = objectMapper.writeValueAsString(new ApiResponse<>(snapshot.response(), snapshot.meta()));
@@ -148,6 +149,10 @@ public class AdminGoodsController {
 
         IdempotencyResponse response = execution.response();
         return ResponseEntity.status(response.status()).contentType(MediaType.APPLICATION_JSON).body(response.body());
+    }
+
+    static String availabilityIdempotencyResourceId(UUID festivalId, UUID goodsId, UUID combinationId) {
+        return festivalId + "/" + goodsId + "/" + combinationId;
     }
 
     private GoodsAvailability validate(GoodsAvailabilityInput input) {
