@@ -267,6 +267,21 @@ class OperationalAccountSettingsIntegrationTest {
             assertPermissionDenied(connection, CLEANUP_ROLE,
                 "SELECT after_account_number FROM operational_account_setting_history");
             executeAs(connection, CLEANUP_ROLE, "DELETE FROM operational_account_setting_history WHERE false");
+
+            // Catalog roles keep the ticket guide but never its legacy account
+            // columns, so an export cannot carry an account out of the catalog.
+            executeAs(connection, EXPORT_ROLE, """
+                SELECT festival_revision_id, unit_price_amount, instructions, updated_at
+                FROM ticket_guide_revisions
+                """);
+            assertPermissionDenied(connection, EXPORT_ROLE,
+                "SELECT account_number FROM ticket_guide_revisions");
+            assertPermissionDenied(connection, EXPORT_ROLE,
+                "SELECT transfer_link_url FROM ticket_guide_revisions");
+            assertPermissionDenied(connection, EXPORT_ROLE, "SELECT * FROM ticket_guide_revisions");
+            assertPermissionDenied(connection, PUBLISH_ROLE,
+                "SELECT account_holder FROM ticket_guide_revisions");
+            assertPermissionDenied(connection, EXPORT_ROLE, "SELECT count(*) FROM ticket_guide");
         }
     }
 
