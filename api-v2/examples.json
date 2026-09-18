@@ -6899,7 +6899,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "code": "MOCK-RECEIPT-CODE"
+            "code": "482913"
           }
         },
         "status": 200,
@@ -6928,7 +6928,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "code": "MOCK-INVALID-RECEIPT-CODE"
+            "code": "000000"
           }
         },
         "status": 422,
@@ -6960,7 +6960,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "code": "MOCK-RECEIPT-CODE"
+            "code": "482913"
           }
         },
         "status": 503,
@@ -6992,7 +6992,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "code": "MOCK-RECEIPT-CODE"
+            "code": "482913"
           }
         },
         "status": 400,
@@ -7024,7 +7024,7 @@
             "Content-Type": "application/json"
           },
           "body": {
-            "code": "MOCK-RECEIPT-CODE"
+            "code": "482913"
           }
         },
         "status": 429,

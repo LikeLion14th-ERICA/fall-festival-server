@@ -57,12 +57,14 @@ test('FAQ is an external config link and direct QR before START stays in local s
   assert.deepEqual(clientStates.stamp.directQrBeforeStart,{date:'2030-10-01',started:false,count:0,claimed:false,route:'STAMP-START',startRecorded:false,stampAdded:false});
 });
 test('Stamp receipt verification hides the code and changes claimed only after success',async()=>{
-  const guide=(await call('/api/v2/stamp-guide')).body.data;assert.doesNotMatch(JSON.stringify(guide),/MOCK-RECEIPT-CODE/);
-  assert.equal(spec.components.schemas.StampReceiptVerificationInput.properties.code.writeOnly,true);assert.doesNotMatch(JSON.stringify(clientStates),/MOCK-RECEIPT-CODE/);
+  const guide=(await call('/api/v2/stamp-guide')).body.data;assert.doesNotMatch(JSON.stringify(guide),/482913/);
+  assert.equal(spec.components.schemas.StampReceiptVerificationInput.properties.code.writeOnly,true);assert.doesNotMatch(JSON.stringify(clientStates),/482913/);
   const invalid=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'wrong-code'},session:'stamp-receipt'});
   assert.equal(invalid.status,422);assert.equal(invalid.body.error.code,'INVALID_RECEIPT_CODE');assert.doesNotMatch(JSON.stringify(invalid.body),/wrong-code/);
-  const verified=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'MOCK-RECEIPT-CODE'},session:'stamp-receipt'});
+  const verified=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'482913'},session:'stamp-receipt'});
   assert.equal(verified.status,200);assert.deepEqual(verified.body.data,{verified:true});
+  for(const code of ['48291','4829130','48291a','482 913'])assert.equal((await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code},session:'stamp-receipt'})).status,422);
+  assert.equal(spec.components.schemas.StampReceiptVerificationInput.properties.code.pattern,'^[0-9]{6}$');
   assert.deepEqual(clientStates.stamp.receiptCodeRejected,{date:'2030-10-01',started:true,count:4,claimed:false,route:'STAMP-REWARD',message:'코드를 확인해 주세요'});
   assert.deepEqual(clientStates.stamp.claimed,{date:'2030-10-01',started:true,count:4,claimed:true});
 });

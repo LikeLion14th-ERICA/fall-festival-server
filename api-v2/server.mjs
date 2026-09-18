@@ -99,7 +99,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(req.headers['x-mock-time']){const time=req.headers['x-mock-time'];const issues=validate(spec.components.schemas.Timestamp,time,spec);if(issues.length)failure(400,'INVALID_MOCK_TIME','유효한 KST RFC 3339 시각이 필요합니다.');now=time;}
       now=scenarioTime(scenario,now);
       let body;
-      if(route.input){if(!req.headers['content-type']?.startsWith('application/json'))failure(415,'UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.');body=await readJson(req);const issues=validate(spec.components.schemas[route.input],body,spec);if(issues.length)failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
+      if(route.input){if(!req.headers['content-type']?.startsWith('application/json'))failure(415,'UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.');body=await readJson(req);const issues=validate(spec.components.schemas[route.input],body,spec);if(issues.length&&route.operationId==='verifyStampReceipt')failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');if(issues.length)failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
       const delay=req.headers['x-mock-delay']||'0';if(!/^\d+$/.test(delay)||Number(delay)>3000)failure(400,'INVALID_MOCK_DELAY','목 지연은 0~3000ms입니다.');
       if(Number(delay))await new Promise(resolve=>setTimeout(resolve,Number(delay)));
       if(scenario==='bad-request')failure(400,'INVALID_QUERY','잘못된 요청 예시입니다.');
