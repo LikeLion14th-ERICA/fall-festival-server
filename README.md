@@ -104,6 +104,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `ADMIN_ALLOWED_ORIGIN` | 필수 | (없음) | `db` | 관리자 credential 요청용 단일 HTTP(S) origin; wildcard·경로·query 불가 |
 | `ADMIN_BOOTSTRAP_USERNAME` | 선택 | (없음) | `db` | 최초 관리자 username; 양쪽 값이 있을 때 공백 제거 후 100자 이하 |
 | `ADMIN_BOOTSTRAP_PASSWORD` | 선택 | (없음) | `db` | 최초 관리자 비밀번호; 양쪽 값이 있을 때 UTF-8 72바이트 이하 |
+| `API_DOCS_ENABLED` | 선택 | `false` | 전체 | `true`면 `/docs`에서 Swagger UI 제공. 로컬·개발 서버 전용, 운영에서는 끔 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
 
@@ -196,6 +197,23 @@ curl --fail-with-body 'http://127.0.0.1:8080/api/v2/timetable?locale=ko'
 그 밖의 `/api/v2/admin/**` 요청에는 `ADMIN` access JWT가 필요합니다. 전체 경로·응답 계약은
 [정적 OpenAPI 3.1 문서](api-v2/openapi.json), 실제 서버와 목 서버의 구분은
 [프런트 연동 안내](api-v2/FRONTEND.md)를 따릅니다.
+
+### Swagger UI로 엔드포인트 확인
+
+로컬·개발 서버에서 `API_DOCS_ENABLED=true`로 실행하면 `http://127.0.0.1:8080/docs`에서 API v2
+계약을 보고 **Try it out**으로 이 서버에 바로 요청할 수 있습니다.
+
+```powershell
+$env:API_DOCS_ENABLED = 'true'
+```
+
+- 화면은 저장소의 `api-v2/openapi.json`을 그대로 보여 주며 요청 대상만 이 서버로 바꿉니다.
+- 실행 중인 서버에 실제 route가 없는 operation은 요약 앞에 `[서버 미구현]`이 붙습니다. 판정은
+  현재 profile 기준이므로 `db` profile 없이 띄우면 DB가 필요한 API가 모두 미구현으로 표시됩니다.
+- 관리자 API는 **Authorize**에 login 응답의 access token을 넣어 호출합니다. login·refresh는
+  `ADMIN_ALLOWED_ORIGIN`과 같은 `Origin`만 허용하므로, Swagger에서 login하려면 로컬에서만
+  `ADMIN_ALLOWED_ORIGIN`을 이 서버 주소(예: `http://127.0.0.1:8080`)로 둡니다.
+- 운영 서버에서는 켜지 않습니다. 꺼져 있으면 `/docs`는 404입니다.
 
 DB 접속정보, JWT secret과 bootstrap password는 저장소, 커밋 메시지, PR 또는 이슈에 넣지
 않습니다. 관련 구현을 추가할 때 [보안 규칙](docs/wiki/engineering/security.md)을 먼저 확인합니다.
