@@ -35,11 +35,7 @@ public class CatalogSnapshotProvider implements ApplicationRunner {
             CatalogSnapshot loaded = store.loadPublished();
             snapshot.set(loaded);
             unavailableReason.set(null);
-            log.info(
-                "Loaded published catalog snapshot: festivalId={}, revision={}",
-                loaded.context().festivalId(),
-                loaded.context().revision()
-            );
+            log.info("Loaded published catalog snapshot: revision={}", loaded.context().revision());
         } catch (RuntimeException exception) {
             unavailableReason.set("Published catalog could not be loaded.");
             log.error("Published catalog snapshot was not loaded.", exception);
