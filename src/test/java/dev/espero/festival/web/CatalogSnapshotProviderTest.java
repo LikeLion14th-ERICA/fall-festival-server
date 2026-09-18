@@ -11,15 +11,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.DefaultApplicationArguments;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpStatus;
 
+@ExtendWith(OutputCaptureExtension.class)
 class CatalogSnapshotProviderTest {
 
     private final CatalogSnapshotStore store = mock(CatalogSnapshotStore.class);
 
     @Test
-    void makesThePublishedSnapshotAvailableAfterStartupLoad() {
+    void makesThePublishedSnapshotAvailableAfterStartupLoad(CapturedOutput output) {
         CatalogSnapshot snapshot = emptySnapshot();
         when(store.loadPublished()).thenReturn(snapshot);
         CatalogSnapshotProvider provider = new CatalogSnapshotProvider(store);
@@ -29,6 +33,11 @@ class CatalogSnapshotProviderTest {
         assertThat(provider.isReady()).isTrue();
         assertThat(provider.required()).isSameAs(snapshot);
         assertThat(provider.unavailableReason()).isNull();
+        assertThat(output)
+            .contains("Loaded published catalog snapshot")
+            .contains("revision=3")
+            .doesNotContain("00000000-0000-0000-0000-000000000003")
+            .doesNotContain("festivalId=");
     }
 
     @Test
