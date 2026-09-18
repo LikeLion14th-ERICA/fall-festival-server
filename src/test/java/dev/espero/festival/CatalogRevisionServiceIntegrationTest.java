@@ -129,6 +129,69 @@ class CatalogRevisionServiceIntegrationTest {
     }
 
     @Test
+    void refusesAnImportWhoseBaselineIsNotTheCurrentPublishedRevision() {
+        UUID published = currentPublishedRevision();
+        assertThat(published).isNotNull();
+
+        assertThatThrownBy(() -> importManifest("qr-stale", "/assets/maps/overview-v1.png", UUID.randomUUID()))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThatThrownBy(() -> importManifest("qr-none", "/assets/maps/overview-v1.png", null))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThat(revisionCount()).isEqualTo(1);
+    }
+
+    @Test
+    void refusesToPublishADraftPreparedBeforeAnotherPublication() throws IOException {
+        UUID firstDraft = importManifest("qr-first", "/assets/maps/overview-v1.png");
+        UUID secondDraft = importManifest("qr-second", "/assets/maps/overview-v1.png");
+
+        revisions.publish(secondDraft, "release-bot");
+
+        assertThatThrownBy(() -> revisions.publish(firstDraft, "release-bot"))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThat(revisionState(secondDraft)).isEqualTo("published");
+        assertThat(revisionState(firstDraft)).isEqualTo("draft");
+    }
+
+    @Test
+    void refusesARollbackWhoseExpectedCurrentRevisionIsStale() throws IOException {
+        UUID source = importManifest("qr-source", "/assets/maps/overview-v1.png");
+        revisions.publish(source, "release-bot");
+        UUID replacement = importManifest("qr-replacement", "/assets/maps/overview-v1.png");
+        revisions.publish(replacement, "release-bot");
+
+        assertThatThrownBy(() -> revisions.rollback(source, source, "incident-bot"))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("BASE_REVISION_CONFLICT");
+        assertThat(revisionState(replacement)).isEqualTo("published");
+        assertThat(revisionState(source)).isEqualTo("archived");
+    }
+
+    @Test
+    void recordsTheReplacedPublicationAsTheBaselineOfARollbackRevision() throws IOException {
+        UUID source = importManifest("qr-base-source", "/assets/maps/overview-v1.png");
+        revisions.publish(source, "release-bot");
+        UUID replacement = importManifest("qr-base-replacement", "/assets/maps/overview-v1.png");
+        revisions.publish(replacement, "release-bot");
+
+        UUID rollback = revisions.rollback(source, replacement, "incident-bot");
+
+        assertThat(baseRevision(rollback)).isEqualTo(replacement);
+        assertThat(baseRevision(replacement)).isEqualTo(source);
+        assertThat(revisionState(rollback)).isEqualTo("published");
+    }
+
+    private UUID baseRevision(UUID revisionId) {
+        return jdbc.queryForObject(
+            "SELECT base_revision_id FROM festival_revisions WHERE id = :revisionId",
+            new MapSqlParameterSource("revisionId", revisionId), UUID.class
+        );
+    }
+
+    @Test
     void importsACompleteManifestAsADraftAndRecordsImportAudit() throws IOException {
         UUID revisionId = importManifest("qr-a", "/assets/maps/overview-v1.png");
 
@@ -257,7 +320,7 @@ class CatalogRevisionServiceIntegrationTest {
         revisions.publish(replacement, "release-bot");
         RollbackCatalogSnapshot sourceBefore = rollbackCatalogSnapshot(source);
 
-        UUID rollback = revisions.rollback(source, "incident-bot");
+        UUID rollback = revisions.rollback(source, currentPublishedRevision(), "incident-bot");
         RollbackCatalogSnapshot sourceAfter = rollbackCatalogSnapshot(source);
         RollbackCatalogSnapshot target = rollbackCatalogSnapshot(rollback);
 
@@ -324,7 +387,7 @@ class CatalogRevisionServiceIntegrationTest {
         UUID newerRevision = importManifest("qr-b", "/assets/maps/overview-v1.png");
         revisions.publish(newerRevision, "release-bot");
 
-        UUID rollbackRevision = revisions.rollback(firstRevision, "incident-bot");
+        UUID rollbackRevision = revisions.rollback(firstRevision, currentPublishedRevision(), "incident-bot");
 
         assertThat(revisionState(rollbackRevision)).isEqualTo("published");
         assertThat(revisionState(firstRevision)).isEqualTo("archived");
@@ -397,9 +460,21 @@ class CatalogRevisionServiceIntegrationTest {
         assertThat(revisionState(publishedRevision)).isEqualTo("published");
     }
 
+    private UUID currentPublishedRevision() {
+        return jdbc.query(
+            "SELECT id FROM festival_revisions WHERE festival_id = :festivalId AND state = 'published'",
+            new MapSqlParameterSource("festivalId", FESTIVAL_ID),
+            (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class)
+        ).stream().findFirst().orElse(null);
+    }
+
     private UUID importManifest(String qrValue, String imageUrl) throws IOException {
+        return importManifest(qrValue, imageUrl, currentPublishedRevision());
+    }
+
+    private UUID importManifest(String qrValue, String imageUrl, UUID baseline) throws IOException {
         Path manifest = tempDir.resolve(UUID.randomUUID() + ".json");
-        Files.writeString(manifest, manifestJson(qrValue, imageUrl));
+        Files.writeString(manifest, manifestJson(qrValue, imageUrl, baseline));
         return revisions.importManifest(manifest, "release-bot");
     }
 
@@ -445,9 +520,14 @@ class CatalogRevisionServiceIntegrationTest {
     }
 
     private String manifestJson(String qrValue, String imageUrl) {
+        return manifestJson(qrValue, imageUrl, currentPublishedRevision());
+    }
+
+    private String manifestJson(String qrValue, String imageUrl, UUID baseline) {
         return """
             {
               "festivalId": "%s",
+              "baselineRevisionId": %s,
               "festivalDays": [
                 {
                   "festivalDate": "2026-10-01",
@@ -560,7 +640,7 @@ class CatalogRevisionServiceIntegrationTest {
                 "qrValue": "%s"
               }
             }
-            """.formatted(FESTIVAL_ID, imageUrl, qrValue);
+            """.formatted(FESTIVAL_ID, baseline == null ? "null" : "\"" + baseline + "\"", imageUrl, qrValue);
     }
 
     private void insertCrowdingState(UUID revisionId) {

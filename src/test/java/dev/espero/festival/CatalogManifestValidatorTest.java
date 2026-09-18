@@ -220,7 +220,7 @@ class CatalogManifestValidatorTest {
         CatalogManifest.StampGuide stampGuide
     ) {
         return new CatalogManifest(
-            UUID.randomUUID(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+            UUID.randomUUID(), null, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
             List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
             List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
             List.of(), List.of(), List.of(), null, List.of(), List.of(), List.of(), ticketGuide, stampGuide
@@ -303,6 +303,7 @@ class CatalogManifestValidatorTest {
             List<CatalogManifest.Space> spaces = space == null ? List.of() : List.of(space);
             return new CatalogManifest(
                 UUID.randomUUID(),
+                null,
                 List.of(new CatalogManifest.FestivalDay(
                     FESTIVAL_DATE,
                     at("2030-10-01T10:00:00+09:00"),

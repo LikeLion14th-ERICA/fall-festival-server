@@ -46,11 +46,30 @@ public class CatalogCliRunner implements ApplicationRunner {
             }
             case "rollback" -> {
                 UUID source = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
-                UUID revision = revisions.rollback(source, actor);
+                // Stating the expected current publication makes an intervening
+                // publish fail instead of being silently replaced.
+                UUID expectedCurrent = expectedCurrentRevision(arguments);
+                UUID revision = revisions.rollback(source, expectedCurrent, actor);
                 System.out.println("rolled back to revision: " + revision);
             }
             default -> throw new CatalogCliException("Unknown command: " + command);
         }
+    }
+
+    /**
+     * Parses the required {@code --expected-current} option. The literal
+     * {@code none} states that the festival is expected to have no published
+     * revision, which keeps "I did not check" from looking like "nothing is
+     * published".
+     */
+    private UUID expectedCurrentRevision(ApplicationArguments arguments) {
+        if (!arguments.containsOption("expected-current")) {
+            throw new CatalogCliException(
+                "Option --expected-current is required. Pass the currently published revision UUID, or none."
+            );
+        }
+        String value = option(arguments, "expected-current", null);
+        return "none".equals(value) ? null : UUID.fromString(value);
     }
 
     private String option(ApplicationArguments arguments, String name, String defaultValue) {
@@ -89,7 +108,8 @@ public class CatalogCliRunner implements ApplicationRunner {
         System.out.println("  import <manifest.json> [--actor=name]");
         System.out.println("  validate <revision-uuid> [--actor=name]");
         System.out.println("  publish <revision-uuid> [--actor=name]");
-        System.out.println("  rollback <archived-revision-uuid> [--actor=name]");
+        System.out.println("  rollback <archived-revision-uuid> --expected-current=<uuid|none> [--actor=name]");
         System.out.println("  --manifest and --revision may replace the positional argument.");
+        System.out.println("  A manifest states baselineRevisionId; import and publish refuse a stale baseline.");
     }
 }
