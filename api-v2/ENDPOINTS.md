@@ -17,7 +17,7 @@
 | GET | `/api/v2/timetable` | 3일 타임테이블 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/performances/{performanceId}` | 공연 정보 팝업 | SHOW-POPUP | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/prohibited-items` | 고정 반입 금지 물품 안내 | SHOW-TIMETABLE | normal, empty, error, bad-request, rate-limited |
-| GET | `/api/v2/spaces` | 부스·주점·플리마켓 목록 | BOOTH-LIST | normal, empty, error, bad-request, rate-limited |
+| GET | `/api/v2/spaces` | 부스&마켓 목록 | BOOTH-LIST | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/spaces/{spaceId}` | 부스·주점·플리마켓 상세 | BOOTH-DETAIL | normal, missing-optional, not-found, error, bad-request, rate-limited |
 | GET | `/api/v2/maps` | 지도 목록 | MAP-OVERVIEW, MAP-AREA | normal, empty, error, bad-request, rate-limited |
 | GET | `/api/v2/maps/{mapId}` | 지도 이미지·버전 | MAP-OVERVIEW, MAP-AREA | normal, not-found, error, bad-request, rate-limited |
@@ -29,10 +29,10 @@
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, unconfigured, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/crowding` | 혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지 | ADM-CROWD | normal, full, error, precondition-required, not-festival-day, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, english-incomplete, english-failed, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, validation-failed, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices/{noticeId}` | 공지 수정 초기값 | ADM-NOTICE-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/notices/{noticeId}` | 공지 수정 | ADM-NOTICE-EDIT | normal, not-found, error, english-incomplete, english-failed, bad-request, rate-limited, unauthorized, forbidden |
-| DELETE | `/api/v2/admin/notices/{noticeId}` | 공지 삭제 | ADM-NOTICE-DELETE | normal, already-deleted, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/notices/{noticeId}` | 공지 수정 | ADM-NOTICE-EDIT | normal, not-found, error, precondition-required, edit-conflict, validation-failed, bad-request, rate-limited, unauthorized, forbidden |
+| DELETE | `/api/v2/admin/notices/{noticeId}` | 공지 삭제 | ADM-NOTICE-DELETE | normal, already-deleted, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates` | 공지 템플릿 목록 | ADM-NOTICE-TEMPLATE | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates/{templateId}` | 템플릿 초기값 | ADM-NOTICE-TEMPLATE | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/goods` | 관리자 실제 제공 옵션별 판매 상태 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
@@ -41,7 +41,6 @@
 | GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/products` | 상품 등록·신규 옵션은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, empty-configuration, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, empty-configuration, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/notice-translations` | 공지 번역 생성·재시도 | ADM-NOTICE-EDIT, ADM-NOTICE-TEMPLATE | normal, english-failed, partial-translation, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/sessions` | 관리자 로그인 |  | normal, invalid-credentials, disabled, invalid-origin, error, bad-request, rate-limited |
 | POST | `/api/v2/admin/sessions/refresh` | 관리자 세션 갱신·refresh rotation |  | normal, expired, revoked, unknown, disabled, invalid-origin, error, bad-request, rate-limited |
 | DELETE | `/api/v2/admin/sessions/current` | 현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공 |  | normal, invalid-origin, error, bad-request, rate-limited, unauthorized, forbidden |

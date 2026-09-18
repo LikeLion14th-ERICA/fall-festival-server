@@ -1,14 +1,11 @@
-const NOTICE_TRANSLATION_LOCALES=['ko','en','zh-Hans','ja'];
-
 export function initializeAdmin(state){
-  state.languages=['ko'];state.translationLocales=NOTICE_TRANSLATION_LOCALES;state.inventory={};
+  state.languages=['ko'];state.inventory={};
   state.idempotency??={};
   for(const g of state.goods){
     g.images=[g.image];g.colors=g.colorImages.map(c=>({id:c.colorId,name:c.colorName,images:[c.image]}));
     g.options=[{colorId:'color-a',sizeId:'size-m'},{colorId:'color-a',sizeId:'size-l'},{colorId:'color-b',sizeId:'size-m'}];
     state.inventory[g.id]={updatedAt:null,statuses:Object.fromEntries(g.options.map((v,i)=>[`${v.colorId}/${v.sizeId}`,i===0?'ON_SALE':'SOLD_OUT']))};
   }
-  for(const n of state.notices)delete n.image;
   return state;
 }
 export function hoursFor(state,operatingDay){
@@ -62,26 +59,27 @@ export function adminExecute(op,state,ctx){
       state.inventory[goodsId]=stock;if(old)state.goods[state.goods.indexOf(old)]=g;else state.goods.push(g);
       return {data:g,status:old?200:201};
     }
-    case 'previewNoticeTranslation':{
-      if(!body.title.trim()||!body.body.trim())failure(422,'KOREAN_REQUIRED','한국어 제목과 본문이 필요합니다.');
-      const translations={ko:{...body,status:'READY'}};
-      for(const locale of state.translationLocales.filter(l=>l!=='ko')){
-        const failed=locale==='en'?scenario==='english-failed':scenario==='partial-translation';
-        translations[locale]=failed?{title:null,body:null,status:'FAILED'}:{title:`[MOCK ${locale}] ${body.title}`,body:`[MOCK ${locale}] ${body.body}`,status:'READY'};
-      }
-      return {data:{source:structuredClone(body),translations,canSave:true}};
-    }
   }
   return null;
 }
-export function validateNotice(body,state,{scenario,failure}){
-  const ready=t=>t?.status==='READY'&&typeof t.title==='string'&&t.title.trim()&&typeof t.body==='string'&&t.body.trim();
-  if(!ready(body.translations.ko))failure(422,'KOREAN_REQUIRED','한국어 제목·본문은 필수입니다.');
-
-
-  for(const [locale,t]of Object.entries(body.translations)){
-    // Inactive translations may be prepared, but public locale selection remains gated.
-    if(t.status==='READY'&&!ready(t))failure(422,'TRANSLATION_CONTENT_REQUIRED','완료 번역은 제목과 본문이 필요합니다.');
+// JSON schema's minLength:1 rejects empty strings but not whitespace-only ones,
+// so title/body blankness still needs an explicit check here. Link labels are a
+// cross-object invariant schema can't express at all: they must exist exactly
+// for the locales that have a body translation.
+export function validateNotice(body,failure){
+  const filled=t=>typeof t?.title==='string'&&t.title.trim()&&typeof t?.body==='string'&&t.body.trim();
+  if(!filled(body.translations.ko))failure(422,'KOREAN_REQUIRED','한국어 제목·본문은 필수입니다.');
+  if(!filled(body.translations.en))failure(422,'ENGLISH_REQUIRED','영어 제목·본문은 필수입니다.');
+  const present=new Set(Object.keys(body.translations));
+  for(const locale of ['zh-Hans','ja']){
+    if(present.has(locale)&&!filled(body.translations[locale]))failure(422,'TRANSLATION_CONTENT_REQUIRED','입력한 번역은 제목과 본문이 필요합니다.');
   }
-  for(const locale of state.translationLocales)if(!body.translations[locale])body.translations[locale]={title:null,body:null,status:'PENDING'};
+  for(const link of body.links){
+    for(const locale of ['zh-Hans','ja']){
+      const hasBody=present.has(locale);
+      const label=link.labels[locale];
+      if(hasBody&&(typeof label!=='string'||!label.trim()))failure(422,'LINK_LABEL_REQUIRED','본문이 있는 언어의 링크 label이 필요합니다.');
+      if(!hasBody&&label!=null)failure(422,'LINK_LABEL_UNEXPECTED','본문이 없는 언어의 링크 label은 null이어야 합니다.');
+    }
+  }
 }

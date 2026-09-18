@@ -26,15 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
  * including other locales, non-current map asset versions and content the
  * public API never returns.</p>
  *
- * <p>The export is lossless. Legacy gaps such as pins without a filter group or
- * a partially configured ticket schedule are reported rather than guessed, and
- * importing such a manifest fails until an approved value is supplied.</p>
+ * <p>The export is lossless. Legacy gaps such as a partially configured ticket
+ * schedule are reported rather than guessed, and importing such a manifest
+ * fails until an approved value is supplied.</p>
  */
 @Service
 @Profile("db")
 public class CatalogExportService {
 
-    public static final String LEGACY_FILTER_GROUPS_UNCONFIGURED = "LEGACY_FILTER_GROUPS_UNCONFIGURED";
     public static final String LEGACY_TICKET_SCHEDULE_UNCONFIGURED = "LEGACY_TICKET_SCHEDULE_UNCONFIGURED";
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -94,13 +93,6 @@ public class CatalogExportService {
 
     private List<String> findings(CatalogManifest manifest) {
         List<String> findings = new ArrayList<>();
-        boolean unconfiguredFilterGroup = manifest.mapPins().stream()
-            .anyMatch(pin -> pin.placeId() != null && pin.filterGroup() == null);
-        if (unconfiguredFilterGroup) {
-            findings.add(LEGACY_FILTER_GROUPS_UNCONFIGURED
-                + ": a PLACE pin has no filter group. Supply the approved group and its Korean"
-                + " label before importing this manifest.");
-        }
         CatalogManifest.TicketGuide ticket = manifest.ticketGuide();
         if (ticket != null) {
             boolean anySchedule = ticket.festivalStartDate() != null || ticket.festivalEndDate() != null

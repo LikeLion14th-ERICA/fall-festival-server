@@ -121,7 +121,7 @@ class CatalogCliRunnerTest {
         Path output = tempDir.resolve("nested").resolve("revision.json");
         when(exports.export(revision)).thenReturn(new CatalogExportService.ExportResult(
             manifest(),
-            List.of(CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED + ": detail")
+            List.of(CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED + ": detail")
         ));
 
         runner.run(new DefaultApplicationArguments(

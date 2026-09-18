@@ -67,7 +67,7 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | NOTICE-LIST-D03 | 본문 텍스트 | API | Notice.body | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D04 | 본문 링크 | API | Notice.links | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D05 | 공지 유형 | API | Notice.type | [위키](../docs/wiki/product/notice.md) |
-| NOTICE-LIST-D06 | 언어별 번역 완료 여부 | API | 서버: Translations의 READY 필터 후 Notices.items 반환 | [위키](../docs/wiki/product/notice.md) |
+| NOTICE-LIST-D06 | 언어별 번역 완료 여부 | API | 서버: Notice.contentLocale 대체 해석 후 Notices.items 반환 | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D07 | 새 공지 존재 여부 | 브라우저 | 브라우저: Notices.visibleIds와 현재 목록 차이 비교 | [위키](../docs/wiki/product/notice.md) |
 | GOODS-LIST-D01 | 상품 이미지 | API | Goods.image | [위키](../docs/wiki/product/goods.md) |
 | GOODS-LIST-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/goods.md) |
@@ -165,7 +165,7 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | MAP-OVERVIEW-D12 | 혼잡도 수정 시각·최초 표시 | 제외 | 제외: 지도 혼잡도 수정 시각 없음 | [위키](../docs/wiki/product/map.md) |
 | ADM-NOTICE-LIST-D05 | 최초 등록 시각 | API | AdminNotice.createdAt | [위키](../docs/wiki/product/admin/notice.md) |
 | ADM-NOTICE-EDIT-D07 | 본문 링크 | API | AdminNotice.links | [위키](../docs/wiki/product/admin/notice.md) |
-| ADM-NOTICE-EDIT-D08 | 번역 완료 상태 | API | AdminNotice.translations + NoticeTranslationPreview.canSave | [위키](../docs/wiki/product/admin/notice.md) |
+| ADM-NOTICE-EDIT-D08 | 번역 완료 상태 | API | AdminNotice.translations (수동 ko·en 필수 입력, 자동 번역 없음) | [위키](../docs/wiki/product/admin/notice.md) |
 | ADM-GOODS-D05 | 남은 재고 수량 | 제외 | 제외: 실제 재고 수량 미관리 | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-D06 | 상품 전체 품절 여부 | API | Availability.allSoldOut | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-CROWD-D09 | 혼잡도 판단 기준 | 프런트 | 프런트 고정 UI: 운영자 판단 기준·85% 자동 만석 아님 | [위키](../docs/wiki/product/admin/crowd.md) |

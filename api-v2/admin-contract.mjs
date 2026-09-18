@@ -20,21 +20,11 @@ export function applyAdminContract(s,ops){
   s.Availability.properties.allSoldOut.description='실제 제공 조합이 1개 이상이고 모두 SOLD_OUT일 때 true.';
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
   s.ProductInput=obj({name:str('필수 상품명'),price:ref('Money'),images:arr(ref('Image'),'복수 이미지. 개수·크기·배치·업로드 방식은 미정.'),colors:s.Goods.properties.colors,sizes:{...s.Goods.properties.sizes,minItems:1},options:s.Goods.properties.options,description:nullable(str('상품 소개'),'선택 소개')},'상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
-  s.Translation.properties.title=nullable(str('번역 제목'),'PENDING/FAILED이면 null 허용');
-  s.Translation.properties.body=nullable(str('번역 본문'),'PENDING/FAILED이면 null 허용');
-  s.Translation.properties.status=en(['READY','PENDING','FAILED'],'완료 / 준비 중 / 실패. READY만 사용자 노출.');
-  s.NoticeSource=obj({title:str('현재 한국어 제목'),body:str('현재 한국어 본문')});
-  s.NoticeTranslationInput=ref('NoticeSource');
-  s.NoticeTranslationPreview=obj({source:ref('NoticeSource'),translations:ref('Translations'),canSave:{type:'boolean',description:'한국어 입력 조건 충족 여부. 영어 실패도 한국어 저장 가능'}},'저장 전 번역 미리보기. 실제 번역 엔진 없이 목 문구 반환. 실패 언어는 FAILED.');
   s.AdminIdentity=obj({id,username:{type:'string',minLength:1,maxLength:100,description:'관리자 로그인 식별자'},authority:en(['ADMIN'],'현재 Product 범위의 단일 관리자 권한'),enabled:{type:'boolean',description:'false이면 로그인·refresh·관리자 API 인증 거부'}});
   s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
   s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
   s.AdminLogout=obj({loggedOut:{type:'boolean',enum:[true],description:'현재 refresh session revoke 및 cookie 만료 완료'}});
-  for(const n of ['NoticeInput','AdminNotice']){
-    delete s[n].properties.image;s[n].required=s[n].required.filter(k=>k!=='image');
-
-  }
-  s.NoticeInput.description='한국어 제목·본문 READY 필수. 외국어 PENDING/FAILED는 한국어 저장을 막지 않음. 게시 후 상세 재번역 절차는 미정.';
+  s.NoticeInput.description='한국어·영어 제목·본문 필수 수동 입력. 자동 번역 없음. 중국어 간체·일본어는 준비된 경우만 포함. 링크는 본문이 있는 언어마다 label 필수, 없는 언어는 null.';
   const find=id=>ops.find(o=>o.operationId===id);
   find('getCrowding').scenarios=find('getCrowding').scenarios.filter(x=>x!=='overnight');
   find('getCrowding').screens=['HOME'];find('getCrowding').summary='홈 재학생존 혼잡도';
@@ -45,9 +35,21 @@ export function applyAdminContract(s,ops){
   crowdingPut.idempotencyKeyRequired=true;
   crowdingPut.scenarios.push('precondition-required','not-festival-day','edit-conflict');
   find('getConfig').scenarios.push('all-languages');
+  find('getNotices').conditional=true;
+  find('getAdminNotice').conditional=true;
+  const noticePost=find('postAdminNotice');
+  noticePost.idempotencyKeyRequired=true;
+  const noticePut=find('putAdminNotice');
+  noticePut.ifMatchRequired=true;
+  noticePut.idempotencyKeyRequired=true;
+  noticePut.scenarios.push('precondition-required','edit-conflict');
+  const noticeDelete=find('deleteAdminNotice');
+  noticeDelete.ifMatchRequired=true;
+  noticeDelete.idempotencyKeyRequired=true;
+  noticeDelete.scenarios.push('precondition-required','edit-conflict');
   find('getAdminGoods').summary='관리자 실제 제공 옵션별 판매 상태';
   const old=ops.findIndex(o=>o.operationId==='putAdminAvailability');ops.splice(old,1);
-  for(const id of ['postAdminNotice','putAdminNotice']){find(id).provisional=false;find(id).summary=find(id).summary.replace('(검토 필요)','');find(id).scenarios.push('english-incomplete','english-failed');}
+  for(const id of ['postAdminNotice','putAdminNotice']){find(id).provisional=false;find(id).summary=find(id).summary.replace('(검토 필요)','');find(id).scenarios.push('validation-failed');}
   function add(operationId,method,path,schema,summary,screens,input,scenarios=['normal','error'],provisional=false){
     ops.push({operationId,method,path:'/api/v2'+path,schema,summary,screens,input,scenarios,admin:true,provisional,parameters:[...path.matchAll(/\{(\w+)\}/g)].map(m=>({name:m[1],in:'path',required:true,schema:m[1]==='operatingDay'?ref('Date'):id,description:'운영일 또는 등록된 안정 ID'}))});
   }
@@ -56,8 +58,6 @@ export function applyAdminContract(s,ops){
   add('getAdminProduct','GET','/admin/products/{goodsId}','Goods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','missing-optional','not-found','error']);
   add('postAdminProduct','POST','/admin/products','Goods','상품 등록·신규 옵션은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','missing-optional','empty-configuration','error'],true);
   add('putAdminProduct','PUT','/admin/products/{goodsId}','Goods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','empty-configuration','not-found','error'],true);
-  add('previewNoticeTranslation','POST','/admin/notice-translations','NoticeTranslationPreview','공지 번역 생성·재시도',['ADM-NOTICE-EDIT','ADM-NOTICE-TEMPLATE'],'NoticeTranslationInput',['normal','english-failed','partial-translation','error'],true);
-  find('previewNoticeTranslation').successStatus=200;
   ops.push(
     {operationId:'createAdminSession',method:'POST',path:'/api/v2/admin/sessions',schema:'AdminSession',summary:'관리자 로그인',screens:[],input:'AdminLoginInput',scenarios:['normal','invalid-credentials','disabled','invalid-origin','error'],admin:true,authRequired:false,security:[],parameters:[],provisional:false,successStatus:200},
     {operationId:'refreshAdminSession',method:'POST',path:'/api/v2/admin/sessions/refresh',schema:'AdminSession',summary:'관리자 세션 갱신·refresh rotation',screens:[],scenarios:['normal','expired','revoked','unknown','disabled','invalid-origin','error'],admin:true,authRequired:false,security:[{AdminRefreshCookie:[]}],parameters:[],provisional:false,successStatus:200},

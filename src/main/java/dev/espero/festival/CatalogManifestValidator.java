@@ -1,5 +1,6 @@
 package dev.espero.festival;
 
+import dev.espero.festival.domain.SpaceCategories;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZoneId;
@@ -19,13 +20,12 @@ public final class CatalogManifestValidator {
 
     private static final Pattern API_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
     private static final Set<String> LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
-    private static final Set<String> SPACE_CATEGORIES = Set.of("BOOTH", "PUB", "FLEA_MARKET");
     private static final Set<String> ARTIST_CATEGORIES = Set.of("ARTIST", "CONTEST");
     private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
     private static final Set<String> PLACE_KINDS = Set.of("SPACE", "FACILITY", "LANDMARK");
     private static final Set<String> MAP_KINDS = Set.of("OVERVIEW", "AREA");
     private static final Set<String> FILTER_GROUPS = Set.of(
-        "STUDENT_COUNCIL", "EXPERIENCE", "CONVENIENCE", "FOOD_AND_BEVERAGE", "PERFORMANCE"
+        "RESTROOM", "PHOTO_BOOTH", "SMOKING_AREA", "TRASH_BIN"
     );
 
     public void validate(CatalogManifest manifest) {
@@ -58,7 +58,7 @@ public final class CatalogManifestValidator {
 
         for (CatalogManifest.Space space : spaces.values()) {
             id(space.id(), "spaces.id");
-            require(SPACE_CATEGORIES.contains(space.category()), "Unsupported space category: " + space.category());
+            require(SpaceCategories.ALL.contains(space.category()), "Unsupported space category: " + space.category());
             image(space.imageUrl(), space.imageWidth(), space.imageHeight(), "spaces.image");
         }
         requireTranslations(
@@ -74,8 +74,8 @@ public final class CatalogManifestValidator {
             locale(event.locale());
             require(event.sortOrder() > 0, "spaceEvents.sortOrder must be positive");
             text(event.content(), "spaceEvents.content");
-            require("BOOTH".equals(spaces.get(event.spaceId()).category()),
-                "Only BOOTH spaces can contain events");
+            require(SpaceCategories.WITH_EVENTS.contains(spaces.get(event.spaceId()).category()),
+                "Only booth-type spaces can contain events");
         }
         requireUnique(manifest.spaceEvents().stream().map(e -> key(e.spaceId(), e.locale(), e.sortOrder())).toList(),
             "spaceEvents");
@@ -87,8 +87,8 @@ public final class CatalogManifestValidator {
             require(item.sortOrder() > 0, "spaceMenuItems.sortOrder must be positive");
             text(item.name(), "spaceMenuItems.name");
             require(item.priceAmount() >= 0, "spaceMenuItems.priceAmount must be non-negative");
-            require("PUB".equals(spaces.get(item.spaceId()).category()),
-                "Only PUB spaces can contain menu items");
+            require(SpaceCategories.WITH_MENU.contains(spaces.get(item.spaceId()).category()),
+                "Only PUB and FOOD_TRUCK spaces can contain menu items");
         }
         requireUnique(manifest.spaceMenuItems().stream().map(e -> key(e.spaceId(), e.locale(), e.sortOrder())).toList(),
             "spaceMenuItems");
@@ -162,9 +162,9 @@ public final class CatalogManifestValidator {
                 "mapPins must have exactly one target");
             if (pin.placeId() != null) {
                 require(places.containsKey(pin.placeId()), "mapPins references an unknown place");
-                require(pin.filterGroup() != null && FILTER_GROUPS.contains(pin.filterGroup()),
-                    CatalogExportService.LEGACY_FILTER_GROUPS_UNCONFIGURED
-                        + ": PLACE mapPins require a supported filterGroup");
+                // A PLACE pin without a design filter is shown only under "all".
+                require(pin.filterGroup() == null || FILTER_GROUPS.contains(pin.filterGroup()),
+                    "Unsupported map pin filter group");
             } else {
                 require(areas.containsKey(pin.areaId()), "mapPins references an unknown area");
                 require(pin.filterGroup() == null, "AREA mapPins must not have a filterGroup");

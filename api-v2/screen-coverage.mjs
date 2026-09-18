@@ -6,7 +6,7 @@ const groups={
   'MAP-AREA':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Space.mapTarget','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)'],
   'MAP-POPUP':['Place.name','Place.hoursText','Place.description','Place.locationText','Place.usage','Place.spaceId'],
   'HOME':['Crowding.savedLevel','Crowding.status','Crowding.updatedAt + Crowding.timeBasis','Crowding.opensAt','Crowding.closesAt','프런트 고정 UI: Crowding.colorToken → 디자인 색상','프런트 번역: Crowding.status; Crowding.message는 참고','Config.languages','브라우저: 선택 언어, 기본 ko','Notices.items[0].title','Config.links.universityNotices','Config.links.faq','Config.links.welcomeDay','Config.links.officialChannels','Channel.label + Channel.iconKey','브라우저: 당일 stamp.started'],
-  'NOTICE-LIST':['Notice.title','Notice.createdAt','Notice.body','Notice.links','Notice.type','서버: Translations의 READY 필터 후 Notices.items 반환','브라우저: Notices.visibleIds와 현재 목록 차이 비교'],
+  'NOTICE-LIST':['Notice.title','Notice.createdAt','Notice.body','Notice.links','Notice.type','서버: Notice.contentLocale 대체 해석 후 Notices.items 반환','브라우저: Notices.visibleIds와 현재 목록 차이 비교'],
   'GOODS-LIST':['Goods.image','Goods.name','Goods.price','Goods.colorImages','Goods.sizes','Availability.sizes'],
   'GOODS-DETAIL':['Goods.colorImages','Goods.name','Goods.price','Goods.colorImages','Goods.sizes','Availability.sizes','프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내'],
   'GOODS-PAYMENT':['PaymentGuide.name','PaymentGuide.price','BankAccount.bankName','BankAccount.accountNumber','BankAccount.holder','PaymentGuide.instructions'],
@@ -34,7 +34,7 @@ export function buildCoverage(source,operations){
   groups['ADM-CROWD'][1]='Crowding.operatingStatus';groups['ADM-CROWD'][8]='프런트 고정 UI: 운영자 판단 기준·85% 자동 만석 아님';
   groups['ADM-NOTICE-LIST'][4]='AdminNotice.createdAt';
   groups['ADM-NOTICE-EDIT'][3]='보류: 이미지 필드 폐기';
-  groups['ADM-NOTICE-EDIT'][6]='AdminNotice.links';groups['ADM-NOTICE-EDIT'][7]='AdminNotice.translations + NoticeTranslationPreview.canSave';
+  groups['ADM-NOTICE-EDIT'][6]='AdminNotice.links';groups['ADM-NOTICE-EDIT'][7]='AdminNotice.translations (수동 ko·en 필수 입력, 자동 번역 없음)';
   groups['ADM-GOODS']=['Availability.goodsId','Availability.name','Availability.variants[].colorId + Availability.variants[].sizeId','Availability.variants[].status','제외: 실제 재고 수량 미관리','Availability.allSoldOut'];
   groups['ADM-CROWD-HOURS']=Array(5).fill('제외: 운영 시간은 개발자 등록, 관리자 편집 없음');
   groups['ADM-GOODS-PRODUCT-LIST']=['Goods.id','Goods.name','Goods.price','Goods.images','Goods.colors','Goods.sizes'];

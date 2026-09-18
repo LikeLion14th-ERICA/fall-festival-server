@@ -709,12 +709,13 @@
               {
                 "id": "notice-safety",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 안전 안내",
                 "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                 "links": [
                   {
-                    "label": "개발용 안내 링크",
                     "url": "https://example.invalid/mock-notice/safety",
+                    "label": "개발용 안내 링크",
                     "target": "_blank"
                   }
                 ],
@@ -723,6 +724,7 @@
               {
                 "id": "notice-weather",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 날씨 대비 안내",
                 "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                 "links": [],
@@ -731,6 +733,7 @@
               {
                 "id": "notice-stage",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 공연 대기 안내",
                 "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                 "links": [],
@@ -739,28 +742,31 @@
               {
                 "id": "notice-route",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 구역 이동 안내",
                 "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:10:00+09:00"
               },
               {
-                "id": "notice-pending",
+                "id": "notice-ko-only",
                 "type": "GENERAL",
-                "title": "번역 대기 예시",
-                "body": "한국어에는 표시합니다.",
+                "contentLocale": "ko",
+                "title": "영어 미번역 예시",
+                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:00:00+09:00"
               },
               {
                 "id": "notice-1",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "예시 공지",
                 "body": "개발용 공지 본문입니다.",
                 "links": [
                   {
+                    "url": "https://example.invalid/mock-notice-link",
                     "label": "예시 안내",
-                    "url": "https://example.invalid/mock-link",
                     "target": "_blank"
                   }
                 ],
@@ -769,6 +775,7 @@
               {
                 "id": "notice-lost",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "예시 분실물",
                 "body": "실제 분실물이 아닙니다.",
                 "links": [],
@@ -777,6 +784,7 @@
               {
                 "id": "notice-lost-card",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 카드지갑",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -785,6 +793,7 @@
               {
                 "id": "notice-lost-earbuds",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 이어폰 케이스",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -796,7 +805,7 @@
               "notice-weather",
               "notice-stage",
               "notice-route",
-              "notice-pending",
+              "notice-ko-only",
               "notice-1",
               "notice-lost",
               "notice-lost-card",
@@ -805,11 +814,9 @@
             "asOfDate": "2030-10-01"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -832,11 +839,9 @@
             "asOfDate": "2030-10-01"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -858,6 +863,7 @@
               {
                 "id": "notice-safety",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 안전 안내",
                 "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                 "links": [],
@@ -866,6 +872,7 @@
               {
                 "id": "notice-weather",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 날씨 대비 안내",
                 "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                 "links": [],
@@ -874,6 +881,7 @@
               {
                 "id": "notice-stage",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 공연 대기 안내",
                 "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                 "links": [],
@@ -882,22 +890,25 @@
               {
                 "id": "notice-route",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 구역 이동 안내",
                 "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:10:00+09:00"
               },
               {
-                "id": "notice-pending",
+                "id": "notice-ko-only",
                 "type": "GENERAL",
-                "title": "번역 대기 예시",
-                "body": "한국어에는 표시합니다.",
+                "contentLocale": "ko",
+                "title": "영어 미번역 예시",
+                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:00:00+09:00"
               },
               {
                 "id": "notice-1",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "예시 공지",
                 "body": "개발용 공지 본문입니다.",
                 "links": [],
@@ -906,6 +917,7 @@
               {
                 "id": "notice-lost",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "예시 분실물",
                 "body": "실제 분실물이 아닙니다.",
                 "links": [],
@@ -914,6 +926,7 @@
               {
                 "id": "notice-lost-card",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 카드지갑",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -922,6 +935,7 @@
               {
                 "id": "notice-lost-earbuds",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 이어폰 케이스",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -933,7 +947,7 @@
               "notice-weather",
               "notice-stage",
               "notice-route",
-              "notice-pending",
+              "notice-ko-only",
               "notice-1",
               "notice-lost",
               "notice-lost-card",
@@ -942,11 +956,9 @@
             "asOfDate": "2030-10-01"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -968,6 +980,7 @@
               {
                 "id": "notice-new",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "추가 예시 공지",
                 "body": "새 공지 버튼 검증용",
                 "links": [],
@@ -976,12 +989,13 @@
               {
                 "id": "notice-safety",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 안전 안내",
                 "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                 "links": [
                   {
-                    "label": "개발용 안내 링크",
                     "url": "https://example.invalid/mock-notice/safety",
+                    "label": "개발용 안내 링크",
                     "target": "_blank"
                   }
                 ],
@@ -990,6 +1004,7 @@
               {
                 "id": "notice-weather",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 날씨 대비 안내",
                 "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                 "links": [],
@@ -998,6 +1013,7 @@
               {
                 "id": "notice-stage",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 공연 대기 안내",
                 "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                 "links": [],
@@ -1006,28 +1022,31 @@
               {
                 "id": "notice-route",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 구역 이동 안내",
                 "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:10:00+09:00"
               },
               {
-                "id": "notice-pending",
+                "id": "notice-ko-only",
                 "type": "GENERAL",
-                "title": "번역 대기 예시",
-                "body": "한국어에는 표시합니다.",
+                "contentLocale": "ko",
+                "title": "영어 미번역 예시",
+                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:00:00+09:00"
               },
               {
                 "id": "notice-1",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "예시 공지",
                 "body": "개발용 공지 본문입니다.",
                 "links": [
                   {
+                    "url": "https://example.invalid/mock-notice-link",
                     "label": "예시 안내",
-                    "url": "https://example.invalid/mock-link",
                     "target": "_blank"
                   }
                 ],
@@ -1036,6 +1055,7 @@
               {
                 "id": "notice-lost",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "예시 분실물",
                 "body": "실제 분실물이 아닙니다.",
                 "links": [],
@@ -1044,6 +1064,7 @@
               {
                 "id": "notice-lost-card",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 카드지갑",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -1052,6 +1073,7 @@
               {
                 "id": "notice-lost-earbuds",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 이어폰 케이스",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -1064,7 +1086,7 @@
               "notice-weather",
               "notice-stage",
               "notice-route",
-              "notice-pending",
+              "notice-ko-only",
               "notice-1",
               "notice-lost",
               "notice-lost-card",
@@ -1073,11 +1095,9 @@
             "asOfDate": "2030-10-01"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -1099,12 +1119,13 @@
               {
                 "id": "notice-safety",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 안전 안내",
                 "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
                 "links": [
                   {
-                    "label": "개발용 안내 링크",
                     "url": "https://example.invalid/mock-notice/safety",
+                    "label": "개발용 안내 링크",
                     "target": "_blank"
                   }
                 ],
@@ -1113,6 +1134,7 @@
               {
                 "id": "notice-weather",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 날씨 대비 안내",
                 "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
                 "links": [],
@@ -1121,6 +1143,7 @@
               {
                 "id": "notice-stage",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 공연 대기 안내",
                 "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
                 "links": [],
@@ -1129,22 +1152,25 @@
               {
                 "id": "notice-route",
                 "type": "GENERAL",
+                "contentLocale": "ko",
                 "title": "목 구역 이동 안내",
                 "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:10:00+09:00"
               },
               {
-                "id": "notice-pending",
+                "id": "notice-ko-only",
                 "type": "GENERAL",
-                "title": "번역 대기 예시",
-                "body": "한국어에는 표시합니다.",
+                "contentLocale": "ko",
+                "title": "영어 미번역 예시",
+                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
                 "links": [],
                 "createdAt": "2030-10-01T17:00:00+09:00"
               },
               {
                 "id": "notice-lost",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "예시 분실물",
                 "body": "실제 분실물이 아닙니다.",
                 "links": [],
@@ -1153,6 +1179,7 @@
               {
                 "id": "notice-lost-card",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 카드지갑",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -1161,6 +1188,7 @@
               {
                 "id": "notice-lost-earbuds",
                 "type": "LOST_FOUND",
+                "contentLocale": "ko",
                 "title": "목 분실물 안내: 이어폰 케이스",
                 "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
                 "links": [],
@@ -1172,7 +1200,7 @@
               "notice-weather",
               "notice-stage",
               "notice-route",
-              "notice-pending",
+              "notice-ko-only",
               "notice-lost",
               "notice-lost-card",
               "notice-lost-earbuds"
@@ -1180,11 +1208,9 @@
             "asOfDate": "2030-10-01"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -4044,6 +4070,53 @@
                 }
               },
               {
+                "id": "space-food-truck-02",
+                "category": "FOOD_TRUCK",
+                "name": "목 달콤트럭",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-food-truck-02",
+                  "alt": "개발용 가상 space 목 달콤트럭 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 푸드트럭 구역 F-02",
+                "operator": "목 개발 푸드트럭 02",
+                "hoursText": "개발용 12:00~24:00",
+                "description": "목 달콤트럭의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.",
+                "contact": null,
+                "experience": null,
+                "events": [],
+                "menu": [
+                  {
+                    "name": "목 크로플",
+                    "price": {
+                      "amount": 5000,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 츄러스",
+                    "price": {
+                      "amount": 4000,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 딸기 스무디",
+                    "price": {
+                      "amount": 4500,
+                      "currency": "KRW"
+                    }
+                  }
+                ],
+                "mapTarget": {
+                  "mapId": "map-food",
+                  "placeId": "place-food-truck-02",
+                  "pinId": "pin-food-truck-02",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
                 "id": "space-booth-12",
                 "category": "BOOTH",
                 "name": "목 드로잉 살롱",
@@ -4337,6 +4410,53 @@
                   "mapId": "map-area",
                   "placeId": "place-booth",
                   "pinId": "pin-booth",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
+                "id": "space-food-truck",
+                "category": "FOOD_TRUCK",
+                "name": "목 불맛트럭",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-food-truck",
+                  "alt": "개발용 가상 space 목 불맛트럭 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 푸드트럭 구역 F-01",
+                "operator": "목 개발 푸드트럭 01",
+                "hoursText": "개발용 12:00~24:00",
+                "description": "목 불맛트럭의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.",
+                "contact": null,
+                "experience": null,
+                "events": [],
+                "menu": [
+                  {
+                    "name": "목 불닭 타코",
+                    "price": {
+                      "amount": 6000,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 치즈 핫도그",
+                    "price": {
+                      "amount": 4500,
+                      "currency": "KRW"
+                    }
+                  },
+                  {
+                    "name": "목 레몬 에이드",
+                    "price": {
+                      "amount": 3500,
+                      "currency": "KRW"
+                    }
+                  }
+                ],
+                "mapTarget": {
+                  "mapId": "map-food",
+                  "placeId": "place-food-truck",
+                  "pinId": "pin-food-truck",
                   "mapVersion": "mock-map-1"
                 }
               },
@@ -4741,6 +4861,37 @@
                 }
               },
               {
+                "id": "space-student-council",
+                "category": "STUDENT_COUNCIL_BOOTH",
+                "name": "목 총학생회 부스",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-student-council",
+                  "alt": "개발용 가상 space 목 총학생회 부스 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 부스 구역 S-01",
+                "operator": "목 총학생회",
+                "hoursText": "개발용 12:00~21:00",
+                "description": "가상 총학생회 부스 안내입니다. 실제 운영 정보가 아닙니다.",
+                "contact": {
+                  "label": "개발용 문의",
+                  "url": "https://example.invalid/mock-contact/student-council",
+                  "target": "_blank"
+                },
+                "experience": "가상 축제 안내와 굿즈 수령 확인",
+                "events": [
+                  "목 축제 퀴즈"
+                ],
+                "menu": [],
+                "mapTarget": {
+                  "mapId": "map-area",
+                  "placeId": "place-student-council",
+                  "pinId": "pin-student-council",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
                 "id": "space-booth-10",
                 "category": "BOOTH",
                 "name": "목 캠퍼스 라디오",
@@ -4889,6 +5040,33 @@
                   "mapId": "map-area",
                   "placeId": "place-booth-06",
                   "pinId": "pin-booth-06",
+                  "mapVersion": "mock-map-1"
+                }
+              },
+              {
+                "id": "space-promotion",
+                "category": "PROMOTION_BOOTH",
+                "name": "목 프로모션 부스",
+                "image": {
+                  "url": "/__mock/assets/sample.svg?variant=space-space-promotion",
+                  "alt": "개발용 가상 space 목 프로모션 부스 이미지 · 실제 축제 자료 아님",
+                  "width": 800,
+                  "height": 600
+                },
+                "locationText": "목 부스 구역 R-01",
+                "operator": "목 협찬사",
+                "hoursText": "개발용 13:00~20:00",
+                "description": "가상 프로모션 부스 안내입니다. 실제 협찬 정보가 아닙니다.",
+                "contact": null,
+                "experience": "가상 제품 체험",
+                "events": [
+                  "목 경품 추첨"
+                ],
+                "menu": [],
+                "mapTarget": {
+                  "mapId": "map-area",
+                  "placeId": "place-promotion",
+                  "pinId": "pin-promotion",
                   "mapVersion": "mock-map-1"
                 }
               },
@@ -5798,12 +5976,16 @@
             "mapVersion": "mock-map-1",
             "filters": [
               {
-                "id": "EXPERIENCE",
-                "label": "체험"
+                "id": "RESTROOM",
+                "label": "화장실"
               },
               {
-                "id": "CONVENIENCE",
-                "label": "편의 시설"
+                "id": "SMOKING_AREA",
+                "label": "흡연구역"
+              },
+              {
+                "id": "TRASH_BIN",
+                "label": "쓰레기통"
               }
             ],
             "items": [
@@ -5817,7 +5999,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-02",
@@ -5829,7 +6011,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-02"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-03",
@@ -5841,7 +6023,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-03"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-04",
@@ -5853,7 +6035,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-04"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-05",
@@ -5865,7 +6047,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-05"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-06",
@@ -5877,7 +6059,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-06"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-07",
@@ -5889,7 +6071,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-07"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-08",
@@ -5901,7 +6083,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-08"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-09",
@@ -5913,7 +6095,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-09"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-10",
@@ -5925,7 +6107,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-10"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-11",
@@ -5937,7 +6119,7 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-11"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
               },
               {
                 "id": "pin-booth-12",
@@ -5949,7 +6131,31 @@
                   "kind": "PLACE",
                   "placeId": "place-booth-12"
                 },
-                "filterGroup": "EXPERIENCE"
+                "filterGroup": null
+              },
+              {
+                "id": "pin-student-council",
+                "category": "student-council-booth",
+                "label": "목 총학생회 부스",
+                "x": 0.14,
+                "y": 0.8700000000000001,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-student-council"
+                },
+                "filterGroup": null
+              },
+              {
+                "id": "pin-promotion",
+                "category": "promotion-booth",
+                "label": "목 프로모션 부스",
+                "x": 0.37,
+                "y": 0.8700000000000001,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-promotion"
+                },
+                "filterGroup": null
               },
               {
                 "id": "pin-toilet",
@@ -5961,7 +6167,7 @@
                   "kind": "PLACE",
                   "placeId": "place-toilet"
                 },
-                "filterGroup": "CONVENIENCE"
+                "filterGroup": "RESTROOM"
               },
               {
                 "id": "pin-smoking",
@@ -5973,7 +6179,19 @@
                   "kind": "PLACE",
                   "placeId": "place-smoking"
                 },
-                "filterGroup": "CONVENIENCE"
+                "filterGroup": "SMOKING_AREA"
+              },
+              {
+                "id": "pin-trash",
+                "category": "trash",
+                "label": "목 쓰레기통",
+                "x": 0.48,
+                "y": 0.88,
+                "target": {
+                  "kind": "PLACE",
+                  "placeId": "place-trash"
+                },
+                "filterGroup": "TRASH_BIN"
               }
             ]
           },
@@ -7336,7 +7554,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-normal"
+            "Idempotency-Key": "mock-putAdminCrowding-normal"
           },
           "body": {
             "level": "CROWDED"
@@ -7355,7 +7573,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-full"
+            "Idempotency-Key": "mock-putAdminCrowding-full"
           },
           "body": {
             "level": "FULL",
@@ -7375,7 +7593,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-error"
+            "Idempotency-Key": "mock-putAdminCrowding-error"
           },
           "body": {
             "level": "CROWDED"
@@ -7410,7 +7628,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-precondition-required"
+            "Idempotency-Key": "mock-putAdminCrowding-precondition-required"
           },
           "body": {
             "level": "CROWDED"
@@ -7445,7 +7663,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-not-festival-day"
+            "Idempotency-Key": "mock-putAdminCrowding-not-festival-day"
           },
           "body": {
             "level": "CROWDED"
@@ -7480,7 +7698,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-edit-conflict"
+            "Idempotency-Key": "mock-putAdminCrowding-edit-conflict"
           },
           "body": {
             "level": "CROWDED"
@@ -7515,7 +7733,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-bad-request"
+            "Idempotency-Key": "mock-putAdminCrowding-bad-request"
           },
           "body": {
             "level": "CROWDED"
@@ -7550,7 +7768,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-rate-limited"
+            "Idempotency-Key": "mock-putAdminCrowding-rate-limited"
           },
           "body": {
             "level": "CROWDED"
@@ -7585,7 +7803,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-unauthorized"
+            "Idempotency-Key": "mock-putAdminCrowding-unauthorized"
           },
           "body": {
             "level": "CROWDED"
@@ -7620,7 +7838,7 @@
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
             "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
-            "Idempotency-Key": "mock-crowding-forbidden"
+            "Idempotency-Key": "mock-putAdminCrowding-forbidden"
           },
           "body": {
             "level": "CROWDED"
@@ -7674,20 +7892,22 @@
                 "translations": {
                   "ko": {
                     "title": "목 안전 안내",
-                    "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.",
-                    "status": "READY"
+                    "body": "가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다."
                   },
                   "en": {
                     "title": "Mock safety notice",
-                    "body": "A fictional safety notice for frontend work.",
-                    "status": "READY"
+                    "body": "A fictional safety notice for frontend work."
                   }
                 },
                 "links": [
                   {
-                    "label": "개발용 안내 링크",
                     "url": "https://example.invalid/mock-notice/safety",
-                    "target": "_blank"
+                    "labels": {
+                      "ko": "개발용 안내 링크",
+                      "en": "Mock guidance link",
+                      "zh-Hans": null,
+                      "ja": null
+                    }
                   }
                 ],
                 "templateId": null,
@@ -7700,13 +7920,11 @@
                 "translations": {
                   "ko": {
                     "title": "목 날씨 대비 안내",
-                    "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.",
-                    "status": "READY"
+                    "body": "가상 날씨 안내 카드 표시를 위한 개발용 공지입니다."
                   },
                   "en": {
                     "title": "Mock weather notice",
-                    "body": "A fictional weather notice for frontend work.",
-                    "status": "READY"
+                    "body": "A fictional weather notice for frontend work."
                   }
                 },
                 "links": [],
@@ -7720,13 +7938,11 @@
                 "translations": {
                   "ko": {
                     "title": "목 공연 대기 안내",
-                    "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.",
-                    "status": "READY"
+                    "body": "가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다."
                   },
                   "en": {
                     "title": "Mock stage notice",
-                    "body": "A fictional stage notice for frontend work.",
-                    "status": "READY"
+                    "body": "A fictional stage notice for frontend work."
                   }
                 },
                 "links": [],
@@ -7740,13 +7956,11 @@
                 "translations": {
                   "ko": {
                     "title": "목 구역 이동 안내",
-                    "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다.",
-                    "status": "READY"
+                    "body": "가상 구역 이동 동선을 확인하는 개발용 공지입니다."
                   },
                   "en": {
                     "title": "Mock route notice",
-                    "body": "A fictional route notice for frontend work.",
-                    "status": "READY"
+                    "body": "A fictional route notice for frontend work."
                   }
                 },
                 "links": [],
@@ -7755,33 +7969,12 @@
                 "updatedAt": "2030-10-01T17:10:00+09:00"
               },
               {
-                "id": "notice-old",
+                "id": "notice-ko-only",
                 "type": "GENERAL",
                 "translations": {
                   "ko": {
-                    "title": "지난 예시 공지",
-                    "body": "사용자 목록에서는 제외합니다.",
-                    "status": "READY"
-                  }
-                },
-                "links": [],
-                "templateId": null,
-                "createdAt": "2030-09-30T18:00:00+09:00",
-                "updatedAt": "2030-10-01T17:00:00+09:00"
-              },
-              {
-                "id": "notice-pending",
-                "type": "GENERAL",
-                "translations": {
-                  "ko": {
-                    "title": "번역 대기 예시",
-                    "body": "한국어에는 표시합니다.",
-                    "status": "READY"
-                  },
-                  "en": {
-                    "title": "Pending",
-                    "body": "Not visible in English.",
-                    "status": "PENDING"
+                    "title": "영어 미번역 예시",
+                    "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다."
                   }
                 },
                 "links": [],
@@ -7790,25 +7983,45 @@
                 "updatedAt": "2030-10-01T17:00:00+09:00"
               },
               {
+                "id": "notice-old",
+                "type": "GENERAL",
+                "translations": {
+                  "ko": {
+                    "title": "지난 예시 공지",
+                    "body": "사용자 목록에서는 제외합니다."
+                  },
+                  "en": {
+                    "title": "Past sample notice",
+                    "body": "Excluded from the user list."
+                  }
+                },
+                "links": [],
+                "templateId": null,
+                "createdAt": "2030-09-30T18:00:00+09:00",
+                "updatedAt": "2030-10-01T17:00:00+09:00"
+              },
+              {
                 "id": "notice-1",
                 "type": "GENERAL",
                 "translations": {
                   "ko": {
                     "title": "예시 공지",
-                    "body": "개발용 공지 본문입니다.",
-                    "status": "READY"
+                    "body": "개발용 공지 본문입니다."
                   },
                   "en": {
                     "title": "Sample notice",
-                    "body": "Mock content only.",
-                    "status": "READY"
+                    "body": "Mock content only."
                   }
                 },
                 "links": [
                   {
-                    "label": "예시 안내",
-                    "url": "https://example.invalid/mock-link",
-                    "target": "_blank"
+                    "url": "https://example.invalid/mock-notice-link",
+                    "labels": {
+                      "ko": "예시 안내",
+                      "en": "Sample link",
+                      "zh-Hans": null,
+                      "ja": null
+                    }
                   }
                 ],
                 "templateId": null,
@@ -7821,13 +8034,11 @@
                 "translations": {
                   "ko": {
                     "title": "목 분실물 안내: 카드지갑",
-                    "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
-                    "status": "READY"
+                    "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다."
                   },
                   "en": {
                     "title": "Mock lost card holder",
-                    "body": "This is a fictional lost-item example.",
-                    "status": "READY"
+                    "body": "This is a fictional lost-item example."
                   }
                 },
                 "links": [],
@@ -7841,13 +8052,11 @@
                 "translations": {
                   "ko": {
                     "title": "목 분실물 안내: 이어폰 케이스",
-                    "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.",
-                    "status": "READY"
+                    "body": "가상 분실물 카드 예시입니다. 실제 신고가 아닙니다."
                   },
                   "en": {
                     "title": "Mock lost earbuds case",
-                    "body": "This is a fictional lost-item example.",
-                    "status": "READY"
+                    "body": "This is a fictional lost-item example."
                   }
                 },
                 "links": [],
@@ -7861,13 +8070,11 @@
                 "translations": {
                   "ko": {
                     "title": "예시 분실물",
-                    "body": "실제 분실물이 아닙니다.",
-                    "status": "READY"
+                    "body": "실제 분실물이 아닙니다."
                   },
                   "en": {
                     "title": "Sample lost item",
-                    "body": "Mock item, not a real report.",
-                    "status": "READY"
+                    "body": "Mock item, not a real report."
                   }
                 },
                 "links": [],
@@ -8076,33 +8283,32 @@
             "X-Mock-Scenario": "normal",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-normal"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8113,26 +8319,24 @@
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null,
             "id": "notice-created-1",
             "createdAt": "2030-10-01T18:00:00.002+09:00",
@@ -8157,23 +8361,32 @@
             "X-Mock-Scenario": "error",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-error"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8196,163 +8409,58 @@
           }
         }
       },
-      "english-incomplete": {
+      "validation-failed": {
         "request": {
           "method": "POST",
           "path": "/api/v2/admin/notices",
           "headers": {
-            "X-Mock-Scenario": "english-incomplete",
+            "X-Mock-Scenario": "validation-failed",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-validation-failed"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "개발용 본문"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
-        "status": 201,
+        "status": 422,
         "response": {
-          "data": {
-            "type": "GENERAL",
-            "translations": {
-              "ko": {
-                "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+          "error": {
+            "code": "VALIDATION_FAILED",
+            "message": "요청 필드를 확인해 주세요.",
+            "details": [
+              {
+                "field": "$.translations.en",
+                "reason": "필수 필드입니다."
               }
-            },
-            "links": [],
-            "templateId": null,
-            "id": "notice-created-1",
-            "createdAt": "2030-10-01T18:00:00.002+09:00",
-            "updatedAt": "2030-10-01T18:00:00.002+09:00"
+            ],
+            "retryable": false
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 2,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "english-failed": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notices",
-          "headers": {
-            "X-Mock-Scenario": "english-failed",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "type": "GENERAL",
-            "translations": {
-              "ko": {
-                "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              }
-            },
-            "links": [],
-            "templateId": null
-          }
-        },
-        "status": 201,
-        "response": {
-          "data": {
-            "type": "GENERAL",
-            "translations": {
-              "ko": {
-                "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              }
-            },
-            "links": [],
-            "templateId": null,
-            "id": "notice-created-1",
-            "createdAt": "2030-10-01T18:00:00.002+09:00",
-            "updatedAt": "2030-10-01T18:00:00.002+09:00"
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 2,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -8366,23 +8474,32 @@
             "X-Mock-Scenario": "bad-request",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-bad-request"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8413,23 +8530,32 @@
             "X-Mock-Scenario": "rate-limited",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-rate-limited"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8460,23 +8586,32 @@
             "X-Mock-Scenario": "unauthorized",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-unauthorized"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8507,23 +8642,32 @@
             "X-Mock-Scenario": "forbidden",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminNotice-forbidden"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8573,20 +8717,22 @@
             "translations": {
               "ko": {
                 "title": "예시 공지",
-                "body": "개발용 공지 본문입니다.",
-                "status": "READY"
+                "body": "개발용 공지 본문입니다."
               },
               "en": {
                 "title": "Sample notice",
-                "body": "Mock content only.",
-                "status": "READY"
+                "body": "Mock content only."
               }
             },
             "links": [
               {
-                "label": "예시 안내",
-                "url": "https://example.invalid/mock-link",
-                "target": "_blank"
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 안내",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
               }
             ],
             "templateId": null,
@@ -8594,11 +8740,9 @@
             "updatedAt": "2030-10-01T16:00:00+09:00"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -8622,13 +8766,11 @@
             "translations": {
               "ko": {
                 "title": "예시 공지",
-                "body": "개발용 공지 본문입니다.",
-                "status": "READY"
+                "body": "개발용 공지 본문입니다."
               },
               "en": {
                 "title": "Sample notice",
-                "body": "Mock content only.",
-                "status": "READY"
+                "body": "Mock content only."
               }
             },
             "links": [],
@@ -8637,11 +8779,9 @@
             "updatedAt": "2030-10-01T16:00:00+09:00"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 1,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -8838,33 +8978,33 @@
             "X-Mock-Scenario": "normal",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-normal"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8875,26 +9015,24 @@
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null,
             "id": "notice-1",
             "createdAt": "2030-10-01T16:00:00+09:00",
@@ -8919,23 +9057,33 @@
             "X-Mock-Scenario": "not-found",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-not-found"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -8966,23 +9114,33 @@
             "X-Mock-Scenario": "error",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-error"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -9005,163 +9163,173 @@
           }
         }
       },
-      "english-incomplete": {
+      "precondition-required": {
         "request": {
           "method": "PUT",
           "path": "/api/v2/admin/notices/notice-1",
           "headers": {
-            "X-Mock-Scenario": "english-incomplete",
+            "X-Mock-Scenario": "precondition-required",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-precondition-required"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "title": "New mock notice",
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
-        "status": 200,
+        "status": 428,
         "response": {
-          "data": {
-            "type": "GENERAL",
-            "translations": {
-              "ko": {
-                "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              }
-            },
-            "links": [],
-            "templateId": null,
-            "id": "notice-1",
-            "createdAt": "2030-10-01T16:00:00+09:00",
-            "updatedAt": "2030-10-01T18:00:00.002+09:00"
+          "error": {
+            "code": "PRECONDITION_REQUIRED",
+            "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+            "details": [],
+            "retryable": false
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 2,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
         }
       },
-      "english-failed": {
+      "edit-conflict": {
         "request": {
           "method": "PUT",
           "path": "/api/v2/admin/notices/notice-1",
           "headers": {
-            "X-Mock-Scenario": "english-failed",
+            "X-Mock-Scenario": "edit-conflict",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-edit-conflict"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "title": "New mock notice",
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
-        "status": 200,
+        "status": 409,
         "response": {
-          "data": {
+          "error": {
+            "code": "EDIT_CONFLICT",
+            "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "validation-failed": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/notices/notice-1",
+          "headers": {
+            "X-Mock-Scenario": "validation-failed",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-validation-failed"
+          },
+          "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "개발용 본문"
               }
             },
-            "links": [],
-            "templateId": null,
-            "id": "notice-1",
-            "createdAt": "2030-10-01T16:00:00+09:00",
-            "updatedAt": "2030-10-01T18:00:00.002+09:00"
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "templateId": null
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "VALIDATION_FAILED",
+            "message": "요청 필드를 확인해 주세요.",
+            "details": [
+              {
+                "field": "$.translations.en",
+                "reason": "필수 필드입니다."
+              }
+            ],
+            "retryable": false
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
-            "revision": 2,
+            "revision": 0,
             "locale": "ko",
             "mock": true
           }
@@ -9175,23 +9343,33 @@
             "X-Mock-Scenario": "bad-request",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-bad-request"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -9222,23 +9400,33 @@
             "X-Mock-Scenario": "rate-limited",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-rate-limited"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -9269,23 +9457,33 @@
             "X-Mock-Scenario": "unauthorized",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-unauthorized"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -9316,23 +9514,33 @@
             "X-Mock-Scenario": "forbidden",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminNotice-forbidden"
           },
           "body": {
             "type": "GENERAL",
             "translations": {
               "ko": {
                 "title": "개발용 새 공지",
-                "body": "개발용 본문",
-                "status": "READY"
+                "body": "개발용 본문"
               },
               "en": {
                 "title": "New mock notice",
-                "body": "Mock body",
-                "status": "READY"
+                "body": "Mock body"
               }
             },
-            "links": [],
+            "links": [
+              {
+                "url": "https://example.invalid/mock-notice-link",
+                "labels": {
+                  "ko": "예시 링크",
+                  "en": "Sample link",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "templateId": null
           }
         },
@@ -9371,7 +9579,9 @@
           "headers": {
             "X-Mock-Scenario": "normal",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-normal"
           }
         },
         "status": 200,
@@ -9398,7 +9608,9 @@
           "headers": {
             "X-Mock-Scenario": "already-deleted",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-already-deleted"
           }
         },
         "status": 409,
@@ -9427,7 +9639,9 @@
           "headers": {
             "X-Mock-Scenario": "error",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-error"
           }
         },
         "status": 503,
@@ -9449,6 +9663,68 @@
           }
         }
       },
+      "precondition-required": {
+        "request": {
+          "method": "DELETE",
+          "path": "/api/v2/admin/notices/notice-1",
+          "headers": {
+            "X-Mock-Scenario": "precondition-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-precondition-required"
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "PRECONDITION_REQUIRED",
+            "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "edit-conflict": {
+        "request": {
+          "method": "DELETE",
+          "path": "/api/v2/admin/notices/notice-1",
+          "headers": {
+            "X-Mock-Scenario": "edit-conflict",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-edit-conflict"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "EDIT_CONFLICT",
+            "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
       "bad-request": {
         "request": {
           "method": "DELETE",
@@ -9456,7 +9732,9 @@
           "headers": {
             "X-Mock-Scenario": "bad-request",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-bad-request"
           }
         },
         "status": 400,
@@ -9485,7 +9763,9 @@
           "headers": {
             "X-Mock-Scenario": "rate-limited",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-rate-limited"
           }
         },
         "status": 429,
@@ -9514,7 +9794,9 @@
           "headers": {
             "X-Mock-Scenario": "unauthorized",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-unauthorized"
           }
         },
         "status": 401,
@@ -9543,7 +9825,9 @@
           "headers": {
             "X-Mock-Scenario": "forbidden",
             "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin"
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminNotice-forbidden"
           }
         },
         "status": 403,
@@ -9594,13 +9878,11 @@
                 "translations": {
                   "ko": {
                     "title": "예시 제목",
-                    "body": "예시 본문",
-                    "status": "READY"
+                    "body": "예시 본문"
                   },
                   "en": {
                     "title": "Sample title",
-                    "body": "Sample body",
-                    "status": "READY"
+                    "body": "Sample body"
                   }
                 }
               }
@@ -9815,13 +10097,11 @@
             "translations": {
               "ko": {
                 "title": "예시 제목",
-                "body": "예시 본문",
-                "status": "READY"
+                "body": "예시 본문"
               },
               "en": {
                 "title": "Sample title",
-                "body": "Sample body",
-                "status": "READY"
+                "body": "Sample body"
               }
             }
           },
@@ -9854,13 +10134,7 @@
             "translations": {
               "ko": {
                 "title": "예시 제목",
-                "body": "예시 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "PENDING"
+                "body": "예시 본문"
               }
             }
           },
@@ -13349,357 +13623,6 @@
               }
             ],
             "description": "실제 상품·가격이 아닙니다."
-          }
-        },
-        "status": 403,
-        "response": {
-          "error": {
-            "code": "FORBIDDEN",
-            "message": "관리자 권한이 없습니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      }
-    }
-  },
-  "previewNoticeTranslation": {
-    "screens": [
-      "ADM-NOTICE-EDIT",
-      "ADM-NOTICE-TEMPLATE"
-    ],
-    "method": "POST",
-    "path": "/api/v2/admin/notice-translations",
-    "scenarios": {
-      "normal": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "normal",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "source": {
-              "title": "개발용 제목",
-              "body": "개발용 본문"
-            },
-            "translations": {
-              "ko": {
-                "title": "개발용 제목",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": "[MOCK en] 개발용 제목",
-                "body": "[MOCK en] 개발용 본문",
-                "status": "READY"
-              },
-              "zh-Hans": {
-                "title": "[MOCK zh-Hans] 개발용 제목",
-                "body": "[MOCK zh-Hans] 개발용 본문",
-                "status": "READY"
-              },
-              "ja": {
-                "title": "[MOCK ja] 개발용 제목",
-                "body": "[MOCK ja] 개발용 본문",
-                "status": "READY"
-              }
-            },
-            "canSave": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "english-failed": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "english-failed",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "source": {
-              "title": "개발용 제목",
-              "body": "개발용 본문"
-            },
-            "translations": {
-              "ko": {
-                "title": "개발용 제목",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              },
-              "zh-Hans": {
-                "title": "[MOCK zh-Hans] 개발용 제목",
-                "body": "[MOCK zh-Hans] 개발용 본문",
-                "status": "READY"
-              },
-              "ja": {
-                "title": "[MOCK ja] 개발용 제목",
-                "body": "[MOCK ja] 개발용 본문",
-                "status": "READY"
-              }
-            },
-            "canSave": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "partial-translation": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "partial-translation",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "source": {
-              "title": "개발용 제목",
-              "body": "개발용 본문"
-            },
-            "translations": {
-              "ko": {
-                "title": "개발용 제목",
-                "body": "개발용 본문",
-                "status": "READY"
-              },
-              "en": {
-                "title": "[MOCK en] 개발용 제목",
-                "body": "[MOCK en] 개발용 본문",
-                "status": "READY"
-              },
-              "zh-Hans": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              },
-              "ja": {
-                "title": null,
-                "body": null,
-                "status": "FAILED"
-              }
-            },
-            "canSave": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 1,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "error": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "error",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 503,
-        "response": {
-          "error": {
-            "code": "SERVICE_UNAVAILABLE",
-            "message": "일시적으로 정보를 불러올 수 없습니다.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "bad-request": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "bad-request",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 400,
-        "response": {
-          "error": {
-            "code": "INVALID_QUERY",
-            "message": "잘못된 요청 예시입니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "rate-limited": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "rate-limited",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 429,
-        "response": {
-          "error": {
-            "code": "RATE_LIMITED",
-            "message": "잠시 후 다시 요청해 주세요.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "unauthorized": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "unauthorized",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
-          }
-        },
-        "status": 401,
-        "response": {
-          "error": {
-            "code": "UNAUTHORIZED",
-            "message": "관리자 인증이 필요합니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "forbidden": {
-        "request": {
-          "method": "POST",
-          "path": "/api/v2/admin/notice-translations",
-          "headers": {
-            "X-Mock-Scenario": "forbidden",
-            "X-Mock-Session": "frontend-demo",
-            "Authorization": "Bearer mock-admin",
-            "Content-Type": "application/json"
-          },
-          "body": {
-            "title": "개발용 제목",
-            "body": "개발용 본문"
           }
         },
         "status": 403,

@@ -4,6 +4,7 @@ import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
 import dev.espero.festival.domain.CatalogSnapshot.Pin;
 import dev.espero.festival.domain.CatalogSnapshot.Space;
+import dev.espero.festival.domain.SpaceCategories;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class CatalogController {
         CatalogSnapshot snapshot = snapshot(request);
         validateQuery(request, Set.of("category", "locale"));
         String category = valueOrDefault(request, "category", "ALL");
-        if (!Set.of("ALL", "BOOTH", "PUB", "FLEA_MARKET").contains(category)) {
+        if (!category.equals("ALL") && !SpaceCategories.ALL.contains(category)) {
             throw invalidQuery();
         }
         List<CatalogResponses.Space> items = snapshot.spaces().stream()

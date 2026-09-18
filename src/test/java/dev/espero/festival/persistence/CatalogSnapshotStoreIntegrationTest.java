@@ -161,11 +161,11 @@ class CatalogSnapshotStoreIntegrationTest {
         });
         assertThat(snapshot.pinsFor("map-area", "map-v1")).singleElement().satisfies(pin -> {
             assertThat(pin.target()).isEqualTo(new CatalogSnapshot.PinTarget("PLACE", "place-test"));
-            assertThat(pin.filterGroup()).isEqualTo("EXPERIENCE");
-            assertThat(pin.filterGroupLabel()).isEqualTo("체험");
+            assertThat(pin.filterGroup()).isEqualTo("PHOTO_BOOTH");
+            assertThat(pin.filterGroupLabel()).isEqualTo("포토부스");
         });
         assertThat(snapshot.filtersFor("map-area", "map-v1"))
-            .containsExactly(new CatalogSnapshot.PinFilter("EXPERIENCE", "체험"));
+            .containsExactly(new CatalogSnapshot.PinFilter("PHOTO_BOOTH", "포토부스"));
         assertThat(snapshot.ticketGuideConfig()).isNotNull();
         assertThat(snapshot.ticketMapTarget()).isEqualTo(new CatalogSnapshot.MapTarget(
             "map-area", "place-test", "pin-test", "map-v1"
@@ -174,7 +174,7 @@ class CatalogSnapshotStoreIntegrationTest {
 
     @Test
     @Transactional
-    void rejectsARevisionWithOnlyPartiallyConfiguredPlacePinFilterGroups() {
+    void loadsAPlacePinOutsideTheDesignFiltersAndLeavesItOutOfTheFilterList() {
         UUID revisionId = publishedRevisionId();
         insertCatalogFixture(revisionId);
         jdbc.update("""
@@ -196,9 +196,17 @@ class CatalogSnapshotStoreIntegrationTest {
             ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-incomplete', 'ko', '필터 누락 장소')
             """, parameters(revisionId));
 
-        assertThatThrownBy(store::loadPublished)
-            .isInstanceOf(CatalogIntegrityException.class)
-            .hasMessageContaining("supported filter group");
+        CatalogSnapshot snapshot = store.loadPublished();
+
+        assertThat(snapshot.pinsFor("map-area", "map-v1"))
+            .filteredOn(pin -> pin.id().equals("pin-incomplete"))
+            .singleElement()
+            .satisfies(pin -> {
+                assertThat(pin.filterGroup()).isNull();
+                assertThat(pin.filterGroupLabel()).isNull();
+            });
+        assertThat(snapshot.filtersFor("map-area", "map-v1"))
+            .containsExactly(new CatalogSnapshot.PinFilter("PHOTO_BOOTH", "포토부스"));
     }
 
     @Test
@@ -822,7 +830,7 @@ class CatalogSnapshotStoreIntegrationTest {
         jdbc.update("""
             INSERT INTO map_pins (
                 festival_revision_id, map_id, map_version, id, category, filter_group, x, y, place_id, area_id
-            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-test', 'booth', 'EXPERIENCE', 0.5, 0.25, 'place-test', NULL)
+            ) VALUES (:revisionId, 'map-area', 'map-v1', 'pin-test', 'booth', 'PHOTO_BOOTH', 0.5, 0.25, 'place-test', NULL)
             """, parameters);
         jdbc.update("""
             INSERT INTO map_pin_translations (
@@ -832,7 +840,7 @@ class CatalogSnapshotStoreIntegrationTest {
         jdbc.update("""
             INSERT INTO map_pin_filter_group_translations (
                 festival_revision_id, filter_group, locale, label
-            ) VALUES (:revisionId, 'EXPERIENCE', 'ko', '체험')
+            ) VALUES (:revisionId, 'PHOTO_BOOTH', 'ko', '포토부스')
             """, parameters);
         jdbc.update("""
             INSERT INTO space_map_targets (
@@ -852,7 +860,7 @@ class CatalogSnapshotStoreIntegrationTest {
         jdbc.update("""
             INSERT INTO map_pins (
                 festival_revision_id, map_id, map_version, id, category, filter_group, x, y, place_id, area_id
-            ) VALUES (:revisionId, 'map-overview', 'overview-v1', :pinId, 'booth', 'EXPERIENCE', 0.5, 0.25, 'place-test', NULL)
+            ) VALUES (:revisionId, 'map-overview', 'overview-v1', :pinId, 'booth', 'PHOTO_BOOTH', 0.5, 0.25, 'place-test', NULL)
             """, parameters);
         jdbc.update("""
             INSERT INTO map_pin_translations (

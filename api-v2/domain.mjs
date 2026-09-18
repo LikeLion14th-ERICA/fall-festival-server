@@ -5,21 +5,18 @@ export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
 const MOCK_STAMP_RECEIPT_CODE = 'MOCK-RECEIPT-CODE';
 const MAP_VERSION = 'mock-map-1';
-const PIN_FILTER_GROUP_ORDER = ['STUDENT_COUNCIL','EXPERIENCE','CONVENIENCE','FOOD_AND_BEVERAGE','PERFORMANCE'];
+// Design filter chips (docs/wiki/product/translations.md). Japanese labels are mock-only until approved.
+const PIN_FILTER_GROUP_ORDER = ['RESTROOM','PHOTO_BOOTH','SMOKING_AREA','TRASH_BIN'];
 const PIN_FILTER_GROUP_LABELS = {
-  ko:{STUDENT_COUNCIL:'총학생회 관련',EXPERIENCE:'체험',CONVENIENCE:'편의 시설',FOOD_AND_BEVERAGE:'F&B',PERFORMANCE:'공연'},
-  en:{STUDENT_COUNCIL:'Student Council',EXPERIENCE:'Experience',CONVENIENCE:'Convenience',FOOD_AND_BEVERAGE:'Food & Beverage',PERFORMANCE:'Performance'},
-  'zh-Hans':{STUDENT_COUNCIL:'学生会相关',EXPERIENCE:'体验',CONVENIENCE:'便利设施',FOOD_AND_BEVERAGE:'餐饮',PERFORMANCE:'演出'},
-  ja:{STUDENT_COUNCIL:'学生会関連',EXPERIENCE:'体験',CONVENIENCE:'便利施設',FOOD_AND_BEVERAGE:'飲食',PERFORMANCE:'公演'},
+  ko:{RESTROOM:'화장실',PHOTO_BOOTH:'포토부스',SMOKING_AREA:'흡연구역',TRASH_BIN:'쓰레기통'},
+  en:{RESTROOM:'Restrooms',PHOTO_BOOTH:'Photo Booth',SMOKING_AREA:'Smoking Area',TRASH_BIN:'Trash Bins'},
+  'zh-Hans':{RESTROOM:'洗手间',PHOTO_BOOTH:'拍照亭',SMOKING_AREA:'吸烟区',TRASH_BIN:'垃圾桶'},
+  ja:{RESTROOM:'トイレ',PHOTO_BOOTH:'フォトブース',SMOKING_AREA:'喫煙所',TRASH_BIN:'ゴミ箱'},
 };
+// Only facility pins that match a design chip carry a group; other PLACE pins appear under "all" only.
 const pinFilterGroup = (pin) => {
   if (pin.target.kind === 'AREA') return null;
-  return ({
-    booth:'EXPERIENCE',pub:'EXPERIENCE',market:'EXPERIENCE',
-    information:'STUDENT_COUNCIL',toilet:'CONVENIENCE',smoking:'CONVENIENCE',
-    stage:'PERFORMANCE',gate:'PERFORMANCE','student-zone':'PERFORMANCE','visitor-zone':'PERFORMANCE',
-    'food-truck':'FOOD_AND_BEVERAGE','photo-booth':'EXPERIENCE',ticket:'PERFORMANCE',
-  }[pin.category] || 'EXPERIENCE');
+  return ({toilet:'RESTROOM','photo-booth':'PHOTO_BOOTH',smoking:'SMOKING_AREA',trash:'TRASH_BIN'}[pin.category] || null);
 };
 const pinFilterLabel = (group,locale) => {
   const label=PIN_FILTER_GROUP_LABELS[locale]?.[group];
@@ -30,6 +27,15 @@ const image = (alt=IMAGE.alt,variant='default') => ({...structuredClone(IMAGE),u
 const mockImage = (kind,id,name) => image(`개발용 가상 ${kind} ${name} 이미지 · 실제 축제 자료 아님`,`${kind}-${id}`);
 const money = amount => ({ amount, currency: 'KRW' });
 const link = (label,path='mock-link') => ({ label, url: `https://example.invalid/${path}`, target: '_blank' });
+const noticeLink = (labels,path='mock-notice-link') => ({ url: `https://example.invalid/${path}`, labels: { ko: null, en: null, 'zh-Hans': null, ja: null, ...labels } });
+// ko always resolves to ko. en falls back to ko when a (legacy) notice has no
+// English translation. zh-Hans/ja use their own translation only when present
+// for THIS notice, otherwise en, then ko. No per-field mixed fallback.
+function resolveNoticeLocale(translations,requested) {
+  if (requested === 'ko') return 'ko';
+  if (requested === 'en') return translations.en ? 'en' : 'ko';
+  return translations[requested] ? requested : (translations.en ? 'en' : 'ko');
+}
 export const isoKst = time => new Date(new Date(time).getTime() + 9 * 3600000).toISOString().replace('Z', '+09:00');
 export const dayKst = time => isoKst(time).slice(0,10);
 
@@ -87,15 +93,17 @@ const performanceFixtures = DATES.flatMap((date,dayIndex) => {
   ];
 });
 
-const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market'};
+const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market',FOOD_TRUCK:'map-food',STUDENT_COUNCIL_BOOTH:'map-area',PROMOTION_BOOTH:'map-area'};
+const EVENT_CATEGORIES = new Set(['BOOTH','STUDENT_COUNCIL_BOOTH','PROMOTION_BOOTH']);
+const MENU_CATEGORIES = new Set(['PUB','FOOD_TRUCK']);
 const space = ({id,category,name,locationText,operator,hoursText,description,contact,experience,events,menu}) => {
   const key=id.replace(/^space-/,'');
   const mapId=mapForCategory[category];
   return {
     id,category,name,image:mockImage('space',id,name),locationText,operator,hoursText,description,contact,
-    experience:category==='BOOTH'?experience:null,
-    events:category==='BOOTH'?events:[],
-    menu:category==='PUB'?menu:[],
+    experience:EVENT_CATEGORIES.has(category)?experience:null,
+    events:EVENT_CATEGORIES.has(category)?events:[],
+    menu:MENU_CATEGORIES.has(category)?menu:[],
     mapTarget:{mapId,placeId:`place-${key}`,pinId:`pin-${key}`,mapVersion:MAP_VERSION},
   };
 };
@@ -128,25 +136,32 @@ const marketDefinitions = [
   ['market','목 필름마켓'],['market-02','목 레코드마켓'],['market-03','목 그래픽마켓'],['market-04','목 빈티지서랍'],
   ['market-05','목 작은책방'],['market-06','목 손편지상점'],['market-07','목 리빙마켓'],['market-08','목 주말공방'],
 ];
+const foodTruckDefinitions = [
+  ['food-truck','목 불맛트럭',[['목 불닭 타코',6000],['목 치즈 핫도그',4500],['목 레몬 에이드',3500]]],
+  ['food-truck-02','목 달콤트럭',[['목 크로플',5000],['목 츄러스',4000],['목 딸기 스무디',4500]]],
+];
 const spaceFixtures = [
   ...boothDefinitions.map(([key,name,experience,events],index)=>space({id:`space-${key}`,category:'BOOTH',name,locationText:`목 부스 구역 A-${String(index+1).padStart(2,'0')}`,operator:`목 개발 운영팀 ${String(index+1).padStart(2,'0')}`,hoursText:index===7?null:'개발용 15:00~22:00',description:`${name}의 가상 체험 안내입니다. 실제 참여 부스·운영 정보가 아닙니다.`,contact:index===4||index===9?null:link('개발용 문의',`mock-contact/${key}`),experience,events})),
   ...pubDefinitions.map(([key,name,theme],index)=>space({id:`space-${key}`,category:'PUB',name,locationText:`목 주점 구역 P-${String(index+1).padStart(2,'0')}`,operator:`목 개발 운영팀 P${String(index+1).padStart(2,'0')}`,hoursText:index===6?null:'개발용 17:00~23:00',description:`${name}의 가상 메뉴·운영 안내입니다. 실제 판매 정보가 아닙니다.`,contact:index===3?null:link('개발용 문의',`mock-contact/${key}`),menu:pubMenu(theme,index)})),
+  ...foodTruckDefinitions.map(([key,name,items],index)=>space({id:`space-${key}`,category:'FOOD_TRUCK',name,locationText:`목 푸드트럭 구역 F-${String(index+1).padStart(2,'0')}`,operator:`목 개발 푸드트럭 ${String(index+1).padStart(2,'0')}`,hoursText:'개발용 12:00~24:00',description:`${name}의 가상 메뉴 안내입니다. 실제 판매 정보가 아닙니다.`,contact:null,menu:items.map(([name,price])=>({name,price:money(price)}))})),
+  space({id:'space-student-council',category:'STUDENT_COUNCIL_BOOTH',name:'목 총학생회 부스',locationText:'목 부스 구역 S-01',operator:'목 총학생회',hoursText:'개발용 12:00~21:00',description:'가상 총학생회 부스 안내입니다. 실제 운영 정보가 아닙니다.',contact:link('개발용 문의','mock-contact/student-council'),experience:'가상 축제 안내와 굿즈 수령 확인',events:['목 축제 퀴즈']}),
+  space({id:'space-promotion',category:'PROMOTION_BOOTH',name:'목 프로모션 부스',locationText:'목 부스 구역 R-01',operator:'목 협찬사',hoursText:'개발용 13:00~20:00',description:'가상 프로모션 부스 안내입니다. 실제 협찬 정보가 아닙니다.',contact:null,experience:'가상 제품 체험',events:['목 경품 추첨']}),
   ...marketDefinitions.map(([key,name],index)=>space({id:`space-${key}`,category:'FLEA_MARKET',name,locationText:`목 플리마켓 구역 M-${String(index+1).padStart(2,'0')}`,operator:index===5?null:`목 개발 셀러 ${String(index+1).padStart(2,'0')}`,hoursText:index===2?null:'개발용 14:00~21:00',description:`${name}의 가상 셀러 소개입니다. 실제 판매 품목·운영 정보가 아닙니다.`,contact:index===1||index===6?null:link('개발용 문의',`mock-contact/${key}`)})),
 ];
 
 export function createState() {
-  const translation = (title,body,status='READY') => ({title,body,status});
+  const translation = (title,body) => ({title,body});
   const notices = [
-    {id:'notice-1',type:'GENERAL',translations:{ko:translation('예시 공지','개발용 공지 본문입니다.'),en:translation('Sample notice','Mock content only.')},links:[link('예시 안내')],image:null,templateId:null,createdAt:'2030-10-01T16:00:00+09:00',updatedAt:'2030-10-01T16:00:00+09:00'},
-    {id:'notice-lost',type:'LOST_FOUND',translations:{ko:translation('예시 분실물','실제 분실물이 아닙니다.'),en:translation('Sample lost item','Mock item, not a real report.')},links:[],image:null,templateId:null,createdAt:'2030-09-30T16:00:00+09:00',updatedAt:'2030-09-30T16:00:00+09:00'},
-    {id:'notice-old',type:'GENERAL',translations:{ko:translation('지난 예시 공지','사용자 목록에서는 제외합니다.')},links:[],image:null,templateId:null,createdAt:'2030-09-30T18:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
-    {id:'notice-pending',type:'GENERAL',translations:{ko:translation('번역 대기 예시','한국어에는 표시합니다.'),en:translation('Pending','Not visible in English.','PENDING')},links:[],image:null,templateId:null,createdAt:'2030-10-01T17:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
-    {id:'notice-route',type:'GENERAL',translations:{ko:translation('목 구역 이동 안내','가상 구역 이동 동선을 확인하는 개발용 공지입니다.'),en:translation('Mock route notice','A fictional route notice for frontend work.')},links:[],image:null,templateId:null,createdAt:'2030-10-01T17:10:00+09:00',updatedAt:'2030-10-01T17:10:00+09:00'},
-    {id:'notice-stage',type:'GENERAL',translations:{ko:translation('목 공연 대기 안내','가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.'),en:translation('Mock stage notice','A fictional stage notice for frontend work.')},links:[],image:null,templateId:null,createdAt:'2030-10-01T17:20:00+09:00',updatedAt:'2030-10-01T17:20:00+09:00'},
-    {id:'notice-weather',type:'GENERAL',translations:{ko:translation('목 날씨 대비 안내','가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.'),en:translation('Mock weather notice','A fictional weather notice for frontend work.')},links:[],image:null,templateId:null,createdAt:'2030-10-01T17:30:00+09:00',updatedAt:'2030-10-01T17:30:00+09:00'},
-    {id:'notice-safety',type:'GENERAL',translations:{ko:translation('목 안전 안내','가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.'),en:translation('Mock safety notice','A fictional safety notice for frontend work.')},links:[link('개발용 안내 링크','mock-notice/safety')],image:null,templateId:null,createdAt:'2030-10-01T17:40:00+09:00',updatedAt:'2030-10-01T17:40:00+09:00'},
-    {id:'notice-lost-card',type:'LOST_FOUND',translations:{ko:translation('목 분실물 안내: 카드지갑','가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.'),en:translation('Mock lost card holder','This is a fictional lost-item example.')},links:[],image:null,templateId:null,createdAt:'2030-09-29T15:00:00+09:00',updatedAt:'2030-10-01T15:00:00+09:00'},
-    {id:'notice-lost-earbuds',type:'LOST_FOUND',translations:{ko:translation('목 분실물 안내: 이어폰 케이스','가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.'),en:translation('Mock lost earbuds case','This is a fictional lost-item example.')},links:[],image:null,templateId:null,createdAt:'2030-09-28T15:00:00+09:00',updatedAt:'2030-10-01T14:00:00+09:00'},
+    {id:'notice-1',type:'GENERAL',translations:{ko:translation('예시 공지','개발용 공지 본문입니다.'),en:translation('Sample notice','Mock content only.')},links:[noticeLink({ko:'예시 안내',en:'Sample link'})],templateId:null,createdAt:'2030-10-01T16:00:00+09:00',updatedAt:'2030-10-01T16:00:00+09:00'},
+    {id:'notice-lost',type:'LOST_FOUND',translations:{ko:translation('예시 분실물','실제 분실물이 아닙니다.'),en:translation('Sample lost item','Mock item, not a real report.')},links:[],templateId:null,createdAt:'2030-09-30T16:00:00+09:00',updatedAt:'2030-09-30T16:00:00+09:00'},
+    {id:'notice-old',type:'GENERAL',translations:{ko:translation('지난 예시 공지','사용자 목록에서는 제외합니다.'),en:translation('Past sample notice','Excluded from the user list.')},links:[],templateId:null,createdAt:'2030-09-30T18:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
+    {id:'notice-ko-only',type:'GENERAL',translations:{ko:translation('영어 미번역 예시','과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.')},links:[],templateId:null,createdAt:'2030-10-01T17:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
+    {id:'notice-route',type:'GENERAL',translations:{ko:translation('목 구역 이동 안내','가상 구역 이동 동선을 확인하는 개발용 공지입니다.'),en:translation('Mock route notice','A fictional route notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:10:00+09:00',updatedAt:'2030-10-01T17:10:00+09:00'},
+    {id:'notice-stage',type:'GENERAL',translations:{ko:translation('목 공연 대기 안내','가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.'),en:translation('Mock stage notice','A fictional stage notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:20:00+09:00',updatedAt:'2030-10-01T17:20:00+09:00'},
+    {id:'notice-weather',type:'GENERAL',translations:{ko:translation('목 날씨 대비 안내','가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.'),en:translation('Mock weather notice','A fictional weather notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:30:00+09:00',updatedAt:'2030-10-01T17:30:00+09:00'},
+    {id:'notice-safety',type:'GENERAL',translations:{ko:translation('목 안전 안내','가상 안전 안내의 긴 본문과 링크 영역을 확인하는 개발용 공지입니다.'),en:translation('Mock safety notice','A fictional safety notice for frontend work.')},links:[noticeLink({ko:'개발용 안내 링크',en:'Mock guidance link'},'mock-notice/safety')],templateId:null,createdAt:'2030-10-01T17:40:00+09:00',updatedAt:'2030-10-01T17:40:00+09:00'},
+    {id:'notice-lost-card',type:'LOST_FOUND',translations:{ko:translation('목 분실물 안내: 카드지갑','가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.'),en:translation('Mock lost card holder','This is a fictional lost-item example.')},links:[],templateId:null,createdAt:'2030-09-29T15:00:00+09:00',updatedAt:'2030-10-01T15:00:00+09:00'},
+    {id:'notice-lost-earbuds',type:'LOST_FOUND',translations:{ko:translation('목 분실물 안내: 이어폰 케이스','가상 분실물 카드 예시입니다. 실제 신고가 아닙니다.'),en:translation('Mock lost earbuds case','This is a fictional lost-item example.')},links:[],templateId:null,createdAt:'2030-09-28T15:00:00+09:00',updatedAt:'2030-10-01T14:00:00+09:00'},
   ];
   const maps = [
     ['map-overview','목 전체 지도','OVERVIEW'],['map-area','목 부스 구역 지도','AREA'],['map-pub','목 주점 구역 지도','AREA'],['map-market','목 플리마켓 구역 지도','AREA'],
@@ -166,12 +181,13 @@ export function createState() {
   for(const space of spaceFixtures){
     const mapId=space.mapTarget.mapId,index=mapIndexes[mapId]||0;
     mapIndexes[mapId]=index+1;
-    pins[mapId].push({id:space.mapTarget.pinId,category:{BOOTH:'booth',PUB:'pub',FLEA_MARKET:'market'}[space.category],label:space.name,...coordinate(index),target:{kind:'PLACE',placeId:space.mapTarget.placeId}});
+    pins[mapId].push({id:space.mapTarget.pinId,category:{BOOTH:'booth',PUB:'pub',FLEA_MARKET:'market',FOOD_TRUCK:'food-truck',STUDENT_COUNCIL_BOOTH:'student-council-booth',PROMOTION_BOOTH:'promotion-booth'}[space.category],label:space.name,...coordinate(index),target:{kind:'PLACE',placeId:space.mapTarget.placeId}});
   }
   const places=spaceFixtures.map(space=>({id:space.mapTarget.placeId,kind:'SPACE',name:space.name,locationText:space.locationText,hoursText:space.hoursText,description:space.description,usage:null,spaceId:space.id}));
   const landmarks = [
     {id:'place-toilet',mapId:'map-area',pinId:'pin-toilet',category:'toilet',label:'목 화장실',x:0.88,y:0.78,kind:'FACILITY',name:'목 화장실',locationText:'목 부스 구역 동쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-smoking',mapId:'map-area',pinId:'pin-smoking',category:'smoking',label:'목 흡연구역',x:0.08,y:0.78,kind:'FACILITY',name:'목 흡연구역',locationText:'목 부스 구역 서쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
+    {id:'place-trash',mapId:'map-area',pinId:'pin-trash',category:'trash',label:'목 쓰레기통',x:0.48,y:0.88,kind:'FACILITY',name:'목 쓰레기통',locationText:'목 부스 구역 남쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-information',mapId:'map-market',pinId:'pin-information',category:'information',label:'목 인포메이션',x:0.88,y:0.78,kind:'LANDMARK',name:'목 인포메이션',locationText:'목 플리마켓 구역 입구',hoursText:'개발용 14:00~21:00',description:'가상 안내 데스크입니다.',usage:'실제 안내소가 아닙니다.'},
     {id:'place-toilet-pub',mapId:'map-pub',pinId:'pin-toilet-pub',category:'toilet',label:'목 화장실',x:0.88,y:0.78,kind:'FACILITY',name:'목 화장실',locationText:'목 주점 구역 동쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
     {id:'place-smoking-pub',mapId:'map-pub',pinId:'pin-smoking-pub',category:'smoking',label:'목 흡연구역',x:0.08,y:0.78,kind:'FACILITY',name:'목 흡연구역',locationText:'목 주점 구역 서쪽',hoursText:null,description:'가상 편의시설 위치입니다.',usage:null},
@@ -242,7 +258,15 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   now=scenarioTime(scenario,now);
   if(scenario==='all-languages'||scenario==='partial-translation')state.languages=['ko','en','zh-Hans','ja'];
   const locale=query.locale||'ko';
-  if(!state.languages.includes(locale))failure(400,KNOWN_LOCALES.has(locale)?'LOCALE_NOT_READY':'INVALID_QUERY',KNOWN_LOCALES.has(locale)?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
+  // Notice resolves its own per-item contentLocale fallback (ko/en required,
+  // zh-Hans/ja best-effort) instead of the site-wide "language not launched
+  // yet" gate that the rest of the catalog still uses.
+  const NOTICE_LIKE_OPERATIONS=new Set(['getNotices']);
+  if(NOTICE_LIKE_OPERATIONS.has(op.operationId)){
+    if(!KNOWN_LOCALES.has(locale))failure(400,'INVALID_QUERY','요청 파라미터를 확인해 주세요.');
+  }else if(!state.languages.includes(locale)){
+    failure(400,KNOWN_LOCALES.has(locale)?'LOCALE_NOT_READY':'INVALID_QUERY',KNOWN_LOCALES.has(locale)?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
+  }
   if(scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
   if(scenario==='unconfigured'&&['getCrowding','getAdminCrowding'].includes(op.operationId))failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
   if(scenario==='not-found')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
@@ -267,8 +291,12 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       return {status:204,data:null,now,locale};
     }
     case 'getNotices':{
-      let items=state.notices.filter(n=>!state.deleted.has(n.id)&&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)&&n.translations[locale]?.status==='READY').map(n=>({id:n.id,type:n.type,title:n.translations[locale].title,body:n.translations[locale].body,links:n.links,createdAt:n.createdAt}));
-      if(scenario==='new-notice')items.push({id:'notice-new',type:'GENERAL',title:locale==='ko'?'추가 예시 공지':'New sample',body:locale==='ko'?'새 공지 버튼 검증용':'Mock new content',links:[],createdAt:now});
+      let items=state.notices.filter(n=>!state.deleted.has(n.id)&&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)).map(n=>{
+        const contentLocale=resolveNoticeLocale(n.translations,locale);
+        const t=n.translations[contentLocale];
+        return {id:n.id,type:n.type,contentLocale,title:t.title,body:t.body,links:n.links.map(l=>({url:l.url,label:l.labels[contentLocale],target:'_blank'})),createdAt:n.createdAt};
+      });
+      if(scenario==='new-notice')items.push({id:'notice-new',type:'GENERAL',contentLocale:locale==='ko'?'ko':'en',title:locale==='ko'?'추가 예시 공지':'New sample',body:locale==='ko'?'새 공지 버튼 검증용':'Mock new content',links:[],createdAt:now});
       if(scenario==='deleted')items=items.filter(n=>n.id!=='notice-1');
       if(empty)items=[];
       items.sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)||a.id.localeCompare(b.id));
@@ -308,7 +336,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const m=find(state.maps,params.mapId);
       if(query.mapVersion!==m.version)failure(409,'MAP_VERSION_MISMATCH','지도 이미지 버전이 다릅니다.');
       const items=empty?[]:structuredClone(state.pins[m.id]).map(pin=>({...pin,filterGroup:pinFilterGroup(pin)}));
-      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE').map(pin=>pin.filterGroup))]
+      const groups=[...new Set(items.filter(pin=>pin.target.kind==='PLACE'&&pin.filterGroup).map(pin=>pin.filterGroup))]
         .sort((a,b)=>PIN_FILTER_GROUP_ORDER.indexOf(a)-PIN_FILTER_GROUP_ORDER.indexOf(b));
       data={mapId:m.id,mapVersion:m.version,filters:groups.map(id=>({id,label:pinFilterLabel(id,locale)})),items};
       break;
@@ -325,7 +353,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getAdminNotices':data={items:empty?[]:structuredClone(state.notices).filter(n=>!state.deleted.has(n.id)).sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)||a.id.localeCompare(b.id))};break;
     case 'getAdminNotice':if(state.deleted.has(params.noticeId))failure(404,'NOT_FOUND','삭제된 공지입니다.');data=find(state.notices,params.noticeId);if(missing)Object.assign(data,{templateId:null,links:[]});break;
     case 'postAdminNotice':case 'putAdminNotice':{
-      validateNotice(body,state,{scenario,failure});
+      validateNotice(body,failure);
       if(body.templateId)find(state.templates,body.templateId);
       let old;
       if(op.method==='PUT'){if(state.deleted.has(params.noticeId))failure(404,'NOT_FOUND','삭제된 공지입니다.');old=find(state.notices,params.noticeId);}
@@ -334,7 +362,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     }
     case 'deleteAdminNotice':if(state.deleted.has(params.noticeId))failure(409,'ALREADY_DELETED','이미 삭제된 공지입니다.');find(state.notices,params.noticeId);state.deleted.add(params.noticeId);mutate();data={id:params.noticeId,deleted:true};break;
     case 'getTemplates':data={items:empty?[]:structuredClone(state.templates)};break;
-    case 'getTemplate':data=find(state.templates,params.templateId);if(missing)data.translations.en={title:null,body:null,status:'PENDING'};break;
+    case 'getTemplate':data=find(state.templates,params.templateId);if(missing)delete data.translations.en;break;
     default:failure(404,'NOT_FOUND','경로가 없습니다.');
   }
   if(op.operationId==='getConfig')data.languages=state.languages.map(code=>({code,label:{ko:'한국어',en:'English','zh-Hans':'中文',ja:'日本語'}[code]}));
