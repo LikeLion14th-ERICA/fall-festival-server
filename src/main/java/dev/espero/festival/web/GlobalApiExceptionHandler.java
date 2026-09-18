@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
@@ -30,8 +31,8 @@ public class GlobalApiExceptionHandler {
      * handler it would otherwise fall through to the generic Exception
      * handler below and report 500 instead of 404.
      */
-    @ExceptionHandler(NoResourceFoundException.class)
-    ResponseEntity<ApiErrorResponse> handleNoResourceFound(NoResourceFoundException exception, HttpServletRequest request) {
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    ResponseEntity<ApiErrorResponse> handleNoResourceFound(Exception exception, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.", List.of(), false),
             metaSupport.metaForError(request)

@@ -50,7 +50,9 @@ public record CatalogManifest(
     List<ProhibitedItemTranslation> prohibitedItemTranslations,
     List<ProhibitedMessage> prohibitedMessages,
     TicketGuide ticketGuide,
-    StampGuide stampGuide
+    StampGuide stampGuide,
+    List<FestivalLink> festivalLinks,
+    List<FestivalLinkTranslation> festivalLinkTranslations
 ) {
 
     public CatalogManifest {
@@ -84,6 +86,84 @@ public record CatalogManifest(
         prohibitedItems = required("prohibitedItems", prohibitedItems);
         prohibitedItemTranslations = required("prohibitedItemTranslations", prohibitedItemTranslations);
         prohibitedMessages = required("prohibitedMessages", prohibitedMessages);
+        // Home links arrived after the first manifests, which may omit them.
+        festivalLinks = optionalList(festivalLinks);
+        festivalLinkTranslations = optionalList(festivalLinkTranslations);
+    }
+
+    /** Manifest without home links; they default to empty. */
+    public CatalogManifest(
+        UUID festivalId,
+        UUID baselineRevisionId,
+        List<FestivalDay> festivalDays,
+        List<Space> spaces,
+        List<SpaceTranslation> spaceTranslations,
+        List<SpaceSortOrder> spaceSortOrders,
+        List<SpaceEvent> spaceEvents,
+        List<SpaceMenuItem> spaceMenuItems,
+        List<Place> places,
+        List<PlaceTranslation> placeTranslations,
+        List<MapDefinition> maps,
+        List<MapTranslation> mapTranslations,
+        List<MapAsset> mapAssets,
+        List<MapArea> mapAreas,
+        List<MapPin> mapPins,
+        List<MapPinTranslation> mapPinTranslations,
+        List<MapPinFilterGroupTranslation> mapPinFilterGroupTranslations,
+        List<SpaceMapTarget> spaceMapTargets,
+        List<Artist> artists,
+        List<ArtistTranslation> artistTranslations,
+        List<ArtistLink> artistLinks,
+        List<ArtistLinkTranslation> artistLinkTranslations,
+        List<ArtistSong> artistSongs,
+        List<ArtistSongTranslation> artistSongTranslations,
+        List<Performance> performances,
+        List<PerformanceTranslation> performanceTranslations,
+        List<PerformanceArtist> performanceArtists,
+        TimetableConfig timetableConfig,
+        List<ProhibitedItem> prohibitedItems,
+        List<ProhibitedItemTranslation> prohibitedItemTranslations,
+        List<ProhibitedMessage> prohibitedMessages,
+        TicketGuide ticketGuide,
+        StampGuide stampGuide
+    ) {
+        this(
+            festivalId,
+            baselineRevisionId,
+            festivalDays,
+            spaces,
+            spaceTranslations,
+            spaceSortOrders,
+            spaceEvents,
+            spaceMenuItems,
+            places,
+            placeTranslations,
+            maps,
+            mapTranslations,
+            mapAssets,
+            mapAreas,
+            mapPins,
+            mapPinTranslations,
+            mapPinFilterGroupTranslations,
+            spaceMapTargets,
+            artists,
+            artistTranslations,
+            artistLinks,
+            artistLinkTranslations,
+            artistSongs,
+            artistSongTranslations,
+            performances,
+            performanceTranslations,
+            performanceArtists,
+            timetableConfig,
+            prohibitedItems,
+            prohibitedItemTranslations,
+            prohibitedMessages,
+            ticketGuide,
+            stampGuide,
+            List.of(),
+            List.of()
+        );
     }
 
     private static <T> List<T> required(String field, List<T> value) {
@@ -96,6 +176,25 @@ public record CatalogManifest(
     private static <T> List<T> optionalList(List<T> value) {
         return value == null ? List.of() : List.copyOf(value);
     }
+
+    /**
+     * A home link. {@code UNIVERSITY_NOTICES}, {@code FAQ} and
+     * {@code WELCOME_DAY} appear at most once; {@code OFFICIAL_CHANNEL} rows are
+     * ordered by {@code sortOrder} and carry the frontend icon key.
+     */
+    public record FestivalLink(
+        String id,
+        String kind,
+        String url,
+        String iconKey,
+        int sortOrder
+    ) {}
+
+    public record FestivalLinkTranslation(
+        String linkId,
+        String locale,
+        String label
+    ) {}
 
     public record FestivalDay(
         LocalDate festivalDate,

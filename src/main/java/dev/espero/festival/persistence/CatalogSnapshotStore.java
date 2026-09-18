@@ -107,6 +107,7 @@ public class CatalogSnapshotStore {
             () -> new CatalogIntegrityException("Catalog revision is missing its stamp guide.")
         );
         MapTarget ticketMapTarget = loadTicketMapTarget(context);
+        CatalogSnapshot.FestivalHome home = loadHome(context);
 
         verifySingleOverview(maps);
         verifySpaceContent(spaces);
@@ -118,8 +119,48 @@ public class CatalogSnapshotStore {
         verifyVersionHistory(context);
 
         return new CatalogSnapshot(
-            context, spaces, maps, places, pins, ticketGuideConfig, stampGuide, ticketMapTarget
+            context, spaces, maps, places, pins, ticketGuideConfig, stampGuide, ticketMapTarget, home
         );
+    }
+
+    /**
+     * Festival title, days and home links. Every link must carry a Korean
+     * label; a link without one would otherwise disappear from the home
+     * screen without notice.
+     */
+    private CatalogSnapshot.FestivalHome loadHome(FestivalContext context) {
+        String title = jdbc.queryForObject("""
+            SELECT f.title
+            FROM festival_revisions r
+            JOIN festivals f ON f.id = r.festival_id
+            WHERE r.id = :revisionId
+            """, parameters(context), String.class);
+        requireText(title, "Festival.title");
+        List<java.time.LocalDate> dates = jdbc.query("""
+            SELECT festival_date FROM festival_days
+            WHERE festival_revision_id = :revisionId
+            ORDER BY festival_date
+            """, parameters(context), (resultSet, rowNumber) -> resultSet.getObject("festival_date", java.time.LocalDate.class));
+        List<CatalogSnapshot.HomeLink> links = jdbc.query("""
+            SELECT l.id, l.kind, t.label, l.url, l.icon_key, l.sort_order
+            FROM festival_links l
+            LEFT JOIN festival_link_translations t
+              ON t.festival_revision_id = l.festival_revision_id AND t.link_id = l.id AND t.locale = :locale
+            WHERE l.festival_revision_id = :revisionId
+            ORDER BY l.kind, l.sort_order, l.id
+            """, parameters(context), (resultSet, rowNumber) -> new CatalogSnapshot.HomeLink(
+                resultSet.getString("id"),
+                resultSet.getString("kind"),
+                resultSet.getString("label"),
+                resultSet.getString("url"),
+                resultSet.getString("icon_key"),
+                resultSet.getInt("sort_order")
+            ));
+        for (CatalogSnapshot.HomeLink link : links) {
+            requireText(link.label(), "FestivalLinkTranslation.label");
+            requireHttpsUri(link.url(), "FestivalLink.url");
+        }
+        return new CatalogSnapshot.FestivalHome(title, dates, links);
     }
 
     private FestivalContext loadPublishedContext() {

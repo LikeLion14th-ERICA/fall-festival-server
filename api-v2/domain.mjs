@@ -3,7 +3,8 @@ import { initializeAdmin,hoursFor,inventoryFor,adminExecute,validateNotice } fro
 export const MOCK_NOW = '2030-10-01T18:00:00+09:00';
 export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
-const MOCK_STAMP_RECEIPT_CODE = 'MOCK-RECEIPT-CODE';
+// Fictional six-digit reward code used only by the mock server.
+const MOCK_STAMP_RECEIPT_CODE = '482913';
 const MAP_VERSION = 'mock-map-1';
 // Design filter chips (docs/wiki/product/translations.md). Japanese labels are mock-only until approved.
 const PIN_FILTER_GROUP_ORDER = ['RESTROOM','PHOTO_BOOTH','SMOKING_AREA','TRASH_BIN'];
@@ -114,6 +115,11 @@ const performanceFixtures = DATES.flatMap((date,dayIndex) => {
   ];
 });
 
+// Fictional receiving accounts; only the detail response carries them.
+const MOCK_BANK_TRANSFERS = {
+  'space-pub':{bankId:'mock-bank',bankDisplayName:'개발용 은행',accountNumber:'000000000000',accountHolderName:'개발용 예금주',tossLinkEnabled:false},
+  'space-food-truck':{bankId:'mock-bank',bankDisplayName:'개발용 은행',accountNumber:'012345678901',accountHolderName:'개발용 푸드트럭',tossLinkEnabled:false},
+};
 const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market',FOOD_TRUCK:'map-food',STUDENT_COUNCIL_BOOTH:'map-area',PROMOTION_BOOTH:'map-area'};
 const EVENT_CATEGORIES = new Set(['BOOTH','STUDENT_COUNCIL_BOOTH','PROMOTION_BOOTH']);
 const MENU_CATEGORIES = new Set(['PUB','FOOD_TRUCK']);
@@ -126,6 +132,7 @@ const space = ({id,category,name,locationText,operator,hoursText,description,con
     events:EVENT_CATEGORIES.has(category)?events:[],
     menu:MENU_CATEGORIES.has(category)?menu:[],
     mapTarget:{mapId,placeId:`place-${key}`,pinId:`pin-${key}`,mapVersion:MAP_VERSION},
+    bankTransfer:null,
   };
 };
 const pubMenu = (theme,index) => [
@@ -381,7 +388,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getPerformance':data=find(state.performances,params.performanceId);if(missing)data.description=null;break;
     case 'getProhibitedItems':data={items:empty?[]:['개발용 반입 금지 물품 예시'],message:empty?null:'총학생회 확정 자료를 사전 번역해 고정 표시합니다. 이 내용은 예시입니다.'};break;
     case 'getSpaces':data={items:empty?[]:structuredClone(state.spaces).filter(s=>!query.category||query.category==='ALL'||s.category===query.category).sort((a,b)=>a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id))};break;
-    case 'getSpace':data=find(state.spaces,params.spaceId);if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null});break;
+    case 'getSpace':data=find(state.spaces,params.spaceId);data.bankTransfer=MOCK_BANK_TRANSFERS[data.id]||null;if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null,bankTransfer:null});break;
     case 'getMaps':data={items:empty?[]:structuredClone(state.maps),overviewId:empty?null:'map-overview'};break;
     case 'getMap':data=find(state.maps,params.mapId);break;
     case 'getPins':{
@@ -401,7 +408,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       data={date,status:ticketStatus,unitPrice:unconfigured?null:money(1500),transferOpensAt:unconfigured?null:`${schedule}T00:00:00+09:00`,transferClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,pickupOpensAt:unconfigured?null:`${schedule}T13:00:00+09:00`,pickupClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,account:open?{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'}:null,transferLink:null,paymentSettingsVersion:unconfigured?null:1,mapTarget:unconfigured?null:{mapId:'map-overview',placeId:'place-ticket',pinId:'pin-ticket',mapVersion:'mock-map-1'},instructions:['실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.','입금과 지급 여부는 현장에서 확인합니다.']};break;
     }
     case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['START는 참여 시작만 기록합니다.','공통 QR 인식 1회당 1개, 하루 4개 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
-    case 'verifyStampReceipt':if(scenario==='invalid-code'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');data={verified:true};break;
+    case 'verifyStampReceipt':if(scenario==='invalid-code'||typeof body.code!=='string'||body.code.trim()!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');data={verified:true};break;
     case 'getAdminNotices':data={items:empty?[]:structuredClone(state.notices).filter(n=>!state.deleted.has(n.id)).sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)||a.id.localeCompare(b.id))};break;
     case 'getAdminNotice':if(state.deleted.has(params.noticeId))failure(404,'NOT_FOUND','삭제된 공지입니다.');data=find(state.notices,params.noticeId);if(missing)Object.assign(data,{templateId:null,links:[]});break;
     case 'postAdminNotice':case 'putAdminNotice':{

@@ -30,12 +30,22 @@ public class ApiSecurityErrorWriter {
         String code,
         String message
     ) throws IOException {
+        write(request, response, status, code, message, status == HttpStatus.SERVICE_UNAVAILABLE.value());
+    }
+
+    public void write(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        int status,
+        String code,
+        String message,
+        boolean retryable
+    ) throws IOException {
         ApiMeta meta = metaSupport.metaForError(request);
         response.setStatus(status);
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setHeader("X-Request-Id", meta.requestId());
-        boolean retryable = status == HttpStatus.SERVICE_UNAVAILABLE.value();
         objectMapper.writeValue(response.getOutputStream(), new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody(code, message, List.of(), retryable), meta
         ));

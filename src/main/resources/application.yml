@@ -1,6 +1,11 @@
 spring:
   application:
     name: fall-festival-server
+  # No classpath static files are served implicitly. The opt-in /docs page
+  # serves the few Swagger UI assets it needs itself.
+  web:
+    resources:
+      add-mappings: false
   # HikariCP is on the classpath (via spring-boot-starter-jdbc) purely so the
   # "db" profile below can use it. Its presence alone makes DataSourceAutoConfiguration
   # try to build a pool regardless of whether spring.datasource.url is set, so
@@ -26,6 +31,18 @@ server:
 
 festival:
   id: ${FESTIVAL_ID:}
+  # SHA-256 hex of the on-site stamp reward code, comma-separated while rotating.
+  # Never put the code itself here; without a value the check answers 503.
+  stamp-receipt:
+    code-sha256: ${STAMP_RECEIPT_CODE_SHA256:}
+  # Per-client limits on /api/v2. trusted-proxy-hops is the number of proxies in
+  # front of the server that append X-Forwarded-For (0 = the socket address).
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    trusted-proxy-hops: ${RATE_LIMIT_TRUSTED_PROXY_HOPS:0}
+  # Swagger UI at /docs for local and development servers. Keep it off in production.
+  api-docs:
+    enabled: ${API_DOCS_ENABLED:false}
   admin-auth:
     access-token-ttl: PT15M
     refresh-token-ttl: P7D

@@ -1,6 +1,8 @@
 package dev.espero.festival.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 
@@ -13,6 +15,12 @@ final class PublicContentLocale {
 
     static final String KOREAN = "ko";
     private static final Set<String> KNOWN_LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
+
+    /**
+     * Published locales in display order with their native names. A locale is
+     * added here only once all of its public content is complete.
+     */
+    static final List<Map.Entry<String, String>> PUBLISHED_LANGUAGES = List.of(Map.entry(KOREAN, "한국어"));
 
     private PublicContentLocale() {}
 

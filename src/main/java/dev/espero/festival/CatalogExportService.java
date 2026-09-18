@@ -86,7 +86,9 @@ public class CatalogExportService {
             prohibitedItemTranslations(revisionId),
             prohibitedMessages(revisionId),
             ticketGuide(revisionId),
-            stampGuide(revisionId)
+            stampGuide(revisionId),
+            festivalLinks(revisionId),
+            festivalLinkTranslations(revisionId)
         );
         return new ExportResult(manifest, findings(manifest));
     }
@@ -487,6 +489,30 @@ public class CatalogExportService {
             """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.ProhibitedMessage(
             resultSet.getString("locale"),
             resultSet.getString("message")
+        ));
+    }
+
+    private List<CatalogManifest.FestivalLink> festivalLinks(UUID revisionId) {
+        return query("""
+            SELECT id, kind, url, icon_key, sort_order FROM festival_links
+            WHERE festival_revision_id = :revisionId ORDER BY kind, sort_order, id
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.FestivalLink(
+            resultSet.getString("id"),
+            resultSet.getString("kind"),
+            resultSet.getString("url"),
+            resultSet.getString("icon_key"),
+            resultSet.getInt("sort_order")
+        ));
+    }
+
+    private List<CatalogManifest.FestivalLinkTranslation> festivalLinkTranslations(UUID revisionId) {
+        return query("""
+            SELECT link_id, locale, label FROM festival_link_translations
+            WHERE festival_revision_id = :revisionId ORDER BY link_id, locale
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.FestivalLinkTranslation(
+            resultSet.getString("link_id"),
+            resultSet.getString("locale"),
+            resultSet.getString("label")
         ));
     }
 

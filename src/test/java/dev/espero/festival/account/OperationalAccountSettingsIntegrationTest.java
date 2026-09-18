@@ -202,6 +202,71 @@ class OperationalAccountSettingsIntegrationTest {
     }
 
     @Test
+    void keepsEachBoothAccountSeparateWithItsOwnVersionsAndHistory() {
+        OperationalAccountTarget pub = OperationalAccountTarget.space(FESTIVAL_ID, "space-pub");
+        OperationalAccountTarget truck = OperationalAccountTarget.space(FESTIVAL_ID, "space-food-truck");
+
+        settings.set(pub, 0, boothAccount("000123456789", "example-bank", true), "6789", audit());
+        settings.set(truck, 0, boothAccount("012300004321", "other-bank", false), "4321", audit());
+        OperationalAccountChangeResult changed = settings.set(
+            pub, 1, boothAccount("000123455555", "example-bank", false), "5555", audit()
+        );
+
+        assertThat(changed.setting().version()).isEqualTo(2);
+        assertThat(changed.setting().accountNumber()).isEqualTo("000123455555");
+        assertThat(changed.setting().tossLinkEnabled()).isFalse();
+        assertThat(settings.findCurrent(truck)).hasValueSatisfying(setting -> {
+            assertThat(setting.version()).isOne();
+            assertThat(setting.bankCode()).isEqualTo("other-bank");
+            assertThat(setting.spaceId()).isEqualTo("space-food-truck");
+        });
+        assertThat(settings.findCurrent(FESTIVAL_ID, OperationalAccountPurpose.TICKET)).isEmpty();
+        assertThat(jdbc.queryForObject("""
+            SELECT count(*) FROM operational_account_setting_history
+            WHERE purpose = 'SPACE' AND scope_id = 'space-pub' AND after_bank_code = 'example-bank'
+            """, Map.of(), Long.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("""
+            SELECT before_toss_link_enabled FROM operational_account_setting_history
+            WHERE purpose = 'SPACE' AND scope_id = 'space-pub' AND version = 2
+            """, Map.of(), Boolean.class)).isTrue();
+
+        OperationalAccountChangeResult restored = settings.restore(pub, 2, 1, "6789", audit());
+        assertThat(restored.setting().accountNumber()).isEqualTo("000123456789");
+        assertThat(restored.setting().tossLinkEnabled()).isTrue();
+        assertThat(settings.clear(pub, 3, audit()).setting().bankCode()).isNull();
+    }
+
+    @Test
+    void rejectsBoothFieldsOnTheWrongPurposeAndInvalidBoothTargets() {
+        OperationalAccountTarget pub = OperationalAccountTarget.space(FESTIVAL_ID, "space-pub");
+
+        assertAccountCode(() -> settings.set(pub, 0, new OperationalAccountChange(
+            OperationalAccountState.CONFIGURED, "은행", "000123456789", "예금주",
+            "https://example.test/transfer", "example-bank", false
+        ), "6789", audit()), "ACCOUNT_TRANSFER_LINK_NOT_ALLOWED");
+        assertAccountCode(() -> settings.set(pub, 0, boothAccount("000123456789", null, false), "6789", audit()),
+            "ACCOUNT_BANK_ID_INVALID");
+        assertAccountCode(() -> settings.set(pub, 0, boothAccount("000123456789", "Bad Bank", false), "6789", audit()),
+            "ACCOUNT_BANK_ID_INVALID");
+        assertAccountCode(() -> settings.set(
+            FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0,
+            boothAccount("000123456789", "example-bank", false), "6789", audit()
+        ), "ACCOUNT_SPACE_FIELDS_NOT_ALLOWED");
+        assertAccountCode(() -> OperationalAccountTarget.space(FESTIVAL_ID, "Space Pub"), "ACCOUNT_SPACE_ID_INVALID");
+        assertAccountCode(() -> new OperationalAccountTarget(FESTIVAL_ID, OperationalAccountPurpose.TICKET, "space-pub"),
+            "ACCOUNT_SPACE_ID_NOT_ALLOWED");
+
+        // The database refuses the same shapes even for a direct SQL writer.
+        assertThatThrownBy(() -> jdbc.update("""
+            INSERT INTO operational_account_settings (
+                festival_id, purpose, scope_id, state, version, bank_name, account_number, account_holder, updated_at
+            ) VALUES (:festivalId, 'SPACE', '', 'CONFIGURED', 1, '은행', '000123456789', '예금주', CURRENT_TIMESTAMP)
+            """, new MapSqlParameterSource("festivalId", FESTIVAL_ID)))
+            .isInstanceOf(DataIntegrityViolationException.class);
+        assertThat(historyCount()).isZero();
+    }
+
+    @Test
     void rejectsStaleExpectedVersionsAndDirectVersionJumps() {
         settings.set(
             FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0, configured("110-0000-1234"), "1234", audit()
@@ -305,11 +370,12 @@ class OperationalAccountSettingsIntegrationTest {
                 "SELECT account_holder FROM ticket_guide_revisions");
             assertPermissionDenied(connection, EXPORT_ROLE, "SELECT count(*) FROM ticket_guide");
 
-            // Crowding and notices stay outside every catalog role.
+            // Crowding, notices and goods stay outside every catalog role.
             for (String role : List.of(EXPORT_ROLE, PUBLISH_ROLE)) {
                 for (String table : List.of(
                     "crowding_state", "crowding_state_dynamic", "notices", "notice_translations",
-                    "notice_links", "notice_link_translations"
+                    "notice_links", "notice_link_translations", "goods", "goods_translations", "goods_colors",
+                    "goods_color_translations", "goods_sizes", "goods_size_translations", "goods_combinations"
                 )) {
                     assertPermissionDenied(connection, role, "SELECT count(*) FROM " + table);
                 }
@@ -359,6 +425,19 @@ class OperationalAccountSettingsIntegrationTest {
                 statement.execute("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
             }
         }
+    }
+
+    private OperationalAccountChange boothAccount(String accountNumber, String bankId, boolean tossLinkEnabled) {
+        return new OperationalAccountChange(
+            OperationalAccountState.CONFIGURED, "예시 은행", accountNumber, "예시 예금주", null, bankId, tossLinkEnabled
+        );
+    }
+
+    private void assertAccountCode(org.assertj.core.api.ThrowableAssert.ThrowingCallable call, String code) {
+        assertThatThrownBy(call)
+            .isInstanceOf(OperationalAccountException.class)
+            .extracting(exception -> ((OperationalAccountException) exception).code())
+            .isEqualTo(code);
     }
 
     private OperationalAccountChange configured(String accountNumber) {

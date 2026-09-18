@@ -14,7 +14,9 @@ public record OperationalAccountHistory(
     String afterAccountNumber,
     String afterAccountHolder,
     String afterTransferLinkUrl,
-    Instant occurredAt
+    Instant occurredAt,
+    String afterBankCode,
+    Boolean afterTossLinkEnabled
 ) {
 
     public boolean isRestorable() {
@@ -26,7 +28,8 @@ public record OperationalAccountHistory(
             throw new OperationalAccountException("ACCOUNT_HISTORY_VERSION_NOT_RESTORABLE");
         }
         return new OperationalAccountChange(
-            afterState, afterBankName, afterAccountNumber, afterAccountHolder, afterTransferLinkUrl
+            afterState, afterBankName, afterAccountNumber, afterAccountHolder, afterTransferLinkUrl,
+            afterBankCode, Boolean.TRUE.equals(afterTossLinkEnabled)
         );
     }
 

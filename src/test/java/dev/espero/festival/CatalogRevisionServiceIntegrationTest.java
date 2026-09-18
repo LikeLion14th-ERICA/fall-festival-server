@@ -117,6 +117,8 @@ class CatalogRevisionServiceIntegrationTest {
             "space_sort_orders",
             "space_translations",
             "spaces",
+            "festival_link_translations",
+            "festival_links",
             "festival_days"
         }) {
             jdbc.update("DELETE FROM " + table + " WHERE festival_revision_id <> :initialRevisionId", parameters);
@@ -309,6 +311,71 @@ class CatalogRevisionServiceIntegrationTest {
         Path manifest = tempDir.resolve(UUID.randomUUID() + ".json");
         Files.writeString(manifest, json);
         return revisions.importManifest(manifest, "release-bot");
+    }
+
+    @Test
+    void publishesHomeLinksAndRestoresThemWithARollback() throws IOException {
+        UUID first = importManifest("qr-links-a", "/assets/maps/overview-v1.png");
+        revisions.publish(first, "release-bot");
+
+        CatalogSnapshot.FestivalHome home = snapshots.loadPublished().home();
+        assertThat(home.title()).isEqualTo("한양문화제 동심");
+        assertThat(home.dates()).isNotEmpty();
+        assertThat(home.links()).extracting(CatalogSnapshot.HomeLink::id)
+            .containsExactlyInAnyOrder("notices", "instagram", "youtube");
+        assertThat(home.links()).filteredOn(link -> link.id().equals("instagram")).singleElement()
+            .satisfies(link -> {
+                assertThat(link.label()).isEqualTo("Instagram");
+                assertThat(link.iconKey()).isEqualTo("instagram");
+            });
+
+        String withFaq = manifestJson("qr-links-b", "/assets/maps/overview-v1.png", currentPublishedRevision())
+            .replace("\"festivalLinks\": [", """
+                "festivalLinks": [
+                {"id": "faq", "kind": "FAQ", "url": "https://example.test/faq", "iconKey": null, "sortOrder": 1},""")
+            .replace("\"festivalLinkTranslations\": [", """
+                "festivalLinkTranslations": [
+                {"linkId": "faq", "locale": "ko", "label": "FAQ"},""");
+        UUID second = importJson(withFaq);
+        revisions.publish(second, "release-bot");
+        assertThat(snapshots.loadPublished().home().links()).extracting(CatalogSnapshot.HomeLink::kind).contains("FAQ");
+
+        UUID rollback = revisions.rollback(first, second, "incident-bot");
+
+        assertThat(snapshots.loadPublished().context().revisionId()).isEqualTo(rollback);
+        assertThat(snapshots.loadPublished().home().links()).extracting(CatalogSnapshot.HomeLink::id)
+            .containsExactlyInAnyOrder("notices", "instagram", "youtube");
+        assertThat(exports.export(rollback).manifest().festivalLinkTranslations()).hasSize(4);
+    }
+
+    @Test
+    void rejectsHomeLinksThatBreakTheLinkRules() throws IOException {
+        String base = manifestJson("qr-link-rules", "/assets/maps/overview-v1.png", currentPublishedRevision());
+        Map<String, String> cases = new LinkedHashMap<>();
+        cases.put("Only one festivalLinks row is allowed for UNIVERSITY_NOTICES", base.replace(
+            "\"festivalLinks\": [",
+            "\"festivalLinks\": [{\"id\": \"notices-2\", \"kind\": \"UNIVERSITY_NOTICES\", "
+                + "\"url\": \"https://example.test/n2\", \"iconKey\": null, \"sortOrder\": 2},"
+        ).replace(
+            "\"festivalLinkTranslations\": [",
+            "\"festivalLinkTranslations\": [{\"linkId\": \"notices-2\", \"locale\": \"ko\", \"label\": \"공지 2\"},"
+        ));
+        cases.put("festivalLinks.url must use https://",
+            base.replace("https://example.test/notices", "http://example.test/notices"));
+        cases.put("festivalLinks.iconKey is only for OFFICIAL_CHANNEL", base.replace(
+            "\"url\": \"https://example.test/notices\", \"iconKey\": null",
+            "\"url\": \"https://example.test/notices\", \"iconKey\": \"bell\""));
+        cases.put("Every festival link needs a Korean festivalLinkTranslations row",
+            base.replace("{\"linkId\": \"youtube\", \"locale\": \"ko\", \"label\": \"YouTube\"}",
+                "{\"linkId\": \"youtube\", \"locale\": \"en\", \"label\": \"YouTube\"}"));
+
+        for (Map.Entry<String, String> entry : cases.entrySet()) {
+            assertThat(entry.getValue()).as(entry.getKey()).isNotEqualTo(base);
+            assertThatThrownBy(() -> importJson(entry.getValue()))
+                .as(entry.getKey())
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessageContaining(entry.getKey());
+        }
     }
 
     @Test
@@ -860,7 +927,18 @@ class CatalogRevisionServiceIntegrationTest {
                 "rewardHoursText": null,
                 "rewardNotice": "운영 안내",
                 "qrValue": "%s"
-              }
+              },
+              "festivalLinks": [
+                {"id": "notices", "kind": "UNIVERSITY_NOTICES", "url": "https://example.test/notices", "iconKey": null, "sortOrder": 1},
+                {"id": "instagram", "kind": "OFFICIAL_CHANNEL", "url": "https://example.test/instagram", "iconKey": "instagram", "sortOrder": 1},
+                {"id": "youtube", "kind": "OFFICIAL_CHANNEL", "url": "https://example.test/youtube", "iconKey": "youtube", "sortOrder": 2}
+              ],
+              "festivalLinkTranslations": [
+                {"linkId": "notices", "locale": "ko", "label": "공지사항"},
+                {"linkId": "instagram", "locale": "ko", "label": "Instagram"},
+                {"linkId": "instagram", "locale": "en", "label": "Instagram"},
+                {"linkId": "youtube", "locale": "ko", "label": "YouTube"}
+              ]
             }
             """.formatted(FESTIVAL_ID, baseline == null ? "null" : "\"" + baseline + "\"", imageUrl, qrValue);
     }

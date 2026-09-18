@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -80,7 +81,13 @@ class CatalogControllerOpenApiTest {
                 Instant.parse("2030-09-01T00:00:00Z")
             )));
         mvc = MockMvcBuilders.standaloneSetup(
-            new CatalogController(snapshots, metaSupport),
+            new CatalogController(snapshots, metaSupport, spaceId -> spaceId.equals("space-booth")
+                ? Optional.of(new CatalogResponses.BankTransfer("example-bank", "예시 은행", "000123456789", "예시 예금주", false))
+                : Optional.empty()),
+            new ConfigController(snapshots, metaSupport, clock),
+            new StampReceiptController(snapshots, metaSupport, new StampReceiptVerifier(
+                java.util.HexFormat.of().formatHex(StampReceiptVerifier.sha256("048213"))
+            )),
             new TicketGuideController(
                 snapshots,
                 accountSettings,
@@ -106,6 +113,42 @@ class CatalogControllerOpenApiTest {
         );
         assertMatchesSchema("/api/v2/places/{placeId}", get("/api/v2/places/place-booth"));
         assertMatchesSchema("/api/v2/ticket-guide", get("/api/v2/ticket-guide"));
+    }
+
+    @Test
+    void validatesStampReceiptSuccessAndRefusalAgainstOpenApi() throws Exception {
+        when(snapshots.required()).thenReturn(snapshot());
+
+        assertMatchesSchema("/api/v2/stamp-receipt-verifications", post("/api/v2/stamp-receipt-verifications")
+            .contentType("application/json").content("{\"code\":\" 048213 \"}"));
+        assertMatchesErrorSchema("/api/v2/stamp-receipt-verifications", "422", "INVALID_RECEIPT_CODE", 3,
+            post("/api/v2/stamp-receipt-verifications").contentType("application/json").content("{\"code\":\"048214\"}"));
+        MvcResult refused = mvc.perform(post("/api/v2/stamp-receipt-verifications")
+                .contentType("application/json").content("{\"code\":\"48213\"}"))
+            .andExpect(status().isUnprocessableEntity())
+            .andReturn();
+        assertThat(refused.getResponse().getContentAsString()).doesNotContain("48213");
+        mvc.perform(post("/api/v2/stamp-receipt-verifications").contentType("application/json").content("{\"code\":\"   \"}"))
+            .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void validatesTheConfigPayloadAgainstOpenApi() throws Exception {
+        CatalogSnapshot base = snapshot();
+        when(snapshots.required()).thenReturn(new CatalogSnapshot(
+            base.context(), base.spaces(), base.maps(), base.places(), base.pinsByMapVersion(),
+            base.ticketGuideConfig(), base.stampGuide(), base.ticketMapTarget(),
+            new CatalogSnapshot.FestivalHome(
+                "한양문화제 동심",
+                List.of(java.time.LocalDate.parse("2030-10-01"), java.time.LocalDate.parse("2030-10-02")),
+                List.of(
+                    new CatalogSnapshot.HomeLink("notices", "UNIVERSITY_NOTICES", "공지사항", "https://example.test/notices", null, 1),
+                    new CatalogSnapshot.HomeLink("instagram", "OFFICIAL_CHANNEL", "Instagram", "https://example.test/ig", "instagram", 1)
+                )
+            )
+        ));
+
+        assertMatchesSchema("/api/v2/config", get("/api/v2/config"));
     }
 
     @Test
@@ -214,19 +257,25 @@ class CatalogControllerOpenApiTest {
     }
 
     private JsonNode responseSchema(String path) {
-        JsonNode operation = openApi.get("paths").get(path).get("get");
-        assertThat(operation).as("OpenAPI GET operation for %s", path).isNotNull();
+        JsonNode operation = operation(path);
         JsonNode schema = operation.get("responses").get("200").get("content").get("application/json").get("schema");
         assertThat(schema).as("OpenAPI 200 JSON schema for %s", path).isNotNull();
         return resolveReferences(schema);
     }
 
     private JsonNode errorSchema(String path, String status) {
-        JsonNode operation = openApi.get("paths").get(path).get("get");
-        assertThat(operation).as("OpenAPI GET operation for %s", path).isNotNull();
+        JsonNode operation = operation(path);
         JsonNode schema = operation.get("responses").get(status).get("content").get("application/json").get("schema");
         assertThat(schema).as("OpenAPI %s JSON schema for %s", status, path).isNotNull();
         return resolveReferences(schema);
+    }
+
+    /** The GET operation of a path, or its POST when the path has no GET. */
+    private JsonNode operation(String path) {
+        JsonNode item = openApi.get("paths").get(path);
+        JsonNode operation = item.has("get") ? item.get("get") : item.get("post");
+        assertThat(operation).as("OpenAPI operation for %s", path).isNotNull();
+        return operation;
     }
 
     private Set<ValidationMessage> validate(JsonNode schema, JsonNode response) {

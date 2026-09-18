@@ -33,7 +33,9 @@ class AccountSettingsCliRunnerTest {
         Path input = writeInput("110-0000-5678", "https://example.test/new-transfer");
         OperationalAccountSetting before = setting(1, "110-0000-1234", "https://example.test/old-transfer");
         OperationalAccountSetting after = setting(2, "110-0000-5678", "https://example.test/new-transfer");
-        when(settings.previewSet(eq(FESTIVAL_ID), eq(OperationalAccountPurpose.TICKET), eq(1L), any(), eq("5678")))
+        when(settings.previewSet(
+            eq(OperationalAccountTarget.festival(FESTIVAL_ID, OperationalAccountPurpose.TICKET)), eq(1L), any(), eq("5678")
+        ))
             .thenReturn(new OperationalAccountChangeResult(OperationalAccountChangeAction.SET, before, after, true));
 
         String output = run(runner, "set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET",
@@ -45,7 +47,36 @@ class AccountSettingsCliRunnerTest {
             )
             .doesNotContain("테스트은행", "110-0000-1234", "110-0000-5678", "테스트예금주",
                 "https://example.test/old-transfer", "https://example.test/new-transfer");
-        verify(settings, never()).set(any(), any(), any(Long.class), any(), any(), any());
+        verify(settings, never()).set(any(OperationalAccountTarget.class), any(Long.class), any(), any(), any());
+    }
+
+    @Test
+    void setsABoothAccountForTheNamedSpaceAndReportsItsSafeFields() throws Exception {
+        OperationalAccountSettingsService settings = mock(OperationalAccountSettingsService.class);
+        AccountSettingsCliRunner runner = new AccountSettingsCliRunner(settings);
+        Path input = temporaryDirectory.resolve("booth.json");
+        Files.writeString(input, """
+            {"bankName": "예시 은행", "accountNumber": "000123456789", "accountHolder": "예시 예금주",
+             "bankId": "example-bank", "tossLinkEnabled": true}
+            """);
+        OperationalAccountTarget target = OperationalAccountTarget.space(FESTIVAL_ID, "space-pub");
+        OperationalAccountSetting after = new OperationalAccountSetting(
+            FESTIVAL_ID, OperationalAccountPurpose.SPACE, OperationalAccountState.CONFIGURED, 1,
+            "예시 은행", "000123456789", "예시 예금주", null, Instant.parse("2026-09-18T00:00:00Z"),
+            "space-pub", "example-bank", true
+        );
+        ArgumentCaptor<OperationalAccountChange> change = ArgumentCaptor.forClass(OperationalAccountChange.class);
+        when(settings.previewSet(eq(target), eq(0L), change.capture(), eq("6789")))
+            .thenReturn(new OperationalAccountChangeResult(OperationalAccountChangeAction.SET, null, after, true));
+
+        String output = run(runner, "set", "--festival-id=" + FESTIVAL_ID, "--purpose=SPACE", "--space-id=space-pub",
+            "--expected-version=0", "--input-file=" + input, "--last-four=6789");
+
+        assertThat(change.getValue().bankCode()).isEqualTo("example-bank");
+        assertThat(change.getValue().tossLinkEnabled()).isTrue();
+        assertThat(output).contains("mode=DRY_RUN", "purpose=SPACE", "spaceId=space-pub", "bankId=example-bank",
+                "tossLinkEnabled=true", "accountLastFour=6789")
+            .doesNotContain("000123456789", "예시 예금주");
     }
 
     @Test
@@ -54,7 +85,9 @@ class AccountSettingsCliRunnerTest {
         AccountSettingsCliRunner runner = new AccountSettingsCliRunner(settings);
         Path input = writeInput("110-0000-5678", null);
         OperationalAccountSetting after = setting(1, "110-0000-5678", null);
-        when(settings.set(eq(FESTIVAL_ID), eq(OperationalAccountPurpose.GOODS), eq(0L), any(), eq("5678"), any()))
+        when(settings.set(
+            eq(OperationalAccountTarget.festival(FESTIVAL_ID, OperationalAccountPurpose.GOODS)), eq(0L), any(), eq("5678"), any()
+        ))
             .thenReturn(new OperationalAccountChangeResult(OperationalAccountChangeAction.SET, null, after, true));
 
         String output = run(runner, "set", "--festival-id=" + FESTIVAL_ID, "--purpose=GOODS",
@@ -62,8 +95,10 @@ class AccountSettingsCliRunnerTest {
             "--actor=release operator", "--reason=approved update", "--evidence-id=OPS-2026-09-18");
 
         ArgumentCaptor<OperationalAccountAuditMetadata> audit = ArgumentCaptor.forClass(OperationalAccountAuditMetadata.class);
-        verify(settings).set(eq(FESTIVAL_ID), eq(OperationalAccountPurpose.GOODS), eq(0L), any(), eq("5678"),
-            audit.capture());
+        verify(settings).set(
+            eq(OperationalAccountTarget.festival(FESTIVAL_ID, OperationalAccountPurpose.GOODS)), eq(0L), any(), eq("5678"),
+            audit.capture()
+        );
         assertThat(audit.getValue()).isEqualTo(
             new OperationalAccountAuditMetadata("release operator", "approved update", "OPS-2026-09-18")
         );

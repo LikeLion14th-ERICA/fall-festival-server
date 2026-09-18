@@ -22,9 +22,9 @@ GRANT SELECT, INSERT, UPDATE ON TABLE :"schema".operational_account_settings TO 
 GRANT SELECT ON TABLE :"schema".operational_account_setting_history TO :"account_operator_role";
 
 GRANT USAGE ON SCHEMA :"schema" TO :"cleanup_role";
-GRANT SELECT (festival_id, purpose, version)
+GRANT SELECT (festival_id, purpose, scope_id, version)
     ON TABLE :"schema".operational_account_settings TO :"cleanup_role";
-GRANT SELECT (id, festival_id, purpose, version, after_state, occurred_at), DELETE
+GRANT SELECT (id, festival_id, purpose, scope_id, version, after_state, occurred_at), DELETE
     ON TABLE :"schema".operational_account_setting_history TO :"cleanup_role";
 
 REVOKE ALL ON TABLE :"schema".operational_account_settings FROM :"catalog_export_role";
@@ -76,5 +76,21 @@ REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_publish_role";
+
+-- Goods are operated outside the catalog as well (V21).
+REVOKE ALL ON TABLE :"schema".goods FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_colors FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_colors FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_color_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_color_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_sizes FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_sizes FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_size_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_size_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_combinations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_combinations FROM :"catalog_publish_role";
 
 COMMIT;

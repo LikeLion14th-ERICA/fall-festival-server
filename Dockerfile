@@ -8,6 +8,8 @@ RUN chmod +x mvnw \
     && ./mvnw --batch-mode --no-transfer-progress dependency:go-offline
 
 COPY src src
+# The API v2 contract is packaged for the opt-in /docs page.
+COPY api-v2/openapi.json api-v2/openapi.json
 RUN ./mvnw --batch-mode --no-transfer-progress -DskipTests package
 
 FROM eclipse-temurin:21-jre-alpine AS runtime

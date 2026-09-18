@@ -6155,7 +6155,8 @@
                               "placeId": "place-pub-07",
                               "pinId": "pin-pub-07",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-03",
@@ -6184,7 +6185,8 @@
                               "placeId": "place-market-03",
                               "pinId": "pin-market-03",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-02",
@@ -6249,7 +6251,8 @@
                               "placeId": "place-pub-02",
                               "pinId": "pin-pub-02",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub",
@@ -6314,7 +6317,8 @@
                               "placeId": "place-pub",
                               "pinId": "pin-pub",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-food-truck-02",
@@ -6361,7 +6365,8 @@
                               "placeId": "place-food-truck-02",
                               "pinId": "pin-food-truck-02",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-12",
@@ -6392,7 +6397,8 @@
                               "placeId": "place-booth-12",
                               "pinId": "pin-booth-12",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-02",
@@ -6417,7 +6423,8 @@
                               "placeId": "place-market-02",
                               "pinId": "pin-market-02",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-02",
@@ -6448,7 +6455,8 @@
                               "placeId": "place-booth-02",
                               "pinId": "pin-booth-02",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-07",
@@ -6473,7 +6481,8 @@
                               "placeId": "place-market-07",
                               "pinId": "pin-market-07",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-05",
@@ -6500,7 +6509,8 @@
                               "placeId": "place-booth-05",
                               "pinId": "pin-booth-05",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-08",
@@ -6565,7 +6575,8 @@
                               "placeId": "place-pub-08",
                               "pinId": "pin-pub-08",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-04",
@@ -6626,7 +6637,8 @@
                               "placeId": "place-pub-04",
                               "pinId": "pin-pub-04",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth",
@@ -6658,7 +6670,8 @@
                               "placeId": "place-booth",
                               "pinId": "pin-booth",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-food-truck",
@@ -6705,7 +6718,8 @@
                               "placeId": "place-food-truck",
                               "pinId": "pin-food-truck",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-04",
@@ -6734,7 +6748,8 @@
                               "placeId": "place-market-04",
                               "pinId": "pin-market-04",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-04",
@@ -6765,7 +6780,8 @@
                               "placeId": "place-booth-04",
                               "pinId": "pin-booth-04",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-06",
@@ -6794,7 +6810,8 @@
                               "placeId": "place-market-06",
                               "pinId": "pin-market-06",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-08",
@@ -6823,7 +6840,8 @@
                               "placeId": "place-booth-08",
                               "pinId": "pin-booth-08",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-10",
@@ -6888,7 +6906,8 @@
                               "placeId": "place-pub-10",
                               "pinId": "pin-pub-10",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-06",
@@ -6953,7 +6972,8 @@
                               "placeId": "place-pub-06",
                               "pinId": "pin-pub-06",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-05",
@@ -6982,7 +7002,8 @@
                               "placeId": "place-market-05",
                               "pinId": "pin-market-05",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market-08",
@@ -7011,7 +7032,8 @@
                               "placeId": "place-market-08",
                               "pinId": "pin-market-08",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-05",
@@ -7076,7 +7098,8 @@
                               "placeId": "place-pub-05",
                               "pinId": "pin-pub-05",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-03",
@@ -7105,7 +7128,8 @@
                               "placeId": "place-booth-03",
                               "pinId": "pin-booth-03",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-student-council",
@@ -7136,7 +7160,8 @@
                               "placeId": "place-student-council",
                               "pinId": "pin-student-council",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-10",
@@ -7163,7 +7188,8 @@
                               "placeId": "place-booth-10",
                               "pinId": "pin-booth-10",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-07",
@@ -7194,7 +7220,8 @@
                               "placeId": "place-booth-07",
                               "pinId": "pin-booth-07",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-03",
@@ -7259,7 +7286,8 @@
                               "placeId": "place-pub-03",
                               "pinId": "pin-pub-03",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-06",
@@ -7288,7 +7316,8 @@
                               "placeId": "place-booth-06",
                               "pinId": "pin-booth-06",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-promotion",
@@ -7315,7 +7344,8 @@
                               "placeId": "place-promotion",
                               "pinId": "pin-promotion",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-11",
@@ -7344,7 +7374,8 @@
                               "placeId": "place-booth-11",
                               "pinId": "pin-booth-11",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-market",
@@ -7373,7 +7404,8 @@
                               "placeId": "place-market",
                               "pinId": "pin-market",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-pub-09",
@@ -7438,7 +7470,8 @@
                               "placeId": "place-pub-09",
                               "pinId": "pin-pub-09",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           },
                           {
                             "id": "space-booth-09",
@@ -7469,7 +7502,8 @@
                               "placeId": "place-booth-09",
                               "pinId": "pin-booth-09",
                               "mapVersion": "mock-map-1"
-                            }
+                            },
+                            "bankTransfer": null
                           }
                         ]
                       },
@@ -7831,7 +7865,8 @@
                           "placeId": "place-booth",
                           "pinId": "pin-booth",
                           "mapVersion": "mock-map-1"
-                        }
+                        },
+                        "bankTransfer": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -7865,7 +7900,8 @@
                         "experience": null,
                         "events": [],
                         "menu": [],
-                        "mapTarget": null
+                        "mapTarget": null,
+                        "bankTransfer": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -11128,7 +11164,7 @@
                 "$ref": "#/components/schemas/StampReceiptVerificationInput"
               },
               "example": {
-                "code": "MOCK-RECEIPT-CODE"
+                "code": "482913"
               }
             }
           }
@@ -22988,6 +23024,17 @@
               }
             ],
             "description": "같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태."
+          },
+          "bankTransfer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BankTransfer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "부스 수취 계좌. 상세 조회에서만 제공하고 목록에서는 항상 null. 공개할 계좌가 없으면 null이며 이때 계좌 안내와 송금 버튼을 표시하지 않음. 상세 응답은 Cache-Control: no-store로 매번 최신 계좌를 받음."
           }
         },
         "required": [
@@ -23003,10 +23050,49 @@
           "experience",
           "events",
           "menu",
-          "mapTarget"
+          "mapTarget",
+          "bankTransfer"
         ],
         "additionalProperties": false,
         "description": ""
+      },
+      "BankTransfer": {
+        "type": "object",
+        "properties": {
+          "bankId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "서비스 내부 은행 식별자. 토스 송금 링크의 은행 파라미터와 같은 값이라고 가정하지 않음."
+          },
+          "bankDisplayName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "화면에 표시할 은행명"
+          },
+          "accountNumber": {
+            "type": "string",
+            "minLength": 1,
+            "description": "앞자리 0을 보존하는 문자열 계좌번호"
+          },
+          "accountHolderName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "부스 담당자가 확인한 공개용 예금주명. 금융기관 실명 검증 결과가 아님."
+          },
+          "tossLinkEnabled": {
+            "type": "boolean",
+            "description": "토스 송금 연결 노출 여부. 실기기 검증 전에는 false이며 계좌 복사는 항상 별도로 제공."
+          }
+        },
+        "required": [
+          "bankId",
+          "bankDisplayName",
+          "accountNumber",
+          "accountHolderName",
+          "tossLinkEnabled"
+        ],
+        "additionalProperties": false,
+        "description": "송금 안내 전용. 금액은 저장하지 않으며 메뉴 가격과 분리한다. 입금 확인은 웹앱 밖에서 현장 근무자가 한다."
       },
       "Spaces": {
         "type": "object",
@@ -23672,9 +23758,10 @@
         "properties": {
           "code": {
             "type": "string",
-            "minLength": 1,
-            "description": "멋사 부스 담당자가 현장에서 입력하는 수령 인증 코드. 실제 값은 서버 비밀 설정으로만 관리하며 클라이언트·로그에 저장하지 않음.",
-            "maxLength": 128,
+            "minLength": 6,
+            "description": "멋사 부스 담당자가 현장에서 입력하는 6자리 숫자 수령 인증 코드. 서버는 hash만 보관하며 클라이언트·로그에 저장하지 않음. 형식이 다르거나 틀리면 같은 INVALID_RECEIPT_CODE로 거절.",
+            "pattern": "^[0-9]{6}$",
+            "maxLength": 6,
             "writeOnly": true
           }
         },

@@ -26,7 +26,7 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 
 현재 Spring Boot 서버에는 공개 공연 조회인 `GET /api/v2/lineup`,
 `/artists/{artistId}`, `/timetable`, `/performances/{performanceId}`,
-`/prohibited-items`가 구현되어 있습니다. 다른 계약 경로는 각 구현 상태를 별도로 확인해야 하며,
+`/prohibited-items`와 홈 공통 설정 `GET /api/v2/config`가 구현되어 있습니다. 다른 계약 경로는 각 구현 상태를 별도로 확인해야 하며,
 계약에 있다는 사실만으로 실제 서버 구현이나 공개 승인을 의미하지 않습니다.
 
 ## 공통 계약
