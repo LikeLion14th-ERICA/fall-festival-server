@@ -31,6 +31,10 @@ server:
 
 festival:
   id: ${FESTIVAL_ID:}
+  # SHA-256 hex of the on-site stamp reward code, comma-separated while rotating.
+  # Never put the code itself here; without a value the check answers 503.
+  stamp-receipt:
+    code-sha256: ${STAMP_RECEIPT_CODE_SHA256:}
   # Per-client limits on /api/v2. trusted-proxy-hops is the number of proxies in
   # front of the server that append X-Forwarded-For (0 = the socket address).
   rate-limit:

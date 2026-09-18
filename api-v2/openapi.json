@@ -11164,7 +11164,7 @@
                 "$ref": "#/components/schemas/StampReceiptVerificationInput"
               },
               "example": {
-                "code": "MOCK-RECEIPT-CODE"
+                "code": "482913"
               }
             }
           }
@@ -23758,9 +23758,10 @@
         "properties": {
           "code": {
             "type": "string",
-            "minLength": 1,
-            "description": "멋사 부스 담당자가 현장에서 입력하는 수령 인증 코드. 실제 값은 서버 비밀 설정으로만 관리하며 클라이언트·로그에 저장하지 않음.",
-            "maxLength": 128,
+            "minLength": 6,
+            "description": "멋사 부스 담당자가 현장에서 입력하는 6자리 숫자 수령 인증 코드. 서버는 hash만 보관하며 클라이언트·로그에 저장하지 않음. 형식이 다르거나 틀리면 같은 INVALID_RECEIPT_CODE로 거절.",
+            "pattern": "^[0-9]{6}$",
+            "maxLength": 6,
             "writeOnly": true
           }
         },
