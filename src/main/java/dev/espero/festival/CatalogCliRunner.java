@@ -31,7 +31,13 @@ public class CatalogCliRunner implements ApplicationRunner {
         switch (command) {
             case "import" -> {
                 Path manifest = Path.of(value(arguments, "manifest", commands, 1, "manifest"));
-                UUID revision = revisions.importManifest(manifest, actor);
+                UUID revision;
+                if (arguments.containsOption("festival-id")) {
+                    UUID festivalId = uuidOption(arguments, "festival-id");
+                    revision = revisions.importManifest(manifest, actor, festivalId);
+                } else {
+                    revision = revisions.importManifest(manifest, actor);
+                }
                 System.out.println("draft revision: " + revision);
             }
             case "validate" -> {
@@ -64,6 +70,15 @@ public class CatalogCliRunner implements ApplicationRunner {
         return values.getFirst();
     }
 
+    private UUID uuidOption(ApplicationArguments arguments, String name) {
+        String value = option(arguments, name, null);
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException exception) {
+            throw new CatalogCliException("Option --" + name + " must be a valid UUID.", exception);
+        }
+    }
+
     private String value(
         ApplicationArguments arguments,
         String optionName,
@@ -86,7 +101,7 @@ public class CatalogCliRunner implements ApplicationRunner {
 
     private void usage() {
         System.out.println("Usage: CatalogCliApplication <import|validate|publish|rollback> [options]");
-        System.out.println("  import <manifest.json> [--actor=name]");
+        System.out.println("  import <manifest.json> [--festival-id=uuid] [--actor=name]");
         System.out.println("  validate <revision-uuid> [--actor=name]");
         System.out.println("  publish <revision-uuid> [--actor=name]");
         System.out.println("  rollback <archived-revision-uuid> [--actor=name]");
