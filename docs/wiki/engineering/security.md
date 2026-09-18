@@ -39,6 +39,26 @@
   상세 원인 없이 거절한다. 이 인증은 로그인 없는 참여의 엄격한 중복 차단이나 사용자별
   수령 이력을 만들지 않는다.
 
+## 요청 수 제한
+
+`/api/v2`는 인증보다 먼저 클라이언트별 token bucket으로 제한한다. 단일 인스턴스 메모리에서 동작하며
+초과하면 `429 RATE_LIMITED`(retryable)와 `Retry-After`를 반환한다. `/healthz`, `/readyz`,
+`/docs`는 제한하지 않는다.
+
+| 정책 | 대상 | 기본값 |
+|---|---|---|
+| public-read | 그 밖의 `/api/v2/**` | 120회 즉시, 초당 4회 회복 |
+| admin | `/api/v2/admin/**` | 60회 즉시, 초당 1회 회복 |
+| admin-login | `POST /admin/sessions`, `/admin/sessions/refresh` | 5회 즉시, 12초마다 1회 회복 |
+| stamp-receipt | `POST /stamp-receipt-verifications` | 5회 즉시, 12초마다 1회 회복 |
+
+클라이언트는 `RATE_LIMIT_TRUSTED_PROXY_HOPS`로 정한다. 브라우저 요청은 Next.js proxy와 호스팅
+load balancer를 거치므로 소켓 주소는 proxy다. 0으로 두면 모든 사용자가 한 bucket을 쓰게 되므로
+배포 환경에서는 실제 hop 수(보통 2)를 설정하고 `X-Forwarded-For` 구성을 실측한다. 백엔드 주소로
+직접 들어오는 요청은 `X-Forwarded-For`를 위조할 수 있으므로 공개 URL을 proxy만 부르도록 제한하는
+것이 좋다. 요청 수 제한 로그에는 IP를 남기지 않는다. 부하 시험(`tools/load-test`)은 서버 용량을
+재기 위해 제한을 끈다.
+
 ## 관리자 감사 이력
 
 - `CatalogRevisionAudit`는 개발자 CLI의 카탈로그 `IMPORT / VALIDATE / PUBLISH / ROLLBACK`
