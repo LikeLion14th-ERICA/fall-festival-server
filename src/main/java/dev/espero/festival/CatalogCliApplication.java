@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Profile;
     CatalogManifestValidator.class,
     CatalogManifestReader.class,
     CatalogRevisionService.class,
+    CatalogExportService.class,
     CatalogCliRunner.class
 })
 public class CatalogCliApplication {

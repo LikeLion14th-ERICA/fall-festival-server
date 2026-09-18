@@ -18,7 +18,19 @@
   transaction에 남긴다. 더 오래된 draft는 게시하지 않는다. 일정·지도처럼 서로 의존하는 변경은
   부분 게시하지 않는다.
 - rollback은 archived revision을 새 증가 revision draft로 복제해 validate·publish를 다시 수행한다.
-  이미지·좌표·핀 target이 같으면 기존 `mapVersion`을 유지한다.
+  이미지·좌표·핀 target이 같으면 기존 `mapVersion`을 유지한다. 호출자는 `--expected-current`로
+  교체하려는 published revision을 명시하며, `none`은 published revision이 없다는 기대를 뜻한다.
+- 모든 draft는 편집 기준이 된 published revision을 `base_revision_id`로 기록한다. manifest의
+  `baselineRevisionId`가 그 값이며, 첫 catalog만 null을 쓴다. import·publish·rollback은 festival
+  행 잠금 안에서 이 값을 현재 published pointer와 비교하고 다르면 `BASE_REVISION_CONFLICT`로
+  중단한다. 그래서 준비 도중 끼어든 게시를 조용히 덮어쓰지 않는다.
+- export는 저장된 revision 하나를 repeatable-read transaction에서 manifest로 되돌린다. 공개
+  `CatalogSnapshot`을 재사용하지 않고 revision-scoped 행을 직접 읽어 다른 locale, 현재가 아닌
+  map asset version과 공개 API가 내보내지 않는 내용까지 보존한다. 계좌·혼잡도는 catalog 밖이므로
+  포함하지 않는다.
+- export는 무손실이다. `PLACE` 핀의 filter group 누락과 부분 설정된 티켓 일정은 추측해 채우지
+  않고 각각 `LEGACY_FILTER_GROUPS_UNCONFIGURED`, `LEGACY_TICKET_SCHEDULE_UNCONFIGURED` finding으로
+  보고하며, 그 manifest의 import·publish는 승인된 값을 넣기 전까지 같은 코드로 실패한다.
 - Current Festival은 서버 `FESTIVAL_ID` 환경변수로 선택한다. DB에서 현재 Festival을 자동
   추측하지 않으며, 설정된 회차에 published revision이 없으면 공개 콘텐츠를 가짜 revision으로
   제공하지 않는다.

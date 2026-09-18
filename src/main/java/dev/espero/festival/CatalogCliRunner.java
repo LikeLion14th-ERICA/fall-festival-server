@@ -14,9 +14,11 @@ import org.springframework.stereotype.Component;
 public class CatalogCliRunner implements ApplicationRunner {
 
     private final CatalogRevisionService revisions;
+    private final CatalogExportService exports;
 
-    public CatalogCliRunner(CatalogRevisionService revisions) {
+    public CatalogCliRunner(CatalogRevisionService revisions, CatalogExportService exports) {
         this.revisions = revisions;
+        this.exports = exports;
     }
 
     @Override
@@ -33,6 +35,16 @@ public class CatalogCliRunner implements ApplicationRunner {
                 Path manifest = Path.of(value(arguments, "manifest", commands, 1, "manifest"));
                 UUID revision = revisions.importManifest(manifest, actor);
                 System.out.println("draft revision: " + revision);
+            }
+            case "export" -> {
+                UUID revision = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
+                Path output = Path.of(requiredOption(arguments, "out"));
+                CatalogExportService.ExportResult result = exports.export(revision);
+                writeManifest(output, result.manifest());
+                System.out.println("exported revision: " + revision + " to " + output);
+                for (String finding : result.findings()) {
+                    System.out.println("finding: " + finding);
+                }
             }
             case "validate" -> {
                 UUID revision = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
@@ -72,6 +84,34 @@ public class CatalogCliRunner implements ApplicationRunner {
         return "none".equals(value) ? null : UUID.fromString(value);
     }
 
+    /**
+     * Writes the manifest as indented JSON. The file is created with the
+     * default local permissions and holds catalog content only, never an
+     * account or a database credential.
+     */
+    private void writeManifest(Path output, CatalogManifest manifest) {
+        try {
+            Path parent = output.toAbsolutePath().getParent();
+            if (parent != null) {
+                java.nio.file.Files.createDirectories(parent);
+            }
+            tools.jackson.databind.json.JsonMapper.builder()
+                .findAndAddModules()
+                .build()
+                .writerWithDefaultPrettyPrinter()
+                .writeValue(output.toFile(), manifest);
+        } catch (java.io.IOException | tools.jackson.core.JacksonException exception) {
+            throw new CatalogCliException("Manifest could not be written: " + output, exception);
+        }
+    }
+
+    private String requiredOption(ApplicationArguments arguments, String name) {
+        if (!arguments.containsOption(name)) {
+            throw new CatalogCliException("Option --" + name + " is required.");
+        }
+        return option(arguments, name, null);
+    }
+
     private String option(ApplicationArguments arguments, String name, String defaultValue) {
         if (!arguments.containsOption(name)) {
             return defaultValue;
@@ -105,6 +145,7 @@ public class CatalogCliRunner implements ApplicationRunner {
 
     private void usage() {
         System.out.println("Usage: CatalogCliApplication <import|validate|publish|rollback> [options]");
+        System.out.println("  export <revision-uuid> --out=<manifest.json>");
         System.out.println("  import <manifest.json> [--actor=name]");
         System.out.println("  validate <revision-uuid> [--actor=name]");
         System.out.println("  publish <revision-uuid> [--actor=name]");
