@@ -43,6 +43,7 @@ public class AdminGoodsController {
 
     private final GoodsStore store;
     private final GoodsViewService views;
+    private final AdminGoodsViewService adminViews;
     private final FestivalProperties properties;
     private final AdminIdempotencyService idempotency;
     private final AdminAuditService audit;
@@ -53,6 +54,7 @@ public class AdminGoodsController {
     public AdminGoodsController(
         GoodsStore store,
         GoodsViewService views,
+        AdminGoodsViewService adminViews,
         FestivalProperties properties,
         AdminIdempotencyService idempotency,
         AdminAuditService audit,
@@ -62,6 +64,7 @@ public class AdminGoodsController {
     ) {
         this.store = store;
         this.views = views;
+        this.adminViews = adminViews;
         this.properties = properties;
         this.idempotency = idempotency;
         this.audit = audit;
@@ -74,6 +77,13 @@ public class AdminGoodsController {
     public ResponseEntity<ApiResponse<GoodsAvailabilityListResponse>> getAdminGoods(HttpServletRequest request) {
         validateQuery(request);
         GoodsViewService.GoodsAvailabilityListSnapshot snapshot = views.availabilityList(request);
+        return ResponseEntity.ok(new ApiResponse<>(snapshot.response(), snapshot.meta()));
+    }
+
+    @GetMapping("/admin/products")
+    public ResponseEntity<ApiResponse<AdminGoodsListResponse>> getAdminProducts(HttpServletRequest request) {
+        validateQuery(request);
+        AdminGoodsViewService.AdminGoodsListSnapshot snapshot = adminViews.list(request);
         return ResponseEntity.ok(new ApiResponse<>(snapshot.response(), snapshot.meta()));
     }
 

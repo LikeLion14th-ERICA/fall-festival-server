@@ -173,6 +173,119 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
     }
 
     @Test
+    void listsAdminProductsWithRawTranslationsOptionsAndKoreanMeta() throws Exception {
+        GoodsFixture goods = insertAdminOptionsGoods(
+            FESTIVAL_ID,
+            OffsetDateTime.parse("2030-09-30T10:00:00+09:00"),
+            OffsetDateTime.parse("2030-10-01T11:00:00+09:00")
+        );
+
+        MvcResult result = mvc.perform(asAdmin(get("/api/v2/admin/products")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.meta.revision").value(0))
+            .andExpect(jsonPath("$.meta.locale").value("ko"))
+            .andReturn();
+
+        JsonNode item = adminProductItem(result, goods.goodsId());
+        assertThat(item.path("optionMode").asString()).isEqualTo("OPTIONS");
+        assertThat(item.path("translations").path("ko").path("name").asString()).isEqualTo("관리자 상품");
+        assertThat(item.path("translations").path("en").path("description").asString())
+            .isEqualTo("Admin description");
+        assertThat(item.path("translations").path("zh-Hans").path("name").asString()).isEqualTo("管理员商品");
+        assertThat(item.path("translations").has("ja")).isTrue();
+        assertThat(item.path("translations").path("ja").isNull()).isTrue();
+        assertThat(item.path("price").path("amount").asLong()).isEqualTo(15000);
+        assertThat(item.path("price").path("currency").asString()).isEqualTo("KRW");
+        assertThat(item.path("colors")).hasSize(2);
+        assertThat(item.path("colors").get(0).path("translations").path("ko").path("name").asString())
+            .isEqualTo("검정");
+        assertThat(item.path("colors").get(0).path("translations").path("zh-Hans").isNull()).isTrue();
+        assertThat(item.path("sizes")).hasSize(2);
+        assertThat(item.path("sizes").get(0).path("translations").path("en").path("label").asString())
+            .isEqualTo("M");
+        assertThat(item.path("sizes").get(0).path("translations").path("ja").isNull()).isTrue();
+        assertThat(item.path("combinations")).hasSize(2);
+        assertThat(statuses(item)).containsExactlyInAnyOrder("ON_SALE", "SOLD_OUT");
+        assertThat(item.path("createdAt").asString()).isEqualTo("2030-09-30T10:00:00+09:00");
+        assertThat(item.path("updatedAt").asString()).isEqualTo("2030-10-01T11:00:00+09:00");
+        assertThat(auditCount()).isZero();
+        assertThat(idempotencyCount()).isZero();
+    }
+
+    @Test
+    void listsSingleAdminProductWithOneOpaqueCombination() throws Exception {
+        GoodsFixture single = insertSingleGoods(FESTIVAL_ID, "ON_SALE");
+
+        MvcResult result = mvc.perform(asAdmin(get("/api/v2/admin/products")))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JsonNode item = adminProductItem(result, single.goodsId());
+        assertThat(item.path("optionMode").asString()).isEqualTo("SINGLE");
+        assertThat(item.path("colors")).isEmpty();
+        assertThat(item.path("sizes")).isEmpty();
+        assertThat(item.path("translations").path("zh-Hans").isNull()).isTrue();
+        assertThat(item.path("translations").path("ja").isNull()).isTrue();
+        assertThat(item.path("combinations")).hasSize(1);
+        JsonNode combination = item.path("combinations").get(0);
+        assertThat(combination.path("combinationId").asString())
+            .isEqualTo(single.combinationIds().getFirst().toString());
+        assertThat(combination.path("colorId").isNull()).isTrue();
+        assertThat(combination.path("sizeId").isNull()).isTrue();
+        assertThat(combination.path("status").asString()).isEqualTo("ON_SALE");
+    }
+
+    @Test
+    void ordersAdminProductsByUpdatedAtDescendingThenIdAscending() throws Exception {
+        UUID firstId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        UUID secondId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+        UUID newestId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+        OffsetDateTime older = OffsetDateTime.parse("2030-10-01T10:00:00+09:00");
+        OffsetDateTime newest = OffsetDateTime.parse("2030-10-01T11:00:00+09:00");
+        insertTimedSingleGoods(FESTIVAL_ID, secondId, older);
+        insertTimedSingleGoods(FESTIVAL_ID, firstId, older);
+        insertTimedSingleGoods(FESTIVAL_ID, newestId, newest);
+
+        MvcResult result = mvc.perform(asAdmin(get("/api/v2/admin/products")))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JsonNode items = objectMapper.readTree(result.getResponse().getContentAsString()).path("data").path("items");
+        assertThat(items).extracting(node -> node.path("id").asString()).containsExactly(
+            newestId.toString(),
+            firstId.toString(),
+            secondId.toString()
+        );
+    }
+
+    @Test
+    void returnsAnEmptyAdminProductList() throws Exception {
+        mvc.perform(asAdmin(get("/api/v2/admin/products")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.empty()))
+            .andExpect(jsonPath("$.meta.revision").value(0))
+            .andExpect(jsonPath("$.meta.locale").value("ko"));
+    }
+
+    @Test
+    void rejectsAdminProductQueriesAndRequiresAdministratorAuthentication() throws Exception {
+        mvc.perform(asAdmin(get("/api/v2/admin/products")).queryParam("locale", "ko"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+        mvc.perform(asAdmin(get("/api/v2/admin/products")).queryParam("foo", "bar"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+        mvc.perform(asAdmin(get("/api/v2/admin/products")).queryParam("page", "1"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+
+        mvc.perform(get("/api/v2/admin/products"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
     void updatesOnlyTheOwnedCombinationWithoutIfMatchAndReturnsTheCurrentAvailability() throws Exception {
         GoodsFixture goods = insertOptionsGoods(FESTIVAL_ID, "ON_SALE", "ON_SALE");
         OffsetDateTime goodsUpdatedAt = goodsTimestamp(goods.goodsId());
@@ -411,6 +524,101 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
         return new GoodsFixture(goodsId, combinationIds);
     }
 
+    private GoodsFixture insertAdminOptionsGoods(
+        UUID festivalId,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt
+    ) {
+        UUID goodsId = UUID.randomUUID();
+        jdbc.update("""
+            INSERT INTO goods (id, festival_id, option_mode, price_amount, created_at, updated_at)
+            VALUES (:id, :festivalId, 'OPTIONS', 15000, :createdAt, :updatedAt)
+            """, new MapSqlParameterSource()
+            .addValue("id", goodsId)
+            .addValue("festivalId", festivalId)
+            .addValue("createdAt", createdAt)
+            .addValue("updatedAt", updatedAt));
+        insertGoodsTranslation(goodsId, "ko", "관리자 상품", "관리자 설명");
+        insertGoodsTranslation(goodsId, "en", "Admin Goods", "Admin description");
+        insertGoodsTranslation(goodsId, "zh-Hans", "管理员商品", "管理员说明");
+
+        List<UUID> colorIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        List<String> colorNames = List.of("검정", "흰색");
+        List<String> colorNamesEn = List.of("Black", "White");
+        for (int index = 0; index < colorIds.size(); index++) {
+            UUID colorId = colorIds.get(index);
+            jdbc.update("INSERT INTO goods_colors (id, goods_id, sort_order) VALUES (:id, :goodsId, :sortOrder)",
+                new MapSqlParameterSource().addValue("id", colorId).addValue("goodsId", goodsId)
+                    .addValue("sortOrder", index));
+            jdbc.update("INSERT INTO goods_color_translations (color_id, locale, name) VALUES (:id, 'ko', :name)",
+                Map.of("id", colorId, "name", colorNames.get(index)));
+            jdbc.update("INSERT INTO goods_color_translations (color_id, locale, name) VALUES (:id, 'en', :name)",
+                Map.of("id", colorId, "name", colorNamesEn.get(index)));
+        }
+
+        List<UUID> sizeIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        List<String> sizeLabels = List.of("M", "L");
+        for (int index = 0; index < sizeIds.size(); index++) {
+            UUID sizeId = sizeIds.get(index);
+            jdbc.update("INSERT INTO goods_sizes (id, goods_id, sort_order) VALUES (:id, :goodsId, :sortOrder)",
+                new MapSqlParameterSource().addValue("id", sizeId).addValue("goodsId", goodsId)
+                    .addValue("sortOrder", index));
+            jdbc.update("INSERT INTO goods_size_translations (size_id, locale, label) VALUES (:id, 'ko', :label)",
+                Map.of("id", sizeId, "label", sizeLabels.get(index)));
+            jdbc.update("INSERT INTO goods_size_translations (size_id, locale, label) VALUES (:id, 'en', :label)",
+                Map.of("id", sizeId, "label", sizeLabels.get(index)));
+        }
+
+        List<UUID> combinationIds = new ArrayList<>();
+        List<String> statuses = List.of("ON_SALE", "SOLD_OUT");
+        for (int index = 0; index < statuses.size(); index++) {
+            UUID combinationId = UUID.randomUUID();
+            jdbc.update("""
+                INSERT INTO goods_combinations (id, goods_id, color_id, size_id, availability, updated_at)
+                VALUES (:id, :goodsId, :colorId, :sizeId, :availability, :updatedAt)
+                """, new MapSqlParameterSource()
+                .addValue("id", combinationId)
+                .addValue("goodsId", goodsId)
+                .addValue("colorId", colorIds.get(index))
+                .addValue("sizeId", sizeIds.get(index))
+                .addValue("availability", statuses.get(index))
+                .addValue("updatedAt", updatedAt));
+            combinationIds.add(combinationId);
+        }
+        return new GoodsFixture(goodsId, combinationIds);
+    }
+
+    private void insertTimedSingleGoods(UUID festivalId, UUID goodsId, OffsetDateTime updatedAt) {
+        UUID combinationId = UUID.randomUUID();
+        jdbc.update("""
+            INSERT INTO goods (id, festival_id, option_mode, price_amount, created_at, updated_at)
+            VALUES (:id, :festivalId, 'SINGLE', 5000, :updatedAt, :updatedAt)
+            """, new MapSqlParameterSource()
+            .addValue("id", goodsId)
+            .addValue("festivalId", festivalId)
+            .addValue("updatedAt", updatedAt));
+        insertGoodsTranslation(goodsId, "ko", "정렬 상품", null);
+        insertGoodsTranslation(goodsId, "en", "Ordered Goods", null);
+        jdbc.update("""
+            INSERT INTO goods_combinations (id, goods_id, color_id, size_id, availability, updated_at)
+            VALUES (:id, :goodsId, NULL, NULL, 'ON_SALE', :updatedAt)
+            """, new MapSqlParameterSource()
+            .addValue("id", combinationId)
+            .addValue("goodsId", goodsId)
+            .addValue("updatedAt", updatedAt));
+    }
+
+    private void insertGoodsTranslation(UUID goodsId, String locale, String name, String description) {
+        jdbc.update("""
+            INSERT INTO goods_translations (goods_id, locale, name, description)
+            VALUES (:goodsId, :locale, :name, :description)
+            """, new MapSqlParameterSource()
+            .addValue("goodsId", goodsId)
+            .addValue("locale", locale)
+            .addValue("name", name)
+            .addValue("description", description));
+    }
+
     private GoodsFixture insertSingleGoods(UUID festivalId, String status) {
         UUID goodsId = UUID.randomUUID();
         UUID combinationId = UUID.randomUUID();
@@ -440,6 +648,16 @@ class AdminGoodsAvailabilityFlowIntegrationTest {
             }
         }
         throw new AssertionError("Goods item was not returned: " + goodsId);
+    }
+
+    private JsonNode adminProductItem(MvcResult result, UUID goodsId) throws Exception {
+        JsonNode items = objectMapper.readTree(result.getResponse().getContentAsString()).path("data").path("items");
+        for (JsonNode item : items) {
+            if (item.path("id").asString().equals(goodsId.toString())) {
+                return item;
+            }
+        }
+        throw new AssertionError("Admin goods item was not returned: " + goodsId);
     }
 
     private List<String> statuses(JsonNode item) {

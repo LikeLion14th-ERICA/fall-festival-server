@@ -49,6 +49,20 @@ public class GoodsStore {
         return hydrate(headers);
     }
 
+    /** All goods for administrator editing, most recently updated first. */
+    public List<Goods> findAllForAdmin(UUID festivalId) {
+        List<GoodsHeader> headers = jdbc.query("""
+            SELECT id, festival_id, option_mode, price_amount, created_at, updated_at
+            FROM goods
+            WHERE festival_id = :festivalId
+            ORDER BY updated_at DESC, id
+            """,
+            new MapSqlParameterSource().addValue("festivalId", festivalId),
+            (resultSet, rowNumber) -> mapHeader(resultSet)
+        );
+        return hydrate(headers);
+    }
+
     public Optional<Goods> findById(UUID festivalId, UUID goodsId) {
         List<GoodsHeader> headers = jdbc.query("""
             SELECT id, festival_id, option_mode, price_amount, created_at, updated_at
