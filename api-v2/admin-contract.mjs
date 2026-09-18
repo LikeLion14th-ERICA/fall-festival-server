@@ -7,19 +7,37 @@ export function applyAdminContract(s,ops){
   const nullable=(schema,d)=>({anyOf:[schema,{type:'null'}],description:d});
   const en=(values,d)=>({type:'string',enum:values,description:d});
   const id=ref('Id');
-  s.Goods.properties.options={...arr(obj({colorId:id,sizeId:id}),'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.'),minItems:1};
-  s.Goods.required.push('options');
-  s.Goods.properties.images=arr(ref('Image'),'상품 복수 이미지. 배열 순서대로 보존, 실제 배치는 GOODS-001에서 정의.');
-  s.Goods.properties.colors={...arr(obj({id,name:str('색상 이름'),images:arr(ref('Image'),'선택 색상별 이미지')}),'등록 색상. 실제 제공 조합은 options에 별도 등록'),minItems:1};
-  s.Goods.required.push('images','colors');
-  s.Goods.properties.image=nullable(ref('Image'),'대표 이미지 없으면 null. 등록 이미지 필수 개수는 합의 대기.');
-  s.Goods.properties.colorImages.description='호환용 색상 이미지 평탄 목록. 색상당 복수 이미지 가능. colors를 색상 목록 기준으로 사용.';
-  const variant=obj({colorId:id,colorName:str('색상명'),sizeId:id,sizeLabel:str('사이즈명'),status:en(['ON_SALE','SOLD_OUT'],'관리자가 구매 가능 / 품절 직접 선택. 수량 계산 없음.')});
-  delete s.Availability.properties.sizes;s.Availability.required=s.Availability.required.filter(k=>k!=='sizes');
-  s.Availability.properties.variants=arr(variant,'색상×사이즈별 공개 상태. 수량 필드 없음.');s.Availability.required.push('variants');
-  s.Availability.properties.allSoldOut.description='실제 제공 조합이 1개 이상이고 모두 SOLD_OUT일 때 true.';
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
-  s.ProductInput=obj({name:str('필수 상품명'),price:ref('Money'),images:arr(ref('Image'),'복수 이미지. 개수·크기·배치·업로드 방식은 미정.'),colors:s.Goods.properties.colors,sizes:{...s.Goods.properties.sizes,minItems:1},options:s.Goods.properties.options,description:nullable(str('상품 소개'),'선택 소개')},'상품명·가격·실제 제공 색상·사이즈·조합은 필수이며 각 배열은 1개 이상이어야 한다. 이미지 입력 구성과 옵션 없는 상품 입력 방식은 미정이며 불완전 상품은 저장하지 않는다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
+  s.GoodsColorTranslation=obj({name:str('색상명')});
+  s.GoodsColorTranslations=obj({ko:ref('GoodsColorTranslation'),en:ref('GoodsColorTranslation'),'zh-Hans':nullable(ref('GoodsColorTranslation'),'이 색상에 zh-Hans 번역이 없으면 null'),ja:nullable(ref('GoodsColorTranslation'),'이 색상에 ja 번역이 없으면 null')},'상품과 같은 ko·en 필수 규칙.',['ko','en','zh-Hans','ja']);
+  s.GoodsSizeTranslation=obj({label:str('사이즈명')});
+  s.GoodsSizeTranslations=obj({ko:ref('GoodsSizeTranslation'),en:ref('GoodsSizeTranslation'),'zh-Hans':nullable(ref('GoodsSizeTranslation'),'이 사이즈에 zh-Hans 번역이 없으면 null'),ja:nullable(ref('GoodsSizeTranslation'),'이 사이즈에 ja 번역이 없으면 null')},'상품과 같은 ko·en 필수 규칙.',['ko','en','zh-Hans','ja']);
+  s.GoodsColorInput=obj({id,translations:ref('GoodsColorTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
+  s.GoodsSizeInput=obj({id,translations:ref('GoodsSizeTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
+  s.GoodsOptionInput=obj({colorId:id,sizeId:id},'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.');
+  s.ProductInput=obj({
+    optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
+    translations:ref('GoodsTranslations'),
+    price:ref('Money'),
+    colors:arr(ref('GoodsColorInput'),'SINGLE이면 []'),
+    sizes:arr(ref('GoodsSizeInput'),'SINGLE이면 []'),
+    options:arr(ref('GoodsOptionInput'),'SINGLE이면 []. OPTIONS면 비어있지 않아야 하며 모든 색상·사이즈가 실제 조합에서 쓰여야 함.'),
+  },'SINGLE은 colors/sizes/options가 모두 빈 배열이어야 한다. OPTIONS는 셋 다 비어있지 않아야 하며 등록한 모든 색상·사이즈가 실제 조합에서 쓰여야 한다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
+  s.AdminGoodsColor=obj({id,translations:ref('GoodsColorTranslations')});
+  s.AdminGoodsSize=obj({id,translations:ref('GoodsSizeTranslations')});
+  s.AdminGoodsCombination=obj({combinationId:id,colorId:nullable(id,'SINGLE 조합이면 null'),sizeId:nullable(id,'SINGLE 조합이면 null'),status:en(['ON_SALE','SOLD_OUT'],'관리자가 구매 가능 / 품절 직접 선택. 수량 계산 없음.')});
+  s.AdminGoods=obj({
+    id,
+    optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
+    translations:ref('GoodsTranslations'),
+    price:ref('Money'),
+    colors:arr(ref('AdminGoodsColor'),'SINGLE이면 []'),
+    sizes:arr(ref('AdminGoodsSize'),'SINGLE이면 []'),
+    combinations:arr(ref('AdminGoodsCombination'),'SINGLE이면 조합 1개, OPTIONS면 실제 제공 조합 전체'),
+    createdAt:ref('Timestamp'),
+    updatedAt:ref('Timestamp'),
+  });
+  s.AdminGoodsList=obj({items:arr(ref('AdminGoods'),'삭제 제외 전체 상품. updatedAt 내림차순·id 오름차순.')});
   s.AdminIdentity=obj({id,username:{type:'string',minLength:1,maxLength:100,description:'관리자 로그인 식별자'},authority:en(['ADMIN'],'현재 Product 범위의 단일 관리자 권한'),enabled:{type:'boolean',description:'false이면 로그인·refresh·관리자 API 인증 거부'}});
   s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
   s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
@@ -38,6 +56,8 @@ export function applyAdminContract(s,ops){
   find('getNotices').conditional=true;
   find('getNotices').cacheControl='private, no-cache, must-revalidate';
   find('getAdminNotice').conditional=true;
+  find('getGoodsAvailability').conditional=true;
+  find('getGoodsAvailability').cacheControl='private, no-cache, must-revalidate';
   const noticePost=find('postAdminNotice');
   noticePost.idempotencyKeyRequired=true;
   const noticePut=find('putAdminNotice');
@@ -48,17 +68,28 @@ export function applyAdminContract(s,ops){
   noticeDelete.ifMatchRequired=true;
   noticeDelete.idempotencyKeyRequired=true;
   noticeDelete.scenarios.push('precondition-required','edit-conflict');
-  find('getAdminGoods').summary='관리자 실제 제공 옵션별 판매 상태';
+  find('getAdminGoods').summary='관리자 실제 제공 조합별 판매 상태';
   const old=ops.findIndex(o=>o.operationId==='putAdminAvailability');ops.splice(old,1);
   for(const id of ['postAdminNotice','putAdminNotice']){find(id).provisional=false;find(id).summary=find(id).summary.replace('(검토 필요)','');find(id).scenarios.push('validation-failed');}
   function add(operationId,method,path,schema,summary,screens,input,scenarios=['normal','error'],provisional=false){
     ops.push({operationId,method,path:'/api/v2'+path,schema,summary,screens,input,scenarios,admin:true,provisional,parameters:[...path.matchAll(/\{(\w+)\}/g)].map(m=>({name:m[1],in:'path',required:true,schema:m[1]==='operatingDay'?ref('Date'):id,description:'운영일 또는 등록된 안정 ID'}))});
   }
-  add('putAdminAvailability','PUT','/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability','Availability','옵션 판매 상태 저장',['ADM-GOODS'],'AvailabilityInput',['normal','sold-out','not-found','error']);
-  add('getAdminProducts','GET','/admin/products','GoodsList','관리자 상품 목록',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','empty','error']);
-  add('getAdminProduct','GET','/admin/products/{goodsId}','Goods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','missing-optional','not-found','error']);
-  add('postAdminProduct','POST','/admin/products','Goods','상품 등록·신규 옵션은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','missing-optional','empty-configuration','error'],true);
-  add('putAdminProduct','PUT','/admin/products/{goodsId}','Goods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','empty-configuration','not-found','error'],true);
+  add('putAdminAvailability','PUT','/admin/goods/{goodsId}/combinations/{combinationId}/availability','Availability','조합 판매 상태 저장. last-write-wins 예외로 If-Match 불필요.',['ADM-GOODS'],'AvailabilityInput',['normal','sold-out','not-found','precondition-required','error']);
+  find('putAdminAvailability').idempotencyKeyRequired=true;
+  add('getAdminProducts','GET','/admin/products','AdminGoodsList','관리자 상품 목록',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','empty','error']);
+  add('getAdminProduct','GET','/admin/products/{goodsId}','AdminGoods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','not-found','error']);
+  add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','precondition-required','error']);
+  add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','not-found','precondition-required','edit-conflict','error']);
+  add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','precondition-required','edit-conflict','error']);
+  find('getAdminProduct').conditional=true;
+  const productPost=find('postAdminProduct');
+  productPost.idempotencyKeyRequired=true;
+  const productPut=find('putAdminProduct');
+  productPut.ifMatchRequired=true;
+  productPut.idempotencyKeyRequired=true;
+  const productDelete=find('deleteAdminProduct');
+  productDelete.ifMatchRequired=true;
+  productDelete.idempotencyKeyRequired=true;
   ops.push(
     {operationId:'createAdminSession',method:'POST',path:'/api/v2/admin/sessions',schema:'AdminSession',summary:'관리자 로그인',screens:[],input:'AdminLoginInput',scenarios:['normal','invalid-credentials','disabled','invalid-origin','error'],admin:true,authRequired:false,security:[],parameters:[],provisional:false,successStatus:200},
     {operationId:'refreshAdminSession',method:'POST',path:'/api/v2/admin/sessions/refresh',schema:'AdminSession',summary:'관리자 세션 갱신·refresh rotation',screens:[],scenarios:['normal','expired','revoked','unknown','disabled','invalid-origin','error'],admin:true,authRequired:false,security:[{AdminRefreshCookie:[]}],parameters:[],provisional:false,successStatus:200},

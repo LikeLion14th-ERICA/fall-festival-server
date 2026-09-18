@@ -4,10 +4,17 @@ import { createState,execute,MOCK_NOW,isoKst,scenarioTime,ApiFailure } from './d
 import { validate } from './validate.mjs';
 import { buildCoverage } from './screen-coverage.mjs';
 
-export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1'};
+export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',combinationId:'combo-shirt-a-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1'};
 const noticeInput={type:'GENERAL',translations:{ko:{title:'개발용 새 공지',body:'개발용 본문'},en:{title:'New mock notice',body:'Mock body'}},links:[{url:'https://example.invalid/mock-notice-link',labels:{ko:'예시 링크',en:'Sample link','zh-Hans':null,ja:null}}],templateId:null};
 const g=createState().goods[0];
-const productInput=Object.fromEntries(['name','price','images','colors','sizes','options','description'].map(k=>[k,g[k]]));
+const productInput={
+  optionMode:g.optionMode,
+  translations:g.translations,
+  price:g.price,
+  colors:g.colors,
+  sizes:g.sizes,
+  options:g.combinations.map(({colorId,sizeId})=>({colorId,sizeId})),
+};
 const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'ON_SALE'},ProductInput:productInput,NoticeInput:noticeInput,StampReceiptVerificationInput:{code:'MOCK-RECEIPT-CODE'},AdminLoginInput:{username:'mock-admin',password:'MOCK-NOT-A-REAL-SECRET'}};
 const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'15분 유효 signed JWT access token. Authorization: Bearer로 전달.'},AdminRefreshCookie:{type:'apiKey',in:'cookie',name:'__Host-festival-admin-refresh',description:'7일 유효 opaque refresh token. Secure·HttpOnly·SameSite=Strict이며 서버에는 SHA-256 hash만 저장.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-16',commit:'1247890eaa2010d25955662aa172e5839c4da652',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json'},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
 const examples={};
@@ -16,7 +23,10 @@ const noBodyStatuses=new Set([204,304]);
 const strongEtagHeader={schema:{type:'string',pattern:'^\"[0-9a-f]{64}\"$'},description:'현재 조건부 응답 표현의 strong ETag'};
 const unscopedOperations=new Set([
   'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-  'getCrowding','getAdminCrowding','putAdminCrowding','getNotices','getAdminNotice'
+  'getCrowding','getAdminCrowding','putAdminCrowding',
+  'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
+  'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
+  'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability'
 ]);
 for(const op of operations){
   const responseName=`${op.schema}${op.conditional?'Conditional':''}Response`;spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');
@@ -46,13 +56,14 @@ for(const op of operations){
     if(op.operationId==='putAdminCrowding'&&scenario==='full')body={level:'FULL',confirmFull:true};
     if(op.operationId==='putAdminAvailability'&&scenario==='sold-out')body={status:'SOLD_OUT'};
     if(op.operationId==='verifyStampReceipt'&&scenario==='invalid-code')body={code:'MOCK-INVALID-RECEIPT-CODE'};
-    if(op.operationId==='putAdminProduct'&&scenario.startsWith('new-option')){body.colors.push({id:'color-new',name:'새 예시 색상',images:[]});body.options.push({colorId:'color-new',sizeId:'size-m'});}
+    if(op.operationId==='putAdminProduct'&&scenario==='new-option'){
+      body.colors.push({id:'color-new',translations:{ko:{name:'새 예시 색상'},en:{name:'New sample color'},'zh-Hans':null,ja:null}});
+      body.options.push({colorId:'color-new',sizeId:'size-m'});
+    }
     if(op.operationId==='putAdminProduct'&&scenario==='option-removal'){
       const removedColor=body.colors.pop();
       body.options=body.options.filter(option=>option.colorId!==removedColor.id);
     }
-    if(op.operationId==='postAdminProduct'&&scenario==='missing-optional')Object.assign(body,{images:[],description:null});
-    if((op.operationId==='postAdminProduct'||op.operationId==='putAdminProduct')&&scenario==='empty-configuration')Object.assign(body,{images:[],colors:[],sizes:[],options:[]});
     if(body?.translations&&scenario==='validation-failed')delete body.translations.en;
     let now=scenarioTime(scenario,MOCK_NOW);
     const meta=revision=>({requestId:'mock-example-request',serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});

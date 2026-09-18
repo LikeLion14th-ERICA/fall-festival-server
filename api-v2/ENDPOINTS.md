@@ -35,12 +35,13 @@
 | DELETE | `/api/v2/admin/notices/{noticeId}` | 공지 삭제 | ADM-NOTICE-DELETE | normal, already-deleted, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates` | 공지 템플릿 목록 | ADM-NOTICE-TEMPLATE | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates/{templateId}` | 템플릿 초기값 | ADM-NOTICE-TEMPLATE | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| GET | `/api/v2/admin/goods` | 관리자 실제 제공 옵션별 판매 상태 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability` | 옵션 판매 상태 저장 | ADM-GOODS | normal, sold-out, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/goods` | 관리자 실제 제공 조합별 판매 상태 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability` | 조합 판매 상태 저장. last-write-wins 예외로 If-Match 불필요. | ADM-GOODS | normal, sold-out, not-found, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products` | 관리자 상품 목록 | ADM-GOODS-PRODUCT-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
-| GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/products` | 상품 등록·신규 옵션은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, missing-optional, empty-configuration, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, empty-configuration, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/products` | 상품 등록·신규 조합은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, validation-failed, not-found, precondition-required, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
+| DELETE | `/api/v2/admin/products/{goodsId}` | 상품 완전 삭제 | ADM-GOODS-PRODUCT-LIST | normal, not-found, precondition-required, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/sessions` | 관리자 로그인 |  | normal, invalid-credentials, disabled, invalid-origin, error, bad-request, rate-limited |
 | POST | `/api/v2/admin/sessions/refresh` | 관리자 세션 갱신·refresh rotation |  | normal, expired, revoked, unknown, disabled, invalid-origin, error, bad-request, rate-limited |
 | DELETE | `/api/v2/admin/sessions/current` | 현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공 |  | normal, invalid-origin, error, bad-request, rate-limited, unauthorized, forbidden |

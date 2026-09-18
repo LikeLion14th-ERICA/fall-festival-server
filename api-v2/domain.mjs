@@ -28,16 +28,37 @@ const mockImage = (kind,id,name) => image(`개발용 가상 ${kind} ${name} 이�
 const money = amount => ({ amount, currency: 'KRW' });
 const link = (label,path='mock-link') => ({ label, url: `https://example.invalid/${path}`, target: '_blank' });
 const noticeLink = (labels,path='mock-notice-link') => ({ url: `https://example.invalid/${path}`, labels: { ko: null, en: null, 'zh-Hans': null, ja: null, ...labels } });
-// ko always resolves to ko. en falls back to ko when a (legacy) notice has no
-// English translation. zh-Hans/ja use their own translation only when present
-// for THIS notice, otherwise en, then ko. No per-field mixed fallback.
-function resolveNoticeLocale(translations,requested) {
+// Goods (unlike notice) always carries all 4 locale keys, null for absent ones.
+const goodsTranslations = (ko,en) => ({ ko, en, 'zh-Hans': null, ja: null });
+// ko always resolves to ko. en falls back to ko when a (legacy) notice/goods
+// entry has no English translation. zh-Hans/ja use their own translation only
+// when present for THIS entry, otherwise en, then ko. No per-field mixed
+// fallback. Shared by notice and goods, which use the same rule.
+function resolveContentLocale(translations,requested) {
   if (requested === 'ko') return 'ko';
   if (requested === 'en') return translations.en ? 'en' : 'ko';
   return translations[requested] ? requested : (translations.en ? 'en' : 'ko');
 }
 export const isoKst = time => new Date(new Date(time).getTime() + 9 * 3600000).toISOString().replace('Z', '+09:00');
 export const dayKst = time => isoKst(time).slice(0,10);
+
+// Colors/sizes follow the product's own resolved contentLocale (validated at
+// write time to always have an entry for every locale the product itself
+// supports), so no separate per-item fallback is needed here.
+function resolveGoodsResponse(g, requestedLocale) {
+  const contentLocale = resolveContentLocale(g.translations, requestedLocale);
+  const t = g.translations[contentLocale];
+  return {
+    id: g.id,
+    contentLocale,
+    name: t.name,
+    description: t.description ?? null,
+    price: g.price,
+    optionMode: g.optionMode,
+    colors: g.colors.map(c => ({ id: c.id, name: c.translations[contentLocale].name })),
+    sizes: g.sizes.map(s => ({ id: s.id, label: s.translations[contentLocale].label })),
+  };
+}
 
 const artist = (id,category,name,songs=[],social=true) => ({
   id,category,name,image:mockImage(category==='ARTIST'?'artist':'contest',id,name),
@@ -209,7 +230,30 @@ export function createState() {
       {operatingDay:'2030-10-02',opensAt:'12:00',closesAt:'21:00'},
       {operatingDay:'2030-10-03',opensAt:'14:00',closesAt:'20:00'},
     ],artists:structuredClone(artistFixtures),performances:structuredClone(performanceFixtures),notices,deleted:new Set(),crowding:{'2030-10-01':{level:'MODERATE',updatedAt:'2030-10-01T17:00:00+09:00'}},
-    goods:[{id:'goods-shirt',name:'예시 의류',price:money(1000),image:image(),colorImages:[{colorId:'color-a',colorName:'예시 색상 A',image:image()},{colorId:'color-b',colorName:'예시 색상 B',image:image()}],sizes:[{id:'size-m',label:'M'},{id:'size-l',label:'L'}],description:'실제 상품·가격이 아닙니다.'}],
+    goods:[{
+      id:'goods-shirt',
+      optionMode:'OPTIONS',
+      translations:goodsTranslations(
+        {name:'예시 의류',description:'실제 상품·가격이 아닙니다.'},
+        {name:'Sample apparel',description:'Not a real product or price.'}
+      ),
+      price:money(1000),
+      colors:[
+        {id:'color-a',translations:goodsTranslations({name:'예시 색상 A'},{name:'Sample Color A'})},
+        {id:'color-b',translations:goodsTranslations({name:'예시 색상 B'},{name:'Sample Color B'})},
+      ],
+      sizes:[
+        {id:'size-m',translations:goodsTranslations({label:'M'},{label:'M'})},
+        {id:'size-l',translations:goodsTranslations({label:'L'},{label:'L'})},
+      ],
+      combinations:[
+        {id:'combo-shirt-a-m',colorId:'color-a',sizeId:'size-m'},
+        {id:'combo-shirt-a-l',colorId:'color-a',sizeId:'size-l'},
+        {id:'combo-shirt-b-m',colorId:'color-b',sizeId:'size-m'},
+      ],
+      createdAt:'2030-10-01T16:00:00+09:00',
+      updatedAt:'2030-10-01T16:00:00+09:00',
+    }],
     spaces:structuredClone(spaceFixtures),maps,pins,places,
     templates:[{id:'template-1',name:'예시 일반 공지',translations:{ko:translation('예시 제목','예시 본문'),en:translation('Sample title','Sample body')}}],
   });
@@ -258,10 +302,10 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   now=scenarioTime(scenario,now);
   if(scenario==='all-languages'||scenario==='partial-translation')state.languages=['ko','en','zh-Hans','ja'];
   const locale=query.locale||'ko';
-  // Notice resolves its own per-item contentLocale fallback (ko/en required,
-  // zh-Hans/ja best-effort) instead of the site-wide "language not launched
-  // yet" gate that the rest of the catalog still uses.
-  const NOTICE_LIKE_OPERATIONS=new Set(['getNotices']);
+  // Notice and goods resolve their own per-item contentLocale fallback
+  // (ko/en required, zh-Hans/ja best-effort) instead of the site-wide
+  // "language not launched yet" gate the rest of the catalog still uses.
+  const NOTICE_LIKE_OPERATIONS=new Set(['getNotices','getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide']);
   if(NOTICE_LIKE_OPERATIONS.has(op.operationId)){
     if(!KNOWN_LOCALES.has(locale))failure(400,'INVALID_QUERY','요청 파라미터를 확인해 주세요.');
   }else if(!state.languages.includes(locale)){
@@ -292,7 +336,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     }
     case 'getNotices':{
       let items=state.notices.filter(n=>!state.deleted.has(n.id)&&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)).map(n=>{
-        const contentLocale=resolveNoticeLocale(n.translations,locale);
+        const contentLocale=resolveContentLocale(n.translations,locale);
         const t=n.translations[contentLocale];
         return {id:n.id,type:n.type,contentLocale,title:t.title,body:t.body,links:n.links.map(l=>({url:l.url,label:l.labels[contentLocale],target:'_blank'})),createdAt:n.createdAt};
       });
@@ -303,13 +347,21 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       if(missing)items.forEach(n=>n.links=[]);
       data={items,visibleIds:items.map(n=>n.id),asOfDate:date};break;
     }
-    case 'getGoods':data={items:empty?[]:structuredClone(state.goods)};break;
+    case 'getGoods':data={items:empty?[]:state.goods.map(g=>resolveGoodsResponse(g,locale))};break;
     case 'getGoodsAvailability':data={items:empty?[]:state.goods.map(g=>getAvailability(g.id))};break;
     case 'getAdminGoods':data={items:empty?[]:state.goods.map(g=>inventoryFor(state,g.id,{admin:true,sold,failure}))};break;
-    case 'getGood':data=find(state.goods,params.goodsId);if(missing)data.description=null;break;
+    case 'getGood':{
+      const g=state.goods.find(g=>g.id===params.goodsId);if(!g)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+      data=resolveGoodsResponse(g,locale);
+      if(missing)data.description=null;
+      break;
+    }
     case 'getGoodAvailability':data=getAvailability(params.goodsId);break;
     case 'getPaymentGuide':{
-      const g=find(state.goods,params.goodsId);data={goodsId:g.id,name:g.name,price:g.price,account:missing?null:{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'},transferLink:null,instructions:['현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.','목 응답은 실제 송금을 지원하지 않습니다.'],locationText:missing?null:'예시 판매 장소',hoursText:missing?null:'예시 운영 시간'};break;
+      const g=state.goods.find(g=>g.id===params.goodsId);if(!g)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+      const resolved=resolveGoodsResponse(g,locale);
+      data={goodsId:g.id,name:resolved.name,price:g.price,account:missing?null:{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'},transferLink:null,instructions:['현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.','목 응답은 실제 송금을 지원하지 않습니다.'],locationText:missing?null:'예시 판매 장소',hoursText:missing?null:'예시 운영 시간'};
+      break;
     }
     case 'getLineup':{
       const selected=query.date||defaultDate(date),category=query.category||'ARTIST';

@@ -34,7 +34,10 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.equal(validateNegative({...baseMeta,revision:-1}),false);
   const unscopedOperations=new Set([
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-    'getCrowding','getAdminCrowding','putAdminCrowding','getNotices','getAdminNotice'
+    'getCrowding','getAdminCrowding','putAdminCrowding',
+    'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
+    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
+    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability'
   ]);
   for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
     if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response?.meta?.revision??0,0,operationId);
@@ -96,7 +99,6 @@ test('Fictional image variants are served from the local mock asset route',async
     ...state.artists.map(artist=>artist.image.url),
     ...state.spaces.map(space=>space.image.url),
     ...state.maps.map(map=>map.image.url),
-    ...state.goods.flatMap(goods=>[goods.image.url,...goods.colorImages.map(color=>color.image.url)]),
   ];
   for(const url of new Set(urls)){
     const response=await fetch(new URL(url,base));
@@ -190,16 +192,20 @@ test('Crowding conditional reads return an ETag and 304 without a body',async()=
   const second=await call('/api/v2/crowding',{session:'crowding-conditional',headers:{'If-None-Match':first.headers.get('etag')}});
   assert.equal(second.status,304);assert.equal(second.body,null);assert.equal(second.headers.get('etag'),first.headers.get('etag'));
 });
-test('Goods save changes only one size and derives sold-out; failed writes do not mutate',async()=>{
-  const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/availability';
+test('Goods save changes only one combination and derives sold-out; failed writes do not mutate',async()=>{
+  const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/combinations/combo-shirt-a-m/availability';
+  const write=(status,extra={})=>call(path,{method:'PUT',session,headers:{...admin,'Idempotency-Key':`goods-flow-${Math.random()}`,...extra},body:{status}});
   const before=await call('/api/v2/goods/goods-shirt/availability',{session});
-  await call(path,{method:'PUT',session,headers:{...admin,'X-Mock-Scenario':'error'},body:{status:'SOLD_OUT'}});
+  await write('SOLD_OUT',{'X-Mock-Scenario':'error'});
   assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,before.body.data);
-  assert.equal((await call(path,{method:'PUT',session,headers:admin,body:{status:'SOLD_OUT'}})).status,200);
-  const sold=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;assert.equal(sold.allSoldOut,true);assert.equal(sold.variants[1].status,'SOLD_OUT');
+  assert.equal((await write('SOLD_OUT')).status,200);
+  const sold=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  assert.equal(sold.allSoldOut,true);
+  assert.equal(sold.combinations.find(c=>c.combinationId==='combo-shirt-a-m').status,'SOLD_OUT');
   assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,1);
   assert.ok((await call('/api/v2/goods/goods-shirt/payment-guide',{session})).body.data.account);
-  await call(path,{method:'PUT',session,headers:admin,body:{status:'ON_SALE'}});assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
+  await write('ON_SALE');
+  assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
 });
 test('Notice create/edit/delete synchronizes public list, contentLocale fallback and immutable template',async()=>{
   const session='notice-flow';
@@ -310,61 +316,67 @@ test('v5 removes operating-hour and quantity writes and map crowd consumers',asy
   assert.doesNotMatch(JSON.stringify(createState()),/"quantit(?:y|ies)"/);
   for(const path of ['/api/v2/admin/goods','/api/v2/goods-availability']){
     const d=(await call(path,{headers:admin})).body.data;
-    assert.equal(d.items[0].variants.length,3);assert.doesNotMatch(JSON.stringify(d),/quantity/);
+    assert.equal(d.items[0].combinations.length,3);assert.doesNotMatch(JSON.stringify(d),/quantity/);
   }
 });
 
-test('v5 sparse options stay independent; counts and nonexistent combinations are rejected',async()=>{
-  const session='sparse-options',path='/api/v2/admin/goods/goods-shirt/colors/color-b/sizes/size-m/availability';
-  for(const body of [{quantity:3},{status:'ON_SALE',quantity:3},{status:'UNKNOWN'}])assert.equal((await call(path,{session,headers:admin,method:'PUT',body})).status,422);
+test('Combinations stay independent; malformed bodies and nonexistent combinations are rejected',async()=>{
+  const session='sparse-options',path='/api/v2/admin/goods/goods-shirt/combinations/combo-shirt-b-m/availability';
+  const write=(body,key=`sparse-${Math.random()}`)=>call(path,{session,headers:{...admin,'Idempotency-Key':key},method:'PUT',body});
+  for(const body of [{quantity:3},{status:'ON_SALE',quantity:3},{status:'UNKNOWN'}])assert.equal((await write(body)).status,422);
   const before=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
-  assert.equal((await call(path,{session,headers:admin,method:'PUT',body:{status:'ON_SALE'}})).status,200);
+  assert.equal((await write({status:'ON_SALE'})).status,200);
   const after=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
-  assert.deepEqual(after.variants.filter(v=>v.colorId==='color-a'),before.variants.filter(v=>v.colorId==='color-a'));
-  assert.equal(after.variants.find(v=>v.colorId==='color-b').status,'ON_SALE');
-  assert.equal((await call(path.replace('size-m','size-l'),{session,headers:admin,method:'PUT',body:{status:'ON_SALE'}})).status,404);
+  assert.deepEqual(
+    after.combinations.filter(c=>c.colorId==='color-a'),
+    before.combinations.filter(c=>c.colorId==='color-a')
+  );
+  assert.equal(after.combinations.find(c=>c.colorId==='color-b').status,'ON_SALE');
+  assert.equal((await write({status:'ON_SALE'},'sparse-missing')).status,200);
+  assert.equal((await call(path.replace('combo-shirt-b-m','unknown-combo'),{session,headers:{...admin,'Idempotency-Key':'sparse-unknown'},method:'PUT',body:{status:'ON_SALE'}})).status,404);
 });
 
-test('Empty product configurations are rejected before state mutation',async()=>{
+test('OPTIONS products with an empty configuration are rejected before state mutation',async()=>{
   const session='products-empty-configuration';
-  const body=structuredClone(examples.postAdminProduct.scenarios['empty-configuration'].request.body);
+  const body={...structuredClone(examples.postAdminProduct.scenarios.normal.request.body),colors:[],sizes:[],options:[]};
   const goodsBefore=(await call('/api/v2/goods',{session})).body.data;
   const availabilityBefore=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
-  for(const [path,method] of [['/api/v2/admin/products','POST'],['/api/v2/admin/products/goods-shirt','PUT']]){
-    const response=await call(path,{session,headers:admin,method,body});
-    assert.equal(response.status,422);
-    assert.equal(response.body.error.code,'VALIDATION_FAILED');
-  }
+  const response=await call('/api/v2/admin/products',{session,headers:{...admin,'Idempotency-Key':'products-empty-config'},method:'POST',body});
+  assert.equal(response.status,422);
+  assert.equal(response.body.error.code,'EMPTY_CONFIGURATION');
   assert.deepEqual((await call('/api/v2/goods',{session})).body.data,goodsBefore);
   assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
 });
 
 test('New product and option combinations start on sale while existing states survive edits',async()=>{
   const session='products-v5',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
-  const opts={session,headers:admin,method:'POST',body};
-  const created=await call('/api/v2/admin/products',opts);assert.equal(created.status,201);
+  const created=await call('/api/v2/admin/products',{session,headers:{...admin,'Idempotency-Key':'products-v5-create'},method:'POST',body});
+  assert.equal(created.status,201);
   const id=created.body.data.id;
   assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,2);
-  body.name='수정 상품';body.price.amount=3000;
-  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,200);
-  assert.ok((await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants.every(v=>v.status==='ON_SALE'));
+  let etag=(await call('/api/v2/admin/products/'+id,{session,headers:admin})).headers.get('etag');
+  body.translations.ko.name='수정 상품';body.price.amount=3000;
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-v5-update-1'},method:'PUT',body})).status,200);
+  assert.ok((await call('/api/v2/goods/'+id+'/availability',{session})).body.data.combinations.every(c=>c.status==='ON_SALE'));
+  etag=(await call('/api/v2/admin/products/'+id,{session,headers:admin})).headers.get('etag');
   body.options.push({colorId:'color-b',sizeId:'size-l'});
-  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body})).status,200);
-  const variants=(await call('/api/v2/goods/'+id+'/availability',{session})).body.data.variants;
-  assert.equal(variants.length,4);assert.equal(variants.filter(v=>v.status==='ON_SALE').length,4);
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-v5-update-2'},method:'PUT',body})).status,200);
+  const combinations=(await call('/api/v2/goods/'+id+'/availability',{session})).body.data.combinations;
+  assert.equal(combinations.length,4);assert.equal(combinations.filter(c=>c.status==='ON_SALE').length,4);
   const invalid=structuredClone(body);invalid.options.push({colorId:'unknown',sizeId:'size-m'});
-  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:admin,method:'PUT',body:invalid})).status,422);
+  assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-v5-invalid'},method:'PUT',body:invalid})).status,422);
 });
 
 test('Color, size, and option deletion removes obsolete availability and preserves retained states',async()=>{
   const session='products-option-deletion';
   const availabilityBefore=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
+  const etag=(await call('/api/v2/admin/products/goods-shirt',{session,headers:admin})).headers.get('etag');
   const body=structuredClone(examples.putAdminProduct.scenarios['option-removal'].request.body);
-  const response=await call('/api/v2/admin/products/goods-shirt',{session,headers:admin,method:'PUT',body});
+  const response=await call('/api/v2/admin/products/goods-shirt',{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-option-deletion'},method:'PUT',body});
   assert.equal(response.status,200);
   const availabilityAfter=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
-  assert.deepEqual(availabilityAfter.variants.map(variant=>`${variant.colorId}/${variant.sizeId}`),['color-a/size-m','color-a/size-l']);
-  assert.deepEqual(availabilityAfter.variants.map(variant=>variant.status),availabilityBefore.variants.filter(variant=>variant.colorId==='color-a').map(variant=>variant.status));
+  assert.deepEqual(availabilityAfter.combinations.map(c=>`${c.colorId}/${c.sizeId}`),['color-a/size-m','color-a/size-l']);
+  assert.deepEqual(availabilityAfter.combinations.map(c=>c.status),availabilityBefore.combinations.filter(c=>c.colorId==='color-a').map(c=>c.status));
 });
 
 test('Notice requires manual ko·en input and rejects link labels that do not match the notice languages',async()=>{
