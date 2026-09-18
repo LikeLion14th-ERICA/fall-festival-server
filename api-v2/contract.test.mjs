@@ -423,3 +423,11 @@ test('Crowd messages use the approved translation for each ready locale',async()
   assert.match(await beforeOpen('en'),/^Student Zone entry starts at \d{2}:\d{2} today$/);
   assert.match(await beforeOpen('zh-Hans'),/^今日学生区\d{2}:\d{2}开放入场$/);
 });
+test('Booth bank transfer appears only on the detail response',async()=>{
+  const detail=(await call('/api/v2/spaces/space-pub')).body.data;
+  assert.equal(detail.bankTransfer.accountNumber,'000000000000');
+  assert.equal(typeof detail.bankTransfer.tossLinkEnabled,'boolean');
+  assert.equal((await call('/api/v2/spaces/space-booth')).body.data.bankTransfer,null);
+  const list=(await call('/api/v2/spaces')).body.data.items;
+  assert.ok(list.every(space=>space.bankTransfer===null));
+});

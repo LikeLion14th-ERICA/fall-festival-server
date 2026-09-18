@@ -27,14 +27,14 @@ public class OperationalAccountHistoryCleanupTarget implements CleanupTarget {
      */
     private static final String PROTECTED_HISTORY_SQL = """
         WITH protected_history AS (
-            (SELECT DISTINCT ON (festival_id, purpose) id
+            (SELECT DISTINCT ON (festival_id, purpose, scope_id) id
              FROM operational_account_setting_history
-             ORDER BY festival_id, purpose, version DESC, id DESC)
+             ORDER BY festival_id, purpose, scope_id, version DESC, id DESC)
             UNION
-            (SELECT DISTINCT ON (festival_id, purpose) id
+            (SELECT DISTINCT ON (festival_id, purpose, scope_id) id
              FROM operational_account_setting_history
              WHERE after_state IS NOT NULL
-             ORDER BY festival_id, purpose, version DESC, id DESC)
+             ORDER BY festival_id, purpose, scope_id, version DESC, id DESC)
         )
         """;
 

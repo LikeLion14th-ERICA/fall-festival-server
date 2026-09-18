@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -21,6 +22,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class OperationalAccountSettingsService {
 
     private static final Logger log = LoggerFactory.getLogger(OperationalAccountSettingsService.class);
+    private static final Pattern BANK_CODE = Pattern.compile("^[a-z0-9][a-z0-9-]{0,31}$");
 
     private final OperationalAccountStore store;
     private final TransferLinkPolicy transferLinks;
@@ -38,7 +40,12 @@ public class OperationalAccountSettingsService {
 
     @Transactional(readOnly = true)
     public Optional<OperationalAccountSetting> findCurrent(UUID festivalId, OperationalAccountPurpose purpose) {
-        return store.findCurrent(requiredFestival(festivalId), Objects.requireNonNull(purpose, "Purpose is required"));
+        return findCurrent(OperationalAccountTarget.festival(festivalId, purpose));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<OperationalAccountSetting> findCurrent(OperationalAccountTarget target) {
+        return store.findCurrent(Objects.requireNonNull(target, "Account target is required"));
     }
 
     @Transactional(readOnly = true)
@@ -49,9 +56,19 @@ public class OperationalAccountSettingsService {
         OperationalAccountChange change,
         String suppliedLastFour
     ) {
-        OperationalAccountChange normalized = normalize(change);
+        return previewSet(OperationalAccountTarget.festival(festivalId, purpose), expectedVersion, change, suppliedLastFour);
+    }
+
+    @Transactional(readOnly = true)
+    public OperationalAccountChangeResult previewSet(
+        OperationalAccountTarget target,
+        long expectedVersion,
+        OperationalAccountChange change,
+        String suppliedLastFour
+    ) {
+        OperationalAccountChange normalized = normalize(target, change);
         requireLastFour(normalized, suppliedLastFour);
-        return preview(OperationalAccountChangeAction.SET, festivalId, purpose, expectedVersion, normalized);
+        return preview(OperationalAccountChangeAction.SET, target, expectedVersion, normalized);
     }
 
     @Transactional
@@ -63,9 +80,20 @@ public class OperationalAccountSettingsService {
         String suppliedLastFour,
         OperationalAccountAuditMetadata audit
     ) {
-        OperationalAccountChange normalized = normalize(change);
+        return set(OperationalAccountTarget.festival(festivalId, purpose), expectedVersion, change, suppliedLastFour, audit);
+    }
+
+    @Transactional
+    public OperationalAccountChangeResult set(
+        OperationalAccountTarget target,
+        long expectedVersion,
+        OperationalAccountChange change,
+        String suppliedLastFour,
+        OperationalAccountAuditMetadata audit
+    ) {
+        OperationalAccountChange normalized = normalize(target, change);
         requireLastFour(normalized, suppliedLastFour);
-        return write(OperationalAccountChangeAction.SET, festivalId, purpose, expectedVersion, normalized, audit);
+        return write(OperationalAccountChangeAction.SET, target, expectedVersion, normalized, audit);
     }
 
     @Transactional(readOnly = true)
@@ -74,13 +102,12 @@ public class OperationalAccountSettingsService {
         OperationalAccountPurpose purpose,
         long expectedVersion
     ) {
-        return preview(
-            OperationalAccountChangeAction.CLEAR,
-            festivalId,
-            purpose,
-            expectedVersion,
-            OperationalAccountChange.unconfigured()
-        );
+        return previewClear(OperationalAccountTarget.festival(festivalId, purpose), expectedVersion);
+    }
+
+    @Transactional(readOnly = true)
+    public OperationalAccountChangeResult previewClear(OperationalAccountTarget target, long expectedVersion) {
+        return preview(OperationalAccountChangeAction.CLEAR, target, expectedVersion, OperationalAccountChange.unconfigured());
     }
 
     @Transactional
@@ -90,13 +117,17 @@ public class OperationalAccountSettingsService {
         long expectedVersion,
         OperationalAccountAuditMetadata audit
     ) {
+        return clear(OperationalAccountTarget.festival(festivalId, purpose), expectedVersion, audit);
+    }
+
+    @Transactional
+    public OperationalAccountChangeResult clear(
+        OperationalAccountTarget target,
+        long expectedVersion,
+        OperationalAccountAuditMetadata audit
+    ) {
         return write(
-            OperationalAccountChangeAction.CLEAR,
-            festivalId,
-            purpose,
-            expectedVersion,
-            OperationalAccountChange.unconfigured(),
-            audit
+            OperationalAccountChangeAction.CLEAR, target, expectedVersion, OperationalAccountChange.unconfigured(), audit
         );
     }
 
@@ -108,9 +139,21 @@ public class OperationalAccountSettingsService {
         long sourceVersion,
         String suppliedLastFour
     ) {
-        OperationalAccountChange restored = restoredChange(festivalId, purpose, sourceVersion);
+        return previewRestore(
+            OperationalAccountTarget.festival(festivalId, purpose), expectedVersion, sourceVersion, suppliedLastFour
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public OperationalAccountChangeResult previewRestore(
+        OperationalAccountTarget target,
+        long expectedVersion,
+        long sourceVersion,
+        String suppliedLastFour
+    ) {
+        OperationalAccountChange restored = restoredChange(target, sourceVersion);
         requireLastFour(restored, suppliedLastFour);
-        return preview(OperationalAccountChangeAction.RESTORE, festivalId, purpose, expectedVersion, restored);
+        return preview(OperationalAccountChangeAction.RESTORE, target, expectedVersion, restored);
     }
 
     @Transactional
@@ -122,62 +165,66 @@ public class OperationalAccountSettingsService {
         String suppliedLastFour,
         OperationalAccountAuditMetadata audit
     ) {
-        OperationalAccountChange restored = restoredChange(festivalId, purpose, sourceVersion);
-        requireLastFour(restored, suppliedLastFour);
-        return write(OperationalAccountChangeAction.RESTORE, festivalId, purpose, expectedVersion, restored, audit);
+        return restore(
+            OperationalAccountTarget.festival(festivalId, purpose), expectedVersion, sourceVersion, suppliedLastFour, audit
+        );
     }
 
-    private OperationalAccountChange restoredChange(
-        UUID festivalId,
-        OperationalAccountPurpose purpose,
-        long sourceVersion
+    @Transactional
+    public OperationalAccountChangeResult restore(
+        OperationalAccountTarget target,
+        long expectedVersion,
+        long sourceVersion,
+        String suppliedLastFour,
+        OperationalAccountAuditMetadata audit
     ) {
+        OperationalAccountChange restored = restoredChange(target, sourceVersion);
+        requireLastFour(restored, suppliedLastFour);
+        return write(OperationalAccountChangeAction.RESTORE, target, expectedVersion, restored, audit);
+    }
+
+    private OperationalAccountChange restoredChange(OperationalAccountTarget target, long sourceVersion) {
         if (sourceVersion < 1) {
             throw new OperationalAccountException("ACCOUNT_HISTORY_VERSION_INVALID");
         }
         OperationalAccountHistory history = store.findHistory(
-            requiredFestival(festivalId), Objects.requireNonNull(purpose, "Purpose is required"), sourceVersion
+            Objects.requireNonNull(target, "Account target is required"), sourceVersion
         ).orElseThrow(() -> new OperationalAccountException("ACCOUNT_HISTORY_VERSION_NOT_FOUND"));
-        return normalize(history.restoredChange());
+        return normalize(target, history.restoredChange());
     }
 
     private OperationalAccountChangeResult preview(
         OperationalAccountChangeAction action,
-        UUID festivalId,
-        OperationalAccountPurpose purpose,
+        OperationalAccountTarget target,
         long expectedVersion,
         OperationalAccountChange desired
     ) {
         Optional<OperationalAccountSetting> current = store.findCurrent(
-            requiredFestival(festivalId), Objects.requireNonNull(purpose, "Purpose is required")
+            Objects.requireNonNull(target, "Account target is required")
         );
         verifyExpectedVersion(current, expectedVersion);
         if (current.filter(setting -> sameValues(setting, desired)).isPresent()) {
             return new OperationalAccountChangeResult(action, current.orElseThrow(), current.orElseThrow(), false);
         }
-        return new OperationalAccountChangeResult(
-            action, current.orElse(null), nextSetting(festivalId, purpose, current, desired), true
-        );
+        return new OperationalAccountChangeResult(action, current.orElse(null), nextSetting(target, current, desired), true);
     }
 
     private OperationalAccountChangeResult write(
         OperationalAccountChangeAction action,
-        UUID festivalId,
-        OperationalAccountPurpose purpose,
+        OperationalAccountTarget target,
         long expectedVersion,
         OperationalAccountChange desired,
         OperationalAccountAuditMetadata audit
     ) {
-        UUID requiredFestival = requiredFestival(festivalId);
-        OperationalAccountPurpose requiredPurpose = Objects.requireNonNull(purpose, "Purpose is required");
+        Objects.requireNonNull(target, "Account target is required");
         Objects.requireNonNull(audit, "Audit metadata is required");
-        Optional<OperationalAccountSetting> current = store.findCurrentForUpdate(requiredFestival, requiredPurpose);
+        Optional<OperationalAccountSetting> current = store.findCurrentForUpdate(target);
         verifyExpectedVersion(current, expectedVersion);
         if (current.filter(setting -> sameValues(setting, desired)).isPresent()) {
             return new OperationalAccountChangeResult(action, current.orElseThrow(), current.orElseThrow(), false);
         }
 
-        OperationalAccountSetting next = nextSetting(requiredFestival, requiredPurpose, current, desired);
+        OperationalAccountSetting next = nextSetting(target, current, desired);
         store.setAuditMetadata(action, audit);
         try {
             if (current.isEmpty()) {
@@ -193,39 +240,62 @@ public class OperationalAccountSettingsService {
     }
 
     private OperationalAccountSetting nextSetting(
-        UUID festivalId,
-        OperationalAccountPurpose purpose,
+        OperationalAccountTarget target,
         Optional<OperationalAccountSetting> current,
         OperationalAccountChange desired
     ) {
         long nextVersion = current.map(OperationalAccountSetting::version)
             .map(version -> version + 1)
-            .orElseGet(() -> store.nextVersion(festivalId, purpose));
+            .orElseGet(() -> store.nextVersion(target));
         return new OperationalAccountSetting(
-            festivalId,
-            purpose,
+            target.festivalId(),
+            target.purpose(),
             desired.state(),
             nextVersion,
             desired.bankName(),
             desired.accountNumber(),
             desired.accountHolder(),
             desired.transferLinkUrl(),
-            clock.instant()
+            clock.instant(),
+            target.spaceId(),
+            desired.bankCode(),
+            desired.tossLinkEnabled()
         );
     }
 
-    private OperationalAccountChange normalize(OperationalAccountChange change) {
+    /**
+     * A booth (SPACE) account carries the service's bank identifier and the
+     * Toss shortcut switch but never a transfer link; festival-wide accounts
+     * carry neither booth field.
+     */
+    private OperationalAccountChange normalize(OperationalAccountTarget target, OperationalAccountChange change) {
         Objects.requireNonNull(change, "Operational account change is required");
         if (change.state() == OperationalAccountState.UNCONFIGURED) {
             return OperationalAccountChange.unconfigured();
+        }
+        boolean space = target.purpose() == OperationalAccountPurpose.SPACE;
+        if (space && change.transferLinkUrl() != null) {
+            throw new OperationalAccountException("ACCOUNT_TRANSFER_LINK_NOT_ALLOWED");
+        }
+        if (!space && (change.bankCode() != null || change.tossLinkEnabled())) {
+            throw new OperationalAccountException("ACCOUNT_SPACE_FIELDS_NOT_ALLOWED");
         }
         return new OperationalAccountChange(
             OperationalAccountState.CONFIGURED,
             requiredText(change.bankName(), "ACCOUNT_BANK_NAME_INVALID", 100),
             accountNumber(change.accountNumber()),
             requiredText(change.accountHolder(), "ACCOUNT_HOLDER_INVALID", 100),
-            transferLinks.validateOptional(change.transferLinkUrl())
+            space ? null : transferLinks.validateOptional(change.transferLinkUrl()),
+            space ? bankCode(change.bankCode()) : null,
+            space && change.tossLinkEnabled()
         );
+    }
+
+    private String bankCode(String value) {
+        if (value == null || !BANK_CODE.matcher(value.strip()).matches()) {
+            throw new OperationalAccountException("ACCOUNT_BANK_ID_INVALID");
+        }
+        return value.strip();
     }
 
     private String accountNumber(String value) {
@@ -261,14 +331,9 @@ public class OperationalAccountSettingsService {
             && Objects.equals(current.bankName(), desired.bankName())
             && Objects.equals(current.accountNumber(), desired.accountNumber())
             && Objects.equals(current.accountHolder(), desired.accountHolder())
-            && Objects.equals(current.transferLinkUrl(), desired.transferLinkUrl());
-    }
-
-    private UUID requiredFestival(UUID festivalId) {
-        if (festivalId == null) {
-            throw new OperationalAccountException("ACCOUNT_FESTIVAL_ID_INVALID");
-        }
-        return festivalId;
+            && Objects.equals(current.transferLinkUrl(), desired.transferLinkUrl())
+            && Objects.equals(current.bankCode(), desired.bankCode())
+            && current.tossLinkEnabled() == desired.tossLinkEnabled();
     }
 
     private String requiredText(String value, String code, int maximumLength) {
@@ -288,8 +353,9 @@ public class OperationalAccountSettingsService {
             @Override
             public void afterCommit() {
                 log.info(
-                    "operational_account_changed purpose={} version={} occurred_at={} change_count=1",
-                    setting.purpose(), setting.version(), setting.updatedAt()
+                    "operational_account_changed purpose={} space_id={} version={} occurred_at={} change_count=1",
+                    setting.purpose(), setting.spaceId() == null ? "-" : setting.spaceId(), setting.version(),
+                    setting.updatedAt()
                 );
             }
         });

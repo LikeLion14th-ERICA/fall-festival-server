@@ -160,6 +160,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 | 2026-09-18 | 디자인 정렬(지도 필터·푸드트럭 구역·부스 분류 6개) | V19·V20, `SpaceCategories`, 계약·목 서버 갱신. `clean verify` 371개, `npm run check` 325개 통과 | #40이 첫 커밋만 병합되어 필터 커밋을 다시 올렸다. |
 | 2026-09-18 | PR 7 로컬 catalog workbench | `WorkbenchUnitTest` 4개, `CatalogWorkbenchIntegrationTest` 4개, catalog role의 혼잡도·공지 테이블 차단 검증 통과. 임시 로컬 PostgreSQL로 브라우저에서 검증·비교·가져오기·게시·지도 URI 편집을 확인했고 console 오류 없음 | 원격 DB·SSH tunnel로는 실행하지 않았다. |
 | 2026-09-19 | `GET /api/v2/config` | V22 `festival_links`, manifest `festivalLinks`·검증·import·rollback 복사·export, snapshot `FestivalHome`, `ConfigController`. OpenAPI provider 검증 포함 | FAQ·웰컴 데이·공지 URL은 확정 전이라 `null`이다. main의 굿즈 schema(V21)와 겹쳐 V22로 재배정했다. |
+| 2026-09-19 | 부스 계좌 송금 안내 | V23로 운영 계좌 설정에 `SPACE`(부스별 scope, `bank_code`, `toss_link_enabled`) 추가, CLI `--space-id`, 부스 상세 `bankTransfer`(목록 null, `no-store`). 계좌·CLI·controller·OpenAPI·V23 업그레이드 테스트 통과 | 토스 송금 URL은 실기기 검증 전이라 `tossLinkEnabled` 기본 false. 원격 DB 미적용. |
 
 새 행에는 실행한 명령의 요약, 실제 결과, 미실행 사유를 남긴다. 실패한 검증은 삭제하지
 않고 원인과 후속 조치를 기록한다.

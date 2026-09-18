@@ -80,7 +80,9 @@ class CatalogControllerOpenApiTest {
                 Instant.parse("2030-09-01T00:00:00Z")
             )));
         mvc = MockMvcBuilders.standaloneSetup(
-            new CatalogController(snapshots, metaSupport),
+            new CatalogController(snapshots, metaSupport, spaceId -> spaceId.equals("space-booth")
+                ? Optional.of(new CatalogResponses.BankTransfer("example-bank", "예시 은행", "000123456789", "예시 예금주", false))
+                : Optional.empty()),
             new ConfigController(snapshots, metaSupport, clock),
             new TicketGuideController(
                 snapshots,

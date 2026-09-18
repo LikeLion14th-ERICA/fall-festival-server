@@ -114,6 +114,11 @@ const performanceFixtures = DATES.flatMap((date,dayIndex) => {
   ];
 });
 
+// Fictional receiving accounts; only the detail response carries them.
+const MOCK_BANK_TRANSFERS = {
+  'space-pub':{bankId:'mock-bank',bankDisplayName:'개발용 은행',accountNumber:'000000000000',accountHolderName:'개발용 예금주',tossLinkEnabled:false},
+  'space-food-truck':{bankId:'mock-bank',bankDisplayName:'개발용 은행',accountNumber:'012345678901',accountHolderName:'개발용 푸드트럭',tossLinkEnabled:false},
+};
 const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market',FOOD_TRUCK:'map-food',STUDENT_COUNCIL_BOOTH:'map-area',PROMOTION_BOOTH:'map-area'};
 const EVENT_CATEGORIES = new Set(['BOOTH','STUDENT_COUNCIL_BOOTH','PROMOTION_BOOTH']);
 const MENU_CATEGORIES = new Set(['PUB','FOOD_TRUCK']);
@@ -126,6 +131,7 @@ const space = ({id,category,name,locationText,operator,hoursText,description,con
     events:EVENT_CATEGORIES.has(category)?events:[],
     menu:MENU_CATEGORIES.has(category)?menu:[],
     mapTarget:{mapId,placeId:`place-${key}`,pinId:`pin-${key}`,mapVersion:MAP_VERSION},
+    bankTransfer:null,
   };
 };
 const pubMenu = (theme,index) => [
@@ -381,7 +387,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getPerformance':data=find(state.performances,params.performanceId);if(missing)data.description=null;break;
     case 'getProhibitedItems':data={items:empty?[]:['개발용 반입 금지 물품 예시'],message:empty?null:'총학생회 확정 자료를 사전 번역해 고정 표시합니다. 이 내용은 예시입니다.'};break;
     case 'getSpaces':data={items:empty?[]:structuredClone(state.spaces).filter(s=>!query.category||query.category==='ALL'||s.category===query.category).sort((a,b)=>a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id))};break;
-    case 'getSpace':data=find(state.spaces,params.spaceId);if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null});break;
+    case 'getSpace':data=find(state.spaces,params.spaceId);data.bankTransfer=MOCK_BANK_TRANSFERS[data.id]||null;if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null,bankTransfer:null});break;
     case 'getMaps':data={items:empty?[]:structuredClone(state.maps),overviewId:empty?null:'map-overview'};break;
     case 'getMap':data=find(state.maps,params.mapId);break;
     case 'getPins':{

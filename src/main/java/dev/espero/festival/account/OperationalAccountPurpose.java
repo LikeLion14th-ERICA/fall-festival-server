@@ -1,9 +1,13 @@
 package dev.espero.festival.account;
 
-/** The only operational account uses supported by the service. */
+/**
+ * Operational account uses. TICKET and GOODS are festival-wide; SPACE is one
+ * booth's receiving account and is always paired with the booth's API id.
+ */
 public enum OperationalAccountPurpose {
     TICKET,
-    GOODS;
+    GOODS,
+    SPACE;
 
     public static OperationalAccountPurpose parse(String value) {
         if (value == null) {

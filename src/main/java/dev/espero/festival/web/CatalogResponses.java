@@ -31,7 +31,20 @@ public final class CatalogResponses {
         String experience,
         List<String> events,
         List<MenuItem> menu,
-        MapTarget mapTarget
+        MapTarget mapTarget,
+        BankTransfer bankTransfer
+    ) {}
+
+    /**
+     * A booth's receiving account for on-site bank transfers. Only the detail
+     * response carries it; staff confirm deposits outside the web app.
+     */
+    public record BankTransfer(
+        String bankId,
+        String bankDisplayName,
+        String accountNumber,
+        String accountHolderName,
+        boolean tossLinkEnabled
     ) {}
 
     public record Spaces(List<Space> items) {}
