@@ -54,7 +54,9 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 | 6 | catalog export·게시 보호 | 통합 완료 | `base_revision_id` 기반 `BASE_REVISION_CONFLICT`, 명시적 rollback 기대값, revision 직접 읽기 exporter와 legacy finding을 구현했다. 로컬 workbench(7)는 아직 시작하지 않았다. |
 | 7 | 로컬 catalog workbench | 대기 | export/publish 보호와 role 분리 뒤에 구현한다. |
 
-현재 통합 branch는 `feat/ops-foundation`이고 마지막 통합 commit은 `586be92`다.
+현재 통합 branch는 `feat/ops-foundation`이고 마지막 `main` 병합 commit은 `05f8f68`(PR #35까지)다.
+PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합돼 `main`에 반영되지 않았으므로,
+그 내용은 이 branch에서 다시 PR로 올린다.
 이전 통합 branch `codex/goal-ops-catalog`와 개별 작업 branch의 내용은 모두 이 branch에
 들어왔다. 이 표는 각 통합 commit, 실패, 외부 의존성 변화 뒤에 반드시 갱신한다.
 
@@ -148,6 +150,8 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 | 2026-09-18 | 전체 `mvnw.cmd verify` 재실행 | Docker 사용 가능 상태에서 312개 통과, 실패·오류·건너뜀 0 | PR 5 티켓 계좌 분리를 시작한다. |
 | 2026-09-18 | PR 5 티켓 계좌 분리 후 `mvnw.cmd clean verify` | 318개 통과, 실패·오류·건너뜀 0 | 계좌 등록 전에는 `UNCONFIGURED`가 정상 응답이다. |
 | 2026-09-18 | PR 5 `api-v2` 재생성과 `npm run check` | 324개 통과. `paymentSettingsVersion`, 조건부 envelope, `Cache-Control`·`X-Server-Time` 헤더 선언을 반영 | 생성물은 source 수정 뒤 재생성했다. |
+| 2026-09-18 | `main`(PR #32~#35) 병합 | 충돌 4건 해결, 기준 revision migration을 V18로 재배정, 개발 catalog manifest의 계좌 field 제거, PG17 테스트의 migration 버전 하드코딩 제거. `clean verify` 343개 통과 | #30·#31 내용과 부하 시나리오를 새 PR로 올린다. |
+| 2026-09-18 | 67 RPS 동적 부하(`tools/load-test/run.ps1`) | `rate-67` 통과: crowding p95 5.137ms·p99 6.380ms, ticket p95 3.548ms·p99 4.231ms, 4,022건 예상 밖 오류·5xx·429 0. 100/200/500 VU 오류 0. DB 연결 최대 10, lock 대기 0 | 원격 환경 용량은 별도로 검증한다. |
 | 2026-09-18 | PR 6 게시 보호·export | `CatalogRevisionServiceIntegrationTest` 21개 통과. 끼어든 게시·stale rollback 차단, export→import→export 동일성, legacy finding과 import 차단을 포함 | 로컬 workbench와 부하 시나리오는 남아 있다. |
 | 2026-09-18 | catalog role의 legacy 티켓 열 차단 | provisioning script를 실행하는 Testcontainers 검증에서 export/publish role의 `SELECT *`와 계좌 열 조회가 권한 거부 | 원격 DB에는 아직 적용하지 않았다. |
 

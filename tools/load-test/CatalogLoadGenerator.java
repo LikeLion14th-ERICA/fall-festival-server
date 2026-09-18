@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +39,16 @@ public class CatalogLoadGenerator {
         "/api/v2/places/place-space-001",
         "/api/v2/ticket-guide"
     };
+    // Dynamic polling load: 500 visible clients poll two resources every 15s,
+    // about 67 RPS split between crowding and the ticket guide.
+    private static final String[] DYNAMIC_ROUTES = {
+        "/api/v2/crowding",
+        "/api/v2/ticket-guide"
+    };
+    private static final int[] DYNAMIC_RATES_PER_SECOND = {34, 33};
+    private static final double DYNAMIC_P95_TARGET_MS = 300;
+    private static final double DYNAMIC_P99_TARGET_MS = 1_000;
+    private static final double DYNAMIC_UNEXPECTED_ERROR_RATIO = 0.001;
 
     private record Hit(
         String route,
@@ -294,19 +305,189 @@ public class CatalogLoadGenerator {
         return allHits;
     }
 
+    /**
+     * Open-loop stage: each route is dispatched on a fixed absolute schedule
+     * regardless of how long earlier responses take, so a slow server shows up
+     * as latency and errors instead of silently lowering the offered load.
+     */
+    private static List<Hit> runRateStage(
+        HttpClient client,
+        String baseUrl,
+        long durationMs,
+        Path statusPath,
+        String stageName,
+        int timeoutMs
+    ) throws Exception {
+        writeStatus(statusPath, stageName);
+        ConcurrentLinkedQueue<Hit> hits = new ConcurrentLinkedQueue<>();
+        ExecutorService requests = Executors.newVirtualThreadPerTaskExecutor();
+        ExecutorService schedulers = Executors.newVirtualThreadPerTaskExecutor();
+        long stageStartedAt = System.nanoTime();
+        long deadline = stageStartedAt + Duration.ofMillis(durationMs).toNanos();
+        List<Future<?>> scheduleFutures = new ArrayList<>();
+
+        for (int routeIndex = 0; routeIndex < DYNAMIC_ROUTES.length; routeIndex++) {
+            final String route = DYNAMIC_ROUTES[routeIndex];
+            final int worker = routeIndex;
+            final long intervalNanos = 1_000_000_000L / DYNAMIC_RATES_PER_SECOND[routeIndex];
+            scheduleFutures.add(schedulers.submit(() -> {
+                for (long sequence = 0; ; sequence++) {
+                    long dispatchAt = stageStartedAt + sequence * intervalNanos;
+                    if (dispatchAt >= deadline) {
+                        return null;
+                    }
+                    long wait = dispatchAt - System.nanoTime();
+                    if (wait > 0) {
+                        TimeUnit.NANOSECONDS.sleep(wait);
+                    }
+                    requests.submit(() -> hits.add(timedGet(
+                        client, baseUrl, route, worker, stageStartedAt, timeoutMs
+                    )));
+                }
+            }));
+        }
+        for (Future<?> future : scheduleFutures) {
+            future.get();
+        }
+        schedulers.shutdown();
+        requests.shutdown();
+        if (!requests.awaitTermination(timeoutMs + 5_000L, TimeUnit.MILLISECONDS)) {
+            requests.shutdownNow();
+        }
+        return new ArrayList<>(hits);
+    }
+
+    private static Hit timedGet(
+        HttpClient client,
+        String baseUrl,
+        String route,
+        int worker,
+        long stageStartedAt,
+        int timeoutMs
+    ) {
+        long startedAt = System.nanoTime();
+        long offsetMs = TimeUnit.NANOSECONDS.toMillis(startedAt - stageStartedAt);
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + route))
+                .timeout(Duration.ofMillis(timeoutMs))
+                .GET()
+                .build();
+            HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            return new Hit(route, worker, offsetMs, System.nanoTime() - startedAt,
+                response.statusCode(), response.body().length, "", "");
+        } catch (HttpTimeoutException exception) {
+            return new Hit(route, worker, offsetMs, System.nanoTime() - startedAt,
+                0, 0, "TIMEOUT", exceptionDetail(exception));
+        } catch (Exception exception) {
+            return new Hit(route, worker, offsetMs, System.nanoTime() - startedAt,
+                0, 0, exception.getClass().getSimpleName(), exceptionDetail(exception));
+        }
+    }
+
+    /** Evaluates the documented dynamic-stage targets and describes each miss. */
+    private static List<String> dynamicTargetViolations(List<Hit> hits, long elapsedMs) {
+        List<String> violations = new ArrayList<>();
+        long unexpected = hits.stream().filter(CatalogLoadGenerator::unexpected).count();
+        double unexpectedRatio = hits.isEmpty() ? 1 : unexpected / (double) hits.size();
+        if (unexpectedRatio > DYNAMIC_UNEXPECTED_ERROR_RATIO) {
+            violations.add(String.format(Locale.ROOT,
+                "unexpected error ratio %.5f exceeds %.3f", unexpectedRatio, DYNAMIC_UNEXPECTED_ERROR_RATIO));
+        }
+        for (int index = 0; index < DYNAMIC_ROUTES.length; index++) {
+            String route = DYNAMIC_ROUTES[index];
+            List<Long> latencies = new ArrayList<>();
+            for (Hit hit : hits) {
+                if (hit.route().equals(route)) {
+                    latencies.add(hit.nanos());
+                }
+            }
+            Collections.sort(latencies);
+            double p95 = percentileMs(latencies, 0.95);
+            double p99 = percentileMs(latencies, 0.99);
+            if (p95 > DYNAMIC_P95_TARGET_MS) {
+                violations.add(String.format(Locale.ROOT, "%s p95 %.3f ms exceeds %.0f ms",
+                    route, p95, DYNAMIC_P95_TARGET_MS));
+            }
+            if (p99 > DYNAMIC_P99_TARGET_MS) {
+                violations.add(String.format(Locale.ROOT, "%s p99 %.3f ms exceeds %.0f ms",
+                    route, p99, DYNAMIC_P99_TARGET_MS));
+            }
+            double achieved = latencies.size() / (elapsedMs / 1000.0);
+            if (achieved < DYNAMIC_RATES_PER_SECOND[index] * 0.95) {
+                violations.add(String.format(Locale.ROOT, "%s achieved %.3f RPS below 95%% of %d RPS",
+                    route, achieved, DYNAMIC_RATES_PER_SECOND[index]));
+            }
+        }
+        return violations;
+    }
+
+    private static String dynamicTargetsJson(List<Hit> hits, List<String> violations) {
+        long unexpected = hits.stream().filter(CatalogLoadGenerator::unexpected).count();
+        StringBuilder list = new StringBuilder("[");
+        for (int index = 0; index < violations.size(); index++) {
+            if (index > 0) {
+                list.append(',');
+            }
+            list.append('"').append(jsonEscape(violations.get(index))).append('"');
+        }
+        list.append(']');
+        return String.format(Locale.ROOT,
+            ",\"offeredRatePerSecond\":{\"%s\":%d,\"%s\":%d},"
+                + "\"targets\":{\"p95Ms\":%.0f,\"p99Ms\":%.0f,\"unexpectedErrorRatio\":%.3f},"
+                + "\"unexpectedErrors\":%d,\"passed\":%s,\"violations\":%s",
+            jsonEscape(DYNAMIC_ROUTES[0]), DYNAMIC_RATES_PER_SECOND[0],
+            jsonEscape(DYNAMIC_ROUTES[1]), DYNAMIC_RATES_PER_SECOND[1],
+            DYNAMIC_P95_TARGET_MS, DYNAMIC_P99_TARGET_MS, DYNAMIC_UNEXPECTED_ERROR_RATIO,
+            unexpected, violations.isEmpty(), list);
+    }
+
     private static String formatStage(
         String stageName,
         int virtualUsers,
         List<Hit> hits,
         long elapsedMs
     ) {
+        return formatStage(stageName, virtualUsers, hits, elapsedMs, ROUTES, "");
+    }
+
+    private static double percentileMs(List<Long> sortedNanos, double percentile) {
+        if (sortedNanos.isEmpty()) {
+            return 0;
+        }
+        int index = Math.max(0, (int) Math.ceil(sortedNanos.size() * percentile) - 1);
+        return sortedNanos.get(index) / 1e6;
+    }
+
+    private static boolean serverError(Hit hit) {
+        return hit.error().isEmpty() && hit.status() >= 500;
+    }
+
+    private static boolean rateLimited(Hit hit) {
+        return hit.error().isEmpty() && hit.status() == 429;
+    }
+
+    /** Transport failures and non-2xx responses other than an explicit 429. */
+    private static boolean unexpected(Hit hit) {
+        return failed(hit) && !rateLimited(hit);
+    }
+
+    private static String formatStage(
+        String stageName,
+        int virtualUsers,
+        List<Hit> hits,
+        long elapsedMs,
+        String[] routes,
+        String extraJson
+    ) {
         int total = hits.size();
         long bytes = 0;
         int non2xx = 0;
         int timeouts = 0;
+        int http5xx = 0;
+        int http429 = 0;
         StringBuilder endpointJson = new StringBuilder();
 
-        for (String route : ROUTES) {
+        for (String route : routes) {
             List<Long> latencies = new ArrayList<>();
             List<Hit> routeHits = new ArrayList<>();
             long responseBytes = 0;
@@ -329,25 +510,24 @@ public class CatalogLoadGenerator {
             }
 
             Collections.sort(latencies);
-            double p95Ms = latencies.isEmpty()
-                ? 0
-                : latencies.get(Math.max(0, (int) Math.ceil(latencies.size() * 0.95) - 1))
-                    / 1e6;
             if (endpointJson.length() > 0) {
                 endpointJson.append(',');
             }
             endpointJson.append(String.format(
                 Locale.ROOT,
                 "{\"endpoint\":\"%s\",\"count\":%d,"
-                    + "\"throughputPerSecond\":%.3f,\"p95Ms\":%.3f,"
-                    + "\"responseBytes\":%d,\"non2xx\":%d,\"timeout\":%d,"
-                    + "\"transportErrors\":%s}",
+                    + "\"throughputPerSecond\":%.3f,\"p95Ms\":%.3f,\"p99Ms\":%.3f,"
+                    + "\"responseBytes\":%d,\"non2xx\":%d,\"http5xx\":%d,\"http429\":%d,"
+                    + "\"timeout\":%d,\"transportErrors\":%s}",
                 jsonEscape(route),
                 latencies.size(),
                 latencies.size() / (elapsedMs / 1000.0),
-                p95Ms,
+                percentileMs(latencies, 0.95),
+                percentileMs(latencies, 0.99),
                 responseBytes,
                 routeNon2xx,
+                routeHits.stream().filter(CatalogLoadGenerator::serverError).count(),
+                routeHits.stream().filter(CatalogLoadGenerator::rateLimited).count(),
                 routeTimeouts,
                 formatTransportErrors(routeHits)
             ));
@@ -361,24 +541,34 @@ public class CatalogLoadGenerator {
             if ("TIMEOUT".equals(hit.error())) {
                 timeouts++;
             }
+            if (serverError(hit)) {
+                http5xx++;
+            }
+            if (rateLimited(hit)) {
+                http429++;
+            }
         }
 
         return String.format(
             Locale.ROOT,
             "{\"name\":\"%s\",\"virtualUsers\":%d,\"durationMs\":%d,"
                 + "\"total\":{\"count\":%d,\"responseBytes\":%d,"
-                + "\"non2xx\":%d,\"timeout\":%d,\"transportErrors\":%s},"
-                + "\"endpoints\":[%s],\"failureSamples\":%s}",
+                + "\"non2xx\":%d,\"http5xx\":%d,\"http429\":%d,"
+                + "\"timeout\":%d,\"transportErrors\":%s},"
+                + "\"endpoints\":[%s],\"failureSamples\":%s%s}",
             jsonEscape(stageName),
             virtualUsers,
             elapsedMs,
             total,
             bytes,
             non2xx,
+            http5xx,
+            http429,
             timeouts,
             formatTransportErrors(hits),
             endpointJson,
-            formatFailureSamples(hits)
+            formatFailureSamples(hits),
+            extraJson
         );
     }
 
@@ -390,6 +580,7 @@ public class CatalogLoadGenerator {
         String smokeReadyPath = arguments.get("--smoke-ready-file");
         long warmupMs = Long.parseLong(arguments.getOrDefault("--warmup-ms", "10000"));
         long stageMs = Long.parseLong(arguments.getOrDefault("--stage-ms", "30000"));
+        long dynamicStageMs = Long.parseLong(arguments.getOrDefault("--dynamic-stage-ms", "60000"));
         int maxSupportedVUs = Integer.parseInt(
             arguments.getOrDefault("--max-supported-vus", "500")
         );
@@ -449,6 +640,13 @@ public class CatalogLoadGenerator {
             );
         }
 
+        HttpResponse<byte[]> crowdingSmoke = sendGet(
+            client, URI.create(baseUrl + "/api/v2/crowding"), REQUEST_TIMEOUT_MS
+        );
+        if (crowdingSmoke == null || crowdingSmoke.statusCode() != 200) {
+            throw new IllegalStateException("Smoke route failed: /api/v2/crowding");
+        }
+
         Files.writeString(Path.of(smokeReadyPath), "smoke-ok\n");
         writeStatus(Path.of(statusPath), "smoke-ok");
         runStage(
@@ -483,6 +681,21 @@ public class CatalogLoadGenerator {
             measuredStages.add(new Stage("vus-" + virtualUsers, hits));
         }
 
+        long dynamicStartedAt = System.currentTimeMillis();
+        List<Hit> dynamicHits = runRateStage(
+            client, baseUrl, dynamicStageMs, Path.of(statusPath), "rate-67", REQUEST_TIMEOUT_MS
+        );
+        long dynamicElapsedMs = System.currentTimeMillis() - dynamicStartedAt;
+        List<String> dynamicViolations = dynamicTargetViolations(dynamicHits, dynamicElapsedMs);
+        stages.add(formatStage(
+            "rate-67",
+            0,
+            dynamicHits,
+            dynamicElapsedMs,
+            DYNAMIC_ROUTES,
+            dynamicTargetsJson(dynamicHits, dynamicViolations)
+        ));
+
         String result = "{\"generatedAt\":\"" + Instant.now()
             + "\",\"baseUrl\":\"" + baseUrl
             + "\",\"fixture\":{\"spaces\":100,\"maps\":7,\"places\":101,\"pins\":207}"
@@ -498,6 +711,11 @@ public class CatalogLoadGenerator {
             StandardCopyOption.ATOMIC_MOVE
         );
         requireNoFailures(measuredStages);
+        if (!dynamicViolations.isEmpty()) {
+            throw new IllegalStateException(
+                "rate-67 missed its targets: " + String.join("; ", dynamicViolations)
+            );
+        }
         writeStatus(Path.of(statusPath), "complete");
     }
 }
