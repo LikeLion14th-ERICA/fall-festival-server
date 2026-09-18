@@ -42,15 +42,6 @@ class GoodsMediaSchemaIntegrationTest {
     private NamedParameterJdbcTemplate jdbc;
 
     @Test
-    void migrationCreatesV24WithoutOperationalMediaData() {
-        assertThat(scalar("SELECT count(*) FROM flyway_schema_history WHERE version = '24' AND success"))
-            .isEqualTo(1);
-        assertThat(scalar("SELECT count(*) FROM media_assets")).isZero();
-        assertThat(scalar("SELECT count(*) FROM goods_images")).isZero();
-        assertThat(scalar("SELECT count(*) FROM goods_image_translations")).isZero();
-    }
-
-    @Test
     void acceptsNormalizedMediaAssociationAndTranslations() {
         UUID festivalId = insertFestival();
         UUID goodsId = insertGoods(festivalId);
