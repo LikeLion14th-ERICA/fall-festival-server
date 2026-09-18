@@ -56,10 +56,16 @@ public class CatalogRevisionService {
     /** Reads, validates and atomically inserts a new draft revision. */
     @Transactional
     public UUID importManifest(java.nio.file.Path manifestPath, String actor) {
-        CatalogManifestReader.ManifestDocument document = manifests.read(manifestPath);
+        return importManifest(manifestPath, actor, null);
+    }
+
+    /** Reads, validates and atomically inserts a new draft revision for an explicit festival. */
+    @Transactional
+    public UUID importManifest(java.nio.file.Path manifestPath, String actor, UUID festivalIdOverride) {
+        CatalogManifestReader.ManifestDocument document = manifests.read(manifestPath, festivalIdOverride);
         CatalogManifest manifest = document.manifest();
         String safeActor = actor(actor);
-        UUID festivalId = manifest.festivalId();
+        UUID festivalId = document.festivalId();
         lockFestival(festivalId);
 
         Instant now = clock.instant();

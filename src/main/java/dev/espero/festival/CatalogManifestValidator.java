@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
@@ -28,8 +29,12 @@ public final class CatalogManifestValidator {
     );
 
     public void validate(CatalogManifest manifest) {
+        validate(manifest, manifest == null ? null : manifest.festivalId());
+    }
+
+    void validate(CatalogManifest manifest, UUID festivalId) {
         require(manifest != null, "manifest is required");
-        require(manifest.festivalId() != null, "festivalId is required");
+        require(festivalId != null, "festivalId is required");
 
         Map<String, CatalogManifest.Space> spaces = unique(
             "spaces", manifest.spaces(), CatalogManifest.Space::id

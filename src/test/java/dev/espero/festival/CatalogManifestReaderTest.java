@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CatalogManifestReaderTest {
@@ -38,10 +39,77 @@ class CatalogManifestReaderTest {
             ).read(file);
 
             assertThat(document.manifest().festivalDays()).isEmpty();
+            assertThat(document.festivalId()).isEqualTo(document.manifest().festivalId());
             assertThat(document.manifest().artists()).isEmpty();
             assertThat(document.manifest().timetableConfig()).isNull();
             assertThat(document.manifest().stampGuide().qrValue()).isEqualTo("PUBLIC-COMMON-QR");
             assertThat(document.sha256()).hasSize(64).matches("[0-9a-f]{64}");
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    void usesFestivalIdOverrideWhenManifestOmitsIt() throws Exception {
+        UUID festivalId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        Path file = writeMinimalManifest(null);
+        try {
+            CatalogManifestReader.ManifestDocument document = reader().read(file, festivalId);
+
+            assertThat(document.manifest().festivalId()).isNull();
+            assertThat(document.festivalId()).isEqualTo(festivalId);
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    void acceptsMatchingManifestAndOverrideFestivalIds() throws Exception {
+        UUID festivalId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        Path file = writeMinimalManifest(festivalId);
+        try {
+            assertThat(reader().read(file, festivalId).festivalId()).isEqualTo(festivalId);
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    void rejectsMismatchedManifestAndOverrideFestivalIds() throws Exception {
+        UUID manifestFestivalId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID overrideFestivalId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        Path file = writeMinimalManifest(manifestFestivalId);
+        try {
+            assertThatThrownBy(() -> reader().read(file, overrideFestivalId))
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessage("Manifest festivalId does not match --festival-id.");
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    void rejectsMissingManifestAndOverrideFestivalIds() throws Exception {
+        Path file = writeMinimalManifest(null);
+        try {
+            assertThatThrownBy(() -> reader().read(file))
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessage("Festival ID is required in the manifest or --festival-id.");
+        } finally {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    void rejectsTopLevelNullAsAControlledValidationFailure() throws Exception {
+        Path file = Files.createTempFile("catalog-null-manifest-", ".json");
+        try {
+            Files.writeString(file, "null");
+
+            assertThatThrownBy(() -> reader().read(file))
+                .isInstanceOf(CatalogCliException.class)
+                .isNotInstanceOf(NullPointerException.class)
+                .hasMessage("Manifest validation failed: manifest is required");
         } finally {
             Files.deleteIfExists(file);
         }
@@ -139,6 +207,32 @@ class CatalogManifestReaderTest {
 
     private CatalogManifestReader reader() {
         return new CatalogManifestReader(new CatalogManifestValidator());
+    }
+
+    private Path writeMinimalManifest(UUID festivalId) throws Exception {
+        Path file = Files.createTempFile("catalog-binding-", ".json");
+        String festivalIdProperty = festivalId == null
+            ? ""
+            : "  \"festivalId\": \"" + festivalId + "\",\n";
+        Files.writeString(file, """
+            {
+            %s  "festivalDays": [], "spaces": [], "spaceTranslations": [],
+              "spaceSortOrders": [], "spaceEvents": [], "spaceMenuItems": [],
+              "places": [], "placeTranslations": [], "maps": [], "mapTranslations": [],
+              "mapAssets": [], "mapAreas": [], "mapPins": [], "mapPinTranslations": [],
+              "mapPinFilterGroupTranslations": [], "spaceMapTargets": [],
+              "artists": [], "artistTranslations": [], "artistLinks": [],
+              "artistLinkTranslations": [], "artistSongs": [], "artistSongTranslations": [],
+              "performances": [], "performanceTranslations": [], "performanceArtists": [],
+              "prohibitedItems": [], "prohibitedItemTranslations": [], "prohibitedMessages": [],
+              "ticketGuide": { "instructions": [] },
+              "stampGuide": {
+                "title": "스탬프투어", "instructions": [], "rewardName": "기념품",
+                "rewardNotice": "수량 소진 시 종료"
+              }
+            }
+            """.formatted(festivalIdProperty));
+        return file;
     }
 
     private String completePerformanceJson(String artists) {

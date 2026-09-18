@@ -25,6 +25,17 @@ class CatalogManifestValidatorTest {
     }
 
     @Test
+    void keepsStandaloneFestivalIdRequirementButAcceptsAnEffectiveImportId() {
+        CatalogManifest manifest = emptyManifest(null, ticketGuide(), stampGuide());
+
+        assertThatThrownBy(() -> validator.validate(manifest))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("festivalId is required");
+        assertThatCode(() -> validator.validate(manifest, UUID.randomUUID()))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
     void acceptsProductPermittedSparseRelationshipsAndOvernightPerformance() {
         PerformanceFixture fixture = new PerformanceFixture();
         fixture.performanceArtists.clear();
@@ -219,8 +230,16 @@ class CatalogManifestValidatorTest {
         CatalogManifest.TicketGuide ticketGuide,
         CatalogManifest.StampGuide stampGuide
     ) {
+        return emptyManifest(UUID.randomUUID(), ticketGuide, stampGuide);
+    }
+
+    private CatalogManifest emptyManifest(
+        UUID festivalId,
+        CatalogManifest.TicketGuide ticketGuide,
+        CatalogManifest.StampGuide stampGuide
+    ) {
         return new CatalogManifest(
-            UUID.randomUUID(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+            festivalId, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
             List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
             List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
             List.of(), List.of(), List.of(), null, List.of(), List.of(), List.of(), ticketGuide, stampGuide
