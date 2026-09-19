@@ -109,9 +109,11 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='forbidden')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');
       if(scenario==='rate-limited')failure(429,'RATE_LIMITED','잠시 후 다시 요청해 주세요.');
       if(scenario==='precondition-required')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
+      if(scenario==='idempotency-key-required')failure(428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.');
       if(scenario==='validation-failed')failure(422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.');
       if(scenario==='payload-too-large')failure(413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.');
       if(scenario==='unsupported-media-type')failure(415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.');
+      if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
       let result;

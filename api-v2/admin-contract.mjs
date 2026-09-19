@@ -85,8 +85,15 @@ export function applyAdminContract(s,ops){
   ops.push({
     operationId:'postAdminGoodsImage',method:'POST',path:'/api/v2/admin/media/goods-images',
     schema:'AdminGoodsImageUpload',summary:'상품 이미지 업로드·상품 연결 전 unattached media 생성',screens:['ADM-GOODS-PRODUCT-EDIT'],
-    scenarios:['normal','validation-failed','payload-too-large','unsupported-media-type','precondition-required','error'],
+    scenarios:['normal','validation-failed','payload-too-large','unsupported-media-type','idempotency-key-required','error'],
     admin:true,provisional:false,parameters:[],multipartInput:true,idempotencyKeyRequired:true,
+    idempotencyKeyDescription:'같은 업로드 재시도에 사용하는 1~128자 키. 누락 시 428.',
+    responseOverrides:{
+      413:{description:'업로드 파일이 10 MiB 제한을 초과했습니다.',code:'PAYLOAD_TOO_LARGE',message:'업로드 파일은 10 MiB 이하여야 합니다.',retryable:false},
+      415:{description:'multipart/form-data 요청이 필요합니다.',code:'UNSUPPORTED_MEDIA_TYPE',message:'multipart/form-data 요청이 필요합니다.',retryable:false},
+      428:{description:'Idempotency-Key 헤더가 필요합니다.',code:'IDEMPOTENCY_KEY_REQUIRED',message:'Idempotency-Key 헤더가 필요합니다.',retryable:false},
+      503:{description:'이미지 처리 서비스를 일시적으로 사용할 수 없습니다.',code:'SERVICE_UNAVAILABLE',message:'일시적으로 이미지를 처리할 수 없습니다.',retryable:true},
+    },
   });
   find('getAdminProduct').conditional=true;
   const productPost=find('postAdminProduct');

@@ -19750,7 +19750,7 @@
               "maxLength": 128,
               "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
             },
-            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
+            "description": "같은 업로드 재시도에 사용하는 1~128자 키. 누락 시 428."
           }
         ],
         "responses": {
@@ -19969,7 +19969,7 @@
             }
           },
           "413": {
-            "description": "요청 본문은 64KiB 이하입니다.",
+            "description": "업로드 파일이 10 MiB 제한을 초과했습니다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
@@ -20009,7 +20009,7 @@
             }
           },
           "415": {
-            "description": "application/json 요청이 필요합니다.",
+            "description": "multipart/form-data 요청이 필요합니다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
@@ -20089,7 +20089,7 @@
             }
           },
           "428": {
-            "description": "조건부 요청이 필요합니다.",
+            "description": "Idempotency-Key 헤더가 필요합니다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
@@ -20104,12 +20104,12 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
-                  "precondition-required": {
-                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: precondition-required",
+                  "idempotency-key-required": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: idempotency-key-required",
                     "value": {
                       "error": {
-                        "code": "PRECONDITION_REQUIRED",
-                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "message": "Idempotency-Key 헤더가 필요합니다.",
                         "details": [],
                         "retryable": false
                       },
@@ -20195,7 +20195,7 @@
             }
           },
           "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "description": "이미지 처리 서비스를 일시적으로 사용할 수 없습니다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
@@ -20215,7 +20215,7 @@
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "message": "일시적으로 이미지를 처리할 수 없습니다.",
                         "details": [],
                         "retryable": true
                       },
@@ -20244,7 +20244,7 @@
           "validation-failed",
           "payload-too-large",
           "unsupported-media-type",
-          "precondition-required",
+          "idempotency-key-required",
           "error",
           "bad-request",
           "rate-limited",

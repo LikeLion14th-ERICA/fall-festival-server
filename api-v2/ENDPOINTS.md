@@ -42,7 +42,7 @@
 | POST | `/api/v2/admin/products` | 상품 등록·신규 조합은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, validation-failed, not-found, precondition-required, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
 | DELETE | `/api/v2/admin/products/{goodsId}` | 상품 완전 삭제 | ADM-GOODS-PRODUCT-LIST | normal, not-found, precondition-required, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/media/goods-images` | 상품 이미지 업로드·상품 연결 전 unattached media 생성 | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, payload-too-large, unsupported-media-type, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/media/goods-images` | 상품 이미지 업로드·상품 연결 전 unattached media 생성 | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, payload-too-large, unsupported-media-type, idempotency-key-required, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/sessions` | 관리자 로그인 |  | normal, invalid-credentials, disabled, invalid-origin, error, bad-request, rate-limited |
 | POST | `/api/v2/admin/sessions/refresh` | 관리자 세션 갱신·refresh rotation |  | normal, expired, revoked, unknown, disabled, invalid-origin, error, bad-request, rate-limited |
 | DELETE | `/api/v2/admin/sessions/current` | 현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공 |  | normal, invalid-origin, error, bad-request, rate-limited, unauthorized, forbidden |

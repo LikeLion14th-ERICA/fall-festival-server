@@ -51,6 +51,25 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
 test('26 screens and 177 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,187);assert.equal(new Set(coverage.data.map(x=>x.id)).size,187);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
+test('Goods image upload error contract matches its Spring runtime behavior',()=>{
+  const upload=operation('postAdminGoodsImage');
+  const response=(status,scenario)=>upload.responses[status];
+  const example=(status,scenario)=>response(status,scenario).content['application/json'].examples[scenario].value.error;
+  assert.match(response(413).description,/10 MiB/);
+  assert.doesNotMatch(response(413).description,/64KiB/);
+  assert.equal(example(413,'payload-too-large').code,'PAYLOAD_TOO_LARGE');
+  assert.equal(example(413,'payload-too-large').message,'업로드 파일은 10 MiB 이하여야 합니다.');
+  assert.match(response(415).description,/multipart\/form-data/);
+  assert.doesNotMatch(response(415).description,/application\/json/);
+  assert.equal(example(415,'unsupported-media-type').code,'UNSUPPORTED_MEDIA_TYPE');
+  assert.equal(example(415,'unsupported-media-type').message,'multipart/form-data 요청이 필요합니다.');
+  assert.equal(example(428,'idempotency-key-required').code,'IDEMPOTENCY_KEY_REQUIRED');
+  assert.equal(example(428,'idempotency-key-required').message,'Idempotency-Key 헤더가 필요합니다.');
+  assert.doesNotMatch(JSON.stringify(response(428)),/PRECONDITION_REQUIRED|If-Match|최신 상태/);
+  assert.equal(example(503,'error').code,'SERVICE_UNAVAILABLE');
+  assert.equal(example(503,'error').message,'일시적으로 이미지를 처리할 수 없습니다.');
+  assert.equal(example(503,'error').retryable,true);
+});
 test('FAQ is an external config link and direct QR before START stays in local start state',async()=>{
   const unconfigured=(await call('/api/v2/config')).body.data;assert.equal(unconfigured.links.faq,null);
   const ready=(await call('/api/v2/config',{headers:{'X-Mock-Scenario':'faq-ready'}})).body.data.links.faq;
