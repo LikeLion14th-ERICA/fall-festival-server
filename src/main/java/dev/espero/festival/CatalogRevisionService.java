@@ -388,6 +388,54 @@ public class CatalogRevisionService {
         insertStampGuide(revisionId, manifest.stampGuide(), now);
         insertPerformanceCatalog(revisionId, manifest);
         insertFestivalLinks(revisionId, manifest);
+        insertTextTranslations(revisionId, manifest);
+    }
+
+    private void insertTextTranslations(UUID revisionId, CatalogManifest manifest) {
+        batch("""
+            INSERT INTO festival_title_translations (festival_revision_id, locale, title)
+            VALUES (:revisionId, :locale, :title)
+            """, manifest.festivalTitleTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("locale", row.locale())
+            .addValue("title", row.title())
+        ).toList());
+        batch("""
+            INSERT INTO map_asset_translations (festival_revision_id, map_id, version, locale, image_alt)
+            VALUES (:revisionId, :mapId, :version, :locale, :imageAlt)
+            """, manifest.mapAssetTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("mapId", row.mapId())
+            .addValue("version", row.version())
+            .addValue("locale", row.locale())
+            .addValue("imageAlt", row.imageAlt())
+        ).toList());
+        batch("""
+            INSERT INTO ticket_guide_translations (festival_revision_id, id, locale, instructions)
+            VALUES (:revisionId, 1, :locale, :instructions)
+            """, manifest.ticketGuideTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("locale", row.locale())
+            .addValue("instructions", postgresArray("text", row.instructions().toArray(String[]::new)))
+        ).toList());
+        batch("""
+            INSERT INTO stamp_guide_translations (
+                festival_revision_id, id, locale, title, instructions, reward_name,
+                reward_location_text, reward_hours_text, reward_notice
+            ) VALUES (
+                :revisionId, 1, :locale, :title, :instructions, :rewardName,
+                :rewardLocationText, :rewardHoursText, :rewardNotice
+            )
+            """, manifest.stampGuideTranslations().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("locale", row.locale())
+            .addValue("title", row.title())
+            .addValue("instructions", postgresArray("text", row.instructions().toArray(String[]::new)))
+            .addValue("rewardName", row.rewardName())
+            .addValue("rewardLocationText", row.rewardLocationText())
+            .addValue("rewardHoursText", row.rewardHoursText())
+            .addValue("rewardNotice", row.rewardNotice())
+        ).toList());
     }
 
     private void insertFestivalLinks(UUID revisionId, CatalogManifest manifest) {
@@ -810,6 +858,29 @@ public class CatalogRevisionService {
             INSERT INTO festival_link_translations (festival_revision_id, link_id, locale, label)
             SELECT :newRevisionId, link_id, locale, label
             FROM festival_link_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO festival_title_translations (festival_revision_id, locale, title)
+            SELECT :newRevisionId, locale, title
+            FROM festival_title_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO map_asset_translations (festival_revision_id, map_id, version, locale, image_alt)
+            SELECT :newRevisionId, map_id, version, locale, image_alt
+            FROM map_asset_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO ticket_guide_translations (festival_revision_id, id, locale, instructions)
+            SELECT :newRevisionId, id, locale, instructions
+            FROM ticket_guide_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO stamp_guide_translations (
+                festival_revision_id, id, locale, title, instructions, reward_name,
+                reward_location_text, reward_hours_text, reward_notice
+            ) SELECT :newRevisionId, id, locale, title, instructions, reward_name,
+                     reward_location_text, reward_hours_text, reward_notice
+              FROM stamp_guide_translations WHERE festival_revision_id = :sourceRevisionId
             """, sourceRevisionId, newRevisionId);
     }
 

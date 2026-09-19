@@ -40,6 +40,10 @@ festival:
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     trusted-proxy-hops: ${RATE_LIMIT_TRUSTED_PROXY_HOPS:0}
+  # Languages to publish besides Korean, comma-separated (en, zh-Hans). A listed
+  # language is served only when its catalog content is complete; otherwise it
+  # stays LOCALE_NOT_READY and the reason is logged at startup.
+  public-locales: ${PUBLIC_LOCALES:ko}
   # Swagger UI at /docs for local and development servers. Keep it off in production.
   api-docs:
     enabled: ${API_DOCS_ENABLED:false}

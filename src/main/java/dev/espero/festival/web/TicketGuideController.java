@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class TicketGuideController {
 
     private static final ZoneId TIMEZONE = ZoneId.of("Asia/Seoul");
-    private static final String CONTENT_LOCALE = PublicContentLocale.KOREAN;
     private static final String CACHE_CONTROL = "private, no-cache";
 
     private final CatalogSnapshotProvider snapshots;
@@ -76,9 +75,10 @@ public class TicketGuideController {
     public ResponseEntity<ConditionalApiResponse<TicketGuideResponse>> getTicketGuide(
         HttpServletRequest request
     ) {
-        CatalogSnapshot snapshot = snapshots.required();
-        metaSupport.setContext(request, snapshot.context(), CONTENT_LOCALE);
-        validateQuery(request);
+        CatalogSnapshot korean = snapshots.required();
+        metaSupport.setContext(request, korean.context(), PublicContentLocale.KOREAN);
+        String locale = validateQuery(request);
+        CatalogSnapshot snapshot = PublicContentLocale.snapshot(snapshots, locale);
 
         Optional<TicketGuideConfig> config = Optional.ofNullable(snapshot.ticketGuideConfig());
         // The configured festival UUID is the identity this process serves.
@@ -97,7 +97,7 @@ public class TicketGuideController {
         return conditionalResponses.respond(
             request,
             data,
-            metaSupport.meta(request, snapshot.context(), CONTENT_LOCALE),
+            metaSupport.meta(request, snapshot.context(), locale),
             CACHE_CONTROL
         );
     }
@@ -196,13 +196,13 @@ public class TicketGuideController {
             : new TicketGuideResponse.MapTarget(target.mapId(), target.placeId(), target.pinId(), target.mapVersion());
     }
 
-    private void validateQuery(HttpServletRequest request) {
+    private String validateQuery(HttpServletRequest request) {
         for (java.util.Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             if (!entry.getKey().equals("locale") || entry.getValue().length != 1) {
                 throw PublicContentLocale.invalidQuery();
             }
         }
-        PublicContentLocale.requirePublishedLocale(request);
+        return PublicContentLocale.requirePublishedLocale(request, snapshots.publishedLocales());
     }
 
     private OffsetDateTime atSeoul(LocalDate date, LocalTime time) {

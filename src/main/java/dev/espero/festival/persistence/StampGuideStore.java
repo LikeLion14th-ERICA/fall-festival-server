@@ -32,14 +32,38 @@ public class StampGuideStore {
 
     /** Loads the immutable guide row belonging to one revision. */
     public Optional<StampGuide> find(UUID festivalRevisionId) {
+        return find(festivalRevisionId, "ko");
+    }
+
+    /**
+     * Korean text lives in the guide row; other locales come from
+     * stamp_guide_translations while dates and the QR value stay shared. A
+     * locale without a translation row finds no guide rather than the Korean
+     * one.
+     */
+    public Optional<StampGuide> find(UUID festivalRevisionId, String locale) {
         return jdbc.query("""
-            SELECT current.title, current.dates, current.instructions,
-                   current.reward_name, current.reward_location_text,
-                   current.reward_hours_text, current.reward_notice,
+            SELECT CASE WHEN :locale = 'ko' THEN current.title ELSE translation.title END AS title,
+                   current.dates,
+                   CASE WHEN :locale = 'ko' THEN current.instructions ELSE translation.instructions END
+                       AS instructions,
+                   CASE WHEN :locale = 'ko' THEN current.reward_name ELSE translation.reward_name END
+                       AS reward_name,
+                   CASE WHEN :locale = 'ko' THEN current.reward_location_text
+                       ELSE translation.reward_location_text END AS reward_location_text,
+                   CASE WHEN :locale = 'ko' THEN current.reward_hours_text
+                       ELSE translation.reward_hours_text END AS reward_hours_text,
+                   CASE WHEN :locale = 'ko' THEN current.reward_notice ELSE translation.reward_notice END
+                       AS reward_notice,
                    current.qr_value, current.updated_at
             FROM stamp_guide_revisions current
+            LEFT JOIN stamp_guide_translations translation
+              ON translation.festival_revision_id = current.festival_revision_id
+             AND translation.id = current.id
+             AND translation.locale = :locale
             WHERE current.id = 1 AND current.festival_revision_id = :festivalRevisionId
-            """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
+              AND (:locale = 'ko' OR translation.locale IS NOT NULL)
+            """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId).addValue("locale", locale),
             (resultSet, rowNumber) -> map(resultSet)
         ).stream().findFirst();
     }

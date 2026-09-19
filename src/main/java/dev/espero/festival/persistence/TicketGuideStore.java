@@ -39,15 +39,31 @@ public class TicketGuideStore {
      * operational account settings instead.</p>
      */
     public Optional<TicketGuideConfig> find(UUID festivalRevisionId) {
+        return find(festivalRevisionId, "ko");
+    }
+
+    /**
+     * Korean instructions live in the guide row; other locales come from
+     * ticket_guide_translations. A locale without a translation row finds no
+     * guide rather than the Korean one.
+     */
+    public Optional<TicketGuideConfig> find(UUID festivalRevisionId, String locale) {
         return jdbc.query("""
             SELECT current.unit_price_amount,
-                   current.instructions, current.festival_start_date,
+                   CASE WHEN :locale = 'ko' THEN current.instructions ELSE translation.instructions END
+                       AS instructions,
+                   current.festival_start_date,
                    current.festival_end_date, current.daily_transfer_open_time,
                    current.daily_transfer_close_time, current.daily_pickup_open_time,
                    current.daily_pickup_close_time, current.updated_at
             FROM ticket_guide_revisions current
+            LEFT JOIN ticket_guide_translations translation
+              ON translation.festival_revision_id = current.festival_revision_id
+             AND translation.id = current.id
+             AND translation.locale = :locale
             WHERE current.id = 1 AND current.festival_revision_id = :festivalRevisionId
-            """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
+              AND (:locale = 'ko' OR translation.locale IS NOT NULL)
+            """, new MapSqlParameterSource("festivalRevisionId", festivalRevisionId).addValue("locale", locale),
             (resultSet, rowNumber) -> map(resultSet)
         ).stream().findFirst();
     }

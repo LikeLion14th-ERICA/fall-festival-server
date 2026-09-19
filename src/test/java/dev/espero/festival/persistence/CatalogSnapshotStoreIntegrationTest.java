@@ -221,7 +221,7 @@ class CatalogSnapshotStoreIntegrationTest {
 
         assertThatThrownBy(store::loadPublished)
             .isInstanceOf(CatalogIntegrityException.class)
-            .hasMessageContaining("Published space is missing a Korean translation");
+            .hasMessageContaining("Published space is missing a translation");
     }
 
     @Test
@@ -236,7 +236,7 @@ class CatalogSnapshotStoreIntegrationTest {
 
         assertThatThrownBy(store::loadPublished)
             .isInstanceOf(CatalogIntegrityException.class)
-            .hasMessageContaining("Published space is missing a Korean sort rank");
+            .hasMessageContaining("Published space is missing a sort rank");
     }
 
     @Test

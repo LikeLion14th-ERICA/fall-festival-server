@@ -46,7 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("db")
 public class CatalogSnapshotStore {
 
-    public static final String PUBLIC_LOCALE = "ko";
+    /** The base locale. Korean text lives in the base rows of single-language tables. */
+    public static final String KOREAN = "ko";
     private static final Set<String> FILTER_GROUPS = Set.of(
         "RESTROOM",
         "PHOTO_BOOTH",
@@ -77,7 +78,17 @@ public class CatalogSnapshotStore {
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public CatalogSnapshot loadPublished() {
-        return loadRevision(loadPublishedContext().revisionId());
+        return loadPublished(KOREAN);
+    }
+
+    /**
+     * Loads the published revision in one locale. Every translated field must
+     * be present in that locale; a missing one rejects the whole snapshot
+     * instead of falling back to Korean.
+     */
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public CatalogSnapshot loadPublished(String locale) {
+        return loadRevision(loadPublishedContext().revisionId(), locale);
     }
 
     /**
@@ -89,25 +100,30 @@ public class CatalogSnapshotStore {
      */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public CatalogSnapshot loadRevision(UUID revisionId) {
-        FestivalContext context = loadRevisionContext(revisionId);
-        return load(context);
+        return loadRevision(revisionId, KOREAN);
     }
 
-    private CatalogSnapshot load(FestivalContext context) {
-        List<CatalogMap> maps = loadMaps(context);
-        List<Place> places = loadPlaces(context);
-        Map<String, List<String>> events = loadEvents(context);
-        Map<String, List<Money>> menus = loadMenus(context);
-        List<Space> spaces = loadSpaces(context, events, menus);
-        Map<PinKey, List<Pin>> pins = loadPins(context, maps);
-        TicketGuideConfig ticketGuideConfig = ticketGuideStore.find(context.revisionId()).orElseThrow(
-            () -> new CatalogIntegrityException("Catalog revision is missing its ticket guide.")
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public CatalogSnapshot loadRevision(UUID revisionId, String locale) {
+        FestivalContext context = loadRevisionContext(revisionId);
+        return load(context, locale);
+    }
+
+    private CatalogSnapshot load(FestivalContext context, String locale) {
+        List<CatalogMap> maps = loadMaps(context, locale);
+        List<Place> places = loadPlaces(context, locale);
+        Map<String, List<String>> events = loadEvents(context, locale);
+        Map<String, List<Money>> menus = loadMenus(context, locale);
+        List<Space> spaces = loadSpaces(context, locale, events, menus);
+        Map<PinKey, List<Pin>> pins = loadPins(context, locale, maps);
+        TicketGuideConfig ticketGuideConfig = ticketGuideStore.find(context.revisionId(), locale).orElseThrow(
+            () -> new CatalogIntegrityException("Catalog revision is missing its ticket guide in " + locale + ".")
         );
-        StampGuide stampGuide = stampGuideStore.find(context.revisionId()).orElseThrow(
-            () -> new CatalogIntegrityException("Catalog revision is missing its stamp guide.")
+        StampGuide stampGuide = stampGuideStore.find(context.revisionId(), locale).orElseThrow(
+            () -> new CatalogIntegrityException("Catalog revision is missing its stamp guide in " + locale + ".")
         );
         MapTarget ticketMapTarget = loadTicketMapTarget(context);
-        CatalogSnapshot.FestivalHome home = loadHome(context);
+        CatalogSnapshot.FestivalHome home = loadHome(context, locale);
 
         verifySingleOverview(maps);
         verifySpaceContent(spaces);
@@ -124,23 +140,25 @@ public class CatalogSnapshotStore {
     }
 
     /**
-     * Festival title, days and home links. Every link must carry a Korean
-     * label; a link without one would otherwise disappear from the home
-     * screen without notice.
+     * Festival title, days and home links. Every link must carry a label in
+     * the requested locale; a link without one would otherwise disappear from
+     * the home screen without notice.
      */
-    private CatalogSnapshot.FestivalHome loadHome(FestivalContext context) {
+    private CatalogSnapshot.FestivalHome loadHome(FestivalContext context, String locale) {
         String title = jdbc.queryForObject("""
-            SELECT f.title
+            SELECT CASE WHEN :locale = 'ko' THEN f.title ELSE t.title END
             FROM festival_revisions r
             JOIN festivals f ON f.id = r.festival_id
+            LEFT JOIN festival_title_translations t
+              ON t.festival_revision_id = r.id AND t.locale = :locale
             WHERE r.id = :revisionId
-            """, parameters(context), String.class);
+            """, parameters(context, locale), String.class);
         requireText(title, "Festival.title");
         List<java.time.LocalDate> dates = jdbc.query("""
             SELECT festival_date FROM festival_days
             WHERE festival_revision_id = :revisionId
             ORDER BY festival_date
-            """, parameters(context), (resultSet, rowNumber) -> resultSet.getObject("festival_date", java.time.LocalDate.class));
+            """, parameters(context, locale), (resultSet, rowNumber) -> resultSet.getObject("festival_date", java.time.LocalDate.class));
         List<CatalogSnapshot.HomeLink> links = jdbc.query("""
             SELECT l.id, l.kind, t.label, l.url, l.icon_key, l.sort_order
             FROM festival_links l
@@ -148,7 +166,7 @@ public class CatalogSnapshotStore {
               ON t.festival_revision_id = l.festival_revision_id AND t.link_id = l.id AND t.locale = :locale
             WHERE l.festival_revision_id = :revisionId
             ORDER BY l.kind, l.sort_order, l.id
-            """, parameters(context), (resultSet, rowNumber) -> new CatalogSnapshot.HomeLink(
+            """, parameters(context, locale), (resultSet, rowNumber) -> new CatalogSnapshot.HomeLink(
                 resultSet.getString("id"),
                 resultSet.getString("kind"),
                 resultSet.getString("label"),
@@ -200,25 +218,32 @@ public class CatalogSnapshotStore {
         return contexts.getFirst();
     }
 
-    private List<CatalogMap> loadMaps(FestivalContext context) {
+    private List<CatalogMap> loadMaps(FestivalContext context, String locale) {
         List<CatalogMap> maps = new ArrayList<>();
         jdbc.query("""
             SELECT m.id, m.kind, m.current_version, mt.name,
-                   a.image_url, a.image_alt, a.image_width, a.image_height
+                   a.image_url, a.image_width, a.image_height,
+                   CASE WHEN :locale = 'ko' THEN a.image_alt ELSE at.image_alt END AS image_alt
             FROM maps m
             JOIN map_asset_versions a
               ON a.festival_revision_id = m.festival_revision_id
              AND a.map_id = m.id
              AND a.version = m.current_version
+            LEFT JOIN map_asset_translations at
+              ON at.festival_revision_id = a.festival_revision_id
+             AND at.map_id = a.map_id
+             AND at.version = a.version
+             AND at.locale = :locale
             LEFT JOIN map_translations mt
               ON mt.festival_revision_id = m.festival_revision_id
              AND mt.map_id = m.id
              AND mt.locale = :locale
             WHERE m.festival_revision_id = :revisionId
             ORDER BY m.sort_rank, m.id
-            """, parameters(context), resultSet -> {
+            """, parameters(context, locale), resultSet -> {
             String name = resultSet.getString("name");
-            require(name != null, "Published map is missing a Korean translation.");
+            require(name != null, "Published map is missing a translation.");
+            require(resultSet.getString("image_alt") != null, "Published map image is missing its alt text.");
             maps.add(new CatalogMap(
                 resultSet.getString("id"),
                 name,
@@ -235,7 +260,7 @@ public class CatalogSnapshotStore {
         return List.copyOf(maps);
     }
 
-    private List<Place> loadPlaces(FestivalContext context) {
+    private List<Place> loadPlaces(FestivalContext context, String locale) {
         List<Place> places = new ArrayList<>();
         jdbc.query("""
             SELECT p.id, p.kind, p.space_id, pt.locale,
@@ -247,8 +272,8 @@ public class CatalogSnapshotStore {
              AND pt.locale = :locale
             WHERE p.festival_revision_id = :revisionId
             ORDER BY p.id
-            """, parameters(context), resultSet -> {
-            require(resultSet.getString("locale") != null, "Published place is missing a Korean translation row.");
+            """, parameters(context, locale), resultSet -> {
+            require(resultSet.getString("locale") != null, "Published place is missing a translation row.");
             places.add(new Place(
                 resultSet.getString("id"),
                 resultSet.getString("kind"),
@@ -263,14 +288,14 @@ public class CatalogSnapshotStore {
         return List.copyOf(places);
     }
 
-    private Map<String, List<String>> loadEvents(FestivalContext context) {
+    private Map<String, List<String>> loadEvents(FestivalContext context, String locale) {
         Map<String, List<String>> events = new LinkedHashMap<>();
         jdbc.query("""
             SELECT space_id, content
             FROM space_events
             WHERE festival_revision_id = :revisionId AND locale = :locale
             ORDER BY space_id, sort_order
-            """, parameters(context), resultSet -> {
+            """, parameters(context, locale), resultSet -> {
                 events.computeIfAbsent(resultSet.getString("space_id"), ignored -> new ArrayList<>())
                     .add(resultSet.getString("content"));
             }
@@ -278,14 +303,14 @@ public class CatalogSnapshotStore {
         return immutableLists(events);
     }
 
-    private Map<String, List<Money>> loadMenus(FestivalContext context) {
+    private Map<String, List<Money>> loadMenus(FestivalContext context, String locale) {
         Map<String, List<Money>> menus = new LinkedHashMap<>();
         jdbc.query("""
             SELECT space_id, name, price_amount
             FROM space_menu_items
             WHERE festival_revision_id = :revisionId AND locale = :locale
             ORDER BY space_id, sort_order
-            """, parameters(context), resultSet -> {
+            """, parameters(context, locale), resultSet -> {
                 menus.computeIfAbsent(resultSet.getString("space_id"), ignored -> new ArrayList<>())
                     .add(new Money(resultSet.getString("name"), resultSet.getInt("price_amount")));
             }
@@ -295,6 +320,7 @@ public class CatalogSnapshotStore {
 
     private List<Space> loadSpaces(
         FestivalContext context,
+        String locale,
         Map<String, List<String>> events,
         Map<String, List<Money>> menus
     ) {
@@ -319,9 +345,9 @@ public class CatalogSnapshotStore {
              AND smt.space_id = s.id
             WHERE s.festival_revision_id = :revisionId
             ORDER BY so.sort_rank NULLS LAST, s.id
-            """, parameters(context), resultSet -> {
-            require(resultSet.getString("locale") != null, "Published space is missing a Korean translation.");
-            require(resultSet.getObject("sort_rank") != null, "Published space is missing a Korean sort rank.");
+            """, parameters(context, locale), resultSet -> {
+            require(resultSet.getString("locale") != null, "Published space is missing a translation.");
+            require(resultSet.getObject("sort_rank") != null, "Published space is missing a sort rank.");
             String contactLabel = resultSet.getString("contact_label");
             String contactUrl = resultSet.getString("contact_url");
             Link contact = contactLabel == null ? null : new Link(contactLabel, contactUrl);
@@ -350,7 +376,7 @@ public class CatalogSnapshotStore {
         return List.copyOf(spaces);
     }
 
-    private Map<PinKey, List<Pin>> loadPins(FestivalContext context, List<CatalogMap> maps) {
+    private Map<PinKey, List<Pin>> loadPins(FestivalContext context, String locale, List<CatalogMap> maps) {
         Map<String, CatalogMap> mapsById = maps.stream()
             .collect(java.util.stream.Collectors.toMap(CatalogMap::id, map -> map));
         Map<PinKey, List<Pin>> pins = new LinkedHashMap<>();
@@ -377,8 +403,8 @@ public class CatalogSnapshotStore {
              AND a.id = p.area_id
             WHERE p.festival_revision_id = :revisionId
             ORDER BY p.map_id, p.map_version, p.id
-            """, parameters(context), resultSet -> {
-            require(resultSet.getString("label") != null, "Published map pin is missing a Korean label.");
+            """, parameters(context, locale), resultSet -> {
+            require(resultSet.getString("label") != null, "Published map pin is missing a label.");
             String placeId = resultSet.getString("place_id");
             String filterGroup = resultSet.getString("filter_group");
             String filterGroupLabel = resultSet.getString("filter_group_label");
@@ -389,7 +415,7 @@ public class CatalogSnapshotStore {
                     "Published AREA pin must not have a filter group label.");
             } else if (filterGroup != null) {
                 require(filterGroupLabel != null,
-                    "Published PLACE pin filter group is missing a Korean label.");
+                    "Published PLACE pin filter group is missing a label.");
             }
             PinTarget target = placeId != null
                 ? new PinTarget("PLACE", placeId)
@@ -770,9 +796,13 @@ public class CatalogSnapshotStore {
     }
 
     private MapSqlParameterSource parameters(FestivalContext context) {
+        return parameters(context, KOREAN);
+    }
+
+    private MapSqlParameterSource parameters(FestivalContext context, String locale) {
         return new MapSqlParameterSource()
             .addValue("revisionId", context.revisionId())
-            .addValue("locale", PUBLIC_LOCALE);
+            .addValue("locale", locale);
     }
 
     private MapTarget targetOrNull(ResultSet resultSet) throws SQLException {

@@ -107,6 +107,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `STAMP_RECEIPT_CODE_SHA256` | 선택 | (없음) | `db` | 스탬프 수령 인증 코드(6자리 숫자)의 SHA-256 hex. 교체 중에는 쉼표로 여러 개. 없으면 인증 API가 503 |
 | `RATE_LIMIT_ENABLED` | 선택 | `true` | 전체 | `/api/v2` 클라이언트별 요청 수 제한. 초과 시 `429 RATE_LIMITED`와 `Retry-After` |
 | `RATE_LIMIT_TRUSTED_PROXY_HOPS` | 선택 | `0` | 전체 | 앞단에서 `X-Forwarded-For`를 붙이는 신뢰 proxy 수. Next.js proxy와 호스팅 load balancer 뒤면 `2` |
+| `PUBLIC_LOCALES` | 선택 | `ko` | `db` | 공개할 언어, 쉼표 구분(`ko,en,zh-Hans`). 한국어는 항상 공개. 나열한 언어도 게시 catalog의 번역이 모두 있어야 공개되고, 빠지면 시작 로그에 이유를 남기고 `LOCALE_NOT_READY` 유지 |
 | `API_DOCS_ENABLED` | 선택 | `false` | 전체 | `true`면 `/docs`에서 Swagger UI 제공. 로컬·개발 서버 전용, 운영에서는 끔 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.

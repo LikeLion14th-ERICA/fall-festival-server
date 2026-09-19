@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * <p>English and Simplified Chinese come from the approved translation table
  * (docs/wiki/product/translations.md). They are served only after the locale
- * itself is published; until then every public request resolves to Korean.</p>
+ * itself is published. A locale without messages here cannot be published.</p>
  */
 final class CrowdingMessages {
 
@@ -40,6 +40,10 @@ final class CrowdingMessages {
     );
 
     private CrowdingMessages() {}
+
+    static boolean supports(String locale) {
+        return MESSAGES.containsKey(locale);
+    }
 
     static String message(CrowdingResponse.Status status, LocalTime opensAt, String locale) {
         Map<CrowdingResponse.Status, String> messages = MESSAGES.get(locale);

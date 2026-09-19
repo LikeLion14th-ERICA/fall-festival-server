@@ -175,7 +175,7 @@ public class PerformanceController {
                 throw invalidQuery();
             }
         }
-        return PublicContentLocale.requirePublishedLocale(request);
+        return PublicContentLocale.requirePublishedLocale(request, snapshots.publishedLocales());
     }
 
     private LocalDate requestedDate(

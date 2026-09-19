@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v2")
 public class CatalogController {
 
-    private static final String LOCALE = PublicContentLocale.KOREAN;
 
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
@@ -73,8 +72,7 @@ public class CatalogController {
 
     @GetMapping("/spaces")
     public ApiResponse<CatalogResponses.Spaces> getSpaces(HttpServletRequest request) {
-        CatalogSnapshot snapshot = snapshot(request);
-        validateQuery(request, Set.of("category", "locale"));
+        CatalogSnapshot snapshot = snapshot(request, Set.of("category", "locale"));
         String category = valueOrDefault(request, "category", "ALL");
         if (!category.equals("ALL") && !SpaceCategories.ALL.contains(category)) {
             throw invalidQuery();
@@ -95,8 +93,7 @@ public class CatalogController {
         @PathVariable String spaceId,
         HttpServletRequest request
     ) {
-        CatalogSnapshot snapshot = snapshot(request);
-        validateQuery(request, Set.of("locale"));
+        CatalogSnapshot snapshot = snapshot(request, Set.of("locale"));
         Space space = snapshot.findSpace(spaceId).orElseThrow(this::notFound);
         CatalogResponses.BankTransfer bankTransfer = bankTransfers.apply(space.id()).orElse(null);
         return ResponseEntity.ok()
@@ -106,8 +103,7 @@ public class CatalogController {
 
     @GetMapping("/maps")
     public ApiResponse<CatalogResponses.Maps> getMaps(HttpServletRequest request) {
-        CatalogSnapshot snapshot = snapshot(request);
-        validateQuery(request, Set.of("locale"));
+        CatalogSnapshot snapshot = snapshot(request, Set.of("locale"));
         List<CatalogResponses.MapInfo> items = snapshot.maps().stream().map(CatalogController::mapResponse).toList();
         return new ApiResponse<>(
             new CatalogResponses.Maps(items, snapshot.overviewId().orElse(null)),
@@ -120,8 +116,7 @@ public class CatalogController {
         @PathVariable String mapId,
         HttpServletRequest request
     ) {
-        CatalogSnapshot snapshot = snapshot(request);
-        validateQuery(request, Set.of("locale"));
+        CatalogSnapshot snapshot = snapshot(request, Set.of("locale"));
         CatalogMap map = snapshot.findMap(mapId).orElseThrow(this::notFound);
         return new ApiResponse<>(mapResponse(map), meta(snapshot, request));
     }
@@ -131,8 +126,7 @@ public class CatalogController {
         @PathVariable String mapId,
         HttpServletRequest request
     ) {
-        CatalogSnapshot snapshot = snapshot(request);
-        validateQuery(request, Set.of("mapVersion", "locale"));
+        CatalogSnapshot snapshot = snapshot(request, Set.of("mapVersion", "locale"));
         String requestedVersion = requiredValue(request, "mapVersion");
         CatalogMap map = snapshot.findMap(mapId).orElseThrow(this::notFound);
         if (!map.version().equals(requestedVersion)) {
@@ -157,8 +151,7 @@ public class CatalogController {
         @PathVariable String placeId,
         HttpServletRequest request
     ) {
-        CatalogSnapshot snapshot = snapshot(request);
-        validateQuery(request, Set.of("locale"));
+        CatalogSnapshot snapshot = snapshot(request, Set.of("locale"));
         CatalogSnapshot.Place place = snapshot.findPlace(placeId).orElseThrow(this::notFound);
         return new ApiResponse<>(new CatalogResponses.Place(
             place.id(),
@@ -172,23 +165,32 @@ public class CatalogController {
         ), meta(snapshot, request));
     }
 
-    private CatalogSnapshot snapshot(HttpServletRequest request) {
-        CatalogSnapshot snapshot = snapshots.required();
-        metaSupport.setContext(request, snapshot.context(), LOCALE);
-        return snapshot;
-    }
-
-    private ApiMeta meta(CatalogSnapshot snapshot, HttpServletRequest request) {
-        return metaSupport.meta(request, snapshot.context(), LOCALE);
-    }
-
-    private void validateQuery(HttpServletRequest request, Set<String> allowed) {
+    /**
+     * Validates the query and returns the snapshot in the requested locale.
+     * Errors before that point carry the Korean context in their meta.
+     */
+    private CatalogSnapshot snapshot(HttpServletRequest request, Set<String> allowed) {
+        CatalogSnapshot korean = snapshots.required();
+        metaSupport.setContext(request, korean.context(), PublicContentLocale.KOREAN);
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             if (!allowed.contains(entry.getKey()) || entry.getValue().length != 1) {
                 throw invalidQuery();
             }
         }
-        PublicContentLocale.requirePublishedLocale(request);
+        String locale = PublicContentLocale.requirePublishedLocale(request, snapshots.publishedLocales());
+        CatalogSnapshot snapshot = PublicContentLocale.snapshot(snapshots, locale);
+        metaSupport.setContext(request, snapshot.context(), locale);
+        return snapshot;
+    }
+
+    private ApiMeta meta(CatalogSnapshot snapshot, HttpServletRequest request) {
+        return metaSupport.meta(request, snapshot.context(), locale(request));
+    }
+
+    /** The locale snapshot(request, allowed) already accepted. */
+    private static String locale(HttpServletRequest request) {
+        String locale = request.getParameter("locale");
+        return locale == null ? PublicContentLocale.KOREAN : locale;
     }
 
     private String requiredValue(HttpServletRequest request, String name) {
