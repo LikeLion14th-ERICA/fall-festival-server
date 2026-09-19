@@ -4,5 +4,6 @@ package dev.espero.festival.domain;
 public enum AdminAuditResourceType {
     CROWDING,
     NOTICE,
-    GOODS
+    GOODS,
+    MEDIA
 }

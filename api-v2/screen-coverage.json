@@ -346,7 +346,8 @@
       "operations": [
         "getAdminProduct",
         "postAdminProduct",
-        "putAdminProduct"
+        "putAdminProduct",
+        "postAdminGoodsImage"
       ],
       "browserData": [
         "ADM-GOODS-PRODUCT-EDIT-D04",

@@ -38,6 +38,7 @@ export function applyAdminContract(s,ops){
     updatedAt:ref('Timestamp'),
   });
   s.AdminGoodsList=obj({items:arr(ref('AdminGoods'),'삭제 제외 전체 상품. updatedAt 내림차순·id 오름차순.')});
+  s.AdminGoodsImageUpload=obj({mediaId:{type:'string',format:'uuid',description:'저장경로를 노출하지 않는 opaque media UUID.'}},'상품과 아직 연결되지 않은 관리자 이미지 업로드 결과.');
   s.AdminIdentity=obj({id,username:{type:'string',minLength:1,maxLength:100,description:'관리자 로그인 식별자'},authority:en(['ADMIN'],'현재 Product 범위의 단일 관리자 권한'),enabled:{type:'boolean',description:'false이면 로그인·refresh·관리자 API 인증 거부'}});
   s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
   s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
@@ -81,6 +82,12 @@ export function applyAdminContract(s,ops){
   add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','precondition-required','error']);
   add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','not-found','precondition-required','edit-conflict','error']);
   add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','precondition-required','edit-conflict','error']);
+  ops.push({
+    operationId:'postAdminGoodsImage',method:'POST',path:'/api/v2/admin/media/goods-images',
+    schema:'AdminGoodsImageUpload',summary:'상품 이미지 업로드·상품 연결 전 unattached media 생성',screens:['ADM-GOODS-PRODUCT-EDIT'],
+    scenarios:['normal','validation-failed','payload-too-large','unsupported-media-type','precondition-required','error'],
+    admin:true,provisional:false,parameters:[],multipartInput:true,idempotencyKeyRequired:true,
+  });
   find('getAdminProduct').conditional=true;
   const productPost=find('postAdminProduct');
   productPost.idempotencyKeyRequired=true;

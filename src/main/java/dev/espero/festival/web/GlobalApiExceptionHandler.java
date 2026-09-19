@@ -1,16 +1,25 @@
 package dev.espero.festival.web;
 
+import dev.espero.festival.media.GoodsImageUploadTooLargeException;
+import dev.espero.festival.media.GoodsImageValidationException;
+import dev.espero.festival.media.MediaProcessingBusyException;
+import dev.espero.festival.media.MediaServiceUnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Duration;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -83,6 +92,52 @@ public class GlobalApiExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(GoodsImageValidationException.class)
+    ResponseEntity<ApiErrorResponse> handleGoodsImageValidation(
+        GoodsImageValidationException exception,
+        HttpServletRequest request
+    ) {
+        return error(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_FAILED", "요청 파일을 확인해 주세요.", false, request);
+    }
+
+    @ExceptionHandler({GoodsImageUploadTooLargeException.class, MaxUploadSizeExceededException.class})
+    ResponseEntity<ApiErrorResponse> handleUploadTooLarge(Exception exception, HttpServletRequest request) {
+        return error(HttpStatus.PAYLOAD_TOO_LARGE, "PAYLOAD_TOO_LARGE", "업로드 파일은 10 MiB 이하여야 합니다.", false, request);
+    }
+
+    @ExceptionHandler(MediaProcessingBusyException.class)
+    ResponseEntity<ApiErrorResponse> handleMediaProcessingBusy(
+        MediaProcessingBusyException exception,
+        HttpServletRequest request
+    ) {
+        long retryAfterSeconds = retryAfterSeconds(exception.retryAfter());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .header(HttpHeaders.RETRY_AFTER, Long.toString(retryAfterSeconds))
+            .body(errorBody("RATE_LIMITED", "잠시 후 다시 요청해 주세요.", true, request));
+    }
+
+    @ExceptionHandler(MediaServiceUnavailableException.class)
+    ResponseEntity<ApiErrorResponse> handleMediaServiceUnavailable(
+        MediaServiceUnavailableException exception,
+        HttpServletRequest request
+    ) {
+        log.error("Goods media infrastructure failure: method={} path={}", request.getMethod(), request.getRequestURI());
+        return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "일시적으로 이미지를 처리할 수 없습니다.", true, request);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<ApiErrorResponse> handleUnsupportedMediaType(
+        HttpMediaTypeNotSupportedException exception,
+        HttpServletRequest request
+    ) {
+        return error(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", "multipart/form-data 요청이 필요합니다.", false, request);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    ResponseEntity<ApiErrorResponse> handleMalformedMultipart(MultipartException exception, HttpServletRequest request) {
+        return error(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_FAILED", "요청 파일을 확인해 주세요.", false, request);
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
         log.error("Unhandled API exception: method={} path={}", request.getMethod(), request.getRequestURI(), exception);
@@ -90,5 +145,32 @@ public class GlobalApiExceptionHandler {
             new ApiErrorResponse.ErrorBody("INTERNAL_ERROR", "처리 중 오류가 발생했습니다.", List.of(), true),
             metaSupport.metaForError(request)
         ));
+    }
+
+    private ResponseEntity<ApiErrorResponse> error(
+        HttpStatus status,
+        String code,
+        String message,
+        boolean retryable,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(status).body(errorBody(code, message, retryable, request));
+    }
+
+    private ApiErrorResponse errorBody(
+        String code,
+        String message,
+        boolean retryable,
+        HttpServletRequest request
+    ) {
+        return new ApiErrorResponse(
+            new ApiErrorResponse.ErrorBody(code, message, List.of(), retryable),
+            metaSupport.metaForError(request)
+        );
+    }
+
+    private static long retryAfterSeconds(Duration retryAfter) {
+        long millis = Math.max(0, retryAfter.toMillis());
+        return Math.max(1, (millis + 999) / 1_000);
     }
 }

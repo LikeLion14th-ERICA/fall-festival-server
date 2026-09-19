@@ -19726,6 +19726,554 @@
         ]
       }
     },
+    "/api/v2/admin/media/goods-images": {
+      "post": {
+        "operationId": "postAdminGoodsImage",
+        "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성",
+        "description": "연결 화면: ADM-GOODS-PRODUCT-EDIT. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminGoodsImageUploadResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: normal",
+                    "value": {
+                      "data": {
+                        "mediaId": "00000000-0000-4000-8000-000000000050"
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: unauthorized",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: forbidden",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "관리자 권한이 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "413": {
+            "description": "요청 본문은 64KiB 이하입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "payload-too-large": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: payload-too-large",
+                    "value": {
+                      "error": {
+                        "code": "PAYLOAD_TOO_LARGE",
+                        "message": "업로드 파일은 10 MiB 이하여야 합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "application/json 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unsupported-media-type": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: unsupported-media-type",
+                    "value": {
+                      "error": {
+                        "code": "UNSUPPORTED_MEDIA_TYPE",
+                        "message": "multipart/form-data 요청이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "요청 필드를 확인해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "validation-failed": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: validation-failed",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "요청 파일을 확인해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "precondition-required": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: precondition-required",
+                    "value": {
+                      "error": {
+                        "code": "PRECONDITION_REQUIRED",
+                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "상품 이미지 업로드·상품 연결 전 unattached media 생성: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "ADM-GOODS-PRODUCT-EDIT"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "validation-failed",
+          "payload-too-large",
+          "unsupported-media-type",
+          "precondition-required",
+          "error",
+          "bad-request",
+          "rate-limited",
+          "unauthorized",
+          "forbidden"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "10 MiB 이하의 JPEG, PNG 또는 WebP 원본. 파일명과 client MIME은 format 판정에 사용하지 않는다.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/admin/sessions": {
       "post": {
         "operationId": "createAdminSession",
@@ -24534,6 +25082,21 @@
         "additionalProperties": false,
         "description": ""
       },
+      "AdminGoodsImageUpload": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "저장경로를 노출하지 않는 opaque media UUID."
+          }
+        },
+        "required": [
+          "mediaId"
+        ],
+        "additionalProperties": false,
+        "description": "상품과 아직 연결되지 않은 관리자 이미지 업로드 결과."
+      },
       "AdminIdentity": {
         "type": "object",
         "properties": {
@@ -25178,6 +25741,23 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/AdminGoods"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "AdminGoodsImageUploadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AdminGoodsImageUpload"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

@@ -3,14 +3,23 @@ package dev.espero.festival.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import dev.espero.festival.media.GoodsImageUploadTooLargeException;
+import dev.espero.festival.media.GoodsImageValidationException;
+import dev.espero.festival.media.GoodsImageValidationReason;
+import dev.espero.festival.media.MediaProcessingBusyException;
+import dev.espero.festival.media.MediaServiceUnavailableException;
 import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -89,6 +98,63 @@ class GlobalApiExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
         assertThat(response.getBody().error().code()).isEqualTo("METHOD_NOT_ALLOWED");
+    }
+
+    @Test
+    void mapsImageValidationToSafe422() {
+        GoodsImageValidationException exception = new GoodsImageValidationException(
+            GoodsImageValidationReason.CORRUPT_IMAGE,
+            "sensitive decoder detail"
+        );
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleGoodsImageValidation(exception, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().error().code()).isEqualTo("VALIDATION_FAILED");
+        assertThat(response.getBody().error().message()).doesNotContain("sensitive");
+    }
+
+    @Test
+    void mapsBothApplicationAndMultipartParserLimitsToTheSame413Envelope() {
+        ResponseEntity<ApiErrorResponse> applicationResponse = handler.handleUploadTooLarge(
+            new GoodsImageUploadTooLargeException(),
+            request
+        );
+        ResponseEntity<ApiErrorResponse> parserResponse = handler.handleUploadTooLarge(
+            new MaxUploadSizeExceededException(10L * 1024 * 1024),
+            request
+        );
+
+        assertThat(applicationResponse.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE);
+        assertThat(parserResponse.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE);
+        assertThat(applicationResponse.getBody().error().code()).isEqualTo("PAYLOAD_TOO_LARGE");
+        assertThat(parserResponse.getBody().error().code()).isEqualTo("PAYLOAD_TOO_LARGE");
+    }
+
+    @Test
+    void mapsProcessingBackPressureToRetryable429WithRoundedUpRetryAfter() {
+        ResponseEntity<ApiErrorResponse> response = handler.handleMediaProcessingBusy(
+            new MediaProcessingBusyException(Duration.ofMillis(1001)),
+            request
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER)).isEqualTo("2");
+        assertThat(response.getBody().error().code()).isEqualTo("RATE_LIMITED");
+        assertThat(response.getBody().error().retryable()).isTrue();
+    }
+
+    @Test
+    void mapsMediaInfrastructureFailureToSafeRetryable503() {
+        ResponseEntity<ApiErrorResponse> response = handler.handleMediaServiceUnavailable(
+            new MediaServiceUnavailableException("C:\\sensitive\\media", new IOException("codec stderr")),
+            request
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(response.getBody().error().code()).isEqualTo("SERVICE_UNAVAILABLE");
+        assertThat(response.getBody().error().message()).doesNotContain("sensitive", "stderr");
+        assertThat(response.getBody().error().retryable()).isTrue();
     }
 
     @Test

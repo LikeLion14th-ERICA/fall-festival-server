@@ -49,6 +49,7 @@ export function adminExecute(op,state,ctx){
     case 'createAdminSession':case 'refreshAdminSession':return {data:{accessToken:'MOCK-SIGNED-ACCESS-TOKEN',expiresAt:'2030-10-01T18:15:00+09:00',admin:{id:'00000000-0000-4000-8000-000000000001',username:'mock-admin',authority:'ADMIN',enabled:true}}};
     case 'deleteCurrentAdminSession':return {data:{loggedOut:true}};
     case 'getCurrentAdmin':return {data:{id:'00000000-0000-4000-8000-000000000001',username:'mock-admin',authority:'ADMIN',enabled:true}};
+    case 'postAdminGoodsImage':return {data:{mediaId:'00000000-0000-4000-8000-000000000050'},status:201};
     case 'putAdminAvailability':{
       const g=state.goods.find(g=>g.id===params.goodsId);if(!g)failure(404,'NOT_FOUND','상품이 없습니다.');
       if(!g.combinations.some(c=>c.id===params.combinationId))failure(404,'NOT_FOUND','등록된 조합이 없습니다.');

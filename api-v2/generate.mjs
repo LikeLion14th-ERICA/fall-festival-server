@@ -26,13 +26,14 @@ const unscopedOperations=new Set([
   'getCrowding','getAdminCrowding','putAdminCrowding',
   'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
   'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
-  'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability'
+  'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
+  'postAdminGoodsImage'
 ]);
 for(const op of operations){
   const responseName=`${op.schema}${op.conditional?'Conditional':''}Response`;spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');
   const scenarios=[...op.scenarios,'bad-request','rate-limited',...(op.admin&&op.authRequired!==false?['unauthorized','forbidden']:[])];
   const successStatus=op.successStatus??(op.method==='POST'?201:200);
-  const statuses=[...(successStatus===200?[200]:[]),400,403,404,405,409,429,500,503,...(op.input?[413,415,422]:[]),...(op.admin?[401]:[]),...(op.ifMatchRequired||op.idempotencyKeyRequired?[428]:[]),...(op.conditional?[304]:[]),successStatus].filter((status,index,array)=>array.indexOf(status)===index);
+  const statuses=[...(successStatus===200?[200]:[]),400,403,404,405,409,429,500,503,...(op.input||op.multipartInput?[413,415,422]:[]),...(op.admin?[401]:[]),...(op.ifMatchRequired||op.idempotencyKeyRequired?[428]:[]),...(op.conditional?[304]:[]),successStatus].filter((status,index,array)=>array.indexOf(status)===index);
   const responses=Object.fromEntries(statuses.map(status=>{
     const conditionalHeaders=op.conditional&&status<300?{ETag:strongEtagHeader,'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'},...(op.cacheControl?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{})}:{};
     const response={description:status<300?'성공':genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'},...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders}};
@@ -47,6 +48,7 @@ for(const op of operations){
   ];
   const operation={operationId:op.operationId,summary:op.summary,description:`연결 화면: ${op.screens.join(', ')||'관리자 공통 인증'}. ${op.provisional?'미정 기획을 위한 검토 필요 계약. ':''}목의 인증/시나리오 헤더는 연동 안내를 참고.`,tags:[op.admin?'관리자':'공개'],security:op.security??(op.admin?[{AdminBearer:[]}]:[]),parameters:[...op.parameters,...headerParameters],responses,'x-screen-ids':op.screens,'x-contract-status':op.provisional?'provisional':'screen-specified','x-mock-scenarios':scenarios,...(op.conditional?{'x-conditional':true}: {})};
   if(op.input)operation.requestBody={required:true,description:op.provisional?'목 연동용 입력 초안. 기획 합의 전 운영 구현 금지.':'저장할 변경값',content:{'application/json':{schema:{$ref:`#/components/schemas/${op.input}`},example:inputExamples[op.input]}}};
+  if(op.multipartInput)operation.requestBody={required:true,description:'10 MiB 이하의 JPEG, PNG 또는 WebP 원본. 파일명과 client MIME은 format 판정에 사용하지 않는다.',content:{'multipart/form-data':{schema:{type:'object',properties:{file:{type:'string',format:'binary'}},required:['file'],additionalProperties:false}}}};
   spec.paths[op.path]??={};spec.paths[op.path][op.method.toLowerCase()]=operation;
   examples[op.operationId]={screens:op.screens,method:op.method,path:op.path,scenarios:{}};
   for(const scenario of scenarios){
@@ -70,7 +72,7 @@ for(const op of operations){
     const conditionalMeta=revision=>({timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});
     try{
       const disabledFailure=op.operationId==='createAdminSession'?[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.']:op.operationId==='refreshAdminSession'?[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.']:[401,...genericErrors[401]];
-      const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure,'precondition-required':[428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.'],'not-festival-day':[409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.'],'edit-conflict':[409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.']}[scenario];
+      const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure,'precondition-required':[428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.'],...(op.multipartInput?{'validation-failed':[422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.'],'payload-too-large':[413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.'],'unsupported-media-type':[415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.']}:{}),'not-festival-day':[409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.'],'edit-conflict':[409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.']}[scenario];
       if(special)throw new ApiFailure(...special);
       if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
       const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)?null:{data:result.data,meta:op.conditional?conditionalMeta(responseRevision):meta(responseRevision)};
@@ -81,7 +83,7 @@ for(const op of operations){
     const qs=new URLSearchParams(query).toString();
     const cookieEndpoint=['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId);
     const mutationHeaders={...(op.ifMatchRequired?{'If-Match':'"'+'0'.repeat(64)+'"'}:{}),...(op.idempotencyKeyRequired?{'Idempotency-Key':`mock-${op.operationId}-${scenario}`}:{})};
-    examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':'frontend-demo',...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(body?{'Content-Type':'application/json'}:{}),...mutationHeaders},...(body?{body}:{})},status,response};
+    examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':'frontend-demo',...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(body?{'Content-Type':'application/json'}:{}),...(op.multipartInput?{'Content-Type':scenario==='unsupported-media-type'?'application/json':'multipart/form-data; boundary=<generated>'}:{}),...mutationHeaders},...(body?{body}:{}),...(op.multipartInput&&scenario!=='unsupported-media-type'?{multipart:{file:'<binary>'}}:{})},status,response};
   }
 }
 const source=JSON.parse(await readFile(new URL('./source-screen-requirements.json',import.meta.url),'utf8'));

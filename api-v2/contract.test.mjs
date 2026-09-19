@@ -16,7 +16,7 @@ function standardValidate(schema,value){const key=JSON.stringify(schema);if(!com
 let server,base;
 before(async()=>{server=await createMockServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;});
 after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));});
-async function call(path,{method='GET',body,headers={},session='test'}={}){const response=await fetch(base+path,{method,headers:{'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},...(body!==undefined?{body:typeof body==='string'?body:JSON.stringify(body)}:{})});const json=[204,304].includes(response.status)?null:await response.json();return {status:response.status,body:json,headers:response.headers};}
+async function call(path,{method='GET',body,multipart=false,headers={},session='test'}={}){const requestHeaders={'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers};let requestBody=body!==undefined?(typeof body==='string'?body:JSON.stringify(body)):undefined;if(multipart){const form=new FormData();form.append('file',new Blob(['mock-image']), 'mock.png');requestBody=form;delete requestHeaders['Content-Type'];}const response=await fetch(base+path,{method,headers:requestHeaders,...(requestBody!==undefined?{body:requestBody}:{})});const json=[204,304].includes(response.status)?null:await response.json();return {status:response.status,body:json,headers:response.headers};}
 async function enableAllMockLocales(session){
   const response=await call('/api/v2/config',{session,headers:{'X-Mock-Scenario':'all-languages'}});
   assert.equal(response.status,200);
@@ -37,7 +37,8 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
-    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability'
+    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
+    'postAdminGoodsImage'
   ]);
   for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
     if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response?.meta?.revision??0,0,operationId);
@@ -113,7 +114,7 @@ test('Fictional image variants are served from the local mock asset route',async
 for(const [opId,group]of Object.entries(examples))for(const [scenario,example]of Object.entries(group.scenarios)){
   test(`${opId}: ${scenario} returns the documented HTTP/schema/body`,async()=>{
     const req=example.request;
-    const got=await call(req.path,{method:req.method,body:req.body,headers:{...req.headers,'X-Mock-Session':opId+'-'+scenario}});
+    const got=await call(req.path,{method:req.method,body:req.body,multipart:Boolean(req.multipart),headers:{...req.headers,'X-Mock-Session':opId+'-'+scenario}});
     assert.equal(got.status,example.status,JSON.stringify(got.body));
     if(got.status===204||got.status===304)assert.equal(got.body,null);
     else standardValidate(operation(opId).responses[got.status].content['application/json'].schema,got.body);
