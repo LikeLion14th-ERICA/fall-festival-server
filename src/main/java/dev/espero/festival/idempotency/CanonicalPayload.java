@@ -2,6 +2,7 @@ package dev.espero.festival.idempotency;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -93,7 +94,8 @@ public final class CanonicalPayload {
             if (!(entry.getKey() instanceof String key) || key.isBlank()) {
                 throw new IllegalArgumentException("Canonical payload map keys must be non-blank strings");
             }
-            entries.add(Map.entry(key, entry.getValue()));
+            // Map.entry rejects null values, but a null field is valid and is written as "null;".
+            entries.add(new AbstractMap.SimpleImmutableEntry<>(key, entry.getValue()));
         }
         entries.sort(Comparator.comparing(Map.Entry::getKey));
         target.append("object[");
