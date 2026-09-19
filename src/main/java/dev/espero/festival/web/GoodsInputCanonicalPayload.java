@@ -15,6 +15,16 @@ final class GoodsInputCanonicalPayload {
         return CanonicalPayload.from(fields(input));
     }
 
+    static CanonicalPayload from(GoodsInput input, String ifMatch) {
+        return CanonicalPayload.from(fields(input, ifMatch));
+    }
+
+    static Map<String, Object> fields(GoodsInput input, String ifMatch) {
+        Map<String, Object> payload = fields(input);
+        payload.put("ifMatch", ifMatch);
+        return payload;
+    }
+
     static Map<String, Object> fields(GoodsInput input) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("optionMode", input.optionMode());

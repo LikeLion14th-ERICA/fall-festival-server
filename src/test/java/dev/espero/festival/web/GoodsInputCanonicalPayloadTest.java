@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 
 class GoodsInputCanonicalPayloadTest {
 
+    private static final String ETAG_A = "\"" + "a".repeat(64) + "\"";
+    private static final String ETAG_B = "\"" + "b".repeat(64) + "\"";
+
     @Test
     void ignoresLocaleMapInsertionOrder() {
         GoodsInput first = input();
@@ -49,6 +52,19 @@ class GoodsInputCanonicalPayloadTest {
             .isNotEqualTo(GoodsInputCanonicalPayload.fields(input));
         assertThat(GoodsInputCanonicalPayload.fields(input).toString())
             .doesNotContain("goodsId", "combinationId", "requestId", "serverTime");
+    }
+
+    @Test
+    void updateFingerprintIncludesTheValidatedIfMatchValue() {
+        GoodsInput input = input();
+
+        assertThat(GoodsInputCanonicalPayload.fields(input, ETAG_A))
+            .isEqualTo(GoodsInputCanonicalPayload.fields(input, ETAG_A));
+        assertThat(GoodsInputCanonicalPayload.fields(input, ETAG_A))
+            .isNotEqualTo(GoodsInputCanonicalPayload.fields(input, ETAG_B));
+        assertThat(GoodsInputCanonicalPayload.fields(input, ETAG_A))
+            .containsEntry("ifMatch", ETAG_A);
+        assertThat(GoodsInputCanonicalPayload.fields(input)).doesNotContainKey("ifMatch");
     }
 
     private static GoodsInput input() {

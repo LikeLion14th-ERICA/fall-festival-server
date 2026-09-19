@@ -129,5 +129,23 @@ public class MediaAssetStore {
             .addValue("attachedAt", OffsetDateTime.ofInstant(attachedAt, ZoneOffset.UTC)));
     }
 
+    public int markGoodsImagesDetached(UUID festivalId, List<UUID> mediaIds, Instant detachedAt) {
+        if (mediaIds.isEmpty()) {
+            return 0;
+        }
+        return jdbc.update("""
+            UPDATE media_assets
+            SET detached_at = :detachedAt
+            WHERE festival_id = :festivalId
+              AND id IN (:mediaIds)
+              AND purpose = 'GOODS_IMAGE'
+              AND attached_at IS NOT NULL
+              AND detached_at IS NULL
+            """, new MapSqlParameterSource()
+            .addValue("festivalId", festivalId)
+            .addValue("mediaIds", mediaIds)
+            .addValue("detachedAt", OffsetDateTime.ofInstant(detachedAt, ZoneOffset.UTC)));
+    }
+
     public record ServingMediaAsset(UUID mediaId) {}
 }

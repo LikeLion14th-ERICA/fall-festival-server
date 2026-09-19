@@ -93,6 +93,21 @@ test('Product create contract is runtime-ready, UUID-safe, and create-specific',
   assert.deepEqual(new Set(input.options.map(option=>option.colorId)),new Set(input.colors.map(color=>color.id)));
   assert.deepEqual(new Set(input.options.map(option=>option.sizeId)),new Set(input.sizes.map(size=>size.id)));
 });
+test('Product update and deletion contracts require concurrency and idempotency headers',()=>{
+  const update=operation('putAdminProduct');
+  const remove=operation('deleteAdminProduct');
+  for(const operation of [update,remove]){
+    assert.equal(operation['x-contract-status'],'screen-specified');
+    assert.equal(operation.parameters.find(parameter=>parameter.name==='If-Match').required,true);
+    assert.equal(operation.parameters.find(parameter=>parameter.name==='Idempotency-Key').required,true);
+    const examples428=operation.responses['428'].content['application/json'].examples;
+    assert.equal(examples428['precondition-required'].value.error.code,'PRECONDITION_REQUIRED');
+    assert.equal(examples428['idempotency-key-required'].value.error.code,'IDEMPOTENCY_KEY_REQUIRED');
+  }
+  assert.equal(update.responses['422'].content['application/json'].examples['invalid-media-reference'].value.error.code,'INVALID_MEDIA_REFERENCE');
+  assert.equal(update.responses['200'].content['application/json'].schema.$ref,'#/components/schemas/AdminGoodsResponse');
+  assert.equal(remove.responses['200'].content['application/json'].schema.$ref,'#/components/schemas/DeletedResponse');
+});
 test('Goods image read representations and binary endpoint are explicit and immutable',async()=>{
   const goods=spec.components.schemas.Goods;
   const adminGoods=spec.components.schemas.AdminGoods;

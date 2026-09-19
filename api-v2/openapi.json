@@ -19128,6 +19128,26 @@
                         "mock": true
                       }
                     }
+                  },
+                  "invalid-media-reference": {
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: invalid-media-reference",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_MEDIA_REFERENCE",
+                        "message": "사용할 수 없는 상품 이미지가 포함되어 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
                   }
                 }
               }
@@ -19149,6 +19169,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "idempotency-key-required": {
+                    "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: idempotency-key-required",
+                    "value": {
+                      "error": {
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "message": "Idempotency-Key 헤더가 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "precondition-required": {
                     "summary": "상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용: precondition-required",
                     "value": {
@@ -19289,7 +19329,9 @@
           "new-option",
           "option-removal",
           "validation-failed",
+          "invalid-media-reference",
           "not-found",
+          "idempotency-key-required",
           "precondition-required",
           "edit-conflict",
           "error",
@@ -19729,6 +19771,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "idempotency-key-required": {
+                    "summary": "상품 완전 삭제: idempotency-key-required",
+                    "value": {
+                      "error": {
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "message": "Idempotency-Key 헤더가 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "precondition-required": {
                     "summary": "상품 완전 삭제: precondition-required",
                     "value": {
@@ -19867,6 +19929,7 @@
         "x-mock-scenarios": [
           "normal",
           "not-found",
+          "idempotency-key-required",
           "precondition-required",
           "edit-conflict",
           "error",

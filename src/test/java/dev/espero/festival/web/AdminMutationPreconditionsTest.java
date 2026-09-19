@@ -34,6 +34,18 @@ class AdminMutationPreconditionsTest {
     }
 
     @Test
+    void extractsOneTrimmedStrongIfMatchAndRejectsDuplicateHeaders() {
+        MockHttpServletRequest valid = request("  " + CURRENT + "  ");
+        assertThat(preconditions.requireValidIfMatch(valid)).isEqualTo(CURRENT);
+
+        MockHttpServletRequest duplicate = request(CURRENT);
+        duplicate.addHeader("If-Match", CURRENT);
+        assertThatThrownBy(() -> preconditions.requireValidIfMatch(duplicate))
+            .isInstanceOf(ApiException.class)
+            .satisfies(error -> assertThat(((ApiException) error).code()).isEqualTo("INVALID_IF_MATCH"));
+    }
+
+    @Test
     void lastWriteWinsIsAnExplicitExceptionToTheDefaultPolicy() throws Exception {
         Method protectedMethod = PolicyProbe.class.getDeclaredMethod("protectedMutation");
         Method lastWriteWinsMethod = PolicyProbe.class.getDeclaredMethod("lastWriteWinsMutation");

@@ -95,8 +95,8 @@ export function applyAdminContract(s,ops){
   add('getAdminProducts','GET','/admin/products','AdminGoodsList','관리자 상품 목록',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','empty','error']);
   add('getAdminProduct','GET','/admin/products/{goodsId}','AdminGoods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','not-found','error']);
   add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','idempotency-key-required','invalid-media-reference','error']);
-  add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','not-found','precondition-required','edit-conflict','error']);
-  add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','precondition-required','edit-conflict','error']);
+  add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','invalid-media-reference','not-found','idempotency-key-required','precondition-required','edit-conflict','error']);
+  add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','idempotency-key-required','precondition-required','edit-conflict','error']);
   ops.push({
     operationId:'postAdminGoodsImage',method:'POST',path:'/api/v2/admin/media/goods-images',
     schema:'AdminGoodsImageUpload',summary:'상품 이미지 업로드·상품 연결 전 unattached media 생성',screens:['ADM-GOODS-PRODUCT-EDIT'],

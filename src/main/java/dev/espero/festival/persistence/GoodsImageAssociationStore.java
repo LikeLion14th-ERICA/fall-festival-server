@@ -2,6 +2,7 @@ package dev.espero.festival.persistence;
 
 import dev.espero.festival.media.GoodsImageAssociationInput;
 import java.util.ArrayList;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +33,35 @@ public class GoodsImageAssociationStore {
             Map.of("festivalId", festivalId, "goodsId", goodsId),
             (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class)
         ).isEmpty();
+    }
+
+    /** Locks every current association and media lifecycle row, including malformed lifecycle states. */
+    public List<LockedGoodsImage> lockCurrent(UUID festivalId, UUID goodsId) {
+        return jdbc.query("""
+            SELECT image.media_id, image.festival_id, media.purpose,
+                   media.attached_at, media.detached_at
+            FROM goods_images AS image
+            JOIN media_assets AS media
+              ON media.id = image.media_id
+             AND media.festival_id = image.festival_id
+            WHERE image.goods_id = :goodsId
+              AND image.festival_id = :festivalId
+            ORDER BY image.media_id
+            FOR UPDATE OF image, media
+            """, Map.of("festivalId", festivalId, "goodsId", goodsId), (resultSet, rowNumber) -> new LockedGoodsImage(
+            resultSet.getObject("media_id", UUID.class),
+            resultSet.getObject("festival_id", UUID.class),
+            resultSet.getString("purpose"),
+            resultSet.getObject("attached_at", OffsetDateTime.class),
+            resultSet.getObject("detached_at", OffsetDateTime.class)
+        ));
+    }
+
+    public int deleteForGoods(UUID festivalId, UUID goodsId) {
+        return jdbc.update("""
+            DELETE FROM goods_images
+            WHERE festival_id = :festivalId AND goods_id = :goodsId
+            """, Map.of("festivalId", festivalId, "goodsId", goodsId));
     }
 
     public void insertAssociations(
@@ -69,4 +99,12 @@ public class GoodsImageAssociationStore {
             VALUES (:mediaId, :locale, :alt)
             """, parameters.toArray(MapSqlParameterSource[]::new));
     }
+
+    public record LockedGoodsImage(
+        UUID mediaId,
+        UUID festivalId,
+        String purpose,
+        OffsetDateTime attachedAt,
+        OffsetDateTime detachedAt
+    ) {}
 }

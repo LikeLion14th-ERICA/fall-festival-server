@@ -21,7 +21,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -182,6 +184,51 @@ public class GoodsStore {
         return hydrate(headers).stream().findFirst();
     }
 
+    /** Rejects client-stable option identifiers already owned by a different goods row. */
+    public boolean hasForeignOptionIds(UUID goodsId, List<UUID> colorIds, List<UUID> sizeIds) {
+        return hasForeignIds("goods_colors", goodsId, colorIds)
+            || hasForeignIds("goods_sizes", goodsId, sizeIds);
+    }
+
+    /** Replaces editable product content while retaining matching combination rows. */
+    public void updateForEdit(Goods current, Goods updated) {
+        int baseUpdated = jdbc.update("""
+            UPDATE goods
+            SET option_mode = :optionMode,
+                price_amount = :priceAmount,
+                updated_at = :updatedAt
+            WHERE id = :id AND festival_id = :festivalId
+            """, new MapSqlParameterSource()
+            .addValue("id", current.id())
+            .addValue("festivalId", current.festivalId())
+            .addValue("optionMode", updated.optionMode().name())
+            .addValue("priceAmount", updated.priceAmount())
+            .addValue("updatedAt", atUtc(updated.updatedAt())));
+        if (baseUpdated != 1) {
+            throw new IllegalStateException("Locked goods row was not updated");
+        }
+
+        jdbc.update("DELETE FROM goods_translations WHERE goods_id = :goodsId", Map.of("goodsId", current.id()));
+        insertProductTranslations(updated);
+
+        if (current.optionMode() != updated.optionMode()) {
+            replaceAllOptions(updated);
+        } else if (updated.optionMode() == GoodsOptionMode.OPTIONS) {
+            updateOptionsDifferentially(current, updated);
+        }
+    }
+
+    /** Hard-deletes one locked festival-owned goods row after image associations are removed. */
+    public void delete(UUID festivalId, UUID goodsId) {
+        int deleted = jdbc.update(
+            "DELETE FROM goods WHERE festival_id = :festivalId AND id = :goodsId",
+            Map.of("festivalId", festivalId, "goodsId", goodsId)
+        );
+        if (deleted != 1) {
+            throw new IllegalStateException("Locked goods row was not deleted");
+        }
+    }
+
     /** Updates one combination only when the complete festival/goods ownership chain matches. */
     public boolean updateAvailability(
         UUID festivalId,
@@ -205,6 +252,189 @@ public class GoodsStore {
             .addValue("availability", availability.name())
             .addValue("updatedAt", OffsetDateTime.ofInstant(updatedAt, ZoneOffset.UTC)));
         return updated == 1;
+    }
+
+    private boolean hasForeignIds(String table, UUID goodsId, List<UUID> ids) {
+        if (ids.isEmpty()) {
+            return false;
+        }
+        Long count = jdbc.queryForObject(
+            "SELECT count(*) FROM " + table + " WHERE id IN (:ids) AND goods_id <> :goodsId",
+            new MapSqlParameterSource().addValue("ids", ids).addValue("goodsId", goodsId),
+            Long.class
+        );
+        return count != null && count > 0;
+    }
+
+    private void replaceAllOptions(Goods updated) {
+        Map<String, Object> goodsId = Map.of("goodsId", updated.id());
+        jdbc.update("DELETE FROM goods_combinations WHERE goods_id = :goodsId", goodsId);
+        jdbc.update("DELETE FROM goods_colors WHERE goods_id = :goodsId", goodsId);
+        jdbc.update("DELETE FROM goods_sizes WHERE goods_id = :goodsId", goodsId);
+        insertColors(updated);
+        insertSizes(updated);
+        insertCombinations(updated.id(), updated.combinations());
+    }
+
+    private void updateOptionsDifferentially(Goods current, Goods updated) {
+        Set<UUID> desiredCombinationIds = updated.combinations().stream()
+            .map(GoodsCombination::id).collect(Collectors.toSet());
+        List<UUID> removedCombinationIds = current.combinations().stream()
+            .map(GoodsCombination::id).filter(id -> !desiredCombinationIds.contains(id)).toList();
+        deleteByIds("goods_combinations", removedCombinationIds);
+
+        updateColorsDifferentially(current, updated);
+        updateSizesDifferentially(current, updated);
+
+        Set<UUID> currentCombinationIds = current.combinations().stream()
+            .map(GoodsCombination::id).collect(Collectors.toSet());
+        insertCombinations(updated.id(), updated.combinations().stream()
+            .filter(combination -> !currentCombinationIds.contains(combination.id())).toList());
+    }
+
+    private void updateColorsDifferentially(Goods current, Goods updated) {
+        Set<UUID> currentIds = current.colors().stream().map(GoodsColor::id).collect(Collectors.toSet());
+        Set<UUID> desiredIds = updated.colors().stream().map(GoodsColor::id).collect(Collectors.toSet());
+        jdbc.update(
+            "UPDATE goods_colors SET sort_order = sort_order + 1000000 WHERE goods_id = :goodsId",
+            Map.of("goodsId", updated.id())
+        );
+        insertColors(updated.id(), updated.colors().stream().filter(color -> !currentIds.contains(color.id())).toList());
+        batch("UPDATE goods_colors SET sort_order = :sortOrder WHERE id = :id AND goods_id = :goodsId",
+            indexedColors(updated));
+        deleteByIds("goods_colors", currentIds.stream().filter(id -> !desiredIds.contains(id)).toList());
+        jdbc.update("""
+            DELETE FROM goods_color_translations
+            WHERE color_id IN (SELECT id FROM goods_colors WHERE goods_id = :goodsId)
+            """, Map.of("goodsId", updated.id()));
+        insertColorTranslations(updated.colors());
+    }
+
+    private void updateSizesDifferentially(Goods current, Goods updated) {
+        Set<UUID> currentIds = current.sizes().stream().map(GoodsSize::id).collect(Collectors.toSet());
+        Set<UUID> desiredIds = updated.sizes().stream().map(GoodsSize::id).collect(Collectors.toSet());
+        jdbc.update(
+            "UPDATE goods_sizes SET sort_order = sort_order + 1000000 WHERE goods_id = :goodsId",
+            Map.of("goodsId", updated.id())
+        );
+        insertSizes(updated.id(), updated.sizes().stream().filter(size -> !currentIds.contains(size.id())).toList());
+        batch("UPDATE goods_sizes SET sort_order = :sortOrder WHERE id = :id AND goods_id = :goodsId",
+            indexedSizes(updated));
+        deleteByIds("goods_sizes", currentIds.stream().filter(id -> !desiredIds.contains(id)).toList());
+        jdbc.update("""
+            DELETE FROM goods_size_translations
+            WHERE size_id IN (SELECT id FROM goods_sizes WHERE goods_id = :goodsId)
+            """, Map.of("goodsId", updated.id()));
+        insertSizeTranslations(updated.sizes());
+    }
+
+    private void insertProductTranslations(Goods goods) {
+        batch("""
+            INSERT INTO goods_translations (goods_id, locale, name, description)
+            VALUES (:goodsId, :locale, :name, :description)
+            """, goods.translations().entrySet().stream()
+            .map(entry -> new MapSqlParameterSource()
+                .addValue("goodsId", goods.id())
+                .addValue("locale", entry.getKey())
+                .addValue("name", entry.getValue().name())
+                .addValue("description", entry.getValue().description()))
+            .toList());
+    }
+
+    private void insertColors(Goods goods) {
+        batch("""
+            INSERT INTO goods_colors (id, goods_id, sort_order)
+            VALUES (:id, :goodsId, :sortOrder)
+            """, indexedColors(goods));
+        insertColorTranslations(goods.colors());
+    }
+
+    private void insertColors(UUID goodsId, List<GoodsColor> colors) {
+        List<MapSqlParameterSource> parameters = new ArrayList<>();
+        for (int index = 0; index < colors.size(); index++) {
+            GoodsColor color = colors.get(index);
+            parameters.add(new MapSqlParameterSource().addValue("id", color.id())
+                .addValue("goodsId", goodsId).addValue("sortOrder", -1 - index));
+        }
+        batch("INSERT INTO goods_colors (id, goods_id, sort_order) VALUES (:id, :goodsId, :sortOrder)", parameters);
+    }
+
+    private List<MapSqlParameterSource> indexedColors(Goods goods) {
+        List<MapSqlParameterSource> result = new ArrayList<>();
+        for (int index = 0; index < goods.colors().size(); index++) {
+            result.add(new MapSqlParameterSource().addValue("id", goods.colors().get(index).id())
+                .addValue("goodsId", goods.id()).addValue("sortOrder", index));
+        }
+        return result;
+    }
+
+    private void insertColorTranslations(List<GoodsColor> colors) {
+        List<MapSqlParameterSource> parameters = new ArrayList<>();
+        colors.forEach(color -> color.translations().forEach((locale, translation) ->
+            parameters.add(new MapSqlParameterSource().addValue("colorId", color.id())
+                .addValue("locale", locale).addValue("name", translation.name()))));
+        batch("""
+            INSERT INTO goods_color_translations (color_id, locale, name)
+            VALUES (:colorId, :locale, :name)
+            """, parameters);
+    }
+
+    private void insertSizes(Goods goods) {
+        batch("""
+            INSERT INTO goods_sizes (id, goods_id, sort_order)
+            VALUES (:id, :goodsId, :sortOrder)
+            """, indexedSizes(goods));
+        insertSizeTranslations(goods.sizes());
+    }
+
+    private void insertSizes(UUID goodsId, List<GoodsSize> sizes) {
+        List<MapSqlParameterSource> parameters = new ArrayList<>();
+        for (int index = 0; index < sizes.size(); index++) {
+            GoodsSize size = sizes.get(index);
+            parameters.add(new MapSqlParameterSource().addValue("id", size.id())
+                .addValue("goodsId", goodsId).addValue("sortOrder", -1 - index));
+        }
+        batch("INSERT INTO goods_sizes (id, goods_id, sort_order) VALUES (:id, :goodsId, :sortOrder)", parameters);
+    }
+
+    private List<MapSqlParameterSource> indexedSizes(Goods goods) {
+        List<MapSqlParameterSource> result = new ArrayList<>();
+        for (int index = 0; index < goods.sizes().size(); index++) {
+            result.add(new MapSqlParameterSource().addValue("id", goods.sizes().get(index).id())
+                .addValue("goodsId", goods.id()).addValue("sortOrder", index));
+        }
+        return result;
+    }
+
+    private void insertSizeTranslations(List<GoodsSize> sizes) {
+        List<MapSqlParameterSource> parameters = new ArrayList<>();
+        sizes.forEach(size -> size.translations().forEach((locale, translation) ->
+            parameters.add(new MapSqlParameterSource().addValue("sizeId", size.id())
+                .addValue("locale", locale).addValue("label", translation.label()))));
+        batch("""
+            INSERT INTO goods_size_translations (size_id, locale, label)
+            VALUES (:sizeId, :locale, :label)
+            """, parameters);
+    }
+
+    private void insertCombinations(UUID goodsId, List<GoodsCombination> combinations) {
+        batch("""
+            INSERT INTO goods_combinations (
+                id, goods_id, color_id, size_id, availability, updated_at
+            ) VALUES (
+                :id, :goodsId, :colorId, :sizeId, :availability, :updatedAt
+            )
+            """, combinations.stream().map(combination -> new MapSqlParameterSource()
+            .addValue("id", combination.id()).addValue("goodsId", goodsId)
+            .addValue("colorId", combination.colorId()).addValue("sizeId", combination.sizeId())
+            .addValue("availability", combination.availability().name())
+            .addValue("updatedAt", atUtc(combination.updatedAt()))).toList());
+    }
+
+    private void deleteByIds(String table, List<UUID> ids) {
+        if (!ids.isEmpty()) {
+            jdbc.update("DELETE FROM " + table + " WHERE id IN (:ids)", new MapSqlParameterSource("ids", ids));
+        }
     }
 
     private List<Goods> hydrate(List<GoodsHeader> headers) {

@@ -5,7 +5,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -355,6 +357,466 @@ class AdminGoodsProductCreationFlowIntegrationTest {
 
         assertNoCreatedProductState();
     }
+
+    @Test
+    void updatesOptionsDifferentiallyAndReordersStableColorsSizesAndImages() throws Exception {
+        UUID firstMedia = UUID.randomUUID();
+        UUID secondMedia = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, firstMedia);
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, secondMedia);
+        UUID colorA = UUID.randomUUID();
+        UUID colorB = UUID.randomUUID();
+        UUID sizeA = UUID.randomUUID();
+        UUID sizeB = UUID.randomUUID();
+        JsonNode create = optionsProduct(
+            List.of(firstMedia, secondMedia), List.of(colorA, colorB), List.of(sizeA, sizeB),
+            List.of(pair(colorA, sizeA), pair(colorA, sizeB), pair(colorB, sizeB))
+        );
+        MvcResult created = postProduct(create.toString(), "options-update-create").andExpect(status().isCreated()).andReturn();
+        UUID goodsId = createdGoodsId(created);
+        Map<String, Map<String, Object>> before = combinationRows(goodsId);
+        Map<String, Object> soldOut = before.get(pairKey(colorA, sizeA));
+        UUID soldOutId = (UUID) soldOut.get("id");
+        mvc.perform(asAdmin(put("/api/v2/admin/goods/" + goodsId + "/combinations/" + soldOutId + "/availability"))
+                .header("Idempotency-Key", "make-sold-out")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":\"SOLD_OUT\"}"))
+            .andExpect(status().isOk());
+        before = combinationRows(goodsId);
+        soldOut = before.get(pairKey(colorA, sizeA));
+        Object soldOutUpdatedAt = soldOut.get("updated_at");
+        Map<UUID, Object> attachedAt = lifecycleTimes(firstMedia, secondMedia);
+        String etag = adminEtag(goodsId);
+        clock.advance(Duration.ofMinutes(5));
+
+        JsonNode update = optionsProduct(
+            List.of(secondMedia, firstMedia), List.of(colorB, colorA), List.of(sizeB, sizeA),
+            List.of(pair(colorA, sizeA), pair(colorB, sizeB), pair(colorB, sizeA))
+        );
+        ((tools.jackson.databind.node.ObjectNode) update.path("translations").path("ko"))
+            .put("name", "수정된 옵션 상품");
+        MvcResult response = putProduct(goodsId, update.toString(), "options-update", etag, "options-request")
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.price.amount").value(2000))
+            .andExpect(jsonPath("$.data.images[0].mediaId").value(secondMedia.toString()))
+            .andExpect(jsonPath("$.data.images[1].mediaId").value(firstMedia.toString()))
+            .andReturn();
+
+        assertThat(orderedIds("goods_colors", goodsId)).containsExactly(colorB, colorA);
+        assertThat(orderedIds("goods_sizes", goodsId)).containsExactly(sizeB, sizeA);
+        Map<String, Map<String, Object>> after = combinationRows(goodsId);
+        assertThat(after).hasSize(3);
+        assertThat(after.get(pairKey(colorA, sizeA)).get("id")).isEqualTo(soldOutId);
+        assertThat(after.get(pairKey(colorA, sizeA)).get("availability")).isEqualTo("SOLD_OUT");
+        assertThat(after.get(pairKey(colorA, sizeA)).get("updated_at")).isEqualTo(soldOutUpdatedAt);
+        assertThat(after.get(pairKey(colorB, sizeB)).get("id"))
+            .isEqualTo(before.get(pairKey(colorB, sizeB)).get("id"));
+        assertThat(after).doesNotContainKey(pairKey(colorA, sizeB));
+        assertThat(after.get(pairKey(colorB, sizeA)).get("availability")).isEqualTo("ON_SALE");
+        assertThat(lifecycleTimes(firstMedia, secondMedia)).isEqualTo(attachedAt);
+        assertThat(response(response).path("data").path("translations").path("ko").path("name").asString())
+            .isEqualTo("수정된 옵션 상품");
+        assertThat(auditCount("PRODUCT_UPDATED", goodsId)).isOne();
+    }
+
+    @Test
+    void replacesImagesAndRollsBackEveryChangeWhenANewImageIsInvalid() throws Exception {
+        UUID first = UUID.randomUUID();
+        UUID kept = UUID.randomUUID();
+        UUID added = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, first);
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, kept);
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, added);
+        JsonNode create = singleProduct(first);
+        addSecondImage(create, kept);
+        UUID goodsId = createdGoodsId(postProduct(create.toString(), "image-replace-create")
+            .andExpect(status().isCreated()).andReturn());
+        Object keptAttachedAt = lifecycle(kept).get("attached_at");
+        String etag = adminEtag(goodsId);
+        JsonNode replacement = singleProduct(kept);
+        addSecondImage(replacement, added);
+        ((tools.jackson.databind.node.ObjectNode) replacement.path("images").get(0).path("alt"))
+            .put("ko", "유지 이미지 수정");
+
+        putProduct(goodsId, replacement.toString(), "image-replace", etag, null)
+            .andExpect(status().isOk());
+
+        assertThat(lifecycle(kept).get("attached_at")).isEqualTo(keptAttachedAt);
+        assertThat(lifecycle(kept).get("detached_at")).isNull();
+        assertThat(lifecycle(added).get("attached_at")).isNotNull();
+        assertThat(lifecycle(first).get("detached_at")).isNotNull();
+        assertThat(Files.exists(mediaFile(FESTIVAL_ID, first, MediaVariant.MASTER))).isTrue();
+        mvc.perform(get("/api/v2/media/goods-images/" + first + "/master")).andExpect(status().isNotFound());
+        performStreaming("/api/v2/media/goods-images/" + kept + "/master").andExpect(status().isOk());
+        performStreaming("/api/v2/media/goods-images/" + added + "/master").andExpect(status().isOk());
+
+        String freshEtag = adminEtag(goodsId);
+        JsonNode invalid = singleProduct(kept);
+        addSecondImage(invalid, UUID.randomUUID());
+        Map<String, Object> goodsBefore = jdbc.queryForMap(
+            "SELECT price_amount, updated_at FROM goods WHERE id = :id", Map.of("id", goodsId)
+        );
+        Map<UUID, Map<String, Object>> lifecycleBefore = Map.of(
+            kept, lifecycle(kept), added, lifecycle(added)
+        );
+        putProduct(goodsId, invalid.toString(), "invalid-replacement", freshEtag, null)
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.error.code").value("INVALID_MEDIA_REFERENCE"));
+
+        assertThat(jdbc.queryForMap(
+            "SELECT price_amount, updated_at FROM goods WHERE id = :id", Map.of("id", goodsId)
+        )).isEqualTo(goodsBefore);
+        assertThat(lifecycle(kept)).isEqualTo(lifecycleBefore.get(kept));
+        assertThat(lifecycle(added)).isEqualTo(lifecycleBefore.get(added));
+        assertThat(associatedMedia(goodsId)).containsExactly(kept, added);
+        assertThat(auditCount("PRODUCT_UPDATED", goodsId)).isOne();
+    }
+
+    @Test
+    void preservesSingleSaleStateButResetsAllCombinationsAcrossModeSwitches() throws Exception {
+        UUID mediaId = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
+        UUID goodsId = createdGoodsId(postProduct(singleProduct(mediaId).toString(), "mode-create")
+            .andExpect(status().isCreated()).andReturn());
+        Map<String, Object> original = jdbc.queryForMap(
+            "SELECT id, updated_at FROM goods_combinations WHERE goods_id = :id", Map.of("id", goodsId)
+        );
+        jdbc.update("UPDATE goods_combinations SET availability = 'SOLD_OUT' WHERE goods_id = :id", Map.of("id", goodsId));
+        String etag = adminEtag(goodsId);
+        clock.advance(Duration.ofMinutes(1));
+
+        putProduct(goodsId, singleProduct(mediaId).toString(), "single-preserve", etag, null)
+            .andExpect(status().isOk());
+        Map<String, Object> preserved = jdbc.queryForMap(
+            "SELECT id, availability, updated_at FROM goods_combinations WHERE goods_id = :id", Map.of("id", goodsId)
+        );
+        assertThat(preserved.get("id")).isEqualTo(original.get("id"));
+        assertThat(preserved.get("availability")).isEqualTo("SOLD_OUT");
+        assertThat(preserved.get("updated_at")).isEqualTo(original.get("updated_at"));
+
+        UUID color = UUID.randomUUID();
+        UUID size = UUID.randomUUID();
+        JsonNode options = optionsProduct(
+            List.of(mediaId), List.of(color), List.of(size), List.of(pair(color, size))
+        );
+        UUID oldSingleId = (UUID) preserved.get("id");
+        putProduct(goodsId, options.toString(), "to-options", adminEtag(goodsId), null)
+            .andExpect(status().isOk());
+        Map<String, Object> option = jdbc.queryForMap(
+            "SELECT id, availability FROM goods_combinations WHERE goods_id = :id", Map.of("id", goodsId)
+        );
+        assertThat(option.get("id")).isNotEqualTo(oldSingleId);
+        assertThat(option.get("availability")).isEqualTo("ON_SALE");
+
+        UUID oldOptionId = (UUID) option.get("id");
+        putProduct(goodsId, singleProduct(mediaId).toString(), "to-single", adminEtag(goodsId), null)
+            .andExpect(status().isOk());
+        Map<String, Object> finalSingle = jdbc.queryForMap(
+            "SELECT id, color_id, size_id, availability FROM goods_combinations WHERE goods_id = :id",
+            Map.of("id", goodsId)
+        );
+        assertThat(finalSingle.get("id")).isNotEqualTo(oldOptionId);
+        assertThat(finalSingle.get("color_id")).isNull();
+        assertThat(finalSingle.get("size_id")).isNull();
+        assertThat(finalSingle.get("availability")).isEqualTo("ON_SALE");
+    }
+
+    @Test
+    void enforcesPutEtagsAndReplaysOriginalBusinessResultWithFreshMeta() throws Exception {
+        UUID mediaId = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
+        UUID goodsId = createdGoodsId(postProduct(singleProduct(mediaId).toString(), "put-replay-create")
+            .andExpect(status().isCreated()).andReturn());
+        String current = adminEtag(goodsId);
+        String body = singleProduct(mediaId).toString();
+
+        mvc.perform(asAdmin(put(ROUTE + "/" + goodsId))
+                .header("Idempotency-Key", "missing-etag")
+                .contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isPreconditionRequired())
+            .andExpect(jsonPath("$.error.code").value("PRECONDITION_REQUIRED"));
+        putProduct(goodsId, body, "invalid-etag", "W/" + current, null)
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_IF_MATCH"));
+        putProduct(goodsId, body, "stale-etag", "\"" + "0".repeat(64) + "\"", null)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error.code").value("EDIT_CONFLICT"));
+
+        MvcResult first = putProduct(goodsId, body, "put-replay", current, "put-request-A")
+            .andExpect(status().isOk()).andReturn();
+        clock.advance(Duration.ofSeconds(2));
+        MvcResult replay = putProduct(goodsId, body, "put-replay", current, "put-request-B")
+            .andExpect(status().isOk()).andReturn();
+        assertThat(response(replay).path("data")).isEqualTo(response(first).path("data"));
+        assertThat(response(replay).path("meta").path("requestId").asString())
+            .isNotEqualTo(response(first).path("meta").path("requestId").asString());
+        assertThat(auditCount("PRODUCT_UPDATED", goodsId)).isOne();
+
+        String fresh = adminEtag(goodsId);
+        putProduct(goodsId, body, "put-replay", fresh, null)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error.code").value("IDEMPOTENCY_KEY_REUSED"));
+        JsonNode changed = singleProduct(mediaId);
+        ((tools.jackson.databind.node.ObjectNode) changed.path("price")).put("amount", 9999);
+        putProduct(goodsId, changed.toString(), "put-replay", current, null)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error.code").value("IDEMPOTENCY_KEY_REUSED"));
+    }
+
+    @Test
+    void rejectsForeignColorIdentifiersWithoutChangingTheTargetProduct() throws Exception {
+        UUID mediaA = UUID.randomUUID();
+        UUID mediaB = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaA);
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaB);
+        UUID foreignColor = UUID.randomUUID();
+        UUID foreignSize = UUID.randomUUID();
+        JsonNode owner = optionsProduct(
+            List.of(mediaA), List.of(foreignColor), List.of(foreignSize),
+            List.of(pair(foreignColor, foreignSize))
+        );
+        postProduct(owner.toString(), "foreign-owner").andExpect(status().isCreated());
+        UUID targetId = createdGoodsId(postProduct(singleProduct(mediaB).toString(), "foreign-target")
+            .andExpect(status().isCreated()).andReturn());
+        UUID ownSize = UUID.randomUUID();
+        JsonNode collision = optionsProduct(
+            List.of(mediaB), List.of(foreignColor), List.of(ownSize), List.of(pair(foreignColor, ownSize))
+        );
+
+        putProduct(targetId, collision.toString(), "foreign-collision", adminEtag(targetId), null)
+            .andExpect(status().isUnprocessableEntity())
+            .andExpect(jsonPath("$.error.code").value("VALIDATION_FAILED"));
+
+        assertThat(jdbc.queryForObject(
+            "SELECT option_mode FROM goods WHERE id = :id", Map.of("id", targetId), String.class
+        )).isEqualTo("SINGLE");
+        assertThat(auditCount("PRODUCT_UPDATED", targetId)).isZero();
+    }
+
+    @Test
+    void hardDeletesProductDetachesMediaAndReplaysAfterTheRowIsGone() throws Exception {
+        UUID first = UUID.randomUUID();
+        UUID second = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, first);
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, second);
+        UUID color = UUID.randomUUID();
+        UUID size = UUID.randomUUID();
+        JsonNode product = optionsProduct(
+            List.of(first, second), List.of(color), List.of(size), List.of(pair(color, size))
+        );
+        UUID goodsId = createdGoodsId(postProduct(product.toString(), "delete-create")
+            .andExpect(status().isCreated()).andReturn());
+        String etag = adminEtag(goodsId);
+
+        MvcResult deleted = deleteProduct(goodsId, "delete-replay", etag, "delete-request-A")
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.id").value(goodsId.toString()))
+            .andExpect(jsonPath("$.data.deleted").value(true))
+            .andReturn();
+        clock.advance(Duration.ofSeconds(2));
+        MvcResult replay = deleteProduct(goodsId, "delete-replay", etag, "delete-request-B")
+            .andExpect(status().isOk()).andReturn();
+        assertThat(response(replay).path("data")).isEqualTo(response(deleted).path("data"));
+        assertThat(response(replay).path("meta").path("requestId").asString())
+            .isNotEqualTo(response(deleted).path("meta").path("requestId").asString());
+        deleteProduct(goodsId, "delete-replay", "\"" + "f".repeat(64) + "\"", null)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error.code").value("IDEMPOTENCY_KEY_REUSED"));
+        deleteProduct(goodsId, "delete-new-key", etag, null)
+            .andExpect(status().isNotFound());
+
+        for (String table : List.of(
+            "goods", "goods_translations", "goods_colors", "goods_color_translations",
+            "goods_sizes", "goods_size_translations", "goods_combinations",
+            "goods_images", "goods_image_translations"
+        )) {
+            assertThat(countRows(table)).as(table).isZero();
+        }
+        assertThat(countRows("media_assets")).isEqualTo(2);
+        assertThat(lifecycle(first).get("attached_at")).isNotNull();
+        assertThat(lifecycle(first).get("detached_at")).isNotNull();
+        assertThat(lifecycle(second).get("detached_at")).isNotNull();
+        assertThat(Files.exists(mediaFile(FESTIVAL_ID, first, MediaVariant.MASTER))).isTrue();
+        assertThat(auditCount("PRODUCT_DELETED", goodsId)).isOne();
+        mvc.perform(get("/api/v2/goods/" + goodsId)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/v2/goods/" + goodsId + "/availability")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide")).andExpect(status().isNotFound());
+        mvc.perform(asAdmin(get(ROUTE + "/" + goodsId))).andExpect(status().isNotFound());
+        mvc.perform(get("/api/v2/media/goods-images/" + first + "/master")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void rejectsDeleteWithoutOneCurrentStrongEtagAndLeavesProductIntact() throws Exception {
+        UUID mediaId = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
+        UUID goodsId = createdGoodsId(postProduct(singleProduct(mediaId).toString(), "delete-etag-create")
+            .andExpect(status().isCreated()).andReturn());
+
+        mvc.perform(asAdmin(delete(ROUTE + "/" + goodsId)).header("Idempotency-Key", "delete-no-etag"))
+            .andExpect(status().isPreconditionRequired())
+            .andExpect(jsonPath("$.error.code").value("PRECONDITION_REQUIRED"));
+        deleteProduct(goodsId, "delete-invalid-etag", "bad", null)
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_IF_MATCH"));
+        deleteProduct(goodsId, "delete-stale-etag", "\"" + "0".repeat(64) + "\"", null)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error.code").value("EDIT_CONFLICT"));
+
+        assertThat(count("goods", "id", goodsId)).isOne();
+        assertThat(lifecycle(mediaId).get("detached_at")).isNull();
+        assertThat(auditCount("PRODUCT_DELETED", goodsId)).isZero();
+    }
+
+    private org.springframework.test.web.servlet.ResultActions putProduct(
+        UUID goodsId,
+        String body,
+        String key,
+        String ifMatch,
+        String clientRequestId
+    ) throws Exception {
+        MockHttpServletRequestBuilder request = asAdmin(put(ROUTE + "/" + goodsId))
+            .header("Idempotency-Key", key)
+            .header("If-Match", ifMatch)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body);
+        if (clientRequestId != null) {
+            request.header("X-Request-Id", clientRequestId);
+        }
+        return mvc.perform(request);
+    }
+
+    private org.springframework.test.web.servlet.ResultActions deleteProduct(
+        UUID goodsId,
+        String key,
+        String ifMatch,
+        String clientRequestId
+    ) throws Exception {
+        MockHttpServletRequestBuilder request = asAdmin(delete(ROUTE + "/" + goodsId))
+            .header("Idempotency-Key", key)
+            .header("If-Match", ifMatch);
+        if (clientRequestId != null) {
+            request.header("X-Request-Id", clientRequestId);
+        }
+        return mvc.perform(request);
+    }
+
+    private String adminEtag(UUID goodsId) throws Exception {
+        return mvc.perform(asAdmin(get(ROUTE + "/" + goodsId)))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getHeader("ETag");
+    }
+
+    private JsonNode optionsProduct(
+        List<UUID> mediaIds,
+        List<UUID> colorIds,
+        List<UUID> sizeIds,
+        List<OptionPairInput> options
+    ) {
+        tools.jackson.databind.node.ObjectNode root = objectMapper.createObjectNode();
+        root.put("optionMode", "OPTIONS");
+        tools.jackson.databind.node.ObjectNode translations = root.putObject("translations");
+        translations.putObject("ko").put("name", "옵션 상품").put("description", "옵션 설명");
+        translations.putObject("en").put("name", "Options product").put("description", "Options description");
+        translations.putNull("zh-Hans");
+        translations.putNull("ja");
+        root.putObject("price").put("amount", 2000).put("currency", "KRW");
+        tools.jackson.databind.node.ArrayNode images = root.putArray("images");
+        for (int index = 0; index < mediaIds.size(); index++) {
+            tools.jackson.databind.node.ObjectNode image = images.addObject();
+            image.put("mediaId", mediaIds.get(index).toString());
+            tools.jackson.databind.node.ObjectNode alt = image.putObject("alt");
+            alt.put("ko", "상품 이미지 " + index);
+            alt.put("en", "Product image " + index);
+            alt.putNull("zh-Hans");
+            alt.putNull("ja");
+        }
+        tools.jackson.databind.node.ArrayNode colors = root.putArray("colors");
+        for (int index = 0; index < colorIds.size(); index++) {
+            tools.jackson.databind.node.ObjectNode color = colors.addObject();
+            color.put("id", colorIds.get(index).toString());
+            tools.jackson.databind.node.ObjectNode values = color.putObject("translations");
+            values.putObject("ko").put("name", "색상 " + index);
+            values.putObject("en").put("name", "Color " + index);
+            values.putNull("zh-Hans");
+            values.putNull("ja");
+        }
+        tools.jackson.databind.node.ArrayNode sizes = root.putArray("sizes");
+        for (int index = 0; index < sizeIds.size(); index++) {
+            tools.jackson.databind.node.ObjectNode size = sizes.addObject();
+            size.put("id", sizeIds.get(index).toString());
+            tools.jackson.databind.node.ObjectNode values = size.putObject("translations");
+            values.putObject("ko").put("label", "크기 " + index);
+            values.putObject("en").put("label", "Size " + index);
+            values.putNull("zh-Hans");
+            values.putNull("ja");
+        }
+        tools.jackson.databind.node.ArrayNode optionNodes = root.putArray("options");
+        options.forEach(option -> optionNodes.addObject()
+            .put("colorId", option.colorId().toString())
+            .put("sizeId", option.sizeId().toString()));
+        return root;
+    }
+
+    private static OptionPairInput pair(UUID colorId, UUID sizeId) {
+        return new OptionPairInput(colorId, sizeId);
+    }
+
+    private static String pairKey(UUID colorId, UUID sizeId) {
+        return colorId + "/" + sizeId;
+    }
+
+    private Map<String, Map<String, Object>> combinationRows(UUID goodsId) {
+        Map<String, Map<String, Object>> result = new java.util.LinkedHashMap<>();
+        jdbc.queryForList("""
+            SELECT id, color_id, size_id, availability, updated_at
+            FROM goods_combinations WHERE goods_id = :id
+            """, Map.of("id", goodsId)).forEach(row -> result.put(
+            pairKey((UUID) row.get("color_id"), (UUID) row.get("size_id")), row
+        ));
+        return result;
+    }
+
+    private Map<UUID, Object> lifecycleTimes(UUID... mediaIds) {
+        Map<UUID, Object> result = new java.util.LinkedHashMap<>();
+        for (UUID mediaId : mediaIds) {
+            result.put(mediaId, lifecycle(mediaId).get("attached_at"));
+        }
+        return result;
+    }
+
+    private Map<String, Object> lifecycle(UUID mediaId) {
+        return jdbc.queryForMap(
+            "SELECT attached_at, detached_at FROM media_assets WHERE id = :id", Map.of("id", mediaId)
+        );
+    }
+
+    private List<UUID> associatedMedia(UUID goodsId) {
+        return jdbc.queryForList(
+            "SELECT media_id FROM goods_images WHERE goods_id = :id ORDER BY sort_order",
+            Map.of("id", goodsId), UUID.class
+        );
+    }
+
+    private Path mediaFile(UUID festivalId, UUID mediaId, MediaVariant variant) {
+        String filename = switch (variant) {
+            case MASTER -> "master.webp";
+            case THUMB_320 -> "320.webp";
+            case THUMB_640 -> "640.webp";
+        };
+        return MEDIA_ROOT.resolve("goods").resolve(festivalId.toString())
+            .resolve(mediaId.toString().replace("-", "").substring(0, 2))
+            .resolve(mediaId.toString()).resolve(filename);
+    }
+
+    private long auditCount(String action, UUID goodsId) {
+        Long count = jdbc.queryForObject("""
+            SELECT count(*) FROM admin_audit_events
+            WHERE action = :action AND resource_type = 'GOODS' AND resource_id = :resourceId
+            """, Map.of("action", action, "resourceId", goodsId.toString()), Long.class);
+        return count == null ? 0 : count;
+    }
+
+    private record OptionPairInput(UUID colorId, UUID sizeId) {}
 
     private org.springframework.test.web.servlet.ResultActions postProduct(String body, String key) throws Exception {
         return postProduct(body, key, null);

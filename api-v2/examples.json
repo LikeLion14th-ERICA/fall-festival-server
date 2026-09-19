@@ -13600,6 +13600,138 @@
           }
         }
       },
+      "invalid-media-reference": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "invalid-media-reference",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminProduct-invalid-media-reference"
+          },
+          "body": {
+            "optionMode": "OPTIONS",
+            "translations": {
+              "ko": {
+                "name": "예시 의류",
+                "description": "실제 상품·가격이 아닙니다."
+              },
+              "en": {
+                "name": "Sample apparel",
+                "description": "Not a real product or price."
+              },
+              "zh-Hans": null,
+              "ja": null
+            },
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "colors": [
+              {
+                "id": "00000000-0000-4000-8000-000000000101",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 A"
+                  },
+                  "en": {
+                    "name": "Sample Color A"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000102",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 B"
+                  },
+                  "en": {
+                    "name": "Sample Color B"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "sizes": [
+              {
+                "id": "00000000-0000-4000-8000-000000000201",
+                "translations": {
+                  "ko": {
+                    "label": "M"
+                  },
+                  "en": {
+                    "label": "M"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000202",
+                "translations": {
+                  "ko": {
+                    "label": "L"
+                  },
+                  "en": {
+                    "label": "L"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "options": [
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              }
+            ]
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "INVALID_MEDIA_REFERENCE",
+            "message": "사용할 수 없는 상품 이미지가 포함되어 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
       "not-found": {
         "request": {
           "method": "PUT",
@@ -13718,6 +13850,138 @@
           "error": {
             "code": "NOT_FOUND",
             "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-required": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminProduct-idempotency-key-required"
+          },
+          "body": {
+            "optionMode": "OPTIONS",
+            "translations": {
+              "ko": {
+                "name": "예시 의류",
+                "description": "실제 상품·가격이 아닙니다."
+              },
+              "en": {
+                "name": "Sample apparel",
+                "description": "Not a real product or price."
+              },
+              "zh-Hans": null,
+              "ja": null
+            },
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "colors": [
+              {
+                "id": "00000000-0000-4000-8000-000000000101",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 A"
+                  },
+                  "en": {
+                    "name": "Sample Color A"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000102",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 B"
+                  },
+                  "en": {
+                    "name": "Sample Color B"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "sizes": [
+              {
+                "id": "00000000-0000-4000-8000-000000000201",
+                "translations": {
+                  "ko": {
+                    "label": "M"
+                  },
+                  "en": {
+                    "label": "M"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000202",
+                "translations": {
+                  "ko": {
+                    "label": "L"
+                  },
+                  "en": {
+                    "label": "L"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "options": [
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              }
+            ]
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
             "details": [],
             "retryable": false
           },
@@ -14711,6 +14975,37 @@
           "error": {
             "code": "NOT_FOUND",
             "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-required": {
+        "request": {
+          "method": "DELETE",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminProduct-idempotency-key-required"
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
             "details": [],
             "retryable": false
           },
