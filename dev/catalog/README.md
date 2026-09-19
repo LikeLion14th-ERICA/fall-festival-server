@@ -1,5 +1,9 @@
 # Development Catalog
 
+프런트 화면 개발용으로 부스·지도까지 채운 목 catalog는
+[`frontend-mock-catalog.json`](frontend-mock-catalog.json)이며, 넣는 절차는
+[프런트 개발용 목 데이터](../admin-mock/README.md)를 따릅니다.
+
 `development-catalog.json`은 개발 환경의 공개 API smoke test에만 사용하는 synthetic
 catalog manifest입니다. 실제 행사 운영 정보나 승인된 production content가 아닙니다.
 
