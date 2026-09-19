@@ -29,6 +29,19 @@ class CanonicalPayloadTest {
     }
 
     @Test
+    void acceptsNullFieldsInNestedObjectsAndTellsThemApartFromMissingOnes() {
+        java.util.Map<String, Object> withNull = new java.util.LinkedHashMap<>();
+        withNull.put("ko", "라벨");
+        withNull.put("ja", null);
+
+        CanonicalPayload nested = CanonicalPayload.from(Map.of("links", List.of(Map.of("labels", withNull))));
+
+        assertThat(nested.value()).contains("key:2:ja;null;");
+        assertThat(nested.value())
+            .isNotEqualTo(CanonicalPayload.from(Map.of("links", List.of(Map.of("labels", Map.of("ko", "라벨"))))).value());
+    }
+
+    @Test
     void preservesArrayOrderAndRejectsAmbiguousValues() {
         assertThat(CanonicalPayload.from(Map.of("items", List.of("A", "B"))).value())
             .isNotEqualTo(CanonicalPayload.from(Map.of("items", List.of("B", "A"))).value());

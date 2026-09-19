@@ -242,6 +242,34 @@ class NoticeFlowIntegrationTest {
     }
 
     @Test
+    void createsANoticeWhoseLinkLeavesTheUntranslatedLabelsNull() throws Exception {
+        String withLink = """
+            {
+              "type": "GENERAL",
+              "translations": {
+                "ko": {"title": "링크 공지", "body": "본문"},
+                "en": {"title": "Linked notice", "body": "Body"}
+              },
+              "links": [{"url": "https://example.invalid/a", "labels": {"ko": "링크", "en": "Link", "zh-Hans": null, "ja": null}}],
+              "templateId": null
+            }
+            """;
+        String key = nextKey();
+
+        for (int attempt = 0; attempt < 2; attempt++) {
+            mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))
+                    .header("Idempotency-Key", key)
+                    .contentType("application/json")
+                    .content(withLink))
+                .andExpect(status().isCreated());
+        }
+        mvc.perform(get("/api/v2/notices"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items.length()").value(1))
+            .andExpect(jsonPath("$.data.items[0].links[0].label").value("링크"));
+    }
+
+    @Test
     void requiresIdempotencyKeyOnCreateAndIfMatchOnUpdate() throws Exception {
         mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))
                 .contentType("application/json")
