@@ -8,6 +8,11 @@
 - 범위: remote development only; production hosting 결정이 아님
 - 검증 게이트: `READ_ONLY_DATABASE_PREFLIGHT`, `DEPLOYMENT_VALIDATION_REQUIRED`
 
+> **2026-09-19 갱신:** backend는 Render가 아니라 A1 인스턴스에 Docker로 이미 올라가 있다.
+> 아래의 Render 관련 결정(Backend, Topology의 Render 표기, 포트·health check·Known limitations의
+> Render 수치)은 더 이상 현재 배포를 설명하지 않는다. A1 구성(실행 방식, reverse proxy, DB 접근)은
+> 확인 후 이 문서를 다시 쓴다. 이미지 저장소는 아래 [굿즈 이미지 저장소](#굿즈-이미지-저장소)를 따른다.
+
 ## Context
 
 원격 프런트엔드와 백엔드는 아직 배포되지 않았다. 프런트엔드 저장소
@@ -201,6 +206,20 @@ preflight 역할을 요청한다. migration 뒤 migration 역할로
 grant했더라도 catalog 역할에서 계좌·혼잡도·공지·굿즈 테이블 권한을 회수한다. catalog 역할에는
 catalog 테이블(V22 `festival_links` 포함) 권한을 provider가 따로 준다. 단일 계정만 제공되면 역할
 분리를 강제할 수 없음을 기록하고 운영 배포는 진행하지 않는다.
+
+## 굿즈 이미지 저장소
+
+굿즈 이미지는 `FESTIVAL_MEDIA_STORAGE_ROOT` 디렉터리에 파일로 저장하고 DB에는 media 기록만 둔다.
+Docker image는 이 값을 `/var/lib/espero/media`로 두고 UID/GID 10001 소유로 만든다.
+
+- 이 경로에 named volume을 mount한다. volume이 없으면 container를 다시 만들 때 파일이 사라지고
+  DB 기록만 남아 이미지 조회가 `503`이 된다.
+- 값이 없으면 업로드·조회가 `503 MEDIA_STORAGE_UNCONFIGURED`이며 상품을 등록할 수 없다. 빈 값이나
+  container 사용자가 쓸 수 없는 경로는 startup에서 실패한다.
+- DB와 volume은 같은 시점으로 함께 백업·복구한다. 한쪽만 복구하면 이미지가 깨지거나 DB에 없는
+  파일이 남는다.
+- 배포 후 관리자로 이미지 하나를 올리고 container를 재시작한 뒤에도 같은 이미지가 조회되는지
+  확인한다.
 
 ## Networking / CORS
 
