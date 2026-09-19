@@ -101,7 +101,8 @@ class CrowdingControllerOpenApiTest {
         when(views.current(org.mockito.ArgumentMatchers.any())).thenReturn(snapshot);
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
         mvc = MockMvcBuilders.standaloneSetup(new CrowdingController(
-            views, store, conditional, preconditions, idempotency, audit, adminContext, clock
+            views, store, conditional, preconditions, idempotency, audit, adminContext, clock,
+            mock(CatalogSnapshotProvider.class)
         )).setControllerAdvice(new GlobalApiExceptionHandler(metaSupport)).build();
     }
 

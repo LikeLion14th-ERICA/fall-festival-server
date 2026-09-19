@@ -88,7 +88,11 @@ public class CatalogExportService {
             ticketGuide(revisionId),
             stampGuide(revisionId),
             festivalLinks(revisionId),
-            festivalLinkTranslations(revisionId)
+            festivalLinkTranslations(revisionId),
+            festivalTitleTranslations(revisionId),
+            mapAssetTranslations(revisionId),
+            ticketGuideTranslations(revisionId),
+            stampGuideTranslations(revisionId)
         );
         return new ExportResult(manifest, findings(manifest));
     }
@@ -513,6 +517,55 @@ public class CatalogExportService {
             resultSet.getString("link_id"),
             resultSet.getString("locale"),
             resultSet.getString("label")
+        ));
+    }
+
+    private List<CatalogManifest.FestivalTitleTranslation> festivalTitleTranslations(UUID revisionId) {
+        return query("""
+            SELECT locale, title FROM festival_title_translations
+            WHERE festival_revision_id = :revisionId ORDER BY locale
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.FestivalTitleTranslation(
+            resultSet.getString("locale"),
+            resultSet.getString("title")
+        ));
+    }
+
+    private List<CatalogManifest.MapAssetTranslation> mapAssetTranslations(UUID revisionId) {
+        return query("""
+            SELECT map_id, version, locale, image_alt FROM map_asset_translations
+            WHERE festival_revision_id = :revisionId ORDER BY map_id, version, locale
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.MapAssetTranslation(
+            resultSet.getString("map_id"),
+            resultSet.getString("version"),
+            resultSet.getString("locale"),
+            resultSet.getString("image_alt")
+        ));
+    }
+
+    private List<CatalogManifest.TicketGuideTranslation> ticketGuideTranslations(UUID revisionId) {
+        return query("""
+            SELECT locale, instructions FROM ticket_guide_translations
+            WHERE festival_revision_id = :revisionId AND id = 1 ORDER BY locale
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.TicketGuideTranslation(
+            resultSet.getString("locale"),
+            strings(resultSet, "instructions")
+        ));
+    }
+
+    private List<CatalogManifest.StampGuideTranslation> stampGuideTranslations(UUID revisionId) {
+        return query("""
+            SELECT locale, title, instructions, reward_name, reward_location_text,
+                   reward_hours_text, reward_notice
+            FROM stamp_guide_translations
+            WHERE festival_revision_id = :revisionId AND id = 1 ORDER BY locale
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.StampGuideTranslation(
+            resultSet.getString("locale"),
+            resultSet.getString("title"),
+            strings(resultSet, "instructions"),
+            resultSet.getString("reward_name"),
+            resultSet.getString("reward_location_text"),
+            resultSet.getString("reward_hours_text"),
+            resultSet.getString("reward_notice")
         ));
     }
 

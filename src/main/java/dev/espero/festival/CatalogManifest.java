@@ -52,7 +52,11 @@ public record CatalogManifest(
     TicketGuide ticketGuide,
     StampGuide stampGuide,
     List<FestivalLink> festivalLinks,
-    List<FestivalLinkTranslation> festivalLinkTranslations
+    List<FestivalLinkTranslation> festivalLinkTranslations,
+    List<FestivalTitleTranslation> festivalTitleTranslations,
+    List<MapAssetTranslation> mapAssetTranslations,
+    List<TicketGuideTranslation> ticketGuideTranslations,
+    List<StampGuideTranslation> stampGuideTranslations
 ) {
 
     public CatalogManifest {
@@ -89,6 +93,11 @@ public record CatalogManifest(
         // Home links arrived after the first manifests, which may omit them.
         festivalLinks = optionalList(festivalLinks);
         festivalLinkTranslations = optionalList(festivalLinkTranslations);
+        // Non-Korean text for single-language parts; Korean stays in the base rows.
+        festivalTitleTranslations = optionalList(festivalTitleTranslations);
+        mapAssetTranslations = optionalList(mapAssetTranslations);
+        ticketGuideTranslations = optionalList(ticketGuideTranslations);
+        stampGuideTranslations = optionalList(stampGuideTranslations);
     }
 
     /** Manifest without home links; they default to empty. */
@@ -162,6 +171,10 @@ public record CatalogManifest(
             ticketGuide,
             stampGuide,
             List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
             List.of()
         );
     }
@@ -195,6 +208,48 @@ public record CatalogManifest(
         String locale,
         String label
     ) {}
+
+    /** The festival title in a non-Korean locale; Korean is the festival's own title. */
+    public record FestivalTitleTranslation(
+        String locale,
+        String title
+    ) {}
+
+    /** Map image alt text in a non-Korean locale. */
+    public record MapAssetTranslation(
+        String mapId,
+        String version,
+        String locale,
+        String imageAlt
+    ) {}
+
+    /** Ticket guide instructions in a non-Korean locale, one per Korean instruction. */
+    public record TicketGuideTranslation(
+        String locale,
+        List<String> instructions
+    ) {
+        public TicketGuideTranslation {
+            instructions = optionalList(instructions);
+        }
+    }
+
+    /**
+     * Stamp guide text in a non-Korean locale. Optional fields are present
+     * exactly when the Korean guide has them.
+     */
+    public record StampGuideTranslation(
+        String locale,
+        String title,
+        List<String> instructions,
+        String rewardName,
+        String rewardLocationText,
+        String rewardHoursText,
+        String rewardNotice
+    ) {
+        public StampGuideTranslation {
+            instructions = optionalList(instructions);
+        }
+    }
 
     public record FestivalDay(
         LocalDate festivalDate,

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.persistence.CatalogSnapshotStore;
+import dev.espero.festival.persistence.LocaleCompletenessStore;
 import dev.espero.festival.persistence.PerformanceRevisionValidator;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -71,6 +72,9 @@ class CatalogRevisionServiceIntegrationTest {
     private CatalogExportService exports;
 
     @Autowired
+    private LocaleCompletenessStore localeCompleteness;
+
+    @Autowired
     private PlatformTransactionManager transactionManager;
 
     @TempDir
@@ -100,6 +104,10 @@ class CatalogRevisionServiceIntegrationTest {
             "artist_translations",
             "artists",
             "timetable_configs",
+            "festival_title_translations",
+            "ticket_guide_translations",
+            "stamp_guide_translations",
+            "map_asset_translations",
             "ticket_guide_revisions",
             "stamp_guide_revisions",
             "space_map_targets",
@@ -396,6 +404,208 @@ class CatalogRevisionServiceIntegrationTest {
         assertThatThrownBy(() -> importExportedManifest(result.manifest()))
             .isInstanceOf(CatalogCliException.class)
             .hasMessageContaining(CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED);
+    }
+
+    @Test
+    void publishesACompleteEnglishCatalogAndKeepsItThroughExportAndRollback() throws IOException {
+        UUID korean = importManifest("qr-locale-ko", "/assets/maps/overview-v1.png");
+        revisions.publish(korean, "release-bot");
+        assertThat(localeCompleteness.findings(korean, "en")).isNotEmpty();
+        assertThatThrownBy(() -> snapshots.loadRevision(korean, "en"))
+            .isInstanceOf(RuntimeException.class);
+
+        CatalogManifest english = withLocale(exports.export(korean).manifest(), "en");
+        UUID translated = importExportedManifest(english);
+        revisions.publish(translated, "release-bot");
+
+        assertThat(localeCompleteness.findings(translated, "en")).isEmpty();
+        assertThat(localeCompleteness.findings(translated, "zh-Hans")).isNotEmpty();
+        CatalogSnapshot koreanSnapshot = snapshots.loadPublished();
+        CatalogSnapshot englishSnapshot = snapshots.loadPublished("en");
+        assertThat(englishSnapshot.home().title()).isEqualTo("en " + koreanSnapshot.home().title());
+        assertThat(englishSnapshot.stampGuide().title()).isEqualTo("en " + koreanSnapshot.stampGuide().title());
+        assertThat(englishSnapshot.stampGuide().qrValue()).isEqualTo(koreanSnapshot.stampGuide().qrValue());
+        assertThat(englishSnapshot.maps()).extracting(map -> map.image().alt())
+            .allMatch(alt -> alt.startsWith("en "));
+        assertThat(englishSnapshot.spaces()).extracting(CatalogSnapshot.Space::name)
+            .allMatch(name -> name.startsWith("en "));
+        assertThat(koreanSnapshot.spaces()).extracting(CatalogSnapshot.Space::name)
+            .noneMatch(name -> name.startsWith("en "));
+
+        CatalogManifest exported = exports.export(translated).manifest();
+        assertThat(exported.festivalTitleTranslations()).hasSize(1);
+        assertThat(exported.stampGuideTranslations()).hasSize(1);
+        assertThat(exported.ticketGuideTranslations()).hasSize(1);
+        assertThat(exported.mapAssetTranslations()).hasSameSizeAs(english.mapAssetTranslations());
+
+        UUID reverted = revisions.rollback(korean, translated, "incident-bot");
+        assertThat(localeCompleteness.findings(reverted, "en")).isNotEmpty();
+        UUID restored = revisions.rollback(translated, reverted, "incident-bot");
+        assertThat(localeCompleteness.findings(restored, "en")).isEmpty();
+    }
+
+    @Test
+    void reportsEachGapThatWouldLeaveAnEnglishScreenPartlyEmpty() throws IOException {
+        UUID korean = importManifest("qr-locale-gaps", "/assets/maps/overview-v1.png");
+        CatalogManifest english = withLocale(exports.export(korean).manifest(), "en");
+        UUID translated = importExportedManifest(english);
+        assertThat(localeCompleteness.findings(translated, "en")).isEmpty();
+
+        MapSqlParameterSource revision = new MapSqlParameterSource("revisionId", translated);
+        jdbc.update("""
+            DELETE FROM space_translations
+            WHERE festival_revision_id = :revisionId AND locale = 'en'
+              AND space_id = (SELECT min(space_id) FROM space_translations WHERE festival_revision_id = :revisionId)
+            """, revision);
+        jdbc.update("DELETE FROM stamp_guide_translations WHERE festival_revision_id = :revisionId", revision);
+        jdbc.update("DELETE FROM festival_title_translations WHERE festival_revision_id = :revisionId", revision);
+
+        assertThat(localeCompleteness.findings(translated, "en"))
+            .anyMatch(finding -> finding.startsWith("space_translations: 1 "))
+            .anyMatch(finding -> finding.startsWith("stamp_guide_translations"))
+            .anyMatch(finding -> finding.startsWith("festival_title_translations"));
+        assertThatThrownBy(() -> snapshots.loadRevision(translated, "en"))
+            .isInstanceOf(RuntimeException.class);
+        assertThat(snapshots.loadRevision(translated)).isNotNull();
+    }
+
+    @Test
+    void rejectsTextTranslationsThatDoNotMatchTheKoreanShape() throws IOException {
+        UUID korean = importManifest("qr-locale-shape", "/assets/maps/overview-v1.png");
+        CatalogManifest english = withLocale(exports.export(korean).manifest(), "en");
+        CatalogManifest.StampGuideTranslation stamp = english.stampGuideTranslations().getFirst();
+        CatalogManifest koreanRow = replaceTextTranslations(english,
+            List.of(new CatalogManifest.FestivalTitleTranslation("ko", "중복 제목")),
+            english.stampGuideTranslations());
+        CatalogManifest extraInstruction = replaceTextTranslations(english, english.festivalTitleTranslations(),
+            List.of(new CatalogManifest.StampGuideTranslation(
+                stamp.locale(), stamp.title(), append(stamp.instructions(), "extra"), stamp.rewardName(),
+                stamp.rewardLocationText(), stamp.rewardHoursText(), stamp.rewardNotice()
+            )));
+
+        assertThatThrownBy(() -> importExportedManifest(koreanRow))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("non-Korean locales only");
+        assertThatThrownBy(() -> importExportedManifest(extraInstruction))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("stampGuideTranslations.instructions must match");
+    }
+
+    private static List<String> append(List<String> values, String value) {
+        List<String> result = new ArrayList<>(values);
+        result.add(value);
+        return result;
+    }
+
+    private static CatalogManifest replaceTextTranslations(
+        CatalogManifest m,
+        List<CatalogManifest.FestivalTitleTranslation> titles,
+        List<CatalogManifest.StampGuideTranslation> stamps
+    ) {
+        return new CatalogManifest(
+            m.festivalId(), m.baselineRevisionId(), m.festivalDays(), m.spaces(), m.spaceTranslations(),
+            m.spaceSortOrders(), m.spaceEvents(), m.spaceMenuItems(), m.places(), m.placeTranslations(),
+            m.maps(), m.mapTranslations(), m.mapAssets(), m.mapAreas(), m.mapPins(), m.mapPinTranslations(),
+            m.mapPinFilterGroupTranslations(), m.spaceMapTargets(), m.artists(), m.artistTranslations(),
+            m.artistLinks(), m.artistLinkTranslations(), m.artistSongs(), m.artistSongTranslations(),
+            m.performances(), m.performanceTranslations(), m.performanceArtists(), m.timetableConfig(),
+            m.prohibitedItems(), m.prohibitedItemTranslations(), m.prohibitedMessages(), m.ticketGuide(),
+            m.stampGuide(), m.festivalLinks(), m.festivalLinkTranslations(), titles, m.mapAssetTranslations(),
+            m.ticketGuideTranslations(), stamps
+        );
+    }
+
+    /** Adds a {@code locale} copy of every Korean text, prefixed so tests can tell them apart. */
+    private static CatalogManifest withLocale(CatalogManifest m, String locale) {
+        java.util.function.UnaryOperator<String> t = value -> value == null ? null : locale + " " + value;
+        java.util.function.Predicate<String> ko = "ko"::equals;
+        return new CatalogManifest(
+            m.festivalId(), m.baselineRevisionId(), m.festivalDays(), m.spaces(),
+            plus(m.spaceTranslations(), m.spaceTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.SpaceTranslation(r.spaceId(), locale, t.apply(r.name()),
+                    t.apply(r.imageAlt()), t.apply(r.locationText()), t.apply(r.operatorText()),
+                    t.apply(r.hoursText()), t.apply(r.descriptionText()), t.apply(r.experienceText()),
+                    t.apply(r.contactLabel()), r.contactUrl())).toList()),
+            plus(m.spaceSortOrders(), m.spaceSortOrders().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.SpaceSortOrder(locale, r.spaceId(), r.sortRank())).toList()),
+            plus(m.spaceEvents(), m.spaceEvents().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.SpaceEvent(r.spaceId(), locale, r.sortOrder(), t.apply(r.content())))
+                .toList()),
+            plus(m.spaceMenuItems(), m.spaceMenuItems().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.SpaceMenuItem(r.spaceId(), locale, r.sortOrder(), t.apply(r.name()),
+                    r.priceAmount())).toList()),
+            m.places(),
+            plus(m.placeTranslations(), m.placeTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.PlaceTranslation(r.placeId(), locale, t.apply(r.name()),
+                    t.apply(r.locationText()), t.apply(r.hoursText()), t.apply(r.descriptionText()),
+                    t.apply(r.usageText()))).toList()),
+            m.maps(),
+            plus(m.mapTranslations(), m.mapTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.MapTranslation(r.mapId(), locale, t.apply(r.name()))).toList()),
+            m.mapAssets(), m.mapAreas(), m.mapPins(),
+            plus(m.mapPinTranslations(), m.mapPinTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.MapPinTranslation(r.mapId(), r.mapVersion(), r.pinId(), locale,
+                    t.apply(r.label()))).toList()),
+            plus(m.mapPinFilterGroupTranslations(), m.mapPinFilterGroupTranslations().stream()
+                .filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.MapPinFilterGroupTranslation(r.filterGroup(), locale,
+                    t.apply(r.label()))).toList()),
+            m.spaceMapTargets(), m.artists(),
+            plus(m.artistTranslations(), m.artistTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.ArtistTranslation(r.artistId(), locale, t.apply(r.name()),
+                    t.apply(r.imageAlt()), t.apply(r.introduction()))).toList()),
+            m.artistLinks(),
+            plus(m.artistLinkTranslations(), m.artistLinkTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.ArtistLinkTranslation(r.artistId(), r.sortOrder(), locale,
+                    t.apply(r.label()))).toList()),
+            m.artistSongs(),
+            plus(m.artistSongTranslations(), m.artistSongTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.ArtistSongTranslation(r.artistId(), r.sortOrder(), locale,
+                    t.apply(r.title()))).toList()),
+            m.performances(),
+            plus(m.performanceTranslations(), m.performanceTranslations().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.PerformanceTranslation(r.performanceId(), locale, t.apply(r.title()),
+                    t.apply(r.description()))).toList()),
+            m.performanceArtists(), m.timetableConfig(), m.prohibitedItems(),
+            plus(m.prohibitedItemTranslations(), m.prohibitedItemTranslations().stream()
+                .filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.ProhibitedItemTranslation(r.itemId(), locale, t.apply(r.label())))
+                .toList()),
+            plus(m.prohibitedMessages(), m.prohibitedMessages().stream().filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.ProhibitedMessage(locale, t.apply(r.message()))).toList()),
+            m.ticketGuide(), m.stampGuide(), m.festivalLinks(),
+            plus(m.festivalLinkTranslations(), m.festivalLinkTranslations().stream()
+                .filter(r -> ko.test(r.locale()))
+                .map(r -> new CatalogManifest.FestivalLinkTranslation(r.linkId(), locale, t.apply(r.label())))
+                .toList()),
+            List.of(new CatalogManifest.FestivalTitleTranslation(locale, t.apply("한양문화제 동심"))),
+            m.mapAssets().stream()
+                .map(a -> new CatalogManifest.MapAssetTranslation(a.mapId(), a.version(), locale,
+                    t.apply(a.imageAlt()))).toList(),
+            List.of(new CatalogManifest.TicketGuideTranslation(locale,
+                m.ticketGuide().instructions().stream().map(t).toList())),
+            List.of(new CatalogManifest.StampGuideTranslation(locale, t.apply(m.stampGuide().title()),
+                m.stampGuide().instructions().stream().map(t).toList(), t.apply(m.stampGuide().rewardName()),
+                t.apply(m.stampGuide().rewardLocationText()), t.apply(m.stampGuide().rewardHoursText()),
+                t.apply(m.stampGuide().rewardNotice())))
+        );
+    }
+
+    /** Keeps the rows of other locales and replaces those in the added rows' locale. */
+    private static <T extends Record> List<T> plus(List<T> first, List<T> added) {
+        java.util.Set<String> locales = new java.util.HashSet<>();
+        added.forEach(row -> locales.add(localeOf(row)));
+        List<T> result = new ArrayList<>(first.stream().filter(row -> !locales.contains(localeOf(row))).toList());
+        result.addAll(added);
+        return result;
+    }
+
+    private static String localeOf(Record row) {
+        try {
+            return (String) row.getClass().getMethod("locale").invoke(row);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     private UUID importExportedManifest(CatalogManifest manifest) throws IOException {

@@ -24,8 +24,6 @@ import org.springframework.stereotype.Service;
 @Profile("db")
 public class CrowdingViewService {
 
-    private static final String CONTENT_LOCALE = PublicContentLocale.KOREAN;
-
     private final CrowdingStore store;
     private final FestivalContextService contextService;
     private final ApiMetaSupport metaSupport;
@@ -88,8 +86,11 @@ public class CrowdingViewService {
         Optional<CrowdingRecord> saved,
         Instant now
     ) {
-        ApiMeta meta = metaSupport.unscopedMeta(request, CONTENT_LOCALE);
-        CrowdingResponse response = response(today, selected, saved, now, context.timezone());
+        // The public query was validated against the published locales; admin
+        // requests carry no locale and read Korean.
+        String locale = java.util.Optional.ofNullable(request.getParameter("locale")).orElse(PublicContentLocale.KOREAN);
+        ApiMeta meta = metaSupport.unscopedMeta(request, locale);
+        CrowdingResponse response = response(today, selected, saved, now, context.timezone(), locale);
         String etag = conditionalResponses.strongEtag(
             new ConditionalApiResponse<>(response, ConditionalApiMeta.from(meta))
         );
@@ -166,7 +167,8 @@ public class CrowdingViewService {
         CrowdingSchedule selected,
         Optional<CrowdingRecord> saved,
         Instant now,
-        ZoneId timezone
+        ZoneId timezone,
+        String locale
     ) {
         OffsetDateTime opensAt = selected.opensAt().atZoneSameInstant(timezone).toOffsetDateTime();
         OffsetDateTime closesAt = selected.closesAt().atZoneSameInstant(timezone).toOffsetDateTime();
@@ -196,7 +198,7 @@ public class CrowdingViewService {
             status,
             saved.map(CrowdingRecord::level).orElse(null),
             active ? color(status) : null,
-            CrowdingMessages.message(status, opensAt.toLocalTime(), CONTENT_LOCALE),
+            CrowdingMessages.message(status, opensAt.toLocalTime(), locale),
             active ? saved.map(record -> OffsetDateTime.ofInstant(record.updatedAt(), timezone)).orElse(null) : null,
             active
                 ? saved.map(record -> CrowdingResponse.TimeBasis.OPERATOR)

@@ -94,6 +94,27 @@ class ConfigControllerTest {
             .andExpect(status().isServiceUnavailable());
     }
 
+    @Test
+    void servesAPublishedLocaleFromItsOwnSnapshotAndListsItAfterKorean() throws Exception {
+        when(snapshots.required()).thenReturn(snapshot("한양문화제 동심", List.of()));
+        when(snapshots.required("en")).thenReturn(snapshot("Hanyang Festival Dongsim", List.of(
+            new HomeLink("notices", "UNIVERSITY_NOTICES", "Notices", "https://example.test/notices", null, 1)
+        )));
+        when(snapshots.publishedLocales()).thenReturn(List.of("ko", "en"));
+        MockMvc mvc = mvc("2030-10-02T03:00:00Z");
+
+        mvc.perform(get("/api/v2/config").param("locale", "en"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.festival.title").value("Hanyang Festival Dongsim"))
+            .andExpect(jsonPath("$.data.links.universityNotices.label").value("Notices"))
+            .andExpect(jsonPath("$.data.languages[*].code", Matchers.contains("ko", "en")))
+            .andExpect(jsonPath("$.data.languages[1].label").value("English"))
+            .andExpect(jsonPath("$.meta.locale").value("en"));
+        mvc.perform(get("/api/v2/config").param("locale", "zh-Hans"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("LOCALE_NOT_READY"));
+    }
+
     private MockMvc mvc(String now) {
         Clock clock = Clock.fixed(Instant.parse(now), ZoneOffset.UTC);
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);

@@ -223,6 +223,72 @@ public final class CatalogManifestValidator {
 
         validateTicketGuide(manifest.ticketGuide(), maps, places, pins, currentVersions);
         validateStampGuide(manifest.stampGuide());
+        validateTextTranslations(manifest);
+    }
+
+    /**
+     * Non-Korean text for the single-language parts. Korean lives in the
+     * base rows, so these lists carry other locales only, and each row must
+     * match the Korean shape: one instruction per Korean instruction and an
+     * optional field exactly when the Korean guide has it.
+     */
+    private void validateTextTranslations(CatalogManifest manifest) {
+        for (CatalogManifest.FestivalTitleTranslation row : manifest.festivalTitleTranslations()) {
+            require(row != null, "festivalTitleTranslations must not contain null");
+            foreignLocale(row.locale(), "festivalTitleTranslations");
+            text(row.title(), "festivalTitleTranslations.title");
+        }
+        requireUnique(manifest.festivalTitleTranslations().stream()
+            .map(CatalogManifest.FestivalTitleTranslation::locale).toList(), "festivalTitleTranslations");
+
+        Set<String> assets = new HashSet<>();
+        manifest.mapAssets().forEach(asset -> assets.add(key(asset.mapId(), asset.version())));
+        for (CatalogManifest.MapAssetTranslation row : manifest.mapAssetTranslations()) {
+            require(row != null && assets.contains(key(row.mapId(), row.version())),
+                "mapAssetTranslations references an unknown map asset");
+            foreignLocale(row.locale(), "mapAssetTranslations");
+            text(row.imageAlt(), "mapAssetTranslations.imageAlt");
+        }
+        requireUnique(manifest.mapAssetTranslations().stream()
+            .map(row -> key(row.mapId(), row.version(), row.locale())).toList(), "mapAssetTranslations");
+
+        int ticketInstructions = manifest.ticketGuide().instructions().size();
+        for (CatalogManifest.TicketGuideTranslation row : manifest.ticketGuideTranslations()) {
+            require(row != null, "ticketGuideTranslations must not contain null");
+            foreignLocale(row.locale(), "ticketGuideTranslations");
+            require(row.instructions().size() == ticketInstructions,
+                "ticketGuideTranslations.instructions must match the Korean instructions");
+            row.instructions().forEach(instruction -> text(instruction, "ticketGuideTranslations.instructions"));
+        }
+        requireUnique(manifest.ticketGuideTranslations().stream()
+            .map(CatalogManifest.TicketGuideTranslation::locale).toList(), "ticketGuideTranslations");
+
+        CatalogManifest.StampGuide korean = manifest.stampGuide();
+        for (CatalogManifest.StampGuideTranslation row : manifest.stampGuideTranslations()) {
+            require(row != null, "stampGuideTranslations must not contain null");
+            foreignLocale(row.locale(), "stampGuideTranslations");
+            text(row.title(), "stampGuideTranslations.title");
+            text(row.rewardName(), "stampGuideTranslations.rewardName");
+            text(row.rewardNotice(), "stampGuideTranslations.rewardNotice");
+            sameShape(korean.rewardLocationText(), row.rewardLocationText(), "stampGuideTranslations.rewardLocationText");
+            sameShape(korean.rewardHoursText(), row.rewardHoursText(), "stampGuideTranslations.rewardHoursText");
+            require(row.instructions().size() == korean.instructions().size(),
+                "stampGuideTranslations.instructions must match the Korean instructions");
+            row.instructions().forEach(instruction -> text(instruction, "stampGuideTranslations.instructions"));
+        }
+        requireUnique(manifest.stampGuideTranslations().stream()
+            .map(CatalogManifest.StampGuideTranslation::locale).toList(), "stampGuideTranslations");
+    }
+
+    private void foreignLocale(String value, String field) {
+        locale(value);
+        require(!"ko".equals(value), field + " holds non-Korean locales only; Korean is the base text");
+    }
+
+    private void sameShape(String korean, String translated, String field) {
+        require((korean == null) == (translated == null),
+            field + " must be present exactly when the Korean text is");
+        optionalText(translated, field);
     }
 
     private void validatePerformanceCatalog(CatalogManifest manifest) {

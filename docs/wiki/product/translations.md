@@ -10,8 +10,9 @@
   같은 여러 글자를 `页`로 잘못 매핑하므로 복사한 텍스트를 그대로 쓰지 않는다.
 - 서버가 만드는 문구는 혼잡도 `message`뿐이며 `CrowdingMessages`에 반영했다. 나머지는
   프런트엔드 문자열 또는 catalog manifest 번역으로 쓴다.
-- 언어 공개는 이 표의 존재와 별개다. 해당 언어의 모든 콘텐츠가 준비되기 전에는
-  `LOCALE_NOT_READY`를 유지한다.
+- 언어 공개는 이 표의 존재와 별개다. 해당 언어의 모든 콘텐츠가 게시 revision에 들어가고
+  `PUBLIC_LOCALES`에 넣기 전에는 `LOCALE_NOT_READY`를 유지한다
+  ([서버의 언어 공개](../engineering/i18n.md#서버의-언어-공개)).
 
 ## 공통·홈
 
