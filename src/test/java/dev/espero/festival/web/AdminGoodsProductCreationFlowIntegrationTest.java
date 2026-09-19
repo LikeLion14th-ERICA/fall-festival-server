@@ -542,6 +542,7 @@ class AdminGoodsProductCreationFlowIntegrationTest {
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.error.code").value("EDIT_CONFLICT"));
 
+        clock.advance(Duration.ofSeconds(1));
         MvcResult first = putProduct(goodsId, body, "put-replay", current, "put-request-A")
             .andExpect(status().isOk()).andReturn();
         clock.advance(Duration.ofSeconds(2));
