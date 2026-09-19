@@ -56,6 +56,12 @@ function resolveGoodsResponse(g, requestedLocale) {
     description: t.description ?? null,
     price: g.price,
     optionMode: g.optionMode,
+    images: g.images.map(image => ({
+      alt: image.alt[contentLocale],
+      masterUrl: image.masterUrl,
+      thumbnail320Url: image.thumbnail320Url,
+      thumbnail640Url: image.thumbnail640Url,
+    })),
     colors: g.colors.map(c => ({ id: c.id, name: c.translations[contentLocale].name })),
     sizes: g.sizes.map(s => ({ id: s.id, label: s.translations[contentLocale].label })),
   };
@@ -245,6 +251,13 @@ export function createState() {
         {name:'Sample apparel',description:'Not a real product or price.'}
       ),
       price:money(1000),
+      images:[{
+        mediaId:'00000000-0000-4000-8000-000000000050',
+        alt:{ko:'개발용 가상 상품 앞면',en:'Fictional product front','zh-Hans':null,ja:null},
+        masterUrl:'/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master',
+        thumbnail320Url:'/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320',
+        thumbnail640Url:'/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640',
+      }],
       colors:[
         {id:'color-a',translations:goodsTranslations({name:'예시 색상 A'},{name:'Sample Color A'})},
         {id:'color-b',translations:goodsTranslations({name:'예시 색상 B'},{name:'Sample Color B'})},
@@ -355,6 +368,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       data={items,visibleIds:items.map(n=>n.id),asOfDate:date};break;
     }
     case 'getGoods':data={items:empty?[]:state.goods.map(g=>resolveGoodsResponse(g,locale))};break;
+    case 'getGoodsImage':data=null;break;
     case 'getGoodsAvailability':data={items:empty?[]:state.goods.map(g=>getAvailability(g.id))};break;
     case 'getAdminGoods':data={items:empty?[]:state.goods.map(g=>inventoryFor(state,g.id,{admin:true,sold,failure}))};break;
     case 'getGood':{

@@ -27,7 +27,13 @@ public class AdminMutationPreconditions {
             throw new IllegalArgumentException("A current strong ETag is required for the mutation");
         }
 
-        List<String> values = Collections.list(request.getHeaders("If-Match"));
+        requireCurrentRepresentation(requireValidIfMatch(request), policy, currentEtag);
+    }
+
+    public String requireValidIfMatch(HttpServletRequest request) {
+        List<String> values = request == null
+            ? List.of()
+            : Collections.list(request.getHeaders("If-Match"));
         if (values.isEmpty()) {
             throw new ApiException(
                 HttpStatus.PRECONDITION_REQUIRED,
@@ -44,7 +50,25 @@ public class AdminMutationPreconditions {
                 false
             );
         }
-        if (!currentEtag.equals(values.getFirst().trim())) {
+        return values.getFirst().trim();
+    }
+
+    public void requireCurrentRepresentation(
+        String validatedIfMatch,
+        AdminMutationConcurrency policy,
+        String currentEtag
+    ) {
+        if (policy == null) {
+            throw new IllegalArgumentException("Administrator mutation policy is required");
+        }
+        if (policy == AdminMutationConcurrency.LAST_WRITE_WINS) {
+            return;
+        }
+        if (validatedIfMatch == null || !validatedIfMatch.matches(STRONG_SHA256_ETAG)
+            || currentEtag == null || !currentEtag.matches(STRONG_SHA256_ETAG)) {
+            throw new IllegalArgumentException("Current and provided strong ETags are required for the mutation");
+        }
+        if (!currentEtag.equals(validatedIfMatch)) {
             throw new ApiException(
                 HttpStatus.CONFLICT,
                 "EDIT_CONFLICT",

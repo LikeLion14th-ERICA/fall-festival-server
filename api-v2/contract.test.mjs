@@ -16,7 +16,7 @@ function standardValidate(schema,value){const key=JSON.stringify(schema);if(!com
 let server,base;
 before(async()=>{server=await createMockServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;});
 after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));});
-async function call(path,{method='GET',body,headers={},session='test'}={}){const response=await fetch(base+path,{method,headers:{'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},...(body!==undefined?{body:typeof body==='string'?body:JSON.stringify(body)}:{})});const json=[204,304].includes(response.status)?null:await response.json();return {status:response.status,body:json,headers:response.headers};}
+async function call(path,{method='GET',body,multipart=false,headers={},session='test'}={}){const requestHeaders={'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers};let requestBody=body!==undefined?(typeof body==='string'?body:JSON.stringify(body)):undefined;if(multipart){const form=new FormData();form.append('file',new Blob(['mock-image']), 'mock.png');requestBody=form;delete requestHeaders['Content-Type'];}const response=await fetch(base+path,{method,headers:requestHeaders,...(requestBody!==undefined?{body:requestBody}:{})});const responseType=response.headers.get('content-type')||'';const responseBody=[204,304].includes(response.status)?null:responseType.startsWith('application/json')?await response.json():new Uint8Array(await response.arrayBuffer());return {status:response.status,body:responseBody,headers:response.headers};}
 async function enableAllMockLocales(session){
   const response=await call('/api/v2/config',{session,headers:{'X-Mock-Scenario':'all-languages'}});
   assert.equal(response.status,200);
@@ -37,7 +37,8 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
-    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability'
+    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
+    'postAdminGoodsImage','getGoodsImage'
   ]);
   for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
     if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response?.meta?.revision??0,0,operationId);
@@ -50,6 +51,110 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
 test('26 screens and 177 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,187);assert.equal(new Set(coverage.data.map(x=>x.id)).size,187);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
+test('Goods image upload error contract matches its Spring runtime behavior',()=>{
+  const upload=operation('postAdminGoodsImage');
+  const response=(status,scenario)=>upload.responses[status];
+  const example=(status,scenario)=>response(status,scenario).content['application/json'].examples[scenario].value.error;
+  assert.match(response(413).description,/10 MiB/);
+  assert.doesNotMatch(response(413).description,/64KiB/);
+  assert.equal(example(413,'payload-too-large').code,'PAYLOAD_TOO_LARGE');
+  assert.equal(example(413,'payload-too-large').message,'업로드 파일은 10 MiB 이하여야 합니다.');
+  assert.match(response(415).description,/multipart\/form-data/);
+  assert.doesNotMatch(response(415).description,/application\/json/);
+  assert.equal(example(415,'unsupported-media-type').code,'UNSUPPORTED_MEDIA_TYPE');
+  assert.equal(example(415,'unsupported-media-type').message,'multipart/form-data 요청이 필요합니다.');
+  assert.equal(example(428,'idempotency-key-required').code,'IDEMPOTENCY_KEY_REQUIRED');
+  assert.equal(example(428,'idempotency-key-required').message,'Idempotency-Key 헤더가 필요합니다.');
+  assert.doesNotMatch(JSON.stringify(response(428)),/PRECONDITION_REQUIRED|If-Match|최신 상태/);
+  assert.equal(example(503,'error').code,'SERVICE_UNAVAILABLE');
+  assert.equal(example(503,'error').message,'일시적으로 이미지를 처리할 수 없습니다.');
+  assert.equal(example(503,'error').retryable,true);
+});
+test('Product create contract is runtime-ready, UUID-safe, and create-specific',()=>{
+  const create=operation('postAdminProduct');
+  const response=(status,scenario)=>create.responses[status].content['application/json'].examples[scenario].value;
+  assert.ok(create.responses['201']);
+  assert.equal(response(428,'idempotency-key-required').error.code,'IDEMPOTENCY_KEY_REQUIRED');
+  assert.equal(response(428,'idempotency-key-required').error.message,'Idempotency-Key 헤더가 필요합니다.');
+  assert.doesNotMatch(JSON.stringify(create.responses['428']),/PRECONDITION_REQUIRED|If-Match|최신 상태/);
+  assert.equal(response(422,'invalid-media-reference').error.code,'INVALID_MEDIA_REFERENCE');
+  assert.equal(response(422,'invalid-media-reference').error.message,'사용할 수 없는 상품 이미지가 포함되어 있습니다.');
+  assert.equal(response(422,'invalid-media-reference').error.retryable,false);
+  assert.ok(create.responses['422'].content['application/json'].examples['validation-failed']);
+  assert.equal(create.parameters.some(parameter=>parameter.name==='If-Match'),false);
+  assert.equal(create.parameters.find(parameter=>parameter.name==='Idempotency-Key').required,true);
+
+  const input=create.requestBody.content['application/json'].example;
+  standardValidate({$ref:'#/components/schemas/ProductInput'},input);
+  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  for(const color of input.colors)assert.match(color.id,uuid);
+  for(const size of input.sizes)assert.match(size.id,uuid);
+  for(const option of input.options){assert.match(option.colorId,uuid);assert.match(option.sizeId,uuid);}
+  assert.deepEqual(new Set(input.options.map(option=>option.colorId)),new Set(input.colors.map(color=>color.id)));
+  assert.deepEqual(new Set(input.options.map(option=>option.sizeId)),new Set(input.sizes.map(size=>size.id)));
+});
+test('Product update and deletion contracts require concurrency and idempotency headers',()=>{
+  const update=operation('putAdminProduct');
+  const remove=operation('deleteAdminProduct');
+  for(const operation of [update,remove]){
+    assert.equal(operation['x-contract-status'],'screen-specified');
+    assert.equal(operation.parameters.find(parameter=>parameter.name==='If-Match').required,true);
+    assert.equal(operation.parameters.find(parameter=>parameter.name==='Idempotency-Key').required,true);
+    const examples428=operation.responses['428'].content['application/json'].examples;
+    assert.equal(examples428['precondition-required'].value.error.code,'PRECONDITION_REQUIRED');
+    assert.equal(examples428['idempotency-key-required'].value.error.code,'IDEMPOTENCY_KEY_REQUIRED');
+  }
+  assert.equal(update.responses['422'].content['application/json'].examples['invalid-media-reference'].value.error.code,'INVALID_MEDIA_REFERENCE');
+  assert.equal(update.responses['200'].content['application/json'].schema.$ref,'#/components/schemas/AdminGoodsResponse');
+  assert.equal(remove.responses['200'].content['application/json'].schema.$ref,'#/components/schemas/DeletedResponse');
+});
+test('Goods image read representations and binary endpoint are explicit and immutable',async()=>{
+  const goods=spec.components.schemas.Goods;
+  const adminGoods=spec.components.schemas.AdminGoods;
+  assert.ok(goods.required.includes('images'));
+  assert.equal(goods.properties.images.items.$ref,'#/components/schemas/GoodsImage');
+  assert.ok(adminGoods.required.includes('images'));
+  assert.equal(adminGoods.properties.images.items.$ref,'#/components/schemas/AdminGoodsImage');
+  for(const name of ['GoodsImage','AdminGoodsImage']){
+    const schema=spec.components.schemas[name];
+    for(const field of ['masterUrl','thumbnail320Url','thumbnail640Url'])assert.ok(schema.required.includes(field));
+  }
+  assert.deepEqual(spec.components.schemas.AdminGoodsImageAlt.required,['ko','en','zh-Hans','ja']);
+
+  const media=operation('getGoodsImage');
+  assert.deepEqual(media.security,[]);
+  assert.deepEqual(media.parameters.find(parameter=>parameter.name==='variant').schema.enum,['master','320','640']);
+  assert.deepEqual(media.responses['200'].content['image/webp'].schema,{type:'string',format:'binary'});
+  assert.equal(media.responses['200'].headers['Content-Disposition'].schema.enum[0],'inline');
+  assert.equal(media.responses['200'].headers['X-Content-Type-Options'].schema.enum[0],'nosniff');
+  assert.equal(media.responses['200'].headers['Cache-Control'].schema.enum[0],'public, max-age=31536000, immutable');
+  assert.ok(media.responses['304']);
+  assert.ok(media.responses['400']);
+  assert.ok(media.responses['404']);
+  assert.ok(media.responses['503']);
+
+  const publicGoods=(await call('/api/v2/goods')).body.data.items[0];
+  const adminGoodsResponse=(await call('/api/v2/admin/products',{headers:admin})).body.data.items[0];
+  assert.equal(publicGoods.images[0].alt,'개발용 가상 상품 앞면');
+  assert.match(publicGoods.images[0].masterUrl,/^\/api\/v2\/media\/goods-images\/[0-9a-f-]+\/master$/);
+  assert.equal(adminGoodsResponse.images[0].mediaId,'00000000-0000-4000-8000-000000000050');
+  assert.deepEqual(Object.keys(adminGoodsResponse.images[0].alt),['ko','en','zh-Hans','ja']);
+
+  const first=await call(publicGoods.images[0].masterUrl);
+  assert.equal(first.status,200);
+  assert.equal(first.headers.get('content-type'),'image/webp');
+  assert.equal(first.headers.get('content-disposition'),'inline');
+  assert.equal(first.headers.get('x-content-type-options'),'nosniff');
+  assert.equal(first.headers.get('cache-control'),'public, max-age=31536000, immutable');
+  assert.ok(first.body.length>0);
+  const etag=first.headers.get('etag');
+  const notModified=await call(publicGoods.images[0].masterUrl,{headers:{'If-None-Match':'W/'+etag}});
+  assert.equal(notModified.status,304);
+  assert.equal(notModified.headers.get('etag'),etag);
+  assert.equal(notModified.headers.get('cache-control'),'public, max-age=31536000, immutable');
+  assert.equal((await call(publicGoods.images[0].masterUrl+'?download=true')).status,400);
+  assert.equal((await call(publicGoods.images[0].masterUrl.replace('/master','/original'))).status,404);
+});
 test('FAQ is an external config link and direct QR before START stays in local start state',async()=>{
   const unconfigured=(await call('/api/v2/config')).body.data;assert.equal(unconfigured.links.faq,null);
   const ready=(await call('/api/v2/config',{headers:{'X-Mock-Scenario':'faq-ready'}})).body.data.links.faq;
@@ -113,14 +218,17 @@ test('Fictional image variants are served from the local mock asset route',async
 for(const [opId,group]of Object.entries(examples))for(const [scenario,example]of Object.entries(group.scenarios)){
   test(`${opId}: ${scenario} returns the documented HTTP/schema/body`,async()=>{
     const req=example.request;
-    const got=await call(req.path,{method:req.method,body:req.body,headers:{...req.headers,'X-Mock-Session':opId+'-'+scenario}});
+    const got=await call(req.path,{method:req.method,body:req.body,multipart:Boolean(req.multipart),headers:{...req.headers,'X-Mock-Session':opId+'-'+scenario}});
     assert.equal(got.status,example.status,JSON.stringify(got.body));
-    if(got.status===204||got.status===304)assert.equal(got.body,null);
+    const binary=operation(opId)['x-binary-response']&&got.status===200;
+    if(binary)assert.ok(got.body instanceof Uint8Array&&got.body.length>0);
+    else if(got.status===204||got.status===304)assert.equal(got.body,null);
     else standardValidate(operation(opId).responses[got.status].content['application/json'].schema,got.body);
-    if(example.status===204||example.status===304)assert.equal(example.response,null);
+    if(operation(opId)['x-binary-response']&&example.status===200)assert.equal(example.response,null);
+    else if(example.status===204||example.status===304)assert.equal(example.response,null);
     else standardValidate(operation(opId).responses[example.status].content['application/json'].schema,example.response);
-    if(got.body && !operation(opId)['x-conditional'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
-    if(got.body){
+    if(got.body && !binary && !operation(opId)['x-conditional'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
+    if(got.body && !binary){
       assert.equal(got.body.meta.mock,true);
       if(operation(opId)['x-conditional']&&got.status===200){
         assert.match(got.headers.get('x-request-id'),/^[0-9a-f-]{36}$/);
@@ -350,6 +458,70 @@ test('OPTIONS products with an empty configuration are rejected before state mut
   assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
 });
 
+test('Product image input requires ordered unique opaque media references and locale-aligned alt text',async()=>{
+  const base=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
+  const post=(body,key)=>call('/api/v2/admin/products',{session:'product-image-input',headers:{...admin,'Idempotency-Key':key},method:'POST',body});
+  assert.equal((await post(base,'image-valid')).status,201);
+
+  const invalid=[];
+  invalid.push({...structuredClone(base),images:[]});
+  invalid.push({...structuredClone(base),images:null});
+  invalid.push({...structuredClone(base),images:[...base.images,...base.images,...base.images]});
+  const duplicate=structuredClone(base);duplicate.images.push(structuredClone(duplicate.images[0]));invalid.push(duplicate);
+  for(const locale of ['ko','en']){
+    const missing=structuredClone(base);delete missing.images[0].alt[locale];invalid.push(missing);
+    const blank=structuredClone(base);blank.images[0].alt[locale]='   ';invalid.push(blank);
+  }
+  const unknown=structuredClone(base);unknown.images[0].alt.fr='Image du produit';invalid.push(unknown);
+  const missingOptional=structuredClone(base);
+  missingOptional.translations['zh-Hans']={name:'示例商品',description:null};
+  missingOptional.images[0].alt['zh-Hans']=null;
+  invalid.push(missingOptional);
+  const unexpectedOptional=structuredClone(base);
+  unexpectedOptional.images[0].alt.ja='不要な代替テキスト';
+  invalid.push(unexpectedOptional);
+  const blankOptional=structuredClone(base);blankOptional.images[0].alt.ja='   ';invalid.push(blankOptional);
+  const urlInput=structuredClone(base);urlInput.images[0].masterUrl='/arbitrary.webp';invalid.push(urlInput);
+
+  for(const [index,body] of invalid.entries()){
+    assert.equal((await post(body,`image-invalid-${index}`)).status,422);
+  }
+});
+
+test('Product descriptions and option labels follow one active locale set',async()=>{
+  const base=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
+  const post=(body,key)=>call('/api/v2/admin/products',{session:'product-locale-invariants',headers:{...admin,'Idempotency-Key':key},method:'POST',body});
+
+  const noDescriptions=structuredClone(base);
+  for(const translation of Object.values(noDescriptions.translations))if(translation)translation.description=null;
+  assert.equal((await post(noDescriptions,'descriptions-all-null')).status,201);
+
+  const mixedRequired=structuredClone(base);mixedRequired.translations.en.description=null;
+  assert.equal((await post(mixedRequired,'descriptions-mixed-required')).status,422);
+  const optionalDescription=structuredClone(noDescriptions);
+  optionalDescription.translations['zh-Hans']={name:'示例商品',description:'不应单独出现'};
+  optionalDescription.images[0].alt['zh-Hans']='示例商品';
+  for(const color of optionalDescription.colors)color.translations['zh-Hans']={name:'示例颜色'};
+  for(const size of optionalDescription.sizes)size.translations['zh-Hans']={label:'示例尺寸'};
+  assert.equal((await post(optionalDescription,'descriptions-mixed-optional')).status,422);
+
+  const completeOptional=structuredClone(base);
+  completeOptional.translations['zh-Hans']={name:'示例商品',description:'示例说明'};
+  completeOptional.images[0].alt['zh-Hans']='示例商品正面';
+  for(const color of completeOptional.colors)color.translations['zh-Hans']={name:'示例颜色'};
+  for(const size of completeOptional.sizes)size.translations['zh-Hans']={label:'示例尺寸'};
+  assert.equal((await post(completeOptional,'locale-complete')).status,201);
+
+  const missingColor=structuredClone(completeOptional);missingColor.colors[0].translations['zh-Hans']=null;
+  assert.equal((await post(missingColor,'locale-missing-color')).status,422);
+  const missingSize=structuredClone(completeOptional);missingSize.sizes[0].translations['zh-Hans']=null;
+  assert.equal((await post(missingSize,'locale-missing-size')).status,422);
+  const unexpectedColor=structuredClone(base);unexpectedColor.colors[0].translations.ja={name:'不要'};
+  assert.equal((await post(unexpectedColor,'locale-unexpected-color')).status,422);
+  const unexpectedSize=structuredClone(base);unexpectedSize.sizes[0].translations.ja={label:'不要'};
+  assert.equal((await post(unexpectedSize,'locale-unexpected-size')).status,422);
+});
+
 test('New product and option combinations start on sale while existing states survive edits',async()=>{
   const session='products-v5',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
   const created=await call('/api/v2/admin/products',{session,headers:{...admin,'Idempotency-Key':'products-v5-create'},method:'POST',body});
@@ -361,24 +533,29 @@ test('New product and option combinations start on sale while existing states su
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-v5-update-1'},method:'PUT',body})).status,200);
   assert.ok((await call('/api/v2/goods/'+id+'/availability',{session})).body.data.combinations.every(c=>c.status==='ON_SALE'));
   etag=(await call('/api/v2/admin/products/'+id,{session,headers:admin})).headers.get('etag');
-  body.options.push({colorId:'color-b',sizeId:'size-l'});
+  body.options.push({colorId:body.colors[1].id,sizeId:body.sizes[1].id});
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-v5-update-2'},method:'PUT',body})).status,200);
   const combinations=(await call('/api/v2/goods/'+id+'/availability',{session})).body.data.combinations;
   assert.equal(combinations.length,4);assert.equal(combinations.filter(c=>c.status==='ON_SALE').length,4);
-  const invalid=structuredClone(body);invalid.options.push({colorId:'unknown',sizeId:'size-m'});
+  const invalid=structuredClone(body);invalid.options.push({colorId:'00000000-0000-4000-8000-000000000999',sizeId:body.sizes[0].id});
   assert.equal((await call('/api/v2/admin/products/'+id,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-v5-invalid'},method:'PUT',body:invalid})).status,422);
 });
 
 test('Color, size, and option deletion removes obsolete availability and preserves retained states',async()=>{
   const session='products-option-deletion';
-  const availabilityBefore=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
-  const etag=(await call('/api/v2/admin/products/goods-shirt',{session,headers:admin})).headers.get('etag');
-  const body=structuredClone(examples.putAdminProduct.scenarios['option-removal'].request.body);
-  const response=await call('/api/v2/admin/products/goods-shirt',{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-option-deletion'},method:'PUT',body});
+  const body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
+  const created=await call('/api/v2/admin/products',{session,headers:{...admin,'Idempotency-Key':'products-option-deletion-create'},method:'POST',body});
+  const goodsId=created.body.data.id;
+  const availabilityBefore=(await call(`/api/v2/goods/${goodsId}/availability`,{session})).body.data;
+  const etag=(await call(`/api/v2/admin/products/${goodsId}`,{session,headers:admin})).headers.get('etag');
+  const removedColor=body.colors.pop();
+  body.options=body.options.filter(option=>option.colorId!==removedColor.id);
+  const response=await call(`/api/v2/admin/products/${goodsId}`,{session,headers:{...admin,'If-Match':etag,'Idempotency-Key':'products-option-deletion'},method:'PUT',body});
   assert.equal(response.status,200);
-  const availabilityAfter=(await call('/api/v2/goods/goods-shirt/availability',{session})).body.data;
-  assert.deepEqual(availabilityAfter.combinations.map(c=>`${c.colorId}/${c.sizeId}`),['color-a/size-m','color-a/size-l']);
-  assert.deepEqual(availabilityAfter.combinations.map(c=>c.status),availabilityBefore.combinations.filter(c=>c.colorId==='color-a').map(c=>c.status));
+  const availabilityAfter=(await call(`/api/v2/goods/${goodsId}/availability`,{session})).body.data;
+  const firstColor=body.colors[0].id;
+  assert.deepEqual(availabilityAfter.combinations.map(c=>`${c.colorId}/${c.sizeId}`),body.options.map(option=>`${option.colorId}/${option.sizeId}`));
+  assert.deepEqual(availabilityAfter.combinations.map(c=>c.status),availabilityBefore.combinations.filter(c=>c.colorId===firstColor).map(c=>c.status));
 });
 
 test('Notice requires manual ko·en input and rejects link labels that do not match the notice languages',async()=>{

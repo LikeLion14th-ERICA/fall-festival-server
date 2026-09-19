@@ -7,30 +7,45 @@ export function applyAdminContract(s,ops){
   const nullable=(schema,d)=>({anyOf:[schema,{type:'null'}],description:d});
   const en=(values,d)=>({type:'string',enum:values,description:d});
   const id=ref('Id');
+  const productInputId={type:'string',format:'uuid',pattern:'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',description:'ProductInput 전용 안정 UUID.'};
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
   s.GoodsColorTranslation=obj({name:str('색상명')});
   s.GoodsColorTranslations=obj({ko:ref('GoodsColorTranslation'),en:ref('GoodsColorTranslation'),'zh-Hans':nullable(ref('GoodsColorTranslation'),'이 색상에 zh-Hans 번역이 없으면 null'),ja:nullable(ref('GoodsColorTranslation'),'이 색상에 ja 번역이 없으면 null')},'상품과 같은 ko·en 필수 규칙.',['ko','en','zh-Hans','ja']);
   s.GoodsSizeTranslation=obj({label:str('사이즈명')});
   s.GoodsSizeTranslations=obj({ko:ref('GoodsSizeTranslation'),en:ref('GoodsSizeTranslation'),'zh-Hans':nullable(ref('GoodsSizeTranslation'),'이 사이즈에 zh-Hans 번역이 없으면 null'),ja:nullable(ref('GoodsSizeTranslation'),'이 사이즈에 ja 번역이 없으면 null')},'상품과 같은 ko·en 필수 규칙.',['ko','en','zh-Hans','ja']);
-  s.GoodsColorInput=obj({id,translations:ref('GoodsColorTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
-  s.GoodsSizeInput=obj({id,translations:ref('GoodsSizeTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
-  s.GoodsOptionInput=obj({colorId:id,sizeId:id},'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.');
+  s.GoodsColorInput=obj({id:productInputId,translations:ref('GoodsColorTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
+  s.GoodsSizeInput=obj({id:productInputId,translations:ref('GoodsSizeTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
+  s.GoodsOptionInput=obj({colorId:productInputId,sizeId:productInputId},'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.');
+  s.GoodsImageAltInput=obj({
+    ko:str('한국어 대체 텍스트. 공백만 입력할 수 없음.'),
+    en:str('영어 대체 텍스트. 공백만 입력할 수 없음.'),
+    'zh-Hans':nullable(str('중국어 간체 대체 텍스트'),'상품 zh-Hans 번역이 없으면 null'),
+    ja:nullable(str('일본어 대체 텍스트'),'상품 ja 번역이 없으면 null'),
+  },'상품 번역과 같은 locale shape. 선택 상품 번역이 있으면 모든 이미지 alt도 같은 locale 값을 가져야 한다.',['ko','en','zh-Hans','ja']);
+  s.GoodsImageInput=obj({
+    mediaId:{type:'string',format:'uuid',description:'사전 업로드로 발급된 opaque media UUID. URL·경로·파일명은 입력하지 않는다.'},
+    alt:ref('GoodsImageAltInput'),
+  },'이미 업로드된 서버 media 참조와 수동 대체 텍스트. URL 입력은 허용하지 않는다.');
   s.ProductInput=obj({
     optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
-    translations:ref('GoodsTranslations'),
+    translations:{...ref('GoodsTranslations'),description:'ko description이 null이면 모든 활성 번역 description도 null. ko description이 있으면 모든 활성 번역에 공백 아닌 description 필수.'},
     price:ref('Money'),
-    colors:arr(ref('GoodsColorInput'),'SINGLE이면 []'),
-    sizes:arr(ref('GoodsSizeInput'),'SINGLE이면 []'),
+    images:{type:'array',items:ref('GoodsImageInput'),minItems:1,maxItems:2,description:'이미 업로드된 opaque media 참조 1~2개. 배열 순서가 표시 순서이며 임의 URL은 허용하지 않는다.'},
+    colors:arr(ref('GoodsColorInput'),'SINGLE이면 []. OPTIONS면 모든 활성 상품 locale의 색상 번역이 각 항목에 완전해야 한다.'),
+    sizes:arr(ref('GoodsSizeInput'),'SINGLE이면 []. OPTIONS면 모든 활성 상품 locale의 사이즈 번역이 각 항목에 완전해야 한다.'),
     options:arr(ref('GoodsOptionInput'),'SINGLE이면 []. OPTIONS면 비어있지 않아야 하며 모든 색상·사이즈가 실제 조합에서 쓰여야 함.'),
   },'SINGLE은 colors/sizes/options가 모두 빈 배열이어야 한다. OPTIONS는 셋 다 비어있지 않아야 하며 등록한 모든 색상·사이즈가 실제 조합에서 쓰여야 한다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
   s.AdminGoodsColor=obj({id,translations:ref('GoodsColorTranslations')});
   s.AdminGoodsSize=obj({id,translations:ref('GoodsSizeTranslations')});
+  s.AdminGoodsImageAlt=obj({ko:str('한국어 대체 텍스트'),en:str('영어 대체 텍스트'),'zh-Hans':nullable(str('중국어 간체 대체 텍스트'),'없으면 null'),ja:nullable(str('일본어 대체 텍스트'),'없으면 null')},'관리자 수정 초기값용 4 locale shape.',['ko','en','zh-Hans','ja']);
+  s.AdminGoodsImage=obj({mediaId:{type:'string',format:'uuid',description:'저장 경로를 노출하지 않는 opaque media UUID.'},alt:ref('AdminGoodsImageAlt'),masterUrl:str('same-origin master WebP API path'),thumbnail320Url:str('same-origin 320px WebP API path'),thumbnail640Url:str('same-origin 640px WebP API path')});
   s.AdminGoodsCombination=obj({combinationId:id,colorId:nullable(id,'SINGLE 조합이면 null'),sizeId:nullable(id,'SINGLE 조합이면 null'),status:en(['ON_SALE','SOLD_OUT'],'관리자가 구매 가능 / 품절 직접 선택. 수량 계산 없음.')});
   s.AdminGoods=obj({
     id,
     optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
     translations:ref('GoodsTranslations'),
     price:ref('Money'),
+    images:arr(ref('AdminGoodsImage'),'sort_order 순 상품 이미지. 기존 이미지 없는 상품은 [].'),
     colors:arr(ref('AdminGoodsColor'),'SINGLE이면 []'),
     sizes:arr(ref('AdminGoodsSize'),'SINGLE이면 []'),
     combinations:arr(ref('AdminGoodsCombination'),'SINGLE이면 조합 1개, OPTIONS면 실제 제공 조합 전체'),
@@ -38,6 +53,7 @@ export function applyAdminContract(s,ops){
     updatedAt:ref('Timestamp'),
   });
   s.AdminGoodsList=obj({items:arr(ref('AdminGoods'),'삭제 제외 전체 상품. updatedAt 내림차순·id 오름차순.')});
+  s.AdminGoodsImageUpload=obj({mediaId:{type:'string',format:'uuid',description:'저장경로를 노출하지 않는 opaque media UUID.'}},'상품과 아직 연결되지 않은 관리자 이미지 업로드 결과.');
   s.AdminIdentity=obj({id,username:{type:'string',minLength:1,maxLength:100,description:'관리자 로그인 식별자'},authority:en(['ADMIN'],'현재 Product 범위의 단일 관리자 권한'),enabled:{type:'boolean',description:'false이면 로그인·refresh·관리자 API 인증 거부'}});
   s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
   s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
@@ -78,9 +94,33 @@ export function applyAdminContract(s,ops){
   find('putAdminAvailability').idempotencyKeyRequired=true;
   add('getAdminProducts','GET','/admin/products','AdminGoodsList','관리자 상품 목록',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','empty','error']);
   add('getAdminProduct','GET','/admin/products/{goodsId}','AdminGoods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','not-found','error']);
-  add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','precondition-required','error']);
-  add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','not-found','precondition-required','edit-conflict','error']);
-  add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','precondition-required','edit-conflict','error']);
+  add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','idempotency-key-required','invalid-media-reference','error']);
+  add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','invalid-media-reference','not-found','idempotency-key-required','precondition-required','edit-conflict','error']);
+  add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','idempotency-key-required','precondition-required','edit-conflict','error']);
+  ops.push({
+    operationId:'postAdminGoodsImage',method:'POST',path:'/api/v2/admin/media/goods-images',
+    schema:'AdminGoodsImageUpload',summary:'상품 이미지 업로드·상품 연결 전 unattached media 생성',screens:['ADM-GOODS-PRODUCT-EDIT'],
+    scenarios:['normal','validation-failed','payload-too-large','unsupported-media-type','idempotency-key-required','error'],
+    admin:true,provisional:false,parameters:[],multipartInput:true,idempotencyKeyRequired:true,
+    idempotencyKeyDescription:'같은 업로드 재시도에 사용하는 1~128자 키. 누락 시 428.',
+    responseOverrides:{
+      413:{description:'업로드 파일이 10 MiB 제한을 초과했습니다.',code:'PAYLOAD_TOO_LARGE',message:'업로드 파일은 10 MiB 이하여야 합니다.',retryable:false},
+      415:{description:'multipart/form-data 요청이 필요합니다.',code:'UNSUPPORTED_MEDIA_TYPE',message:'multipart/form-data 요청이 필요합니다.',retryable:false},
+      428:{description:'Idempotency-Key 헤더가 필요합니다.',code:'IDEMPOTENCY_KEY_REQUIRED',message:'Idempotency-Key 헤더가 필요합니다.',retryable:false},
+      503:{description:'이미지 처리 서비스를 일시적으로 사용할 수 없습니다.',code:'SERVICE_UNAVAILABLE',message:'일시적으로 이미지를 처리할 수 없습니다.',retryable:true},
+    },
+  });
+  ops.push({
+    operationId:'getGoodsImage',method:'GET',path:'/api/v2/media/goods-images/{mediaId}/{variant}',
+    schema:null,summary:'연결된 상품 이미지 WebP variant 조회',screens:['GOODS-LIST','GOODS-DETAIL'],
+    scenarios:['normal','not-found','error'],admin:false,provisional:false,security:[],binaryResponse:true,
+    conditional:true,cacheControl:'public, max-age=31536000, immutable',
+    parameters:[
+      {name:'mediaId',in:'path',required:true,schema:{type:'string',format:'uuid'},description:'opaque media UUID'},
+      {name:'variant',in:'path',required:true,schema:{type:'string',enum:['master','320','640']},description:'서버가 허용한 WebP variant'},
+    ],
+    responseOverrides:{503:{description:'저장된 이미지 variant를 일시적으로 제공할 수 없습니다.',code:'SERVICE_UNAVAILABLE',message:'일시적으로 이미지를 처리할 수 없습니다.',retryable:true}},
+  });
   find('getAdminProduct').conditional=true;
   const productPost=find('postAdminProduct');
   productPost.idempotencyKeyRequired=true;

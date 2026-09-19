@@ -6,6 +6,11 @@ spring:
   web:
     resources:
       add-mappings: false
+  servlet:
+    multipart:
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:10485760B}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:12582912B}
+      file-size-threshold: ${SPRING_SERVLET_MULTIPART_FILE_SIZE_THRESHOLD:0B}
   # HikariCP is on the classpath (via spring-boot-starter-jdbc) purely so the
   # "db" profile below can use it. Its presence alone makes DataSourceAutoConfiguration
   # try to build a pool regardless of whether spring.datasource.url is set, so

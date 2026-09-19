@@ -22,14 +22,15 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const spec=JSON.parse(await readFile(new URL('./openapi.json',import.meta.url),'utf8'));
   const examples=JSON.parse(await readFile(new URL('./examples.json',import.meta.url),'utf8'));
   const sessions=new Map();
-  const routes=Object.entries(spec.paths).flatMap(([path,methods])=>Object.entries(methods).map(([method,o])=>{const schemes=(o.security||[]).flatMap(requirement=>Object.keys(requirement));return {path,method:method.toUpperCase(),definition:o,operationId:o.operationId,input:o.requestBody?.content['application/json'].schema.$ref?.split('/').at(-1),requiresBearer:schemes.includes('AdminBearer'),requiresRefreshCookie:schemes.includes('AdminRefreshCookie'),cookieCsrf:['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(o.operationId),scenarios:o['x-mock-scenarios'],regex:new RegExp('^'+path.replace(/\{\w+\}/g,'([a-z0-9][a-z0-9-]{0,63})')+'$'),keys:[...path.matchAll(/\{(\w+)\}/g)].map(m=>m[1])};}));
+  const routes=Object.entries(spec.paths).flatMap(([path,methods])=>Object.entries(methods).map(([method,o])=>{const schemes=(o.security||[]).flatMap(requirement=>Object.keys(requirement));const jsonBody=o.requestBody?.content?.['application/json'];return {path,method:method.toUpperCase(),definition:o,operationId:o.operationId,input:jsonBody?.schema?.$ref?.split('/').at(-1),multipart:Boolean(o.requestBody?.content?.['multipart/form-data']),requiresBearer:schemes.includes('AdminBearer'),requiresRefreshCookie:schemes.includes('AdminRefreshCookie'),cookieCsrf:['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(o.operationId),scenarios:o['x-mock-scenarios'],regex:new RegExp('^'+path.replace(/\{\w+\}/g,'([a-z0-9][a-z0-9-]{0,63})')+'$'),keys:[...path.matchAll(/\{(\w+)\}/g)].map(m=>m[1])};}));
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin, X-Mock-Session, X-Mock-Scenario, X-Mock-Time'};
   const unscopedOperations=new Set([
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
-    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability'
+    'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
+    'postAdminGoodsImage','getGoodsImage'
   ]);
   const server=http.createServer(async(req,res)=>{
     let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
@@ -81,6 +82,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
           }
         }else{
           const issues=validate(p.schema,value,spec,p.name);
+          if(issues.length&&route.operationId==='getGoodsImage'&&p.name==='variant')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
           if(issues.length)failure(400,p.name==='If-Match'?'INVALID_IF_MATCH':p.name==='Idempotency-Key'?'INVALID_IDEMPOTENCY_KEY':p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','요청 값 형식이 잘못되었습니다.',issues);
         }
       }
@@ -100,6 +102,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       now=scenarioTime(scenario,now);
       let body;
       if(route.input){if(!req.headers['content-type']?.startsWith('application/json'))failure(415,'UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.');body=await readJson(req);const issues=validate(spec.components.schemas[route.input],body,spec);if(issues.length&&route.operationId==='verifyStampReceipt')failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');if(issues.length)failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
+      if(route.multipart){if(!req.headers['content-type']?.startsWith('multipart/form-data'))failure(415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.');await drainMultipart(req);}
       const delay=req.headers['x-mock-delay']||'0';if(!/^\d+$/.test(delay)||Number(delay)>3000)failure(400,'INVALID_MOCK_DELAY','목 지연은 0~3000ms입니다.');
       if(Number(delay))await new Promise(resolve=>setTimeout(resolve,Number(delay)));
       if(scenario==='bad-request')failure(400,'INVALID_QUERY','잘못된 요청 예시입니다.');
@@ -107,6 +110,13 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='forbidden')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');
       if(scenario==='rate-limited')failure(429,'RATE_LIMITED','잠시 후 다시 요청해 주세요.');
       if(scenario==='precondition-required')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
+      if(scenario==='idempotency-key-required')failure(428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.');
+      if(scenario==='invalid-media-reference')failure(422,'INVALID_MEDIA_REFERENCE','사용할 수 없는 상품 이미지가 포함되어 있습니다.');
+      if(scenario==='validation-failed')failure(422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.');
+      if(scenario==='payload-too-large')failure(413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.');
+      if(scenario==='unsupported-media-type')failure(415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.');
+      if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
+      if(route.operationId==='getGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
       let result;
@@ -128,13 +138,30 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         result=execute(route,state,{params,query,body,scenario,now});
       }
       now=result.now;
+      if(route.definition['x-binary-response']){
+        const etag=strongEtag(`goods-media-v1\n${params.mediaId}\n${params.variant}`);
+        const mediaHeaders={
+          ...headers,
+          'Content-Type':'image/webp',
+          'Content-Disposition':'inline',
+          'X-Content-Type-Options':'nosniff',
+          'Cache-Control':'public, max-age=31536000, immutable',
+          'ETag':etag,
+          'X-Request-Id':requestId,
+        };
+        if(matchesEtag(req.headers['if-none-match'],etag)){
+          res.writeHead(304,mediaHeaders);return res.end();
+        }
+        res.writeHead(200,mediaHeaders);return res.end(Buffer.from(`MOCK-WEBP:${params.mediaId}:${params.variant}`));
+      }
       const responseRevision=unscopedOperations.has(route.operationId)?0:state.revision;
       const responseMeta=route.definition['x-conditional']
         ? {timezone:'Asia/Seoul',festivalId:'festival-mock',revision:responseRevision,locale,mock:true}
         : meta(responseRevision);
       const response=noBodyStatuses.has(result.status)?null:{data:result.data,meta:responseMeta};
       let responseStatus=result.status;
-      const extra=result.status===201?{Location:`/api/v2/admin/${route.operationId==='postAdminProduct'?'products':'notices'}/${result.data.id}`}:{ };
+      const locationResource=route.operationId==='postAdminProduct'?'products':route.operationId==='postAdminNotice'?'notices':null;
+      const extra=result.status===201&&locationResource?{Location:`/api/v2/admin/${locationResource}/${result.data.id}`}:{ };
       if(route.definition.parameters.some(parameter=>parameter.name==='If-None-Match')&&result.status===200){
         const etag=strongEtag({data:response.data,meta:{timezone:response.meta.timezone,festivalId:response.meta.festivalId,revision:response.meta.revision,locale:response.meta.locale,mock:response.meta.mock}});
         extra.ETag=etag;
@@ -163,6 +190,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   return server;
 }
 async function readJson(req){let bytes=0,parts=[];for await(const part of req){bytes+=part.length;if(bytes>65536)failure(413,'PAYLOAD_TOO_LARGE','요청 본문은 64KiB 이하입니다.');parts.push(part);}try{return JSON.parse(Buffer.concat(parts).toString('utf8'));}catch{failure(400,'INVALID_JSON','JSON 형식이 잘못되었습니다.');}}
+async function drainMultipart(req){let bytes=0;for await(const part of req){bytes+=part.length;if(bytes>12582912)failure(413,'PAYLOAD_TOO_LARGE','업로드 요청은 12 MiB 이하여야 합니다.');}if(bytes===0)failure(422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.');}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   const port=Number(process.env.MOCK_PORT||4010);if(!Number.isInteger(port)||port<1||port>65535)throw new Error('Invalid MOCK_PORT');
   const options=process.env.MOCK_CORS_ORIGINS?{origins:process.env.MOCK_CORS_ORIGINS.split(',').map(s=>s.trim())}:{};

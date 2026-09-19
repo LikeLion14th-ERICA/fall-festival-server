@@ -11,6 +11,10 @@
 - `admin_audit_events`에서 현재 시각 기준 1년보다 오래된 행을 정리한다.
 - `admin_idempotency_records`에서는 `COMPLETED` 상태이고 완료 시각에서 24시간이 지난
   replay 응답만 정리한다. `IN_PROGRESS` lease는 만료됐어도 이 작업이 삭제하지 않는다.
+- `media_assets`에서는 상품에 한 번도 연결되지 않은 `GOODS_IMAGE`를 생성 24시간 뒤,
+  상품에서 분리된 `GOODS_IMAGE`를 분리 1일 뒤 정리한다. 두 target 모두 현재
+  `goods_images` 연관이 없는 행만 삭제하며 정확한 경계 시각의 행은 유지한다. 미디어
+  저장소가 설정되지 않은 서버에는 target 자체가 등록되지 않는다.
 - 한 번의 run은 최대 500행을 처리한다. `festival.cleanup.batch-size`는 1~500만 허용하며
   기본값은 500이다. 남은 행은 다음 scheduler run에서 처리해 한 transaction이 오래
   유지되지 않게 한다.
@@ -28,10 +32,11 @@ lock·batch·결과 경계를 재사용한다.
 transaction이 rollback되면 실행되지 않는다. dry-run에서는 아무것도 예약하지 않는다. 실패한
 작업은 `FESTIVAL_CLEANUP_POST_COMMIT_MAX_ATTEMPTS`번까지 재시도하며, 끝내 실패해도 이미
 commit된 삭제를 되돌리지 않고 결과의 `postCommit`과 `post_commit_failed_count`로 보고한다.
-행은 이미 사라졌으므로 작업은 멱등이어야 한다. 파일 삭제는
-`CleanupPostCommitAction.deleteFile(target, path)`를 쓰며, 없는 파일은 이미 삭제된 것으로
-처리한다. 재시도 뒤에도 남은 파일은 소유 담당자가 별도 sweep으로 정리한다. 로그에는 예외
-종류만 남기고 파일 경로는 남기지 않는다.
+행은 이미 사라졌으므로 작업은 멱등이어야 한다. 일반 파일 target은
+`CleanupPostCommitAction.deleteFile(target, path)`를 쓰고, 상품 미디어는
+`MediaStorage.delete(festivalId, mediaId)`를 호출해 저장소의 경로 격리와 symlink 검사를
+재사용한다. 없는 파일은 이미 삭제된 것으로 처리한다. 재시도 뒤에도 남은 파일은 소유 담당자가
+별도 sweep으로 정리한다. 로그에는 예외 종류만 남기고 파일 경로는 남기지 않는다.
 
 ## 운영 설정
 

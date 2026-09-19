@@ -1332,6 +1332,14 @@
                   "currency": "KRW"
                 },
                 "optionMode": "OPTIONS",
+                "images": [
+                  {
+                    "alt": "개발용 가상 상품 앞면",
+                    "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                    "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                    "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                  }
+                ],
                 "colors": [
                   {
                     "id": "color-a",
@@ -1721,6 +1729,14 @@
               "currency": "KRW"
             },
             "optionMode": "OPTIONS",
+            "images": [
+              {
+                "alt": "개발용 가상 상품 앞면",
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -1774,6 +1790,14 @@
               "currency": "KRW"
             },
             "optionMode": "OPTIONS",
+            "images": [
+              {
+                "alt": "개발용 가상 상품 앞면",
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -10832,6 +10856,20 @@
                   "amount": 1000,
                   "currency": "KRW"
                 },
+                "images": [
+                  {
+                    "mediaId": "00000000-0000-4000-8000-000000000050",
+                    "alt": {
+                      "ko": "개발용 가상 상품 앞면",
+                      "en": "Fictional product front",
+                      "zh-Hans": null,
+                      "ja": null
+                    },
+                    "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                    "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                    "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                  }
+                ],
                 "colors": [
                   {
                     "id": "color-a",
@@ -11135,6 +11173,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -11435,9 +11487,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -11450,7 +11513,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -11465,7 +11528,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -11478,7 +11541,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -11493,16 +11556,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -11528,9 +11591,23 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -11543,7 +11620,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -11558,7 +11635,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -11571,7 +11648,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -11587,20 +11664,20 @@
             "combinations": [
               {
                 "combinationId": "combo-1",
-                "colorId": "color-a",
-                "sizeId": "size-m",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
                 "status": "ON_SALE"
               },
               {
                 "combinationId": "combo-2",
-                "colorId": "color-a",
-                "sizeId": "size-l",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202",
                 "status": "ON_SALE"
               },
               {
                 "combinationId": "combo-3",
-                "colorId": "color-b",
-                "sizeId": "size-m",
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
                 "status": "ON_SALE"
               }
             ],
@@ -11643,9 +11720,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -11658,7 +11746,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -11673,7 +11761,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -11686,7 +11774,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -11701,16 +11789,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -11739,16 +11827,16 @@
           }
         }
       },
-      "precondition-required": {
+      "idempotency-key-required": {
         "request": {
           "method": "POST",
           "path": "/api/v2/admin/products",
           "headers": {
-            "X-Mock-Scenario": "precondition-required",
+            "X-Mock-Scenario": "idempotency-key-required",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "Idempotency-Key": "mock-postAdminProduct-precondition-required"
+            "Idempotency-Key": "mock-postAdminProduct-idempotency-key-required"
           },
           "body": {
             "optionMode": "OPTIONS",
@@ -11768,9 +11856,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -11783,7 +11882,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -11798,7 +11897,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -11811,7 +11910,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -11826,16 +11925,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -11843,8 +11942,139 @@
         "status": 428,
         "response": {
           "error": {
-            "code": "PRECONDITION_REQUIRED",
-            "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "invalid-media-reference": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/products",
+          "headers": {
+            "X-Mock-Scenario": "invalid-media-reference",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminProduct-invalid-media-reference"
+          },
+          "body": {
+            "optionMode": "OPTIONS",
+            "translations": {
+              "ko": {
+                "name": "예시 의류",
+                "description": "실제 상품·가격이 아닙니다."
+              },
+              "en": {
+                "name": "Sample apparel",
+                "description": "Not a real product or price."
+              },
+              "zh-Hans": null,
+              "ja": null
+            },
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "colors": [
+              {
+                "id": "00000000-0000-4000-8000-000000000101",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 A"
+                  },
+                  "en": {
+                    "name": "Sample Color A"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000102",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 B"
+                  },
+                  "en": {
+                    "name": "Sample Color B"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "sizes": [
+              {
+                "id": "00000000-0000-4000-8000-000000000201",
+                "translations": {
+                  "ko": {
+                    "label": "M"
+                  },
+                  "en": {
+                    "label": "M"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000202",
+                "translations": {
+                  "ko": {
+                    "label": "L"
+                  },
+                  "en": {
+                    "label": "L"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "options": [
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              }
+            ]
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "INVALID_MEDIA_REFERENCE",
+            "message": "사용할 수 없는 상품 이미지가 포함되어 있습니다.",
             "details": [],
             "retryable": false
           },
@@ -11888,9 +12118,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -11903,7 +12144,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -11918,7 +12159,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -11931,7 +12172,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -11946,16 +12187,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12008,9 +12249,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12023,7 +12275,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12038,7 +12290,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12051,7 +12303,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12066,16 +12318,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12128,9 +12380,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12143,7 +12406,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12158,7 +12421,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12171,7 +12434,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12186,16 +12449,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12248,9 +12511,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12263,7 +12537,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12278,7 +12552,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12291,7 +12565,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12306,16 +12580,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12368,9 +12642,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12383,7 +12668,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12398,7 +12683,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12411,7 +12696,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12426,16 +12711,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12498,9 +12783,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12513,7 +12809,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12528,7 +12824,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12541,7 +12837,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12556,16 +12852,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12591,9 +12887,23 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12606,7 +12916,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12621,7 +12931,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12634,7 +12944,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12649,22 +12959,22 @@
             ],
             "combinations": [
               {
-                "combinationId": "combo-shirt-a-m",
-                "colorId": "color-a",
-                "sizeId": "size-m",
+                "combinationId": "combo-1",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
                 "status": "ON_SALE"
               },
               {
-                "combinationId": "combo-shirt-a-l",
-                "colorId": "color-a",
-                "sizeId": "size-l",
-                "status": "SOLD_OUT"
+                "combinationId": "combo-2",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202",
+                "status": "ON_SALE"
               },
               {
-                "combinationId": "combo-shirt-b-m",
-                "colorId": "color-b",
-                "sizeId": "size-m",
-                "status": "SOLD_OUT"
+                "combinationId": "combo-3",
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
+                "status": "ON_SALE"
               }
             ],
             "createdAt": "2030-10-01T16:00:00+09:00",
@@ -12711,9 +13021,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12726,7 +13047,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12739,7 +13060,7 @@
                 }
               },
               {
-                "id": "color-new",
+                "id": "00000000-0000-4000-8000-000000000103",
                 "translations": {
                   "ko": {
                     "name": "새 예시 색상"
@@ -12754,7 +13075,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12767,7 +13088,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12782,20 +13103,20 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-new",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000103",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -12821,9 +13142,23 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12836,7 +13171,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -12849,7 +13184,7 @@
                 }
               },
               {
-                "id": "color-new",
+                "id": "00000000-0000-4000-8000-000000000103",
                 "translations": {
                   "ko": {
                     "name": "새 예시 색상"
@@ -12864,7 +13199,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12877,7 +13212,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -12892,27 +13227,27 @@
             ],
             "combinations": [
               {
-                "combinationId": "combo-shirt-a-m",
-                "colorId": "color-a",
-                "sizeId": "size-m",
+                "combinationId": "combo-1",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
                 "status": "ON_SALE"
               },
               {
-                "combinationId": "combo-shirt-a-l",
-                "colorId": "color-a",
-                "sizeId": "size-l",
-                "status": "SOLD_OUT"
+                "combinationId": "combo-2",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202",
+                "status": "ON_SALE"
               },
               {
-                "combinationId": "combo-shirt-b-m",
-                "colorId": "color-b",
-                "sizeId": "size-m",
-                "status": "SOLD_OUT"
+                "combinationId": "combo-3",
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
+                "status": "ON_SALE"
               },
               {
-                "combinationId": "combo-1",
-                "colorId": "color-new",
-                "sizeId": "size-m",
+                "combinationId": "combo-4",
+                "colorId": "00000000-0000-4000-8000-000000000103",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
                 "status": "ON_SALE"
               }
             ],
@@ -12960,9 +13295,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -12977,7 +13323,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -12990,7 +13336,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13005,12 +13351,12 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               }
             ]
           }
@@ -13036,9 +13382,23 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13053,7 +13413,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13066,7 +13426,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13081,16 +13441,16 @@
             ],
             "combinations": [
               {
-                "combinationId": "combo-shirt-a-m",
-                "colorId": "color-a",
-                "sizeId": "size-m",
+                "combinationId": "combo-1",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201",
                 "status": "ON_SALE"
               },
               {
-                "combinationId": "combo-shirt-a-l",
-                "colorId": "color-a",
-                "sizeId": "size-l",
-                "status": "SOLD_OUT"
+                "combinationId": "combo-2",
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202",
+                "status": "ON_SALE"
               }
             ],
             "createdAt": "2030-10-01T16:00:00+09:00",
@@ -13133,9 +13493,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13148,7 +13519,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13163,7 +13534,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13176,7 +13547,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13191,16 +13562,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13216,6 +13587,138 @@
                 "reason": "필수 필드입니다."
               }
             ],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "invalid-media-reference": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "invalid-media-reference",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminProduct-invalid-media-reference"
+          },
+          "body": {
+            "optionMode": "OPTIONS",
+            "translations": {
+              "ko": {
+                "name": "예시 의류",
+                "description": "실제 상품·가격이 아닙니다."
+              },
+              "en": {
+                "name": "Sample apparel",
+                "description": "Not a real product or price."
+              },
+              "zh-Hans": null,
+              "ja": null
+            },
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "colors": [
+              {
+                "id": "00000000-0000-4000-8000-000000000101",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 A"
+                  },
+                  "en": {
+                    "name": "Sample Color A"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000102",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 B"
+                  },
+                  "en": {
+                    "name": "Sample Color B"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "sizes": [
+              {
+                "id": "00000000-0000-4000-8000-000000000201",
+                "translations": {
+                  "ko": {
+                    "label": "M"
+                  },
+                  "en": {
+                    "label": "M"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000202",
+                "translations": {
+                  "ko": {
+                    "label": "L"
+                  },
+                  "en": {
+                    "label": "L"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "options": [
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              }
+            ]
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "INVALID_MEDIA_REFERENCE",
+            "message": "사용할 수 없는 상품 이미지가 포함되어 있습니다.",
+            "details": [],
             "retryable": false
           },
           "meta": {
@@ -13259,9 +13762,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13274,7 +13788,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13289,7 +13803,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13302,7 +13816,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13317,16 +13831,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13336,6 +13850,138 @@
           "error": {
             "code": "NOT_FOUND",
             "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-required": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminProduct-idempotency-key-required"
+          },
+          "body": {
+            "optionMode": "OPTIONS",
+            "translations": {
+              "ko": {
+                "name": "예시 의류",
+                "description": "실제 상품·가격이 아닙니다."
+              },
+              "en": {
+                "name": "Sample apparel",
+                "description": "Not a real product or price."
+              },
+              "zh-Hans": null,
+              "ja": null
+            },
+            "price": {
+              "amount": 1000,
+              "currency": "KRW"
+            },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "colors": [
+              {
+                "id": "00000000-0000-4000-8000-000000000101",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 A"
+                  },
+                  "en": {
+                    "name": "Sample Color A"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000102",
+                "translations": {
+                  "ko": {
+                    "name": "예시 색상 B"
+                  },
+                  "en": {
+                    "name": "Sample Color B"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "sizes": [
+              {
+                "id": "00000000-0000-4000-8000-000000000201",
+                "translations": {
+                  "ko": {
+                    "label": "M"
+                  },
+                  "en": {
+                    "label": "M"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              },
+              {
+                "id": "00000000-0000-4000-8000-000000000202",
+                "translations": {
+                  "ko": {
+                    "label": "L"
+                  },
+                  "en": {
+                    "label": "L"
+                  },
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
+            "options": [
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
+              },
+              {
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
+              }
+            ]
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
             "details": [],
             "retryable": false
           },
@@ -13380,9 +14026,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13395,7 +14052,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13410,7 +14067,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13423,7 +14080,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13438,16 +14095,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13501,9 +14158,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13516,7 +14184,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13531,7 +14199,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13544,7 +14212,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13559,16 +14227,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13622,9 +14290,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13637,7 +14316,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13652,7 +14331,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13665,7 +14344,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13680,16 +14359,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13743,9 +14422,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13758,7 +14448,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13773,7 +14463,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13786,7 +14476,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13801,16 +14491,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13864,9 +14554,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -13879,7 +14580,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -13894,7 +14595,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -13907,7 +14608,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -13922,16 +14623,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -13985,9 +14686,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -14000,7 +14712,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -14015,7 +14727,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -14028,7 +14740,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -14043,16 +14755,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -14106,9 +14818,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
-                "id": "color-a",
+                "id": "00000000-0000-4000-8000-000000000101",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 A"
@@ -14121,7 +14844,7 @@
                 }
               },
               {
-                "id": "color-b",
+                "id": "00000000-0000-4000-8000-000000000102",
                 "translations": {
                   "ko": {
                     "name": "예시 색상 B"
@@ -14136,7 +14859,7 @@
             ],
             "sizes": [
               {
-                "id": "size-m",
+                "id": "00000000-0000-4000-8000-000000000201",
                 "translations": {
                   "ko": {
                     "label": "M"
@@ -14149,7 +14872,7 @@
                 }
               },
               {
-                "id": "size-l",
+                "id": "00000000-0000-4000-8000-000000000202",
                 "translations": {
                   "ko": {
                     "label": "L"
@@ -14164,16 +14887,16 @@
             ],
             "options": [
               {
-                "colorId": "color-a",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               },
               {
-                "colorId": "color-a",
-                "sizeId": "size-l"
+                "colorId": "00000000-0000-4000-8000-000000000101",
+                "sizeId": "00000000-0000-4000-8000-000000000202"
               },
               {
-                "colorId": "color-b",
-                "sizeId": "size-m"
+                "colorId": "00000000-0000-4000-8000-000000000102",
+                "sizeId": "00000000-0000-4000-8000-000000000201"
               }
             ]
           }
@@ -14252,6 +14975,37 @@
           "error": {
             "code": "NOT_FOUND",
             "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-required": {
+        "request": {
+          "method": "DELETE",
+          "path": "/api/v2/admin/products/goods-shirt",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-deleteAdminProduct-idempotency-key-required"
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
             "details": [],
             "retryable": false
           },
@@ -14471,6 +15225,483 @@
             "message": "관리자 권한이 없습니다.",
             "details": [],
             "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "postAdminGoodsImage": {
+    "screens": [
+      "ADM-GOODS-PRODUCT-EDIT"
+    ],
+    "method": "POST",
+    "path": "/api/v2/admin/media/goods-images",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-normal"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 201,
+        "response": {
+          "data": {
+            "mediaId": "00000000-0000-4000-8000-000000000050"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "validation-failed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "validation-failed",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-validation-failed"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "VALIDATION_FAILED",
+            "message": "요청 파일을 확인해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "payload-too-large": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "payload-too-large",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-payload-too-large"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 413,
+        "response": {
+          "error": {
+            "code": "PAYLOAD_TOO_LARGE",
+            "message": "업로드 파일은 10 MiB 이하여야 합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unsupported-media-type": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "unsupported-media-type",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-postAdminGoodsImage-unsupported-media-type"
+          }
+        },
+        "status": 415,
+        "response": {
+          "error": {
+            "code": "UNSUPPORTED_MEDIA_TYPE",
+            "message": "multipart/form-data 요청이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-required": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-idempotency-key-required"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-error"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 이미지를 처리할 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-bad-request"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-rate-limited"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-unauthorized"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/media/goods-images",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "multipart/form-data; boundary=<generated>",
+            "Idempotency-Key": "mock-postAdminGoodsImage-forbidden"
+          },
+          "multipart": {
+            "file": "<binary>"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getGoodsImage": {
+    "screens": [
+      "GOODS-LIST",
+      "GOODS-DETAIL"
+    ],
+    "method": "GET",
+    "path": "/api/v2/media/goods-images/{mediaId}/{variant}",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": null
+      },
+      "not-found": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "not-found",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 이미지를 처리할 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
           },
           "meta": {
             "requestId": "mock-example-request",
