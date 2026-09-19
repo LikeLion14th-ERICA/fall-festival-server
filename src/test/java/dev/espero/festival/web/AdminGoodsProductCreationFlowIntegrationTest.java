@@ -178,7 +178,8 @@ class AdminGoodsProductCreationFlowIntegrationTest {
             .andExpect(jsonPath("$.data.items[0].id").value(goodsId.toString()));
         mvc.perform(get("/api/v2/goods/" + goodsId))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.images[0].mediaId").value(OPENAPI_MEDIA_ID.toString()));
+            .andExpect(jsonPath("$.data.images[0].masterUrl")
+                .value("/api/v2/media/goods-images/" + OPENAPI_MEDIA_ID + "/master"));
         mvc.perform(get("/api/v2/goods/" + goodsId + "/availability"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.combinations", org.hamcrest.Matchers.hasSize(3)))
