@@ -74,7 +74,7 @@ public class AdminNoticeViewService {
             notice.category().name(),
             translations,
             links,
-            null,
+            notice.templateId(),
             OffsetDateTime.ofInstant(notice.createdAt(), TIMEZONE),
             OffsetDateTime.ofInstant(notice.updatedAt(), TIMEZONE)
         );

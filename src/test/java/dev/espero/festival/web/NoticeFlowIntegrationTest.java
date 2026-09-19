@@ -51,6 +51,7 @@ class NoticeFlowIntegrationTest {
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
     private static final UUID ADMIN_ID = UUID.fromString("7c9a2b1e-2f9c-4f0a-9b53-2f4c3a0e6d22");
     private static final String ADMIN_LIST_ROUTE = "/api/v2/admin/notices";
+    private static final String PLACEHOLDER_TEMPLATE = "template-registration-required";
 
     private static final String VALID_CREATE_BODY = """
         {
@@ -85,6 +86,9 @@ class NoticeFlowIntegrationTest {
 
     @Autowired
     private tools.jackson.databind.ObjectMapper objectMapper;
+
+    @Autowired
+    private dev.espero.festival.persistence.NoticeTemplateStore templates;
 
     private MockMvc mvc;
     private int keySequence;
@@ -333,6 +337,66 @@ class NoticeFlowIntegrationTest {
                 .content(withTemplate))
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.error.code").value("TEMPLATE_NOT_FOUND"));
+    }
+
+    @Test
+    void servesThePlaceholderTemplateInEveryLocaleToAdministratorsOnly() throws Exception {
+        mvc.perform(get("/api/v2/admin/notice-templates"))
+            .andExpect(status().isUnauthorized());
+
+        mvc.perform(asAdmin(get("/api/v2/admin/notice-templates")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.data.items[0].id").value(PLACEHOLDER_TEMPLATE))
+            .andExpect(jsonPath("$.data.items[0].name").value("템플릿 등록 필요"));
+
+        mvc.perform(asAdmin(get("/api/v2/admin/notice-templates/" + PLACEHOLDER_TEMPLATE)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.translations.ko.title").value("템플릿 등록 필요"))
+            .andExpect(jsonPath("$.data.translations.ko.body").value("템플릿 등록 필요"))
+            .andExpect(jsonPath("$.data.translations.en.title").value("Template registration required"))
+            .andExpect(jsonPath("$.data.translations['zh-Hans'].title").value("需要登记模板"))
+            .andExpect(jsonPath("$.data.translations.ja.title").value("テンプレート登録が必要"));
+
+        mvc.perform(asAdmin(get("/api/v2/admin/notice-templates/no-such-template")))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+        mvc.perform(asAdmin(get("/api/v2/admin/notice-templates").param("page", "2")))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
+    }
+
+    @Test
+    void keepsTheTemplateANoticeStartedFromUntilThatTemplateIsRemoved() throws Exception {
+        String fromTemplate = VALID_CREATE_BODY.replace(
+            "\"templateId\": null", "\"templateId\": \"" + PLACEHOLDER_TEMPLATE + "\""
+        );
+        String body = mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))
+                .header("Idempotency-Key", nextKey())
+                .contentType("application/json")
+                .content(fromTemplate))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.templateId").value(PLACEHOLDER_TEMPLATE))
+            .andReturn().getResponse().getContentAsString();
+        String noticeId = objectMapper.readTree(body).path("data").path("id").asString();
+
+        dev.espero.festival.domain.NoticeTemplate placeholder = templates.find(PLACEHOLDER_TEMPLATE).orElseThrow();
+        try {
+            templates.replaceAll(List.of(new dev.espero.festival.domain.NoticeTemplate(
+                "rain-delay", "우천 지연",
+                Map.of("ko", new dev.espero.festival.domain.NoticeTranslation("우천으로 지연", "공연이 지연됩니다."))
+            )), clock.instant());
+
+            mvc.perform(asAdmin(get("/api/v2/admin/notice-templates")))
+                .andExpect(jsonPath("$.data.items[*].id", org.hamcrest.Matchers.contains("rain-delay")))
+                .andExpect(jsonPath("$.data.items[0].translations.en").doesNotExist());
+            mvc.perform(asAdmin(get(ADMIN_LIST_ROUTE + "/" + noticeId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.translations.ko.title").value("관리자 공지"))
+                .andExpect(jsonPath("$.data.templateId").doesNotExist());
+        } finally {
+            templates.replaceAll(List.of(placeholder), clock.instant());
+        }
     }
 
     private MockHttpServletRequestBuilder asAdmin(MockHttpServletRequestBuilder request) {

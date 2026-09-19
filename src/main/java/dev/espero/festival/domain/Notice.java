@@ -14,6 +14,8 @@ public record Notice(
     NoticeCategory category,
     Map<String, NoticeTranslation> translations,
     List<NoticeLink> links,
+    /** The template the notice started from, or null when written directly. */
+    String templateId,
     Instant createdAt,
     Instant updatedAt
 ) {}

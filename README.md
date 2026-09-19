@@ -214,6 +214,27 @@ $code = Read-Host '6자리 수령 인증 코드'; [Convert]::ToHexString([Securi
 출력된 64자리 hex를 `STAMP_RECEIPT_CODE_SHA256`에 넣습니다. 행사일마다 새 코드로 바꾸고, 바꾸는
 동안에는 `이전hash,새hash`처럼 함께 넣었다가 이전 값을 뺍니다. hash도 비밀값으로 다룹니다.
 
+### 공지 템플릿 교체
+
+관리자 공지 작성 화면의 템플릿(`GET /api/v2/admin/notice-templates`)은 API로 등록하지 않고
+JSON 파일로 전체를 교체합니다. 처음에는 V26 migration이 넣은 `template-registration-required`
+("템플릿 등록 필요") 하나만 있습니다. 실제 템플릿을 받으면 아래 형식으로 파일을 만듭니다.
+`ko`는 필수이고 `en`·`zh-Hans`·`ja`는 준비된 경우만 넣습니다. 제목은 200자, 본문은 10000자까지이며
+파일에 없는 템플릿은 삭제됩니다. 그 템플릿에서 시작한 공지는 내용을 유지하고 연결만 끊깁니다.
+
+```json
+{"templates": [
+  {"id": "rain-delay", "name": "우천 지연",
+   "translations": {"ko": {"title": "...", "body": "..."}, "en": {"title": "...", "body": "..."}}}
+]}
+```
+
+`--confirm` 없이 실행하면 검증 후 바뀔 내용만 출력합니다. DB 접속 환경변수는 서버와 같습니다.
+
+```powershell
+java '-Dloader.main=dev.espero.festival.NoticeTemplateCliApplication' -cp target/fall-festival-server-0.0.1-SNAPSHOT.jar org.springframework.boot.loader.launch.PropertiesLauncher replace --input-file=templates.json
+```
+
 ### Swagger UI로 엔드포인트 확인
 
 로컬·개발 서버에서 `API_DOCS_ENABLED=true`로 실행하면 `http://127.0.0.1:8080/docs`에서 API v2

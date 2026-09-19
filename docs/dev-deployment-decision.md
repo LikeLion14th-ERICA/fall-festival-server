@@ -3,7 +3,7 @@
 ## Status
 
 - 상태: 개발 환경 DB 결정 갱신, 아직 backend를 provision하지 않음
-- 기준: `main` `9357409` (2026-09-19, Flyway V1~V24)
+- 기준: `main` `9357409` (2026-09-19, Flyway V1~V26)
 - Provider 정책 확인일: 2026-09-17 (provision 직전 재확인)
 - 범위: remote development only; production hosting 결정이 아님
 - 검증 게이트: `READ_ONLY_DATABASE_PREFLIGHT`, `DEPLOYMENT_VALIDATION_REQUIRED`
@@ -109,7 +109,7 @@ migrate, catalog import와 catalog publish를 실행하지 않는다. Flyway가 
 process도 이 database를 대상으로 먼저 기동하지 않는다. 이 점검은 저장소의 standalone
 `DatabasePreflightApplication`으로 수행한다(SELECT만 실행, 불명확하면 `STOP_AND_REVIEW`,
 [DB 읽기 전용 사전 점검](wiki/engineering/database-preflight.md)). Network access, database/schema 상태,
-migration history와 V1~V24 호환성을 확인한 뒤에만 mutation 단계로 진행한다. 공유 schema라면
+migration history와 V1~V26 호환성을 확인한 뒤에만 mutation 단계로 진행한다. 공유 schema라면
 별도 database 또는 schema가 필요한지 다시 결정한다.
 
 팀에서 제공한 connection 정보는 다음 Spring 변수로 분리해 Render secret/environment settings에만
@@ -128,7 +128,7 @@ direct/pooled connection option은 read-only preflight와 제공 조건을 확�
 
 `FESTIVAL_ID`에는 read-only preflight와 이후 승인된 migration 결과로 이 development DB에 실제
 존재함을 확인한 `festivals.id`를 사용한다. 기존 festival이 있으면 그 사용 가능성을 먼저 검토하고,
-빈 호환 schema에 V1~V24을 적용한 경우에만 Flyway가 만든 development festival을 확인한다. V6 seed
+빈 호환 schema에 V1~V26을 적용한 경우에만 Flyway가 만든 development festival을 확인한다. V6 seed
 UUID를 무조건 가정하거나 production/shared 환경의 UUID를 추측해 사용하지 않는다. UUID literal은
 이 decision에 복제하지 않는다.
 
@@ -146,7 +146,7 @@ team-provided PostgreSQL development database
   -> READ_ONLY_DATABASE_PREFLIGHT (SELECT / metadata only)
   -> network, schema, flyway_schema_history와 기존 data 확인
   -> migration compatibility 판정
-  -> 안전할 때만 Flyway V1-V24 적용 또는 현재 migration 상태에서 continue
+  -> 안전할 때만 Flyway V1-V26 적용 또는 현재 migration 상태에서 continue
   -> DB 제공자가 발급한 역할에 provisioning script 적용
   -> development DB의 실제 festivals.id를 FESTIVAL_ID로 결정
   -> 기존 festival/catalog data가 있으면 STOP_AND_REVIEW
@@ -188,6 +188,8 @@ development test-data 결정이 나온 뒤 manifest에 넣는다.
   유지한다.
 - V24는 번역 테이블 4개(축제명·지도 이미지 대체 텍스트·티켓·스탬프 안내)를 추가만 한다. 기존 행은
   바꾸지 않는다. catalog export·publish 역할에 이 테이블 권한을 provider가 함께 준다.
+- V26은 공지 템플릿 테이블과 `notices.template_id`를 추가하고 `템플릿 등록 필요` 임시 템플릿
+  하나를 넣는다. 실제 템플릿은 템플릿 CLI로 교체한다.
 - 계좌·role 관련 migration 뒤에는 역할 provisioning script를 다시 실행한다.
 
 ### 역할 provisioning
@@ -280,8 +282,8 @@ ADMIN_BOOTSTRAP_PASSWORD=<bootstrap-password>
 ## Flyway
 
 기존 database가 비어 있다고 가정하지 않는다. 먼저 `READ_ONLY_DATABASE_PREFLIGHT`에서
-`flyway_schema_history`, schema와 기존 data를 확인하고 V1~V24 호환성을 판정한다. 안전하다고
-승인된 경우에만 빈 호환 schema에는 V1~V24을 적용하고, 기존 Flyway history가 있으면 확인된 현재
+`flyway_schema_history`, schema와 기존 data를 확인하고 V1~V26 호환성을 판정한다. 안전하다고
+승인된 경우에만 빈 호환 schema에는 V1~V26을 적용하고, 기존 Flyway history가 있으면 확인된 현재
 migration 상태에서 이어간다. 상태가 불명확하거나 공유 schema이면 migrate하지 않고
 `STOP_AND_REVIEW`한다. Production 또는 multi-instance 배포에서는 별도 migration gate를 다시
 결정한다.
@@ -310,7 +312,7 @@ keep-alive hack은 추가하지 않는다. Render 무료 plan 수치와 lifecycl
 - [ ] 기존 table, `flyway_schema_history`, migration version과 festival table 확인
 - [ ] 현재 data와 동일 database/schema를 사용하는 다른 서비스·팀 여부 확인
 - [ ] Render에서 team-provided PostgreSQL로 network access 가능한지 확인
-- [ ] V1~V24 migration compatibility 검토와 mutation 승인 기록
+- [ ] V1~V26 migration compatibility 검토와 mutation 승인 기록
 - [ ] 역할 provisioning script 적용과 catalog 역할의 계좌·혼잡도·공지·굿즈 접근 거부 확인
 - [ ] 안전한 경우에만 Flyway 적용 또는 확인된 현재 migration 상태에서 continue
 - [ ] 실제 development festival/revision과 `FESTIVAL_ID` 확인
