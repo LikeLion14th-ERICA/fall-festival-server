@@ -39,14 +39,16 @@ public class ConfigController {
 
     @GetMapping("/config")
     public ApiResponse<ConfigResponse> getConfig(HttpServletRequest request) {
-        CatalogSnapshot snapshot = snapshots.required();
-        metaSupport.setContext(request, snapshot.context(), PublicContentLocale.KOREAN);
+        CatalogSnapshot korean = snapshots.required();
+        metaSupport.setContext(request, korean.context(), PublicContentLocale.KOREAN);
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             if (!entry.getKey().equals("locale") || entry.getValue().length != 1) {
                 throw PublicContentLocale.invalidQuery();
             }
         }
-        String locale = PublicContentLocale.requirePublishedLocale(request);
+        List<String> published = snapshots.publishedLocales();
+        String locale = PublicContentLocale.requirePublishedLocale(request, published);
+        CatalogSnapshot snapshot = PublicContentLocale.snapshot(snapshots, locale);
 
         CatalogSnapshot.FestivalHome home = snapshot.home();
         if (home.title() == null) {
@@ -62,12 +64,18 @@ public class ConfigController {
                 home.dates(),
                 defaultDate(home.dates(), today)
             ),
-            PublicContentLocale.PUBLISHED_LANGUAGES.stream()
-                .map(language -> new ConfigResponse.Language(language.getKey(), language.getValue()))
-                .toList(),
+            languages(published),
             links(home.links())
         );
         return new ApiResponse<>(response, metaSupport.meta(request, snapshot.context(), locale));
+    }
+
+    /** Korean first; an empty list (the catalog has not loaded yet) still offers Korean. */
+    private static List<ConfigResponse.Language> languages(List<String> published) {
+        List<String> codes = published.isEmpty() ? List.of(PublicContentLocale.KOREAN) : published;
+        return codes.stream()
+            .map(code -> new ConfigResponse.Language(code, PublicContentLocale.nativeName(code)))
+            .toList();
     }
 
     /**

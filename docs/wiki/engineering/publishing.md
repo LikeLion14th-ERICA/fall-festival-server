@@ -37,6 +37,11 @@
   `OFFICIAL_CHANNEL`은 `iconKey`와 고유 `sortOrder`)와 `festivalLinkTranslations`(한국어 필수)로
   revision에 넣는다(V22). 이전 manifest에는 두 field가 없어도 되며 빈 목록으로 읽는다. 공개
   `GET /api/v2/config`는 게시 snapshot의 축제명·축제일·링크를 반환하고, 없는 링크는 `null`이다.
+- 한 언어로만 저장하던 축제명·지도 이미지 대체 텍스트·티켓 안내·스탬프 안내의 다른 언어는
+  `festivalTitleTranslations`·`mapAssetTranslations`·`ticketGuideTranslations`·
+  `stampGuideTranslations`로 넣는다(V24, 한국어 행 금지). 안내 번역은 한국어와 instruction 수가
+  같고, 한국어에 있는 선택 field만 채운다. 이전 manifest에는 없어도 된다. 언어 공개 조건은
+  [다국어](i18n.md#서버의-언어-공개)에 있다.
 - Current Festival은 서버 `FESTIVAL_ID` 환경변수로 선택한다. DB에서 현재 Festival을 자동
   추측하지 않으며, 설정된 회차에 published revision이 없으면 공개 콘텐츠를 가짜 revision으로
   제공하지 않는다.

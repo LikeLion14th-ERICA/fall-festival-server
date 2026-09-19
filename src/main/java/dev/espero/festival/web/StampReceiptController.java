@@ -46,7 +46,7 @@ public class StampReceiptController {
                 throw PublicContentLocale.invalidQuery();
             }
         }
-        String locale = PublicContentLocale.requirePublishedLocale(request);
+        String locale = PublicContentLocale.requirePublishedLocale(request, snapshots.publishedLocales());
         if (!verifier.configured()) {
             throw new ApiException(
                 HttpStatus.SERVICE_UNAVAILABLE,

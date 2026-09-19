@@ -28,7 +28,6 @@ public class StampGuideController {
 
     private static final String TIMEZONE = "Asia/Seoul";
     private static final int DAILY_LIMIT = 4;
-    private static final String CONTENT_LOCALE = PublicContentLocale.KOREAN;
 
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
@@ -40,9 +39,10 @@ public class StampGuideController {
 
     @GetMapping("/stamp-guide")
     public ApiResponse<StampGuideResponse> getStampGuide(HttpServletRequest request) {
-        CatalogSnapshot snapshot = snapshots.required();
-        metaSupport.setContext(request, snapshot.context(), CONTENT_LOCALE);
-        validateQuery(request);
+        CatalogSnapshot korean = snapshots.required();
+        metaSupport.setContext(request, korean.context(), PublicContentLocale.KOREAN);
+        String locale = validateQuery(request);
+        CatalogSnapshot snapshot = PublicContentLocale.snapshot(snapshots, locale);
         StampGuide guide = java.util.Optional.ofNullable(snapshot.stampGuide()).orElseThrow(() -> new ApiException(
             HttpStatus.SERVICE_UNAVAILABLE,
             "STAMP_GUIDE_NOT_CONFIGURED",
@@ -64,15 +64,15 @@ public class StampGuideController {
             TIMEZONE,
             guide.qrValue()
         );
-        return new ApiResponse<>(data, metaSupport.meta(request, snapshot.context(), CONTENT_LOCALE));
+        return new ApiResponse<>(data, metaSupport.meta(request, snapshot.context(), locale));
     }
 
-    private void validateQuery(HttpServletRequest request) {
+    private String validateQuery(HttpServletRequest request) {
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             if (!entry.getKey().equals("locale") || entry.getValue().length != 1) {
                 throw PublicContentLocale.invalidQuery();
             }
         }
-        PublicContentLocale.requirePublishedLocale(request);
+        return PublicContentLocale.requirePublishedLocale(request, snapshots.publishedLocales());
     }
 }

@@ -43,6 +43,7 @@ public class CrowdingController {
     private final AdminAuditService audit;
     private final AdminContext adminContext;
     private final Clock clock;
+    private final CatalogSnapshotProvider snapshots;
 
     public CrowdingController(
         CrowdingViewService views,
@@ -52,7 +53,8 @@ public class CrowdingController {
         AdminIdempotencyService idempotency,
         AdminAuditService audit,
         AdminContext adminContext,
-        Clock clock
+        Clock clock,
+        CatalogSnapshotProvider snapshots
     ) {
         this.views = views;
         this.store = store;
@@ -62,6 +64,7 @@ public class CrowdingController {
         this.audit = audit;
         this.adminContext = adminContext;
         this.clock = clock;
+        this.snapshots = snapshots;
     }
 
     @GetMapping("/crowding")
@@ -229,7 +232,7 @@ public class CrowdingController {
                 throw PublicContentLocale.invalidQuery();
             }
         }
-        PublicContentLocale.requirePublishedLocale(request);
+        PublicContentLocale.requirePublishedLocale(request, snapshots.publishedLocales());
     }
 
     private void validateAdminQuery(HttpServletRequest request) {
