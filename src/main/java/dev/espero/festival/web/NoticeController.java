@@ -17,6 +17,7 @@ import dev.espero.festival.idempotency.IdempotencyKeyPolicy;
 import dev.espero.festival.idempotency.IdempotencyRequest;
 import dev.espero.festival.idempotency.IdempotencyResponse;
 import dev.espero.festival.persistence.NoticeStore;
+import dev.espero.festival.persistence.NoticeTemplateStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class NoticeController {
     private final NoticeViewService views;
     private final AdminNoticeViewService adminViews;
     private final NoticeStore store;
+    private final NoticeTemplateStore templates;
     private final FestivalProperties properties;
     private final ApiMetaSupport metaSupport;
     private final ConditionalResponseSupport conditionalResponses;
@@ -66,6 +68,7 @@ public class NoticeController {
         NoticeViewService views,
         AdminNoticeViewService adminViews,
         NoticeStore store,
+        NoticeTemplateStore templates,
         FestivalProperties properties,
         ApiMetaSupport metaSupport,
         ConditionalResponseSupport conditionalResponses,
@@ -79,6 +82,7 @@ public class NoticeController {
         this.views = views;
         this.adminViews = adminViews;
         this.store = store;
+        this.templates = templates;
         this.properties = properties;
         this.metaSupport = metaSupport;
         this.conditionalResponses = conditionalResponses;
@@ -128,7 +132,8 @@ public class NoticeController {
         );
 
         IdempotencyExecution execution = idempotency.execute(idempotencyRequest, () -> {
-            UUID noticeId = store.insert(festivalId, category, translations, links, clock.instant());
+            requireTemplate(input.templateId());
+            UUID noticeId = store.insert(festivalId, category, translations, links, input.templateId(), clock.instant());
             Notice created = store.findForAdmin(festivalId, noticeId).orElseThrow();
             AdminNoticeViewService.AdminNoticeSnapshot snapshot = adminViews.snapshot(request, created);
             audit.record(
@@ -172,7 +177,8 @@ public class NoticeController {
             mutationPreconditions.requireCurrentRepresentation(
                 request, AdminMutationConcurrency.IF_MATCH_REQUIRED, currentSnapshot.etag()
             );
-            store.update(noticeId, category, translations, links, clock.instant());
+            requireTemplate(input.templateId());
+            store.update(noticeId, category, translations, links, input.templateId(), clock.instant());
             Notice updated = store.findForAdmin(festivalId, noticeId).orElseThrow();
             AdminNoticeViewService.AdminNoticeSnapshot updatedSnapshot = adminViews.snapshot(request, updated);
             audit.record(
@@ -262,6 +268,10 @@ public class NoticeController {
         payload.put("type", input.type());
         payload.put("translations", translations);
         payload.put("links", links);
+        // Added only when set so requests without a template keep their earlier fingerprint.
+        if (input.templateId() != null) {
+            payload.put("templateId", input.templateId());
+        }
         return CanonicalPayload.from(payload);
     }
 
@@ -299,6 +309,12 @@ public class NoticeController {
     private void validateAdminQuery(HttpServletRequest request) {
         if (!request.getParameterMap().isEmpty()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_QUERY", "요청 파라미터를 확인해 주세요.", false);
+        }
+    }
+
+    private void requireTemplate(String templateId) {
+        if (templateId != null && !templates.exists(templateId)) {
+            throw NoticeInputValidator.templateNotFound();
         }
     }
 

@@ -76,6 +76,10 @@ REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".notice_templates FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".notice_templates FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".notice_template_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".notice_template_translations FROM :"catalog_publish_role";
 
 -- Goods are operated outside the catalog as well (V21).
 REVOKE ALL ON TABLE :"schema".goods FROM :"catalog_export_role";

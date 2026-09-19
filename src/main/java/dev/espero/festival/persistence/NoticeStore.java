@@ -37,7 +37,7 @@ public class NoticeStore {
      * the given window (the caller's KST "today"). */
     public List<Notice> findVisible(UUID festivalId, Instant generalWindowStart, Instant generalWindowEnd) {
         List<NoticeHeader> headers = jdbc.query("""
-            SELECT id, festival_id, category, created_at, updated_at
+            SELECT id, festival_id, category, template_id, created_at, updated_at
             FROM notices
             WHERE festival_id = :festivalId
               AND deleted_at IS NULL
@@ -59,7 +59,7 @@ public class NoticeStore {
     /** All non-deleted notices for a festival, most recently updated first. */
     public List<Notice> findAllForAdmin(UUID festivalId) {
         List<NoticeHeader> headers = jdbc.query("""
-            SELECT id, festival_id, category, created_at, updated_at
+            SELECT id, festival_id, category, template_id, created_at, updated_at
             FROM notices
             WHERE festival_id = :festivalId
               AND deleted_at IS NULL
@@ -73,7 +73,7 @@ public class NoticeStore {
 
     public Optional<Notice> findForAdmin(UUID festivalId, UUID noticeId) {
         List<NoticeHeader> headers = jdbc.query("""
-            SELECT id, festival_id, category, created_at, updated_at
+            SELECT id, festival_id, category, template_id, created_at, updated_at
             FROM notices
             WHERE festival_id = :festivalId
               AND id = :id
@@ -100,7 +100,7 @@ public class NoticeStore {
     /** Locks the notice row before an administrator checks its ETag and writes it. */
     public Optional<Notice> findForUpdate(UUID festivalId, UUID noticeId) {
         List<NoticeHeader> headers = jdbc.query("""
-            SELECT id, festival_id, category, created_at, updated_at
+            SELECT id, festival_id, category, template_id, created_at, updated_at
             FROM notices
             WHERE festival_id = :festivalId
               AND id = :id
@@ -119,18 +119,20 @@ public class NoticeStore {
         NoticeCategory category,
         Map<String, NoticeTranslation> translations,
         List<NoticeLinkDraft> links,
+        String templateId,
         Instant now
     ) {
         UUID noticeId = UUID.randomUUID();
         OffsetDateTime timestamp = atUtc(now);
         jdbc.update("""
-            INSERT INTO notices (id, festival_id, category, created_at, updated_at)
-            VALUES (:id, :festivalId, :category, :timestamp, :timestamp)
+            INSERT INTO notices (id, festival_id, category, template_id, created_at, updated_at)
+            VALUES (:id, :festivalId, :category, :templateId, :timestamp, :timestamp)
             """,
             new MapSqlParameterSource()
                 .addValue("id", noticeId)
                 .addValue("festivalId", festivalId)
                 .addValue("category", category.name())
+                .addValue("templateId", templateId)
                 .addValue("timestamp", timestamp)
         );
         writeTranslations(noticeId, translations);
@@ -144,16 +146,18 @@ public class NoticeStore {
         NoticeCategory category,
         Map<String, NoticeTranslation> translations,
         List<NoticeLinkDraft> links,
+        String templateId,
         Instant now
     ) {
         jdbc.update("""
             UPDATE notices
-            SET category = :category, updated_at = :updatedAt
+            SET category = :category, template_id = :templateId, updated_at = :updatedAt
             WHERE id = :id
             """,
             new MapSqlParameterSource()
                 .addValue("id", noticeId)
                 .addValue("category", category.name())
+                .addValue("templateId", templateId)
                 .addValue("updatedAt", atUtc(now))
         );
         jdbc.update("DELETE FROM notice_translations WHERE notice_id = :id", Map.of("id", noticeId));
@@ -233,6 +237,7 @@ public class NoticeStore {
                 header.category(),
                 translationsByNotice.getOrDefault(header.id(), Map.of()),
                 linksByNotice.getOrDefault(header.id(), List.of()),
+                header.templateId(),
                 header.createdAt(),
                 header.updatedAt()
             ));
@@ -306,6 +311,7 @@ public class NoticeStore {
             resultSet.getObject("id", UUID.class),
             resultSet.getObject("festival_id", UUID.class),
             NoticeCategory.valueOf(resultSet.getString("category")),
+            resultSet.getString("template_id"),
             resultSet.getObject("created_at", OffsetDateTime.class).toInstant(),
             resultSet.getObject("updated_at", OffsetDateTime.class).toInstant()
         );
@@ -319,6 +325,7 @@ public class NoticeStore {
         UUID id,
         UUID festivalId,
         NoticeCategory category,
+        String templateId,
         Instant createdAt,
         Instant updatedAt
     ) {}

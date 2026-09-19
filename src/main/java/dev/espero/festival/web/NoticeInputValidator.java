@@ -3,6 +3,7 @@ package dev.espero.festival.web;
 import dev.espero.festival.domain.NoticeCategory;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -16,6 +17,7 @@ final class NoticeInputValidator {
 
     private static final Set<String> OPTIONAL_LOCALES = Set.of("zh-Hans", "ja");
     private static final Set<String> KNOWN_LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
+    private static final Pattern TEMPLATE_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
 
     private NoticeInputValidator() {}
 
@@ -50,13 +52,10 @@ final class NoticeInputValidator {
         for (NoticeInput.LinkInput link : input.links()) {
             validateLink(link, translations.keySet());
         }
-        if (input.templateId() != null) {
-            throw new ApiException(
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                "TEMPLATE_NOT_FOUND",
-                "등록된 공지 템플릿이 없습니다.",
-                false
-            );
+        // Whether the template exists is checked against the store; an id that
+        // cannot be a template id is reported the same way.
+        if (input.templateId() != null && !TEMPLATE_ID.matcher(input.templateId()).matches()) {
+            throw templateNotFound();
         }
         return category;
     }
@@ -103,6 +102,15 @@ final class NoticeInputValidator {
         } catch (IllegalArgumentException | NullPointerException exception) {
             throw validationFailed();
         }
+    }
+
+    static ApiException templateNotFound() {
+        return new ApiException(
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            "TEMPLATE_NOT_FOUND",
+            "등록된 공지 템플릿이 없습니다.",
+            false
+        );
     }
 
     private static ApiException validationFailed() {
