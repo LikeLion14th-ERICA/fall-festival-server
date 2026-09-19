@@ -13,7 +13,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/** Verifies that a fresh database reaches V24 without seeding operational media rows. */
+/** Verifies that a fresh database reaches V25 without seeding operational media rows. */
 @SpringBootTest
 @ActiveProfiles("db")
 @Testcontainers(disabledWithoutDocker = true)
@@ -33,8 +33,8 @@ class GoodsMediaMigrationIntegrationTest {
     private JdbcTemplate jdbc;
 
     @Test
-    void freshMigrationCreatesV24WithoutOperationalMediaData() {
-        assertThat(count("SELECT count(*) FROM flyway_schema_history WHERE version = '24' AND success"))
+    void freshMigrationCreatesV25WithoutOperationalMediaData() {
+        assertThat(count("SELECT count(*) FROM flyway_schema_history WHERE version = '25' AND success"))
             .isEqualTo(1);
         assertThat(count("SELECT count(*) FROM media_assets")).isZero();
         assertThat(count("SELECT count(*) FROM goods_images")).isZero();
