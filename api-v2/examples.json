@@ -11487,6 +11487,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -11580,7 +11591,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
-            "images": [],
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -11696,6 +11720,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -11821,6 +11856,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -11941,6 +11987,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12061,6 +12118,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12181,6 +12249,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12301,6 +12380,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12421,6 +12511,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12551,6 +12652,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12778,6 +12890,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13041,6 +13164,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13228,6 +13362,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13354,6 +13499,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13475,6 +13631,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13596,6 +13763,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13717,6 +13895,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13838,6 +14027,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13959,6 +14159,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -14080,6 +14291,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -14201,6 +14423,17 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                }
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",

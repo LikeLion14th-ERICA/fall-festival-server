@@ -15,10 +15,21 @@ export function applyAdminContract(s,ops){
   s.GoodsColorInput=obj({id,translations:ref('GoodsColorTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
   s.GoodsSizeInput=obj({id,translations:ref('GoodsSizeTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
   s.GoodsOptionInput=obj({colorId:id,sizeId:id},'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.');
+  s.GoodsImageAltInput=obj({
+    ko:str('한국어 대체 텍스트. 공백만 입력할 수 없음.'),
+    en:str('영어 대체 텍스트. 공백만 입력할 수 없음.'),
+    'zh-Hans':nullable(str('중국어 간체 대체 텍스트'),'상품 zh-Hans 번역이 없으면 null'),
+    ja:nullable(str('일본어 대체 텍스트'),'상품 ja 번역이 없으면 null'),
+  },'상품 번역과 같은 locale shape. 선택 상품 번역이 있으면 모든 이미지 alt도 같은 locale 값을 가져야 한다.',['ko','en','zh-Hans','ja']);
+  s.GoodsImageInput=obj({
+    mediaId:{type:'string',format:'uuid',description:'사전 업로드로 발급된 opaque media UUID. URL·경로·파일명은 입력하지 않는다.'},
+    alt:ref('GoodsImageAltInput'),
+  },'이미 업로드된 서버 media 참조와 수동 대체 텍스트. URL 입력은 허용하지 않는다.');
   s.ProductInput=obj({
     optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
     translations:ref('GoodsTranslations'),
     price:ref('Money'),
+    images:{type:'array',items:ref('GoodsImageInput'),minItems:1,maxItems:2,description:'이미 업로드된 opaque media 참조 1~2개. 배열 순서가 표시 순서이며 임의 URL은 허용하지 않는다.'},
     colors:arr(ref('GoodsColorInput'),'SINGLE이면 []'),
     sizes:arr(ref('GoodsSizeInput'),'SINGLE이면 []'),
     options:arr(ref('GoodsOptionInput'),'SINGLE이면 []. OPTIONS면 비어있지 않아야 하며 모든 색상·사이즈가 실제 조합에서 쓰여야 함.'),

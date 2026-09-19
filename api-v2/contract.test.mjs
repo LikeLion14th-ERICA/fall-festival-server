@@ -420,6 +420,36 @@ test('OPTIONS products with an empty configuration are rejected before state mut
   assert.deepEqual((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data,availabilityBefore);
 });
 
+test('Product image input requires ordered unique opaque media references and locale-aligned alt text',async()=>{
+  const base=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
+  const post=(body,key)=>call('/api/v2/admin/products',{session:'product-image-input',headers:{...admin,'Idempotency-Key':key},method:'POST',body});
+  assert.equal((await post(base,'image-valid')).status,201);
+
+  const invalid=[];
+  invalid.push({...structuredClone(base),images:[]});
+  invalid.push({...structuredClone(base),images:null});
+  invalid.push({...structuredClone(base),images:[...base.images,...base.images,...base.images]});
+  const duplicate=structuredClone(base);duplicate.images.push(structuredClone(duplicate.images[0]));invalid.push(duplicate);
+  for(const locale of ['ko','en']){
+    const missing=structuredClone(base);delete missing.images[0].alt[locale];invalid.push(missing);
+    const blank=structuredClone(base);blank.images[0].alt[locale]='   ';invalid.push(blank);
+  }
+  const unknown=structuredClone(base);unknown.images[0].alt.fr='Image du produit';invalid.push(unknown);
+  const missingOptional=structuredClone(base);
+  missingOptional.translations['zh-Hans']={name:'示例商品',description:null};
+  missingOptional.images[0].alt['zh-Hans']=null;
+  invalid.push(missingOptional);
+  const unexpectedOptional=structuredClone(base);
+  unexpectedOptional.images[0].alt.ja='不要な代替テキスト';
+  invalid.push(unexpectedOptional);
+  const blankOptional=structuredClone(base);blankOptional.images[0].alt.ja='   ';invalid.push(blankOptional);
+  const urlInput=structuredClone(base);urlInput.images[0].masterUrl='/arbitrary.webp';invalid.push(urlInput);
+
+  for(const [index,body] of invalid.entries()){
+    assert.equal((await post(body,`image-invalid-${index}`)).status,422);
+  }
+});
+
 test('New product and option combinations start on sale while existing states survive edits',async()=>{
   const session='products-v5',body=structuredClone(examples.postAdminProduct.scenarios.normal.request.body);
   const created=await call('/api/v2/admin/products',{session,headers:{...admin,'Idempotency-Key':'products-v5-create'},method:'POST',body});

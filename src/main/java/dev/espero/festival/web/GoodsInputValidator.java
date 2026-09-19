@@ -40,6 +40,7 @@ final class GoodsInputValidator {
         if (input.price() == null || input.price().amount() < 0 || !"KRW".equals(input.price().currency())) {
             throw validationFailed();
         }
+        validateImages(input);
         if (input.colors() == null || input.sizes() == null || input.options() == null) {
             throw validationFailed();
         }
@@ -87,6 +88,58 @@ final class GoodsInputValidator {
         return optionMode;
     }
 
+    private static void validateImages(GoodsInput input) {
+        if (input.images() == null || input.images().isEmpty() || input.images().size() > 2) {
+            throw validationFailed();
+        }
+        Set<java.util.UUID> mediaIds = new HashSet<>();
+        for (GoodsInput.ImageInput image : input.images()) {
+            if (image == null || image.mediaId() == null || image.alt() == null
+                || !KNOWN_LOCALES.containsAll(image.alt().keySet())) {
+                throw validationFailed();
+            }
+            if (!mediaIds.add(image.mediaId())) {
+                throw new ApiException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "DUPLICATE_MEDIA",
+                    "상품 이미지가 중복됩니다.",
+                    false
+                );
+            }
+            if (!hasText(image.alt().get("ko"))) {
+                throw new ApiException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "KOREAN_REQUIRED",
+                    "상품 이미지의 한국어 대체 텍스트는 필수입니다.",
+                    false
+                );
+            }
+            if (!hasText(image.alt().get("en"))) {
+                throw new ApiException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "ENGLISH_REQUIRED",
+                    "상품 이미지의 영어 대체 텍스트는 필수입니다.",
+                    false
+                );
+            }
+            for (String locale : OPTIONAL_LOCALES) {
+                boolean productHasTranslation = input.translations().get(locale) != null;
+                String alt = image.alt().get(locale);
+                if (alt != null && !hasText(alt)) {
+                    throw validationFailed();
+                }
+                if (productHasTranslation != hasText(alt)) {
+                    throw new ApiException(
+                        HttpStatus.UNPROCESSABLE_ENTITY,
+                        "TRANSLATION_CONTENT_REQUIRED",
+                        "상품 번역과 이미지 대체 텍스트의 언어를 일치시켜 주세요.",
+                        false
+                    );
+                }
+            }
+        }
+    }
+
     private static void requireUniqueIds(java.util.List<java.util.UUID> ids) {
         if (new HashSet<>(ids).size() != ids.size()) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "DUPLICATE_OPTION", "색상·사이즈 ID가 중복됩니다.", false);
@@ -116,6 +169,10 @@ final class GoodsInputValidator {
             return size.label() != null && !size.label().isBlank();
         }
         return false;
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private static boolean filled(GoodsInput.TranslationInput translation) {

@@ -8,6 +8,7 @@ public record GoodsInput(
     String optionMode,
     Map<String, TranslationInput> translations,
     PriceInput price,
+    List<ImageInput> images,
     List<ColorInput> colors,
     List<SizeInput> sizes,
     List<OptionInput> options
@@ -16,6 +17,8 @@ public record GoodsInput(
     public record TranslationInput(String name, String description) {}
 
     public record PriceInput(long amount, String currency) {}
+
+    public record ImageInput(UUID mediaId, Map<String, String> alt) {}
 
     public record ColorInput(UUID id, Map<String, ColorTranslationInput> translations) {}
 

@@ -11,6 +11,7 @@ const productInput={
   optionMode:g.optionMode,
   translations:g.translations,
   price:g.price,
+  images:g.images.map(({mediaId,alt})=>({mediaId,alt})),
   colors:g.colors,
   sizes:g.sizes,
   options:g.combinations.map(({colorId,sizeId})=>({colorId,sizeId})),

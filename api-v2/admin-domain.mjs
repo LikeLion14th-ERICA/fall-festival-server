@@ -84,7 +84,13 @@ export function adminExecute(op,state,ctx){
         optionMode:body.optionMode,
         translations:structuredClone(body.translations),
         price:structuredClone(body.price),
-        images:structuredClone(old?.images||[]),
+        images:body.images.map(image=>({
+          mediaId:image.mediaId,
+          alt:structuredClone(image.alt),
+          masterUrl:`/api/v2/media/goods-images/${image.mediaId}/master`,
+          thumbnail320Url:`/api/v2/media/goods-images/${image.mediaId}/320`,
+          thumbnail640Url:`/api/v2/media/goods-images/${image.mediaId}/640`,
+        })),
         colors:structuredClone(body.colors),
         sizes:structuredClone(body.sizes),
         combinations,
@@ -117,6 +123,21 @@ export function validateProduct(body,failure){
   for(const locale of ['zh-Hans','ja']){
     const t=body.translations?.[locale];
     if(t!=null&&(!filledName(t)||!filledDescription(t)))failure(422,'TRANSLATION_CONTENT_REQUIRED','입력한 번역은 상품명이 필요합니다.');
+  }
+  if(!Array.isArray(body.images)||body.images.length<1||body.images.length>2)failure(422,'VALIDATION_FAILED','상품 이미지는 1~2개가 필요합니다.');
+  const mediaIds=new Set();
+  for(const image of body.images){
+    if(mediaIds.has(image.mediaId))failure(422,'DUPLICATE_MEDIA','상품 이미지가 중복됩니다.');
+    mediaIds.add(image.mediaId);
+    if(typeof image.alt?.ko!=='string'||!image.alt.ko.trim())failure(422,'KOREAN_REQUIRED','상품 이미지의 한국어 대체 텍스트는 필수입니다.');
+    if(typeof image.alt?.en!=='string'||!image.alt.en.trim())failure(422,'ENGLISH_REQUIRED','상품 이미지의 영어 대체 텍스트는 필수입니다.');
+    for(const locale of ['zh-Hans','ja']){
+      const productHasTranslation=body.translations?.[locale]!=null;
+      const alt=image.alt?.[locale];
+      const imageHasAlt=typeof alt==='string'&&Boolean(alt.trim());
+      if(alt!=null&&!imageHasAlt)failure(422,'VALIDATION_FAILED','상품 이미지 대체 텍스트는 공백일 수 없습니다.');
+      if(productHasTranslation!==imageHasAlt)failure(422,'TRANSLATION_CONTENT_REQUIRED','상품 번역과 이미지 대체 텍스트의 언어를 일치시켜 주세요.');
+    }
   }
   if(body.optionMode==='SINGLE'){
     if(body.colors.length||body.sizes.length||body.options.length)failure(422,'VALIDATION_FAILED','SINGLE 상품은 색상·사이즈·조합을 등록할 수 없습니다.');

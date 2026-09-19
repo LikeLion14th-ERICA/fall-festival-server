@@ -4,6 +4,7 @@ import dev.espero.festival.media.ProcessedGoodsImage;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -86,6 +87,46 @@ public class MediaAssetStore {
                 .addValue("mediaId", mediaId),
             (resultSet, rowNumber) -> new ServingMediaAsset(resultSet.getObject("id", UUID.class))
         ).stream().findFirst();
+    }
+
+    /** Locks attachable goods-media rows in the deterministic order supplied by the caller. */
+    public List<UUID> lockAttachableGoodsImages(UUID festivalId, List<UUID> sortedMediaIds) {
+        return jdbc.query("""
+            SELECT media.id
+            FROM media_assets AS media
+            WHERE media.festival_id = :festivalId
+              AND media.id IN (:mediaIds)
+              AND media.purpose = 'GOODS_IMAGE'
+              AND media.attached_at IS NULL
+              AND media.detached_at IS NULL
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM goods_images AS image
+                  WHERE image.media_id = media.id
+              )
+            ORDER BY media.id
+            FOR UPDATE
+            """,
+            new MapSqlParameterSource()
+                .addValue("festivalId", festivalId)
+                .addValue("mediaIds", sortedMediaIds),
+            (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class)
+        );
+    }
+
+    public int markGoodsImagesAttached(UUID festivalId, List<UUID> mediaIds, Instant attachedAt) {
+        return jdbc.update("""
+            UPDATE media_assets
+            SET attached_at = :attachedAt
+            WHERE festival_id = :festivalId
+              AND id IN (:mediaIds)
+              AND purpose = 'GOODS_IMAGE'
+              AND attached_at IS NULL
+              AND detached_at IS NULL
+            """, new MapSqlParameterSource()
+            .addValue("festivalId", festivalId)
+            .addValue("mediaIds", mediaIds)
+            .addValue("attachedAt", OffsetDateTime.ofInstant(attachedAt, ZoneOffset.UTC)));
     }
 
     public record ServingMediaAsset(UUID mediaId) {}

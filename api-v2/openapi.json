@@ -17200,7 +17200,20 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
-                        "images": [],
+                        "images": [
+                          {
+                            "mediaId": "00000000-0000-4000-8000-000000000050",
+                            "alt": {
+                              "ko": "개발용 가상 상품 앞면",
+                              "en": "Fictional product front",
+                              "zh-Hans": null,
+                              "ja": null
+                            },
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -17742,6 +17755,17 @@
                   "amount": 1000,
                   "currency": "KRW"
                 },
+                "images": [
+                  {
+                    "mediaId": "00000000-0000-4000-8000-000000000050",
+                    "alt": {
+                      "ko": "개발용 가상 상품 앞면",
+                      "en": "Fictional product front",
+                      "zh-Hans": null,
+                      "ja": null
+                    }
+                  }
+                ],
                 "colors": [
                   {
                     "id": "color-a",
@@ -19279,6 +19303,17 @@
                   "amount": 1000,
                   "currency": "KRW"
                 },
+                "images": [
+                  {
+                    "mediaId": "00000000-0000-4000-8000-000000000050",
+                    "alt": {
+                      "ko": "개발용 가상 상품 앞면",
+                      "en": "Fictional product front",
+                      "zh-Hans": null,
+                      "ja": null
+                    }
+                  }
+                ],
                 "colors": [
                   {
                     "id": "color-a",
@@ -25331,6 +25366,74 @@
         "additionalProperties": false,
         "description": "실제 제공하는 조합만 명시. 자동 곱집합 생성 없음."
       },
+      "GoodsImageAltInput": {
+        "type": "object",
+        "properties": {
+          "ko": {
+            "type": "string",
+            "minLength": 1,
+            "description": "한국어 대체 텍스트. 공백만 입력할 수 없음."
+          },
+          "en": {
+            "type": "string",
+            "minLength": 1,
+            "description": "영어 대체 텍스트. 공백만 입력할 수 없음."
+          },
+          "zh-Hans": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "중국어 간체 대체 텍스트"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "상품 zh-Hans 번역이 없으면 null"
+          },
+          "ja": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "일본어 대체 텍스트"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "상품 ja 번역이 없으면 null"
+          }
+        },
+        "required": [
+          "ko",
+          "en",
+          "zh-Hans",
+          "ja"
+        ],
+        "additionalProperties": false,
+        "description": "상품 번역과 같은 locale shape. 선택 상품 번역이 있으면 모든 이미지 alt도 같은 locale 값을 가져야 한다."
+      },
+      "GoodsImageInput": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "사전 업로드로 발급된 opaque media UUID. URL·경로·파일명은 입력하지 않는다."
+          },
+          "alt": {
+            "$ref": "#/components/schemas/GoodsImageAltInput"
+          }
+        },
+        "required": [
+          "mediaId",
+          "alt"
+        ],
+        "additionalProperties": false,
+        "description": "이미 업로드된 서버 media 참조와 수동 대체 텍스트. URL 입력은 허용하지 않는다."
+      },
       "ProductInput": {
         "type": "object",
         "properties": {
@@ -25347,6 +25450,15 @@
           },
           "price": {
             "$ref": "#/components/schemas/Money"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoodsImageInput"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "이미 업로드된 opaque media 참조 1~2개. 배열 순서가 표시 순서이며 임의 URL은 허용하지 않는다."
           },
           "colors": {
             "type": "array",
@@ -25374,6 +25486,7 @@
           "optionMode",
           "translations",
           "price",
+          "images",
           "colors",
           "sizes",
           "options"
