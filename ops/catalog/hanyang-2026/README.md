@@ -32,7 +32,7 @@
 
 | 항목 | 위치 | 비고 |
 |---|---|---|
-| 축제일 운영 시작·종료 시각 | `festivalDays[].opensAt/closesAt` | 재학생존 혼잡도 운영 시간으로도 쓰인다. 주간 11:00~17:00, 야간 18:00~익일 00:00 중 무엇을 기준으로 할지 정해야 한다. |
+| 축제일 운영 시작·종료 시각 | `festivalDays[].opensAt/closesAt` | 재학생존 혼잡도 운영 시간으로도 쓰인다. 주간 11:00~17:00, 야간 18:00~익일 00:00 중 무엇을 기준으로 할지 정해야 한다. 종료 시각이 다음 날로 넘어가면(익일 00:00) catalog 검증은 통과하지만 혼잡도 API가 `503 CROWDING_SCHEDULE_UNCONFIGURED`가 되므로 같은 날 23:59 이전으로 넣는다. |
 | 부스·주점 대표 이미지 | `spaces[].imageUrl/imageWidth/imageHeight` | 28곳 모두 |
 | 주점 메뉴 가격 | `spaceMenuItems[].priceAmount` | 13개 메뉴. 0원은 무료로 표시되므로 넣지 않는다. |
 | 아티스트 사진 | `artists[].imageUrl/imageWidth/imageHeight` | 8팀. 사용처를 총학생회에 보고한 뒤 사용한다. |

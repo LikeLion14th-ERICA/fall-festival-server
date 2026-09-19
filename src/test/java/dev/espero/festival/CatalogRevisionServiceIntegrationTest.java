@@ -387,6 +387,32 @@ class CatalogRevisionServiceIntegrationTest {
     }
 
     @Test
+    void importsAndPublishesTheFrontendMockCatalog() {
+        UUID revision = revisions.importManifest(
+            Path.of("dev", "catalog", "frontend-mock-catalog.json"),
+            "release-bot",
+            FESTIVAL_ID,
+            new CatalogRevisionService.BaselineOverride(currentPublishedRevision())
+        );
+        revisions.publish(revision, "release-bot");
+
+        CatalogSnapshot snapshot = snapshots.loadPublished();
+        assertThat(snapshot.spaces()).hasSize(20);
+        assertThat(snapshot.spaces()).extracting(CatalogSnapshot.Space::category).containsOnly(
+            "PUB", "BOOTH", "FLEA_MARKET", "FOOD_TRUCK", "STUDENT_COUNCIL_BOOTH", "PROMOTION_BOOTH"
+        ).contains("STUDENT_COUNCIL_BOOTH", "PROMOTION_BOOTH", "FOOD_TRUCK");
+        assertThat(snapshot.spaces()).allSatisfy(space -> {
+            assertThat(space.name()).startsWith("[목]");
+            assertThat(space.mapTarget()).isNotNull();
+        });
+        assertThat(snapshot.maps()).hasSize(4);
+        assertThat(snapshot.overviewId()).hasValue("map-mock-overview");
+        assertThat(snapshot.ticketMapTarget()).isNotNull();
+        assertThat(snapshot.home().links()).hasSize(6);
+        assertThat(exports.export(revision).findings()).isEmpty();
+    }
+
+    @Test
     void reportsAndBlocksALegacyRevisionWithAPartialTicketSchedule() throws IOException {
         UUID revisionId = importManifest("qr-legacy-ticket", "/assets/maps/overview-v1.png");
         jdbc.update("""

@@ -1,0 +1,2254 @@
+{
+  "festivalDays": [
+    {
+      "festivalDate": "2026-09-29",
+      "opensAt": "2026-09-29T11:00:00+09:00",
+      "closesAt": "2026-09-29T23:00:00+09:00"
+    },
+    {
+      "festivalDate": "2026-09-30",
+      "opensAt": "2026-09-30T11:00:00+09:00",
+      "closesAt": "2026-09-30T23:00:00+09:00"
+    },
+    {
+      "festivalDate": "2026-10-01",
+      "opensAt": "2026-10-01T11:00:00+09:00",
+      "closesAt": "2026-10-01T23:00:00+09:00"
+    }
+  ],
+  "spaces": [
+    {
+      "id": "mock-pub-moonlight",
+      "category": "PUB",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-pub-moonlight",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-pub-sunset",
+      "category": "PUB",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-pub-sunset",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-pub-wave",
+      "category": "PUB",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-pub-wave",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-pub-starlight",
+      "category": "PUB",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-pub-starlight",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-pub-youth",
+      "category": "PUB",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-pub-youth",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-booth-constellation",
+      "category": "BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-booth-constellation",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-booth-rhythm",
+      "category": "BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-booth-rhythm",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-booth-likelion",
+      "category": "BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-booth-likelion",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-booth-green",
+      "category": "BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-booth-green",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-booth-radio",
+      "category": "BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-booth-radio",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-market-film",
+      "category": "FLEA_MARKET",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-market-film",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-market-record",
+      "category": "FLEA_MARKET",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-market-record",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-market-vintage",
+      "category": "FLEA_MARKET",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-market-vintage",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-market-books",
+      "category": "FLEA_MARKET",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-market-books",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-truck-fire",
+      "category": "FOOD_TRUCK",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-truck-fire",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-truck-sweet",
+      "category": "FOOD_TRUCK",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-truck-sweet",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-truck-coffee",
+      "category": "FOOD_TRUCK",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-truck-coffee",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-council-booth",
+      "category": "STUDENT_COUNCIL_BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-council-booth",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-promo-drink",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-promo-drink",
+      "imageWidth": 800,
+      "imageHeight": 600
+    },
+    {
+      "id": "mock-promo-app",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": "https://placehold.co/800x600/png?text=mock-promo-app",
+      "imageWidth": 800,
+      "imageHeight": 600
+    }
+  ],
+  "spaceTranslations": [
+    {
+      "spaceId": "mock-pub-moonlight",
+      "locale": "ko",
+      "name": "[목] 달빛포차",
+      "imageAlt": "[목] 달빛포차 대표 이미지",
+      "locationText": "주점 구역 P-01",
+      "operatorText": "목 컴퓨터학부 학생회",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": "목 주점 설명입니다. 실제 운영 정보가 아닙니다.",
+      "experienceText": null,
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/moonlight"
+    },
+    {
+      "spaceId": "mock-pub-sunset",
+      "locale": "ko",
+      "name": "[목] 노을상회",
+      "imageAlt": "[목] 노을상회 대표 이미지",
+      "locationText": "주점 구역 P-02",
+      "operatorText": "목 경영학부 학생회",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-pub-wave",
+      "locale": "ko",
+      "name": "[목] 파도주점",
+      "imageAlt": "[목] 파도주점 대표 이미지",
+      "locationText": "주점 구역 P-03",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "name": "[목] 별빛식당",
+      "imageAlt": "[목] 별빛식당 대표 이미지",
+      "locationText": "주점 구역 P-04",
+      "operatorText": "목 디자인대학 학생회",
+      "hoursText": "17:00 ~ 23:00",
+      "descriptionText": "메뉴가 많은 주점 예시입니다.",
+      "experienceText": null,
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/starlight"
+    },
+    {
+      "spaceId": "mock-pub-youth",
+      "locale": "ko",
+      "name": "[목] 청춘포차",
+      "imageAlt": "[목] 청춘포차 대표 이미지",
+      "locationText": "주점 구역 P-05",
+      "operatorText": "목 공학대학 학생회",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-booth-constellation",
+      "locale": "ko",
+      "name": "[목] 별자리 연구소",
+      "imageAlt": "[목] 별자리 연구소 대표 이미지",
+      "locationText": "부스 구역 B-01",
+      "operatorText": "목 천문 동아리",
+      "hoursText": "12:00 ~ 18:00",
+      "descriptionText": "나만의 별자리 카드를 만드는 체험 부스입니다.",
+      "experienceText": "카드를 골라 스티커로 꾸미면 완성됩니다.",
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/constellation"
+    },
+    {
+      "spaceId": "mock-booth-rhythm",
+      "locale": "ko",
+      "name": "[목] 리듬 아케이드",
+      "imageAlt": "[목] 리듬 아케이드 대표 이미지",
+      "locationText": "부스 구역 B-02",
+      "operatorText": "목 음악 동아리",
+      "hoursText": "13:00 ~ 19:00",
+      "descriptionText": null,
+      "experienceText": "리듬 게임 한 판에 기념품을 드립니다.",
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-booth-likelion",
+      "locale": "ko",
+      "name": "[목] 멋쟁이사자처럼 부스",
+      "imageAlt": "[목] 멋쟁이사자처럼 부스 대표 이미지",
+      "locationText": "부스 구역 B-03",
+      "operatorText": "목 멋쟁이사자처럼",
+      "hoursText": "12:00 ~ 20:00",
+      "descriptionText": "스탬프 투어를 시작하고 상품을 받는 부스입니다.",
+      "experienceText": "QR을 스캔해 스탬프 투어를 시작합니다.",
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/likelion"
+    },
+    {
+      "spaceId": "mock-booth-green",
+      "locale": "ko",
+      "name": "[목] 초록 공방",
+      "imageAlt": "[목] 초록 공방 대표 이미지",
+      "locationText": "부스 구역 B-04",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-booth-radio",
+      "locale": "ko",
+      "name": "[목] 캠퍼스 라디오",
+      "imageAlt": "[목] 캠퍼스 라디오 대표 이미지",
+      "locationText": "부스 구역 B-05",
+      "operatorText": "목 방송국",
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": "사연을 남기면 현장에서 읽어 드립니다.",
+      "experienceText": "사연 카드를 작성해 함에 넣어 주세요.",
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/radio"
+    },
+    {
+      "spaceId": "mock-market-film",
+      "locale": "ko",
+      "name": "[목] 필름마켓",
+      "imageAlt": "[목] 필름마켓 대표 이미지",
+      "locationText": "플리마켓 구역 M-01",
+      "operatorText": "목 사진 동아리",
+      "hoursText": "12:00 ~ 18:00",
+      "descriptionText": "필름 사진 엽서를 판매합니다.",
+      "experienceText": null,
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/film"
+    },
+    {
+      "spaceId": "mock-market-record",
+      "locale": "ko",
+      "name": "[목] 레코드마켓",
+      "imageAlt": "[목] 레코드마켓 대표 이미지",
+      "locationText": "플리마켓 구역 M-02",
+      "operatorText": "목 개인 판매자",
+      "hoursText": "13:00 ~ 18:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-market-vintage",
+      "locale": "ko",
+      "name": "[목] 빈티지서랍",
+      "imageAlt": "[목] 빈티지서랍 대표 이미지",
+      "locationText": "플리마켓 구역 M-03",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-market-books",
+      "locale": "ko",
+      "name": "[목] 작은책방",
+      "imageAlt": "[목] 작은책방 대표 이미지",
+      "locationText": "플리마켓 구역 M-04",
+      "operatorText": "목 독서 동아리",
+      "hoursText": "12:00 ~ 17:00",
+      "descriptionText": "중고 책과 굿즈를 나눕니다.",
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-truck-fire",
+      "locale": "ko",
+      "name": "[목] 불맛트럭",
+      "imageAlt": "[목] 불맛트럭 대표 이미지",
+      "locationText": "푸드트럭 구역 F-01",
+      "operatorText": "목 푸드트럭 1호",
+      "hoursText": "11:00 ~ 22:00",
+      "descriptionText": "직화 메뉴를 판매하는 푸드트럭입니다.",
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-truck-sweet",
+      "locale": "ko",
+      "name": "[목] 달콤트럭",
+      "imageAlt": "[목] 달콤트럭 대표 이미지",
+      "locationText": "푸드트럭 구역 F-02",
+      "operatorText": "목 푸드트럭 2호",
+      "hoursText": "12:00 ~ 22:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/sweet"
+    },
+    {
+      "spaceId": "mock-truck-coffee",
+      "locale": "ko",
+      "name": "[목] 커피트럭",
+      "imageAlt": "[목] 커피트럭 대표 이미지",
+      "locationText": "푸드트럭 구역 F-03",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-council-booth",
+      "locale": "ko",
+      "name": "[목] 총학생회 부스",
+      "imageAlt": "[목] 총학생회 부스 대표 이미지",
+      "locationText": "부스 구역 S-01",
+      "operatorText": "목 총학생회",
+      "hoursText": "11:00 ~ 21:00",
+      "descriptionText": "축제 안내와 분실물 접수를 받습니다.",
+      "experienceText": "안내 책자와 굿즈 수령 확인을 도와드립니다.",
+      "contactLabel": "문의 SNS",
+      "contactUrl": "https://example.invalid/mock/contact/council"
+    },
+    {
+      "spaceId": "mock-promo-drink",
+      "locale": "ko",
+      "name": "[목] 음료 프로모션 부스",
+      "imageAlt": "[목] 음료 프로모션 부스 대표 이미지",
+      "locationText": "부스 구역 R-01",
+      "operatorText": "목 협찬사 A",
+      "hoursText": "13:00 ~ 20:00",
+      "descriptionText": "새 음료를 시음하는 부스입니다.",
+      "experienceText": "시음 후 설문에 답하면 경품 추첨에 참여합니다.",
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "mock-promo-app",
+      "locale": "ko",
+      "name": "[목] 앱 프로모션 부스",
+      "imageAlt": "[목] 앱 프로모션 부스 대표 이미지",
+      "locationText": "부스 구역 R-02",
+      "operatorText": "목 협찬사 B",
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    }
+  ],
+  "spaceSortOrders": [
+    {
+      "locale": "ko",
+      "spaceId": "mock-pub-sunset",
+      "sortRank": 1
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-pub-moonlight",
+      "sortRank": 2
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-truck-sweet",
+      "sortRank": 3
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-market-record",
+      "sortRank": 4
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-booth-rhythm",
+      "sortRank": 5
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-booth-likelion",
+      "sortRank": 6
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-pub-starlight",
+      "sortRank": 7
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-booth-constellation",
+      "sortRank": 8
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-truck-fire",
+      "sortRank": 9
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-market-vintage",
+      "sortRank": 10
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-promo-app",
+      "sortRank": 11
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-promo-drink",
+      "sortRank": 12
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-market-books",
+      "sortRank": 13
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-pub-youth",
+      "sortRank": 14
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-booth-green",
+      "sortRank": 15
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-council-booth",
+      "sortRank": 16
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-booth-radio",
+      "sortRank": 17
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-truck-coffee",
+      "sortRank": 18
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-pub-wave",
+      "sortRank": 19
+    },
+    {
+      "locale": "ko",
+      "spaceId": "mock-market-film",
+      "sortRank": 20
+    }
+  ],
+  "spaceEvents": [
+    {
+      "spaceId": "mock-booth-constellation",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "별자리 퀴즈"
+    },
+    {
+      "spaceId": "mock-booth-constellation",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "스탬프 카드 꾸미기"
+    },
+    {
+      "spaceId": "mock-booth-rhythm",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "최고 점수 이벤트"
+    },
+    {
+      "spaceId": "mock-booth-likelion",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "스탬프 투어 상품 수령"
+    },
+    {
+      "spaceId": "mock-council-booth",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "축제 퀴즈"
+    },
+    {
+      "spaceId": "mock-council-booth",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "분실물 접수"
+    },
+    {
+      "spaceId": "mock-promo-drink",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "경품 추첨"
+    }
+  ],
+  "spaceMenuItems": [
+    {
+      "spaceId": "mock-pub-moonlight",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "닭꼬치",
+      "priceAmount": 4000
+    },
+    {
+      "spaceId": "mock-pub-moonlight",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "김치전",
+      "priceAmount": 8000
+    },
+    {
+      "spaceId": "mock-pub-moonlight",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "하이볼",
+      "priceAmount": 5500
+    },
+    {
+      "spaceId": "mock-pub-sunset",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "떡볶이",
+      "priceAmount": 6000
+    },
+    {
+      "spaceId": "mock-pub-sunset",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "어묵탕",
+      "priceAmount": 9000
+    },
+    {
+      "spaceId": "mock-pub-wave",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "모둠튀김",
+      "priceAmount": 12000
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "치즈볼",
+      "priceAmount": 5000
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "감자튀김",
+      "priceAmount": 6000
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "순대볶음",
+      "priceAmount": 13000
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "sortOrder": 4,
+      "name": "콜라",
+      "priceAmount": 2000
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "sortOrder": 5,
+      "name": "사이다",
+      "priceAmount": 2000
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "locale": "ko",
+      "sortOrder": 6,
+      "name": "레모네이드",
+      "priceAmount": 4500
+    },
+    {
+      "spaceId": "mock-pub-youth",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "제육볶음",
+      "priceAmount": 12000
+    },
+    {
+      "spaceId": "mock-truck-fire",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "불닭 타코",
+      "priceAmount": 6000
+    },
+    {
+      "spaceId": "mock-truck-fire",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "치즈 핫도그",
+      "priceAmount": 4500
+    },
+    {
+      "spaceId": "mock-truck-sweet",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "크로플",
+      "priceAmount": 5000
+    },
+    {
+      "spaceId": "mock-truck-sweet",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "츄러스",
+      "priceAmount": 4000
+    },
+    {
+      "spaceId": "mock-truck-sweet",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "딸기 스무디",
+      "priceAmount": 4500
+    },
+    {
+      "spaceId": "mock-truck-coffee",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "아메리카노",
+      "priceAmount": 3000
+    }
+  ],
+  "places": [
+    {
+      "id": "place-mock-pub-moonlight",
+      "kind": "SPACE",
+      "spaceId": "mock-pub-moonlight"
+    },
+    {
+      "id": "place-mock-pub-sunset",
+      "kind": "SPACE",
+      "spaceId": "mock-pub-sunset"
+    },
+    {
+      "id": "place-mock-pub-wave",
+      "kind": "SPACE",
+      "spaceId": "mock-pub-wave"
+    },
+    {
+      "id": "place-mock-pub-starlight",
+      "kind": "SPACE",
+      "spaceId": "mock-pub-starlight"
+    },
+    {
+      "id": "place-mock-pub-youth",
+      "kind": "SPACE",
+      "spaceId": "mock-pub-youth"
+    },
+    {
+      "id": "place-mock-booth-constellation",
+      "kind": "SPACE",
+      "spaceId": "mock-booth-constellation"
+    },
+    {
+      "id": "place-mock-booth-rhythm",
+      "kind": "SPACE",
+      "spaceId": "mock-booth-rhythm"
+    },
+    {
+      "id": "place-mock-booth-likelion",
+      "kind": "SPACE",
+      "spaceId": "mock-booth-likelion"
+    },
+    {
+      "id": "place-mock-booth-green",
+      "kind": "SPACE",
+      "spaceId": "mock-booth-green"
+    },
+    {
+      "id": "place-mock-booth-radio",
+      "kind": "SPACE",
+      "spaceId": "mock-booth-radio"
+    },
+    {
+      "id": "place-mock-market-film",
+      "kind": "SPACE",
+      "spaceId": "mock-market-film"
+    },
+    {
+      "id": "place-mock-market-record",
+      "kind": "SPACE",
+      "spaceId": "mock-market-record"
+    },
+    {
+      "id": "place-mock-market-vintage",
+      "kind": "SPACE",
+      "spaceId": "mock-market-vintage"
+    },
+    {
+      "id": "place-mock-market-books",
+      "kind": "SPACE",
+      "spaceId": "mock-market-books"
+    },
+    {
+      "id": "place-mock-truck-fire",
+      "kind": "SPACE",
+      "spaceId": "mock-truck-fire"
+    },
+    {
+      "id": "place-mock-truck-sweet",
+      "kind": "SPACE",
+      "spaceId": "mock-truck-sweet"
+    },
+    {
+      "id": "place-mock-truck-coffee",
+      "kind": "SPACE",
+      "spaceId": "mock-truck-coffee"
+    },
+    {
+      "id": "place-mock-council-booth",
+      "kind": "SPACE",
+      "spaceId": "mock-council-booth"
+    },
+    {
+      "id": "place-mock-promo-drink",
+      "kind": "SPACE",
+      "spaceId": "mock-promo-drink"
+    },
+    {
+      "id": "place-mock-promo-app",
+      "kind": "SPACE",
+      "spaceId": "mock-promo-app"
+    },
+    {
+      "id": "mock-restroom-main",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "mock-photo-booth",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "mock-smoking-area",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "mock-trash-bin",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "mock-ticket-booth",
+      "kind": "LANDMARK",
+      "spaceId": null
+    }
+  ],
+  "placeTranslations": [
+    {
+      "placeId": "place-mock-pub-moonlight",
+      "locale": "ko",
+      "name": "[목] 달빛포차",
+      "locationText": "주점 구역 P-01",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": "목 주점 설명입니다. 실제 운영 정보가 아닙니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-pub-sunset",
+      "locale": "ko",
+      "name": "[목] 노을상회",
+      "locationText": "주점 구역 P-02",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-pub-wave",
+      "locale": "ko",
+      "name": "[목] 파도주점",
+      "locationText": "주점 구역 P-03",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-pub-starlight",
+      "locale": "ko",
+      "name": "[목] 별빛식당",
+      "locationText": "주점 구역 P-04",
+      "hoursText": "17:00 ~ 23:00",
+      "descriptionText": "메뉴가 많은 주점 예시입니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-pub-youth",
+      "locale": "ko",
+      "name": "[목] 청춘포차",
+      "locationText": "주점 구역 P-05",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-booth-constellation",
+      "locale": "ko",
+      "name": "[목] 별자리 연구소",
+      "locationText": "부스 구역 B-01",
+      "hoursText": "12:00 ~ 18:00",
+      "descriptionText": "나만의 별자리 카드를 만드는 체험 부스입니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-booth-rhythm",
+      "locale": "ko",
+      "name": "[목] 리듬 아케이드",
+      "locationText": "부스 구역 B-02",
+      "hoursText": "13:00 ~ 19:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-booth-likelion",
+      "locale": "ko",
+      "name": "[목] 멋쟁이사자처럼 부스",
+      "locationText": "부스 구역 B-03",
+      "hoursText": "12:00 ~ 20:00",
+      "descriptionText": "스탬프 투어를 시작하고 상품을 받는 부스입니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-booth-green",
+      "locale": "ko",
+      "name": "[목] 초록 공방",
+      "locationText": "부스 구역 B-04",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-booth-radio",
+      "locale": "ko",
+      "name": "[목] 캠퍼스 라디오",
+      "locationText": "부스 구역 B-05",
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": "사연을 남기면 현장에서 읽어 드립니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-market-film",
+      "locale": "ko",
+      "name": "[목] 필름마켓",
+      "locationText": "플리마켓 구역 M-01",
+      "hoursText": "12:00 ~ 18:00",
+      "descriptionText": "필름 사진 엽서를 판매합니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-market-record",
+      "locale": "ko",
+      "name": "[목] 레코드마켓",
+      "locationText": "플리마켓 구역 M-02",
+      "hoursText": "13:00 ~ 18:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-market-vintage",
+      "locale": "ko",
+      "name": "[목] 빈티지서랍",
+      "locationText": "플리마켓 구역 M-03",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-market-books",
+      "locale": "ko",
+      "name": "[목] 작은책방",
+      "locationText": "플리마켓 구역 M-04",
+      "hoursText": "12:00 ~ 17:00",
+      "descriptionText": "중고 책과 굿즈를 나눕니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-truck-fire",
+      "locale": "ko",
+      "name": "[목] 불맛트럭",
+      "locationText": "푸드트럭 구역 F-01",
+      "hoursText": "11:00 ~ 22:00",
+      "descriptionText": "직화 메뉴를 판매하는 푸드트럭입니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-truck-sweet",
+      "locale": "ko",
+      "name": "[목] 달콤트럭",
+      "locationText": "푸드트럭 구역 F-02",
+      "hoursText": "12:00 ~ 22:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-truck-coffee",
+      "locale": "ko",
+      "name": "[목] 커피트럭",
+      "locationText": "푸드트럭 구역 F-03",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-council-booth",
+      "locale": "ko",
+      "name": "[목] 총학생회 부스",
+      "locationText": "부스 구역 S-01",
+      "hoursText": "11:00 ~ 21:00",
+      "descriptionText": "축제 안내와 분실물 접수를 받습니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-promo-drink",
+      "locale": "ko",
+      "name": "[목] 음료 프로모션 부스",
+      "locationText": "부스 구역 R-01",
+      "hoursText": "13:00 ~ 20:00",
+      "descriptionText": "새 음료를 시음하는 부스입니다.",
+      "usageText": null
+    },
+    {
+      "placeId": "place-mock-promo-app",
+      "locale": "ko",
+      "name": "[목] 앱 프로모션 부스",
+      "locationText": "부스 구역 R-02",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "mock-restroom-main",
+      "locale": "ko",
+      "name": "[목] 화장실",
+      "locationText": "학생회관 1층",
+      "hoursText": "상시",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "mock-photo-booth",
+      "locale": "ko",
+      "name": "[목] 포토부스",
+      "locationText": "본관 앞 광장",
+      "hoursText": "12:00 ~ 22:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "mock-smoking-area",
+      "locale": "ko",
+      "name": "[목] 흡연구역",
+      "locationText": "체육관 뒤편",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "mock-trash-bin",
+      "locale": "ko",
+      "name": "[목] 쓰레기통",
+      "locationText": "주점 구역 입구",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "mock-ticket-booth",
+      "locale": "ko",
+      "name": "[목] 외부인 티켓존",
+      "locationText": "정문 옆 티켓 부스",
+      "hoursText": "12:00 ~ 21:00",
+      "descriptionText": "외부인 티켓을 구매하고 팔찌를 받는 곳입니다.",
+      "usageText": "송금 완료 화면을 스태프에게 보여 주세요."
+    }
+  ],
+  "maps": [
+    {
+      "id": "map-mock-overview",
+      "kind": "OVERVIEW",
+      "sortRank": 1,
+      "currentVersion": "overview-v1"
+    },
+    {
+      "id": "map-mock-pub",
+      "kind": "AREA",
+      "sortRank": 2,
+      "currentVersion": "pub-v1"
+    },
+    {
+      "id": "map-mock-booth",
+      "kind": "AREA",
+      "sortRank": 3,
+      "currentVersion": "booth-v1"
+    },
+    {
+      "id": "map-mock-market",
+      "kind": "AREA",
+      "sortRank": 4,
+      "currentVersion": "market-v1"
+    }
+  ],
+  "mapTranslations": [
+    {
+      "mapId": "map-mock-overview",
+      "locale": "ko",
+      "name": "[목] 전체 지도"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "locale": "ko",
+      "name": "[목] 주점·푸드트럭 구역"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "locale": "ko",
+      "name": "[목] 부스 구역"
+    },
+    {
+      "mapId": "map-mock-market",
+      "locale": "ko",
+      "name": "[목] 플리마켓 구역"
+    }
+  ],
+  "mapAssets": [
+    {
+      "mapId": "map-mock-overview",
+      "version": "overview-v1",
+      "imageUrl": "https://placehold.co/1600x1000/png?text=map-mock-overview",
+      "imageAlt": "[목] 전체 지도 이미지",
+      "imageWidth": 1600,
+      "imageHeight": 1000
+    },
+    {
+      "mapId": "map-mock-pub",
+      "version": "pub-v1",
+      "imageUrl": "https://placehold.co/1600x1000/png?text=map-mock-pub",
+      "imageAlt": "[목] 주점·푸드트럭 구역 이미지",
+      "imageWidth": 1600,
+      "imageHeight": 1000
+    },
+    {
+      "mapId": "map-mock-booth",
+      "version": "booth-v1",
+      "imageUrl": "https://placehold.co/1600x1000/png?text=map-mock-booth",
+      "imageAlt": "[목] 부스 구역 이미지",
+      "imageWidth": 1600,
+      "imageHeight": 1000
+    },
+    {
+      "mapId": "map-mock-market",
+      "version": "market-v1",
+      "imageUrl": "https://placehold.co/1600x1000/png?text=map-mock-market",
+      "imageAlt": "[목] 플리마켓 구역 이미지",
+      "imageWidth": 1600,
+      "imageHeight": 1000
+    }
+  ],
+  "mapAreas": [
+    {
+      "id": "area-mock-pub",
+      "targetMapId": "map-mock-pub"
+    },
+    {
+      "id": "area-mock-booth",
+      "targetMapId": "map-mock-booth"
+    },
+    {
+      "id": "area-mock-market",
+      "targetMapId": "map-mock-market"
+    }
+  ],
+  "mapPins": [
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-area-mock-pub",
+      "category": "area",
+      "filterGroup": null,
+      "x": 0.2,
+      "y": 0.3,
+      "placeId": null,
+      "areaId": "area-mock-pub"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-area-mock-booth",
+      "category": "area",
+      "filterGroup": null,
+      "x": 0.5,
+      "y": 0.3,
+      "placeId": null,
+      "areaId": "area-mock-booth"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-area-mock-market",
+      "category": "area",
+      "filterGroup": null,
+      "x": 0.8,
+      "y": 0.3,
+      "placeId": null,
+      "areaId": "area-mock-market"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-pub-moonlight",
+      "category": "pub",
+      "filterGroup": null,
+      "x": 0.15,
+      "y": 0.2,
+      "placeId": "place-mock-pub-moonlight",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-pub-sunset",
+      "category": "pub",
+      "filterGroup": null,
+      "x": 0.38,
+      "y": 0.2,
+      "placeId": "place-mock-pub-sunset",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-pub-wave",
+      "category": "pub",
+      "filterGroup": null,
+      "x": 0.61,
+      "y": 0.2,
+      "placeId": "place-mock-pub-wave",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-pub-starlight",
+      "category": "pub",
+      "filterGroup": null,
+      "x": 0.84,
+      "y": 0.2,
+      "placeId": "place-mock-pub-starlight",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-pub-youth",
+      "category": "pub",
+      "filterGroup": null,
+      "x": 0.15,
+      "y": 0.45,
+      "placeId": "place-mock-pub-youth",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-booth-constellation",
+      "category": "booth",
+      "filterGroup": null,
+      "x": 0.15,
+      "y": 0.2,
+      "placeId": "place-mock-booth-constellation",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-booth-rhythm",
+      "category": "booth",
+      "filterGroup": null,
+      "x": 0.38,
+      "y": 0.2,
+      "placeId": "place-mock-booth-rhythm",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-booth-likelion",
+      "category": "booth",
+      "filterGroup": null,
+      "x": 0.61,
+      "y": 0.2,
+      "placeId": "place-mock-booth-likelion",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-booth-green",
+      "category": "booth",
+      "filterGroup": null,
+      "x": 0.84,
+      "y": 0.2,
+      "placeId": "place-mock-booth-green",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-booth-radio",
+      "category": "booth",
+      "filterGroup": null,
+      "x": 0.15,
+      "y": 0.45,
+      "placeId": "place-mock-booth-radio",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "id": "pin-mock-market-film",
+      "category": "flea-market",
+      "filterGroup": null,
+      "x": 0.15,
+      "y": 0.2,
+      "placeId": "place-mock-market-film",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "id": "pin-mock-market-record",
+      "category": "flea-market",
+      "filterGroup": null,
+      "x": 0.38,
+      "y": 0.2,
+      "placeId": "place-mock-market-record",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "id": "pin-mock-market-vintage",
+      "category": "flea-market",
+      "filterGroup": null,
+      "x": 0.61,
+      "y": 0.2,
+      "placeId": "place-mock-market-vintage",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "id": "pin-mock-market-books",
+      "category": "flea-market",
+      "filterGroup": null,
+      "x": 0.84,
+      "y": 0.2,
+      "placeId": "place-mock-market-books",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-truck-fire",
+      "category": "food-truck",
+      "filterGroup": null,
+      "x": 0.38,
+      "y": 0.45,
+      "placeId": "place-mock-truck-fire",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-truck-sweet",
+      "category": "food-truck",
+      "filterGroup": null,
+      "x": 0.61,
+      "y": 0.45,
+      "placeId": "place-mock-truck-sweet",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "id": "pin-mock-truck-coffee",
+      "category": "food-truck",
+      "filterGroup": null,
+      "x": 0.84,
+      "y": 0.45,
+      "placeId": "place-mock-truck-coffee",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-council-booth",
+      "category": "student-council-booth",
+      "filterGroup": null,
+      "x": 0.38,
+      "y": 0.45,
+      "placeId": "place-mock-council-booth",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-promo-drink",
+      "category": "promotion-booth",
+      "filterGroup": null,
+      "x": 0.61,
+      "y": 0.45,
+      "placeId": "place-mock-promo-drink",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "id": "pin-mock-promo-app",
+      "category": "promotion-booth",
+      "filterGroup": null,
+      "x": 0.84,
+      "y": 0.45,
+      "placeId": "place-mock-promo-app",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-mock-restroom-main",
+      "category": "restroom",
+      "filterGroup": "RESTROOM",
+      "x": 0.1,
+      "y": 0.8,
+      "placeId": "mock-restroom-main",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-mock-photo-booth",
+      "category": "photo-booth",
+      "filterGroup": "PHOTO_BOOTH",
+      "x": 0.3,
+      "y": 0.8,
+      "placeId": "mock-photo-booth",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-mock-smoking-area",
+      "category": "smoking",
+      "filterGroup": "SMOKING_AREA",
+      "x": 0.5,
+      "y": 0.8,
+      "placeId": "mock-smoking-area",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-mock-trash-bin",
+      "category": "trash",
+      "filterGroup": "TRASH_BIN",
+      "x": 0.7,
+      "y": 0.8,
+      "placeId": "mock-trash-bin",
+      "areaId": null
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "id": "pin-mock-ticket-booth",
+      "category": "ticket",
+      "filterGroup": null,
+      "x": 0.85,
+      "y": 0.55,
+      "placeId": "mock-ticket-booth",
+      "areaId": null
+    }
+  ],
+  "mapPinTranslations": [
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-area-mock-pub",
+      "locale": "ko",
+      "label": "[목] 주점·푸드트럭 구역"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-area-mock-booth",
+      "locale": "ko",
+      "label": "[목] 부스 구역"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-area-mock-market",
+      "locale": "ko",
+      "label": "[목] 플리마켓 구역"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-moonlight",
+      "locale": "ko",
+      "label": "[목] 달빛포차"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-sunset",
+      "locale": "ko",
+      "label": "[목] 노을상회"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-wave",
+      "locale": "ko",
+      "label": "[목] 파도주점"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-starlight",
+      "locale": "ko",
+      "label": "[목] 별빛식당"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-youth",
+      "locale": "ko",
+      "label": "[목] 청춘포차"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-constellation",
+      "locale": "ko",
+      "label": "[목] 별자리 연구소"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-rhythm",
+      "locale": "ko",
+      "label": "[목] 리듬 아케이드"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-likelion",
+      "locale": "ko",
+      "label": "[목] 멋쟁이사자처럼 부스"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-green",
+      "locale": "ko",
+      "label": "[목] 초록 공방"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-radio",
+      "locale": "ko",
+      "label": "[목] 캠퍼스 라디오"
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-film",
+      "locale": "ko",
+      "label": "[목] 필름마켓"
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-record",
+      "locale": "ko",
+      "label": "[목] 레코드마켓"
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-vintage",
+      "locale": "ko",
+      "label": "[목] 빈티지서랍"
+    },
+    {
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-books",
+      "locale": "ko",
+      "label": "[목] 작은책방"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-truck-fire",
+      "locale": "ko",
+      "label": "[목] 불맛트럭"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-truck-sweet",
+      "locale": "ko",
+      "label": "[목] 달콤트럭"
+    },
+    {
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-truck-coffee",
+      "locale": "ko",
+      "label": "[목] 커피트럭"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-council-booth",
+      "locale": "ko",
+      "label": "[목] 총학생회 부스"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-promo-drink",
+      "locale": "ko",
+      "label": "[목] 음료 프로모션 부스"
+    },
+    {
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-promo-app",
+      "locale": "ko",
+      "label": "[목] 앱 프로모션 부스"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-mock-restroom-main",
+      "locale": "ko",
+      "label": "[목] 화장실"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-mock-photo-booth",
+      "locale": "ko",
+      "label": "[목] 포토부스"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-mock-smoking-area",
+      "locale": "ko",
+      "label": "[목] 흡연구역"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-mock-trash-bin",
+      "locale": "ko",
+      "label": "[목] 쓰레기통"
+    },
+    {
+      "mapId": "map-mock-overview",
+      "mapVersion": "overview-v1",
+      "pinId": "pin-mock-ticket-booth",
+      "locale": "ko",
+      "label": "[목] 외부인 티켓존"
+    }
+  ],
+  "mapPinFilterGroupTranslations": [
+    {
+      "filterGroup": "RESTROOM",
+      "locale": "ko",
+      "label": "화장실"
+    },
+    {
+      "filterGroup": "PHOTO_BOOTH",
+      "locale": "ko",
+      "label": "포토부스"
+    },
+    {
+      "filterGroup": "SMOKING_AREA",
+      "locale": "ko",
+      "label": "흡연구역"
+    },
+    {
+      "filterGroup": "TRASH_BIN",
+      "locale": "ko",
+      "label": "쓰레기통"
+    }
+  ],
+  "spaceMapTargets": [
+    {
+      "spaceId": "mock-pub-moonlight",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-moonlight",
+      "placeId": "place-mock-pub-moonlight"
+    },
+    {
+      "spaceId": "mock-pub-sunset",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-sunset",
+      "placeId": "place-mock-pub-sunset"
+    },
+    {
+      "spaceId": "mock-pub-wave",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-wave",
+      "placeId": "place-mock-pub-wave"
+    },
+    {
+      "spaceId": "mock-pub-starlight",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-starlight",
+      "placeId": "place-mock-pub-starlight"
+    },
+    {
+      "spaceId": "mock-pub-youth",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-pub-youth",
+      "placeId": "place-mock-pub-youth"
+    },
+    {
+      "spaceId": "mock-booth-constellation",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-constellation",
+      "placeId": "place-mock-booth-constellation"
+    },
+    {
+      "spaceId": "mock-booth-rhythm",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-rhythm",
+      "placeId": "place-mock-booth-rhythm"
+    },
+    {
+      "spaceId": "mock-booth-likelion",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-likelion",
+      "placeId": "place-mock-booth-likelion"
+    },
+    {
+      "spaceId": "mock-booth-green",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-green",
+      "placeId": "place-mock-booth-green"
+    },
+    {
+      "spaceId": "mock-booth-radio",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-booth-radio",
+      "placeId": "place-mock-booth-radio"
+    },
+    {
+      "spaceId": "mock-market-film",
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-film",
+      "placeId": "place-mock-market-film"
+    },
+    {
+      "spaceId": "mock-market-record",
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-record",
+      "placeId": "place-mock-market-record"
+    },
+    {
+      "spaceId": "mock-market-vintage",
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-vintage",
+      "placeId": "place-mock-market-vintage"
+    },
+    {
+      "spaceId": "mock-market-books",
+      "mapId": "map-mock-market",
+      "mapVersion": "market-v1",
+      "pinId": "pin-mock-market-books",
+      "placeId": "place-mock-market-books"
+    },
+    {
+      "spaceId": "mock-truck-fire",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-truck-fire",
+      "placeId": "place-mock-truck-fire"
+    },
+    {
+      "spaceId": "mock-truck-sweet",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-truck-sweet",
+      "placeId": "place-mock-truck-sweet"
+    },
+    {
+      "spaceId": "mock-truck-coffee",
+      "mapId": "map-mock-pub",
+      "mapVersion": "pub-v1",
+      "pinId": "pin-mock-truck-coffee",
+      "placeId": "place-mock-truck-coffee"
+    },
+    {
+      "spaceId": "mock-council-booth",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-council-booth",
+      "placeId": "place-mock-council-booth"
+    },
+    {
+      "spaceId": "mock-promo-drink",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-promo-drink",
+      "placeId": "place-mock-promo-drink"
+    },
+    {
+      "spaceId": "mock-promo-app",
+      "mapId": "map-mock-booth",
+      "mapVersion": "booth-v1",
+      "pinId": "pin-mock-promo-app",
+      "placeId": "place-mock-promo-app"
+    }
+  ],
+  "artists": [
+    {
+      "id": "mock-artist-wish",
+      "category": "ARTIST",
+      "imageUrl": "https://placehold.co/800x800/png?text=mock-artist-wish",
+      "imageWidth": 800,
+      "imageHeight": 800
+    },
+    {
+      "id": "mock-artist-dawn",
+      "category": "ARTIST",
+      "imageUrl": "https://placehold.co/800x800/png?text=mock-artist-dawn",
+      "imageWidth": 800,
+      "imageHeight": 800
+    },
+    {
+      "id": "mock-artist-echo",
+      "category": "ARTIST",
+      "imageUrl": "https://placehold.co/800x800/png?text=mock-artist-echo",
+      "imageWidth": 800,
+      "imageHeight": 800
+    },
+    {
+      "id": "mock-contest-a",
+      "category": "CONTEST",
+      "imageUrl": "https://placehold.co/800x800/png?text=mock-contest-a",
+      "imageWidth": 800,
+      "imageHeight": 800
+    },
+    {
+      "id": "mock-contest-b",
+      "category": "CONTEST",
+      "imageUrl": "https://placehold.co/800x800/png?text=mock-contest-b",
+      "imageWidth": 800,
+      "imageHeight": 800
+    }
+  ],
+  "artistTranslations": [
+    {
+      "artistId": "mock-artist-wish",
+      "locale": "ko",
+      "name": "[목] 위시 밴드",
+      "imageAlt": "[목] 위시 밴드 프로필 사진",
+      "introduction": "[목] 위시 밴드 소개입니다. 실제 출연진이 아닙니다."
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "locale": "ko",
+      "name": "[목] 새벽 사중주",
+      "imageAlt": "[목] 새벽 사중주 프로필 사진",
+      "introduction": "[목] 새벽 사중주 소개입니다. 실제 출연진이 아닙니다."
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "locale": "ko",
+      "name": "[목] 에코",
+      "imageAlt": "[목] 에코 프로필 사진",
+      "introduction": "[목] 에코 소개입니다. 실제 출연진이 아닙니다."
+    },
+    {
+      "artistId": "mock-contest-a",
+      "locale": "ko",
+      "name": "[목] 가요제 참가팀 A",
+      "imageAlt": "[목] 가요제 참가팀 A 프로필 사진",
+      "introduction": "[목] 가요제 참가팀 A 소개입니다. 실제 출연진이 아닙니다."
+    },
+    {
+      "artistId": "mock-contest-b",
+      "locale": "ko",
+      "name": "[목] 가요제 참가팀 B",
+      "imageAlt": "[목] 가요제 참가팀 B 프로필 사진",
+      "introduction": "[목] 가요제 참가팀 B 소개입니다. 실제 출연진이 아닙니다."
+    }
+  ],
+  "artistLinks": [
+    {
+      "artistId": "mock-artist-wish",
+      "sortOrder": 1,
+      "url": "https://example.invalid/mock/artist/mock-artist-wish"
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "sortOrder": 1,
+      "url": "https://example.invalid/mock/artist/mock-artist-dawn"
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "sortOrder": 1,
+      "url": "https://example.invalid/mock/artist/mock-artist-echo"
+    }
+  ],
+  "artistLinkTranslations": [
+    {
+      "artistId": "mock-artist-wish",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "공식 SNS"
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "공식 SNS"
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "공식 SNS"
+    }
+  ],
+  "artistSongs": [
+    {
+      "artistId": "mock-artist-wish",
+      "sortOrder": 1,
+      "url": "https://example.invalid/mock/song/mock-artist-wish-1"
+    },
+    {
+      "artistId": "mock-artist-wish",
+      "sortOrder": 2,
+      "url": "https://example.invalid/mock/song/mock-artist-wish-2"
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "sortOrder": 1,
+      "url": "https://example.invalid/mock/song/mock-artist-dawn-1"
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "sortOrder": 2,
+      "url": "https://example.invalid/mock/song/mock-artist-dawn-2"
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "sortOrder": 1,
+      "url": "https://example.invalid/mock/song/mock-artist-echo-1"
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "sortOrder": 2,
+      "url": "https://example.invalid/mock/song/mock-artist-echo-2"
+    }
+  ],
+  "artistSongTranslations": [
+    {
+      "artistId": "mock-artist-wish",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "[목] 대표곡 1"
+    },
+    {
+      "artistId": "mock-artist-wish",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "[목] 대표곡 2"
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "[목] 대표곡 1"
+    },
+    {
+      "artistId": "mock-artist-dawn",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "[목] 대표곡 2"
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "[목] 대표곡 1"
+    },
+    {
+      "artistId": "mock-artist-echo",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "[목] 대표곡 2"
+    }
+  ],
+  "performances": [
+    {
+      "id": "mock-performance-1",
+      "festivalDate": "2026-09-29",
+      "startsAt": "2026-09-29T18:00:00+09:00",
+      "endsAt": "2026-09-29T18:40:00+09:00"
+    },
+    {
+      "id": "mock-performance-2",
+      "festivalDate": "2026-09-29",
+      "startsAt": "2026-09-29T20:00:00+09:00",
+      "endsAt": "2026-09-29T20:50:00+09:00"
+    },
+    {
+      "id": "mock-performance-3",
+      "festivalDate": "2026-09-30",
+      "startsAt": "2026-09-30T19:00:00+09:00",
+      "endsAt": "2026-09-30T19:40:00+09:00"
+    },
+    {
+      "id": "mock-performance-4",
+      "festivalDate": "2026-10-01",
+      "startsAt": "2026-10-01T20:30:00+09:00",
+      "endsAt": "2026-10-01T21:30:00+09:00"
+    }
+  ],
+  "performanceTranslations": [
+    {
+      "performanceId": "mock-performance-1",
+      "locale": "ko",
+      "title": "[목] 가요제 본선",
+      "description": "실제 공연 일정이 아닙니다."
+    },
+    {
+      "performanceId": "mock-performance-2",
+      "locale": "ko",
+      "title": "[목] 위시 밴드 공연",
+      "description": "실제 공연 일정이 아닙니다."
+    },
+    {
+      "performanceId": "mock-performance-3",
+      "locale": "ko",
+      "title": "[목] 새벽 사중주 공연",
+      "description": "실제 공연 일정이 아닙니다."
+    },
+    {
+      "performanceId": "mock-performance-4",
+      "locale": "ko",
+      "title": "[목] 에코 × 위시 밴드 합동 무대",
+      "description": "실제 공연 일정이 아닙니다."
+    }
+  ],
+  "performanceArtists": [
+    {
+      "performanceId": "mock-performance-1",
+      "artistId": "mock-contest-a",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "mock-performance-1",
+      "artistId": "mock-contest-b",
+      "displayOrder": 2
+    },
+    {
+      "performanceId": "mock-performance-2",
+      "artistId": "mock-artist-wish",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "mock-performance-3",
+      "artistId": "mock-artist-dawn",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "mock-performance-4",
+      "artistId": "mock-artist-echo",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "mock-performance-4",
+      "artistId": "mock-artist-wish",
+      "displayOrder": 2
+    }
+  ],
+  "timetableConfig": {
+    "axisStartTime": "17:00:00",
+    "axisEndTime": "23:00:00"
+  },
+  "prohibitedItems": [
+    {
+      "id": "mock-prohibited-1",
+      "sortOrder": 1
+    },
+    {
+      "id": "mock-prohibited-2",
+      "sortOrder": 2
+    },
+    {
+      "id": "mock-prohibited-3",
+      "sortOrder": 3
+    },
+    {
+      "id": "mock-prohibited-4",
+      "sortOrder": 4
+    }
+  ],
+  "prohibitedItemTranslations": [
+    {
+      "itemId": "mock-prohibited-1",
+      "locale": "ko",
+      "label": "주류 반입"
+    },
+    {
+      "itemId": "mock-prohibited-2",
+      "locale": "ko",
+      "label": "유리병"
+    },
+    {
+      "itemId": "mock-prohibited-3",
+      "locale": "ko",
+      "label": "화기류"
+    },
+    {
+      "itemId": "mock-prohibited-4",
+      "locale": "ko",
+      "label": "대형 삼각대"
+    }
+  ],
+  "prohibitedMessages": [
+    {
+      "locale": "ko",
+      "message": "[목] 안전을 위해 아래 물품은 반입할 수 없어요."
+    }
+  ],
+  "ticketGuide": {
+    "unitPriceAmount": 10000,
+    "mapId": "map-mock-overview",
+    "placeId": "mock-ticket-booth",
+    "pinId": "pin-mock-ticket-booth",
+    "mapVersion": "overview-v1",
+    "instructions": [
+      "[목] 외부인 티켓존 방문",
+      "[목] 버튼을 눌러 티켓 금액 송금",
+      "[목] 송금 완료 화면을 스태프에게 제시",
+      "[목] 팔찌를 받고 입장"
+    ],
+    "festivalStartDate": "2026-09-29",
+    "festivalEndDate": "2026-10-01",
+    "dailyTransferOpenTime": "12:00:00",
+    "dailyTransferCloseTime": "21:00:00",
+    "dailyPickupOpenTime": "12:00:00",
+    "dailyPickupCloseTime": "21:30:00"
+  },
+  "stampGuide": {
+    "title": "[목] 스탬프 투어",
+    "dates": [
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01"
+    ],
+    "instructions": [
+      "[목] 멋사 부스에서 QR을 스캔해 시작",
+      "[목] 다른 부스 체험 후 QR 스캔",
+      "[목] 4개를 모으면 멋사 부스에서 상품 수령"
+    ],
+    "rewardName": "[목] 기념 음료",
+    "rewardLocationText": "[목] 멋쟁이사자처럼 부스",
+    "rewardHoursText": "12:00 ~ 20:00",
+    "rewardNotice": "[목] 준비 수량이 소진되면 지급이 끝나요.",
+    "qrValue": "https://example.invalid/mock/stamp"
+  },
+  "festivalLinks": [
+    {
+      "id": "mock-notices",
+      "kind": "UNIVERSITY_NOTICES",
+      "url": "https://example.invalid/mock/notices",
+      "iconKey": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "mock-faq",
+      "kind": "FAQ",
+      "url": "https://example.invalid/mock/faq",
+      "iconKey": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "mock-welcome",
+      "kind": "WELCOME_DAY",
+      "url": "https://example.invalid/mock/welcome",
+      "iconKey": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "instagram",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://www.instagram.com/hanyang_erica_stu/",
+      "iconKey": "instagram",
+      "sortOrder": 1
+    },
+    {
+      "id": "youtube",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://www.youtube.com/@hanyang_erica_stu",
+      "iconKey": "youtube",
+      "sortOrder": 2
+    },
+    {
+      "id": "student-council",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://ericastu.hanyang.ac.kr/ko/act",
+      "iconKey": "website",
+      "sortOrder": 3
+    }
+  ],
+  "festivalLinkTranslations": [
+    {
+      "linkId": "mock-notices",
+      "locale": "ko",
+      "label": "[목] 학교 공지사항"
+    },
+    {
+      "linkId": "mock-faq",
+      "locale": "ko",
+      "label": "[목] FAQ"
+    },
+    {
+      "linkId": "mock-welcome",
+      "locale": "ko",
+      "label": "[목] 에리카 웰컴 데이"
+    },
+    {
+      "linkId": "instagram",
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "linkId": "youtube",
+      "locale": "ko",
+      "label": "YouTube"
+    },
+    {
+      "linkId": "student-council",
+      "locale": "ko",
+      "label": "총학생회 홈페이지"
+    }
+  ]
+}
