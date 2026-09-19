@@ -124,6 +124,24 @@ class FileSystemMediaStorageTest {
     }
 
     @Test
+    void discardsStagingIdempotentlyWithoutTouchingOtherOperations() throws Exception {
+        FileSystemMediaStorage storage = storage();
+        UUID discarded = UUID.randomUUID();
+        UUID retained = UUID.randomUUID();
+        storage.createStaging(discarded);
+        storage.createStaging(retained);
+        try (var output = storage.openStagingOutput(discarded, MediaVariant.MASTER)) {
+            output.write(new byte[]{1});
+        }
+
+        storage.discardStaging(discarded);
+        storage.discardStaging(discarded);
+
+        assertThat(storage.stagingDirectory(discarded)).doesNotExist();
+        assertThat(storage.stagingDirectory(retained)).isDirectory();
+    }
+
+    @Test
     void refusesSymlinkEscapeWhenThePlatformSupportsSymlinks() throws Exception {
         FileSystemMediaStorage storage = storage();
         Path outside = temporaryDirectory.resolveSibling("outside-" + UUID.randomUUID());
@@ -146,6 +164,27 @@ class FileSystemMediaStorageTest {
 
         Files.delete(finalDirectory);
         Files.delete(outside.resolve("master.webp"));
+        Files.delete(outside);
+    }
+
+    @Test
+    void refusesToFollowStagingSymlinksDuringDiscard() throws Exception {
+        FileSystemMediaStorage storage = storage();
+        UUID operationId = UUID.randomUUID();
+        Path outside = temporaryDirectory.resolveSibling("staging-outside-" + UUID.randomUUID());
+        Files.createDirectories(outside);
+        Files.writeString(outside.resolve("keep.txt"), "outside");
+        try {
+            Files.createSymbolicLink(storage.stagingDirectory(operationId), outside);
+        } catch (UnsupportedOperationException | IOException | SecurityException exception) {
+            Assumptions.assumeTrue(false, "Symbolic link creation unavailable: " + exception.getClass().getSimpleName());
+        }
+
+        assertThatThrownBy(() -> storage.discardStaging(operationId)).isInstanceOf(IOException.class);
+        assertThat(outside.resolve("keep.txt")).exists();
+
+        Files.delete(storage.stagingDirectory(operationId));
+        Files.delete(outside.resolve("keep.txt"));
         Files.delete(outside);
     }
 

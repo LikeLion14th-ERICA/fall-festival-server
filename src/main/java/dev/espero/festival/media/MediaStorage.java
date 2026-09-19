@@ -12,6 +12,8 @@ public interface MediaStorage {
 
     OutputStream openStagingOutput(UUID operationId, MediaVariant variant) throws IOException;
 
+    void discardStaging(UUID operationId) throws IOException;
+
     String storageKey(UUID festivalId, UUID mediaId);
 
     void finalizeStaging(UUID operationId, UUID festivalId, UUID mediaId) throws IOException;

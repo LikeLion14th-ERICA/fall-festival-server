@@ -61,6 +61,16 @@ public final class FileSystemMediaStorage implements MediaStorage {
     }
 
     @Override
+    public void discardStaging(UUID operationId) throws IOException {
+        Path staging = stagingDirectory(operationId);
+        if (Files.notExists(staging, LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        rejectExistingSymlinkComponents(staging);
+        deleteTree(staging);
+    }
+
+    @Override
     public String storageKey(UUID festivalId, UUID mediaId) {
         requireUuid(festivalId, "Festival id");
         requireUuid(mediaId, "Media id");
@@ -113,6 +123,10 @@ public final class FileSystemMediaStorage implements MediaStorage {
             return;
         }
         rejectExistingSymlinkComponents(target);
+        deleteTree(target);
+    }
+
+    private void deleteTree(Path target) throws IOException {
         Files.walkFileTree(target, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {

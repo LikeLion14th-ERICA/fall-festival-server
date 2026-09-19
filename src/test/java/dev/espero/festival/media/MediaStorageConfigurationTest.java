@@ -17,13 +17,21 @@ class MediaStorageConfigurationTest {
 
     @Test
     void storageRootIsOptionalUntilMediaUploadIsEnabled() {
-        contextRunner.run(context -> assertThat(context).doesNotHaveBean(MediaStorage.class));
+        contextRunner.run(context -> {
+            assertThat(context).doesNotHaveBean(MediaStorage.class);
+            assertThat(context).doesNotHaveBean(GoodsImageInspector.class);
+            assertThat(context).doesNotHaveBean(GoodsImageProcessor.class);
+        });
     }
 
     @Test
     void configuredRootCreatesTheFilesystemStorageBean() {
         contextRunner
             .withPropertyValues("festival.media.storage-root=" + temporaryDirectory)
-            .run(context -> assertThat(context).hasSingleBean(MediaStorage.class));
+            .run(context -> {
+                assertThat(context).hasSingleBean(MediaStorage.class);
+                assertThat(context).hasSingleBean(GoodsImageInspector.class);
+                assertThat(context).hasSingleBean(GoodsImageProcessor.class);
+            });
     }
 }

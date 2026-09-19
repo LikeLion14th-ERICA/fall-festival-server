@@ -9,19 +9,10 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,11 +21,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 class ExternalWebpToolsCompatibilityTest {
 
-    private static final Path CWEBP = Path.of("/usr/bin/cwebp");
-    private static final Path DWEBP = Path.of("/usr/bin/dwebp");
-    private static final Duration PROCESS_TIMEOUT = Duration.ofSeconds(15);
     private static final int IMAGE_SIZE = 1024;
-    private static final int WEBP_QUALITY = 80;
+
+    private final ExternalWebpTools webpTools = new ExternalWebpTools();
 
     @TempDir
     Path temporaryDirectory;
@@ -45,8 +34,8 @@ class ExternalWebpToolsCompatibilityTest {
 
         @Test
         void repeatedlyEncodesPngAndDecodesWebp() throws Exception {
-            assertThat(CWEBP).isExecutable();
-            assertThat(DWEBP).isExecutable();
+            assertThat(ExternalWebpTools.CWEBP).isExecutable();
+            assertThat(ExternalWebpTools.DWEBP).isExecutable();
             Path input = writeImage("input.png", "png");
 
             for (int iteration = 0; iteration < 10; iteration++) {
@@ -76,7 +65,7 @@ class ExternalWebpToolsCompatibilityTest {
     @Test
     void readsSyntheticExifOrientation() throws Exception {
         byte[] jpeg = imageBytes("jpeg");
-        byte[] orientedJpeg = insertExifOrientation(jpeg, 6);
+        byte[] orientedJpeg = GoodsImageTestFixtures.insertExifOrientation(jpeg, 6);
 
         var metadata = ImageMetadataReader.readMetadata(new ByteArrayInputStream(orientedJpeg));
         var directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
@@ -125,60 +114,11 @@ class ExternalWebpToolsCompatibilityTest {
     }
 
     private void encode(Path input, Path output) throws Exception {
-        runCommand(
-            CWEBP.toString(),
-            "-metadata", "none",
-            "-q", Integer.toString(WEBP_QUALITY),
-            input.toString(),
-            "-o", output.toString()
-        );
+        webpTools.encode(input, output);
     }
 
     private void decode(Path input, Path output) throws Exception {
-        runCommand(DWEBP.toString(), input.toString(), "-o", output.toString());
-    }
-
-    private void runCommand(String executable, String... arguments) throws Exception {
-        List<String> command = new ArrayList<>(arguments.length + 1);
-        command.add(executable);
-        command.addAll(List.of(arguments));
-
-        Process process = new ProcessBuilder(command)
-            .redirectErrorStream(true)
-            .start();
-        CompletableFuture<String> output = CompletableFuture.supplyAsync(() -> readOutput(process));
-
-        boolean completed = process.waitFor(PROCESS_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
-        if (!completed) {
-            process.destroyForcibly();
-            boolean terminated = process.waitFor(5, TimeUnit.SECONDS);
-            throw new AssertionError(
-                "Command timed out; terminated=" + terminated + ": " + executable
-                    + System.lineSeparator() + awaitOutput(output)
-            );
-        }
-
-        String commandOutput = awaitOutput(output);
-        assertThat(process.exitValue())
-            .withFailMessage("Command failed (%s):%n%s", executable, commandOutput)
-            .isZero();
-    }
-
-    private String awaitOutput(CompletableFuture<String> output) throws Exception {
-        try {
-            return output.get(5, TimeUnit.SECONDS);
-        } catch (TimeoutException exception) {
-            output.cancel(true);
-            return "<process output capture timed out>";
-        }
-    }
-
-    private String readOutput(Process process) {
-        try {
-            return new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException exception) {
-            throw new IllegalStateException("Failed to capture process output", exception);
-        }
+        webpTools.decode(input, output);
     }
 
     private void assertWebpContainer(Path webp) throws IOException {
@@ -217,32 +157,4 @@ class ExternalWebpToolsCompatibilityTest {
         }
     }
 
-    private byte[] insertExifOrientation(byte[] jpeg, int orientation) throws IOException {
-        ByteBuffer tiff = ByteBuffer.allocate(26).order(ByteOrder.LITTLE_ENDIAN);
-        tiff.put((byte) 'I').put((byte) 'I');
-        tiff.putShort((short) 42);
-        tiff.putInt(8);
-        tiff.putShort((short) 1);
-        tiff.putShort((short) ExifIFD0Directory.TAG_ORIENTATION);
-        tiff.putShort((short) 3);
-        tiff.putInt(1);
-        tiff.putShort((short) orientation);
-        tiff.putShort((short) 0);
-        tiff.putInt(0);
-
-        var payload = new ByteArrayOutputStream();
-        payload.write("Exif\0\0".getBytes(StandardCharsets.US_ASCII));
-        payload.write(tiff.array());
-
-        var result = new ByteArrayOutputStream(jpeg.length + payload.size() + 4);
-        result.write(jpeg, 0, 2);
-        try (var data = new DataOutputStream(result)) {
-            data.writeByte(0xff);
-            data.writeByte(0xe1);
-            data.writeShort(payload.size() + 2);
-            payload.writeTo(data);
-            data.write(jpeg, 2, jpeg.length - 2);
-        }
-        return result.toByteArray();
-    }
 }

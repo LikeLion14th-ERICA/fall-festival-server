@@ -3,8 +3,12 @@ FROM eclipse-temurin:21-jdk-alpine-3.24 AS build
 RUN apk add --no-cache libwebp-tools \
     && command -v cwebp \
     && command -v dwebp \
+    && command -v webpinfo \
+    && command -v img2webp \
     && cwebp -version \
-    && dwebp -version
+    && dwebp -version \
+    && webpinfo -version \
+    && img2webp -version
 
 WORKDIR /workspace
 
@@ -18,7 +22,7 @@ COPY src src
 COPY api-v2/openapi.json api-v2/openapi.json
 RUN ./mvnw --batch-mode --no-transfer-progress \
     -Dmedia.codec.external-tools.required=true \
-    -Dtest=ExternalWebpToolsCompatibilityTest \
+    -Dtest=ExternalWebpToolsCompatibilityTest,GoodsImageProcessorAlpineIntegrationTest \
     test
 RUN ./mvnw --batch-mode --no-transfer-progress -DskipTests package
 
@@ -27,8 +31,12 @@ FROM eclipse-temurin:21-jre-alpine-3.24 AS runtime
 RUN apk add --no-cache libwebp-tools \
     && command -v cwebp \
     && command -v dwebp \
+    && command -v webpinfo \
+    && command -v img2webp \
     && cwebp -version \
     && dwebp -version \
+    && webpinfo -version \
+    && img2webp -version \
     && addgroup --system app \
     && adduser --system --ingroup app app
 

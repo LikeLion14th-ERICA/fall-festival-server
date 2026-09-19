@@ -15,4 +15,19 @@ class MediaStorageConfiguration {
     MediaStorage mediaStorage(MediaStorageProperties properties) throws IOException {
         return new FileSystemMediaStorage(properties.configuredRoot());
     }
+
+    @Bean
+    WebpTools webpTools() {
+        return new ExternalWebpTools();
+    }
+
+    @Bean
+    GoodsImageInspector goodsImageInspector(WebpTools webpTools) {
+        return new GoodsImageInspector(webpTools);
+    }
+
+    @Bean
+    GoodsImageProcessor goodsImageProcessor(MediaStorage mediaStorage, WebpTools webpTools) {
+        return new GoodsImageProcessor(mediaStorage, webpTools);
+    }
 }
