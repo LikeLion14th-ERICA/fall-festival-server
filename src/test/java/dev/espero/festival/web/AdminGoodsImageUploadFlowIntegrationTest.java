@@ -352,7 +352,7 @@ class AdminGoodsImageUploadFlowIntegrationTest {
         return request.with(authentication(UsernamePasswordAuthenticationToken.authenticated(
             new AdminPrincipal(ADMIN_ID, "media-admin", "ADMIN"),
             null,
-            java.util.List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+            java.util.List.of(new SimpleGrantedAuthority("ADMIN"))
         )));
     }
 
