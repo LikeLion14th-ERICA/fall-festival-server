@@ -6,13 +6,16 @@ import dev.espero.festival.auth.AdminPrincipal;
 import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.AdminAuditAction;
 import dev.espero.festival.domain.AdminAuditResourceType;
+import dev.espero.festival.domain.Goods;
 import dev.espero.festival.domain.GoodsAvailability;
+import dev.espero.festival.goods.GoodsCreationService;
 import dev.espero.festival.idempotency.AdminIdempotencyService;
 import dev.espero.festival.idempotency.CanonicalPayload;
 import dev.espero.festival.idempotency.IdempotencyExecution;
 import dev.espero.festival.idempotency.IdempotencyKeyPolicy;
 import dev.espero.festival.idempotency.IdempotencyRequest;
 import dev.espero.festival.idempotency.IdempotencyResponse;
+import dev.espero.festival.media.UnavailableGoodsImageException;
 import dev.espero.festival.persistence.GoodsStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
@@ -26,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,39 +44,46 @@ public class AdminGoodsController {
 
     private static final String AVAILABILITY_ROUTE =
         "/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability";
+    private static final String PRODUCT_POST_ROUTE = "/api/v2/admin/products";
 
     private final GoodsStore store;
     private final GoodsViewService views;
     private final AdminGoodsViewService adminViews;
+    private final GoodsCreationService goodsCreation;
     private final ConditionalResponseSupport conditionalResponses;
     private final FestivalProperties properties;
     private final AdminIdempotencyService idempotency;
     private final AdminAuditService audit;
     private final AdminContext adminContext;
     private final Clock clock;
+    private final ApiMetaSupport metaSupport;
     private final ObjectMapper objectMapper;
 
     public AdminGoodsController(
         GoodsStore store,
         GoodsViewService views,
         AdminGoodsViewService adminViews,
+        GoodsCreationService goodsCreation,
         ConditionalResponseSupport conditionalResponses,
         FestivalProperties properties,
         AdminIdempotencyService idempotency,
         AdminAuditService audit,
         AdminContext adminContext,
         Clock clock,
+        ApiMetaSupport metaSupport,
         ObjectMapper objectMapper
     ) {
         this.store = store;
         this.views = views;
         this.adminViews = adminViews;
+        this.goodsCreation = goodsCreation;
         this.conditionalResponses = conditionalResponses;
         this.properties = properties;
         this.idempotency = idempotency;
         this.audit = audit;
         this.adminContext = adminContext;
         this.clock = clock;
+        this.metaSupport = metaSupport;
         this.objectMapper = objectMapper;
     }
 
@@ -98,6 +109,55 @@ public class AdminGoodsController {
         validateQuery(request);
         AdminGoodsViewService.AdminGoodsSnapshot snapshot = adminViews.find(request, goodsId);
         return conditionalResponses.respond(request, snapshot.response(), snapshot.meta());
+    }
+
+    @PostMapping(path = "/admin/products", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<AdminGoodsResponse>> postAdminProduct(
+        HttpServletRequest request,
+        @RequestBody GoodsInput input
+    ) {
+        validateQuery(request);
+        GoodsInputValidator.validate(input);
+        String idempotencyKey = requireIdempotencyKey(request);
+        AdminPrincipal principal = adminContext.requireCurrent();
+        UUID festivalId = properties.configuredFestivalId();
+
+        IdempotencyRequest idempotencyRequest = new IdempotencyRequest(
+            principal.adminId(),
+            "POST",
+            PRODUCT_POST_ROUTE,
+            productIdempotencyResourceId(festivalId),
+            idempotencyKey,
+            GoodsInputCanonicalPayload.from(input)
+        );
+
+        IdempotencyExecution execution;
+        try {
+            execution = idempotency.execute(idempotencyRequest, () -> {
+                Goods created = goodsCreation.create(festivalId, input, clock.instant());
+                AdminGoodsViewService.AdminGoodsSnapshot snapshot = adminViews.snapshot(request, created);
+                audit.record(
+                    AdminAuditAction.PRODUCT_CREATED,
+                    AdminAuditResourceType.GOODS,
+                    created.id().toString(),
+                    ApiMetaSupport.resolveRequestId(request)
+                );
+                String json = objectMapper.writeValueAsString(new ApiResponse<>(snapshot.response(), snapshot.meta()));
+                return new IdempotencyResponse(HttpStatus.CREATED.value(), MediaType.APPLICATION_JSON_VALUE, json);
+            });
+        } catch (UnavailableGoodsImageException exception) {
+            throw new ApiException(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "INVALID_MEDIA_REFERENCE",
+                "사용할 수 없는 상품 이미지가 포함되어 있습니다.",
+                false
+            );
+        }
+
+        AdminGoodsResponse data = storedGoods(execution.response());
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(new ApiResponse<>(data, metaSupport.unscopedMeta(request, "ko")));
     }
 
     @PutMapping("/admin/goods/{goodsId}/combinations/{combinationId}/availability")
@@ -153,6 +213,19 @@ public class AdminGoodsController {
 
     static String availabilityIdempotencyResourceId(UUID festivalId, UUID goodsId, UUID combinationId) {
         return festivalId + "/" + goodsId + "/" + combinationId;
+    }
+
+    static String productIdempotencyResourceId(UUID festivalId) {
+        return festivalId + "/PRODUCTS";
+    }
+
+    private AdminGoodsResponse storedGoods(IdempotencyResponse response) {
+        try {
+            String data = objectMapper.readTree(response.body()).path("data").toString();
+            return objectMapper.readValue(data, AdminGoodsResponse.class);
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException("Stored product creation response is invalid", exception);
+        }
     }
 
     private GoodsAvailability validate(GoodsAvailabilityInput input) {

@@ -38,6 +38,97 @@ public class GoodsStore {
         this.jdbc = jdbc;
     }
 
+    /** Inserts a validated new goods aggregate except for media associations. */
+    public void insertForCreation(Goods goods) {
+        MapSqlParameterSource goodsParameters = new MapSqlParameterSource()
+            .addValue("id", goods.id())
+            .addValue("festivalId", goods.festivalId())
+            .addValue("optionMode", goods.optionMode().name())
+            .addValue("priceAmount", goods.priceAmount())
+            .addValue("createdAt", atUtc(goods.createdAt()))
+            .addValue("updatedAt", atUtc(goods.updatedAt()));
+        jdbc.update("""
+            INSERT INTO goods (
+                id, festival_id, option_mode, price_amount, price_currency, created_at, updated_at
+            ) VALUES (
+                :id, :festivalId, :optionMode, :priceAmount, 'KRW', :createdAt, :updatedAt
+            )
+            """, goodsParameters);
+
+        batch("""
+            INSERT INTO goods_translations (goods_id, locale, name, description)
+            VALUES (:goodsId, :locale, :name, :description)
+            """, goods.translations().entrySet().stream()
+            .map(entry -> new MapSqlParameterSource()
+                .addValue("goodsId", goods.id())
+                .addValue("locale", entry.getKey())
+                .addValue("name", entry.getValue().name())
+                .addValue("description", entry.getValue().description()))
+            .toList());
+
+        List<MapSqlParameterSource> colors = new ArrayList<>();
+        List<MapSqlParameterSource> colorTranslations = new ArrayList<>();
+        for (int index = 0; index < goods.colors().size(); index++) {
+            GoodsColor color = goods.colors().get(index);
+            colors.add(new MapSqlParameterSource()
+                .addValue("id", color.id())
+                .addValue("goodsId", goods.id())
+                .addValue("sortOrder", index));
+            color.translations().forEach((locale, translation) ->
+                colorTranslations.add(new MapSqlParameterSource()
+                    .addValue("colorId", color.id())
+                    .addValue("locale", locale)
+                    .addValue("name", translation.name())));
+        }
+        batch("""
+            INSERT INTO goods_colors (id, goods_id, sort_order)
+            VALUES (:id, :goodsId, :sortOrder)
+            """, colors);
+        batch("""
+            INSERT INTO goods_color_translations (color_id, locale, name)
+            VALUES (:colorId, :locale, :name)
+            """, colorTranslations);
+
+        List<MapSqlParameterSource> sizes = new ArrayList<>();
+        List<MapSqlParameterSource> sizeTranslations = new ArrayList<>();
+        for (int index = 0; index < goods.sizes().size(); index++) {
+            GoodsSize size = goods.sizes().get(index);
+            sizes.add(new MapSqlParameterSource()
+                .addValue("id", size.id())
+                .addValue("goodsId", goods.id())
+                .addValue("sortOrder", index));
+            size.translations().forEach((locale, translation) ->
+                sizeTranslations.add(new MapSqlParameterSource()
+                    .addValue("sizeId", size.id())
+                    .addValue("locale", locale)
+                    .addValue("label", translation.label())));
+        }
+        batch("""
+            INSERT INTO goods_sizes (id, goods_id, sort_order)
+            VALUES (:id, :goodsId, :sortOrder)
+            """, sizes);
+        batch("""
+            INSERT INTO goods_size_translations (size_id, locale, label)
+            VALUES (:sizeId, :locale, :label)
+            """, sizeTranslations);
+
+        batch("""
+            INSERT INTO goods_combinations (
+                id, goods_id, color_id, size_id, availability, updated_at
+            ) VALUES (
+                :id, :goodsId, :colorId, :sizeId, :availability, :updatedAt
+            )
+            """, goods.combinations().stream()
+            .map(combination -> new MapSqlParameterSource()
+                .addValue("id", combination.id())
+                .addValue("goodsId", goods.id())
+                .addValue("colorId", combination.colorId())
+                .addValue("sizeId", combination.sizeId())
+                .addValue("availability", combination.availability().name())
+                .addValue("updatedAt", atUtc(combination.updatedAt())))
+            .toList());
+    }
+
     public List<Goods> findAll(UUID festivalId) {
         List<GoodsHeader> headers = jdbc.query("""
             SELECT id, festival_id, option_mode, price_amount, created_at, updated_at
@@ -331,6 +422,16 @@ public class GoodsStore {
             resultSet.getObject("created_at", OffsetDateTime.class).toInstant(),
             resultSet.getObject("updated_at", OffsetDateTime.class).toInstant()
         );
+    }
+
+    private void batch(String sql, List<MapSqlParameterSource> parameters) {
+        if (!parameters.isEmpty()) {
+            jdbc.batchUpdate(sql, parameters.toArray(MapSqlParameterSource[]::new));
+        }
+    }
+
+    private static OffsetDateTime atUtc(Instant instant) {
+        return OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 
     private record GoodsHeader(

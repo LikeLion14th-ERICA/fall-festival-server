@@ -39,7 +39,7 @@
 | PUT | `/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability` | 조합 판매 상태 저장. last-write-wins 예외로 If-Match 불필요. | ADM-GOODS | normal, sold-out, not-found, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products` | 관리자 상품 목록 | ADM-GOODS-PRODUCT-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
-| POST | `/api/v2/admin/products` | 상품 등록·신규 조합은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
+| POST | `/api/v2/admin/products` | 상품 등록·신규 조합은 ON_SALE | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, idempotency-key-required, invalid-media-reference, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/products/{goodsId}` | 상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용 | ADM-GOODS-PRODUCT-EDIT | normal, new-option, option-removal, validation-failed, not-found, precondition-required, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
 | DELETE | `/api/v2/admin/products/{goodsId}` | 상품 완전 삭제 | ADM-GOODS-PRODUCT-LIST | normal, not-found, precondition-required, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/media/goods-images` | 상품 이미지 업로드·상품 연결 전 unattached media 생성 | ADM-GOODS-PRODUCT-EDIT | normal, validation-failed, payload-too-large, unsupported-media-type, idempotency-key-required, error, bad-request, rate-limited, unauthorized, forbidden |

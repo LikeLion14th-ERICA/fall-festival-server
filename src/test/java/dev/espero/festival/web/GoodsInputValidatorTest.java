@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -87,6 +88,56 @@ class GoodsInputValidatorTest {
             .doesNotThrowAnyException();
     }
 
+    @Test
+    void requiresDescriptionsAcrossEveryActiveProductLocaleOrNowhere() {
+        assertThatCode(() -> GoodsInputValidator.validate(withDescriptions(null, null, null, null)))
+            .doesNotThrowAnyException();
+        assertValidationFailed(withDescriptions(null, "English", null, null));
+        assertThatCode(() -> GoodsInputValidator.validate(withDescriptions("한국어", "English", "中文", "日本語")))
+            .doesNotThrowAnyException();
+        assertValidationFailed(withDescriptions("한국어", null, "中文", "日本語"));
+        assertValidationFailed(withDescriptions("한국어", "English", null, "日本語"));
+        assertValidationFailed(withDescriptions("한국어", "English", "中文", null));
+        assertValidationFailed(withDescriptions(null, null, "中文", null));
+    }
+
+    @Test
+    void requiresColorAndSizeTranslationsForExactlyTheActiveOptionalLocales() {
+        assertThatCode(() -> GoodsInputValidator.validate(optionsInput("zh-Hans", true, true)))
+            .doesNotThrowAnyException();
+        assertValidationFailed(optionsInput("zh-Hans", false, true));
+        assertValidationFailed(optionsInput("zh-Hans", true, false));
+        assertValidationFailed(optionsInput(null, true, false));
+        assertValidationFailed(optionsInput(null, false, true));
+        assertThatCode(() -> GoodsInputValidator.validate(optionsInput("ja", true, true)))
+            .doesNotThrowAnyException();
+        assertValidationFailed(optionsInput("ja", false, true));
+        assertValidationFailed(optionsInput("ja", true, false));
+    }
+
+    @Test
+    void rejectsUnknownColorOrSizeLocales() {
+        GoodsInput input = optionsInput(null, false, false);
+        input.colors().getFirst().translations().put("fr", new GoodsInput.ColorTranslationInput("Noir"));
+        assertValidationFailed(input);
+
+        input = optionsInput(null, false, false);
+        input.sizes().getFirst().translations().put("fr", new GoodsInput.SizeTranslationInput("M"));
+        assertValidationFailed(input);
+    }
+
+    @Test
+    void rejectsNullOptionItemsAndIdentifiersWithoutThrowingNullPointerException() {
+        GoodsInput valid = optionsInput(null, false, false);
+        assertValidationFailed(replaceOptions(valid, Arrays.asList((GoodsInput.OptionInput) null)));
+        assertValidationFailed(replaceColors(valid, Arrays.asList((GoodsInput.ColorInput) null)));
+        assertValidationFailed(replaceSizes(valid, Arrays.asList((GoodsInput.SizeInput) null)));
+        assertValidationFailed(replaceColors(valid, List.of(new GoodsInput.ColorInput(null, colorTranslations(null)))));
+        assertValidationFailed(replaceSizes(valid, List.of(new GoodsInput.SizeInput(null, sizeTranslations(null)))));
+        assertValidationFailed(replaceOptions(valid, List.of(new GoodsInput.OptionInput(null, valid.sizes().getFirst().id()))));
+        assertValidationFailed(replaceOptions(valid, List.of(new GoodsInput.OptionInput(valid.colors().getFirst().id(), null))));
+    }
+
     private static void assertValidationFailed(GoodsInput input) {
         assertThatThrownBy(() -> GoodsInputValidator.validate(input))
             .isInstanceOfSatisfying(ApiException.class, exception ->
@@ -119,6 +170,87 @@ class GoodsInputValidatorTest {
 
     private static GoodsInput.TranslationInput translation(String name) {
         return new GoodsInput.TranslationInput(name, null);
+    }
+
+    private static GoodsInput withDescriptions(String ko, String en, String zhHans, String ja) {
+        Map<String, GoodsInput.TranslationInput> translations = new LinkedHashMap<>();
+        translations.put("ko", new GoodsInput.TranslationInput("상품", ko));
+        translations.put("en", new GoodsInput.TranslationInput("Goods", en));
+        translations.put("zh-Hans", new GoodsInput.TranslationInput("商品", zhHans));
+        translations.put("ja", new GoodsInput.TranslationInput("商品", ja));
+        Map<String, String> alt = alt();
+        alt.put("zh-Hans", "商品图片");
+        alt.put("ja", "商品画像");
+        return new GoodsInput(
+            "SINGLE", translations, new GoodsInput.PriceInput(1000, "KRW"),
+            List.of(image(UUID.randomUUID(), alt)), List.of(), List.of(), List.of()
+        );
+    }
+
+    private static GoodsInput optionsInput(String optionalLocale, boolean colorOptional, boolean sizeOptional) {
+        UUID colorId = UUID.randomUUID();
+        UUID sizeId = UUID.randomUUID();
+        Map<String, GoodsInput.TranslationInput> translations = new LinkedHashMap<>();
+        translations.put("ko", translation("상품"));
+        translations.put("en", translation("Goods"));
+        translations.put("zh-Hans", null);
+        translations.put("ja", null);
+        Map<String, String> imageAlt = alt();
+        if (optionalLocale != null) {
+            translations.put(optionalLocale, translation("Localized product"));
+            imageAlt.put(optionalLocale, "Localized image");
+        }
+        return new GoodsInput(
+            "OPTIONS",
+            translations,
+            new GoodsInput.PriceInput(1000, "KRW"),
+            List.of(image(UUID.randomUUID(), imageAlt)),
+            List.of(new GoodsInput.ColorInput(
+                colorId,
+                colorTranslations(colorOptional ? (optionalLocale == null ? "zh-Hans" : optionalLocale) : null)
+            )),
+            List.of(new GoodsInput.SizeInput(
+                sizeId,
+                sizeTranslations(sizeOptional ? (optionalLocale == null ? "zh-Hans" : optionalLocale) : null)
+            )),
+            List.of(new GoodsInput.OptionInput(colorId, sizeId))
+        );
+    }
+
+    private static Map<String, GoodsInput.ColorTranslationInput> colorTranslations(String optionalLocale) {
+        Map<String, GoodsInput.ColorTranslationInput> translations = new LinkedHashMap<>();
+        translations.put("ko", new GoodsInput.ColorTranslationInput("검정"));
+        translations.put("en", new GoodsInput.ColorTranslationInput("Black"));
+        translations.put("zh-Hans", null);
+        translations.put("ja", null);
+        if (optionalLocale != null) {
+            translations.put(optionalLocale, new GoodsInput.ColorTranslationInput("Localized color"));
+        }
+        return translations;
+    }
+
+    private static Map<String, GoodsInput.SizeTranslationInput> sizeTranslations(String optionalLocale) {
+        Map<String, GoodsInput.SizeTranslationInput> translations = new LinkedHashMap<>();
+        translations.put("ko", new GoodsInput.SizeTranslationInput("중간"));
+        translations.put("en", new GoodsInput.SizeTranslationInput("Medium"));
+        translations.put("zh-Hans", null);
+        translations.put("ja", null);
+        if (optionalLocale != null) {
+            translations.put(optionalLocale, new GoodsInput.SizeTranslationInput("Localized size"));
+        }
+        return translations;
+    }
+
+    private static GoodsInput replaceColors(GoodsInput input, List<GoodsInput.ColorInput> colors) {
+        return new GoodsInput(input.optionMode(), input.translations(), input.price(), input.images(), colors, input.sizes(), input.options());
+    }
+
+    private static GoodsInput replaceSizes(GoodsInput input, List<GoodsInput.SizeInput> sizes) {
+        return new GoodsInput(input.optionMode(), input.translations(), input.price(), input.images(), input.colors(), sizes, input.options());
+    }
+
+    private static GoodsInput replaceOptions(GoodsInput input, List<GoodsInput.OptionInput> options) {
+        return new GoodsInput(input.optionMode(), input.translations(), input.price(), input.images(), input.colors(), input.sizes(), options);
     }
 
     private static GoodsInput.ImageInput image() {

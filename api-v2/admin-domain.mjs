@@ -124,6 +124,11 @@ export function validateProduct(body,failure){
     const t=body.translations?.[locale];
     if(t!=null&&(!filledName(t)||!filledDescription(t)))failure(422,'TRANSLATION_CONTENT_REQUIRED','입력한 번역은 상품명이 필요합니다.');
   }
+  const descriptionsPresent=body.translations.ko.description!==null;
+  for(const locale of ['en','zh-Hans','ja']){
+    const t=body.translations[locale];
+    if(t!=null&&descriptionsPresent!==(t.description!==null))failure(422,'TRANSLATION_CONTENT_REQUIRED','상품 소개는 모든 상품 번역에 함께 입력하거나 모두 비워 주세요.');
+  }
   if(!Array.isArray(body.images)||body.images.length<1||body.images.length>2)failure(422,'VALIDATION_FAILED','상품 이미지는 1~2개가 필요합니다.');
   const mediaIds=new Set();
   for(const image of body.images){
@@ -151,6 +156,11 @@ export function validateProduct(body,failure){
       const t=entry.translations;
       if(!filledField(t?.ko,field))failure(422,'KOREAN_REQUIRED','색상·사이즈의 한국어 이름은 필수입니다.');
       if(!filledField(t?.en,field))failure(422,'ENGLISH_REQUIRED','색상·사이즈의 영어 이름은 필수입니다.');
+      for(const locale of ['zh-Hans','ja']){
+        const productHasTranslation=body.translations[locale]!=null;
+        const optionHasTranslation=filledField(t?.[locale],field);
+        if(productHasTranslation!==Boolean(optionHasTranslation))failure(422,'TRANSLATION_CONTENT_REQUIRED','상품 번역과 색상·사이즈 번역의 언어를 일치시켜 주세요.');
+      }
     }
   }
   const keys=body.options.map(v=>`${v.colorId}/${v.sizeId}`);

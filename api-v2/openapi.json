@@ -17216,7 +17216,7 @@
                         ],
                         "colors": [
                           {
-                            "id": "color-a",
+                            "id": "00000000-0000-4000-8000-000000000101",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 A"
@@ -17229,7 +17229,7 @@
                             }
                           },
                           {
-                            "id": "color-b",
+                            "id": "00000000-0000-4000-8000-000000000102",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 B"
@@ -17244,7 +17244,7 @@
                         ],
                         "sizes": [
                           {
-                            "id": "size-m",
+                            "id": "00000000-0000-4000-8000-000000000201",
                             "translations": {
                               "ko": {
                                 "label": "M"
@@ -17257,7 +17257,7 @@
                             }
                           },
                           {
-                            "id": "size-l",
+                            "id": "00000000-0000-4000-8000-000000000202",
                             "translations": {
                               "ko": {
                                 "label": "L"
@@ -17273,20 +17273,20 @@
                         "combinations": [
                           {
                             "combinationId": "combo-1",
-                            "colorId": "color-a",
-                            "sizeId": "size-m",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
                             "status": "ON_SALE"
                           },
                           {
                             "combinationId": "combo-2",
-                            "colorId": "color-a",
-                            "sizeId": "size-l",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000202",
                             "status": "ON_SALE"
                           },
                           {
                             "combinationId": "combo-3",
-                            "colorId": "color-b",
-                            "sizeId": "size-m",
+                            "colorId": "00000000-0000-4000-8000-000000000102",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
                             "status": "ON_SALE"
                           }
                         ],
@@ -17563,6 +17563,26 @@
                         "mock": true
                       }
                     }
+                  },
+                  "invalid-media-reference": {
+                    "summary": "상품 등록·신규 조합은 ON_SALE: invalid-media-reference",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_MEDIA_REFERENCE",
+                        "message": "사용할 수 없는 상품 이미지가 포함되어 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
                   }
                 }
               }
@@ -17584,12 +17604,12 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
-                  "precondition-required": {
-                    "summary": "상품 등록·신규 조합은 ON_SALE: precondition-required",
+                  "idempotency-key-required": {
+                    "summary": "상품 등록·신규 조합은 ON_SALE: idempotency-key-required",
                     "value": {
                       "error": {
-                        "code": "PRECONDITION_REQUIRED",
-                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "message": "Idempotency-Key 헤더가 필요합니다.",
                         "details": [],
                         "retryable": false
                       },
@@ -17722,7 +17742,8 @@
         "x-mock-scenarios": [
           "normal",
           "validation-failed",
-          "precondition-required",
+          "idempotency-key-required",
+          "invalid-media-reference",
           "error",
           "bad-request",
           "rate-limited",
@@ -17768,7 +17789,7 @@
                 ],
                 "colors": [
                   {
-                    "id": "color-a",
+                    "id": "00000000-0000-4000-8000-000000000101",
                     "translations": {
                       "ko": {
                         "name": "예시 색상 A"
@@ -17781,7 +17802,7 @@
                     }
                   },
                   {
-                    "id": "color-b",
+                    "id": "00000000-0000-4000-8000-000000000102",
                     "translations": {
                       "ko": {
                         "name": "예시 색상 B"
@@ -17796,7 +17817,7 @@
                 ],
                 "sizes": [
                   {
-                    "id": "size-m",
+                    "id": "00000000-0000-4000-8000-000000000201",
                     "translations": {
                       "ko": {
                         "label": "M"
@@ -17809,7 +17830,7 @@
                     }
                   },
                   {
-                    "id": "size-l",
+                    "id": "00000000-0000-4000-8000-000000000202",
                     "translations": {
                       "ko": {
                         "label": "L"
@@ -17824,16 +17845,16 @@
                 ],
                 "options": [
                   {
-                    "colorId": "color-a",
-                    "sizeId": "size-m"
+                    "colorId": "00000000-0000-4000-8000-000000000101",
+                    "sizeId": "00000000-0000-4000-8000-000000000201"
                   },
                   {
-                    "colorId": "color-a",
-                    "sizeId": "size-l"
+                    "colorId": "00000000-0000-4000-8000-000000000101",
+                    "sizeId": "00000000-0000-4000-8000-000000000202"
                   },
                   {
-                    "colorId": "color-b",
-                    "sizeId": "size-m"
+                    "colorId": "00000000-0000-4000-8000-000000000102",
+                    "sizeId": "00000000-0000-4000-8000-000000000201"
                   }
                 ]
               }
@@ -18466,7 +18487,7 @@
                         ],
                         "colors": [
                           {
-                            "id": "color-a",
+                            "id": "00000000-0000-4000-8000-000000000101",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 A"
@@ -18479,7 +18500,7 @@
                             }
                           },
                           {
-                            "id": "color-b",
+                            "id": "00000000-0000-4000-8000-000000000102",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 B"
@@ -18494,7 +18515,7 @@
                         ],
                         "sizes": [
                           {
-                            "id": "size-m",
+                            "id": "00000000-0000-4000-8000-000000000201",
                             "translations": {
                               "ko": {
                                 "label": "M"
@@ -18507,7 +18528,7 @@
                             }
                           },
                           {
-                            "id": "size-l",
+                            "id": "00000000-0000-4000-8000-000000000202",
                             "translations": {
                               "ko": {
                                 "label": "L"
@@ -18522,22 +18543,22 @@
                         ],
                         "combinations": [
                           {
-                            "combinationId": "combo-shirt-a-m",
-                            "colorId": "color-a",
-                            "sizeId": "size-m",
+                            "combinationId": "combo-1",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
                             "status": "ON_SALE"
                           },
                           {
-                            "combinationId": "combo-shirt-a-l",
-                            "colorId": "color-a",
-                            "sizeId": "size-l",
-                            "status": "SOLD_OUT"
+                            "combinationId": "combo-2",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000202",
+                            "status": "ON_SALE"
                           },
                           {
-                            "combinationId": "combo-shirt-b-m",
-                            "colorId": "color-b",
-                            "sizeId": "size-m",
-                            "status": "SOLD_OUT"
+                            "combinationId": "combo-3",
+                            "colorId": "00000000-0000-4000-8000-000000000102",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
+                            "status": "ON_SALE"
                           }
                         ],
                         "createdAt": "2030-10-01T16:00:00+09:00",
@@ -18592,7 +18613,7 @@
                         ],
                         "colors": [
                           {
-                            "id": "color-a",
+                            "id": "00000000-0000-4000-8000-000000000101",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 A"
@@ -18605,7 +18626,7 @@
                             }
                           },
                           {
-                            "id": "color-b",
+                            "id": "00000000-0000-4000-8000-000000000102",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 B"
@@ -18618,7 +18639,7 @@
                             }
                           },
                           {
-                            "id": "color-new",
+                            "id": "00000000-0000-4000-8000-000000000103",
                             "translations": {
                               "ko": {
                                 "name": "새 예시 색상"
@@ -18633,7 +18654,7 @@
                         ],
                         "sizes": [
                           {
-                            "id": "size-m",
+                            "id": "00000000-0000-4000-8000-000000000201",
                             "translations": {
                               "ko": {
                                 "label": "M"
@@ -18646,7 +18667,7 @@
                             }
                           },
                           {
-                            "id": "size-l",
+                            "id": "00000000-0000-4000-8000-000000000202",
                             "translations": {
                               "ko": {
                                 "label": "L"
@@ -18661,27 +18682,27 @@
                         ],
                         "combinations": [
                           {
-                            "combinationId": "combo-shirt-a-m",
-                            "colorId": "color-a",
-                            "sizeId": "size-m",
+                            "combinationId": "combo-1",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
                             "status": "ON_SALE"
                           },
                           {
-                            "combinationId": "combo-shirt-a-l",
-                            "colorId": "color-a",
-                            "sizeId": "size-l",
-                            "status": "SOLD_OUT"
+                            "combinationId": "combo-2",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000202",
+                            "status": "ON_SALE"
                           },
                           {
-                            "combinationId": "combo-shirt-b-m",
-                            "colorId": "color-b",
-                            "sizeId": "size-m",
-                            "status": "SOLD_OUT"
+                            "combinationId": "combo-3",
+                            "colorId": "00000000-0000-4000-8000-000000000102",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
+                            "status": "ON_SALE"
                           },
                           {
-                            "combinationId": "combo-1",
-                            "colorId": "color-new",
-                            "sizeId": "size-m",
+                            "combinationId": "combo-4",
+                            "colorId": "00000000-0000-4000-8000-000000000103",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
                             "status": "ON_SALE"
                           }
                         ],
@@ -18737,7 +18758,7 @@
                         ],
                         "colors": [
                           {
-                            "id": "color-a",
+                            "id": "00000000-0000-4000-8000-000000000101",
                             "translations": {
                               "ko": {
                                 "name": "예시 색상 A"
@@ -18752,7 +18773,7 @@
                         ],
                         "sizes": [
                           {
-                            "id": "size-m",
+                            "id": "00000000-0000-4000-8000-000000000201",
                             "translations": {
                               "ko": {
                                 "label": "M"
@@ -18765,7 +18786,7 @@
                             }
                           },
                           {
-                            "id": "size-l",
+                            "id": "00000000-0000-4000-8000-000000000202",
                             "translations": {
                               "ko": {
                                 "label": "L"
@@ -18780,16 +18801,16 @@
                         ],
                         "combinations": [
                           {
-                            "combinationId": "combo-shirt-a-m",
-                            "colorId": "color-a",
-                            "sizeId": "size-m",
+                            "combinationId": "combo-1",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000201",
                             "status": "ON_SALE"
                           },
                           {
-                            "combinationId": "combo-shirt-a-l",
-                            "colorId": "color-a",
-                            "sizeId": "size-l",
-                            "status": "SOLD_OUT"
+                            "combinationId": "combo-2",
+                            "colorId": "00000000-0000-4000-8000-000000000101",
+                            "sizeId": "00000000-0000-4000-8000-000000000202",
+                            "status": "ON_SALE"
                           }
                         ],
                         "createdAt": "2030-10-01T16:00:00+09:00",
@@ -19316,7 +19337,7 @@
                 ],
                 "colors": [
                   {
-                    "id": "color-a",
+                    "id": "00000000-0000-4000-8000-000000000101",
                     "translations": {
                       "ko": {
                         "name": "예시 색상 A"
@@ -19329,7 +19350,7 @@
                     }
                   },
                   {
-                    "id": "color-b",
+                    "id": "00000000-0000-4000-8000-000000000102",
                     "translations": {
                       "ko": {
                         "name": "예시 색상 B"
@@ -19344,7 +19365,7 @@
                 ],
                 "sizes": [
                   {
-                    "id": "size-m",
+                    "id": "00000000-0000-4000-8000-000000000201",
                     "translations": {
                       "ko": {
                         "label": "M"
@@ -19357,7 +19378,7 @@
                     }
                   },
                   {
-                    "id": "size-l",
+                    "id": "00000000-0000-4000-8000-000000000202",
                     "translations": {
                       "ko": {
                         "label": "L"
@@ -19372,16 +19393,16 @@
                 ],
                 "options": [
                   {
-                    "colorId": "color-a",
-                    "sizeId": "size-m"
+                    "colorId": "00000000-0000-4000-8000-000000000101",
+                    "sizeId": "00000000-0000-4000-8000-000000000201"
                   },
                   {
-                    "colorId": "color-a",
-                    "sizeId": "size-l"
+                    "colorId": "00000000-0000-4000-8000-000000000101",
+                    "sizeId": "00000000-0000-4000-8000-000000000202"
                   },
                   {
-                    "colorId": "color-b",
-                    "sizeId": "size-m"
+                    "colorId": "00000000-0000-4000-8000-000000000102",
+                    "sizeId": "00000000-0000-4000-8000-000000000201"
                   }
                 ]
               }
@@ -25319,7 +25340,10 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Id"
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "description": "ProductInput 전용 안정 UUID."
           },
           "translations": {
             "$ref": "#/components/schemas/GoodsColorTranslations"
@@ -25336,7 +25360,10 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/components/schemas/Id"
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "description": "ProductInput 전용 안정 UUID."
           },
           "translations": {
             "$ref": "#/components/schemas/GoodsSizeTranslations"
@@ -25353,10 +25380,16 @@
         "type": "object",
         "properties": {
           "colorId": {
-            "$ref": "#/components/schemas/Id"
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "description": "ProductInput 전용 안정 UUID."
           },
           "sizeId": {
-            "$ref": "#/components/schemas/Id"
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+            "description": "ProductInput 전용 안정 UUID."
           }
         },
         "required": [
@@ -25446,7 +25479,8 @@
             "description": "단일 판매 상태 / 색상×사이즈 조합별 판매 상태"
           },
           "translations": {
-            "$ref": "#/components/schemas/GoodsTranslations"
+            "$ref": "#/components/schemas/GoodsTranslations",
+            "description": "ko description이 null이면 모든 활성 번역 description도 null. ko description이 있으면 모든 활성 번역에 공백 아닌 description 필수."
           },
           "price": {
             "$ref": "#/components/schemas/Money"
@@ -25465,14 +25499,14 @@
             "items": {
               "$ref": "#/components/schemas/GoodsColorInput"
             },
-            "description": "SINGLE이면 []"
+            "description": "SINGLE이면 []. OPTIONS면 모든 활성 상품 locale의 색상 번역이 각 항목에 완전해야 한다."
           },
           "sizes": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GoodsSizeInput"
             },
-            "description": "SINGLE이면 []"
+            "description": "SINGLE이면 []. OPTIONS면 모든 활성 상품 locale의 사이즈 번역이 각 항목에 완전해야 한다."
           },
           "options": {
             "type": "array",

@@ -2,6 +2,7 @@ package dev.espero.festival.web;
 
 import dev.espero.festival.domain.GoodsOptionMode;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 
@@ -37,6 +38,7 @@ final class GoodsInputValidator {
                 );
             }
         }
+        validateDescriptions(input.translations());
         if (input.price() == null || input.price().amount() < 0 || !"KRW".equals(input.price().currency())) {
             throw validationFailed();
         }
@@ -57,13 +59,19 @@ final class GoodsInputValidator {
                 HttpStatus.UNPROCESSABLE_ENTITY, "EMPTY_CONFIGURATION", "OPTIONS 상품은 색상·사이즈·조합이 모두 필요합니다.", false
             );
         }
+        if (input.colors().stream().anyMatch(color -> color == null || color.id() == null)
+            || input.sizes().stream().anyMatch(size -> size == null || size.id() == null)
+            || input.options().stream().anyMatch(option ->
+                option == null || option.colorId() == null || option.sizeId() == null)) {
+            throw validationFailed();
+        }
         requireUniqueIds(input.colors().stream().map(GoodsInput.ColorInput::id).toList());
         requireUniqueIds(input.sizes().stream().map(GoodsInput.SizeInput::id).toList());
         for (GoodsInput.ColorInput color : input.colors()) {
-            requireNameOrLabel(color.translations(), "color");
+            validateColorTranslations(input, color.translations());
         }
         for (GoodsInput.SizeInput size : input.sizes()) {
-            requireNameOrLabel(size.translations(), "size");
+            validateSizeTranslations(input, size.translations());
         }
         Set<String> optionKeys = new HashSet<>();
         Set<java.util.UUID> knownColors = input.colors().stream().map(GoodsInput.ColorInput::id).collect(java.util.stream.Collectors.toSet());
@@ -140,35 +148,73 @@ final class GoodsInputValidator {
         }
     }
 
+    private static void validateDescriptions(Map<String, GoodsInput.TranslationInput> translations) {
+        boolean descriptionsPresent = translations.get("ko").description() != null;
+        if (descriptionsPresent != (translations.get("en").description() != null)) {
+            throw translationContentRequired("상품 소개는 모든 상품 번역에 함께 입력하거나 모두 비워 주세요.");
+        }
+        for (String locale : OPTIONAL_LOCALES) {
+            GoodsInput.TranslationInput translation = translations.get(locale);
+            if (translation != null && descriptionsPresent != (translation.description() != null)) {
+                throw translationContentRequired("상품 소개는 모든 상품 번역에 함께 입력하거나 모두 비워 주세요.");
+            }
+        }
+    }
+
     private static void requireUniqueIds(java.util.List<java.util.UUID> ids) {
         if (new HashSet<>(ids).size() != ids.size()) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "DUPLICATE_OPTION", "색상·사이즈 ID가 중복됩니다.", false);
         }
     }
 
-    private static void requireNameOrLabel(Object translations, String kind) {
-        if (translations == null) {
+    private static void validateColorTranslations(
+        GoodsInput input,
+        java.util.Map<String, GoodsInput.ColorTranslationInput> translations
+    ) {
+        if (translations == null || !KNOWN_LOCALES.containsAll(translations.keySet())) {
             throw validationFailed();
         }
-        java.util.Map<?, ?> map = (java.util.Map<?, ?>) translations;
-        Object ko = map.get("ko");
-        Object en = map.get("en");
-        if (!hasText(ko, kind)) {
+        if (!hasText(translations.get("ko"))) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "KOREAN_REQUIRED", "색상·사이즈의 한국어 이름은 필수입니다.", false);
         }
-        if (!hasText(en, kind)) {
+        if (!hasText(translations.get("en"))) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "ENGLISH_REQUIRED", "색상·사이즈의 영어 이름은 필수입니다.", false);
+        }
+        for (String locale : OPTIONAL_LOCALES) {
+            boolean productHasTranslation = input.translations().get(locale) != null;
+            if (productHasTranslation != hasText(translations.get(locale))) {
+                throw translationContentRequired("상품 번역과 색상 번역의 언어를 일치시켜 주세요.");
+            }
         }
     }
 
-    private static boolean hasText(Object translation, String kind) {
-        if (translation instanceof GoodsInput.ColorTranslationInput color) {
-            return color.name() != null && !color.name().isBlank();
+    private static void validateSizeTranslations(
+        GoodsInput input,
+        java.util.Map<String, GoodsInput.SizeTranslationInput> translations
+    ) {
+        if (translations == null || !KNOWN_LOCALES.containsAll(translations.keySet())) {
+            throw validationFailed();
         }
-        if (translation instanceof GoodsInput.SizeTranslationInput size) {
-            return size.label() != null && !size.label().isBlank();
+        if (!hasText(translations.get("ko"))) {
+            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "KOREAN_REQUIRED", "색상·사이즈의 한국어 이름은 필수입니다.", false);
         }
-        return false;
+        if (!hasText(translations.get("en"))) {
+            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "ENGLISH_REQUIRED", "색상·사이즈의 영어 이름은 필수입니다.", false);
+        }
+        for (String locale : OPTIONAL_LOCALES) {
+            boolean productHasTranslation = input.translations().get(locale) != null;
+            if (productHasTranslation != hasText(translations.get(locale))) {
+                throw translationContentRequired("상품 번역과 사이즈 번역의 언어를 일치시켜 주세요.");
+            }
+        }
+    }
+
+    private static boolean hasText(GoodsInput.ColorTranslationInput translation) {
+        return translation != null && translation.name() != null && !translation.name().isBlank();
+    }
+
+    private static boolean hasText(GoodsInput.SizeTranslationInput translation) {
+        return translation != null && translation.label() != null && !translation.label().isBlank();
     }
 
     private static boolean hasText(String value) {
@@ -191,5 +237,9 @@ final class GoodsInputValidator {
 
     private static ApiException validationFailed() {
         return new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_FAILED", "요청 필드를 확인해 주세요.", false);
+    }
+
+    private static ApiException translationContentRequired(String message) {
+        return new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "TRANSLATION_CONTENT_REQUIRED", message, false);
     }
 }

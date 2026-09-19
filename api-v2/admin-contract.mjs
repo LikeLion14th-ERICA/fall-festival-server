@@ -7,14 +7,15 @@ export function applyAdminContract(s,ops){
   const nullable=(schema,d)=>({anyOf:[schema,{type:'null'}],description:d});
   const en=(values,d)=>({type:'string',enum:values,description:d});
   const id=ref('Id');
+  const productInputId={type:'string',format:'uuid',pattern:'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',description:'ProductInput 전용 안정 UUID.'};
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
   s.GoodsColorTranslation=obj({name:str('색상명')});
   s.GoodsColorTranslations=obj({ko:ref('GoodsColorTranslation'),en:ref('GoodsColorTranslation'),'zh-Hans':nullable(ref('GoodsColorTranslation'),'이 색상에 zh-Hans 번역이 없으면 null'),ja:nullable(ref('GoodsColorTranslation'),'이 색상에 ja 번역이 없으면 null')},'상품과 같은 ko·en 필수 규칙.',['ko','en','zh-Hans','ja']);
   s.GoodsSizeTranslation=obj({label:str('사이즈명')});
   s.GoodsSizeTranslations=obj({ko:ref('GoodsSizeTranslation'),en:ref('GoodsSizeTranslation'),'zh-Hans':nullable(ref('GoodsSizeTranslation'),'이 사이즈에 zh-Hans 번역이 없으면 null'),ja:nullable(ref('GoodsSizeTranslation'),'이 사이즈에 ja 번역이 없으면 null')},'상품과 같은 ko·en 필수 규칙.',['ko','en','zh-Hans','ja']);
-  s.GoodsColorInput=obj({id,translations:ref('GoodsColorTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
-  s.GoodsSizeInput=obj({id,translations:ref('GoodsSizeTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
-  s.GoodsOptionInput=obj({colorId:id,sizeId:id},'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.');
+  s.GoodsColorInput=obj({id:productInputId,translations:ref('GoodsColorTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
+  s.GoodsSizeInput=obj({id:productInputId,translations:ref('GoodsSizeTranslations')},'id는 번역문에서 파생하지 않는 클라이언트 생성 안정 UUID.');
+  s.GoodsOptionInput=obj({colorId:productInputId,sizeId:productInputId},'실제 제공하는 조합만 명시. 자동 곱집합 생성 없음.');
   s.GoodsImageAltInput=obj({
     ko:str('한국어 대체 텍스트. 공백만 입력할 수 없음.'),
     en:str('영어 대체 텍스트. 공백만 입력할 수 없음.'),
@@ -27,11 +28,11 @@ export function applyAdminContract(s,ops){
   },'이미 업로드된 서버 media 참조와 수동 대체 텍스트. URL 입력은 허용하지 않는다.');
   s.ProductInput=obj({
     optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
-    translations:ref('GoodsTranslations'),
+    translations:{...ref('GoodsTranslations'),description:'ko description이 null이면 모든 활성 번역 description도 null. ko description이 있으면 모든 활성 번역에 공백 아닌 description 필수.'},
     price:ref('Money'),
     images:{type:'array',items:ref('GoodsImageInput'),minItems:1,maxItems:2,description:'이미 업로드된 opaque media 참조 1~2개. 배열 순서가 표시 순서이며 임의 URL은 허용하지 않는다.'},
-    colors:arr(ref('GoodsColorInput'),'SINGLE이면 []'),
-    sizes:arr(ref('GoodsSizeInput'),'SINGLE이면 []'),
+    colors:arr(ref('GoodsColorInput'),'SINGLE이면 []. OPTIONS면 모든 활성 상품 locale의 색상 번역이 각 항목에 완전해야 한다.'),
+    sizes:arr(ref('GoodsSizeInput'),'SINGLE이면 []. OPTIONS면 모든 활성 상품 locale의 사이즈 번역이 각 항목에 완전해야 한다.'),
     options:arr(ref('GoodsOptionInput'),'SINGLE이면 []. OPTIONS면 비어있지 않아야 하며 모든 색상·사이즈가 실제 조합에서 쓰여야 함.'),
   },'SINGLE은 colors/sizes/options가 모두 빈 배열이어야 한다. OPTIONS는 셋 다 비어있지 않아야 하며 등록한 모든 색상·사이즈가 실제 조합에서 쓰여야 한다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
   s.AdminGoodsColor=obj({id,translations:ref('GoodsColorTranslations')});
@@ -93,7 +94,7 @@ export function applyAdminContract(s,ops){
   find('putAdminAvailability').idempotencyKeyRequired=true;
   add('getAdminProducts','GET','/admin/products','AdminGoodsList','관리자 상품 목록',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','empty','error']);
   add('getAdminProduct','GET','/admin/products/{goodsId}','AdminGoods','상품 수정 초기값',['ADM-GOODS-PRODUCT-EDIT'],undefined,['normal','not-found','error']);
-  add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','precondition-required','error']);
+  add('postAdminProduct','POST','/admin/products','AdminGoods','상품 등록·신규 조합은 ON_SALE',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','validation-failed','idempotency-key-required','invalid-media-reference','error']);
   add('putAdminProduct','PUT','/admin/products/{goodsId}','AdminGoods','상품 수정·유지 조합 상태 보존, 신규 ON_SALE, 삭제 허용',['ADM-GOODS-PRODUCT-EDIT'],'ProductInput',['normal','new-option','option-removal','validation-failed','not-found','precondition-required','edit-conflict','error']);
   add('deleteAdminProduct','DELETE','/admin/products/{goodsId}','Deleted','상품 완전 삭제',['ADM-GOODS-PRODUCT-LIST'],undefined,['normal','not-found','precondition-required','edit-conflict','error']);
   ops.push({
