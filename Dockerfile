@@ -37,15 +37,23 @@ RUN apk add --no-cache libwebp-tools \
     && dwebp -version \
     && webpinfo -version \
     && img2webp -version \
-    && addgroup --system app \
-    && adduser --system --ingroup app app
+    && addgroup -S -g 10001 app \
+    && adduser -S -D -H -u 10001 -G app app \
+    && mkdir -p /var/lib/espero/media \
+    && chown app:app /var/lib/espero/media
 
 WORKDIR /app
 COPY --from=build --chown=app:app \
     /workspace/target/fall-festival-server-*.jar app.jar
 
+# Goods images are stored here. Mount a named volume at this path so the files
+# survive the container being recreated; a new named volume copies this
+# directory's ownership. The fixed UID/GID 10001 lets a host directory be
+# prepared for a bind mount instead.
 ENV SERVER_ADDRESS=0.0.0.0 \
-    SERVER_PORT=8080
+    SERVER_PORT=8080 \
+    FESTIVAL_MEDIA_STORAGE_ROOT=/var/lib/espero/media
+VOLUME ["/var/lib/espero/media"]
 
 USER app
 EXPOSE 8080

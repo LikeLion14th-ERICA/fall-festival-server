@@ -108,6 +108,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `RATE_LIMIT_ENABLED` | 선택 | `true` | 전체 | `/api/v2` 클라이언트별 요청 수 제한. 초과 시 `429 RATE_LIMITED`와 `Retry-After` |
 | `RATE_LIMIT_TRUSTED_PROXY_HOPS` | 선택 | `0` | 전체 | 앞단에서 `X-Forwarded-For`를 붙이는 신뢰 proxy 수. Next.js proxy와 호스팅 load balancer 뒤면 `2` |
 | `PUBLIC_LOCALES` | 선택 | `ko` | `db` | 공개할 언어, 쉼표 구분(`ko,en,zh-Hans`). 한국어는 항상 공개. 나열한 언어도 게시 catalog의 번역이 모두 있어야 공개되고, 빠지면 시작 로그에 이유를 남기고 `LOCALE_NOT_READY` 유지 |
+| `FESTIVAL_MEDIA_STORAGE_ROOT` | 굿즈 이미지에 필수 | (없음, Docker image는 `/var/lib/espero/media`) | `db` | 굿즈 이미지 원본·변환본을 저장할 쓰기 가능한 디렉터리. 없으면 이미지 업로드·조회가 `503 MEDIA_STORAGE_UNCONFIGURED`이고 상품을 등록할 수 없음. 빈 값이나 쓸 수 없는 경로는 startup 실패 |
 | `API_DOCS_ENABLED` | 선택 | `false` | 전체 | `true`면 `/docs`에서 Swagger UI 제공. 로컬·개발 서버 전용, 운영에서는 끔 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
@@ -262,6 +263,16 @@ docker build --tag fall-festival-server:local .
 ```
 
 이미지는 `0.0.0.0:8080`으로 bind하지만 DB와 runtime 환경변수를 자체 provision하지 않습니다.
+굿즈 이미지는 image 안의 `/var/lib/espero/media`(UID/GID 10001 소유)에 저장되므로 그 경로에
+named volume을 mount합니다. volume 없이 실행하면 container를 다시 만들 때 이미지 파일이 사라지고,
+DB에는 기록이 남아 이미지 조회가 `503`이 됩니다. DB와 이 volume은 같은 시점으로 함께 백업합니다.
+
+```bash
+docker volume create espero-media
+docker run --env-file <server.env> -v espero-media:/var/lib/espero/media -p 8080:8080 fall-festival-server:local
+```
+
+host 디렉터리를 bind mount하려면 먼저 `chown 10001:10001 <dir>`로 container 사용자가 쓸 수 있게 합니다.
 로컬 실행과 Docker image build는 지원하지만 원격 개발 서버는 아직 provision되지 않았고 운영
 배포 절차도 확정되지 않았습니다. 인프라와 인증·관측성 구성이 정해진 뒤 별도 runbook으로
 작성합니다. 배포 전 검토할 development provider와 same-origin proxy 기본안은
