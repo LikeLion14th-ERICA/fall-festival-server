@@ -246,7 +246,8 @@ class AdminGoodsImageUploadFlowIntegrationTest {
                 .header("Idempotency-Key", "json-key")
                 .content("{}")))
             .andExpect(status().isUnsupportedMediaType())
-            .andExpect(jsonPath("$.error.code").value("UNSUPPORTED_MEDIA_TYPE"));
+            .andExpect(jsonPath("$.error.code").value("UNSUPPORTED_MEDIA_TYPE"))
+            .andExpect(jsonPath("$.error.message").value("multipart/form-data 요청이 필요합니다."));
 
         assertNoPersistentState();
     }

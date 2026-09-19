@@ -348,7 +348,9 @@ class AdminGoodsProductCreationFlowIntegrationTest {
                 .header("Idempotency-Key", "wrong-type-product")
                 .contentType(MediaType.TEXT_PLAIN)
                 .content(body)))
-            .andExpect(status().isUnsupportedMediaType());
+            .andExpect(status().isUnsupportedMediaType())
+            .andExpect(jsonPath("$.error.code").value("UNSUPPORTED_MEDIA_TYPE"))
+            .andExpect(jsonPath("$.error.message").value("application/json 요청이 필요합니다."));
         mvc.perform(asAdmin(post(ROUTE)
                 .header("Idempotency-Key", "malformed-product")
                 .contentType(MediaType.APPLICATION_JSON)

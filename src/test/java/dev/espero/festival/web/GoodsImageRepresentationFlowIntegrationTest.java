@@ -105,6 +105,18 @@ class GoodsImageRepresentationFlowIntegrationTest {
     }
 
     @Test
+    void publicListAndDetailReturnAnEmptyImageArrayWhenNoImageIsAssociated() throws Exception {
+        UUID goodsId = insertGoods();
+
+        mvc.perform(get("/api/v2/goods"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items[0].images", org.hamcrest.Matchers.empty()));
+        mvc.perform(get("/api/v2/goods/" + goodsId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.images", org.hamcrest.Matchers.empty()));
+    }
+
+    @Test
     void adminListAndDetailExposeFullAltShapeAndImagesChangeTheDetailEtag() throws Exception {
         UUID goodsId = insertGoods();
         String before = mvc.perform(asAdmin(get("/api/v2/admin/products/" + goodsId)))

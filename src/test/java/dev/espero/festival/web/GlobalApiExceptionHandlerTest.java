@@ -17,8 +17,11 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -155,6 +158,22 @@ class GlobalApiExceptionHandlerTest {
         assertThat(response.getBody().error().code()).isEqualTo("SERVICE_UNAVAILABLE");
         assertThat(response.getBody().error().message()).doesNotContain("sensitive", "stderr");
         assertThat(response.getBody().error().retryable()).isTrue();
+    }
+
+    @Test
+    void mapsAnUnsupportedTypeWithoutJsonOrMultipartSupportToTheGenericMessage() {
+        HttpMediaTypeNotSupportedException exception = new HttpMediaTypeNotSupportedException(
+            MediaType.TEXT_PLAIN,
+            java.util.List.of(MediaType.APPLICATION_XML),
+            HttpMethod.POST
+        );
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleUnsupportedMediaType(exception, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        assertThat(response.getBody().error().code()).isEqualTo("UNSUPPORTED_MEDIA_TYPE");
+        assertThat(response.getBody().error().message()).isEqualTo("지원하지 않는 Content-Type입니다.");
+        assertThat(response.getBody().error().retryable()).isFalse();
     }
 
     @Test

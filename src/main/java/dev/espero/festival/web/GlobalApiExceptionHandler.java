@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -130,7 +131,8 @@ public class GlobalApiExceptionHandler {
         HttpMediaTypeNotSupportedException exception,
         HttpServletRequest request
     ) {
-        return error(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", "multipart/form-data 요청이 필요합니다.", false, request);
+        String message = unsupportedMediaTypeMessage(exception.getSupportedMediaTypes());
+        return error(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", message, false, request);
     }
 
     @ExceptionHandler(MultipartException.class)
@@ -172,5 +174,15 @@ public class GlobalApiExceptionHandler {
     private static long retryAfterSeconds(Duration retryAfter) {
         long millis = Math.max(0, retryAfter.toMillis());
         return Math.max(1, (millis + 999) / 1_000);
+    }
+
+    private static String unsupportedMediaTypeMessage(List<MediaType> supportedMediaTypes) {
+        if (supportedMediaTypes.stream().anyMatch(MediaType.MULTIPART_FORM_DATA::isCompatibleWith)) {
+            return "multipart/form-data 요청이 필요합니다.";
+        }
+        if (supportedMediaTypes.stream().anyMatch(MediaType.APPLICATION_JSON::isCompatibleWith)) {
+            return "application/json 요청이 필요합니다.";
+        }
+        return "지원하지 않는 Content-Type입니다.";
     }
 }
