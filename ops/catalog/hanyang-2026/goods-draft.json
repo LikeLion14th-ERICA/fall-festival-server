@@ -1,0 +1,554 @@
+{
+  "products": [
+    {
+      "key": "baseball-jersey",
+      "body": {
+        "optionMode": "OPTIONS",
+        "translations": {
+          "ko": {
+            "name": "야구 유니폼",
+            "description": null
+          },
+          "en": {
+            "name": "Baseball Jersey",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 39000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "야구 유니폼",
+              "en": "Baseball Jersey"
+            }
+          }
+        ],
+        "colors": [
+          {
+            "id": "4e98d826-75fb-5c8b-ab81-ac69ed39d2c5",
+            "translations": {
+              "ko": {
+                "name": "블루"
+              },
+              "en": {
+                "name": "Blue"
+              }
+            }
+          }
+        ],
+        "sizes": [
+          {
+            "id": "c556254a-0346-5956-b9c0-02e837b5a53f",
+            "translations": {
+              "ko": {
+                "label": "S"
+              },
+              "en": {
+                "label": "S"
+              }
+            }
+          },
+          {
+            "id": "969688ac-0cdd-50f2-b1d1-27f4a35d8e66",
+            "translations": {
+              "ko": {
+                "label": "M"
+              },
+              "en": {
+                "label": "M"
+              }
+            }
+          },
+          {
+            "id": "c8f2af38-1001-50bd-ac86-4ddacb76dddf",
+            "translations": {
+              "ko": {
+                "label": "L"
+              },
+              "en": {
+                "label": "L"
+              }
+            }
+          },
+          {
+            "id": "37c84b78-f66d-5565-a7eb-14d6742e5eff",
+            "translations": {
+              "ko": {
+                "label": "XL"
+              },
+              "en": {
+                "label": "XL"
+              }
+            }
+          },
+          {
+            "id": "7999a268-4794-53e2-8a7e-d273a7ac98ab",
+            "translations": {
+              "ko": {
+                "label": "2XL"
+              },
+              "en": {
+                "label": "2XL"
+              }
+            }
+          }
+        ],
+        "options": [
+          {
+            "colorId": "4e98d826-75fb-5c8b-ab81-ac69ed39d2c5",
+            "sizeId": "c556254a-0346-5956-b9c0-02e837b5a53f"
+          },
+          {
+            "colorId": "4e98d826-75fb-5c8b-ab81-ac69ed39d2c5",
+            "sizeId": "969688ac-0cdd-50f2-b1d1-27f4a35d8e66"
+          },
+          {
+            "colorId": "4e98d826-75fb-5c8b-ab81-ac69ed39d2c5",
+            "sizeId": "c8f2af38-1001-50bd-ac86-4ddacb76dddf"
+          },
+          {
+            "colorId": "4e98d826-75fb-5c8b-ab81-ac69ed39d2c5",
+            "sizeId": "37c84b78-f66d-5565-a7eb-14d6742e5eff"
+          },
+          {
+            "colorId": "4e98d826-75fb-5c8b-ab81-ac69ed39d2c5",
+            "sizeId": "7999a268-4794-53e2-8a7e-d273a7ac98ab"
+          }
+        ]
+      }
+    },
+    {
+      "key": "football-jersey",
+      "body": {
+        "optionMode": "OPTIONS",
+        "translations": {
+          "ko": {
+            "name": "축구 유니폼",
+            "description": null
+          },
+          "en": {
+            "name": "Football Jersey",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 39000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "축구 유니폼",
+              "en": "Football Jersey"
+            }
+          }
+        ],
+        "colors": [
+          {
+            "id": "8594d668-b76f-562c-92f8-af8ff9dbb0bb",
+            "translations": {
+              "ko": {
+                "name": "블루"
+              },
+              "en": {
+                "name": "Blue"
+              }
+            }
+          }
+        ],
+        "sizes": [
+          {
+            "id": "eca45d8b-107f-529d-b051-a26ec052b734",
+            "translations": {
+              "ko": {
+                "label": "S"
+              },
+              "en": {
+                "label": "S"
+              }
+            }
+          },
+          {
+            "id": "32649c9b-f959-5d66-9233-d2099d96ccd5",
+            "translations": {
+              "ko": {
+                "label": "M"
+              },
+              "en": {
+                "label": "M"
+              }
+            }
+          },
+          {
+            "id": "446ca1cc-64aa-509e-ab6c-c8595178300c",
+            "translations": {
+              "ko": {
+                "label": "L"
+              },
+              "en": {
+                "label": "L"
+              }
+            }
+          },
+          {
+            "id": "440dc034-c4a9-563a-9156-5aadb49d1c1b",
+            "translations": {
+              "ko": {
+                "label": "XL"
+              },
+              "en": {
+                "label": "XL"
+              }
+            }
+          },
+          {
+            "id": "fdf7a6bb-e5fe-5126-9f7c-d2763e3f664b",
+            "translations": {
+              "ko": {
+                "label": "2XL"
+              },
+              "en": {
+                "label": "2XL"
+              }
+            }
+          }
+        ],
+        "options": [
+          {
+            "colorId": "8594d668-b76f-562c-92f8-af8ff9dbb0bb",
+            "sizeId": "eca45d8b-107f-529d-b051-a26ec052b734"
+          },
+          {
+            "colorId": "8594d668-b76f-562c-92f8-af8ff9dbb0bb",
+            "sizeId": "32649c9b-f959-5d66-9233-d2099d96ccd5"
+          },
+          {
+            "colorId": "8594d668-b76f-562c-92f8-af8ff9dbb0bb",
+            "sizeId": "446ca1cc-64aa-509e-ab6c-c8595178300c"
+          },
+          {
+            "colorId": "8594d668-b76f-562c-92f8-af8ff9dbb0bb",
+            "sizeId": "440dc034-c4a9-563a-9156-5aadb49d1c1b"
+          },
+          {
+            "colorId": "8594d668-b76f-562c-92f8-af8ff9dbb0bb",
+            "sizeId": "fdf7a6bb-e5fe-5126-9f7c-d2763e3f664b"
+          }
+        ]
+      }
+    },
+    {
+      "key": "windbreaker",
+      "body": {
+        "optionMode": "OPTIONS",
+        "translations": {
+          "ko": {
+            "name": "바람막이",
+            "description": null
+          },
+          "en": {
+            "name": "Windbreaker",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 47000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "바람막이",
+              "en": "Windbreaker"
+            }
+          }
+        ],
+        "colors": [
+          {
+            "id": "564217c1-cb74-5df7-856f-9e09a12552fe",
+            "translations": {
+              "ko": {
+                "name": "블랙"
+              },
+              "en": {
+                "name": "Black"
+              }
+            }
+          }
+        ],
+        "sizes": [
+          {
+            "id": "c8748e01-7e5f-50e2-afcb-7fd0dd53e67c",
+            "translations": {
+              "ko": {
+                "label": "S"
+              },
+              "en": {
+                "label": "S"
+              }
+            }
+          },
+          {
+            "id": "0b7ecf37-de4a-5890-9a9b-0179878b5097",
+            "translations": {
+              "ko": {
+                "label": "M"
+              },
+              "en": {
+                "label": "M"
+              }
+            }
+          },
+          {
+            "id": "4e4476c9-deee-543d-abac-e91278c06c74",
+            "translations": {
+              "ko": {
+                "label": "L"
+              },
+              "en": {
+                "label": "L"
+              }
+            }
+          },
+          {
+            "id": "58097500-fc65-52a0-adbd-8e42efaada05",
+            "translations": {
+              "ko": {
+                "label": "XL"
+              },
+              "en": {
+                "label": "XL"
+              }
+            }
+          },
+          {
+            "id": "001c6866-09df-586a-8fcd-9aecf7d4226a",
+            "translations": {
+              "ko": {
+                "label": "2XL"
+              },
+              "en": {
+                "label": "2XL"
+              }
+            }
+          }
+        ],
+        "options": [
+          {
+            "colorId": "564217c1-cb74-5df7-856f-9e09a12552fe",
+            "sizeId": "c8748e01-7e5f-50e2-afcb-7fd0dd53e67c"
+          },
+          {
+            "colorId": "564217c1-cb74-5df7-856f-9e09a12552fe",
+            "sizeId": "0b7ecf37-de4a-5890-9a9b-0179878b5097"
+          },
+          {
+            "colorId": "564217c1-cb74-5df7-856f-9e09a12552fe",
+            "sizeId": "4e4476c9-deee-543d-abac-e91278c06c74"
+          },
+          {
+            "colorId": "564217c1-cb74-5df7-856f-9e09a12552fe",
+            "sizeId": "58097500-fc65-52a0-adbd-8e42efaada05"
+          },
+          {
+            "colorId": "564217c1-cb74-5df7-856f-9e09a12552fe",
+            "sizeId": "001c6866-09df-586a-8fcd-9aecf7d4226a"
+          }
+        ]
+      }
+    },
+    {
+      "key": "bandana",
+      "body": {
+        "optionMode": "OPTIONS",
+        "translations": {
+          "ko": {
+            "name": "반다나",
+            "description": null
+          },
+          "en": {
+            "name": "Bandana",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 6000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "반다나",
+              "en": "Bandana"
+            }
+          }
+        ],
+        "colors": [
+          {
+            "id": "67b404f2-c754-5334-804e-72fa356cff8c",
+            "translations": {
+              "ko": {
+                "name": "민트"
+              },
+              "en": {
+                "name": "Mint"
+              }
+            }
+          },
+          {
+            "id": "0d1165cd-3206-532d-afc7-249c3aab76d5",
+            "translations": {
+              "ko": {
+                "name": "블루"
+              },
+              "en": {
+                "name": "Blue"
+              }
+            }
+          }
+        ],
+        "sizes": [
+          {
+            "id": "a9de2b4f-c241-5c89-9f3c-d45948a9453c",
+            "translations": {
+              "ko": {
+                "label": "FREE"
+              },
+              "en": {
+                "label": "FREE"
+              }
+            }
+          }
+        ],
+        "options": [
+          {
+            "colorId": "67b404f2-c754-5334-804e-72fa356cff8c",
+            "sizeId": "a9de2b4f-c241-5c89-9f3c-d45948a9453c"
+          },
+          {
+            "colorId": "0d1165cd-3206-532d-afc7-249c3aab76d5",
+            "sizeId": "a9de2b4f-c241-5c89-9f3c-d45948a9453c"
+          }
+        ]
+      }
+    },
+    {
+      "key": "slogan",
+      "body": {
+        "optionMode": "SINGLE",
+        "translations": {
+          "ko": {
+            "name": "슬로건",
+            "description": null
+          },
+          "en": {
+            "name": "Cheering Towel",
+            "description": null
+          },
+          "zh-Hans": {
+            "name": "应援毛巾",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 8000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "슬로건",
+              "en": "Cheering Towel",
+              "zh-Hans": "应援毛巾"
+            }
+          }
+        ],
+        "colors": [],
+        "sizes": [],
+        "options": []
+      }
+    },
+    {
+      "key": "drawstring-bag",
+      "body": {
+        "optionMode": "SINGLE",
+        "translations": {
+          "ko": {
+            "name": "짐색",
+            "description": null
+          },
+          "en": {
+            "name": "Drawstring Bag",
+            "description": null
+          },
+          "zh-Hans": {
+            "name": "抽绳包",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 10000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "짐색",
+              "en": "Drawstring Bag",
+              "zh-Hans": "抽绳包"
+            }
+          }
+        ],
+        "colors": [],
+        "sizes": [],
+        "options": []
+      }
+    },
+    {
+      "key": "keycap-keychain",
+      "body": {
+        "optionMode": "SINGLE",
+        "translations": {
+          "ko": {
+            "name": "키캡키링",
+            "description": null
+          },
+          "en": {
+            "name": "Keycap Keychain",
+            "description": null
+          },
+          "zh-Hans": {
+            "name": "键帽钥匙扣",
+            "description": null
+          }
+        },
+        "price": {
+          "amount": 7000,
+          "currency": "KRW"
+        },
+        "images": [
+          {
+            "mediaId": null,
+            "alt": {
+              "ko": "키캡키링",
+              "en": "Keycap Keychain",
+              "zh-Hans": "键帽钥匙扣"
+            }
+          }
+        ],
+        "colors": [],
+        "sizes": [],
+        "options": []
+      }
+    }
+  ]
+}

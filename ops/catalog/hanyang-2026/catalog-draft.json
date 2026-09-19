@@ -1,0 +1,1693 @@
+{
+  "festivalDays": [
+    {
+      "festivalDate": "2026-09-29",
+      "opensAt": null,
+      "closesAt": null
+    },
+    {
+      "festivalDate": "2026-09-30",
+      "opensAt": null,
+      "closesAt": null
+    },
+    {
+      "festivalDate": "2026-10-01",
+      "opensAt": null,
+      "closesAt": null
+    }
+  ],
+  "spaces": [
+    {
+      "id": "pub-thunder-aegis",
+      "category": "PUB",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "pub-choi-pocha",
+      "category": "PUB",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "pub-geulmuntong",
+      "category": "PUB",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "pub-namwol",
+      "category": "PUB",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "pubzone-photo-booth",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "pubzone-tarot-booth",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "food-truck-zone-11",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "food-truck-zone-12",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "booth-pleeting",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-academic-info-team",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-rotc",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-career",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-data-security",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-chaplain",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-international",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-optician",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-told",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-ybm",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-counselor",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-operations",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-industry-talent",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-robotics",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-startup-center",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-development",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-starbucks",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-nongshim",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-gahee",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-samsung-miracle-eye",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    }
+  ],
+  "spaceTranslations": [
+    {
+      "spaceId": "pub-thunder-aegis",
+      "locale": "ko",
+      "name": "썬더이지스",
+      "imageAlt": "썬더이지스 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 1번 (주점 구역 왼쪽 위)",
+      "operatorText": "첨단융합대학 동아리 AEGIS",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "pub-choi-pocha",
+      "locale": "ko",
+      "name": "최가네포차",
+      "imageAlt": "최가네포차 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 2번 (1번 주점 오른쪽)",
+      "operatorText": "국방지능정보융합공학부 국방전략기술공학과 학생회",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "pub-geulmuntong",
+      "locale": "ko",
+      "name": "안녕하세요글문통입니다잘부탁드립니다",
+      "imageAlt": "안녕하세요글문통입니다잘부탁드립니다 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 4번 (1번 주점 아래)",
+      "operatorText": "글로벌문화통상학부 학생회",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "pub-namwol",
+      "locale": "ko",
+      "name": "남월 우주정거장점",
+      "imageAlt": "남월 우주정거장점 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 5번 (2번 주점 아래)",
+      "operatorText": "중앙동아리 HYCO",
+      "hoursText": "18:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "pubzone-photo-booth",
+      "locale": "ko",
+      "name": "포토부스",
+      "imageAlt": "포토부스 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 3번 (2번 주점 오른쪽)",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "pubzone-tarot-booth",
+      "locale": "ko",
+      "name": "카운셀러(타로부스)",
+      "imageAlt": "카운셀러(타로부스) 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 6번 (3번 포토부스 아래)",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "food-truck-zone-11",
+      "locale": "ko",
+      "name": "푸드트럭존 11번 구역",
+      "imageAlt": "푸드트럭존 11번 구역 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 11번 (7·8번 노상존 아래)",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "food-truck-zone-12",
+      "locale": "ko",
+      "name": "푸드트럭존 12번 구역",
+      "imageAlt": "푸드트럭존 12번 구역 대표 이미지",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 12번 (9·10번 노상존 아래)",
+      "operatorText": null,
+      "hoursText": null,
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "booth-pleeting",
+      "locale": "ko",
+      "name": "플리팅",
+      "imageAlt": "플리팅 대표 이미지",
+      "locationText": "학술정보관 흡연장 옆",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": "플레이리스트를 바탕으로 진행하는 소개팅 콘텐츠",
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-academic-info-team",
+      "locale": "ko",
+      "name": "학술정보팀",
+      "imageAlt": "학술정보팀 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 1번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-rotc",
+      "locale": "ko",
+      "name": "학군단",
+      "imageAlt": "학군단 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 2번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-career",
+      "locale": "ko",
+      "name": "커리어개발팀",
+      "imageAlt": "커리어개발팀 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 3번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-data-security",
+      "locale": "ko",
+      "name": "데이터보안/활용사업",
+      "imageAlt": "데이터보안/활용사업 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 4번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-chaplain",
+      "locale": "ko",
+      "name": "교목실",
+      "imageAlt": "교목실 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 5번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-international",
+      "locale": "ko",
+      "name": "국제팀",
+      "imageAlt": "국제팀 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 6번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-optician",
+      "locale": "ko",
+      "name": "안경원",
+      "imageAlt": "안경원 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 7번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-told",
+      "locale": "ko",
+      "name": "TOLD",
+      "imageAlt": "TOLD 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 8번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-ybm",
+      "locale": "ko",
+      "name": "YBM",
+      "imageAlt": "YBM 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 9번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-counselor",
+      "locale": "ko",
+      "name": "카운셀러",
+      "imageAlt": "카운셀러 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 10번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-operations",
+      "locale": "ko",
+      "name": "프로모션 운영부스",
+      "imageAlt": "프로모션 운영부스 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 11번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-industry-talent",
+      "locale": "ko",
+      "name": "산업 인재양성 부스",
+      "imageAlt": "산업 인재양성 부스 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 1번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-robotics",
+      "locale": "ko",
+      "name": "지능형로봇사업팀",
+      "imageAlt": "지능형로봇사업팀 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 2번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-startup-center",
+      "locale": "ko",
+      "name": "창업교육센터",
+      "imageAlt": "창업교육센터 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 3번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-development",
+      "locale": "ko",
+      "name": "발전협력팀",
+      "imageAlt": "발전협력팀 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 4~6번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-starbucks",
+      "locale": "ko",
+      "name": "스타벅스",
+      "imageAlt": "스타벅스 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 7번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-nongshim",
+      "locale": "ko",
+      "name": "농심",
+      "imageAlt": "농심 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 8번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-gahee",
+      "locale": "ko",
+      "name": "가히",
+      "imageAlt": "가히 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 9번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    },
+    {
+      "spaceId": "promo-samsung-miracle-eye",
+      "locale": "ko",
+      "name": "삼성미라클안과",
+      "imageAlt": "삼성미라클안과 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 10번째",
+      "operatorText": null,
+      "hoursText": "11:00 ~ 17:00",
+      "descriptionText": null,
+      "experienceText": null,
+      "contactLabel": null,
+      "contactUrl": null
+    }
+  ],
+  "spaceSortOrders": [
+    {
+      "locale": "ko",
+      "spaceId": "pub-thunder-aegis",
+      "sortRank": 1
+    },
+    {
+      "locale": "ko",
+      "spaceId": "pub-choi-pocha",
+      "sortRank": 2
+    },
+    {
+      "locale": "ko",
+      "spaceId": "pub-geulmuntong",
+      "sortRank": 3
+    },
+    {
+      "locale": "ko",
+      "spaceId": "pub-namwol",
+      "sortRank": 4
+    },
+    {
+      "locale": "ko",
+      "spaceId": "pubzone-photo-booth",
+      "sortRank": 5
+    },
+    {
+      "locale": "ko",
+      "spaceId": "pubzone-tarot-booth",
+      "sortRank": 6
+    },
+    {
+      "locale": "ko",
+      "spaceId": "food-truck-zone-11",
+      "sortRank": 7
+    },
+    {
+      "locale": "ko",
+      "spaceId": "food-truck-zone-12",
+      "sortRank": 8
+    },
+    {
+      "locale": "ko",
+      "spaceId": "booth-pleeting",
+      "sortRank": 9
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-academic-info-team",
+      "sortRank": 10
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-rotc",
+      "sortRank": 11
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-career",
+      "sortRank": 12
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-data-security",
+      "sortRank": 13
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-chaplain",
+      "sortRank": 14
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-international",
+      "sortRank": 15
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-optician",
+      "sortRank": 16
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-told",
+      "sortRank": 17
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-ybm",
+      "sortRank": 18
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-counselor",
+      "sortRank": 19
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-operations",
+      "sortRank": 20
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-industry-talent",
+      "sortRank": 21
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-robotics",
+      "sortRank": 22
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-startup-center",
+      "sortRank": 23
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-development",
+      "sortRank": 24
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-starbucks",
+      "sortRank": 25
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-nongshim",
+      "sortRank": 26
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-gahee",
+      "sortRank": 27
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-samsung-miracle-eye",
+      "sortRank": 28
+    }
+  ],
+  "spaceEvents": [
+    {
+      "spaceId": "pubzone-tarot-booth",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "타로부스 운영"
+    },
+    {
+      "spaceId": "booth-pleeting",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "하루 6회 진행"
+    }
+  ],
+  "spaceMenuItems": [
+    {
+      "spaceId": "pub-thunder-aegis",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "닭꼬치",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-thunder-aegis",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "염통꼬치",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-thunder-aegis",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "오리훈제구이",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-thunder-aegis",
+      "locale": "ko",
+      "sortOrder": 4,
+      "name": "소세지야채볶음",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-choi-pocha",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "흑후추 우삼겹 볶음",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-choi-pocha",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "최가네 닭볶음",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-choi-pocha",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "두부김치",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-geulmuntong",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "김치전",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-geulmuntong",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "국물무뼈닭발",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-geulmuntong",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "제육볶음",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-namwol",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "직화 백짬뽕 칼국수",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-namwol",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "직화 우삼겹 숙주 볶음",
+      "priceAmount": null
+    },
+    {
+      "spaceId": "pub-namwol",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "스페이스X 스테이크",
+      "priceAmount": null
+    }
+  ],
+  "places": [
+    {
+      "id": "street-zone-7",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "street-zone-8",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "street-zone-9",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "street-zone-10",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-liquor-booth-1",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-liquor-booth-2",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-headquarters",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-restroom-upper",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-restroom-lower",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-smoking-upper",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-smoking-lower",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-trash",
+      "kind": "FACILITY",
+      "spaceId": null
+    },
+    {
+      "id": "pubzone-ev-charger",
+      "kind": "FACILITY",
+      "spaceId": null
+    }
+  ],
+  "placeTranslations": [
+    {
+      "placeId": "street-zone-7",
+      "locale": "ko",
+      "name": "노상존 7번",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 7번 (4번 주점 아래, 노상존 줄 가장 왼쪽)",
+      "hoursText": "12:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "street-zone-8",
+      "locale": "ko",
+      "name": "노상존 8번",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 8번 (5번 주점 아래)",
+      "hoursText": "12:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "street-zone-9",
+      "locale": "ko",
+      "name": "노상존 9번",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 9번 (6번 타로부스 아래)",
+      "hoursText": "12:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "street-zone-10",
+      "locale": "ko",
+      "name": "노상존 10번",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 10번 (노상존 줄 가장 오른쪽)",
+      "hoursText": "12:00 ~ 익일 00:00",
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-liquor-booth-1",
+      "locale": "ko",
+      "name": "주류 판매 부스 1",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 아래쪽, 왼쪽 흡연장과 운영본부 사이",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-liquor-booth-2",
+      "locale": "ko",
+      "name": "주류 판매 부스 2",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 아래쪽, 왼쪽 흡연장과 운영본부 사이",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-headquarters",
+      "locale": "ko",
+      "name": "운영본부",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 아래쪽 가운데, 주류 판매 부스 오른쪽",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-restroom-upper",
+      "locale": "ko",
+      "name": "화장실",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 오른쪽 위 흡연장 왼쪽",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-restroom-lower",
+      "locale": "ko",
+      "name": "화장실",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 왼쪽 아래 흡연장 왼쪽",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-smoking-upper",
+      "locale": "ko",
+      "name": "지정 흡연장",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 오른쪽 위",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-smoking-lower",
+      "locale": "ko",
+      "name": "지정 흡연장",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 왼쪽 아래, 화장실과 주류 판매 부스 사이",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-trash",
+      "locale": "ko",
+      "name": "쓰레기장",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 오른쪽 아래, 운영본부 오른쪽",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    },
+    {
+      "placeId": "pubzone-ev-charger",
+      "locale": "ko",
+      "name": "전기차 충전소",
+      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 위쪽 주차 구획, 3번 포토부스 위",
+      "hoursText": null,
+      "descriptionText": null,
+      "usageText": null
+    }
+  ],
+  "maps": [],
+  "mapTranslations": [],
+  "mapAssets": [],
+  "mapAreas": [],
+  "mapPins": [],
+  "mapPinTranslations": [],
+  "mapPinFilterGroupTranslations": [],
+  "spaceMapTargets": [],
+  "artists": [
+    {
+      "id": "nct-wish",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "nowimyoung",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "kim-haon",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "lucenne",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "heegyu",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "ahof",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "alphadriveone",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "fromis-9",
+      "category": "ARTIST",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    }
+  ],
+  "artistTranslations": [
+    {
+      "artistId": "nct-wish",
+      "locale": "ko",
+      "name": "NCT WISH",
+      "imageAlt": "NCT WISH 프로필 사진",
+      "introduction": "🌠NCT WISH🌠\n💫 눈부시게 맑은, 우리를 닮은 소년의 계절 💫\n이 가을 우리 모두의 소원(WISH)이 되어줄 NCT WISH"
+    },
+    {
+      "artistId": "nowimyoung",
+      "locale": "ko",
+      "name": "나우아임영",
+      "imageAlt": "나우아임영 프로필 사진",
+      "introduction": "💋나우아임영💋\n🔥 한 마디면 떼창, 두 마디면 전부 뛰게 만드는 화력 🔥\n'KISS KISS KISS'로 ERICA의 심장을 훔치러 오는 나우아임영"
+    },
+    {
+      "artistId": "kim-haon",
+      "locale": "ko",
+      "name": "김하온",
+      "imageAlt": "김하온 프로필 사진",
+      "introduction": "🎶김하온🎶\n💨 힘을 뺀 목소리로 더 깊게 박히는 사색의 라임 💨\n'붕붕' 타고 동심의 하늘 위를 날아오를 김하온"
+    },
+    {
+      "artistId": "lucenne",
+      "locale": "ko",
+      "name": "리센느",
+      "imageAlt": "리센느 프로필 사진",
+      "introduction": "💗리센느💗\n⭐ 별처럼 반짝이는 다섯 소녀의 청량한 한 컷 ⭐\n'Pretty Girl'로 캠퍼스를 온통 핑크빛으로 물들일 리센느"
+    },
+    {
+      "artistId": "heegyu",
+      "locale": "ko",
+      "name": "희규",
+      "imageAlt": "희규 프로필 사진",
+      "introduction": "🌙희규🌙\n🎸 듣기만 해도 스며드는 위로, 담백한 목소리 위 밴드 사운드 🎸\n'고장난 히치하이킹'으로 가을밤을 통째로 옮겨다 놓을 희규"
+    },
+    {
+      "artistId": "ahof",
+      "locale": "ko",
+      "name": "아홉 (AHOF)",
+      "imageAlt": "아홉 (AHOF) 프로필 사진",
+      "introduction": "⚡아홉⚡\n🏆 아홉 명이 완성하는 단 하나의 무대 🏆\n명예의 전당을 향해 거침없이 달려가는 아홉(AHOF)"
+    },
+    {
+      "artistId": "alphadriveone",
+      "locale": "ko",
+      "name": "알파드라이브원",
+      "imageAlt": "알파드라이브원 프로필 사진",
+      "introduction": "🚀알파드라이브원🚀\n🔥 멈추지 않는 질주 🔥\n캠퍼스를 통째로 뒤흔들 알파드라이브원"
+    },
+    {
+      "artistId": "fromis-9",
+      "locale": "ko",
+      "name": "프로미스나인",
+      "imageAlt": "프로미스나인 프로필 사진",
+      "introduction": "🍊프로미스나인🍊\n✨ 상큼한 에너지로 한양문화제의 무대를 환하게 물들이는 순간,\n한양을 더 설레게 할 프로미스나인(fromis_9)이 찾아옵니다! 🍀\n* 지원 불참"
+    }
+  ],
+  "artistLinks": [],
+  "artistLinkTranslations": [],
+  "artistSongs": [
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "lucenne",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "lucenne",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "lucenne",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "alphadriveone",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "alphadriveone",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "alphadriveone",
+      "sortOrder": 3,
+      "url": null
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 1,
+      "url": null
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 2,
+      "url": null
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 3,
+      "url": null
+    }
+  ],
+  "artistSongTranslations": [
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "Steady"
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "poppop"
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "Ode to Love"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "AH AH (feat. 식케이 (Sik-K))"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "KISS KISS KISS (Feat. 선우 (THE BOYZ)) (Prod. by Hukky Shibaseki)"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "NOW IM YOUNG (Prod. by Hukky Shibaseki)"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "붕붕 (Feat. 식케이) (Prod. GroovyRoom)"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "TICK TOCK (Feat. ZICO) (Prod. by ZICO, Crush)"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "Skrr (feat. 지젤 of aespa)"
+    },
+    {
+      "artistId": "lucenne",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "LOVE ATTACK"
+    },
+    {
+      "artistId": "lucenne",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "Deja Vu"
+    },
+    {
+      "artistId": "lucenne",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "Pretty Girl"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "내 마음의 방패"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "히치하이킹"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "도시 라디오"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "그곳에서 다시 만나기로 해 (Rendezvous)"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "피노키오는 거짓말을 싫어해"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "RUN TO YOU"
+    },
+    {
+      "artistId": "alphadriveone",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "FREAK ALARM"
+    },
+    {
+      "artistId": "alphadriveone",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "OMG!"
+    },
+    {
+      "artistId": "alphadriveone",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "BORN DIRE"
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 1,
+      "locale": "ko",
+      "title": "LIKE YOU BETTER"
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 2,
+      "locale": "ko",
+      "title": "Vitamin ME"
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 3,
+      "locale": "ko",
+      "title": "Supersonic"
+    }
+  ],
+  "performances": [
+    {
+      "id": "performance-nct-wish",
+      "festivalDate": "2026-09-29",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-nowimyoung",
+      "festivalDate": "2026-09-29",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-kim-haon",
+      "festivalDate": "2026-09-29",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-lucenne",
+      "festivalDate": "2026-09-29",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-heegyu",
+      "festivalDate": "2026-10-01",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-ahof",
+      "festivalDate": "2026-10-01",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-alphadriveone",
+      "festivalDate": "2026-10-01",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-fromis-9",
+      "festivalDate": "2026-10-01",
+      "startsAt": null,
+      "endsAt": null
+    },
+    {
+      "id": "performance-sgaeting",
+      "festivalDate": "2026-09-29",
+      "startsAt": "2026-09-29T17:30:00+09:00",
+      "endsAt": null
+    }
+  ],
+  "performanceTranslations": [
+    {
+      "performanceId": "performance-nct-wish",
+      "locale": "ko",
+      "title": "NCT WISH",
+      "description": null
+    },
+    {
+      "performanceId": "performance-nowimyoung",
+      "locale": "ko",
+      "title": "나우아임영",
+      "description": null
+    },
+    {
+      "performanceId": "performance-kim-haon",
+      "locale": "ko",
+      "title": "김하온",
+      "description": null
+    },
+    {
+      "performanceId": "performance-lucenne",
+      "locale": "ko",
+      "title": "리센느",
+      "description": null
+    },
+    {
+      "performanceId": "performance-heegyu",
+      "locale": "ko",
+      "title": "희규",
+      "description": null
+    },
+    {
+      "performanceId": "performance-ahof",
+      "locale": "ko",
+      "title": "아홉 (AHOF)",
+      "description": null
+    },
+    {
+      "performanceId": "performance-alphadriveone",
+      "locale": "ko",
+      "title": "알파드라이브원",
+      "description": null
+    },
+    {
+      "performanceId": "performance-fromis-9",
+      "locale": "ko",
+      "title": "프로미스나인",
+      "description": null
+    },
+    {
+      "performanceId": "performance-sgaeting",
+      "locale": "ko",
+      "title": "스개팅",
+      "description": "대운동장 공연무대. 정확한 시각은 추후 공지."
+    }
+  ],
+  "performanceArtists": [
+    {
+      "performanceId": "performance-nct-wish",
+      "artistId": "nct-wish",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-nowimyoung",
+      "artistId": "nowimyoung",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-kim-haon",
+      "artistId": "kim-haon",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-lucenne",
+      "artistId": "lucenne",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-heegyu",
+      "artistId": "heegyu",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-ahof",
+      "artistId": "ahof",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-alphadriveone",
+      "artistId": "alphadriveone",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "performance-fromis-9",
+      "artistId": "fromis-9",
+      "displayOrder": 1
+    }
+  ],
+  "timetableConfig": null,
+  "prohibitedItems": [],
+  "prohibitedItemTranslations": [],
+  "prohibitedMessages": [],
+  "ticketGuide": {
+    "unitPriceAmount": null,
+    "mapId": null,
+    "placeId": null,
+    "pinId": null,
+    "mapVersion": null,
+    "instructions": [
+      "외부인 티켓존 방문: 외부인 티켓 구매 부스로 이동",
+      "티켓 금액 송금: 버튼을 눌러 지정 계좌와 금액이 입력된 송금 화면으로 이동",
+      "송금 완료 화면 확인: 완료 화면을 닫지 말고 티켓 부스 스태프에게 제시",
+      "팔찌 수령 후 입장: 확인 후 팔찌를 받고 외부인 존에서 관람"
+    ],
+    "festivalStartDate": null,
+    "festivalEndDate": null,
+    "dailyTransferOpenTime": null,
+    "dailyTransferCloseTime": null,
+    "dailyPickupOpenTime": null,
+    "dailyPickupCloseTime": null
+  },
+  "stampGuide": {
+    "title": "스탬프 투어",
+    "dates": [],
+    "instructions": [
+      "멋사 부스에서 QR을 스캔해 시작 스탬프 1개 적립",
+      "다른 부스 체험 후 운영자가 보여주는 QR 스캔",
+      "총 4개를 다 모은 뒤 멋사 부스에서 몬스터 수령"
+    ],
+    "rewardName": "몬스터 음료",
+    "rewardLocationText": "멋사 부스",
+    "rewardHoursText": null,
+    "rewardNotice": "상품은 준비 수량 소진 시 지급이 종료됩니다",
+    "qrValue": null
+  },
+  "festivalLinks": [
+    {
+      "id": "instagram",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://www.instagram.com/hanyang_erica_stu/",
+      "iconKey": "instagram",
+      "sortOrder": 1
+    },
+    {
+      "id": "youtube",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://www.youtube.com/@hanyang_erica_stu",
+      "iconKey": "youtube",
+      "sortOrder": 2
+    },
+    {
+      "id": "student-council",
+      "kind": "OFFICIAL_CHANNEL",
+      "url": "https://ericastu.hanyang.ac.kr/ko/act",
+      "iconKey": "website",
+      "sortOrder": 3
+    }
+  ],
+  "festivalLinkTranslations": [
+    {
+      "linkId": "instagram",
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "linkId": "youtube",
+      "locale": "ko",
+      "label": "YouTube"
+    },
+    {
+      "linkId": "student-council",
+      "locale": "ko",
+      "label": "총학생회 홈페이지"
+    }
+  ],
+  "festivalTitleTranslations": [],
+  "mapAssetTranslations": [],
+  "ticketGuideTranslations": [
+    {
+      "locale": "en",
+      "instructions": [
+        "Visit the Ticket Booth",
+        "Transfer the Ticket Fee: Tap the button to open the pre-filled transfer screen",
+        "Show Transfer Confirmation: Keep the confirmation screen open and show it to staff",
+        "Get Your Wristband & Enter: After verification, enter the Visitor Zone"
+      ]
+    },
+    {
+      "locale": "zh-Hans",
+      "instructions": [
+        "前往售票处",
+        "支付票款：点击按钮进入已填写账号和金额的转账页面",
+        "出示转账成功页面：请勿关闭页面，并向工作人员出示",
+        "领取手环并入场：确认后进入访客区观演"
+      ]
+    }
+  ],
+  "stampGuideTranslations": [
+    {
+      "locale": "en",
+      "title": "Stamp Rally",
+      "instructions": [
+        "Scan the QR code at the LIKELION Booth to get your first stamp",
+        "After trying activities at other booths, scan the QR code shown by staff.",
+        "Collect all 4 stamps and claim your Monster at the LIKELION Booth"
+      ],
+      "rewardName": "Monster Drink",
+      "rewardLocationText": "LIKELION Booth",
+      "rewardHoursText": null,
+      "rewardNotice": "Prizes available while supplies last"
+    },
+    {
+      "locale": "zh-Hans",
+      "title": "集章活动",
+      "instructions": [
+        "在 LIKELION 展位扫描二维码，获得第1枚印章",
+        "体验其他展位后，扫描工作人员出示的二维码",
+        "集满4枚印章后，前往 LIKELION 展位领取 Monster"
+      ],
+      "rewardName": "Monster 饮料",
+      "rewardLocationText": "LIKELION 展位",
+      "rewardHoursText": null,
+      "rewardNotice": "奖品数量有限，领完即止"
+    }
+  ]
+}
