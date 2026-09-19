@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -62,4 +63,30 @@ public class MediaAssetStore {
         );
         return count != null && count == 1;
     }
+
+    /** Finds only live media attached to a goods row owned by the same festival. */
+    public Optional<ServingMediaAsset> findAttachedForServing(UUID festivalId, UUID mediaId) {
+        return jdbc.query("""
+            SELECT media.id
+            FROM media_assets AS media
+            JOIN goods_images AS image
+              ON image.media_id = media.id
+             AND image.festival_id = media.festival_id
+            JOIN goods
+              ON goods.id = image.goods_id
+             AND goods.festival_id = image.festival_id
+            WHERE media.id = :mediaId
+              AND media.festival_id = :festivalId
+              AND media.purpose = 'GOODS_IMAGE'
+              AND media.attached_at IS NOT NULL
+              AND media.detached_at IS NULL
+            """,
+            new MapSqlParameterSource()
+                .addValue("festivalId", festivalId)
+                .addValue("mediaId", mediaId),
+            (resultSet, rowNumber) -> new ServingMediaAsset(resultSet.getObject("id", UUID.class))
+        ).stream().findFirst();
+    }
+
+    public record ServingMediaAsset(UUID mediaId) {}
 }

@@ -16,7 +16,7 @@ function standardValidate(schema,value){const key=JSON.stringify(schema);if(!com
 let server,base;
 before(async()=>{server=await createMockServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;});
 after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));});
-async function call(path,{method='GET',body,multipart=false,headers={},session='test'}={}){const requestHeaders={'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers};let requestBody=body!==undefined?(typeof body==='string'?body:JSON.stringify(body)):undefined;if(multipart){const form=new FormData();form.append('file',new Blob(['mock-image']), 'mock.png');requestBody=form;delete requestHeaders['Content-Type'];}const response=await fetch(base+path,{method,headers:requestHeaders,...(requestBody!==undefined?{body:requestBody}:{})});const json=[204,304].includes(response.status)?null:await response.json();return {status:response.status,body:json,headers:response.headers};}
+async function call(path,{method='GET',body,multipart=false,headers={},session='test'}={}){const requestHeaders={'X-Mock-Session':session,...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers};let requestBody=body!==undefined?(typeof body==='string'?body:JSON.stringify(body)):undefined;if(multipart){const form=new FormData();form.append('file',new Blob(['mock-image']), 'mock.png');requestBody=form;delete requestHeaders['Content-Type'];}const response=await fetch(base+path,{method,headers:requestHeaders,...(requestBody!==undefined?{body:requestBody}:{})});const responseType=response.headers.get('content-type')||'';const responseBody=[204,304].includes(response.status)?null:responseType.startsWith('application/json')?await response.json():new Uint8Array(await response.arrayBuffer());return {status:response.status,body:responseBody,headers:response.headers};}
 async function enableAllMockLocales(session){
   const response=await call('/api/v2/config',{session,headers:{'X-Mock-Scenario':'all-languages'}});
   assert.equal(response.status,200);
@@ -38,7 +38,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
-    'postAdminGoodsImage'
+    'postAdminGoodsImage','getGoodsImage'
   ]);
   for(const [operationId,group]of Object.entries(examples))for(const example of Object.values(group.scenarios)){
     if(example.status>=400||unscopedOperations.has(operationId))assert.equal(example.response?.meta?.revision??0,0,operationId);
@@ -69,6 +69,53 @@ test('Goods image upload error contract matches its Spring runtime behavior',()=
   assert.equal(example(503,'error').code,'SERVICE_UNAVAILABLE');
   assert.equal(example(503,'error').message,'일시적으로 이미지를 처리할 수 없습니다.');
   assert.equal(example(503,'error').retryable,true);
+});
+test('Goods image read representations and binary endpoint are explicit and immutable',async()=>{
+  const goods=spec.components.schemas.Goods;
+  const adminGoods=spec.components.schemas.AdminGoods;
+  assert.ok(goods.required.includes('images'));
+  assert.equal(goods.properties.images.items.$ref,'#/components/schemas/GoodsImage');
+  assert.ok(adminGoods.required.includes('images'));
+  assert.equal(adminGoods.properties.images.items.$ref,'#/components/schemas/AdminGoodsImage');
+  for(const name of ['GoodsImage','AdminGoodsImage']){
+    const schema=spec.components.schemas[name];
+    for(const field of ['masterUrl','thumbnail320Url','thumbnail640Url'])assert.ok(schema.required.includes(field));
+  }
+  assert.deepEqual(spec.components.schemas.AdminGoodsImageAlt.required,['ko','en','zh-Hans','ja']);
+
+  const media=operation('getGoodsImage');
+  assert.deepEqual(media.security,[]);
+  assert.deepEqual(media.parameters.find(parameter=>parameter.name==='variant').schema.enum,['master','320','640']);
+  assert.deepEqual(media.responses['200'].content['image/webp'].schema,{type:'string',format:'binary'});
+  assert.equal(media.responses['200'].headers['Content-Disposition'].schema.enum[0],'inline');
+  assert.equal(media.responses['200'].headers['X-Content-Type-Options'].schema.enum[0],'nosniff');
+  assert.equal(media.responses['200'].headers['Cache-Control'].schema.enum[0],'public, max-age=31536000, immutable');
+  assert.ok(media.responses['304']);
+  assert.ok(media.responses['400']);
+  assert.ok(media.responses['404']);
+  assert.ok(media.responses['503']);
+
+  const publicGoods=(await call('/api/v2/goods')).body.data.items[0];
+  const adminGoodsResponse=(await call('/api/v2/admin/products',{headers:admin})).body.data.items[0];
+  assert.equal(publicGoods.images[0].alt,'개발용 가상 상품 앞면');
+  assert.match(publicGoods.images[0].masterUrl,/^\/api\/v2\/media\/goods-images\/[0-9a-f-]+\/master$/);
+  assert.equal(adminGoodsResponse.images[0].mediaId,'00000000-0000-4000-8000-000000000050');
+  assert.deepEqual(Object.keys(adminGoodsResponse.images[0].alt),['ko','en','zh-Hans','ja']);
+
+  const first=await call(publicGoods.images[0].masterUrl);
+  assert.equal(first.status,200);
+  assert.equal(first.headers.get('content-type'),'image/webp');
+  assert.equal(first.headers.get('content-disposition'),'inline');
+  assert.equal(first.headers.get('x-content-type-options'),'nosniff');
+  assert.equal(first.headers.get('cache-control'),'public, max-age=31536000, immutable');
+  assert.ok(first.body.length>0);
+  const etag=first.headers.get('etag');
+  const notModified=await call(publicGoods.images[0].masterUrl,{headers:{'If-None-Match':'W/'+etag}});
+  assert.equal(notModified.status,304);
+  assert.equal(notModified.headers.get('etag'),etag);
+  assert.equal(notModified.headers.get('cache-control'),'public, max-age=31536000, immutable');
+  assert.equal((await call(publicGoods.images[0].masterUrl+'?download=true')).status,400);
+  assert.equal((await call(publicGoods.images[0].masterUrl.replace('/master','/original'))).status,404);
 });
 test('FAQ is an external config link and direct QR before START stays in local start state',async()=>{
   const unconfigured=(await call('/api/v2/config')).body.data;assert.equal(unconfigured.links.faq,null);
@@ -135,12 +182,15 @@ for(const [opId,group]of Object.entries(examples))for(const [scenario,example]of
     const req=example.request;
     const got=await call(req.path,{method:req.method,body:req.body,multipart:Boolean(req.multipart),headers:{...req.headers,'X-Mock-Session':opId+'-'+scenario}});
     assert.equal(got.status,example.status,JSON.stringify(got.body));
-    if(got.status===204||got.status===304)assert.equal(got.body,null);
+    const binary=operation(opId)['x-binary-response']&&got.status===200;
+    if(binary)assert.ok(got.body instanceof Uint8Array&&got.body.length>0);
+    else if(got.status===204||got.status===304)assert.equal(got.body,null);
     else standardValidate(operation(opId).responses[got.status].content['application/json'].schema,got.body);
-    if(example.status===204||example.status===304)assert.equal(example.response,null);
+    if(operation(opId)['x-binary-response']&&example.status===200)assert.equal(example.response,null);
+    else if(example.status===204||example.status===304)assert.equal(example.response,null);
     else standardValidate(operation(opId).responses[example.status].content['application/json'].schema,example.response);
-    if(got.body && !operation(opId)['x-conditional'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
-    if(got.body){
+    if(got.body && !binary && !operation(opId)['x-conditional'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
+    if(got.body && !binary){
       assert.equal(got.body.meta.mock,true);
       if(operation(opId)['x-conditional']&&got.status===200){
         assert.match(got.headers.get('x-request-id'),/^[0-9a-f-]{36}$/);

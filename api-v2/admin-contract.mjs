@@ -25,12 +25,15 @@ export function applyAdminContract(s,ops){
   },'SINGLE은 colors/sizes/options가 모두 빈 배열이어야 한다. OPTIONS는 셋 다 비어있지 않아야 하며 등록한 모든 색상·사이즈가 실제 조합에서 쓰여야 한다. 유지한 조합의 판매 상태는 보존하고 신규 조합은 ON_SALE로 생성하며 삭제된 조합의 상태는 함께 제거한다.');
   s.AdminGoodsColor=obj({id,translations:ref('GoodsColorTranslations')});
   s.AdminGoodsSize=obj({id,translations:ref('GoodsSizeTranslations')});
+  s.AdminGoodsImageAlt=obj({ko:str('한국어 대체 텍스트'),en:str('영어 대체 텍스트'),'zh-Hans':nullable(str('중국어 간체 대체 텍스트'),'없으면 null'),ja:nullable(str('일본어 대체 텍스트'),'없으면 null')},'관리자 수정 초기값용 4 locale shape.',['ko','en','zh-Hans','ja']);
+  s.AdminGoodsImage=obj({mediaId:{type:'string',format:'uuid',description:'저장 경로를 노출하지 않는 opaque media UUID.'},alt:ref('AdminGoodsImageAlt'),masterUrl:str('same-origin master WebP API path'),thumbnail320Url:str('same-origin 320px WebP API path'),thumbnail640Url:str('same-origin 640px WebP API path')});
   s.AdminGoodsCombination=obj({combinationId:id,colorId:nullable(id,'SINGLE 조합이면 null'),sizeId:nullable(id,'SINGLE 조합이면 null'),status:en(['ON_SALE','SOLD_OUT'],'관리자가 구매 가능 / 품절 직접 선택. 수량 계산 없음.')});
   s.AdminGoods=obj({
     id,
     optionMode:en(['SINGLE','OPTIONS'],'단일 판매 상태 / 색상×사이즈 조합별 판매 상태'),
     translations:ref('GoodsTranslations'),
     price:ref('Money'),
+    images:arr(ref('AdminGoodsImage'),'sort_order 순 상품 이미지. 기존 이미지 없는 상품은 [].'),
     colors:arr(ref('AdminGoodsColor'),'SINGLE이면 []'),
     sizes:arr(ref('AdminGoodsSize'),'SINGLE이면 []'),
     combinations:arr(ref('AdminGoodsCombination'),'SINGLE이면 조합 1개, OPTIONS면 실제 제공 조합 전체'),
@@ -94,6 +97,17 @@ export function applyAdminContract(s,ops){
       428:{description:'Idempotency-Key 헤더가 필요합니다.',code:'IDEMPOTENCY_KEY_REQUIRED',message:'Idempotency-Key 헤더가 필요합니다.',retryable:false},
       503:{description:'이미지 처리 서비스를 일시적으로 사용할 수 없습니다.',code:'SERVICE_UNAVAILABLE',message:'일시적으로 이미지를 처리할 수 없습니다.',retryable:true},
     },
+  });
+  ops.push({
+    operationId:'getGoodsImage',method:'GET',path:'/api/v2/media/goods-images/{mediaId}/{variant}',
+    schema:null,summary:'연결된 상품 이미지 WebP variant 조회',screens:['GOODS-LIST','GOODS-DETAIL'],
+    scenarios:['normal','not-found','error'],admin:false,provisional:false,security:[],binaryResponse:true,
+    conditional:true,cacheControl:'public, max-age=31536000, immutable',
+    parameters:[
+      {name:'mediaId',in:'path',required:true,schema:{type:'string',format:'uuid'},description:'opaque media UUID'},
+      {name:'variant',in:'path',required:true,schema:{type:'string',enum:['master','320','640']},description:'서버가 허용한 WebP variant'},
+    ],
+    responseOverrides:{503:{description:'저장된 이미지 variant를 일시적으로 제공할 수 없습니다.',code:'SERVICE_UNAVAILABLE',message:'일시적으로 이미지를 처리할 수 없습니다.',retryable:true}},
   });
   find('getAdminProduct').conditional=true;
   const productPost=find('postAdminProduct');

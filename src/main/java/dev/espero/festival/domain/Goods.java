@@ -13,6 +13,7 @@ public record Goods(
     GoodsOptionMode optionMode,
     Map<String, GoodsTranslation> translations,
     long priceAmount,
+    List<GoodsImage> images,
     List<GoodsColor> colors,
     List<GoodsSize> sizes,
     List<GoodsCombination> combinations,

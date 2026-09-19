@@ -26,7 +26,8 @@
       "name": "굿즈 목록",
       "operations": [
         "getGoods",
-        "getGoodsAvailability"
+        "getGoodsAvailability",
+        "getGoodsImage"
       ],
       "browserData": [
         "GOODS-LIST-D01"
@@ -40,7 +41,8 @@
       "name": "굿즈 상세",
       "operations": [
         "getGood",
-        "getGoodAvailability"
+        "getGoodAvailability",
+        "getGoodsImage"
       ],
       "browserData": [
         "GOODS-DETAIL-D01",

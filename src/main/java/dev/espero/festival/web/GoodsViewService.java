@@ -6,6 +6,8 @@ import dev.espero.festival.account.OperationalAccountSettingsService;
 import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.Goods;
 import dev.espero.festival.domain.GoodsCombination;
+import dev.espero.festival.domain.GoodsImage;
+import dev.espero.festival.domain.GoodsImageTranslation;
 import dev.espero.festival.domain.GoodsTranslation;
 import dev.espero.festival.persistence.GoodsStore;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,17 +33,20 @@ public class GoodsViewService {
     private final FestivalProperties properties;
     private final OperationalAccountSettingsService accountSettings;
     private final ApiMetaSupport metaSupport;
+    private final GoodsMediaUrlSupport mediaUrls;
 
     public GoodsViewService(
         GoodsStore store,
         FestivalProperties properties,
         OperationalAccountSettingsService accountSettings,
-        ApiMetaSupport metaSupport
+        ApiMetaSupport metaSupport,
+        GoodsMediaUrlSupport mediaUrls
     ) {
         this.store = store;
         this.properties = properties;
         this.accountSettings = accountSettings;
         this.metaSupport = metaSupport;
+        this.mediaUrls = mediaUrls;
     }
 
     public GoodsListSnapshot list(HttpServletRequest request) {
@@ -81,16 +86,17 @@ public class GoodsViewService {
     public GoodsPaymentGuideSnapshot paymentGuide(HttpServletRequest request, UUID goodsId) {
         String requestedLocale = ContentLocale.requestedLocale(request);
         Goods goods = store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound);
-        GoodsResponse resolved = toResponse(goods, requestedLocale);
+        String contentLocale = ContentLocale.resolve(goods.translations(), requestedLocale);
+        GoodsTranslation translation = goods.translations().get(contentLocale);
         Optional<OperationalAccountSetting> setting = accountSettings.findCurrent(
             properties.configuredFestivalId(), OperationalAccountPurpose.GOODS
         );
         // transferLink stays null until the display-name source for the link
         // is decided, matching TicketGuideController's TICKET account guide.
         GoodsPaymentGuideResponse response = new GoodsPaymentGuideResponse(
-            resolved.id(),
-            resolved.name(),
-            new GoodsPaymentGuideResponse.Money(resolved.price().amount(), resolved.price().currency()),
+            goods.id().toString(),
+            translation.name(),
+            new GoodsPaymentGuideResponse.Money(goods.priceAmount(), CURRENCY),
             account(setting),
             null,
             List.of(),
@@ -110,6 +116,9 @@ public class GoodsViewService {
         List<GoodsSizeResponse> sizes = goods.sizes().stream()
             .map(size -> new GoodsSizeResponse(size.id().toString(), size.translations().get(contentLocale).label()))
             .toList();
+        List<GoodsImageResponse> images = goods.images().stream()
+            .map(image -> toImageResponse(image, contentLocale))
+            .toList();
         return new GoodsResponse(
             goods.id().toString(),
             contentLocale,
@@ -117,8 +126,23 @@ public class GoodsViewService {
             translation.description(),
             new GoodsResponse.Money(goods.priceAmount(), CURRENCY),
             goods.optionMode().name(),
+            images,
             colors,
             sizes
+        );
+    }
+
+    private GoodsImageResponse toImageResponse(GoodsImage image, String contentLocale) {
+        GoodsImageTranslation translation = image.translations().get(contentLocale);
+        if (translation == null) {
+            throw new GoodsDataConsistencyException("Goods image translation is missing for resolved content locale");
+        }
+        GoodsMediaUrlSupport.GoodsMediaUrls urls = mediaUrls.urls(image.mediaId());
+        return new GoodsImageResponse(
+            translation.alt(),
+            urls.masterUrl(),
+            urls.thumbnail320Url(),
+            urls.thumbnail640Url()
         );
     }
 

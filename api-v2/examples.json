@@ -1332,6 +1332,14 @@
                   "currency": "KRW"
                 },
                 "optionMode": "OPTIONS",
+                "images": [
+                  {
+                    "alt": "개발용 가상 상품 앞면",
+                    "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                    "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                    "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                  }
+                ],
                 "colors": [
                   {
                     "id": "color-a",
@@ -1721,6 +1729,14 @@
               "currency": "KRW"
             },
             "optionMode": "OPTIONS",
+            "images": [
+              {
+                "alt": "개발용 가상 상품 앞면",
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -1774,6 +1790,14 @@
               "currency": "KRW"
             },
             "optionMode": "OPTIONS",
+            "images": [
+              {
+                "alt": "개발용 가상 상품 앞면",
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -10832,6 +10856,20 @@
                   "amount": 1000,
                   "currency": "KRW"
                 },
+                "images": [
+                  {
+                    "mediaId": "00000000-0000-4000-8000-000000000050",
+                    "alt": {
+                      "ko": "개발용 가상 상품 앞면",
+                      "en": "Fictional product front",
+                      "zh-Hans": null,
+                      "ja": null
+                    },
+                    "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                    "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                    "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                  }
+                ],
                 "colors": [
                   {
                     "id": "color-a",
@@ -11135,6 +11173,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -11528,6 +11580,7 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [],
             "colors": [
               {
                 "id": "color-a",
@@ -12591,6 +12644,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -12821,6 +12888,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -13036,6 +13117,20 @@
               "amount": 1000,
               "currency": "KRW"
             },
+            "images": [
+              {
+                "mediaId": "00000000-0000-4000-8000-000000000050",
+                "alt": {
+                  "ko": "개발용 가상 상품 앞면",
+                  "en": "Fictional product front",
+                  "zh-Hans": null,
+                  "ja": null
+                },
+                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+              }
+            ],
             "colors": [
               {
                 "id": "color-a",
@@ -14814,6 +14909,140 @@
             "message": "관리자 권한이 없습니다.",
             "details": [],
             "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getGoodsImage": {
+    "screens": [
+      "GOODS-LIST",
+      "GOODS-DETAIL"
+    ],
+    "method": "GET",
+    "path": "/api/v2/media/goods-images/{mediaId}/{variant}",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": null
+      },
+      "not-found": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "not-found",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 이미지를 처리할 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
           },
           "meta": {
             "requestId": "mock-example-request",

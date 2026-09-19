@@ -1915,6 +1915,14 @@
                               "currency": "KRW"
                             },
                             "optionMode": "OPTIONS",
+                            "images": [
+                              {
+                                "alt": "개발용 가상 상품 앞면",
+                                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                              }
+                            ],
                             "colors": [
                               {
                                 "id": "color-a",
@@ -2706,6 +2714,14 @@
                           "currency": "KRW"
                         },
                         "optionMode": "OPTIONS",
+                        "images": [
+                          {
+                            "alt": "개발용 가상 상품 앞면",
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -2751,6 +2767,14 @@
                           "currency": "KRW"
                         },
                         "optionMode": "OPTIONS",
+                        "images": [
+                          {
+                            "alt": "개발용 가상 상품 앞면",
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -16686,6 +16710,20 @@
                               "amount": 1000,
                               "currency": "KRW"
                             },
+                            "images": [
+                              {
+                                "mediaId": "00000000-0000-4000-8000-000000000050",
+                                "alt": {
+                                  "ko": "개발용 가상 상품 앞면",
+                                  "en": "Fictional product front",
+                                  "zh-Hans": null,
+                                  "ja": null
+                                },
+                                "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                                "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                                "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                              }
+                            ],
                             "colors": [
                               {
                                 "id": "color-a",
@@ -17162,6 +17200,7 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
+                        "images": [],
                         "colors": [
                           {
                             "id": "color-a",
@@ -17866,6 +17905,20 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
+                        "images": [
+                          {
+                            "mediaId": "00000000-0000-4000-8000-000000000050",
+                            "alt": {
+                              "ko": "개발용 가상 상품 앞면",
+                              "en": "Fictional product front",
+                              "zh-Hans": null,
+                              "ja": null
+                            },
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -18373,6 +18426,20 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
+                        "images": [
+                          {
+                            "mediaId": "00000000-0000-4000-8000-000000000050",
+                            "alt": {
+                              "ko": "개발용 가상 상품 앞면",
+                              "en": "Fictional product front",
+                              "zh-Hans": null,
+                              "ja": null
+                            },
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -18485,6 +18552,20 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
+                        "images": [
+                          {
+                            "mediaId": "00000000-0000-4000-8000-000000000050",
+                            "alt": {
+                              "ko": "개발용 가상 상품 앞면",
+                              "en": "Fictional product front",
+                              "zh-Hans": null,
+                              "ja": null
+                            },
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -18616,6 +18697,20 @@
                           "amount": 1000,
                           "currency": "KRW"
                         },
+                        "images": [
+                          {
+                            "mediaId": "00000000-0000-4000-8000-000000000050",
+                            "alt": {
+                              "ko": "개발용 가상 상품 앞면",
+                              "en": "Fictional product front",
+                              "zh-Hans": null,
+                              "ja": null
+                            },
+                            "masterUrl": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/master",
+                            "thumbnail320Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/320",
+                            "thumbnail640Url": "/api/v2/media/goods-images/00000000-0000-4000-8000-000000000050/640"
+                          }
+                        ],
                         "colors": [
                           {
                             "id": "color-a",
@@ -20272,6 +20367,325 @@
             }
           }
         }
+      }
+    },
+    "/api/v2/media/goods-images/{mediaId}/{variant}": {
+      "get": {
+        "operationId": "getGoodsImage",
+        "summary": "연결된 상품 이미지 WebP variant 조회",
+        "description": "연결 화면: GOODS-LIST, GOODS-DETAIL. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "opaque media UUID"
+          },
+          {
+            "name": "variant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "master",
+                "320",
+                "640"
+              ]
+            },
+            "description": "서버가 허용한 WebP variant"
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(?:\\*|(?:W/)?\"[0-9a-f]{64}\")$"
+            },
+            "description": "현재 media ETag. weak validator와 *도 GET 비교에 허용."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "public, max-age=31536000, immutable"
+                  ]
+                },
+                "description": "응답에 적용되는 캐시 지시문."
+              },
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "inline"
+                  ]
+                },
+                "description": "브라우저 inline 표시"
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "nosniff"
+                  ]
+                },
+                "description": "MIME sniffing 차단"
+              }
+            },
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "public, max-age=31536000, immutable"
+                  ]
+                },
+                "description": "응답에 적용되는 캐시 지시문."
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "연결된 상품 이미지 WebP variant 조회: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not-found": {
+                    "summary": "연결된 상품 이미지 WebP variant 조회: not-found",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "요청한 정보를 찾을 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "연결된 상품 이미지 WebP variant 조회: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "저장된 이미지 variant를 일시적으로 제공할 수 없습니다.",
+            "headers": {},
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "연결된 상품 이미지 WebP variant 조회: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 이미지를 처리할 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "GOODS-LIST",
+          "GOODS-DETAIL"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "not-found",
+          "error",
+          "bad-request",
+          "rate-limited"
+        ],
+        "x-conditional": true,
+        "x-binary-response": true
       }
     },
     "/api/v2/admin/sessions": {
@@ -22752,6 +23166,42 @@
         "additionalProperties": false,
         "description": ""
       },
+      "GoodsImage": {
+        "type": "object",
+        "properties": {
+          "alt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "상품의 contentLocale과 같은 언어로 해석된 이미지 대체 텍스트"
+          },
+          "masterUrl": {
+            "type": "string",
+            "minLength": 1,
+            "description": "same-origin master WebP API path",
+            "format": "uri-reference"
+          },
+          "thumbnail320Url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "same-origin 320px WebP API path",
+            "format": "uri-reference"
+          },
+          "thumbnail640Url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "same-origin 640px WebP API path",
+            "format": "uri-reference"
+          }
+        },
+        "required": [
+          "alt",
+          "masterUrl",
+          "thumbnail320Url",
+          "thumbnail640Url"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
       "Goods": {
         "type": "object",
         "properties": {
@@ -22800,6 +23250,13 @@
             ],
             "description": "SINGLE은 단일 판매 상태, OPTIONS는 색상×사이즈 조합별 판매 상태"
           },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GoodsImage"
+            },
+            "description": "sort_order 순 상품 이미지. 기존 이미지 없는 상품은 []."
+          },
           "colors": {
             "type": "array",
             "items": {
@@ -22822,6 +23279,7 @@
           "description",
           "price",
           "optionMode",
+          "images",
           "colors",
           "sizes"
         ],
@@ -24957,6 +25415,92 @@
         "additionalProperties": false,
         "description": ""
       },
+      "AdminGoodsImageAlt": {
+        "type": "object",
+        "properties": {
+          "ko": {
+            "type": "string",
+            "minLength": 1,
+            "description": "한국어 대체 텍스트"
+          },
+          "en": {
+            "type": "string",
+            "minLength": 1,
+            "description": "영어 대체 텍스트"
+          },
+          "zh-Hans": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "중국어 간체 대체 텍스트"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "없으면 null"
+          },
+          "ja": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "일본어 대체 텍스트"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "없으면 null"
+          }
+        },
+        "required": [
+          "ko",
+          "en",
+          "zh-Hans",
+          "ja"
+        ],
+        "additionalProperties": false,
+        "description": "관리자 수정 초기값용 4 locale shape."
+      },
+      "AdminGoodsImage": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "저장 경로를 노출하지 않는 opaque media UUID."
+          },
+          "alt": {
+            "$ref": "#/components/schemas/AdminGoodsImageAlt"
+          },
+          "masterUrl": {
+            "type": "string",
+            "minLength": 1,
+            "description": "same-origin master WebP API path"
+          },
+          "thumbnail320Url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "same-origin 320px WebP API path"
+          },
+          "thumbnail640Url": {
+            "type": "string",
+            "minLength": 1,
+            "description": "same-origin 640px WebP API path"
+          }
+        },
+        "required": [
+          "mediaId",
+          "alt",
+          "masterUrl",
+          "thumbnail320Url",
+          "thumbnail640Url"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
       "AdminGoodsCombination": {
         "type": "object",
         "properties": {
@@ -25023,6 +25567,13 @@
           "price": {
             "$ref": "#/components/schemas/Money"
           },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminGoodsImage"
+            },
+            "description": "sort_order 순 상품 이미지. 기존 이미지 없는 상품은 []."
+          },
           "colors": {
             "type": "array",
             "items": {
@@ -25056,6 +25607,7 @@
           "optionMode",
           "translations",
           "price",
+          "images",
           "colors",
           "sizes",
           "combinations",

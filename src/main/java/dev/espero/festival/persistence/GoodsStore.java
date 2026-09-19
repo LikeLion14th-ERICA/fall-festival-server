@@ -5,6 +5,8 @@ import dev.espero.festival.domain.GoodsAvailability;
 import dev.espero.festival.domain.GoodsColor;
 import dev.espero.festival.domain.GoodsColorTranslation;
 import dev.espero.festival.domain.GoodsCombination;
+import dev.espero.festival.domain.GoodsImage;
+import dev.espero.festival.domain.GoodsImageTranslation;
 import dev.espero.festival.domain.GoodsOptionMode;
 import dev.espero.festival.domain.GoodsSize;
 import dev.espero.festival.domain.GoodsSizeTranslation;
@@ -120,6 +122,7 @@ public class GoodsStore {
         }
         List<UUID> ids = headers.stream().map(GoodsHeader::id).toList();
         Map<UUID, Map<String, GoodsTranslation>> translationsByGoods = loadTranslations(ids);
+        Map<UUID, List<GoodsImage>> imagesByGoods = loadImages(ids);
         Map<UUID, List<GoodsColor>> colorsByGoods = loadColors(ids);
         Map<UUID, List<GoodsSize>> sizesByGoods = loadSizes(ids);
         Map<UUID, List<GoodsCombination>> combinationsByGoods = loadCombinations(ids);
@@ -131,6 +134,7 @@ public class GoodsStore {
                 header.optionMode(),
                 translationsByGoods.getOrDefault(header.id(), Map.of()),
                 header.priceAmount(),
+                imagesByGoods.getOrDefault(header.id(), List.of()),
                 colorsByGoods.getOrDefault(header.id(), List.of()),
                 sizesByGoods.getOrDefault(header.id(), List.of()),
                 combinationsByGoods.getOrDefault(header.id(), List.of()),
@@ -139,6 +143,59 @@ public class GoodsStore {
             ));
         }
         return result;
+    }
+
+    private Map<UUID, List<GoodsImage>> loadImages(List<UUID> goodsIds) {
+        List<ImageHeader> imageHeaders = jdbc.query("""
+            SELECT gi.goods_id, gi.media_id
+            FROM goods_images AS gi
+            JOIN goods AS goods
+              ON goods.id = gi.goods_id
+             AND goods.festival_id = gi.festival_id
+            JOIN media_assets AS media
+              ON media.id = gi.media_id
+             AND media.festival_id = gi.festival_id
+            WHERE gi.goods_id IN (:goodsIds)
+              AND media.purpose = 'GOODS_IMAGE'
+              AND media.attached_at IS NOT NULL
+              AND media.detached_at IS NULL
+            ORDER BY gi.goods_id, gi.sort_order
+            """,
+            new MapSqlParameterSource("goodsIds", goodsIds),
+            (resultSet, rowNumber) -> new ImageHeader(
+                resultSet.getObject("goods_id", UUID.class),
+                resultSet.getObject("media_id", UUID.class)
+            )
+        );
+        if (imageHeaders.isEmpty()) {
+            return Map.of();
+        }
+
+        List<UUID> mediaIds = imageHeaders.stream().map(ImageHeader::mediaId).toList();
+        Map<UUID, Map<String, GoodsImageTranslation>> translationsByMedia = new LinkedHashMap<>();
+        jdbc.query("""
+            SELECT media_id, locale, alt_text
+            FROM goods_image_translations
+            WHERE media_id IN (:mediaIds)
+            """,
+            new MapSqlParameterSource("mediaIds", mediaIds),
+            (resultSet, rowNumber) -> {
+                UUID mediaId = resultSet.getObject("media_id", UUID.class);
+                translationsByMedia.computeIfAbsent(mediaId, key -> new LinkedHashMap<>())
+                    .put(resultSet.getString("locale"), new GoodsImageTranslation(resultSet.getString("alt_text")));
+                return null;
+            }
+        );
+
+        Map<UUID, List<GoodsImage>> imagesByGoods = new LinkedHashMap<>();
+        for (ImageHeader header : imageHeaders) {
+            imagesByGoods.computeIfAbsent(header.goodsId(), key -> new ArrayList<>())
+                .add(new GoodsImage(
+                    header.mediaId(),
+                    translationsByMedia.getOrDefault(header.mediaId(), Map.of())
+                ));
+        }
+        return imagesByGoods;
     }
 
     private Map<UUID, Map<String, GoodsTranslation>> loadTranslations(List<UUID> goodsIds) {
@@ -288,4 +345,6 @@ public class GoodsStore {
     private record ColorHeader(UUID id, UUID goodsId) {}
 
     private record SizeHeader(UUID id, UUID goodsId) {}
+
+    private record ImageHeader(UUID goodsId, UUID mediaId) {}
 }

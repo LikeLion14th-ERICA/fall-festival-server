@@ -3,6 +3,7 @@ package dev.espero.festival.web;
 import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.Goods;
 import dev.espero.festival.domain.GoodsColorTranslation;
+import dev.espero.festival.domain.GoodsImageTranslation;
 import dev.espero.festival.domain.GoodsSizeTranslation;
 import dev.espero.festival.domain.GoodsTranslation;
 import dev.espero.festival.persistence.GoodsStore;
@@ -31,22 +32,25 @@ public class AdminGoodsViewService {
     private final FestivalProperties properties;
     private final ApiMetaSupport metaSupport;
     private final ConditionalResponseSupport conditionalResponses;
+    private final GoodsMediaUrlSupport mediaUrls;
 
     public AdminGoodsViewService(
         GoodsStore store,
         FestivalProperties properties,
         ApiMetaSupport metaSupport,
-        ConditionalResponseSupport conditionalResponses
+        ConditionalResponseSupport conditionalResponses,
+        GoodsMediaUrlSupport mediaUrls
     ) {
         this.store = store;
         this.properties = properties;
         this.metaSupport = metaSupport;
         this.conditionalResponses = conditionalResponses;
+        this.mediaUrls = mediaUrls;
     }
 
     public AdminGoodsListSnapshot list(HttpServletRequest request) {
         List<AdminGoodsResponse> items = store.findAllForAdmin(properties.configuredFestivalId()).stream()
-            .map(AdminGoodsViewService::toResponse)
+            .map(this::toResponse)
             .toList();
         return new AdminGoodsListSnapshot(
             new AdminGoodsListResponse(items),
@@ -69,7 +73,19 @@ public class AdminGoodsViewService {
         return new AdminGoodsSnapshot(goods, response, meta, etag);
     }
 
-    private static AdminGoodsResponse toResponse(Goods goods) {
+    private AdminGoodsResponse toResponse(Goods goods) {
+        List<AdminGoodsImageResponse> images = goods.images().stream()
+            .map(image -> {
+                GoodsMediaUrlSupport.GoodsMediaUrls urls = mediaUrls.urls(image.mediaId());
+                return new AdminGoodsImageResponse(
+                    image.mediaId().toString(),
+                    fullTranslations(image.translations(), GoodsImageTranslation::alt),
+                    urls.masterUrl(),
+                    urls.thumbnail320Url(),
+                    urls.thumbnail640Url()
+                );
+            })
+            .toList();
         List<AdminGoodsColorResponse> colors = goods.colors().stream()
             .map(color -> new AdminGoodsColorResponse(
                 color.id().toString(),
@@ -104,6 +120,7 @@ public class AdminGoodsViewService {
                 translation -> new AdminGoodsResponse.Translation(translation.name(), translation.description())
             ),
             new AdminGoodsResponse.Money(goods.priceAmount(), CURRENCY),
+            images,
             colors,
             sizes,
             combinations,

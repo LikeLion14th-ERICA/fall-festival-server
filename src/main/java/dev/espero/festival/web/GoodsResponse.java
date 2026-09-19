@@ -9,6 +9,7 @@ public record GoodsResponse(
     String description,
     Money price,
     String optionMode,
+    List<GoodsImageResponse> images,
     List<GoodsColorResponse> colors,
     List<GoodsSizeResponse> sizes
 ) {

@@ -9,6 +9,7 @@ public record AdminGoodsResponse(
     String optionMode,
     Map<String, Translation> translations,
     Money price,
+    List<AdminGoodsImageResponse> images,
     List<AdminGoodsColorResponse> colors,
     List<AdminGoodsSizeResponse> sizes,
     List<AdminGoodsCombinationResponse> combinations,

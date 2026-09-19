@@ -30,7 +30,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
-    'postAdminGoodsImage'
+    'postAdminGoodsImage','getGoodsImage'
   ]);
   const server=http.createServer(async(req,res)=>{
     let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
@@ -82,6 +82,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
           }
         }else{
           const issues=validate(p.schema,value,spec,p.name);
+          if(issues.length&&route.operationId==='getGoodsImage'&&p.name==='variant')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
           if(issues.length)failure(400,p.name==='If-Match'?'INVALID_IF_MATCH':p.name==='Idempotency-Key'?'INVALID_IDEMPOTENCY_KEY':p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','요청 값 형식이 잘못되었습니다.',issues);
         }
       }
@@ -114,6 +115,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='payload-too-large')failure(413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.');
       if(scenario==='unsupported-media-type')failure(415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.');
       if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
+      if(route.operationId==='getGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
       let result;
@@ -135,6 +137,22 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         result=execute(route,state,{params,query,body,scenario,now});
       }
       now=result.now;
+      if(route.definition['x-binary-response']){
+        const etag=strongEtag(`goods-media-v1\n${params.mediaId}\n${params.variant}`);
+        const mediaHeaders={
+          ...headers,
+          'Content-Type':'image/webp',
+          'Content-Disposition':'inline',
+          'X-Content-Type-Options':'nosniff',
+          'Cache-Control':'public, max-age=31536000, immutable',
+          'ETag':etag,
+          'X-Request-Id':requestId,
+        };
+        if(matchesEtag(req.headers['if-none-match'],etag)){
+          res.writeHead(304,mediaHeaders);return res.end();
+        }
+        res.writeHead(200,mediaHeaders);return res.end(Buffer.from(`MOCK-WEBP:${params.mediaId}:${params.variant}`));
+      }
       const responseRevision=unscopedOperations.has(route.operationId)?0:state.revision;
       const responseMeta=route.definition['x-conditional']
         ? {timezone:'Asia/Seoul',festivalId:'festival-mock',revision:responseRevision,locale,mock:true}

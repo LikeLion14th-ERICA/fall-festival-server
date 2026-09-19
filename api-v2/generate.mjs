@@ -4,7 +4,7 @@ import { createState,execute,MOCK_NOW,isoKst,scenarioTime,ApiFailure } from './d
 import { validate } from './validate.mjs';
 import { buildCoverage } from './screen-coverage.mjs';
 
-export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',combinationId:'combo-shirt-a-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1'};
+export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',combinationId:'combo-shirt-a-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1',mediaId:'00000000-0000-4000-8000-000000000050',variant:'master'};
 const noticeInput={type:'GENERAL',translations:{ko:{title:'개발용 새 공지',body:'개발용 본문'},en:{title:'New mock notice',body:'Mock body'}},links:[{url:'https://example.invalid/mock-notice-link',labels:{ko:'예시 링크',en:'Sample link','zh-Hans':null,ja:null}}],templateId:null};
 const g=createState().goods[0];
 const productInput={
@@ -27,27 +27,30 @@ const unscopedOperations=new Set([
   'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
   'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
   'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
-  'postAdminGoodsImage'
+  'postAdminGoodsImage','getGoodsImage'
 ]);
 for(const op of operations){
-  const responseName=`${op.schema}${op.conditional?'Conditional':''}Response`;spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');
+  const responseName=op.schema?`${op.schema}${op.conditional?'Conditional':''}Response`:null;
+  if(responseName)spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');
   const scenarios=[...op.scenarios,'bad-request','rate-limited',...(op.admin&&op.authRequired!==false?['unauthorized','forbidden']:[])];
   const successStatus=op.successStatus??(op.method==='POST'?201:200);
   const statuses=[...(successStatus===200?[200]:[]),400,403,404,405,409,429,500,503,...(op.input||op.multipartInput?[413,415,422]:[]),...(op.admin?[401]:[]),...(op.ifMatchRequired||op.idempotencyKeyRequired?[428]:[]),...(op.conditional?[304]:[]),successStatus].filter((status,index,array)=>array.indexOf(status)===index);
   const responses=Object.fromEntries(statuses.map(status=>{
-    const conditionalHeaders=op.conditional&&status<300?{ETag:strongEtagHeader,'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'},...(op.cacheControl?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{})}:{};
+    const conditionalHeaders=op.conditional&&(status<300||(op.binaryResponse&&status===304))?{ETag:strongEtagHeader,...(op.binaryResponse?{}:{'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'}}),...(op.cacheControl?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:op.binaryResponse?'응답에 적용되는 캐시 지시문.':'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{})}:{};
+    const binaryHeaders=op.binaryResponse&&status===200?{'Content-Disposition':{schema:{type:'string',enum:['inline']},description:'브라우저 inline 표시'},'X-Content-Type-Options':{schema:{type:'string',enum:['nosniff']},description:'MIME sniffing 차단'}}:{};
     const responseOverride=op.responseOverrides?.[status];
-    const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'},...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders}};
-    if(!noBodyStatuses.has(status))response.content={'application/json':{schema:{$ref:`#/components/schemas/${status<300?responseName:'Error'}`},examples:{}}};
+    const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{...(op.binaryResponse?{}:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'}}),...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders,...binaryHeaders}};
+    if(op.binaryResponse&&status===200)response.content={'image/webp':{schema:{type:'string',format:'binary'}}};
+    else if(!noBodyStatuses.has(status))response.content={'application/json':{schema:{$ref:`#/components/schemas/${status<300?responseName:'Error'}`},examples:{}}};
     return [status,response];
   }));
   if(['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId))responses[200].headers['Set-Cookie']={schema:{type:'string'},description:op.operationId==='deleteCurrentAdminSession'?'refresh cookie 만료(Max-Age=0)':'Secure; HttpOnly; SameSite=Strict refresh cookie'};
   const headerParameters=[
-    ...(op.conditional?[{name:'If-None-Match',in:'header',required:false,schema:strongEtagHeader.schema,description:'표현이 변경되지 않았으면 304를 요청하는 strong ETag'}]:[]),
+    ...(op.conditional?[{name:'If-None-Match',in:'header',required:false,schema:op.binaryResponse?{type:'string',pattern:'^(?:\\*|(?:W/)?"[0-9a-f]{64}")$'}:strongEtagHeader.schema,description:op.binaryResponse?'현재 media ETag. weak validator와 *도 GET 비교에 허용.':'표현이 변경되지 않았으면 304를 요청하는 strong ETag'}]:[]),
     ...(op.ifMatchRequired?[{name:'If-Match',in:'header',required:true,schema:strongEtagHeader.schema,description:'현재 표현의 strong ETag. 누락 시 428, 불일치 시 409.'}]:[]),
     ...(op.idempotencyKeyRequired?[{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:1,maxLength:128,pattern:'^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'},description:op.idempotencyKeyDescription??'같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428.'}]:[]),
   ];
-  const operation={operationId:op.operationId,summary:op.summary,description:`연결 화면: ${op.screens.join(', ')||'관리자 공통 인증'}. ${op.provisional?'미정 기획을 위한 검토 필요 계약. ':''}목의 인증/시나리오 헤더는 연동 안내를 참고.`,tags:[op.admin?'관리자':'공개'],security:op.security??(op.admin?[{AdminBearer:[]}]:[]),parameters:[...op.parameters,...headerParameters],responses,'x-screen-ids':op.screens,'x-contract-status':op.provisional?'provisional':'screen-specified','x-mock-scenarios':scenarios,...(op.conditional?{'x-conditional':true}: {})};
+  const operation={operationId:op.operationId,summary:op.summary,description:`연결 화면: ${op.screens.join(', ')||'관리자 공통 인증'}. ${op.provisional?'미정 기획을 위한 검토 필요 계약. ':''}목의 인증/시나리오 헤더는 연동 안내를 참고.`,tags:[op.admin?'관리자':'공개'],security:op.security??(op.admin?[{AdminBearer:[]}]:[]),parameters:[...op.parameters,...headerParameters],responses,'x-screen-ids':op.screens,'x-contract-status':op.provisional?'provisional':'screen-specified','x-mock-scenarios':scenarios,...(op.conditional?{'x-conditional':true}: {}),...(op.binaryResponse?{'x-binary-response':true}: {})};
   if(op.input)operation.requestBody={required:true,description:op.provisional?'목 연동용 입력 초안. 기획 합의 전 운영 구현 금지.':'저장할 변경값',content:{'application/json':{schema:{$ref:`#/components/schemas/${op.input}`},example:inputExamples[op.input]}}};
   if(op.multipartInput)operation.requestBody={required:true,description:'10 MiB 이하의 JPEG, PNG 또는 WebP 원본. 파일명과 client MIME은 format 판정에 사용하지 않는다.',content:{'multipart/form-data':{schema:{type:'object',properties:{file:{type:'string',format:'binary'}},required:['file'],additionalProperties:false}}}};
   spec.paths[op.path]??={};spec.paths[op.path][op.method.toLowerCase()]=operation;
@@ -76,10 +79,10 @@ for(const op of operations){
       const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure,'precondition-required':[428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.'],'idempotency-key-required':[428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.'],...(op.multipartInput?{'validation-failed':[422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.'],'payload-too-large':[413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.'],'unsupported-media-type':[415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.']}:{}),'not-festival-day':[409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.'],'edit-conflict':[409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.']}[scenario];
       if(special)throw new ApiFailure(...special);
       if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
-      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)?null:{data:result.data,meta:op.conditional?conditionalMeta(responseRevision):meta(responseRevision)};
+      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)||op.binaryResponse?null:{data:result.data,meta:op.conditional?conditionalMeta(responseRevision):meta(responseRevision)};
     }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;const override=op.responseOverrides?.[status];response={error:{code:override?.code??e.code,message:override?.message??e.message,details:e.details,retryable:override?.retryable??[429,500,503].includes(status)},meta:meta(0)};}
     if(!responses[status])throw new Error(`Missing response ${op.operationId} ${status}`);
-    if(responses[status].content)responses[status].content['application/json'].examples[scenario]={summary:`${op.summary}: ${scenario}`,value:response};
+    if(responses[status].content?.['application/json'])responses[status].content['application/json'].examples[scenario]={summary:`${op.summary}: ${scenario}`,value:response};
     const actualPath=op.path.replace(/\{(\w+)\}/g,(_,key)=>sampleParams[key]);
     const qs=new URLSearchParams(query).toString();
     const cookieEndpoint=['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId);
