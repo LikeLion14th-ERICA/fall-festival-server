@@ -2,6 +2,8 @@ package dev.espero.festival.media;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.cleanup.GoodsDetachedMediaCleanupTarget;
+import dev.espero.festival.cleanup.GoodsUnattachedMediaCleanupTarget;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -21,6 +23,8 @@ class MediaStorageConfigurationTest {
             assertThat(context).doesNotHaveBean(MediaStorage.class);
             assertThat(context).doesNotHaveBean(GoodsImageInspector.class);
             assertThat(context).doesNotHaveBean(GoodsImageProcessor.class);
+            assertThat(context).doesNotHaveBean(GoodsUnattachedMediaCleanupTarget.class);
+            assertThat(context).doesNotHaveBean(GoodsDetachedMediaCleanupTarget.class);
         });
     }
 
@@ -32,6 +36,21 @@ class MediaStorageConfigurationTest {
                 assertThat(context).hasSingleBean(MediaStorage.class);
                 assertThat(context).hasSingleBean(GoodsImageInspector.class);
                 assertThat(context).hasSingleBean(GoodsImageProcessor.class);
+                assertThat(context).doesNotHaveBean(GoodsUnattachedMediaCleanupTarget.class);
+                assertThat(context).doesNotHaveBean(GoodsDetachedMediaCleanupTarget.class);
+            });
+    }
+
+    @Test
+    void dbProfileAndConfiguredStorageRegisterBothCleanupTargets() {
+        contextRunner
+            .withPropertyValues(
+                "spring.profiles.active=db",
+                "festival.media.storage-root=" + temporaryDirectory
+            )
+            .run(context -> {
+                assertThat(context).hasSingleBean(GoodsUnattachedMediaCleanupTarget.class);
+                assertThat(context).hasSingleBean(GoodsDetachedMediaCleanupTarget.class);
             });
     }
 }
