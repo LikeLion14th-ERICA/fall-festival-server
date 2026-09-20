@@ -13,8 +13,8 @@
 
 | 데이터 | 파일 | 넣는 방법 |
 |---|---|---|
-| 부스 20개(6개 분류 모두), 지도 4장·핀 28개(편의시설 필터 4종), 공연 4개·아티스트 5명, 티켓·스탬프 안내, 반입 금지 물품, 홈 링크 | [`dev/catalog/frontend-mock-catalog.json`](../catalog/frontend-mock-catalog.json) | catalog 워크벤치 또는 CLI로 import·publish |
-| 공지 3개(일반 2, 분실물 1, 링크 포함 1), 굿즈 3개(단일 2, 색상×사이즈 옵션 1) | [`seed-admin-content.mjs`](seed-admin-content.mjs) | 관리자 API |
+| 부스 20개(6개 분류 모두), 지도 4장·핀 28개(편의시설 필터 4종), 공연 4개·아티스트 5명, 티켓·스탬프 안내, 반입 금지 물품, 홈 링크 | [`dev/catalog/frontend-mock-catalog.json`](../catalog/frontend-mock-catalog.json) | [`Publish-MockCatalog.ps1`](Publish-MockCatalog.ps1) |
+| 공지 3개(일반 2, 분실물 1, 링크 포함 1), 굿즈 3개(단일 2, 색상×사이즈 옵션 1) | [`seed-admin-content.mjs`](seed-admin-content.mjs) | [`Seed-AdminMockContent.ps1`](Seed-AdminMockContent.ps1) |
 | 티켓 계좌, 부스 계좌 | 아래 JSON 예시 | 계좌 CLI |
 
 부스는 운영 정보가 비어 있는 경우(운영 주체·시간·설명·SNS 없음), 메뉴가 많은 주점, 이벤트가 없는 부스처럼
@@ -24,32 +24,38 @@
 
 ## 1. catalog (부스·지도·공연·안내)
 
-[로컬 카탈로그 워크벤치](../../docs/wiki/engineering/catalog-workbench.md)에서 파일을 불러와 검증·비교 후
-가져오기·게시합니다. 기준 revision은 **현재 게시본**을 선택합니다. CLI로 할 때는 다음과 같습니다.
+`Publish-MockCatalog.ps1`이 읽기 전용 사전 점검 → 현재 revision 확인 → 기준 revision 자동 선택 →
+import → publish를 한 번에 합니다. 비밀번호는 화면에 남지 않게 입력받고 이 process 안에서만 씁니다.
 
 ```powershell
-java '-Dloader.main=dev.espero.festival.CatalogCliApplication' -cp target/fall-festival-server-0.0.1-SNAPSHOT.jar org.springframework.boot.loader.launch.PropertiesLauncher import --manifest=dev/catalog/frontend-mock-catalog.json --festival-id=<축제-UUID> --baseline-revision=<현재-게시-revision-UUID> --actor=<이름>
-java '-Dloader.main=dev.espero.festival.CatalogCliApplication' -cp target/fall-festival-server-0.0.1-SNAPSHOT.jar org.springframework.boot.loader.launch.PropertiesLauncher publish --revision=<import가-출력한-UUID> --actor=<이름>
+.\mvnw.cmd --batch-mode --no-transfer-progress -DskipTests package
+.\dev\admin-mock\Publish-MockCatalog.ps1 -DatabaseUrl 'jdbc:postgresql://<host>:<port>/<database>?sslmode=require' -Username '<DB 사용자>' -FestivalId '<축제 UUID>' -Actor '<본인 이름>' -DryRun
 ```
+
+- **축제 UUID**는 `GET /api/v2/config` 응답의 `data.festival.id`입니다.
+- `-DryRun`은 DB를 바꾸지 않고 현재 revision과 기준 revision만 보여 줍니다. 먼저 이걸로 확인하세요.
+- 실제로 게시하려면 `-DryRun`을 빼고 실행한 뒤 `yes`를 입력합니다. 확인 없이 진행하려면 `-Force`.
+- SSL을 쓰지 않는 DB면 URL에서 `?sslmode=require`를 뺍니다. schema가 `public`이 아니면 `-Schema`를 줍니다.
+- 사전 점검이 `STOP_AND_REVIEW`로 나오는 것은 **정상**입니다. 이미 축제·catalog 데이터가 있는 DB라는 뜻이며,
+  이 작업은 migration이 아니라 기존 게시본 위에 새 revision을 얹는 것입니다.
+- 기준 revision이 그사이 바뀌면 `BASE_REVISION_CONFLICT`로 멈춥니다. 다시 실행하면 새 기준으로 진행합니다.
 
 게시 뒤 **백엔드를 재시작**해야 공개 API에 새 revision이 보입니다. `/readyz`가 200이고 `/api/v2/spaces`의
 `meta.revision`이 올라갔는지 확인합니다.
 
+워크벤치를 쓸 수도 있지만 loopback DB 주소만 받으므로 승인된 SSH tunnel이 필요합니다
+([워크벤치 runbook](../../docs/wiki/engineering/catalog-workbench.md)).
+
 ## 2. 공지·굿즈 (관리자 API)
 
-Node 18 이상에서 실행합니다. `ADMIN_ORIGIN`은 서버의 `ADMIN_ALLOWED_ORIGIN`과 같아야 합니다. 비밀번호는
-셸 환경변수로만 넣고 명령 기록에 남기지 않습니다.
+Node 18 이상이 필요합니다. `-AdminOrigin`은 서버의 `ADMIN_ALLOWED_ORIGIN`과 같아야 합니다.
 
 ```powershell
-$env:ADMIN_BASE_URL = 'https://api-festival.likelionerica.com'
-$env:ADMIN_ORIGIN = '<서버의 ADMIN_ALLOWED_ORIGIN>'
-$env:ADMIN_USERNAME = '<관리자 아이디>'
-$env:ADMIN_PASSWORD = Read-Host -MaskInput '관리자 비밀번호'
-node dev/admin-mock/seed-admin-content.mjs --dry-run
-node dev/admin-mock/seed-admin-content.mjs
+.\dev\admin-mock\Seed-AdminMockContent.ps1 -BaseUrl 'https://api-festival.likelionerica.com' -AdminOrigin '<서버의 ADMIN_ALLOWED_ORIGIN>' -Username '<관리자 아이디>' -DryRun
+.\dev\admin-mock\Seed-AdminMockContent.ps1 -BaseUrl 'https://api-festival.likelionerica.com' -AdminOrigin '<서버의 ADMIN_ALLOWED_ORIGIN>' -Username '<관리자 아이디>'
 ```
 
-- `--dry-run`은 로그인 없이 보낼 내용만 출력합니다.
+- `-DryRun`은 로그인 없이 보낼 내용만 출력합니다.
 - 한국어 제목·이름이 이미 있는 항목은 건너뛰므로 여러 번 실행해도 중복되지 않습니다.
 - 굿즈 이미지는 스크립트가 1024×1024 단색 PNG를 만들어 올립니다. 서버가 WebP로 변환하려면
   `cwebp`가 필요해서 Docker 이미지에서만 동작합니다. Windows에서 jar를 직접 띄우면 이미지 업로드가 503입니다.
@@ -84,3 +90,5 @@ node dev/admin-mock/seed-admin-content.mjs
   import·publish되고 공개 snapshot으로 읽힙니다.
 - 로컬 PostgreSQL과 Linux 컨테이너에서 CLI import·publish, 두 번째 import(수정)와 재시작 반영, 공개 API 13개
   경로, 스크립트의 공지·굿즈 생성과 재실행 시 건너뛰기, 굿즈 이미지 조회를 확인했습니다.
+- `Publish-MockCatalog.ps1`을 V26까지 migration한 로컬 DB에서 `-DryRun`과 실제 게시로 두 번 실행해, 기준
+  revision 자동 선택과 재실행 시 새 기준 사용(부스 20·핀 28·홈 링크 6행)을 확인했습니다.
