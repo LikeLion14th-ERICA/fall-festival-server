@@ -99,10 +99,20 @@ function Invoke-MockCatalogPublish {
         Write-Host ''
         Write-Host '확인할 점' -ForegroundColor Yellow
         # A failed connection reports only its SQLSTATE, so say what each one means.
-        $sqlState = ($preflight | Select-String -Pattern '^sqlState=(.+)$').Matches.Groups[1].Value
+        $sqlStateMatch = $preflight | Select-String -Pattern '^sqlState=(.+)$' | Select-Object -First 1
+        $sqlState = if ($sqlStateMatch) { $sqlStateMatch.Matches[0].Groups[1].Value } else { '' }
+        if ($preflight -match '^finding=CONFIGURATION_INVALID$') {
+            Write-Host '  - 접속 설정이 올바르지 않습니다. 비밀번호가 비어 있거나, URL에 sslmode·sslrootcert 외의 옵션 또는 사용자·비밀번호가 들어 있는지 확인하세요.'
+            throw '접속 설정이 올바르지 않습니다 (CONFIGURATION_INVALID).'
+        }
         switch ($sqlState) {
             '08001' { Write-Host '  - 서버에 닿지 못했습니다. host·port, 방화벽, VPN·SSH tunnel 사용 여부를 확인하세요.' }
-            '08004' { Write-Host '  - 서버가 연결을 거절했습니다. database 이름, 사용자, SSL 요구(?sslmode=require), 접속 IP 허용 목록, pooler 전용 포트·사용자 형식을 확인하세요.' }
+            '08004' {
+                Write-Host '  - 서버가 연결을 거절했습니다. 가장 흔한 원인은 SSL 설정 불일치입니다.'
+                Write-Host '    · 서버가 SSL을 쓰지 않는데 URL에 ?sslmode=require를 붙이면 이 코드가 납니다. 옵션을 빼고 다시 실행하세요.'
+                Write-Host '    · 반대로 서버가 SSL을 요구하면 ?sslmode=require를 붙이세요.'
+                Write-Host '    · 그 밖에 접속 IP 허용 목록, pooler 전용 포트·사용자 형식도 확인하세요.'
+            }
             '28P01' { Write-Host '  - 비밀번호가 맞지 않습니다.' }
             '28000' { Write-Host '  - 이 사용자·IP로는 접속이 허용되지 않습니다(pg_hba). 제공자에게 확인하세요.' }
             '3D000' { Write-Host '  - 그 이름의 database가 없습니다. URL 끝의 database 이름을 확인하세요.' }
