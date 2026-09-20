@@ -38,6 +38,16 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+function Show-SslUrlHint {
+    if ($DatabaseUrl -match 'sslmode=(require|verify-ca|verify-full)|ssl=true') {
+        Write-Host ''
+        Write-Host '이 URL은 SSL 접속을 요구하고 있습니다:' -ForegroundColor Yellow
+        Write-Host "  $DatabaseUrl"
+        Write-Host '  서버가 SSL을 지원하지 않으면 접속이 거절됩니다. 옵션을 빼고 다시 실행하세요:'
+        Write-Host ("  -DatabaseUrl '{0}'" -f ($DatabaseUrl -split '\?')[0])
+    }
+}
+
 function Invoke-CatalogCli {
     param([Parameter(Mandatory)][string[]]$CliArguments)
     # The CLI's own result lines are what matters here, so keep Spring's startup log out.
@@ -45,7 +55,10 @@ function Invoke-CatalogCli {
     $output = & java "-Dloader.main=dev.espero.festival.CatalogCliApplication" -cp $Jar `
         org.springframework.boot.loader.launch.PropertiesLauncher @CliArguments @quiet 2>&1
     $output | ForEach-Object { Write-Host "  $_" }
-    if ($LASTEXITCODE -ne 0) { throw "catalog CLI failed (exit $LASTEXITCODE)" }
+    if ($LASTEXITCODE -ne 0) {
+        if ($output | Select-String -Pattern 'enableSSL|does not support SSL|SSL.*지원') { Show-SslUrlHint }
+        throw "catalog CLI failed (exit $LASTEXITCODE)"
+    }
     return $output
 }
 
@@ -79,12 +92,12 @@ function Show-ConnectionError {
         org.springframework.boot.loader.launch.PropertiesLauncher export `
         --revision=00000000-0000-4000-8000-000000000001 --out=$([System.IO.Path]::GetTempFileName()) `
         --spring.main.banner-mode=off --logging.level.root=WARN 2>&1
-    # A reachable database still fails this probe on the made-up revision, so only
-    # connection-level errors mean the CLI could not connect either.
-    $failedToConnect = $probe | Select-String -Pattern 'FATAL|refused|The connection attempt failed|연결 시도가 실패' |
-        Select-Object -First 3
-    if ($failedToConnect) {
-        $failedToConnect | ForEach-Object { Write-Host "  $_" }
+    # A reachable database still fails this probe on the made-up revision, so treat a
+    # rejected revision or any server-side error as proof that the CLI did connect.
+    $connected = $probe | Select-String -Pattern 'catalog-cli:|ERROR: |draft revision'
+    if (-not $connected) {
+        $probe | Select-String -Pattern 'PSQLException|FATAL|refused' | Select-Object -First 3 |
+            ForEach-Object { Write-Host "  $_" }
     }
     else {
         Write-Host '  catalog CLI는 이 DB에 접속했습니다. 사전 점검만 거절당했다는 뜻입니다.' -ForegroundColor Green
@@ -165,6 +178,7 @@ function Invoke-MockCatalogPublish {
         }
         if ($sqlState) {
             Write-Host '  - DBeaver 연결이 SSH tunnel을 쓰고 있다면, 같은 tunnel을 연 뒤 -DatabaseUrl을 127.0.0.1:<로컬포트>로 주세요.'
+            Show-SslUrlHint
             Show-ConnectionError
             throw "DB에 연결하지 못했습니다 (sqlState=$sqlState)."
         }
