@@ -32,7 +32,6 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$exitCode = 1
 
 function Invoke-CatalogCli {
     param([Parameter(Mandatory)][string[]]$CliArguments)
@@ -64,7 +63,9 @@ $env:SPRING_DATASOURCE_USERNAME = $Username
 $env:SPRING_DATASOURCE_PASSWORD = $plainPassword
 $env:SPRING_FLYWAY_ENABLED = 'false'
 
-try {
+# A plain `return` inside the script body would skip the final exit and leak the
+# preflight's exit code, so the flow lives in a function that returns its own code.
+function Invoke-MockCatalogPublish {
     Write-Host '읽기 전용 사전 점검 중...' -ForegroundColor Cyan
     $preflight = & java "-Dloader.main=dev.espero.festival.preflight.DatabasePreflightApplication" -cp $Jar `
         org.springframework.boot.loader.launch.PropertiesLauncher 2>&1
@@ -76,7 +77,7 @@ try {
         $preflight | ForEach-Object { Write-Host "  $_" }
         throw "preflight failed (exit $preflightExit)"
     }
-    ($preflight | Select-String -Pattern '^(status|postgresqlVersion|database|currentUser|migrationCount)=') |
+    ($preflight | Select-String -Pattern '^(status|postgresqlVersion|database|schema|currentUser|migrationCount|festivalCount|revisionCount|finding)=') |
         ForEach-Object { Write-Host "  $_" }
 
     $revisions = $preflight | Select-String -Pattern '^revision=' | ForEach-Object {
@@ -88,7 +89,20 @@ try {
         [pscustomobject]$fields
     } | Where-Object { $_.festival_id -eq $FestivalId }
 
-    if (-not $revisions) { throw "이 festival($FestivalId)의 revision을 찾지 못했습니다. --festival-id와 schema를 확인하세요." }
+    if (-not $revisions) {
+        # The findings above say why: a wrong schema, a missing read permission or
+        # a festival id this database does not hold.
+        Write-Host ''
+        Write-Host '사전 점검 출력(테이블 목록 제외):' -ForegroundColor Yellow
+        $preflight | Where-Object { $_ -notmatch '^(relation|migration|catalogPresent)' } |
+            ForEach-Object { Write-Host "  $_" }
+        Write-Host ''
+        Write-Host '확인할 점' -ForegroundColor Yellow
+        Write-Host "  - schema: 지금 '$Schema'로 조회했습니다. 다른 schema면 -Schema로 지정하세요."
+        Write-Host '  - 축제 UUID: GET /api/v2/config 응답의 data.festival.id와 같은지 확인하세요.'
+        Write-Host '  - 권한: 위에 SCHEMA_MISSING_OR_INACCESSIBLE·TABLE_ACCESS_INCOMPLETE가 있으면 이 DB 계정이 해당 schema를 읽지 못합니다.'
+        throw "이 festival($FestivalId)의 revision을 찾지 못했습니다."
+    }
     Write-Host ''
     Write-Host '현재 revision:' -ForegroundColor Cyan
     $revisions | Sort-Object { [int]$_.revision_number } |
@@ -104,15 +118,13 @@ try {
     Write-Host ("작업자       : {0}" -f $Actor)
     if ($DryRun) {
         Write-Host 'DryRun이므로 여기서 멈춥니다. DB는 바뀌지 않았습니다.' -ForegroundColor Yellow
-        $exitCode = 0
-        return
+        return 0
     }
     if (-not $Force) {
         $answer = Read-Host '이 DB에 목 catalog를 게시할까요? 공개 서비스의 부스·지도·공연이 바뀝니다 (yes/no)'
         if ($answer -ne 'yes') {
             Write-Host '취소했습니다. DB는 바뀌지 않았습니다.'
-            $exitCode = 0
-            return
+            return 0
         }
     }
 
@@ -134,10 +146,15 @@ try {
     Write-Host '  2) /readyz가 200인지, /api/v2/spaces의 부스가 20개인지 확인합니다.'
     Write-Host '  3) 공지·굿즈는 dev/admin-mock/seed-admin-content.mjs로 넣습니다.'
     Write-Host ("  되돌리려면: rollback --revision=<이전 published id> --expected-current={0} --actor=<이름>" -f $draft)
-    $exitCode = 0
+    return 0
+}
+
+try {
+    $exitCode = Invoke-MockCatalogPublish
 }
 catch {
     Write-Host ("실패: {0}" -f $_.Exception.Message) -ForegroundColor Red
+    $exitCode = 1
 }
 finally {
     foreach ($name in 'PREFLIGHT_DATASOURCE_URL', 'PREFLIGHT_DATASOURCE_USERNAME', 'PREFLIGHT_DATASOURCE_PASSWORD',
