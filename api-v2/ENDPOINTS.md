@@ -27,7 +27,7 @@
 | GET | `/api/v2/stamp-guide` | 스탬프 안내·공통 QR | STAMP-START, STAMP-COLLECT, STAMP-REWARD | normal, missing-optional, error, bad-request, rate-limited |
 | POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, error, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, unconfigured, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/crowding` | 혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지 | ADM-CROWD | normal, full, error, precondition-required, not-festival-day, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/crowding` | 혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지 | ADM-CROWD | normal, full, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, validation-failed, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices/{noticeId}` | 공지 수정 초기값 | ADM-NOTICE-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |

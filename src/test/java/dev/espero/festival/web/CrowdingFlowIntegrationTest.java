@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -102,7 +103,7 @@ class CrowdingFlowIntegrationTest {
     }
 
     @Test
-    void refusesToSaveBeforeTheFestivalAndShowsTheFirstDayAsBeforeOpen() throws Exception {
+    void savesTheFirstOperatingDayBeforeTheFestivalAndKeepsPublicBeforeOpen() throws Exception {
         publish(DEVELOPMENT_CATALOG);
         clock.set(OffsetDateTime.parse("2026-09-28T12:00:00+09:00"));
 
@@ -111,11 +112,11 @@ class CrowdingFlowIntegrationTest {
             .andExpect(jsonPath("$.data.operatingDay").value("2026-09-29"))
             .andExpect(jsonPath("$.data.operatingStatus").value("BEFORE_OPEN"));
 
-        assertRejectedAsNotAFestivalDay();
+        assertSavedForSelectedOperatingDay("2026-09-29");
     }
 
     @Test
-    void refusesToSaveOnAGapDayAndShowsTheNextDayAsBeforeOpen() throws Exception {
+    void savesTheNextOperatingDayOnAGapDayAndKeepsPublicBeforeOpen() throws Exception {
         Path withGap = tempDir.resolve("gap-catalog.json");
         String manifest = Files.readString(DEVELOPMENT_CATALOG).replaceFirst(
             "(?s)\\{\\s*\"festivalDate\": \"2026-09-30\".*?\\},\\s*",
@@ -131,11 +132,11 @@ class CrowdingFlowIntegrationTest {
             .andExpect(jsonPath("$.data.operatingDay").value("2026-10-01"))
             .andExpect(jsonPath("$.data.operatingStatus").value("BEFORE_OPEN"));
 
-        assertRejectedAsNotAFestivalDay();
+        assertSavedForSelectedOperatingDay("2026-10-01");
     }
 
     @Test
-    void refusesToSaveAfterTheFestivalAndShowsTheLastDayAsClosed() throws Exception {
+    void savesTheLastOperatingDayAfterTheFestivalAndKeepsPublicClosed() throws Exception {
         publish(DEVELOPMENT_CATALOG);
         clock.set(OffsetDateTime.parse("2026-10-02T12:00:00+09:00"));
 
@@ -144,7 +145,7 @@ class CrowdingFlowIntegrationTest {
             .andExpect(jsonPath("$.data.operatingDay").value("2026-10-01"))
             .andExpect(jsonPath("$.data.operatingStatus").value("CLOSED"));
 
-        assertRejectedAsNotAFestivalDay();
+        assertSavedForSelectedOperatingDay("2026-10-01");
     }
 
     @Test
@@ -234,19 +235,22 @@ class CrowdingFlowIntegrationTest {
         )).isEqualTo(1);
     }
 
-    private void assertRejectedAsNotAFestivalDay() throws Exception {
+    private void assertSavedForSelectedOperatingDay(String operatingDay) throws Exception {
         String etag = adminCrowding()
             .andExpect(status().isOk())
             .andReturn().getResponse().getHeader("ETag");
 
         save(etag, nextKey(), "CROWDED")
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.error.code").value("NOT_FESTIVAL_DAY"));
+            .andExpect(status().isNoContent());
 
+        adminCrowding()
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.operatingDay").value(operatingDay))
+            .andExpect(jsonPath("$.data.savedLevel").value("CROWDED"));
         assertThat(jdbc.queryForObject(
-            "SELECT count(*) FROM crowding_state_dynamic", Map.of(), Long.class
-        )).isZero();
-        assertThat(auditCount()).isZero();
+            "SELECT operating_date FROM crowding_state_dynamic", Map.of(), LocalDate.class
+        )).isEqualTo(LocalDate.parse(operatingDay));
+        assertThat(auditCount()).isEqualTo(1);
     }
 
     private ResultActions publicCrowding() throws Exception {

@@ -67,7 +67,7 @@ export function applyAdminContract(s,ops){
   crowdingPut.successStatus=204;
   crowdingPut.ifMatchRequired=true;
   crowdingPut.idempotencyKeyRequired=true;
-  crowdingPut.scenarios.push('precondition-required','not-festival-day','edit-conflict');
+  crowdingPut.scenarios.push('precondition-required','edit-conflict');
   find('getConfig').scenarios.push('all-languages');
   find('getNotices').conditional=true;
   find('getNotices').cacheControl='private, no-cache, must-revalidate';

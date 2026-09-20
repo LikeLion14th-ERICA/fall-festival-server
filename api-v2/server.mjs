@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { createState,execute,ApiFailure,dayKst,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
+import { createState,execute,ApiFailure,crowdingDayFor,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
 import { validate } from './validate.mjs';
 
 const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
@@ -117,13 +117,12 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='unsupported-media-type')failure(415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.');
       if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(route.operationId==='getGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
-      if(scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
       let result;
       if(route.operationId==='putAdminCrowding'){
         const key=req.headers['idempotency-key'];
         const fingerprint=stableJson({
-          operatingDay:dayKst(now),
+          operatingDay:crowdingDayFor(now),
           payload:{level:body.level,confirmFull:body.confirmFull===true},
         });
         const prior=state.idempotency[key];

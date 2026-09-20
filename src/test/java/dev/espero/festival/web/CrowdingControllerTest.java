@@ -116,6 +116,22 @@ class CrowdingControllerTest {
     }
 
     @Test
+    void adminReadsTheSelectedOperatingDaysSavedLevelOutsideTheFestivalDay() {
+        schedule();
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-01")))
+            .thenReturn(Optional.of(new CrowdingRecord("FULL", Instant.parse("2030-09-30T06:30:00Z"))));
+        CrowdingViewService service = serviceAt("2030-09-30T05:00:00Z");
+
+        CrowdingResponse publicData = service.current(request).response();
+        CrowdingResponse adminData = service.currentForAdmin(request).response();
+
+        assertThat(publicData.savedLevel()).isNull();
+        assertThat(adminData.operatingDay()).isEqualTo(java.time.LocalDate.parse("2030-10-01"));
+        assertThat(adminData.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.BEFORE_OPEN);
+        assertThat(adminData.savedLevel()).isEqualTo("FULL");
+    }
+
+    @Test
     void rejectsAnUnconfiguredSchedule() {
         when(contextService.currentPublished()).thenReturn(ApiMetaTestFixtures.PUBLISHED_CONTEXT);
         when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of());

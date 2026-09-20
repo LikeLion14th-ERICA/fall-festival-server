@@ -99,6 +99,7 @@ class CrowdingControllerOpenApiTest {
         ConditionalResponseSupport conditional = new ConditionalResponseSupport(new tools.jackson.databind.ObjectMapper());
         etag = conditional.strongEtag(new ConditionalApiResponse<>(response, ConditionalApiMeta.from(meta)));
         when(views.current(org.mockito.ArgumentMatchers.any())).thenReturn(snapshot);
+        when(views.currentForAdmin(org.mockito.ArgumentMatchers.any())).thenReturn(snapshot);
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
         mvc = MockMvcBuilders.standaloneSetup(new CrowdingController(
             views, store, conditional, preconditions, idempotency, audit, adminContext, clock,

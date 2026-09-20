@@ -106,7 +106,7 @@ export const operations = [
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
   ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','error'],'StampReceiptVerificationInput'],
   ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','unconfigured','error']],
-  ['putAdminCrowding','PUT','/admin/crowding','Crowding','혼잡도 저장·운영 시간 밖 허용·동일 상태 시각 유지',['ADM-CROWD'],[],['normal','full','error'],'CrowdingInput'],
+  ['putAdminCrowding','PUT','/admin/crowding','Crowding','혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지',['ADM-CROWD'],[],['normal','full','error'],'CrowdingInput'],
   ['getAdminNotices','GET','/admin/notices','AdminNotices','관리자 공지 목록',['ADM-NOTICE-LIST'],[],['normal','empty','error']],
   ['postAdminNotice','POST','/admin/notices','AdminNotice','공지 등록(검토 필요)',['ADM-NOTICE-EDIT'],[],['normal','error'],'NoticeInput'],
   ['getAdminNotice','GET','/admin/notices/{noticeId}','AdminNotice','공지 수정 초기값',['ADM-NOTICE-EDIT'],[],['normal','missing-optional','not-found','error']],

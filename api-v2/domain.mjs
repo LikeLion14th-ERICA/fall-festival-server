@@ -285,19 +285,20 @@ export function failure(status,code,message,details=[]) { throw new ApiFailure(s
 const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
 function find(items,id) { const item=items.find(x=>x.id===id);if(!item)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');return structuredClone(item); }
 const defaultDate = date => date < DATES[0] ? DATES[0] : date > DATES.at(-1) ? DATES.at(-1) : date;
+export const crowdingDayFor = now => defaultDate(dayKst(now));
 // Approved crowd messages (docs/wiki/product/translations.md). Japanese has no approved copy yet.
 const CROWD_MESSAGES={
   ko:{BEFORE_OPEN:t=>`오늘 재학생존 입장은 ${t}에 시작해요`,RELAXED:'재학생존의 공간이 많이 남았어요.',MODERATE:'재학생존의 공간이 절반 이상 찼어요.',CROWDED:'재학생존이 많이 혼잡해요.',FULL:'재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.',CLOSED:'오늘 재학생존 운영이 종료됐어요'},
   en:{BEFORE_OPEN:t=>`Student Zone entry starts at ${t} today`,RELAXED:'Plenty of space available',MODERATE:'At least half full',CROWDED:'Very crowded',FULL:'The Student Zone is full. Please use the Visitor Zone.',CLOSED:'The Student Zone is closed for today'},
   'zh-Hans':{BEFORE_OPEN:t=>`今日学生区${t}开放入场`,RELAXED:'空间充足',MODERATE:'已占用一半以上',CROWDED:'非常拥挤',FULL:'本校学生区已满，请前往访客区。',CLOSED:'今日学生区已关闭'},
 };
-function crowdInfo(state,now,scenario,locale='ko') {
+function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=false) {
   const today=dayKst(now);
   let operatingDay=defaultDate(today);
   const hours=hoursFor(state,operatingDay);
   const opensAt=`${operatingDay}T${hours.opensAt}:00+09:00`;
   const closesAt=`${operatingDay}T${hours.closesAt}:00+09:00`;
-  const stored=scenario==='unmodified'||today!==operatingDay?null:state.crowding[operatingDay];
+  const stored=scenario==='unmodified'||(!includeSelectedDaySavedState&&today!==operatingDay)?null:state.crowding[operatingDay];
   const status=+new Date(now)<+new Date(opensAt)?'BEFORE_OPEN':+new Date(now)>=+new Date(closesAt)?'CLOSED':stored?.level||'RELAXED';
   const colors={RELAXED:'green',MODERATE:'orange',CROWDED:'red',FULL:'black'};
   const messages=CROWD_MESSAGES[locale]||CROWD_MESSAGES.ko;
@@ -345,11 +346,10 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   if(extra)return {status:extra.status||200,data:extra.data,now,locale};
   switch(op.operationId){
     case 'getConfig':data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:DATES,defaultDate:empty?null:defaultDate(date)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}],welcomeDay:scenario==='welcome-ready'?link('에리카 웰컴 데이'):null}};break;
-    case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale);break;
+    case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale,op.operationId==='getAdminCrowding');break;
     case 'putAdminCrowding':{
       if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');
-      const savedDay=dayKst(now);
-      if(!DATES.includes(savedDay))failure(409,'NOT_FESTIVAL_DAY','현재 날짜는 축제 운영일이 아닙니다.');
+      const savedDay=crowdingDayFor(now);
       const stored=state.crowding[savedDay];
       if(stored?.level!==body.level)state.crowding[savedDay]={level:body.level,updatedAt:mutate()};
       return {status:204,data:null,now,locale};

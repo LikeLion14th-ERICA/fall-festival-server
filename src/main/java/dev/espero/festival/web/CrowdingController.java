@@ -79,7 +79,7 @@ public class CrowdingController {
         HttpServletRequest request
     ) {
         validateAdminQuery(request);
-        CrowdingViewService.CrowdingSnapshot snapshot = views.current(request);
+        CrowdingViewService.CrowdingSnapshot snapshot = views.currentForAdmin(request);
         return conditionalResponses.respond(request, snapshot.response(), snapshot.meta());
     }
 
@@ -91,15 +91,7 @@ public class CrowdingController {
     ) {
         validateHeaders(request);
         CrowdingLevel level = validateInput(input);
-        CrowdingViewService.CrowdingSnapshot snapshot = views.current(request);
-        if (!views.isActualFestivalDay(snapshot)) {
-            throw new ApiException(
-                HttpStatus.CONFLICT,
-                "NOT_FESTIVAL_DAY",
-                "현재 날짜는 축제 운영일이 아닙니다.",
-                false
-            );
-        }
+        CrowdingViewService.CrowdingSnapshot snapshot = views.currentForAdmin(request);
 
         AdminPrincipal principal = adminContext.requireCurrent();
         String idempotencyKey = singleHeader(request, "Idempotency-Key");

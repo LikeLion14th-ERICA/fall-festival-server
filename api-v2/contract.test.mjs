@@ -292,9 +292,11 @@ test('Crowding no-op, FULL confirmation, day boundary, restoration, shared read 
   const outsideSession='crowding-outside-festival-day';
   const outsideAdmin=await call('/api/v2/admin/crowding',{session:outsideSession,headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'}});
   const outsideSave=await call('/api/v2/admin/crowding',{session:outsideSession,method:'PUT',headers:{...admin,'If-Match':outsideAdmin.headers.get('etag'),'Idempotency-Key':'crowding-outside','X-Mock-Time':'2030-09-30T10:00:00+09:00'},body:{level:'CROWDED'}});
-  assert.equal(outsideSave.status,409);assert.equal(outsideSave.body.error.code,'NOT_FESTIVAL_DAY');
+  assert.equal(outsideSave.status,204);
+  const outsideSaved=await call('/api/v2/admin/crowding',{session:outsideSession,headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'}});
+  assert.equal(outsideSaved.body.data.operatingDay,'2030-10-01');assert.equal(outsideSaved.body.data.savedLevel,'CROWDED');
   const festivalOpening=await call('/api/v2/crowding',{session:outsideSession,headers:{'X-Mock-Time':'2030-10-01T14:00:00+09:00'}});
-  assert.equal(festivalOpening.body.data.status,'MODERATE');
+  assert.equal(festivalOpening.body.data.status,'CROWDED');
 });
 test('Crowding conditional reads return an ETag and 304 without a body',async()=>{
   const first=await call('/api/v2/crowding',{session:'crowding-conditional'});

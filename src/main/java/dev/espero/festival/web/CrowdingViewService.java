@@ -45,6 +45,14 @@ public class CrowdingViewService {
     }
 
     public CrowdingSnapshot current(HttpServletRequest request) {
+        return current(request, false);
+    }
+
+    public CrowdingSnapshot currentForAdmin(HttpServletRequest request) {
+        return current(request, true);
+    }
+
+    private CrowdingSnapshot current(HttpServletRequest request, boolean includeSelectedDaySavedState) {
         PublishedFestivalContext context = publishedContext();
         List<CrowdingSchedule> schedules = schedules(context);
         Instant now = clock.instant();
@@ -52,7 +60,7 @@ public class CrowdingViewService {
         CrowdingSchedule selected = select(schedules, today);
         Optional<CrowdingRecord> saved;
         try {
-            saved = today.equals(selected.operatingDate())
+            saved = includeSelectedDaySavedState || today.equals(selected.operatingDate())
                 ? store.findFor(context.festivalId(), selected.operatingDate())
                 : Optional.empty();
         } catch (DataAccessException exception) {
@@ -71,10 +79,6 @@ public class CrowdingViewService {
         Instant now
     ) {
         return snapshot(request, context, schedules, today, selected, saved, now);
-    }
-
-    public boolean isActualFestivalDay(CrowdingSnapshot snapshot) {
-        return snapshot.today().equals(snapshot.operatingDay());
     }
 
     private CrowdingSnapshot snapshot(
