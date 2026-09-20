@@ -51,9 +51,6 @@ class OperationalCatalogDraftTest {
         for (JsonNode item : draft.path("spaceMenuItems")) {
             gaps.add(fill((ObjectNode) item, "priceAmount", 1));
         }
-        for (JsonNode song : draft.path("artistSongs")) {
-            gaps.add(fill((ObjectNode) song, "url", "https://example.invalid/song"));
-        }
         for (JsonNode performance : draft.path("performances")) {
             String date = performance.path("festivalDate").asString();
             if (performance.path("startsAt").isNull()) {

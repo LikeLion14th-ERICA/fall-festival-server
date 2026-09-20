@@ -12,8 +12,9 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Each 2026 goods draft is a product request body whose only gap is the
- * uploaded image id. Filling that id must give a body the admin API accepts.
+ * Each 2026 goods draft is a product request body. Images already carry a
+ * real uploaded media id once uploaded; any still-null id is filled with a
+ * placeholder here so the whole draft can be validated end to end.
  */
 class OperationalGoodsDraftTest {
 
@@ -27,8 +28,9 @@ class OperationalGoodsDraftTest {
         for (JsonNode product : products) {
             ObjectNode body = (ObjectNode) product.path("body").deepCopy();
             for (JsonNode image : body.path("images")) {
-                assertThat(image.path("mediaId").isNull()).as(product.path("key").asString()).isTrue();
-                ((ObjectNode) image).put("mediaId", UUID.randomUUID().toString());
+                if (image.path("mediaId").isNull()) {
+                    ((ObjectNode) image).put("mediaId", UUID.randomUUID().toString());
+                }
             }
             GoodsInput input = JSON.treeToValue(body, GoodsInput.class);
             GoodsInputValidator.validate(input);

@@ -7,11 +7,11 @@
         "translations": {
           "ko": {
             "name": "야구 유니폼",
-            "description": null
+            "description": "치수(cm)\nS(90) 총장 73·어깨넓이 47·가슴둘레 111·밑단둘레 111·소매장 21\nM(95) 총장 75·어깨넓이 49·가슴둘레 116·밑단둘레 116·소매장 22\nL(100) 총장 77·어깨넓이 51·가슴둘레 121·밑단둘레 121·소매장 23\nXL(105) 총장 79·어깨넓이 53·가슴둘레 126·밑단둘레 126·소매장 24\n2XL(110) 총장 81·어깨넓이 55·가슴둘레 131·밑단둘레 131·소매장 25"
           },
           "en": {
             "name": "Baseball Jersey",
-            "description": null
+            "description": "Size chart (cm)\nS(90) Length 73 / Shoulder 47 / Chest 111 / Hem 111 / Sleeve 21\nM(95) Length 75 / Shoulder 49 / Chest 116 / Hem 116 / Sleeve 22\nL(100) Length 77 / Shoulder 51 / Chest 121 / Hem 121 / Sleeve 23\nXL(105) Length 79 / Shoulder 53 / Chest 126 / Hem 126 / Sleeve 24\n2XL(110) Length 81 / Shoulder 55 / Chest 131 / Hem 131 / Sleeve 25"
           }
         },
         "price": {
@@ -20,10 +20,17 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "c1a7db8a-b215-4082-a99b-23e093f35f80",
             "alt": {
-              "ko": "야구 유니폼",
-              "en": "Baseball Jersey"
+              "ko": "야구 유니폼 앞면",
+              "en": "Baseball Jersey Front"
+            }
+          },
+          {
+            "mediaId": "6547da24-f636-4640-b28a-d479ab9dda0e",
+            "alt": {
+              "ko": "야구 유니폼 뒷면",
+              "en": "Baseball Jersey Back"
             }
           }
         ],
@@ -128,11 +135,11 @@
         "translations": {
           "ko": {
             "name": "축구 유니폼",
-            "description": null
+            "description": "치수(cm)\nS(90) 총장 68·어깨넓이 42.5·가슴둘레 104·밑단둘레 102·소매장 19\nM(95) 총장 70·어깨넓이 45·가슴둘레 110·밑단둘레 108·소매장 21\nL(100) 총장 72·어깨넓이 47.5·가슴둘레 116·밑단둘레 114·소매장 22\nXL(105) 총장 74·어깨넓이 50·가슴둘레 122·밑단둘레 120·소매장 23\n2XL(110) 총장 76·어깨넓이 52.5·가슴둘레 128·밑단둘레 126·소매장 24"
           },
           "en": {
             "name": "Football Jersey",
-            "description": null
+            "description": "Size chart (cm)\nS(90) Length 68 / Shoulder 42.5 / Chest 104 / Hem 102 / Sleeve 19\nM(95) Length 70 / Shoulder 45 / Chest 110 / Hem 108 / Sleeve 21\nL(100) Length 72 / Shoulder 47.5 / Chest 116 / Hem 114 / Sleeve 22\nXL(105) Length 74 / Shoulder 50 / Chest 122 / Hem 120 / Sleeve 23\n2XL(110) Length 76 / Shoulder 52.5 / Chest 128 / Hem 126 / Sleeve 24"
           }
         },
         "price": {
@@ -141,10 +148,17 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "d5b828fc-7363-4d81-88f4-0a31402a5a15",
             "alt": {
-              "ko": "축구 유니폼",
-              "en": "Football Jersey"
+              "ko": "축구 유니폼 앞면",
+              "en": "Football Jersey Front"
+            }
+          },
+          {
+            "mediaId": "5d1d57e7-b201-4806-982d-af8281f8bdb4",
+            "alt": {
+              "ko": "축구 유니폼 뒷면",
+              "en": "Football Jersey Back"
             }
           }
         ],
@@ -262,10 +276,17 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "04e52818-84e7-43fe-9169-50017ef48c5d",
             "alt": {
               "ko": "바람막이",
               "en": "Windbreaker"
+            }
+          },
+          {
+            "mediaId": "53239be7-264f-4364-b283-5b1ba5de18ab",
+            "alt": {
+              "ko": "바람막이 상세 이미지",
+              "en": "Windbreaker Detail"
             }
           }
         ],
@@ -383,10 +404,17 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "c140fb56-95e7-423c-a13b-f0e798471c78",
             "alt": {
-              "ko": "반다나",
-              "en": "Bandana"
+              "ko": "반다나 민트",
+              "en": "Bandana Mint"
+            }
+          },
+          {
+            "mediaId": "19ff1eeb-bb27-4350-8a16-28de16cad444",
+            "alt": {
+              "ko": "반다나 블루",
+              "en": "Bandana Blue"
             }
           }
         ],
@@ -463,11 +491,19 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "86625cee-fb35-4e1b-a370-ebb6aaad9651",
             "alt": {
-              "ko": "슬로건",
-              "en": "Cheering Towel",
-              "zh-Hans": "应援毛巾"
+              "ko": "슬로건 앞면",
+              "en": "Cheering Towel Front",
+              "zh-Hans": "应援毛巾 正面"
+            }
+          },
+          {
+            "mediaId": "6ff36bb8-dd8d-4e75-8a32-766400d0b525",
+            "alt": {
+              "ko": "슬로건 뒷면",
+              "en": "Cheering Towel Back",
+              "zh-Hans": "应援毛巾 背面"
             }
           }
         ],
@@ -500,7 +536,7 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "d599d001-578e-4502-8d60-d98e4e390766",
             "alt": {
               "ko": "짐색",
               "en": "Drawstring Bag",
@@ -537,7 +573,7 @@
         },
         "images": [
           {
-            "mediaId": null,
+            "mediaId": "5bb9c644-fe9e-4b71-bd01-0c9e9420b8ed",
             "alt": {
               "ko": "키캡키링",
               "en": "Keycap Keychain",
