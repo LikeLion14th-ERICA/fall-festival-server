@@ -938,7 +938,7 @@
       "locale": "ko",
       "name": "주류 판매 부스 1",
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 아래쪽, 왼쪽 흡연장과 운영본부 사이",
-      "hoursText": null,
+      "hoursText": "18:00 ~ 23:30",
       "descriptionText": null,
       "usageText": null
     },
@@ -947,7 +947,7 @@
       "locale": "ko",
       "name": "주류 판매 부스 2",
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 아래쪽, 왼쪽 흡연장과 운영본부 사이",
-      "hoursText": null,
+      "hoursText": "18:00 ~ 23:30",
       "descriptionText": null,
       "usageText": null
     },
@@ -1145,122 +1145,122 @@
     {
       "artistId": "nct-wish",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/1zJUr9Oo5zEjvJrdlg67jQ"
     },
     {
       "artistId": "nct-wish",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/1Y3Z8ZgjFse47Nt2ZR4EFU"
     },
     {
       "artistId": "nct-wish",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/08aIVRb9ucpxKdAJb50HAx"
     },
     {
       "artistId": "nowimyoung",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/12A7D36p9PqK66yVlfpYa4"
     },
     {
       "artistId": "nowimyoung",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/1alWuqrk1v7xzECNR8ovRo"
     },
     {
       "artistId": "nowimyoung",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/6tTz1LRQ89JkBdD9iUBPO9"
     },
     {
       "artistId": "kim-haon",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/3uJN5Acv1WMsITAEvHuJox"
     },
     {
       "artistId": "kim-haon",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/3m08yeqLjXsqblRU3KXPAp"
     },
     {
       "artistId": "kim-haon",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/21IVUjbu1ms4ZISGt74NCy"
     },
     {
       "artistId": "lucenne",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/6uosenLUNFZtOIih5T0qfV"
     },
     {
       "artistId": "lucenne",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/1pBUzZE9PoKLoPxo6QxsG6"
     },
     {
       "artistId": "lucenne",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/26GehcyfHwgzfS0ok9yDYk"
     },
     {
       "artistId": "heegyu",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/5oCP9TCoQ26IyPBjoBI0hr"
     },
     {
       "artistId": "heegyu",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/1KTPpYM8cdkHaEgXN7NvgW"
     },
     {
       "artistId": "heegyu",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/25Q0b3Nph0tWYPlbJhZou7"
     },
     {
       "artistId": "ahof",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/4nKnOIDXFjRSMG4vkXDwzY"
     },
     {
       "artistId": "ahof",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/3hXsfPCNGZnZx0l4AYvh8E"
     },
     {
       "artistId": "ahof",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/0ku6osTANoM57WO6LWAgwZ"
     },
     {
       "artistId": "alphadriveone",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/4LYM1IwuTq6b5vqTdQTbag"
     },
     {
       "artistId": "alphadriveone",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/2tMfEwk96cjTSRTelQkwx6"
     },
     {
       "artistId": "alphadriveone",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/5SCyHMxB5SWZP4EAKI5YRu"
     },
     {
       "artistId": "fromis-9",
       "sortOrder": 1,
-      "url": null
+      "url": "https://open.spotify.com/track/7t4Z19BqZ23ExgdiOP0nf6"
     },
     {
       "artistId": "fromis-9",
       "sortOrder": 2,
-      "url": null
+      "url": "https://open.spotify.com/track/70RQYCjVacuJgeYAmU2sXd"
     },
     {
       "artistId": "fromis-9",
       "sortOrder": 3,
-      "url": null
+      "url": "https://open.spotify.com/track/6oNLSQX8bcAdbCElZYju3v"
     }
   ],
   "artistSongTranslations": [
