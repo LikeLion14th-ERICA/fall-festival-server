@@ -98,9 +98,25 @@ function Invoke-MockCatalogPublish {
             ForEach-Object { Write-Host "  $_" }
         Write-Host ''
         Write-Host '확인할 점' -ForegroundColor Yellow
-        Write-Host "  - schema: 지금 '$Schema'로 조회했습니다. 다른 schema면 -Schema로 지정하세요."
-        Write-Host '  - 축제 UUID: GET /api/v2/config 응답의 data.festival.id와 같은지 확인하세요.'
-        Write-Host '  - 권한: 위에 SCHEMA_MISSING_OR_INACCESSIBLE·TABLE_ACCESS_INCOMPLETE가 있으면 이 DB 계정이 해당 schema를 읽지 못합니다.'
+        # A failed connection reports only its SQLSTATE, so say what each one means.
+        $sqlState = ($preflight | Select-String -Pattern '^sqlState=(.+)$').Matches.Groups[1].Value
+        switch ($sqlState) {
+            '08001' { Write-Host '  - 서버에 닿지 못했습니다. host·port, 방화벽, VPN·SSH tunnel 사용 여부를 확인하세요.' }
+            '08004' { Write-Host '  - 서버가 연결을 거절했습니다. database 이름, 사용자, SSL 요구(?sslmode=require), 접속 IP 허용 목록, pooler 전용 포트·사용자 형식을 확인하세요.' }
+            '28P01' { Write-Host '  - 비밀번호가 맞지 않습니다.' }
+            '28000' { Write-Host '  - 이 사용자·IP로는 접속이 허용되지 않습니다(pg_hba). 제공자에게 확인하세요.' }
+            '3D000' { Write-Host '  - 그 이름의 database가 없습니다. URL 끝의 database 이름을 확인하세요.' }
+            '53300' { Write-Host '  - 연결 수가 한도에 찼습니다. 잠시 뒤 다시 시도하세요.' }
+            default {
+                Write-Host "  - schema: 지금 '$Schema'로 조회했습니다. 다른 schema면 -Schema로 지정하세요."
+                Write-Host '  - 축제 UUID: GET /api/v2/config 응답의 data.festival.id와 같은지 확인하세요.'
+                Write-Host '  - 권한: 위에 SCHEMA_MISSING_OR_INACCESSIBLE·TABLE_ACCESS_INCOMPLETE가 있으면 이 DB 계정이 해당 schema를 읽지 못합니다.'
+            }
+        }
+        if ($sqlState) {
+            Write-Host '  - DBeaver 연결이 SSH tunnel을 쓰고 있다면, 같은 tunnel을 연 뒤 -DatabaseUrl을 127.0.0.1:<로컬포트>로 주세요.'
+            throw "DB에 연결하지 못했습니다 (sqlState=$sqlState)."
+        }
         throw "이 festival($FestivalId)의 revision을 찾지 못했습니다."
     }
     Write-Host ''
