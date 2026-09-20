@@ -20,14 +20,14 @@
         },
         "images": [
           {
-            "mediaId": "c1a7db8a-b215-4082-a99b-23e093f35f80",
+            "mediaId": "fc961b7c-6cc9-4f24-9dce-739174ed662f",
             "alt": {
               "ko": "야구 유니폼 앞면",
               "en": "Baseball Jersey Front"
             }
           },
           {
-            "mediaId": "6547da24-f636-4640-b28a-d479ab9dda0e",
+            "mediaId": "aacbd008-17a1-40b9-a56c-0b331edb9ee5",
             "alt": {
               "ko": "야구 유니폼 뒷면",
               "en": "Baseball Jersey Back"
@@ -148,14 +148,14 @@
         },
         "images": [
           {
-            "mediaId": "d5b828fc-7363-4d81-88f4-0a31402a5a15",
+            "mediaId": "26888bfc-5fc3-4db6-9894-8aa8ec9a4314",
             "alt": {
               "ko": "축구 유니폼 앞면",
               "en": "Football Jersey Front"
             }
           },
           {
-            "mediaId": "5d1d57e7-b201-4806-982d-af8281f8bdb4",
+            "mediaId": "6ade0606-24ce-45b4-98f0-4e96bc2309d9",
             "alt": {
               "ko": "축구 유니폼 뒷면",
               "en": "Football Jersey Back"
@@ -276,14 +276,14 @@
         },
         "images": [
           {
-            "mediaId": "04e52818-84e7-43fe-9169-50017ef48c5d",
+            "mediaId": "8e7dc5da-c2cd-49d1-951c-237797648697",
             "alt": {
               "ko": "바람막이",
               "en": "Windbreaker"
             }
           },
           {
-            "mediaId": "53239be7-264f-4364-b283-5b1ba5de18ab",
+            "mediaId": "ecdef538-1f57-4be9-8113-ab0374a47348",
             "alt": {
               "ko": "바람막이 상세 이미지",
               "en": "Windbreaker Detail"
@@ -404,14 +404,14 @@
         },
         "images": [
           {
-            "mediaId": "c140fb56-95e7-423c-a13b-f0e798471c78",
+            "mediaId": "201d3c02-85dc-43f4-952d-d3387d354906",
             "alt": {
               "ko": "반다나 민트",
               "en": "Bandana Mint"
             }
           },
           {
-            "mediaId": "19ff1eeb-bb27-4350-8a16-28de16cad444",
+            "mediaId": "e47a67a5-8275-4ac7-9954-5746a2111370",
             "alt": {
               "ko": "반다나 블루",
               "en": "Bandana Blue"
@@ -491,7 +491,7 @@
         },
         "images": [
           {
-            "mediaId": "86625cee-fb35-4e1b-a370-ebb6aaad9651",
+            "mediaId": "de88686f-6fab-4f27-bc60-720c6f1b87b1",
             "alt": {
               "ko": "슬로건 앞면",
               "en": "Cheering Towel Front",
@@ -499,7 +499,7 @@
             }
           },
           {
-            "mediaId": "6ff36bb8-dd8d-4e75-8a32-766400d0b525",
+            "mediaId": "eb2707c3-4f27-44e4-8bee-cd5862c8c5b9",
             "alt": {
               "ko": "슬로건 뒷면",
               "en": "Cheering Towel Back",
@@ -536,7 +536,7 @@
         },
         "images": [
           {
-            "mediaId": "d599d001-578e-4502-8d60-d98e4e390766",
+            "mediaId": "c8a62212-eef4-4596-b1d1-c37b3d6a66c1",
             "alt": {
               "ko": "짐색",
               "en": "Drawstring Bag",
@@ -573,7 +573,7 @@
         },
         "images": [
           {
-            "mediaId": "5bb9c644-fe9e-4b71-bd01-0c9e9420b8ed",
+            "mediaId": "27aca13d-2cf0-4561-8a29-fe7b7d392845",
             "alt": {
               "ko": "키캡키링",
               "en": "Keycap Keychain",
