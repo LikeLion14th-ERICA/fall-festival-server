@@ -370,13 +370,15 @@ class OperationalAccountSettingsIntegrationTest {
                 "SELECT account_holder FROM ticket_guide_revisions");
             assertPermissionDenied(connection, EXPORT_ROLE, "SELECT count(*) FROM ticket_guide");
 
-            // Crowding, notices and goods stay outside every catalog role.
+            // Crowding, notices, goods, media and admin auth stay outside every catalog role.
             for (String role : List.of(EXPORT_ROLE, PUBLISH_ROLE)) {
                 for (String table : List.of(
                     "crowding_state", "crowding_state_dynamic", "notices", "notice_translations",
                     "notice_links", "notice_link_translations", "notice_templates", "notice_template_translations",
                     "goods", "goods_translations", "goods_colors",
-                    "goods_color_translations", "goods_sizes", "goods_size_translations", "goods_combinations"
+                    "goods_color_translations", "goods_sizes", "goods_size_translations", "goods_combinations",
+                    "media_assets", "goods_images", "goods_image_translations",
+                    "admin_accounts", "admin_refresh_sessions", "admin_audit_events", "admin_idempotency_records"
                 )) {
                     assertPermissionDenied(connection, role, "SELECT count(*) FROM " + table);
                 }

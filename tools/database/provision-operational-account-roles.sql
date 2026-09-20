@@ -1,4 +1,4 @@
--- Run with psql after V15 (or its merge-time renumbered successor) has migrated.
+-- Run with psql after every migration has been applied.
 -- Example variables are intentionally omitted: role and schema names are supplied by each DB provider.
 -- Required psql variables: schema, runtime_role, cleanup_role, account_operator_role,
 -- catalog_export_role, catalog_publish_role.
@@ -96,5 +96,24 @@ REVOKE ALL ON TABLE :"schema".goods_size_translations FROM :"catalog_export_role
 REVOKE ALL ON TABLE :"schema".goods_size_translations FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".goods_combinations FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".goods_combinations FROM :"catalog_publish_role";
+
+-- Goods images and their media assets are uploaded and served outside the catalog.
+REVOKE ALL ON TABLE :"schema".media_assets FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".media_assets FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_images FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_images FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".goods_image_translations FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".goods_image_translations FROM :"catalog_publish_role";
+
+-- Admin credentials, refresh sessions, audit events and idempotency records
+-- must never be reachable from the catalog workbench.
+REVOKE ALL ON TABLE :"schema".admin_accounts FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".admin_accounts FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".admin_refresh_sessions FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".admin_refresh_sessions FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".admin_audit_events FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".admin_audit_events FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".admin_idempotency_records FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".admin_idempotency_records FROM :"catalog_publish_role";
 
 COMMIT;
