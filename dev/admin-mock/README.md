@@ -39,6 +39,10 @@ import → publish를 한 번에 합니다. 비밀번호는 화면에 남지 않
 - 사전 점검이 `STOP_AND_REVIEW`로 나오는 것은 **정상**입니다. 이미 축제·catalog 데이터가 있는 DB라는 뜻이며,
   이 작업은 migration이 아니라 기존 게시본 위에 새 revision을 얹는 것입니다.
 - 기준 revision이 그사이 바뀌면 `BASE_REVISION_CONFLICT`로 멈춥니다. 다시 실행하면 새 기준으로 진행합니다.
+- 연결 풀러(PgBouncer 등) 뒤의 DB는 사전 점검의 startup 옵션을 거부해 `08004`·`08P01`로 멈춥니다. 이때
+  스크립트가 catalog CLI로 접속을 다시 시도해 원인을 알려 주며, 직접 접속 포트가 없으면 DBeaver에서
+  `SELECT id FROM festival_revisions WHERE state = 'published';`로 확인한 값을 넣어
+  `-SkipPreflight -BaselineRevision <id>`로 진행합니다. 이 경우 사전 점검이 빠지므로 값을 직접 확인해야 합니다.
 
 게시 뒤 **백엔드를 재시작**해야 공개 API에 새 revision이 보입니다. `/readyz`가 200이고 `/api/v2/spaces`의
 `meta.revision`이 올라갔는지 확인합니다.

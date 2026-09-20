@@ -25,6 +25,11 @@ param(
     [string]$Schema = 'public',
     [string]$Manifest = 'dev/catalog/frontend-mock-catalog.json',
     [string]$Jar = 'target/fall-festival-server-0.0.1-SNAPSHOT.jar',
+    # The published revision to build on. Required with -SkipPreflight.
+    [string]$BaselineRevision,
+    # For databases behind a connection pooler that rejects the preflight's startup
+    # options. The preflight is the safety check, so state the baseline yourself.
+    [switch]$SkipPreflight,
     # Stops after the preflight summary without importing anything.
     [switch]$DryRun,
     # Skips the confirmation prompt for an unattended run.
@@ -65,7 +70,37 @@ $env:SPRING_FLYWAY_ENABLED = 'false'
 
 # A plain `return` inside the script body would skip the final exit and leak the
 # preflight's exit code, so the flow lives in a function that returns its own code.
+# The preflight hides server messages by design, so ask the catalog CLI, which
+# connects without startup options and prints what the server actually said.
+function Show-ConnectionError {
+    Write-Host ''
+    Write-Host '서버가 보낸 실제 메시지:' -ForegroundColor Yellow
+    $probe = & java "-Dloader.main=dev.espero.festival.CatalogCliApplication" -cp $Jar `
+        org.springframework.boot.loader.launch.PropertiesLauncher export `
+        --revision=00000000-0000-4000-8000-000000000001 --out=$([System.IO.Path]::GetTempFileName()) `
+        --spring.main.banner-mode=off --logging.level.root=WARN 2>&1
+    # A reachable database still fails this probe on the made-up revision, so only
+    # connection-level errors mean the CLI could not connect either.
+    $failedToConnect = $probe | Select-String -Pattern 'FATAL|refused|The connection attempt failed|연결 시도가 실패' |
+        Select-Object -First 3
+    if ($failedToConnect) {
+        $failedToConnect | ForEach-Object { Write-Host "  $_" }
+    }
+    else {
+        Write-Host '  catalog CLI는 이 DB에 접속했습니다. 사전 점검만 거절당했다는 뜻입니다.' -ForegroundColor Green
+        Write-Host '  연결 풀러(PgBouncer 등)가 사전 점검의 startup 옵션을 거부하는 경우입니다.'
+        Write-Host '  DBeaver에서 아래를 실행해 published revision을 확인한 뒤,'
+        Write-Host "    SELECT id FROM festival_revisions WHERE state = 'published';"
+        Write-Host '  -SkipPreflight -BaselineRevision <그 id>를 붙여 다시 실행하세요.'
+    }
+}
+
 function Invoke-MockCatalogPublish {
+    if ($SkipPreflight) {
+        if (-not $BaselineRevision) { throw '-SkipPreflight에는 -BaselineRevision이 필요합니다.' }
+        Write-Host '사전 점검을 건너뜁니다. 기준 revision은 입력값을 그대로 씁니다.' -ForegroundColor Yellow
+        return Invoke-ImportAndPublish -Baseline $BaselineRevision
+    }
     Write-Host '읽기 전용 사전 점검 중...' -ForegroundColor Cyan
     $preflight = & java "-Dloader.main=dev.espero.festival.preflight.DatabasePreflightApplication" -cp $Jar `
         org.springframework.boot.loader.launch.PropertiesLauncher 2>&1
@@ -114,6 +149,11 @@ function Invoke-MockCatalogPublish {
                 Write-Host '    · 그 밖에 접속 IP 허용 목록, pooler 전용 포트·사용자 형식도 확인하세요.'
             }
             '28P01' { Write-Host '  - 비밀번호가 맞지 않습니다.' }
+            '08P01' {
+                Write-Host '  - 서버가 접속 요청 형식을 거부했습니다. 연결 풀러(PgBouncer 등)가 사전 점검의 startup 옵션을 받지 않는 경우입니다.'
+                Write-Host '    · DB 제공자가 직접 접속용 포트를 따로 준다면 그 포트를 쓰세요.'
+                Write-Host '    · 없으면 -SkipPreflight -BaselineRevision <published revision id>로 진행할 수 있습니다.'
+            }
             '28000' { Write-Host '  - 이 사용자·IP로는 접속이 허용되지 않습니다(pg_hba). 제공자에게 확인하세요.' }
             '3D000' { Write-Host '  - 그 이름의 database가 없습니다. URL 끝의 database 이름을 확인하세요.' }
             '53300' { Write-Host '  - 연결 수가 한도에 찼습니다. 잠시 뒤 다시 시도하세요.' }
@@ -125,6 +165,7 @@ function Invoke-MockCatalogPublish {
         }
         if ($sqlState) {
             Write-Host '  - DBeaver 연결이 SSH tunnel을 쓰고 있다면, 같은 tunnel을 연 뒤 -DatabaseUrl을 127.0.0.1:<로컬포트>로 주세요.'
+            Show-ConnectionError
             throw "DB에 연결하지 못했습니다 (sqlState=$sqlState)."
         }
         throw "이 festival($FestivalId)의 revision을 찾지 못했습니다."
@@ -137,6 +178,14 @@ function Invoke-MockCatalogPublish {
     $published = @($revisions | Where-Object { $_.state -eq 'published' })
     if ($published.Count -gt 1) { throw 'published revision이 둘 이상입니다. 원인을 확인하기 전에는 진행하지 않습니다.' }
     $baseline = if ($published.Count -eq 1) { $published[0].id } else { 'none' }
+    if ($BaselineRevision) { $baseline = $BaselineRevision }
+
+    return Invoke-ImportAndPublish -Baseline $baseline
+}
+
+function Invoke-ImportAndPublish {
+    param([Parameter(Mandatory)][string]$Baseline)
+    $baseline = $Baseline
 
     Write-Host ''
     Write-Host ("기준 revision: {0}" -f $baseline)
