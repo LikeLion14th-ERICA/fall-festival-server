@@ -13,6 +13,7 @@ const requiredGates = [
 ];
 const forbiddenKey = /(password|secret|token|authorization|cookie|jdbc|databaseUrl|connectionString)/i;
 const forbiddenValue = /(jdbc:|postgres(?:ql)?:\/\/|bearer\s|-----begin .*private key-----)/i;
+const invalidJsonMessage = "error: invalid evidence JSON input";
 
 function fail(errors, message) { errors.push(message); }
 
@@ -131,6 +132,6 @@ try {
     console.log(`Evidence is structurally valid: ${evidencePath}`);
   }
 } catch (error) {
-  console.error(`error: ${error.message}`);
+  console.error(invalidJsonMessage);
   process.exitCode = 1;
 }

@@ -6,6 +6,7 @@ const sha256 = /^[0-9a-f]{64}$/;
 const identifier = /^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$/;
 const forbiddenKey = /(password|secret|token|authorization|cookie|jdbc|databaseUrl|connectionString)/i;
 const forbiddenValue = /(jdbc:|postgres(?:ql)?:\/\/|bearer\s|-----begin .*private key-----)/i;
+const invalidJsonMessage = "error: invalid recovery plan JSON input";
 
 function check(condition, errors, message) {
   if (!condition) errors.push(message);
@@ -72,6 +73,6 @@ try {
     console.log(`Recovery plan is structurally valid: ${file}`);
   }
 } catch (error) {
-  console.error(`error: ${error.message}`);
+  console.error(invalidJsonMessage);
   process.exitCode = 1;
 }
