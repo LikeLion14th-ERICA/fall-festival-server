@@ -34,6 +34,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Runs non-web operator entry points in separate JVMs against only a fresh
@@ -55,6 +59,8 @@ class OperatorToolProcessE2eTest {
     Path temporaryDirectory;
 
     private String databaseUrl;
+
+    private final JsonMapper json = JsonMapper.builder().findAndAddModules().build();
 
     @BeforeEach
     void migrateFreshDatabase() throws SQLException {
@@ -174,6 +180,134 @@ class OperatorToolProcessE2eTest {
         success(catalog("publish", "--revision=" + replacement, "--actor=operator-tool-e2e"));
         assertThat(currentPublishedRevision()).isEqualTo(replacement);
         assertThat(revisionState(corruptDraft)).isEqualTo("draft");
+    }
+
+    @Test
+    void catalogCliRoundTripsEveryManifestSectionIncludingHistoricalAssetsAndUnfilteredPins() throws Exception {
+        UUID baseline = currentPublishedRevision();
+        Path input = candidateManifest();
+        ObjectNode candidate = (ObjectNode) json.readTree(Files.readString(input));
+        ArrayNode assets = (ArrayNode) candidate.path("mapAssets");
+        ObjectNode historicalAsset = ((ObjectNode) assets.get(0)).deepCopy();
+        historicalAsset.put("version", "roundtrip-history-v1");
+        historicalAsset.put("imageUrl", "/assets/maps/roundtrip-history-v1.png");
+        assets.add(historicalAsset);
+        candidate.putArray("festivalTitleTranslations").addObject()
+            .put("locale", "en").put("title", "[TEST] Round-trip festival");
+        candidate.putArray("mapAssetTranslations").addObject()
+            .put("mapId", historicalAsset.path("mapId").asText())
+            .put("version", historicalAsset.path("version").asText())
+            .put("locale", "en").put("imageAlt", "[TEST] Historical map");
+        // Null PLACE filter groups are valid: these pins are outside the optional design filters.
+        ObjectNode unfilteredPin = null;
+        for (JsonNode pin : candidate.path("mapPins")) {
+            if (pin.path("placeId").isTextual()) {
+                unfilteredPin = (ObjectNode) pin;
+                unfilteredPin.putNull("filterGroup");
+                break;
+            }
+        }
+        assertThat(unfilteredPin).isNotNull();
+        Files.writeString(input, json.writeValueAsString(candidate));
+        UUID source = importCandidate(input, baseline);
+        Path firstExport = temporaryDirectory.resolve("first-export.json");
+        Map<String, Long> beforeExport = catalogRowCounts();
+        ProcessResult exported = success(catalog("export", "--revision=" + source, "--out=" + firstExport));
+        assertThat(exported.output()).doesNotContain("finding:");
+        assertThat(catalogRowCounts()).isEqualTo(beforeExport);
+
+        UUID copy = printedRevision(success(catalog("import", "--manifest=" + firstExport)));
+        assertThat(copy).isNotEqualTo(source);
+        assertThat(baseRevision(copy)).isEqualTo(baseline);
+        success(catalog("validate", "--revision=" + copy));
+        assertThat(auditCount(copy, "VALIDATE")).isOne();
+        Path secondExport = temporaryDirectory.resolve("second-export.json");
+        success(catalog("export", "--revision=" + copy, "--out=" + secondExport));
+
+        ObjectNode original = (ObjectNode) json.readTree(Files.readString(firstExport));
+        ObjectNode roundTripped = (ObjectNode) json.readTree(Files.readString(secondExport));
+        // Export excludes generated row IDs/audit timestamps. Compare every remaining field;
+        // normalize only top-level row order, preserving ordered instructions inside each row.
+        assertThat(canonicalManifest(roundTripped)).isEqualTo(canonicalManifest(original));
+        assertThat(original.path("mapAssets").size()).isEqualTo(assets.size());
+        assertThat(original.path("festivalTitleTranslations").size()).isOne();
+        assertThat(original.path("mapAssetTranslations").size()).isOne();
+        for (String section : List.of("spaces", "places", "maps", "mapPins", "artists", "performances",
+            "performanceArtists", "prohibitedItems", "festivalLinks")) {
+            assertThat(original.path(section).size()).as(section + " is exercised").isPositive();
+        }
+        assertThat(original.path("ticketGuide").isObject()).isTrue();
+        assertThat(original.path("stampGuide").isObject()).isTrue();
+        assertThat(currentPublishedRevision()).isEqualTo(baseline);
+        success(catalog("publish", "--revision=" + copy));
+        assertThat(currentPublishedRevision()).isEqualTo(copy);
+        assertThat(revisionState(source)).isEqualTo("draft");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"festival_start_date", "festival_end_date", "daily_transfer_open_time",
+        "daily_transfer_close_time", "daily_pickup_open_time", "daily_pickup_close_time"})
+    void catalogCliBlocksEveryPartialLegacyTicketScheduleAndPublishesOnlyAfterCorrection(String missingColumn)
+        throws Exception {
+        UUID baseline = currentPublishedRevision();
+        Path input = candidateManifest();
+        UUID legacy = importCandidate(input, baseline);
+        try (Connection connection = connection(); PreparedStatement statement = connection.prepareStatement(
+            // Identifier comes only from the explicit test parameter list above.
+            "UPDATE ticket_guide_revisions SET " + missingColumn + " = NULL WHERE festival_revision_id = ?"
+        )) {
+            statement.setObject(1, legacy);
+            assertThat(statement.executeUpdate()).isOne();
+        }
+        Map<String, Long> before = catalogRowCounts();
+        long draftsBefore = draftCount();
+        Path exported = temporaryDirectory.resolve("legacy-ticket.json");
+        ProcessResult export = success(catalog("export", "--revision=" + legacy, "--out=" + exported));
+        assertThat(export.output()).contains("finding: LEGACY_TICKET_SCHEDULE_UNCONFIGURED");
+        assertThat(catalogRowCounts()).isEqualTo(before);
+
+        for (String[] command : List.of(
+            new String[] {"import", "--manifest=" + exported},
+            new String[] {"validate", "--revision=" + legacy},
+            new String[] {"publish", "--revision=" + legacy}
+        )) {
+            ProcessResult rejected = catalog(command);
+            assertFailure(rejected, "import".equals(command[0])
+                ? "LEGACY_TICKET_SCHEDULE_UNCONFIGURED" : "TicketGuide schedule must be complete.");
+            assertThat(rejected.output()).doesNotContain(databaseUrl, POSTGRES.getPassword(), "Exception in thread");
+            assertThat(currentPublishedRevision()).isEqualTo(baseline);
+            assertThat(revisionState(legacy)).isEqualTo("draft");
+            assertThat(draftCount()).isEqualTo(draftsBefore);
+            assertThat(catalogRowCounts()).isEqualTo(before);
+        }
+
+        ObjectNode correction = (ObjectNode) json.readTree(Files.readString(exported));
+        correction.set("ticketGuide", json.readTree(Files.readString(input)).path("ticketGuide"));
+        Files.writeString(exported, json.writeValueAsString(correction));
+        UUID corrected = printedRevision(success(catalog("import", "--manifest=" + exported)));
+        success(catalog("validate", "--revision=" + corrected));
+        success(catalog("publish", "--revision=" + corrected));
+        assertThat(currentPublishedRevision()).isEqualTo(corrected);
+        assertThat(revisionState(legacy)).isEqualTo("draft");
+        assertThat(auditCount(legacy, "VALIDATE")).isZero();
+        assertThat(auditCount(legacy, "PUBLISH")).isZero();
+        assertThat(auditCount(corrected, "IMPORT")).isOne();
+        assertThat(auditCount(corrected, "VALIDATE")).isOne();
+        assertThat(auditCount(corrected, "PUBLISH")).isOne();
+    }
+
+    private ObjectNode canonicalManifest(ObjectNode manifest) {
+        ObjectNode canonical = manifest.deepCopy();
+        for (String name : manifest.propertyNames()) {
+            if (manifest.path(name).isArray()) {
+                List<JsonNode> rows = new ArrayList<>();
+                manifest.path(name).forEach(rows::add);
+                rows.sort(java.util.Comparator.comparing(JsonNode::toString));
+                ArrayNode sorted = canonical.putArray(name);
+                rows.forEach(sorted::add);
+            }
+        }
+        return canonical;
     }
 
     @Test
