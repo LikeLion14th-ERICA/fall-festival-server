@@ -6,10 +6,12 @@ import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.espero.festival.CatalogCliApplication;
 import dev.espero.festival.CatalogCliRunner;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,6 +33,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.WebApplicationType;
@@ -126,6 +129,12 @@ class CrowdingConcurrencyE2eTest {
         .connectTimeout(Duration.ofSeconds(5))
         .build();
 
+    @BeforeEach
+    void resetCrowdingState() {
+        jdbc.update("DELETE FROM crowding_state_dynamic WHERE festival_id = ?", FESTIVAL_ID);
+        jdbc.update("DELETE FROM admin_audit_events WHERE action = 'CROWDING_UPDATED'");
+    }
+
     @Test
     void concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse() throws Exception {
         PreparedCandidate candidate = prepared();
@@ -168,6 +177,109 @@ class CrowdingConcurrencyE2eTest {
         assertThat(JsonPath.<Boolean>read(reused.body(), "$.error.retryable")).isFalse();
         assertThat(crowdingAuditCount()).isOne();
         assertThat(crowdingState(candidate.operatingDay())).isEqualTo("CROWDED");
+    }
+
+    @Test
+    void loopbackPublicCrowdingFollowsFirstDayGapDayAndLastDayBoundaries() throws Exception {
+        PreparedCandidate candidate = prepared();
+
+        assertPublicCrowdingAt("2026-09-28T12:00:00+09:00", "2026-09-29", "BEFORE_OPEN");
+        assertPublicCrowdingAt("2026-09-30T12:00:00+09:00", "2026-10-02", "BEFORE_OPEN");
+        assertPublicCrowdingAt("2026-10-04T12:00:00+09:00", "2026-10-03", "CLOSED");
+
+        assertThat(candidate.operatingDay()).isEqualTo(LocalDate.parse("2026-09-29"));
+    }
+
+    @Test
+    void loopbackPublicCrowdingUsesExactOpeningAndClosingInstants() throws Exception {
+        assertPublicCrowdingAt("2026-09-29T10:59:59+09:00", "2026-09-29", "BEFORE_OPEN");
+        assertPublicCrowdingAt("2026-09-29T11:00:00+09:00", "2026-09-29", "OPEN");
+        assertPublicCrowdingAt("2026-09-29T22:59:59+09:00", "2026-09-29", "OPEN");
+        assertPublicCrowdingAt("2026-09-29T23:00:00+09:00", "2026-09-29", "CLOSED");
+    }
+
+    @Test
+    void loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours() throws Exception {
+        clock.set(instant("2026-09-29T10:00:00+09:00"));
+        String beforeOpenToken = login();
+        HttpResponse<String> beforeOpen = adminCrowding(beforeOpenToken);
+        HttpResponse<String> savedBeforeOpen = send(updateRequest(
+            beforeOpenToken,
+            requiredHeader(beforeOpen, "ETag"),
+            "crowding-before-open-save",
+            "MODERATE"
+        ));
+        assertThat(savedBeforeOpen.statusCode()).isEqualTo(204);
+        assertThat(crowdingState(LocalDate.parse("2026-09-29"))).isEqualTo("MODERATE");
+
+        clock.set(instant("2026-09-29T23:00:00+09:00"));
+        String afterCloseToken = login();
+        HttpResponse<String> afterClose = adminCrowding(afterCloseToken);
+        HttpResponse<String> savedAfterClose = send(updateRequest(
+            afterCloseToken,
+            requiredHeader(afterClose, "ETag"),
+            "crowding-after-close-save",
+            "CROWDED"
+        ));
+        assertThat(savedAfterClose.statusCode()).isEqualTo(204);
+        assertThat(crowdingState(LocalDate.parse("2026-09-29"))).isEqualTo("CROWDED");
+
+        clock.set(instant("2026-09-30T12:00:00+09:00"));
+        String gapDayToken = login();
+        HttpResponse<String> gapDay = adminCrowding(gapDayToken);
+        assertThat(gapDay.statusCode()).isEqualTo(200);
+        assertThat(JsonPath.<String>read(gapDay.body(), "$.data.operatingDay")).isEqualTo("2026-10-02");
+        HttpResponse<String> rejected = send(updateRequest(
+            gapDayToken,
+            requiredHeader(gapDay, "ETag"),
+            "crowding-gap-day-rejected",
+            "CROWDED"
+        ));
+        assertThat(rejected.statusCode()).isEqualTo(409);
+        assertThat(errorCode(rejected)).isEqualTo("NOT_FESTIVAL_DAY");
+        assertThat(crowdingStateCount(LocalDate.parse("2026-10-02"))).isZero();
+    }
+
+    @Test
+    void loopbackAdminRequiresIfMatchAndRejectsStaleRepresentation() throws Exception {
+        clock.set(instant("2026-09-29T12:00:00+09:00"));
+        String accessToken = login();
+        HttpResponse<String> initial = adminCrowding(accessToken);
+        String etag = requiredHeader(initial, "ETag");
+
+        HttpRequest missingIfMatch = HttpRequest.newBuilder(uri("/api/v2/admin/crowding"))
+            .timeout(HTTP_REQUEST_TIMEOUT)
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Origin", ADMIN_ORIGIN)
+            .header("Content-Type", "application/json")
+            .header("Idempotency-Key", "crowding-missing-if-match")
+            .PUT(HttpRequest.BodyPublishers.ofString("{\"level\":\"CROWDED\"}"))
+            .build();
+        HttpResponse<String> missing = send(missingIfMatch);
+        assertThat(missing.statusCode()).isEqualTo(428);
+        assertThat(errorCode(missing)).isEqualTo("PRECONDITION_REQUIRED");
+
+        assertThat(send(updateRequest(accessToken, etag, "crowding-stale-first", "CROWDED"))
+            .statusCode()).isEqualTo(204);
+        HttpResponse<String> stale = send(updateRequest(accessToken, etag, "crowding-stale-second", "MODERATE"));
+        assertThat(stale.statusCode()).isEqualTo(409);
+        assertThat(errorCode(stale)).isEqualTo("EDIT_CONFLICT");
+        assertThat(crowdingState(LocalDate.parse("2026-09-29"))).isEqualTo("CROWDED");
+    }
+
+    private void assertPublicCrowdingAt(String at, String operatingDay, String operatingStatus) throws Exception {
+        clock.set(instant(at));
+        HttpResponse<String> response = send(HttpRequest.newBuilder(uri("/api/v2/crowding"))
+            .timeout(HTTP_REQUEST_TIMEOUT)
+            .GET()
+            .build());
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(JsonPath.<String>read(response.body(), "$.data.operatingDay")).isEqualTo(operatingDay);
+        assertThat(JsonPath.<String>read(response.body(), "$.data.operatingStatus")).isEqualTo(operatingStatus);
+    }
+
+    private Instant instant(String offsetDateTime) {
+        return OffsetDateTime.parse(offsetDateTime).toInstant();
     }
 
     private String login() throws Exception {
@@ -314,7 +426,7 @@ class CrowdingConcurrencyE2eTest {
                 POSTGRES.start();
                 migrate();
                 UUID baseline = publishedRevision();
-                UUID revision = importAndPublishWithHostileOverrides(baseline);
+                UUID revision = importAndPublishWithHostileOverrides(baseline, gapCandidateManifest());
                 preparedCandidate = new PreparedCandidate(
                     revision,
                     midpointOfFirstOperatingWindow(revision)
@@ -334,7 +446,7 @@ class CrowdingConcurrencyE2eTest {
             .migrate();
     }
 
-    private static UUID importAndPublish(UUID baseline) {
+    private static UUID importAndPublish(UUID baseline, Path manifest) {
         try (ConfigurableApplicationContext context = new SpringApplicationBuilder(CatalogCliApplication.class)
             .environment(containerEnvironment())
             .profiles("db", "catalog-cli")
@@ -343,7 +455,7 @@ class CrowdingConcurrencyE2eTest {
             CatalogCliRunner runner = context.getBean(CatalogCliRunner.class);
             runner.run(new DefaultApplicationArguments(
                 "import",
-                "--manifest=" + CANDIDATE_MANIFEST.toAbsolutePath(),
+                "--manifest=" + manifest.toAbsolutePath(),
                 "--festival-id=" + FESTIVAL_ID,
                 "--baseline-revision=" + baseline,
                 "--actor=crowding-concurrency-e2e"
@@ -359,7 +471,7 @@ class CrowdingConcurrencyE2eTest {
         }
     }
 
-    private static UUID importAndPublishWithHostileOverrides(UUID baseline) {
+    private static UUID importAndPublishWithHostileOverrides(UUID baseline, Path manifest) {
         String previousHikariUrl = System.getProperty("spring.datasource.hikari.jdbc-url");
         String previousDataSourceClass = System.getProperty("spring.datasource.hikari.data-source-class-name");
         String previousDataSourcePropertyUrl = System.getProperty("spring.datasource.hikari.data-source-properties.URL");
@@ -369,12 +481,26 @@ class CrowdingConcurrencyE2eTest {
         System.setProperty("spring.datasource.hikari.data-source-properties.URL", "jdbc:unsupported:crowding-e2e");
         System.setProperty("spring.datasource.jndi-name", "java:comp/env/jdbc/unsupported-crowding-e2e");
         try {
-            return importAndPublish(baseline);
+            return importAndPublish(baseline, manifest);
         } finally {
             restoreSystemProperty("spring.datasource.hikari.jdbc-url", previousHikariUrl);
             restoreSystemProperty("spring.datasource.hikari.data-source-class-name", previousDataSourceClass);
             restoreSystemProperty("spring.datasource.hikari.data-source-properties.URL", previousDataSourcePropertyUrl);
             restoreSystemProperty("spring.datasource.jndi-name", previousJndiName);
+        }
+    }
+
+    private static Path gapCandidateManifest() {
+        try {
+            String manifest = Files.readString(CANDIDATE_MANIFEST)
+                .replace("2026-09-30", "2026-10-02")
+                .replace("2026-10-01", "2026-10-03");
+            Path path = Files.createTempFile("crowding-boundary-catalog-", ".json");
+            Files.writeString(path, manifest);
+            path.toFile().deleteOnExit();
+            return path;
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not create the gap-day catalog fixture.", exception);
         }
     }
 
