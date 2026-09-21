@@ -1,5 +1,6 @@
 package dev.espero.festival;
 
+import dev.espero.festival.persistence.CatalogIntegrityException;
 import dev.espero.festival.persistence.CatalogSnapshotStore;
 import dev.espero.festival.persistence.PerformanceRevisionValidator;
 import java.sql.Array;
@@ -917,8 +918,15 @@ public class CatalogRevisionService {
     }
 
     private void validateStoredRevision(UUID revisionId) {
-        snapshots.loadRevision(revisionId);
-        performanceRevisions.validate(revisionId);
+        try {
+            snapshots.loadRevision(revisionId);
+            performanceRevisions.validate(revisionId);
+        } catch (CatalogIntegrityException exception) {
+            throw new CatalogCliException(
+                "Stored catalog revision failed validation: " + exception.getMessage(),
+                exception
+            );
+        }
     }
 
     private void insertRevision(
