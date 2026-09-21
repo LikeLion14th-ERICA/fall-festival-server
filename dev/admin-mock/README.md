@@ -4,7 +4,8 @@
 넣는 절차입니다. 실제 행사 정보가 아니며 나중에 실데이터로 바꿉니다.
 
 - 모든 이름은 `[목]`으로 시작하고, 링크는 `example.invalid`를 씁니다. 예외는 HOME-008에서 확정한
-  총학생회 공식 채널 3개입니다.
+  총학생회 공식 채널 3개와 원격 테스트용 공통 스탬프 QR 값
+  `https://festival.likelionerica.com/stamps`입니다.
 - 서버 응답의 `meta.mock`은 실서버라서 항상 `false`입니다. 목 데이터인지는 `[목]` 접두어로 구분합니다.
 - 이 서버와 DB는 공개되어 있어서 넣은 데이터는 누구나 볼 수 있습니다. 실제 계좌·개인정보는 넣지 않습니다.
 - 원격 DB에 쓰는 작업이므로 팀의 승인을 받고 진행합니다.
@@ -14,6 +15,7 @@
 | 데이터 | 파일 | 넣는 방법 |
 |---|---|---|
 | 부스 20개(6개 분류 모두), 지도 4장·핀 28개(편의시설 필터 4종), 공연 4개·아티스트 5명, 티켓·스탬프 안내, 반입 금지 물품, 홈 링크 | [`dev/catalog/frontend-mock-catalog.json`](../catalog/frontend-mock-catalog.json) | [`Publish-MockCatalog.ps1`](Publish-MockCatalog.ps1) |
+| 스탬프 QR draft 점검 | [`Set-StampGuideQr-DBeaver.sql`](Set-StampGuideQr-DBeaver.sql) | DBeaver에서 승인된 draft만 점검·검토 |
 | 공지 3개(일반 2, 분실물 1, 링크 포함 1), 굿즈 3개(단일 2, 색상×사이즈 옵션 1) | [`seed-admin-content.mjs`](seed-admin-content.mjs) | [`Seed-AdminMockContent.ps1`](Seed-AdminMockContent.ps1) |
 | 티켓 계좌, 부스 계좌 | 아래 JSON 예시 | 계좌 CLI |
 
@@ -37,7 +39,8 @@ import → publish를 한 번에 합니다. 비밀번호는 화면에 남지 않
 - 실제로 게시하려면 `-DryRun`을 빼고 실행한 뒤 `yes`를 입력합니다. 확인 없이 진행하려면 `-Force`.
 - SSL을 쓰지 않는 DB면 URL에서 `?sslmode=require`를 뺍니다. schema가 `public`이 아니면 `-Schema`를 줍니다.
 - 사전 점검이 `STOP_AND_REVIEW`로 나오는 것은 **정상**입니다. 이미 축제·catalog 데이터가 있는 DB라는 뜻이며,
-  이 작업은 migration이 아니라 기존 게시본 위에 새 revision을 얹는 것입니다.
+  이 작업은 migration이 아니라 기존 게시본 위에 새 revision을 얹는 것입니다. 다만 현재 운영 판정이
+  `mutationAuthorized=false`이면 팀 승인 전에는 import·publish를 진행하지 않습니다.
 - 기준 revision이 그사이 바뀌면 `BASE_REVISION_CONFLICT`로 멈춥니다. 다시 실행하면 새 기준으로 진행합니다.
 - 연결 풀러(PgBouncer 등) 뒤의 DB는 사전 점검의 startup 옵션을 거부해 `08004`·`08P01`로 멈춥니다. 이때
   스크립트가 catalog CLI로 접속을 다시 시도해 원인을 알려 주며, 직접 접속 포트가 없으면 DBeaver에서
@@ -46,6 +49,31 @@ import → publish를 한 번에 합니다. 비밀번호는 화면에 남지 않
 
 게시 뒤 **백엔드를 재시작**해야 공개 API에 새 revision이 보입니다. `/readyz`가 200이고 `/api/v2/spaces`의
 `meta.revision`이 올라갔는지 확인합니다.
+
+### DBeaver에서 QR 값 확인·draft 점검
+
+published revision은 직접 `UPDATE`하지 않습니다. revision·감사 이력을 보존하려면 이 manifest를
+`Publish-MockCatalog.ps1`로 새 revision으로 게시합니다. DBeaver에서는 먼저 다음 읽기 전용 조회로
+현재 값과 기준 revision을 확인한 뒤, 확인한 revision을 `-BaselineRevision`에만 사용합니다.
+
+```sql
+SELECT r.id, r.festival_id, r.revision_number, r.state, g.qr_value
+FROM festival_revisions AS r
+JOIN stamp_guide_revisions AS g
+  ON g.festival_revision_id = r.id AND g.id = 1
+WHERE r.festival_id = '<FESTIVAL_UUID>'::UUID
+  AND r.state = 'published'
+ORDER BY r.revision_number DESC;
+```
+
+`qr_value`에 넣을 테스트 URL은 `https://festival.likelionerica.com/stamps`입니다. DB·catalog 변경 권한이
+승인된 뒤에만 게시하고, 게시 뒤에는 backend를 재시작한 다음 `/api/v2/stamp-guide`가 이 값을 반환하는지 확인합니다.
+
+이미 정상 import한 **draft**의 QR을 예외적으로 점검해야 하면
+[`Set-StampGuideQr-DBeaver.sql`](Set-StampGuideQr-DBeaver.sql)을 사용합니다. 이 파일은 festival·현재
+published baseline·draft 상태·guide 행을 모두 잠그고 확인하며, 기본값은 `ROLLBACK`입니다. published
+revision을 직접 수정하거나 이 SQL로 publish하지 않습니다. DBeaver에서는 일부 문장만 실행하지 말고 파일 전체를
+실행해 `ROLLBACK`까지 끝냅니다.
 
 워크벤치를 쓸 수도 있지만 loopback DB 주소만 받으므로 승인된 SSH tunnel이 필요합니다
 ([워크벤치 runbook](../../docs/wiki/engineering/catalog-workbench.md)).

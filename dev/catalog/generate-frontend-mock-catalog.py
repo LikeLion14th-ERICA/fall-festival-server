@@ -2,7 +2,8 @@
 
 Run from the repository root: python dev/catalog/generate-frontend-mock-catalog.py
 Every name starts with "[목]" and every link points to example.invalid, except
-the student council's official channels confirmed in HOME-008.
+the student council's official channels confirmed in HOME-008 and the deployed
+test stamp page used as the common QR value.
 """
 import json
 from pathlib import Path
@@ -203,7 +204,7 @@ def build():
                          "[목] 4개를 모으면 멋사 부스에서 상품 수령"],
         "rewardName": "[목] 기념 음료", "rewardLocationText": "[목] 멋쟁이사자처럼 부스",
         "rewardHoursText": "12:00 ~ 20:00", "rewardNotice": "[목] 준비 수량이 소진되면 지급이 끝나요.",
-        "qrValue": "https://example.invalid/mock/stamp"}
+        "qrValue": "https://festival.likelionerica.com/stamps"}
     m["festivalLinks"] = [
         {"id": "mock-notices", "kind": "UNIVERSITY_NOTICES", "url": link("notices"), "iconKey": None, "sortOrder": 1},
         {"id": "mock-faq", "kind": "FAQ", "url": link("faq"), "iconKey": None, "sortOrder": 1},
