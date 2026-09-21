@@ -13,6 +13,7 @@ import dev.espero.festival.support.ApiMetaTestFixtures;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -116,6 +117,19 @@ class CrowdingControllerTest {
     }
 
     @Test
+    void selectsEach2026OperatingDayWithSameLocalDateScheduleBoundaries() {
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            sameDaySchedule("2026-09-29"),
+            sameDaySchedule("2026-09-30"),
+            sameDaySchedule("2026-10-01")
+        ));
+
+        assertCurrent("2026-09-28T23:00:00Z", "2026-09-29", CrowdingResponse.OperatingStatus.BEFORE_OPEN);
+        assertCurrent("2026-09-30T03:00:00Z", "2026-09-30", CrowdingResponse.OperatingStatus.OPEN);
+        assertCurrent("2026-10-01T14:00:00Z", "2026-10-01", CrowdingResponse.OperatingStatus.CLOSED);
+    }
+
+    @Test
     void adminReadsTheSelectedOperatingDaysSavedLevelOutsideTheFestivalDay() {
         schedule();
         when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-01")))
@@ -163,5 +177,27 @@ class CrowdingControllerTest {
                 assertThat(api.status().value()).isEqualTo(503);
                 assertThat(api.code()).isEqualTo("CROWDING_SCHEDULE_UNCONFIGURED");
             });
+    }
+
+    private void assertCurrent(
+        String instant,
+        String operatingDay,
+        CrowdingResponse.OperatingStatus operatingStatus
+    ) {
+        CrowdingResponse data = serviceAt(instant).current(request).response();
+
+        assertThat(data.operatingDay()).isEqualTo(LocalDate.parse(operatingDay));
+        assertThat(data.opensAt().toLocalDate()).isEqualTo(LocalDate.parse(operatingDay));
+        assertThat(data.closesAt().toLocalDate()).isEqualTo(LocalDate.parse(operatingDay));
+        assertThat(data.operatingStatus()).isEqualTo(operatingStatus);
+    }
+
+    private static CrowdingSchedule sameDaySchedule(String date) {
+        LocalDate operatingDate = LocalDate.parse(date);
+        return new CrowdingSchedule(
+            operatingDate,
+            operatingDate.atTime(9, 0).atOffset(ZoneOffset.ofHours(9)),
+            operatingDate.atTime(23, 0).atOffset(ZoneOffset.ofHours(9))
+        );
     }
 }
