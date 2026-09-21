@@ -25,7 +25,7 @@
 | STAMP-START | stamp-guide + 당일 로컬 상태 | 선택 수령 안내·QR 누락은 자료 대기. START만으로 적립하지 않음. START 전 기본 카메라 QR 직접 진입은 이 화면으로 이동하며 자동 시작·적립 없음 |
 | STAMP-COLLECT | guide + 로컬 count/date/started/claimed | 처음0칸. 공통 QR1회당1개·하루4개. 자정 초기화. START 후 기본 카메라 QR 진입만 적립 처리하며 카메라 오류는 HTTP 오류와 분리 |
 | STAMP-REWARD | 로컬4칸·수령 상태 + `POST /stamp-receipt-verifications` | 4칸 전 수령 불가. 안내 창에는 상품 수령 버튼 없이 담당자용 코드 입력칸과 확인 버튼을 둔다. `verified: true`일 때만 `claimed=true`로 저장·창 닫기. 코드 오류·통신 실패는 미수령 상태·창을 유지하고 코드값은 저장하지 않는다. 서버 지급 기록·재고·엄격한 중복 차단 없음 |
-| ADM-CROWD | admin/crowding | 저장 전 savedLevel/updatedAt=null. FULL 확인 취소는 요청 없음. 저장 실패 기존값 유지. 자정 초기화. 시간 읽기 전용. 운영 밖 저장409는 기술 초안 |
+| ADM-CROWD | admin/crowding | 저장 전 savedLevel/updatedAt=null. FULL 확인 취소는 요청 없음. 실제 `FestivalDay`인 날짜는 운영 전·운영 종료 뒤에도 저장할 수 있다. 실제 FestivalDay가 아닌 날짜의 PUT은 `409 NOT_FESTIVAL_DAY`이며 기존 상태를 유지한다. 저장 실패 기존값 유지. 자정 초기화. 시간 읽기 전용 |
 | ADM-NOTICE-LIST | admin/notices, 최종 수정순 | 등록 공지 없음. 조회 실패 재시도. 지난 일반 공지도 관리자에는 유지 |
 | ADM-NOTICE-EDIT | 수정 초기값 + 선택적 번역 미리보기 | 영어 PENDING/FAILED도 한국어 저장 성공. 한국어 공백·잘못된 링크422. 실패 시 입력 유지. 이미지 직접 첨부 없음 |
 | ADM-NOTICE-DELETE | 확인 후 DELETE | 취소는 요청 없음. 실패 기존 공지 유지. 성공 모든 언어·홈에서 제거. 이미 삭제409/404는 목록 재동기화 |

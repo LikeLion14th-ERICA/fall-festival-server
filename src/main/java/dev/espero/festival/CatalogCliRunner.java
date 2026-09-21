@@ -53,7 +53,7 @@ public class CatalogCliRunner implements ApplicationRunner {
                 System.out.println("draft revision: " + revision);
             }
             case "export" -> {
-                UUID revision = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
+                UUID revision = uuidValue(arguments, "revision", commands, 1, "revision");
                 Path output = Path.of(requiredOption(arguments, "out"));
                 CatalogExportService.ExportResult result = exports.export(revision);
                 writeManifest(output, result.manifest());
@@ -63,17 +63,17 @@ public class CatalogCliRunner implements ApplicationRunner {
                 }
             }
             case "validate" -> {
-                UUID revision = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
+                UUID revision = uuidValue(arguments, "revision", commands, 1, "revision");
                 revisions.validateRevision(revision, actor);
                 System.out.println("validated revision: " + revision);
             }
             case "publish" -> {
-                UUID revision = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
+                UUID revision = uuidValue(arguments, "revision", commands, 1, "revision");
                 revisions.publish(revision, actor);
                 System.out.println("published revision: " + revision);
             }
             case "rollback" -> {
-                UUID source = UUID.fromString(value(arguments, "revision", commands, 1, "revision"));
+                UUID source = uuidValue(arguments, "revision", commands, 1, "revision");
                 // Stating the expected current publication makes an intervening
                 // publish fail instead of being silently replaced.
                 UUID expectedCurrent = expectedCurrentRevision(arguments);
@@ -97,7 +97,7 @@ public class CatalogCliRunner implements ApplicationRunner {
             );
         }
         String value = option(arguments, "expected-current", null);
-        return "none".equals(value) ? null : UUID.fromString(value);
+        return "none".equals(value) ? null : parseUuid(value, "expected-current");
     }
 
     /**
@@ -149,10 +149,26 @@ public class CatalogCliRunner implements ApplicationRunner {
 
     private UUID uuidOption(ApplicationArguments arguments, String name) {
         String value = option(arguments, name, null);
+        return parseUuid(value, name);
+    }
+
+    private UUID uuidValue(
+        ApplicationArguments arguments,
+        String optionName,
+        List<String> commands,
+        int positionalIndex,
+        String argumentName
+    ) {
+        return parseUuid(value(arguments, optionName, commands, positionalIndex, argumentName), argumentName);
+    }
+
+    private UUID parseUuid(String value, String name) {
         try {
             return UUID.fromString(value);
         } catch (IllegalArgumentException exception) {
-            throw new CatalogCliException("Option --" + name + " must be a valid UUID.", exception);
+            throw new CatalogCliException(
+                "Option --" + name + " must be a valid UUID.", exception
+            );
         }
     }
 

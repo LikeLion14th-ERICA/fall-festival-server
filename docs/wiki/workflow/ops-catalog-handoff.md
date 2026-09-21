@@ -13,22 +13,119 @@
 워크벤치다. 공지·굿즈 콘텐츠 API/UI/미디어 작업과 관리자 SPA 자체는 다른 담당자
 범위다.
 
-## 이어받는 에이전트 프로필
+## Backend release E2E · 2026-09-21
 
-이 작업에는 적용된 Observatory 프로필의 다음 조합만 사용한다. 목적에 맞지 않는
-모델이나 추론 강도를 임의로 바꾸지 않는다.
+`src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java`는 후보 catalog
+manifest를 미래 릴리스 전에 독립적으로 검증하는 backend 게이트다. Testcontainers PostgreSQL에
+Flyway를 적용하고, 실제 Catalog CLI로 import·publish한 다음 랜덤 포트 서버를 기동한다.
+원격 개발·운영 DB나 그 자격증명에는 연결하지 않는다.
 
-| 작업 성격 | 모델 · 추론 강도 |
-|---|---|
-| 메인 통합과 최종 판단 | `gpt-5.6-terra / ultra` |
-| 단순하고 경계가 분명한 구현 | `gpt-5.6-luna / medium` |
-| 상위 수준의 계획 | `gpt-5.6-sol / medium` |
-| 고맥락 검토와 계획 검토 | `gpt-6-astra / low` |
-| 난도가 높거나 해법이 불명확한 설계·문제 해결 | `gpt-6-astra / max` |
-| 복잡하지만 요구가 명확한 구현 | `gpt-5.6-luna / max` |
+기본 후보는 사용자 흐름 검증용 `dev/catalog/frontend-mock-catalog.json`이다. 이 fixture는
+로컬 Testcontainers 전용이며 원격 개발 DB나 운영 데이터로 import·publish하지 않는다. 빈
+catalog 또는 실제 출시 후보는 `-Dfestival.release-e2e.manifest=<path>`로 지정한다. 실제
+콘텐츠 관계까지 요구하려면
+`-Dfestival.release-e2e.require-user-journey-content=true`를 함께 지정한다.
 
-병렬 구현을 맡길 때는 각 하위 작업의 성격과 위 행을 함께 기록한다. 현재 공통
-cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
+E2E는 응답에서 ID를 읽어 다음 흐름을 HTTP로 검사한다.
+
+- 서비스 health/readiness와 published revision의 config
+- 공간 목록·분류·상세와 대표 `mapTarget`에서 AREA 지도·핀·장소로의 이동
+- overview의 AREA 핀에서 대상 구역 지도 이동, stale `mapVersion` 409 뒤의 재조회
+- 기본 날짜의 lineup에서 artist·performance·timetable로의 연결
+- ticket guide의 조건부 응답과 지도 target, stamp 안내의 보상·기간·일일 한도
+- 관리자 login·`/admin/me`·refresh rotation·logout
+- 혼잡도 변경, idempotency replay, 같은 단계 no-op, stale ETag, FULL 확인
+- locale·중복 query 오류, weak·다중 ETag, CORS·잘못된 인증 입력과 후보 datasource 격리
+- 모든 선언 날짜·lineup category·공간 category filter의 반복 응답·정렬·상세 관계
+- 실행 중인 server에서 별도 계좌 CLI set·clear의 ticket guide 반영과 transfer close 계좌 비노출
+- 실제 동시 혼잡도 PUT의 단일 변경·감사·idempotency 재사용 거절
+- 게시 A/B, 제어된 server restart, expected-current rollback 뒤 새 revision A 복원과 동적 상태 보존
+- 공개 입력 오류 뒤의 config 복구와 malformed admin bearer가 공개 경로를 막지 않는지
+- 첫 FestivalDay 전·마지막 FestivalDay 후 config와 lineup의 같은 기본 날짜 선택
+- TICKET 계좌가 설정된 상태의 송금 개시·마감 초 경계에서 상태·계좌 노출·settings version·ETag 전환
+- 혼잡도 첫날 전·공백일·마지막 날 뒤와 개장·마감 경계, 비축제일 PUT 거절·운영 시간 밖 축제일 저장
+- 선택 회차에 게시본이 없는 deploy의 `/healthz` 생존·`/readyz` not-ready·공개 config `CATALOG_NOT_READY` 경계와 공개·login rate limit의 client 분리·refill 회복
+- 별도 관리자 session server에서 누락 Origin·malformed JSON·token 없는 logout의 안전한 거절
+
+빈 목록과 `UNCONFIGURED` 티켓은 non-strict 후보에서 현재 계약상 유효한 표현으로 다룬다.
+strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀·AREA 핀·공연·타임테이블 관계를
+요구한다.
+
+이 게이트는 공지·굿즈 담당자의 API·미디어 검증, 원격 DB preflight·role provisioning,
+실제 배포 smoke와 운영 자료 승인을 대체하지 않는다. 후속 작업자는 이 경계를 유지하고,
+변경 뒤 focused E2E와 전체 `mvnw.cmd verify` 결과를 아래 검증 기록에 추가한다. 브라우저의
+navigation/back 상태, Secure·SameSite cookie, 관리자 proxy, 모바일 네트워크 복귀와 polling은
+web 저장소와 실기기 acceptance gate에서 확인한다.
+
+현재 release E2E 시나리오는 HTTP-01~24와 OPS-01~20, 총 **44개**다. 이 수는 관련 요청을
+한 lifecycle 안에 묶는 JUnit method 수와 다르며, 각 시나리오의 상세 매핑은
+[검증 명령](validation.md#릴리스-후보-backend-e2e)에 둔다.
+
+## 운영자·개발자 도구 E2E · 2026-09-21
+
+`src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java`는 실제 별도 JVM의
+`CatalogCliApplication`과 `AccountSettingsCliApplication`을 새 Testcontainers PostgreSQL에 연결한다.
+다음 작업자가 이 테스트를 in-process service test로 바꾸거나 원격 datasource를 재사용하지 않는다.
+
+- Catalog CLI: 같은 baseline에서 만든 두 draft 중 먼저 게시된 revision만 통과하는지, export,
+  archived revision rollback, stale publish·rollback 거절, malformed UUID의 안전한 exit 1을 확인한다.
+- 계좌 CLI: dry-run 무변경, confirm set, 잘못된 끝 네 자리 거절, clear, restore-version, versioned
+  trigger history와 stdout/stderr의 은행·계좌번호·예금주·DB credential redaction을 확인한다.
+- `DatabasePreflightIntegrationTest`는 이미 JDK와 PostgreSQL driver만의 별도 process로 preflight의
+  read-only·`STOP_AND_REVIEW` 경계를 확인한다. migrated catalog DB의 preflight 성공을 요구하지 않는다.
+- `CatalogWorkbenchIntegrationTest`는 HTTP 워크벤치가 다른 축제 revision의 export·diff·publish를
+  `REVISION_FESTIVAL_MISMATCH`로 거절하고 해당 축제의 published pointer·revision·audit을 바꾸지
+  않는지 확인한다.
+- 추가 process 경계는 손상된 draft publish 뒤 정상 replacement 복구, Catalog·계좌 CLI의
+  read-only role 거절, 계좌 입력·expected-version 무결성, standalone preflight의 설정 오류
+  redaction, hostile logging 환경의 JDBC URL·비밀번호·stack trace 비노출까지 확인한다.
+- Catalog CLI의 마지막 audit insert를 PostgreSQL trigger로 실패시키면 import·publish·rollback의
+  draft·복제 행·published pointer·audit이 각각 같은 transaction에서 rollback되고 재시도만
+  성공하는지 확인한다. 두 real child JVM의 publish/publish·publish/rollback도 festival 행 잠금에서
+  실제로 대기한 뒤 승자 하나만 state·audit을 남기는지 확인한다.
+- `OperationalReleaseGateE2eTest`는 별도 SELECT-only role로 preflight를 실행해 Flyway history를
+  바꾸지 않는지, 같은 role의 Account CLI clear·restore가 current setting·version·history를
+  바꾸지 못하는지 확인한다.
+- `DatabasePreflightEmptyDatabaseE2eTest`는 JDK+PostgreSQL driver child JVM이 빈 DB를 두 번
+  점검해도 relation·Flyway·festival·revision·audit을 만들지 않는지 확인한다.
+- 실제 CLI draft export→import→validate→draft export→publish는 generated ID·감사 시각 외 의미
+  단위로 왕복 동일해야 한다. source draft는 이 흐름 뒤에도 draft로 남는다. 일정 필수값 6개 중
+  하나라도 빠진 legacy ticket은 export finding과 무변경 차단 뒤 값 복구 retry만 게시할 수 있다.
+  `null` PLACE filter는 현재 계약상 정상으로 lossless 보존한다.
+
+이 E2E는 test classpath의 main entry point를 실행한다. 배포 JAR의 `PropertiesLauncher` 명령은
+package 뒤 운영 runbook대로 별도로 실행한다. 단, 이 검증도 원격 DB, SSH tunnel, 실제 계좌 또는
+배포 환경을 사용하지 않는다.
+
+## E2E 재개·출시 후보 확인
+
+1. Docker가 실행 중인지 확인하고, 원격 DB에는 연결하지 않는다. 이 release E2E는 Docker 부재 시
+   skip하지 않고 실패해야 한다.
+2. HTTP release E2E는 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest test"`를 실행한다.
+3. 운영자·개발자 도구 확인은 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,OperationalReleaseGateE2eTest,DatabasePreflightEmptyDatabaseE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"`를 실행한다.
+4. 실제 출시 후보는 `-Dfestival.release-e2e.manifest=<path>`와
+   `-Dfestival.release-e2e.require-user-journey-content=true`를 지정해 실행한다.
+5. focused E2E가 통과하면 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress clean verify"`를 실행한다.
+6. 실패하면 fixture를 완화하지 않는다. 끊어진 catalog 관계, 계약, 서버 동작 중 어느 층이
+   원인인지 기록하고 수정한다.
+7. 원격 개발 DB 검증은 별도의 `DatabasePreflightApplication`과 운영 승인 절차로 수행한다.
+
+## 다음 작업자 재개 기준 · 2026-09-22
+
+- 이 문서의 release E2E는 원격 개발 DB를 읽거나 변경하지 않는다. Testcontainers PostgreSQL만
+  사용하며, Docker가 없을 때 focused release E2E가 성공으로 보이면 중단하고 Docker 환경에서
+  다시 실행한다.
+- 재개 전 `git fetch origin`으로 최신 `main`을 확인한다. `origin/main`을 포함하지 않은 branch는
+  먼저 병합하고, 충돌을 해결한 뒤 HTTP·운영자 focused 명령과 전체 `clean verify`를 다시 실행한다.
+- 현재 matrix는 HTTP-01~24와 OPS-01~20, 총 44개다. focused 명령의 JUnit invocation은 HTTP
+  20개, 운영자·개발자 도구 48개다. scenario 수와 invocation 수를 같은 수치로 보고하지 않는다.
+- 유지해야 할 경계: 비축제일 관리자 혼잡도 PUT은 `409 NOT_FESTIVAL_DAY`, 실제 FestivalDay의
+  운영 전·후 저장은 허용한다. pre-open 티켓은 계좌를 노출하지 않는다. legacy ticket 일정은
+  import·validate·publish 모두 `LEGACY_TICKET_SCHEDULE_UNCONFIGURED`으로 차단한다. `null`
+  PLACE filter는 현재 계약상 정상이며 lossless로 보존한다.
+- 워크벤치 role context와 E2E는 일반·Hikari datasource, JNDI, 외부 config의 상속을 차단해야
+  한다. 이 격리가 약해지면 local test가 팀 원격 DB에 연결할 수 있으므로 fixture를 바꾸어
+  우회하지 말고 isolation을 먼저 복구한다.
 
 ## 재개 절차
 
@@ -51,8 +148,8 @@ cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 | 3 | 관리자 혼잡도 백엔드 | 통합 완료 | FestivalDay 일정 기반 GET/PUT과 `crowding_state_dynamic`을 통합했다. migration은 병합 시 V16으로 재배정했고 원격 DB에는 적용하지 않았다. |
 | 4 | 계좌 운영 설정 | 구현 통합, provisioning 대기 | CLI·V15 설정/이력 schema·history retention을 통합했다. DB provider의 role 발급과 provisioning script 실행은 남아 있다. |
 | 5 | 티켓 계좌 분리와 polling | 통합 완료 | catalog에서 계좌·송금 링크를 제거하고 `/ticket-guide`가 현재 `TICKET` 설정과 합쳐 조건부 응답을 낸다. 실제 계좌 등록과 read 전환 배포는 [계좌 운영 설정](../engineering/operational-account-settings.md)의 runbook을 따른다. |
-| 6 | catalog export·게시 보호 | 통합 완료 | `base_revision_id` 기반 `BASE_REVISION_CONFLICT`, 명시적 rollback 기대값, revision 직접 읽기 exporter와 legacy finding을 구현했다. 로컬 workbench(7)는 아직 시작하지 않았다. |
-| 7 | 로컬 catalog workbench | 구현 완료 | `127.0.0.1` 전용 companion·UI, 세션 token, Host·Origin 검증, loopback(SSH tunnel) DB URL 강제, export·publish role 분리 context, 검증·diff·가져오기·게시·게시 후 확인. [runbook](../engineering/catalog-workbench.md). |
+| 6 | catalog export·게시 보호 | 통합 완료 | `base_revision_id` 기반 `BASE_REVISION_CONFLICT`, 명시적 rollback 기대값, revision 직접 읽기 exporter와 legacy finding을 구현했다. 실제 process E2E가 stale draft·rollback을 검증한다. |
+| 7 | 로컬 catalog workbench | 구현 완료 | `127.0.0.1` 전용 companion·UI, 세션 token, Host·Origin 검증, loopback(SSH tunnel) DB URL 강제, export·publish role 분리 context, 검증·diff·가져오기·게시·게시 후 확인과 cross-festival revision 차단. [runbook](../engineering/catalog-workbench.md). |
 
 현재 통합 branch는 `feat/ops-foundation`이고 마지막 `main` 병합 commit은 `05f8f68`(PR #35까지)다.
 PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합돼 `main`에 반영되지 않았으므로,
@@ -74,7 +171,6 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
   provisional 번호**다.
 - `b107026`: client supplied request ID를 반사하지 않는 conditional response 정책을
   부스·지도 백엔드 문서에도 맞췄다.
-- `81ae54e`: 적용된 Observatory profile의 모델·추론 강도 배정을 이 문서에 남겼다.
 - `792e51c`: 500행 이하 단일 transaction batch, advisory lock, dry-run, 전용 cleanup
   datasource/role 검증과 1년 감사 retention을 추가했다.
 - `ca2a2d1`: `COMPLETED` idempotency response만 24시간 뒤 정리하는 target을 추가했다.
@@ -137,6 +233,10 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 
 | 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
 |---|---|---|---|
+| 2026-09-22 | release E2E 44개 확장·회귀 정리 | HTTP focused 20개, 운영자·개발자 도구 focused 48개가 각각 실패·오류·건너뜀 0으로 통과했다. `api-v2` 생성·계약 검사 357개도 통과했다. 최신 `origin/main` 포함을 확인한 뒤 `mvnw.cmd clean verify`는 648개 중 639개 통과, 실패·오류 0, 선택적 미디어 호환성 9개 skip으로 통과했고 JAR를 생성했다. 테스트가 발견한 티켓 pre-open 계좌 노출, 비축제일 혼잡도 저장 허용, 워크벤치 datasource 상속, legacy ticket 일정 오류 식별자 불일치, 오래된 혼잡도 기대값을 수정했다. | 이후 변경은 44개 scenario matrix와 Testcontainers-only isolation을 유지한다. 원격 DB preflight·role provisioning·실제 배포 smoke와 공지·굿즈 담당 범위는 별도 gate다. |
+| 2026-09-21 | 상세 release E2E 확장·격리 hardening | HTTP-01~17·OPS-01~12의 29개 시나리오를 문서화했다. 별도 CLI JVM, 계좌 변경의 live HTTP 반영, 동시 idempotency, publish→restart→rollback lifecycle, 전체 candidate traversal, locale·ETag·CORS 오류를 Testcontainers에서 확인했다. Hikari datasource-class/property URL·Flyway URL·JNDI 상속도 dummy 값으로 회귀 검증했고 원격 DB에는 연결하지 않았다. focused 16개는 실패·오류 0, `mvnw.cmd clean verify`는 621개 실패·오류 0, skip 9와 JAR 패키징으로 통과했다. 종료 뒤 Testcontainers가 내려간 Hikari connection refused 로그와 Surefire self-fork 30초 정리 경고가 있었지만 Maven exit은 0이었다. | 이후 확장된 44개 scenario matrix와 Testcontainers-only isolation을 유지한다. 종료 경고가 실패·지연으로 바뀌면 별도 원인 분석을 한다. |
+| 2026-09-21 | 운영자·개발자 도구 process E2E와 전체 backend 검증 | 실제 별도 JVM의 Catalog CLI·계좌 CLI에서 baseline 충돌·rollback·dry-run·confirm·redaction과 안전한 framework failure를 확인했다. hostile Hikari 환경변수도 Testcontainers child에 전달되지 않는다. focused 27개와 `mvnw.cmd clean verify` 608개가 실패·오류 0, skip 9로 통과했고 JAR를 패키징했다. 종료 뒤 Surefire가 30초 후 남은 test fork JVM을 정리했다는 경고가 있었지만 Maven exit은 0이었다. | 다음 변경에서도 operator process E2E를 유지한다. Surefire 종료 경고가 테스트 실패나 종료 지연으로 바뀌면 별도 원인 분석을 한다. |
+| 2026-09-21 | 상세 사용자 흐름 backend E2E | `frontend-mock-catalog.json` strict 흐름 1개와 `development-catalog.json` sparse 후보 1개가 각각 임시 PostgreSQL에서 통과했다. 공간·지도·핀·장소, 공연·타임테이블, 티켓·스탬프, 관리자 refresh/logout, 혼잡도 동시성 흐름을 포함한다. 최신 `origin/main` 확인 뒤 `mvnw.cmd clean verify`는 603개 통과, 실패·오류 0, 기존 환경 의존 skip 9개였다. | 실제 출시 후보에는 strict property를 지정하고, 공지·굿즈·브라우저·배포 전용 게이트를 별도로 통과시킨다. |
 | 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |
 | 2026-09-18 | CORS·Maven wrapper focused test | `AdminCorsConfigurationTest` 1개 통과 | 전체 suite는 통합 뒤 실행한다. |
 | 2026-09-18 | conditional response subtask | agent branch에서 Maven 261개 통과 | `282c84a`로 통합했다. |
@@ -178,7 +278,11 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 | 혼잡도: 축제 전·공백일·축제 후 거절, snapshot·운영 시각 없음, V5 행 유무, publish/rollback 뒤 보존 | `CrowdingFlowIntegrationTest`, `CrowdingStateMigrationIntegrationTest`, `CrowdingControllerTest`, `CrowdingStoreIntegrationTest`. 운영 시각은 `festival_days`에서 NOT NULL이므로 누락은 운영일 없는 게시본으로 검증한다. |
 | 계좌: trigger·direct SQL 이력, history 변경 차단, dry-run, last-four·version 거절, restore/clear, role 차단, 민감값 로그 부재 | `OperationalAccountSettingsIntegrationTest`, `AccountSettingsCliRunnerTest` |
 | 티켓: `UNCONFIGURED`, 송금 경계 ETag 변경, 304 흐름, 계좌 수정 뒤 15초 안 반영, legacy 열 미접근 | `TicketGuideAccountFlowIntegrationTest`, `TicketGuideControllerTest`, `TicketGuideStoreIntegrationTest`, provisioning role 검증(`OperationalAccountSettingsIntegrationTest`) |
-| export/publish: 끼어든 게시·rollback 충돌 차단, semantic round-trip, legacy 차단, 최신 공연 catalog 보존 | `CatalogRevisionServiceIntegrationTest` |
+| 운영자 CLI: 실제 main exit·출력·DB 결과 | `OperatorToolProcessE2eTest`(Catalog import·validate·publish·export·stale baseline·rollback과 계좌 dry-run·set·last-four 거절·clear·restore·redaction) |
+| export/publish: 끼어든 게시·rollback 충돌 차단, semantic round-trip, legacy 차단, 최신 공연 catalog 보존 | `CatalogRevisionServiceIntegrationTest`, `CatalogWorkbenchIntegrationTest`(다른 축제 revision export·diff·publish 차단) |
+| 사용자 흐름: 공간·지도·공연·티켓·스탬프·관리자 세션·혼잡도 연계 | `ReleaseReadinessHttpE2eTest`의 HTTP-01~09. 실제 candidate의 ID를 응답에서 읽어 관계를 검증한다. |
+| 출시 후보 콘텐츠 관계 | `ReleaseReadinessHttpE2eTest`에 `festival.release-e2e.require-user-journey-content=true`를 지정한다. |
+| 브라우저·proxy·실기기 동작 | backend E2E 범위 밖이며 web 저장소와 실기기 acceptance gate에서 검증한다. |
 | 67 RPS 부하와 지표 기록 | `tools/load-test/run.ps1`의 `rate-67` 단계. 결과와 heap·GC·DB 지표는 `tools/load-test/README.md`에 있다. 로컬 결과이며 원격 용량은 확정하지 않았다. |
 
 ## 외부 의존성

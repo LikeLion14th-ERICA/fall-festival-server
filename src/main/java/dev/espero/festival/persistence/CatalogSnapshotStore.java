@@ -1,5 +1,6 @@
 package dev.espero.festival.persistence;
 
+import dev.espero.festival.CatalogExportService;
 import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
@@ -643,7 +644,8 @@ public class CatalogSnapshotStore {
         if (!anySchedule) {
             return;
         }
-        require(config.hasSchedule(), "TicketGuide schedule must be complete.");
+        require(config.hasSchedule(), CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED
+            + ": TicketGuide schedule must be complete.");
         require(!config.festivalStartDate().isAfter(config.festivalEndDate()),
             "TicketGuide festival dates are reversed.");
         require(config.dailyTransferOpenTime().isBefore(config.dailyTransferCloseTime()),

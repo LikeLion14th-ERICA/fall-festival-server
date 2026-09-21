@@ -96,6 +96,7 @@ class WorkbenchController {
     @PostMapping(path = "/api/export", consumes = MediaType.APPLICATION_JSON_VALUE)
     Map<String, Object> export(@RequestBody JsonNode request) {
         UUID revisionId = uuid(request, "revisionId");
+        requireRevisionBelongsToFestival(revisionId);
         CatalogExportService.ExportResult result = roles.exports().export(revisionId);
         return Map.of("manifest", result.manifest(), "findings", result.findings());
     }
@@ -121,6 +122,9 @@ class WorkbenchController {
         UUID against = request.hasNonNull("againstRevisionId")
             ? uuid(request, "againstRevisionId")
             : roles.revisions().published(festivalId).map(WorkbenchRevisionQueries.RevisionSummary::id).orElse(null);
+        if (against != null) {
+            requireRevisionBelongsToFestival(against);
+        }
         JsonNode before = against == null
             ? json.createObjectNode()
             : json.valueToTree(roles.exports().export(against).manifest());
@@ -148,9 +152,10 @@ class WorkbenchController {
 
     @PostMapping(path = "/api/publish", consumes = MediaType.APPLICATION_JSON_VALUE)
     Map<String, Object> publish(@RequestBody JsonNode request) {
-        CatalogRevisionService publisher = publisher();
         String actor = actor(request);
         UUID revisionId = uuid(request, "revisionId");
+        requireRevisionBelongsToFestival(revisionId);
+        CatalogRevisionService publisher = publisher();
         publisher.publish(revisionId, actor);
         log.info("catalog_workbench action=PUBLISH revision={}", revisionId);
         return Map.of(
@@ -226,6 +231,18 @@ class WorkbenchController {
             HttpStatus.FORBIDDEN, "PUBLISH_ROLE_NOT_CONFIGURED",
             "This workbench runs export-only. Configure the publish role to import or publish."
         ));
+    }
+
+    private void requireRevisionBelongsToFestival(UUID revisionId) {
+        roles.revisions().festivalForRevision(revisionId).ifPresent(owner -> {
+            if (!owner.equals(festivalId)) {
+                throw new WorkbenchRequestException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "REVISION_FESTIVAL_MISMATCH",
+                    "The revision does not belong to the configured festival."
+                );
+            }
+        });
     }
 
     private <T> T withManifestFile(JsonNode manifest, Function<Path, T> action) {

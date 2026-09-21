@@ -8,9 +8,9 @@ import dev.espero.festival.account.TransferLinkPolicy;
 import dev.espero.festival.persistence.OperationalAccountStore;
 import java.time.Clock;
 import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -37,13 +37,15 @@ public class AccountSettingsCliApplication {
         ConfigurableApplicationContext context = null;
         int exitCode = 1;
         try {
-            context = new SpringApplicationBuilder(AccountSettingsCliApplication.class)
-                .profiles("db", "account-settings-cli")
-                // Keep the property as a diagnostic signal, while the auto-configuration exclusion
-                // above prevents an environment value from ever enabling Flyway for this writer.
-                .properties("spring.flyway.enabled=false")
-                .web(WebApplicationType.NONE)
-                .run();
+            OperatorCliApplicationSupport.prepareLogging();
+            SpringApplication application = new SpringApplication(AccountSettingsCliApplication.class);
+            application.setAdditionalProfiles("db", "account-settings-cli");
+            // Keep the property as a diagnostic signal, while the auto-configuration exclusion
+            // above prevents an environment value from ever enabling Flyway for this writer.
+            application.setDefaultProperties(java.util.Map.of("spring.flyway.enabled", "false"));
+            application.setWebApplicationType(WebApplicationType.NONE);
+            OperatorCliApplicationSupport.configure(application);
+            context = application.run();
             context.getBean(AccountSettingsCliRunner.class).execute(args, System.out);
             exitCode = 0;
         } catch (OperationalAccountException exception) {

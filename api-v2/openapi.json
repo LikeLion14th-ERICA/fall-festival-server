@@ -11686,7 +11686,7 @@
       },
       "put": {
         "operationId": "putAdminCrowding",
-        "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지",
+        "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지",
         "description": "연결 화면: ADM-CROWD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -11749,7 +11749,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: bad-request",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -11789,7 +11789,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: unauthorized",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -11829,7 +11829,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: forbidden",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -11907,7 +11907,7 @@
                 },
                 "examples": {
                   "edit-conflict": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: edit-conflict",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: edit-conflict",
                     "value": {
                       "error": {
                         "code": "EDIT_CONFLICT",
@@ -12004,7 +12004,7 @@
                 },
                 "examples": {
                   "precondition-required": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: precondition-required",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: precondition-required",
                     "value": {
                       "error": {
                         "code": "PRECONDITION_REQUIRED",
@@ -12051,7 +12051,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: rate-limited",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -12110,7 +12110,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "혼잡도 저장·운영일 전후 허용·동일 상태 시각 유지: error",
+                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -12141,6 +12141,7 @@
         "x-mock-scenarios": [
           "normal",
           "full",
+          "not-festival-day",
           "error",
           "precondition-required",
           "edit-conflict",

@@ -7433,6 +7433,25 @@
         "status": 204,
         "response": null
       },
+      "not-festival-day": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding",
+          "headers": {
+            "X-Mock-Scenario": "not-festival-day",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "Idempotency-Key": "mock-putAdminCrowding-not-festival-day"
+          },
+          "body": {
+            "level": "CROWDED"
+          }
+        },
+        "status": 204,
+        "response": null
+      },
       "error": {
         "request": {
           "method": "PUT",

@@ -92,6 +92,14 @@ public class CrowdingController {
         validateHeaders(request);
         CrowdingLevel level = validateInput(input);
         CrowdingViewService.CrowdingSnapshot snapshot = views.currentForAdmin(request);
+        if (!snapshot.today().equals(snapshot.operatingDay())) {
+            throw new ApiException(
+                HttpStatus.CONFLICT,
+                "NOT_FESTIVAL_DAY",
+                "축제 운영일에만 혼잡도를 저장할 수 있습니다.",
+                false
+            );
+        }
 
         AdminPrincipal principal = adminContext.requireCurrent();
         String idempotencyKey = singleHeader(request, "Idempotency-Key");

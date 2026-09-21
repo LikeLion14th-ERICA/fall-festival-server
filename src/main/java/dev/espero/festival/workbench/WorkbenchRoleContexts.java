@@ -74,6 +74,26 @@ class WorkbenchRoleContexts implements DisposableBean {
         settings.put("spring.datasource.url", role.url());
         settings.put("spring.datasource.username", role.username());
         settings.put("spring.datasource.password", role.password());
+        settings.put("spring.datasource.type", "com.zaxxer.hikari.HikariDataSource");
+        settings.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
+        settings.put("spring.datasource.hikari.jdbc-url", role.url());
+        settings.put("spring.datasource.hikari.username", role.username());
+        settings.put("spring.datasource.hikari.password", role.password());
+        settings.put("spring.datasource.hikari.data-source-class-name", "");
+        settings.put("spring.datasource.hikari.data-source-properties.URL", "");
+        settings.put("spring.datasource.hikari.data-source-properties.url", "");
+        settings.put("spring.datasource.hikari.data-source-properties.user", "");
+        settings.put("spring.datasource.hikari.data-source-properties.password", "");
+        settings.put("spring.datasource.jndi-name", "");
+        settings.put(
+            "spring.autoconfigure.exclude",
+            "org.springframework.boot.jdbc.autoconfigure.JndiDataSourceAutoConfiguration"
+        );
+        settings.put("spring.config.location", "classpath:/application.yml");
+        settings.put("spring.config.import", "");
+        settings.put("spring.config.additional-location", "");
+        settings.put("spring.profiles.active", "");
+        settings.put("spring.profiles.include", "");
         settings.put("spring.datasource.hikari.maximum-pool-size", "2");
         settings.put("spring.datasource.hikari.read-only", Boolean.toString(readOnly));
         settings.put("spring.flyway.enabled", "false");
