@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -103,7 +102,7 @@ class CrowdingFlowIntegrationTest {
     }
 
     @Test
-    void savesTheFirstOperatingDayBeforeTheFestivalAndKeepsPublicBeforeOpen() throws Exception {
+    void rejectsSavingBeforeTheFirstFestivalDayAndKeepsPublicBeforeOpen() throws Exception {
         publish(DEVELOPMENT_CATALOG);
         clock.set(OffsetDateTime.parse("2026-09-28T12:00:00+09:00"));
 
@@ -112,11 +111,11 @@ class CrowdingFlowIntegrationTest {
             .andExpect(jsonPath("$.data.operatingDay").value("2026-09-29"))
             .andExpect(jsonPath("$.data.operatingStatus").value("BEFORE_OPEN"));
 
-        assertSavedForSelectedOperatingDay("2026-09-29");
+        assertRejectsSaveOnNonFestivalDayAndPreservesState("2026-09-29");
     }
 
     @Test
-    void savesTheNextOperatingDayOnAGapDayAndKeepsPublicBeforeOpen() throws Exception {
+    void rejectsSavingOnAGapDayAndKeepsPublicBeforeOpen() throws Exception {
         Path withGap = tempDir.resolve("gap-catalog.json");
         String manifest = Files.readString(DEVELOPMENT_CATALOG).replaceFirst(
             "(?s)\\{\\s*\"festivalDate\": \"2026-09-30\".*?\\},\\s*",
@@ -132,11 +131,11 @@ class CrowdingFlowIntegrationTest {
             .andExpect(jsonPath("$.data.operatingDay").value("2026-10-01"))
             .andExpect(jsonPath("$.data.operatingStatus").value("BEFORE_OPEN"));
 
-        assertSavedForSelectedOperatingDay("2026-10-01");
+        assertRejectsSaveOnNonFestivalDayAndPreservesState("2026-10-01");
     }
 
     @Test
-    void savesTheLastOperatingDayAfterTheFestivalAndKeepsPublicClosed() throws Exception {
+    void rejectsSavingAfterTheLastFestivalDayAndKeepsPublicClosed() throws Exception {
         publish(DEVELOPMENT_CATALOG);
         clock.set(OffsetDateTime.parse("2026-10-02T12:00:00+09:00"));
 
@@ -145,7 +144,7 @@ class CrowdingFlowIntegrationTest {
             .andExpect(jsonPath("$.data.operatingDay").value("2026-10-01"))
             .andExpect(jsonPath("$.data.operatingStatus").value("CLOSED"));
 
-        assertSavedForSelectedOperatingDay("2026-10-01");
+        assertRejectsSaveOnNonFestivalDayAndPreservesState("2026-10-01");
     }
 
     @Test
@@ -235,22 +234,26 @@ class CrowdingFlowIntegrationTest {
         )).isEqualTo(1);
     }
 
-    private void assertSavedForSelectedOperatingDay(String operatingDay) throws Exception {
+    private void assertRejectsSaveOnNonFestivalDayAndPreservesState(
+        String operatingDay
+    ) throws Exception {
         String etag = adminCrowding()
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.operatingDay").value(operatingDay))
             .andReturn().getResponse().getHeader("ETag");
+        List<Map<String, Object>> stateBefore = crowdingStateRows();
+        List<Map<String, Object>> auditBefore = auditRows();
 
         save(etag, nextKey(), "CROWDED")
-            .andExpect(status().isNoContent());
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.error.code").value("NOT_FESTIVAL_DAY"));
 
         adminCrowding()
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.operatingDay").value(operatingDay))
-            .andExpect(jsonPath("$.data.savedLevel").value("CROWDED"));
-        assertThat(jdbc.queryForObject(
-            "SELECT operating_date FROM crowding_state_dynamic", Map.of(), LocalDate.class
-        )).isEqualTo(LocalDate.parse(operatingDay));
-        assertThat(auditCount()).isEqualTo(1);
+            .andExpect(jsonPath("$.data.savedLevel").doesNotExist());
+        assertThat(crowdingStateRows()).isEqualTo(stateBefore);
+        assertThat(auditRows()).isEqualTo(auditBefore);
     }
 
     private ResultActions publicCrowding() throws Exception {
@@ -305,6 +308,30 @@ class CrowdingFlowIntegrationTest {
             Long.class
         );
         return count == null ? 0 : count;
+    }
+
+    private List<Map<String, Object>> crowdingStateRows() {
+        return jdbc.queryForList(
+            """
+            SELECT festival_id::text AS festival_id, operating_date, level, updated_at
+            FROM crowding_state_dynamic
+            ORDER BY festival_id, operating_date
+            """,
+            Map.of()
+        );
+    }
+
+    private List<Map<String, Object>> auditRows() {
+        return jdbc.queryForList(
+            """
+            SELECT id::text AS id, admin_id::text AS admin_id, action, resource_type,
+                   resource_id, occurred_at, request_id
+            FROM admin_audit_events
+            WHERE admin_id = :adminId
+            ORDER BY occurred_at, id
+            """,
+            new MapSqlParameterSource("adminId", ADMIN_ID)
+        );
     }
 
     private void resetData() {
