@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -139,6 +140,23 @@ class CatalogWorkbenchIntegrationTest {
         Response afterRestart = workbench.post("/api/post-publish-check", Map.of());
         assertThat(afterRestart.body().path("revisionMatches").asBoolean()).isTrue();
 
+        Response invalidDraftResponse = workbench.post("/api/import", Map.of(
+            "manifest", manifest, "actor", "release operator", "baselineRevisionId", draft
+        ));
+        assertThat(invalidDraftResponse.status()).isEqualTo(200);
+        String invalidDraft = invalidDraftResponse.body().path("revisionId").asString();
+        deletePerformanceTranslations(invalidDraft);
+
+        Response rejected = workbench.post("/api/publish", Map.of(
+            "revisionId", invalidDraft, "actor", "release operator"
+        ));
+        assertThat(rejected.status()).isEqualTo(422);
+        assertThat(rejected.body().path("error").asString()).isEqualTo("CATALOG_REJECTED");
+        assertThat(rejected.body().path("message").asString())
+            .contains("performances")
+            .doesNotContain("jdbc:", "password", "CatalogIntegrityException", "at dev.espero");
+        assertThat(workbench.get("/api/status").body().path("published").path("id").asString()).isEqualTo(draft);
+
         assertThat(auditActors()).containsOnly("release operator");
     }
 
@@ -235,6 +253,17 @@ class CatalogWorkbenchIntegrationTest {
             }
         }
         return actors;
+    }
+
+    private void deletePerformanceTranslations(String revisionId) throws SQLException {
+        try (Connection connection = DriverManager.getConnection(
+            POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword()
+        ); PreparedStatement statement = connection.prepareStatement(
+            "DELETE FROM performance_translations WHERE festival_revision_id = ?"
+        )) {
+            statement.setObject(1, java.util.UUID.fromString(revisionId));
+            statement.executeUpdate();
+        }
     }
 
     private static List<String> sectionNames(JsonNode diff) {
