@@ -3,6 +3,7 @@
 .idea
 .vscode
 .worktrees
+.claude
 
 .env
 .env.*
