@@ -104,19 +104,19 @@ const providerTests = {
   getPins: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi'),
   getPlace: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi'),
   getTicketGuide: provider('src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java', 'reflectsEachAccountChangeOnTheNextRequestWithANewEtag', 'hidesTheAccountAndChangesTheEtagAtTheDailyTransferClose'),
-  getStampGuide: scopeBlock('OpenAPI provisional operation; release exposure waits for the stamp-tour operating data and approval gate.', 'src/test/java/dev/espero/festival/web/StampGuideControllerTest.java', 'returnsGuideMatchingApiV2Schema', 'throwsServiceUnavailableWhenGuideNotConfigured'),
+  getStampGuide: provider('src/test/java/dev/espero/festival/web/StampGuideControllerTest.java', 'returnsGuideMatchingApiV2Schema', 'throwsServiceUnavailableWhenGuideNotConfigured', 'rejectsUnreadyAndUnknownLocalesWithoutFallingBack'),
   verifyStampReceipt: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesStampReceiptSuccessAndRefusalAgainstOpenApi'),
   getAdminCrowding: provider('src/test/java/dev/espero/festival/web/CrowdingFlowIntegrationTest.java', 'savesWithTheCurrentEtagThenServesTheNewRepresentationAndRejectsStaleWrites'),
   putAdminCrowding: provider('src/test/java/dev/espero/festival/web/CrowdingControllerOpenApiTest.java', 'validatesMissingConcurrencyPreconditionAgainstThe428Contract'),
   getAdminNotices: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
-  postAdminNotice: scopeBlock('OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted.', 'src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
+  postAdminNotice: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi', 'requiresIdempotencyKeyOnCreateAndIfMatchOnUpdate', 'rejectsInvalidNoticeInputShapes'),
   getAdminNotice: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
-  putAdminNotice: scopeBlock('OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted.', 'src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
+  putAdminNotice: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi', 'requiresIdempotencyKeyOnCreateAndIfMatchOnUpdate', 'rejectsMismatchedIfMatchAsAnEditConflict', 'rejectsInvalidNoticeInputShapes'),
   deleteAdminNotice: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
   getTemplates: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'servesThePlaceholderTemplateInEveryLocaleToAdministratorsOnly'),
   getTemplate: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'keepsTheTemplateANoticeStartedFromUntilThatTemplateIsRemoved'),
   getAdminGoods: provider('src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java', 'listsMixedAndSoldOutGoodsForAnAuthenticatedAdminWithUnscopedKoreanMeta'),
-  putAdminAvailability: scopeBlock('OpenAPI provisional operation; goods availability writes have provider tests but are not counted as release exposure until the provisional contract is promoted.', 'src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java', 'updatesOnlyTheOwnedCombinationWithoutIfMatchAndReturnsTheCurrentAvailability'),
+  putAdminAvailability: provider('src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java', 'updatesOnlyTheOwnedCombinationWithoutIfMatchAndReturnsTheCurrentAvailability', 'rejectsInvalidMissingLegacyAndExtraInput', 'hidesUnknownAndCrossOwnershipCombinationsBehindNotFound', 'requiresOneValidIdempotencyKey'),
   getAdminProducts: provider('src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java', 'listsAdminProductsWithRawTranslationsOptionsAndKoreanMeta'),
   postAdminProduct: provider('src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java', 'createsOpenApiShapedOptionsProductAndExposesEveryReadModel'),
   getAdminProduct: provider('src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java', 'getsAdminProductDetailWithStableStrongEtagAndConditionalRevalidation'),
@@ -185,14 +185,14 @@ const operationUnresolvedReasons = {
   getGoodAvailability: 'No release scenario currently traverses a goods availability detail; the provider integration test remains the source of live coverage.',
   getPaymentGuide: 'No release scenario currently traverses the goods payment guide; the provider integration test remains the source of live coverage.',
   getAdminNotices: 'No HTTP/OPS release scenario currently covers admin notice reads.',
-  postAdminNotice: 'Provisional contract and no HTTP/OPS release scenario currently covers admin notice writes.',
+  postAdminNotice: 'No HTTP/OPS release scenario currently covers admin notice creation; provider tests cover success, authorization boundaries, idempotency, and invalid input.',
   getAdminNotice: 'No HTTP/OPS release scenario currently covers an admin notice detail.',
-  putAdminNotice: 'Provisional contract and no HTTP/OPS release scenario currently covers admin notice writes.',
+  putAdminNotice: 'No HTTP/OPS release scenario currently covers admin notice updates; provider tests cover success, If-Match conflicts, authorization boundaries, and invalid input.',
   deleteAdminNotice: 'No HTTP/OPS release scenario currently covers admin notice deletion.',
   getTemplates: 'No HTTP/OPS release scenario currently covers admin notice templates.',
   getTemplate: 'No HTTP/OPS release scenario currently covers an admin notice template detail.',
   getAdminGoods: 'No HTTP/OPS release scenario currently covers admin goods reads.',
-  putAdminAvailability: 'Provisional contract and no HTTP/OPS release scenario currently covers admin availability writes.',
+  putAdminAvailability: 'No HTTP/OPS release scenario currently covers admin availability writes; provider tests cover success, idempotency, validation, authorization, and unknown combinations.',
   getAdminProducts: 'No HTTP/OPS release scenario currently covers admin product reads.',
   postAdminProduct: 'No HTTP/OPS release scenario currently covers admin product creation.',
   getAdminProduct: 'No HTTP/OPS release scenario currently covers an admin product detail.',
@@ -208,6 +208,22 @@ const expectedScenarioIds = [
 ];
 
 export const releaseScenarioIds = Object.freeze(expectedScenarioIds);
+export const releaseTestAnchor = 'Postgresql17MigrationReleaseTest';
+export const releaseTestAnchorFile = 'src/test/java/dev/espero/festival/preflight/Postgresql17MigrationReleaseTest.java';
+
+const testClassName = file => file.split(/[\\/]/).pop().replace(/\.java$/, '');
+
+export const buildReleaseTestSelection = metadata => {
+  const classes = new Set([releaseTestAnchor]);
+  for (const operation of metadata?.operations ?? []) {
+    if (operation.status !== 'live') continue;
+    for (const test of operation.testMapping?.tests ?? []) classes.add(testClassName(test.file));
+  }
+  for (const scenario of metadata?.scenarios ?? []) {
+    for (const test of scenario.testMapping?.tests ?? []) classes.add(testClassName(test.file));
+  }
+  return [...classes].sort((left, right) => left.localeCompare(right));
+};
 
 export const buildReleaseOperationCoverage = spec => {
   const operations = [];

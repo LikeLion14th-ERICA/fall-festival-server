@@ -431,9 +431,9 @@
       "operationId": "getStampGuide",
       "path": "/api/v2/stamp-guide",
       "method": "GET",
-      "status": "non-exposure",
+      "status": "live",
       "testMapping": {
-        "kind": "scope-block",
+        "kind": "provider",
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/StampGuideControllerTest.java",
@@ -442,14 +442,17 @@
           {
             "file": "src/test/java/dev/espero/festival/web/StampGuideControllerTest.java",
             "test": "throwsServiceUnavailableWhenGuideNotConfigured"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/StampGuideControllerTest.java",
+            "test": "rejectsUnreadyAndUnknownLocalesWithoutFallingBack"
           }
-        ],
-        "reason": "OpenAPI provisional operation; release exposure waits for the stamp-tour operating data and approval gate."
+        ]
       },
       "scenarioIds": [
         "HTTP-06"
       ],
-      "unresolvedReason": "OpenAPI provisional operation; release exposure waits for the stamp-tour operating data and approval gate."
+      "unresolvedReason": null
     },
     {
       "operationId": "verifyStampReceipt",
@@ -537,19 +540,26 @@
       "operationId": "postAdminNotice",
       "path": "/api/v2/admin/notices",
       "method": "POST",
-      "status": "non-exposure",
+      "status": "live",
       "testMapping": {
-        "kind": "scope-block",
+        "kind": "provider",
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
             "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "requiresIdempotencyKeyOnCreateAndIfMatchOnUpdate"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "rejectsInvalidNoticeInputShapes"
           }
-        ],
-        "reason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+        ]
       },
       "scenarioIds": [],
-      "unresolvedReason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice creation; provider tests cover success, authorization boundaries, idempotency, and invalid input."
     },
     {
       "operationId": "getAdminNotice",
@@ -572,19 +582,30 @@
       "operationId": "putAdminNotice",
       "path": "/api/v2/admin/notices/{noticeId}",
       "method": "PUT",
-      "status": "non-exposure",
+      "status": "live",
       "testMapping": {
-        "kind": "scope-block",
+        "kind": "provider",
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
             "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "requiresIdempotencyKeyOnCreateAndIfMatchOnUpdate"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "rejectsMismatchedIfMatchAsAnEditConflict"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "rejectsInvalidNoticeInputShapes"
           }
-        ],
-        "reason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+        ]
       },
       "scenarioIds": [],
-      "unresolvedReason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice updates; provider tests cover success, If-Match conflicts, authorization boundaries, and invalid input."
     },
     {
       "operationId": "deleteAdminNotice",
@@ -658,19 +679,30 @@
       "operationId": "putAdminAvailability",
       "path": "/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability",
       "method": "PUT",
-      "status": "non-exposure",
+      "status": "live",
       "testMapping": {
-        "kind": "scope-block",
+        "kind": "provider",
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
             "test": "updatesOnlyTheOwnedCombinationWithoutIfMatchAndReturnsTheCurrentAvailability"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "rejectsInvalidMissingLegacyAndExtraInput"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "hidesUnknownAndCrossOwnershipCombinationsBehindNotFound"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "requiresOneValidIdempotencyKey"
           }
-        ],
-        "reason": "OpenAPI provisional operation; goods availability writes have provider tests but are not counted as release exposure until the provisional contract is promoted."
+        ]
       },
       "scenarioIds": [],
-      "unresolvedReason": "OpenAPI provisional operation; goods availability writes have provider tests but are not counted as release exposure until the provisional contract is promoted."
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin availability writes; provider tests cover success, idempotency, validation, authorization, and unknown combinations."
     },
     {
       "operationId": "getAdminProducts",

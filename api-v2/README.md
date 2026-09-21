@@ -19,6 +19,7 @@ branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 �
 | [client-state-examples.json](client-state-examples.json) | 스탬프 등 HTTP 응답으로 만들지 않는 로컬 상태 |
 | [source-screen-requirements.json](source-screen-requirements.json) | 출처 8개 탭의 원문 스냅샷 |
 | [release-operation-coverage.json](release-operation-coverage.json) | OpenAPI 전체 operation의 릴리스 provider·scope coverage와 HTTP/OPS 시나리오 매핑 |
+| [release-test-selection.mjs](release-test-selection.mjs) | live provider·HTTP/OPS 시나리오·PostgreSQL 17 release anchor의 Maven test class 선택기 |
 | [VERIFICATION.md](VERIFICATION.md) | 실제 검증 결과와 범위 |
 
 `openapi.json`이 API 계약의 기계 판독 source of truth입니다. 이 저장소에는 runtime
@@ -27,8 +28,10 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 
 릴리스 coverage metadata도 `openapi.json`에서 자동 inventory합니다. 원천 매핑은
 `release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 44개 operation이
-정확히 한 번 분류되는지, 각 live operation의 provider test 또는 provisional scope block과
-HTTP-01~24·OPS-01~20 매핑이 유효한지 확인합니다. 이 검사는 제품 route를 활성화하지 않습니다.
+정확히 한 번 분류되는지, 각 live operation의 provider test와
+HTTP-01~24·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
+live provider와 44개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
+정렬된 Maven `-Dtest` CSV로 출력합니다. 이 검사는 제품 route를 활성화하지 않습니다.
 
 현재 Spring Boot 서버에는 공개 공연 조회인 `GET /api/v2/lineup`,
 `/artists/{artistId}`, `/timetable`, `/performances/{performanceId}`,
