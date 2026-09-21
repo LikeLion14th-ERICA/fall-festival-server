@@ -9,6 +9,13 @@
 - 범위: remote development only; production hosting 결정이 아님
 - 검증 게이트: `READ_ONLY_DATABASE_PREFLIGHT`, `DEPLOYMENT_VALIDATION_REQUIRED`
 
+### Gate status
+
+| 게이트 | 현재 상태 | 종료 조건 |
+|---|---|---|
+| `READ_ONLY_DATABASE_PREFLIGHT` | 읽기 전용 조사는 완료했지만 결과는 `STOP_AND_REVIEW`, `mutationAuthorized=false`다. 변경 권한을 뜻하지 않는다. | 기존 data·사용 범위와 mutation 승인 기록을 확인한다. 그 전에는 migration, import, publish, role 변경을 실행하지 않는다. |
+| `DEPLOYMENT_VALIDATION_REQUIRED` | 미완료다. backend가 A1에 이미 떠 있다는 사실만으로 이 게이트가 통과한 것은 아니다. | 아래 배포 검증 목록의 해당 항목을 실제 로그·응답으로 확인해 기록한다. 재기동 뒤 연결된 굿즈 이미지의 공개 URL `200` 확인도 포함한다. |
+
 > **2026-09-20 갱신:** backend는 Render가 아니라 A1 인스턴스에서 root `Dockerfile`의
 > 이미지를 단일 `docker run`으로 실행한다. Caddy reverse proxy와 Cloudflare edge 연결은
 > 확인했지만 SSH 접속·host port·Caddy upstream·TLS 발급 방식·Cloudflare proxy 모드는
@@ -405,6 +412,7 @@ backend는 이미 A1에 떠 있으므로 아래는 최초 provision이 아니라
 - [ ] 컨테이너 listen 주소와 host port/Caddy upstream 확인 (`Caddyfile` 및 A1 실행 정보 필요)
 - [ ] Web backend 최초 시작 또는 controlled restart 뒤 `/healthz` 200 확인
 - [ ] `/readyz` 200 확인
+- [ ] 재기동 뒤 실제로 연결된 굿즈 이미지가 있으면, 공개 굿즈 응답이 돌려준 `images[].masterUrl`을 확인된 공개 URL에서 `GET`해 `200`인지 확인. 실제 연결 이미지가 없으면 이 검증은 미완료이며, 상세 절차는 [행사 당일 운영 절차서](wiki/workflow/festival-day-runbook.md)를 따른다.
 - [ ] `/api/v2/lineup`이 valid envelope를 반환하는지 확인
 - [ ] `/api/v2/timetable`의 dates, axis와 items가 manifest와 일치하는지 확인
 - [ ] `/api/v2/config`의 축제명·날짜·공식 채널 링크 확인
