@@ -83,6 +83,8 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
+          scan-ref: '.'
+          skip-dirs: 'test'
           scanners: vuln,secret,misconfig
           format: sarif
           output: trivy-fs.sarif

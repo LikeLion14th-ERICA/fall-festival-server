@@ -9,6 +9,8 @@ coverage·scan·PostgreSQL 17·E2E·load·recovery·browser handoff gate는 [릴
 CI의 Trivy image·filesystem vulnerability/secret/misconfiguration scan은 `HIGH,CRITICAL`을
 fail-closed로 처리한다(`ignore-unfixed=false`, `exit-code=1`). release candidate image는
 immutable digest를 대상으로 같은 High/Critical 기준의 Trivy evidence를 남겨야 한다.
+filesystem scan은 루트 backend 대상(`scan-ref: .`)이며, 별도 실기기 검증 프로젝트인 최상위 `test/`만
+`skip-dirs`로 제외한다. 루트 `src/test`, `api-v2`, `tools`, Dockerfile, workflow와 설정 파일은 계속 검사한다.
 CodeQL workflow는 Java/Kotlin 분석 결과를 생성한다. GitHub CodeQL workflow만으로는 alert
 severity를 merge 차단으로 병합하지 않으므로, repository admin이 `main` 보호 ruleset에서
 CodeQL security alerts `High or higher`와 관련 CI checks를 required로 설정해야 evidence의

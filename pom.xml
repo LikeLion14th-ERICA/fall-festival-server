@@ -16,6 +16,7 @@
     <description>Backend for the Hanyang University ERICA fall festival service</description>
     <properties>
         <java.version>21</java.version>
+        <tomcat.version>11.0.25</tomcat.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <swagger-ui.version>5.32.15</swagger-ui.version>
         <festival.test.excluded-groups>release-pg17</festival.test.excluded-groups>
