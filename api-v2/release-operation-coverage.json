@@ -1,0 +1,1549 @@
+{
+  "schemaVersion": 1,
+  "source": "api-v2/openapi.json",
+  "operationCount": 44,
+  "operations": [
+    {
+      "operationId": "getConfig",
+      "path": "/api/v2/config",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesTheConfigPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-01",
+        "HTTP-10",
+        "HTTP-19",
+        "HTTP-20"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getCrowding",
+      "path": "/api/v2/crowding",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingControllerOpenApiTest.java",
+            "test": "validatesPublicSuccessAndConditionalNotModifiedResponses"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-08",
+        "HTTP-10",
+        "HTTP-18",
+        "HTTP-21",
+        "HTTP-24"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getNotices",
+      "path": "/api/v2/notices",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "listsTodaysGeneralNoticeAndAnyDayLostFoundOrderedNewestFirst"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "resolvesContentLocaleWithFallbackAndKeepsTitleBodyLinkLabelInTheSameLanguage"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-10",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getGoods",
+      "path": "/api/v2/goods",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java",
+            "test": "listsGoodsWithResolvedColorsAndSizes"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getGoodsAvailability",
+      "path": "/api/v2/goods-availability",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java",
+            "test": "returnsAvailabilityWithCombinationsAndAllSoldOut"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getGood",
+      "path": "/api/v2/goods/{goodsId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java",
+            "test": "createsOpenApiShapedOptionsProductAndExposesEveryReadModel"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getGoodAvailability",
+      "path": "/api/v2/goods/{goodsId}/availability",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java",
+            "test": "createsOpenApiShapedOptionsProductAndExposesEveryReadModel"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getPaymentGuide",
+      "path": "/api/v2/goods/{goodsId}/payment-guide",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java",
+            "test": "returnsPaymentGuideAccountOnlyWhenConfigured"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getLineup",
+      "path": "/api/v2/lineup",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java",
+            "test": "validatesLineupSuccessAndEmptyResponses"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
+        "HTTP-14",
+        "HTTP-18",
+        "HTTP-19"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getArtist",
+      "path": "/api/v2/artists/{artistId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java",
+            "test": "validatesArtistSuccessAndMissingOptionalResponses"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
+        "HTTP-14",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getTimetable",
+      "path": "/api/v2/timetable",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java",
+            "test": "validatesTimetableNormalAndEmptyResponses"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
+        "HTTP-14",
+        "HTTP-18",
+        "HTTP-19"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getPerformance",
+      "path": "/api/v2/performances/{performanceId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java",
+            "test": "validatesPerformanceNormalNullableEmptyAndErrorResponses"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
+        "HTTP-14",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getProhibitedItems",
+      "path": "/api/v2/prohibited-items",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java",
+            "test": "validatesProhibitedNormalEmptyAndBadRequestResponses"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getSpaces",
+      "path": "/api/v2/spaces",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-02",
+        "HTTP-03",
+        "HTTP-04",
+        "HTTP-14",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getSpace",
+      "path": "/api/v2/spaces/{spaceId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-02",
+        "HTTP-03",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getMaps",
+      "path": "/api/v2/maps",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-03",
+        "HTTP-04",
+        "HTTP-14",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getMap",
+      "path": "/api/v2/maps/{mapId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-04",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getPins",
+      "path": "/api/v2/maps/{mapId}/pins",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-03",
+        "HTTP-04",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getPlace",
+      "path": "/api/v2/places/{placeId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-03",
+        "HTTP-04",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getTicketGuide",
+      "path": "/api/v2/ticket-guide",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java",
+            "test": "reflectsEachAccountChangeOnTheNextRequestWithANewEtag"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java",
+            "test": "hidesTheAccountAndChangesTheEtagAtTheDailyTransferClose"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-06",
+        "HTTP-11",
+        "HTTP-18",
+        "HTTP-23"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getStampGuide",
+      "path": "/api/v2/stamp-guide",
+      "method": "GET",
+      "status": "non-exposure",
+      "testMapping": {
+        "kind": "scope-block",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/StampGuideControllerTest.java",
+            "test": "returnsGuideMatchingApiV2Schema"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/StampGuideControllerTest.java",
+            "test": "throwsServiceUnavailableWhenGuideNotConfigured"
+          }
+        ],
+        "reason": "OpenAPI provisional operation; release exposure waits for the stamp-tour operating data and approval gate."
+      },
+      "scenarioIds": [
+        "HTTP-06"
+      ],
+      "unresolvedReason": "OpenAPI provisional operation; release exposure waits for the stamp-tour operating data and approval gate."
+    },
+    {
+      "operationId": "verifyStampReceipt",
+      "path": "/api/v2/stamp-receipt-verifications",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesStampReceiptSuccessAndRefusalAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-06"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getAdminCrowding",
+      "path": "/api/v2/admin/crowding",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingFlowIntegrationTest.java",
+            "test": "savesWithTheCurrentEtagThenServesTheNewRepresentationAndRejectsStaleWrites"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-08",
+        "HTTP-09",
+        "HTTP-12",
+        "HTTP-16",
+        "HTTP-24"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "putAdminCrowding",
+      "path": "/api/v2/admin/crowding",
+      "method": "PUT",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingControllerOpenApiTest.java",
+            "test": "validatesMissingConcurrencyPreconditionAgainstThe428Contract"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-08",
+        "HTTP-09",
+        "HTTP-12",
+        "HTTP-16",
+        "HTTP-24"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getAdminNotices",
+      "path": "/api/v2/admin/notices",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice reads."
+    },
+    {
+      "operationId": "postAdminNotice",
+      "path": "/api/v2/admin/notices",
+      "method": "POST",
+      "status": "non-exposure",
+      "testMapping": {
+        "kind": "scope-block",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          }
+        ],
+        "reason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+    },
+    {
+      "operationId": "getAdminNotice",
+      "path": "/api/v2/admin/notices/{noticeId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers an admin notice detail."
+    },
+    {
+      "operationId": "putAdminNotice",
+      "path": "/api/v2/admin/notices/{noticeId}",
+      "method": "PUT",
+      "status": "non-exposure",
+      "testMapping": {
+        "kind": "scope-block",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          }
+        ],
+        "reason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "OpenAPI provisional operation; the admin notice write remains outside the release exposure baseline until the contract is promoted."
+    },
+    {
+      "operationId": "deleteAdminNotice",
+      "path": "/api/v2/admin/notices/{noticeId}",
+      "method": "DELETE",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice deletion."
+    },
+    {
+      "operationId": "getTemplates",
+      "path": "/api/v2/admin/notice-templates",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "servesThePlaceholderTemplateInEveryLocaleToAdministratorsOnly"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice templates."
+    },
+    {
+      "operationId": "getTemplate",
+      "path": "/api/v2/admin/notice-templates/{templateId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "keepsTheTemplateANoticeStartedFromUntilThatTemplateIsRemoved"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers an admin notice template detail."
+    },
+    {
+      "operationId": "getAdminGoods",
+      "path": "/api/v2/admin/goods",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "listsMixedAndSoldOutGoodsForAnAuthenticatedAdminWithUnscopedKoreanMeta"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin goods reads."
+    },
+    {
+      "operationId": "putAdminAvailability",
+      "path": "/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability",
+      "method": "PUT",
+      "status": "non-exposure",
+      "testMapping": {
+        "kind": "scope-block",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "updatesOnlyTheOwnedCombinationWithoutIfMatchAndReturnsTheCurrentAvailability"
+          }
+        ],
+        "reason": "OpenAPI provisional operation; goods availability writes have provider tests but are not counted as release exposure until the provisional contract is promoted."
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "OpenAPI provisional operation; goods availability writes have provider tests but are not counted as release exposure until the provisional contract is promoted."
+    },
+    {
+      "operationId": "getAdminProducts",
+      "path": "/api/v2/admin/products",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "listsAdminProductsWithRawTranslationsOptionsAndKoreanMeta"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product reads."
+    },
+    {
+      "operationId": "postAdminProduct",
+      "path": "/api/v2/admin/products",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java",
+            "test": "createsOpenApiShapedOptionsProductAndExposesEveryReadModel"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product creation."
+    },
+    {
+      "operationId": "getAdminProduct",
+      "path": "/api/v2/admin/products/{goodsId}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsAvailabilityFlowIntegrationTest.java",
+            "test": "getsAdminProductDetailWithStableStrongEtagAndConditionalRevalidation"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers an admin product detail."
+    },
+    {
+      "operationId": "putAdminProduct",
+      "path": "/api/v2/admin/products/{goodsId}",
+      "method": "PUT",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java",
+            "test": "updatesOptionsDifferentiallyAndReordersStableColorsSizesAndImages"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product updates."
+    },
+    {
+      "operationId": "deleteAdminProduct",
+      "path": "/api/v2/admin/products/{goodsId}",
+      "method": "DELETE",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java",
+            "test": "hardDeletesProductDetachesMediaAndReplaysAfterTheRowIsGone"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product deletion."
+    },
+    {
+      "operationId": "postAdminGoodsImage",
+      "path": "/api/v2/admin/media/goods-images",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminGoodsImageUploadFlowIntegrationTest.java",
+            "test": "uploadsAndReplaysTheSameImageWithOneMutationAndFreshMeta"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin goods media upload."
+    },
+    {
+      "operationId": "getGoodsImage",
+      "path": "/api/v2/media/goods-images/{mediaId}/{variant}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/GoodsMediaControllerIntegrationTest.java",
+            "test": "anonymouslyStreamsEveryAttachedVariantWithImmutableHeaders"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS release scenario currently covers goods media retrieval."
+    },
+    {
+      "operationId": "createAdminSession",
+      "path": "/api/v2/admin/sessions",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java",
+            "test": "loginReturnsAccessTokenAndSecureHttpOnlyRefreshCookie"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-07",
+        "HTTP-12",
+        "HTTP-22"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "refreshAdminSession",
+      "path": "/api/v2/admin/sessions/refresh",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java",
+            "test": "refreshRotatesTheCookie"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-07",
+        "HTTP-12"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "deleteCurrentAdminSession",
+      "path": "/api/v2/admin/sessions/current",
+      "method": "DELETE",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java",
+            "test": "logoutRevokesSessionAndExpiresCookie"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-07",
+        "HTTP-12"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getCurrentAdmin",
+      "path": "/api/v2/admin/me",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java",
+            "test": "meUsesAuthenticatedPrincipalWithoutParsingJwt"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-07",
+        "HTTP-12"
+      ],
+      "unresolvedReason": null
+    }
+  ],
+  "scenarioCount": 44,
+  "scenarios": [
+    {
+      "id": "HTTP-01",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys"
+          }
+        ]
+      },
+      "operationIds": [
+        "getConfig"
+      ]
+    },
+    {
+      "id": "HTTP-02",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys"
+          }
+        ]
+      },
+      "operationIds": [
+        "getSpaces",
+        "getSpace"
+      ]
+    },
+    {
+      "id": "HTTP-03",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys"
+          }
+        ]
+      },
+      "operationIds": [
+        "getSpaces",
+        "getSpace",
+        "getMaps",
+        "getPins",
+        "getPlace"
+      ]
+    },
+    {
+      "id": "HTTP-04",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys"
+          }
+        ]
+      },
+      "operationIds": [
+        "getSpaces",
+        "getMaps",
+        "getMap",
+        "getPins",
+        "getPlace"
+      ]
+    },
+    {
+      "id": "HTTP-05",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys"
+          }
+        ]
+      },
+      "operationIds": [
+        "getLineup",
+        "getArtist",
+        "getTimetable",
+        "getPerformance",
+        "getProhibitedItems"
+      ]
+    },
+    {
+      "id": "HTTP-06",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys"
+          }
+        ]
+      },
+      "operationIds": [
+        "getTicketGuide",
+        "getStampGuide",
+        "verifyStampReceipt"
+      ]
+    },
+    {
+      "id": "HTTP-07",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/AdminSessionReleaseE2eTest.java",
+            "test": "userSessionLifecycleRotatesAndRevokesRefreshCredentials"
+          }
+        ]
+      },
+      "operationIds": [
+        "createAdminSession",
+        "refreshAdminSession",
+        "deleteCurrentAdminSession",
+        "getCurrentAdmin"
+      ]
+    },
+    {
+      "id": "HTTP-08",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
+            "test": "concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse"
+          }
+        ]
+      },
+      "operationIds": [
+        "getCrowding",
+        "getAdminCrowding",
+        "putAdminCrowding"
+      ]
+    },
+    {
+      "id": "HTTP-09",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
+            "test": "loopbackAdminRequiresIfMatchAndRejectsStaleRepresentation"
+          }
+        ]
+      },
+      "operationIds": [
+        "getAdminCrowding",
+        "putAdminCrowding"
+      ]
+    },
+    {
+      "id": "HTTP-10",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "publicQueriesRejectUnpublishedLocalesAndDuplicateParametersWithReleaseMetadata"
+          }
+        ]
+      },
+      "operationIds": [
+        "getConfig",
+        "getCrowding",
+        "getNotices"
+      ]
+    },
+    {
+      "id": "HTTP-11",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "publicConditionalReadsAcceptWeakAndMultiValueValidators"
+          }
+        ]
+      },
+      "operationIds": [
+        "getTicketGuide"
+      ]
+    },
+    {
+      "id": "HTTP-12",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/AdminSessionReleaseE2eTest.java",
+            "test": "sessionBoundaryRejectsBadOriginCredentialsTokensAndMalformedBodies"
+          }
+        ]
+      },
+      "operationIds": [
+        "getAdminCrowding",
+        "putAdminCrowding",
+        "createAdminSession",
+        "refreshAdminSession",
+        "deleteCurrentAdminSession",
+        "getCurrentAdmin"
+      ]
+    },
+    {
+      "id": "HTTP-13",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "releaseCliChildCannotBeRedirectedByAHostileDatasourceOverride"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "HTTP-14",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "traversesEveryDeclaredDateCategoryAndExposedSpaceFilter"
+          }
+        ]
+      },
+      "operationIds": [
+        "getLineup",
+        "getArtist",
+        "getTimetable",
+        "getPerformance",
+        "getSpaces",
+        "getMaps"
+      ]
+    },
+    {
+      "id": "HTTP-15",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalAccountPropagationE2eTest.java",
+            "test": "cliSetAndClearPropagateToHttpWithConditionalEtagSemantics"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "HTTP-16",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
+            "test": "concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse"
+          }
+        ]
+      },
+      "operationIds": [
+        "getAdminCrowding",
+        "putAdminCrowding"
+      ]
+    },
+    {
+      "id": "HTTP-17",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CatalogPublicationLifecycleE2eTest.java",
+            "test": "publicationAndRollbackBecomeVisibleAfterRestartWithoutChangingDynamicState"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "HTTP-18",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "publicInputFailuresStaySafeAndDoNotBlockAnonymousCatalogNavigation"
+          }
+        ]
+      },
+      "operationIds": [
+        "getCrowding",
+        "getNotices",
+        "getGoods",
+        "getGoodsAvailability",
+        "getGood",
+        "getGoodAvailability",
+        "getPaymentGuide",
+        "getLineup",
+        "getArtist",
+        "getTimetable",
+        "getPerformance",
+        "getProhibitedItems",
+        "getSpaces",
+        "getSpace",
+        "getMaps",
+        "getMap",
+        "getPins",
+        "getPlace",
+        "getTicketGuide"
+      ]
+    },
+    {
+      "id": "HTTP-19",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java",
+            "test": "defaultDateAndLineupStayAlignedBeforeAndAfterTheFestivalCalendar"
+          }
+        ]
+      },
+      "operationIds": [
+        "getConfig",
+        "getLineup",
+        "getTimetable"
+      ]
+    },
+    {
+      "id": "HTTP-20",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseFailureModesHttpE2eTest.java",
+            "test": "unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable"
+          }
+        ]
+      },
+      "operationIds": [
+        "getConfig"
+      ]
+    },
+    {
+      "id": "HTTP-21",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseFailureModesHttpE2eTest.java",
+            "test": "unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable"
+          }
+        ]
+      },
+      "operationIds": [
+        "getCrowding"
+      ]
+    },
+    {
+      "id": "HTTP-22",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ReleaseFailureModesHttpE2eTest.java",
+            "test": "unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable"
+          }
+        ]
+      },
+      "operationIds": [
+        "createAdminSession"
+      ]
+    },
+    {
+      "id": "HTTP-23",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalAccountPropagationE2eTest.java",
+            "test": "transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds"
+          }
+        ]
+      },
+      "operationIds": [
+        "getTicketGuide"
+      ]
+    },
+    {
+      "id": "HTTP-24",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
+            "test": "loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours"
+          }
+        ]
+      },
+      "operationIds": [
+        "getCrowding",
+        "getAdminCrowding",
+        "putAdminCrowding"
+      ]
+    },
+    {
+      "id": "OPS-01",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-02",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-03",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliRejectsCorruptDraftAndRecoversWithAValidReplacementThroughSeparateProcesses"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-04",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "accountSettingsCliKeepsDryRunsSafeAndChangesVersionedHistoryThroughItsRealMain"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-05",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalReleaseGateE2eTest.java",
+            "test": "readOnlyPreflightRoleInspectsPublishedDatabaseWithoutMutation"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-06",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/workbench/CatalogWorkbenchIntegrationTest.java",
+            "test": "validatesDiffsImportsPublishesAndChecksTheBackend"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-07",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliRejectsCorruptDraftAndRecoversWithAValidReplacementThroughSeparateProcesses"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-08",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliCannotImportWithAReadOnlyRoleAndDoesNotCreateDraftOrAuditRows"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-09",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "accountSettingsCliRejectsUnknownInputAndStaleExpectedVersionWithoutWriting"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-10",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalReleaseGateE2eTest.java",
+            "test": "readOnlyAccountRoleCannotClearOrRestoreAnExistingSetting"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-11",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "databasePreflightStandaloneMainStopsOnExistingCatalogAndRedactsConfigurationFailures"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-12",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "databasePreflightStandaloneMainStopsOnExistingCatalogAndRedactsConfigurationFailures"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-13",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliRollsBackLateAuditFailureAndCanRetry"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-14",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliRollsBackLateAuditFailureAndCanRetry"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-15",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliRollsBackLateAuditFailureAndCanRetry"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-16",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliSerializesCompetingProcessesWithoutLosingTheWinner"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-17",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliSerializesCompetingProcessesWithoutLosingTheWinner"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-18",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/DatabasePreflightEmptyDatabaseE2eTest.java",
+            "test": "standalonePreflightCanInspectAnEmptyDatabaseTwiceWithoutCreatingApplicationState"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-19",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliRoundTripsEveryManifestSectionIncludingHistoricalAssetsAndUnfilteredPins"
+          }
+        ]
+      },
+      "operationIds": []
+    },
+    {
+      "id": "OPS-20",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java",
+            "test": "catalogCliBlocksEveryPartialLegacyTicketScheduleAndPublishesOnlyAfterCorrection"
+          }
+        ]
+      },
+      "operationIds": []
+    }
+  ]
+}
