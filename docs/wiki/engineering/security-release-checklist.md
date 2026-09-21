@@ -35,6 +35,7 @@
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |
 | 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; 기본 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest` |
 | 오류·로그 | 오류 envelope와 startup/cleanup/API 오류 로그에 connection string·비밀값·stack trace를 넣지 않음 | `GlobalApiExceptionHandlerTest`, `CatalogSnapshotProviderTest`, `CleanupJobSafetyTest` |
+| 의존성·비밀값·이미지 | 저장소 manifest와 root runtime image의 high/critical 취약점, 저장소 비밀값 | `docker-build`의 Trivy filesystem·image scan |
 
 미디어는 UUID 기반 저장 경로와 WebP 재인코딩을 쓴다. 확장자 검사·malware scan·signed upload URL은
 현재 계약의 보호 수단이 아니므로 실제 기능을 추가하기 전에는 통과 항목으로 만들지 않는다.
@@ -48,7 +49,7 @@
   `RATE_LIMIT_TRUSTED_PROXY_HOPS`를 확인했다. 검증용 `test/Caddyfile`은 운영 증거가 아니다.
 - [ ] runtime·catalog·account·cleanup role의 DB 최소 권한, 인터넷 비노출, DB TLS 정책을 확인했다.
 - [ ] DB와 media volume을 같은 recovery set으로 백업했고, 격리 환경 restore 결과를 기록했다.
-- [ ] secret, Maven dependency, container image 취약점 scan 결과와 high/critical 대응을 기록했다.
+- [ ] `docker-build`의 Trivy filesystem·root image high/critical 결과와 대응을 release 기록에 남겼다.
 - [ ] 실제 HTTP 요청으로 SQL injection 성격의 값이 parameter binding·안전 오류로 처리되는지 확인했다.
 - [ ] 긴 query/header, slow request의 서버·proxy 제한을 실제 설정과 함께 확인했다.
 - [ ] 공지·링크를 소비하는 프런트가 raw HTML이나 `javascript:` URL을 실행하지 않는지 확인했다.
