@@ -17,10 +17,11 @@ staging 결과는 운영 배포 성공의 증거가 아니라 승인된 release 
 다음 중 하나라도 빠지거나 실패하면 release를 block한다.
 
 - candidate image digest 또는 Git commit을 고유하게 식별할 수 없다.
-- OpenAPI hash, migration checksum, coverage, dependency/container/secret scan 중 하나가
+- OpenAPI hash, migration checksum, operation mapping, dependency/container/secret scan 중 하나가
   후보와 연결되지 않거나 실패했다.
-- PostgreSQL 17 compatibility/preflight, backend release E2E, load 결과 중 하나가 staging
-  증거로 남지 않았다. Docker가 없어 focused E2E를 건너뛴 결과는 성공으로 취급하지 않는다.
+- PostgreSQL 17 compatibility/preflight, disposable-DB backend release E2E, staging smoke/load 결과
+  중 하나가 해당 evidence bundle에 남지 않았다. Docker가 없어 focused E2E를 건너뛴 결과는
+  성공으로 취급하지 않는다.
 - recovery set 또는 복구 리허설이 없고 데이터·media 복구 결과를 같은 artifact ID로 묶지 못했다.
 - RPO 또는 RTO의 승인된 목표가 없다. 목표값을 임의로 정하지 말고 릴리스 승인 기록에 확정한다.
 - on-call 주 담당·대체 담당, 실제 연락 채널, alert 수신·acknowledge·escalation 경로가
@@ -40,7 +41,7 @@ release 책임자는 staging 실행 전에 다음 필드를 하나의 보호된 
 | --- | --- |
 | `evidenceId` | 재사용하지 않는 작업 기록 ID |
 | `candidateCommit` | 후보 Git commit SHA |
-| `candidateImageDigest` | 후보 container image의 immutable digest |
+| `candidateImageDigest` | 후보 container image의 immutable digest와 OCI revision label |
 | `stagingTarget` | staging 식별자와 Asia/Seoul 시작·종료 시각 |
 | `festivalId` | 검증 대상 회차 식별자(운영 secret 아님) |
 | `operator` / `reviewer` | 실행자와 독립 확인자 |
@@ -50,6 +51,11 @@ release 책임자는 staging 실행 전에 다음 필드를 하나의 보호된 
 남긴다. 로그·스크린샷·브라우저 export에 Authorization header, cookie, password, connection
 string, 계좌 원문, stamp code/hash, 개인정보가 있으면 제거하거나 저장하지 않는다.
 
+protected record에는 registry에서 확인한 실제 candidate image digest, 그 image의 OCI revision
+label, `candidateCommit`과 label의 일치 결과, 그리고 Trivy image scan evidence의 artifact ID와
+report hash를 반드시 연결한다. registry 주소, credential, secret, host 값과 scan 원문에 포함된
+민감한 경로는 저장소에 넣지 않는다.
+
 ## 3. staging gate와 증거 형식
 
 각 행은 같은 `evidenceId`와 `candidateImageDigest`를 가리켜야 한다. `status`가 `PASS`가
@@ -57,18 +63,22 @@ string, 계좌 원문, stamp code/hash, 개인정보가 있으면 제거하거�
 
 | gate | 확인할 내용 | 최소 evidence |
 | --- | --- | --- |
-| Candidate identity | commit·image·catalog candidate가 같은 후보인지 | SHA, image digest, manifest/revision ID, 생성 시각 |
+| Candidate identity | commit·image·catalog candidate가 같은 후보인지 | SHA, image digest, OCI revision label과 candidate commit 일치, manifest/revision ID, 생성 시각 |
 | OpenAPI contract | 후보 계약과 생성 artifact가 일치하는지 | `api-v2/openapi.json` SHA-256, source revision, contract check 결과 |
 | Migration | Flyway history와 후보 SQL checksum이 일치하는지 | migration 목록·checksum, schema 대상, `mutationAuthorized` 판정 |
-| Coverage | 후보 backend 테스트 coverage 기준을 충족하는지 | tool version, line/branch 결과, report hash, threshold 판정 |
-| Scan | dependency, container, SAST/secret/license scan 결과 | scanner·database version, 결과 요약, report hash, waiver 승인 ID |
+| Operation mapping | 44개 OpenAPI operation classification과 provider·scenario mapping이 후보와 일치하는지 | classification/provider·scenario mapping hash, check 결과, 누락·중복 0 판정 |
+| Scan | dependency, container, SAST/secret/license scan 결과 | scanner·database version, Trivy image scan evidence, 결과 요약, report hash, waiver 승인 ID |
 | PostgreSQL 17 | 지원 PostgreSQL 17 staging에서 preflight와 migration 확인 | server version, schema, Flyway result/checksum, read-only preflight 결과 |
-| Release E2E | 후보 import/publish, 공개 흐름, admin 경계, rollback/restart 관계 | 실행 ID, exit code, scenario summary, `/healthz`, `/readyz`, `meta.revision` |
+| Automated release E2E | disposable Testcontainers DB에서 후보 import/publish, 공개 흐름, admin 경계, rollback/restart 관계 | 실행 ID, exit code, scenario summary, `/healthz`, `/readyz`, `meta.revision` |
+| Staging smoke | 실제 staging 후보 image의 공개·관리자 경계와 readiness 확인 | staging target reference, image digest, smoke 결과, `/healthz`, `/readyz`, `meta.revision` |
 | Load | 승인된 동시 사용자·RPS profile에서 latency와 오류 확인 | profile, duration, p95/p99, 4xx/5xx/429, heap/GC/DB pool, report hash |
 | Recovery | DB와 media를 같은 recovery set으로 복원하고 검증 | recovery set ID, dump/media checksum, restore 시각, revision/media smoke |
 | Browser handoff | 지원 브라우저·viewport에서 운영자와 사용자 흐름 인수인계 | browser/version/viewport, run ID, navigation/back·cookie·CORS 결과, owner sign-off |
 
-기존 release E2E의 HTTP-01~24와 OPS-01~20, Testcontainers-only 격리, load 기준은
+자동 release E2E의 HTTP-01~24와 OPS-01~20은 disposable Testcontainers PostgreSQL DB 전용이다.
+이 자동 검사는 실제 staging datasource·운영 DB·원격 개발 DB를 사용하지 않으며, Docker가 없으면
+성공으로 취급하지 않는다. 실제 staging은 별도 후보 image를 배포해 smoke, load, browser handoff,
+recovery를 실행하고 그 결과를 별도 gate evidence로 연결한다. 각 절차와 기존 시나리오·load 기준은
 [검증 명령과 CI](validation.md), [운영·카탈로그 구현 인수인계](ops-catalog-handoff.md),
 [운영](../engineering/operations.md)을 따른다. 이 문서는 그 결과를 다시 구현하거나 숫자를
 복제하지 않고 후보별 증거를 연결한다.
@@ -93,9 +103,10 @@ migrationChecksums: <protected-report-id>
 
 ### 3.2 실행·부하·브라우저 handoff
 
-release E2E는 staging datasource만 사용한다. 원격 개발 DB나 운영 DB를 연결한 결과는 이 gate의
-증거가 아니다. Docker 부재로 테스트를 skip했거나 실행 중인 서버 없이 명령 형식만 확인한
-경우도 PASS가 아니다.
+자동 HTTP/OPS E2E는 disposable Testcontainers DB만 사용한다. 실제 staging 후보 image의
+배포·smoke·load·browser handoff·recovery는 이 자동 E2E와 별도 실행이며, 각각의 실제 target과
+artifact ID를 protected record에 연결한다. Docker 부재로 테스트를 skip했거나 실행 중인 서버
+없이 명령 형식만 확인한 경우도 PASS가 아니다.
 
 부하 결과에는 profile, 대상 endpoint와 dataset, 실행 시간, 성공·실패·timeout, latency
 percentile, JVM·DB 자원, rate limit 응답을 함께 기록한다. 운영 용량을 staging 한 번의 결과로
