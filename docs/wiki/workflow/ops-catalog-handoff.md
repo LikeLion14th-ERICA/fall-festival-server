@@ -35,6 +35,11 @@ E2E는 응답에서 ID를 읽어 다음 흐름을 HTTP로 검사한다.
 - ticket guide의 조건부 응답과 지도 target, stamp 안내의 보상·기간·일일 한도
 - 관리자 login·`/admin/me`·refresh rotation·logout
 - 혼잡도 변경, idempotency replay, 같은 단계 no-op, stale ETag, FULL 확인
+- locale·중복 query 오류, weak·다중 ETag, CORS·잘못된 인증 입력과 후보 datasource 격리
+- 모든 선언 날짜·lineup category·공간 category filter의 반복 응답·정렬·상세 관계
+- 실행 중인 server에서 별도 계좌 CLI set·clear의 ticket guide 반영과 transfer close 계좌 비노출
+- 실제 동시 혼잡도 PUT의 단일 변경·감사·idempotency 재사용 거절
+- 게시 A/B, 제어된 server restart, expected-current rollback 뒤 새 revision A 복원과 동적 상태 보존
 
 빈 목록과 `UNCONFIGURED` 티켓은 non-strict 후보에서 현재 계약상 유효한 표현으로 다룬다.
 strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀·AREA 핀·공연·타임테이블 관계를
@@ -45,6 +50,10 @@ strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀�
 변경 뒤 focused E2E와 전체 `mvnw.cmd verify` 결과를 아래 검증 기록에 추가한다. 브라우저의
 navigation/back 상태, Secure·SameSite cookie, 관리자 proxy, 모바일 네트워크 복귀와 polling은
 web 저장소와 실기기 acceptance gate에서 확인한다.
+
+현재 release E2E 시나리오는 HTTP-01~17과 OPS-01~12, 총 **29개**다. 이 수는 관련 요청을
+한 lifecycle 안에 묶는 JUnit method 수와 다르며, 각 시나리오의 상세 매핑은
+[검증 명령](validation.md#릴리스-후보-backend-e2e)에 둔다.
 
 ## 운영자·개발자 도구 E2E · 2026-09-21
 
@@ -61,6 +70,9 @@ web 저장소와 실기기 acceptance gate에서 확인한다.
 - `CatalogWorkbenchIntegrationTest`는 HTTP 워크벤치가 다른 축제 revision의 export·diff·publish를
   `REVISION_FESTIVAL_MISMATCH`로 거절하고 해당 축제의 published pointer·revision·audit을 바꾸지
   않는지 확인한다.
+- 추가 process 경계는 손상된 draft publish 뒤 정상 replacement 복구, Catalog·계좌 CLI의
+  read-only role 거절, 계좌 입력·expected-version 무결성, standalone preflight의 설정 오류
+  redaction, hostile logging 환경의 JDBC URL·비밀번호·stack trace 비노출까지 확인한다.
 
 이 E2E는 test classpath의 main entry point를 실행한다. 배포 JAR의 `PropertiesLauncher` 명령은
 package 뒤 운영 runbook대로 별도로 실행한다. 단, 이 검증도 원격 DB, SSH tunnel, 실제 계좌 또는
@@ -69,7 +81,7 @@ package 뒤 운영 runbook대로 별도로 실행한다. 단, 이 검증도 원�
 ## E2E 재개·출시 후보 확인
 
 1. Docker가 실행 중인지 확인하고, 원격 DB에는 연결하지 않는다.
-2. 기본 흐름 확인은 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest test"`를 실행한다.
+2. HTTP release E2E는 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest test"`를 실행한다.
 3. 운영자·개발자 도구 확인은 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"`를 실행한다.
 4. 실제 출시 후보는 `-Dfestival.release-e2e.manifest=<path>`와
    `-Dfestival.release-e2e.require-user-journey-content=true`를 지정해 실행한다.
@@ -184,6 +196,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 
 | 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
 |---|---|---|---|
+| 2026-09-21 | 상세 release E2E 확장·격리 hardening | HTTP-01~17·OPS-01~12의 29개 시나리오를 문서화했다. 별도 CLI JVM, 계좌 변경의 live HTTP 반영, 동시 idempotency, publish→restart→rollback lifecycle, 전체 candidate traversal, locale·ETag·CORS 오류를 Testcontainers에서 확인했다. Hikari datasource-class/property URL·Flyway URL·JNDI 상속도 dummy 값으로 회귀 검증했고 원격 DB에는 연결하지 않았다. focused 16개는 실패·오류 0, `mvnw.cmd clean verify`는 621개 실패·오류 0, skip 9와 JAR 패키징으로 통과했다. 종료 뒤 Testcontainers가 내려간 Hikari connection refused 로그와 Surefire self-fork 30초 정리 경고가 있었지만 Maven exit은 0이었다. | 다음 변경에서도 29개 scenario matrix와 Testcontainers-only isolation을 유지한다. 종료 경고가 실패·지연으로 바뀌면 별도 원인 분석을 한다. |
 | 2026-09-21 | 운영자·개발자 도구 process E2E와 전체 backend 검증 | 실제 별도 JVM의 Catalog CLI·계좌 CLI에서 baseline 충돌·rollback·dry-run·confirm·redaction과 안전한 framework failure를 확인했다. hostile Hikari 환경변수도 Testcontainers child에 전달되지 않는다. focused 27개와 `mvnw.cmd clean verify` 608개가 실패·오류 0, skip 9로 통과했고 JAR를 패키징했다. 종료 뒤 Surefire가 30초 후 남은 test fork JVM을 정리했다는 경고가 있었지만 Maven exit은 0이었다. | 다음 변경에서도 operator process E2E를 유지한다. Surefire 종료 경고가 테스트 실패나 종료 지연으로 바뀌면 별도 원인 분석을 한다. |
 | 2026-09-21 | 상세 사용자 흐름 backend E2E | `frontend-mock-catalog.json` strict 흐름 1개와 `development-catalog.json` sparse 후보 1개가 각각 임시 PostgreSQL에서 통과했다. 공간·지도·핀·장소, 공연·타임테이블, 티켓·스탬프, 관리자 refresh/logout, 혼잡도 동시성 흐름을 포함한다. 최신 `origin/main` 확인 뒤 `mvnw.cmd clean verify`는 603개 통과, 실패·오류 0, 기존 환경 의존 skip 9개였다. | 실제 출시 후보에는 strict property를 지정하고, 공지·굿즈·브라우저·배포 전용 게이트를 별도로 통과시킨다. |
 | 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |

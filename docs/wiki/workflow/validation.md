@@ -51,11 +51,30 @@ Docker 엔진이 없으면 이 테스트는 skip하지 않고 실패한다.
 | HTTP-07 | 관리자 세션 | 로그인 → `/admin/me` → refresh rotation → 이전 refresh 거부 → logout 뒤 refresh 거부 |
 | HTTP-08 | 혼잡도 운영 | 공개 조회 → 관리자 변경 → 같은 idempotency key replay → 공개 반영 → 같은 단계 재선택의 no-op |
 | HTTP-09 | 충돌·확인 처리 | stale `If-Match`의 409, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |
+| HTTP-10 | locale·query 오류 | 미게시 locale의 `LOCALE_NOT_READY`, 미지원·중복 query의 `INVALID_QUERY`, 후보 meta와 안전한 오류 envelope |
+| HTTP-11 | 조건부 읽기 호환성 | ticket guide의 strong ETag에 weak validator와 다중 `If-None-Match` 값을 보내도 304·새 request ID·cache 지시자가 일관됨 |
+| HTTP-12 | 관리자 입력 경계 | 허용하지 않은 Origin의 credential 발급 거절, 잘못된 비밀번호와 손상 access token의 안전한 401 |
+| HTTP-13 | release E2E datasource 격리 | Hikari·JNDI override가 있어도 후보 import helper와 HTTP context가 Testcontainers datasource만 사용 |
+| HTTP-14 | 전체 후보 탐색 | 모든 선언 날짜·ARTIST/CONTEST 목록의 반복 응답·순서·상세 관계와 노출된 모든 공간 category filter·중복 없음 |
+| HTTP-15 | 계좌 CLI의 즉시 반영 | 별도 Account CLI의 TICKET set·clear가 실행 중 server의 ticket guide·version·ETag/304에 즉시 반영되고 마감 시 계좌를 숨김 |
+| HTTP-16 | 혼잡도 동시 변경 | 실제 admin HTTP 요청 두 개의 같은 key/ETag 경쟁에서 한 번만 저장·감사되고 replay·key 재사용 거절이 보존됨 |
+| HTTP-17 | 게시·재시작·rollback lifecycle | A 게시 → 실행 server의 A snapshot 유지 → 재시작의 B 노출 → expected-current rollback → 재시작의 새 revision A 복원과 동적 상태 보존 |
+
+위 HTTP-01~17은 서로 다른 출시 위험을 나타내는 **17개 시나리오**다. JUnit test
+method는 관계된 요청을 한 transaction·server lifecycle 안에서 묶으므로 시나리오 수와
+method 수가 같지 않다.
 
 기본 흐름 fixture를 단독 실행하려면 다음을 사용한다.
 
 ```powershell
 cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest test"
+```
+
+실행 중인 server·별도 계좌 CLI·동시 관리자 요청·게시 lifecycle까지 포함한 HTTP release
+E2E는 다음 명령으로 실행한다.
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest test"
 ```
 
 다른 후보 manifest는 경로를 시스템 프로퍼티로 준다. 이 기본 모드에서는 빈 공간·지도와
@@ -95,6 +114,15 @@ main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource�
 | OPS-04 | 계좌 CLI 변경 | set dry-run 무변경, confirm set, 잘못된 끝 네 자리 거절, clear·restore-version의 증가 version·trigger history·민감값 redaction |
 | OPS-05 | DB 사전 점검 | `DatabasePreflightIntegrationTest`가 JDK+PostgreSQL driver만의 별도 JVM에서 read-only 조사와 `STOP_AND_REVIEW`를 검증 |
 | OPS-06 | 로컬 workbench | `CatalogWorkbenchIntegrationTest`가 HTTP token·Host·Origin·role 경계와 다른 축제 revision의 export·diff·publish 거절을 검증 |
+| OPS-07 | 손상 draft 복구 | 불완전 draft publish가 pointer·감사를 바꾸지 않고, 같은 baseline의 정상 replacement가 다음 별도 process에서 게시됨 |
+| OPS-08 | Catalog write role 경계 | SELECT-only PostgreSQL role의 import가 실패하고 draft·catalog audit을 남기지 않음 |
+| OPS-09 | 계좌 입력·version 무결성 | 예상 밖 JSON field와 stale expected-version이 무변경으로 거절되고, 같은 값 set은 version·history를 늘리지 않음 |
+| OPS-10 | 계좌 write role 경계 | SELECT-only role이 Account CLI set을 실행해도 current setting·history를 만들 수 없음 |
+| OPS-11 | standalone preflight 실패 | 기존 catalog의 `STOP_AND_REVIEW`와 잘못된 datasource 설정의 `CONFIGURATION_INVALID`가 별도 process에서 비밀값 없이 출력됨 |
+| OPS-12 | hostile logging 환경 | Hikari·Spring package DEBUG 환경에서도 CLI가 JDBC URL·비밀번호·stack trace를 출력하지 않음 |
+
+위 OPS-01~12는 **12개 시나리오**다. HTTP 17개와 합쳐 현재 backend release
+E2E 시나리오는 **29개**다.
 
 운영 도구 focused 검증은 다음 명령으로 실행한다.
 

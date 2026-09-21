@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.espero.festival.AccountSettingsCliApplication;
 import dev.espero.festival.CatalogCliApplication;
+import dev.espero.festival.preflight.DatabasePreflightApplication;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,6 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class OperatorToolProcessE2eTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
+    private static final String READ_ONLY_ROLE_PASSWORD = "operator-read-only-password";
     private static final Pattern PRINTED_REVISION = Pattern.compile("(?:draft|exported|validated|published|rolled back to) revision: "
         + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})");
 
@@ -134,12 +137,62 @@ class OperatorToolProcessE2eTest {
         );
 
         ProcessResult unavailable = catalogWithRuntimeEnvironment(Map.of(
-            "SPRING_DATASOURCE_HIKARI_JDBC_URL", rejectedDatasource
+            "SPRING_DATASOURCE_HIKARI_JDBC_URL", rejectedDatasource,
+            "LOGGING_LEVEL_COM_ZAXXER_HIKARI", "DEBUG",
+            "LOGGING_LEVEL_ORG_SPRINGFRAMEWORK", "DEBUG"
         ), "validate", "--revision=" + rollback);
         assertFailure(unavailable, "catalog-cli: CATALOG_CLI_UNAVAILABLE");
         assertThat(unavailable.output()).doesNotContain(
             "Application run failed", "Exception in thread", rejectedDatasource, databaseUrl, POSTGRES.getPassword()
         );
+    }
+
+    @Test
+    void catalogCliRejectsCorruptDraftAndRecoversWithAValidReplacementThroughSeparateProcesses() throws Exception {
+        UUID initialRevision = currentPublishedRevision();
+        Path manifest = candidateManifest();
+
+        UUID corruptDraft = printedRevision(success(catalog(
+            "import", "--manifest=" + manifest, "--festival-id=" + FESTIVAL_ID,
+            "--baseline-revision=" + initialRevision, "--actor=operator-tool-e2e"
+        )));
+        deletePerformanceTranslations(corruptDraft);
+
+        ProcessResult rejected = catalog("publish", "--revision=" + corruptDraft, "--actor=operator-tool-e2e");
+        assertFailure(rejected, "catalog-cli:");
+        assertThat(rejected.output()).doesNotContain("Exception in thread", databaseUrl, POSTGRES.getPassword());
+        assertThat(currentPublishedRevision()).isEqualTo(initialRevision);
+        assertThat(revisionState(corruptDraft)).isEqualTo("draft");
+        assertThat(auditCount(corruptDraft, "PUBLISH")).isZero();
+
+        UUID replacement = printedRevision(success(catalog(
+            "import", "--manifest=" + manifest, "--festival-id=" + FESTIVAL_ID,
+            "--baseline-revision=" + initialRevision, "--actor=operator-tool-e2e"
+        )));
+        success(catalog("publish", "--revision=" + replacement, "--actor=operator-tool-e2e"));
+        assertThat(currentPublishedRevision()).isEqualTo(replacement);
+        assertThat(revisionState(corruptDraft)).isEqualTo("draft");
+    }
+
+    @Test
+    void catalogCliCannotImportWithAReadOnlyRoleAndDoesNotCreateDraftOrAuditRows() throws Exception {
+        String role = createReadOnlyRole("catalog_readonly");
+        UUID initialRevision = currentPublishedRevision();
+        Path manifest = candidateManifest();
+
+        ProcessResult denied = catalogWithRuntimeEnvironment(Map.of(
+            "SPRING_DATASOURCE_USERNAME", role,
+            "SPRING_DATASOURCE_PASSWORD", READ_ONLY_ROLE_PASSWORD
+        ), "import", "--manifest=" + manifest, "--festival-id=" + FESTIVAL_ID,
+            "--baseline-revision=" + initialRevision, "--actor=operator-tool-e2e");
+
+        assertFailure(denied, "catalog-cli: CATALOG_CLI_UNAVAILABLE");
+        assertThat(denied.output()).doesNotContain(
+            "Exception in thread", databaseUrl, POSTGRES.getPassword(), READ_ONLY_ROLE_PASSWORD
+        );
+        assertThat(currentPublishedRevision()).isEqualTo(initialRevision);
+        assertThat(draftCount()).isZero();
+        assertThat(totalCatalogAuditCount()).isZero();
     }
 
     @Test
@@ -191,15 +244,172 @@ class OperatorToolProcessE2eTest {
         assertThat(accountHistoryActions()).containsExactly("SET", "CLEAR", "RESTORE");
         assertThat(accountHistoryActorCount("operator-tool-e2e")).isEqualTo(3L);
 
+        ProcessResult noChange = success(account("set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET",
+            "--expected-version=3", "--input-file=" + input, "--last-four=1234", "--confirm",
+            "--actor=operator-tool-e2e", "--reason=release-verification", "--evidence-id=OPS-E2E-5"));
+        assertThat(noChange.output()).contains("mode=APPLIED", "resultVersion=3", "changed=false")
+            .doesNotContain(accountNumber, "Test Bank", "Test Holder", databaseUrl, POSTGRES.getPassword());
+        assertThat(accountHistoryActions()).containsExactly("SET", "CLEAR", "RESTORE");
+
         String rejectedDatasource = "jdbc:unsupported:account-must-not-leak";
         ProcessResult unavailable = accountWithRuntimeEnvironment(Map.of(
-            "SPRING_DATASOURCE_HIKARI_JDBC_URL", rejectedDatasource
+            "SPRING_DATASOURCE_HIKARI_JDBC_URL", rejectedDatasource,
+            "LOGGING_LEVEL_COM_ZAXXER_HIKARI", "DEBUG",
+            "LOGGING_LEVEL_ORG_SPRINGFRAMEWORK", "DEBUG"
         ), "clear", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET", "--expected-version=3", "--confirm",
-            "--actor=operator-tool-e2e", "--reason=release-verification", "--evidence-id=OPS-E2E-5");
+            "--actor=operator-tool-e2e", "--reason=release-verification", "--evidence-id=OPS-E2E-6");
         assertFailure(unavailable, "account-settings-cli: ACCOUNT_CLI_UNAVAILABLE");
         assertThat(unavailable.output()).doesNotContain(
             "Application run failed", "Exception in thread", rejectedDatasource, databaseUrl, POSTGRES.getPassword()
         );
+    }
+
+    @Test
+    void accountSettingsCliRejectsUnknownInputAndStaleExpectedVersionWithoutWriting() throws Exception {
+        Path invalid = temporaryDirectory.resolve("invalid-account-input.json");
+        Files.writeString(invalid, """
+            {"bankName":"Test Bank","accountNumber":"12345678901234","accountHolder":"Test Holder",
+             "transferLinkUrl":null,"unexpected":"must-be-rejected"}
+            """, StandardCharsets.UTF_8);
+
+        ProcessResult invalidInput = account("set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET",
+            "--expected-version=0", "--input-file=" + invalid, "--last-four=1234", "--confirm",
+            "--actor=operator-tool-e2e", "--reason=release-verification", "--evidence-id=OPS-E2E-7");
+        assertFailure(invalidInput, "account-settings-cli: ACCOUNT_CLI_UNAVAILABLE");
+        assertThat(accountCount()).isZero();
+        assertThat(accountHistoryCount()).isZero();
+
+        Path input = temporaryDirectory.resolve("valid-account-input.json");
+        Files.writeString(input, """
+            {"bankName":"Test Bank","accountNumber":"12345678901234","accountHolder":"Test Holder",
+             "transferLinkUrl":null}
+            """, StandardCharsets.UTF_8);
+        success(account("set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET",
+            "--expected-version=0", "--input-file=" + input, "--last-four=1234", "--confirm",
+            "--actor=operator-tool-e2e", "--reason=release-verification", "--evidence-id=OPS-E2E-8"));
+
+        ProcessResult stale = account("clear", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET",
+            "--expected-version=0", "--confirm", "--actor=operator-tool-e2e",
+            "--reason=release-verification", "--evidence-id=OPS-E2E-9");
+        assertFailure(stale, "account-settings-cli: ACCOUNT_EXPECTED_VERSION_MISMATCH");
+        assertThat(accountState()).isEqualTo("CONFIGURED");
+        assertThat(accountVersion()).isOne();
+        assertThat(accountHistoryCount()).isOne();
+    }
+
+    @Test
+    void accountSettingsCliCannotWriteThroughAReadOnlyRole() throws Exception {
+        String role = createReadOnlyRole("account_readonly");
+        Path input = temporaryDirectory.resolve("account-input.json");
+        Files.writeString(input, """
+            {"bankName":"Test Bank","accountNumber":"12345678901234","accountHolder":"Test Holder",
+             "transferLinkUrl":null}
+            """, StandardCharsets.UTF_8);
+
+        ProcessResult denied = accountWithRuntimeEnvironment(Map.of(
+            "SPRING_DATASOURCE_USERNAME", role,
+            "SPRING_DATASOURCE_PASSWORD", READ_ONLY_ROLE_PASSWORD
+        ), "set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET", "--expected-version=0",
+            "--input-file=" + input, "--last-four=1234", "--confirm", "--actor=operator-tool-e2e",
+            "--reason=release-verification", "--evidence-id=OPS-E2E-10");
+
+        assertFailure(denied, "account-settings-cli: ACCOUNT_CLI_UNAVAILABLE");
+        assertThat(denied.output()).doesNotContain(
+            "Exception in thread", databaseUrl, POSTGRES.getPassword(), READ_ONLY_ROLE_PASSWORD
+        );
+        assertThat(accountCount()).isZero();
+        assertThat(accountHistoryCount()).isZero();
+    }
+
+    @Test
+    void databasePreflightStandaloneMainStopsOnExistingCatalogAndRedactsConfigurationFailures() throws Exception {
+        ProcessResult existing = preflight(Map.of(
+            "PREFLIGHT_FESTIVAL_ID", FESTIVAL_ID.toString(),
+            "SPRING_PROFILES_ACTIVE", "db,catalog-cli",
+            "SPRING_FLYWAY_ENABLED", "true"
+        ));
+        assertThat(existing.exitCode()).isEqualTo(2);
+        assertThat(existing.output()).contains(
+            "mode=READ_ONLY_DATABASE_PREFLIGHT", "status=STOP_AND_REVIEW", "mutationAuthorized=false",
+            "finding=EXISTING_FESTIVAL_OR_CATALOG_DATA", "transactionReadOnly=on"
+        ).doesNotContain("Spring Boot", "Flyway Community", "Exception", databaseUrl);
+        assertThat(currentPublishedRevision()).isNotNull();
+
+        String secretUrl = "jdbc:postgresql://secret-user:secret-password@db.invalid:5432/festival";
+        ProcessResult invalid = preflight(Map.of(
+            "PREFLIGHT_DATASOURCE_URL", secretUrl,
+            "PREFLIGHT_DATASOURCE_USERNAME", "secret-user",
+            "PREFLIGHT_DATASOURCE_PASSWORD", "secret-password",
+            "PREFLIGHT_SCHEMA", "public"
+        ));
+        assertThat(invalid.exitCode()).isEqualTo(2);
+        assertThat(invalid.output()).contains("status=STOP_AND_REVIEW", "finding=CONFIGURATION_INVALID")
+            .doesNotContain(secretUrl, "secret-user", "secret-password");
+    }
+
+    private void deletePerformanceTranslations(UUID revisionId) throws SQLException {
+        try (Connection connection = connection(); PreparedStatement statement = connection.prepareStatement(
+            "DELETE FROM performance_translations WHERE festival_revision_id = ?"
+        )) {
+            statement.setObject(1, revisionId);
+            assertThat(statement.executeUpdate()).isGreaterThan(0);
+        }
+    }
+
+    private String createReadOnlyRole(String prefix) throws SQLException {
+        String role = prefix + "_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+            statement.execute("CREATE ROLE " + role + " LOGIN PASSWORD '" + READ_ONLY_ROLE_PASSWORD + "'");
+            statement.execute("GRANT USAGE ON SCHEMA public TO " + role);
+            statement.execute("GRANT SELECT ON ALL TABLES IN SCHEMA public TO " + role);
+        }
+        return role;
+    }
+
+    private long draftCount() throws SQLException {
+        return accountScalar("SELECT count(*) FROM festival_revisions WHERE festival_id = ? AND state = 'draft'", FESTIVAL_ID);
+    }
+
+    private long totalCatalogAuditCount() throws SQLException {
+        return accountScalar("SELECT count(*) FROM catalog_revision_audit");
+    }
+
+    private ProcessResult preflight(Map<String, String> overrides) throws Exception {
+        Path classes = Path.of(DatabasePreflightApplication.class.getProtectionDomain().getCodeSource()
+            .getLocation().toURI());
+        Path driver = Path.of(Class.forName("org.postgresql.Driver").getProtectionDomain().getCodeSource()
+            .getLocation().toURI());
+        List<String> command = List.of(
+            Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+            "-cp", classes + File.pathSeparator + driver,
+            DatabasePreflightApplication.class.getName()
+        );
+        ProcessBuilder builder = new ProcessBuilder(command)
+            .directory(temporaryDirectory.toFile())
+            .redirectErrorStream(true);
+        Map<String, String> environment = builder.environment();
+        Map<String, String> inherited = new HashMap<>(environment);
+        environment.clear();
+        copyOsEnvironment(inherited, environment);
+        environment.put("PREFLIGHT_DATASOURCE_URL", databaseUrl);
+        environment.put("PREFLIGHT_DATASOURCE_USERNAME", POSTGRES.getUsername());
+        environment.put("PREFLIGHT_DATASOURCE_PASSWORD", POSTGRES.getPassword());
+        environment.put("PREFLIGHT_SCHEMA", "public");
+        environment.putAll(overrides);
+
+        Process process = builder.start();
+        FutureTask<String> output = new FutureTask<>(
+            () -> new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8)
+        );
+        Thread.ofVirtual().start(output);
+        try {
+            assertThat(process.waitFor(45, TimeUnit.SECONDS)).as("preflight process must terminate").isTrue();
+            return new ProcessResult(process.exitValue(), output.get(5, TimeUnit.SECONDS));
+        } finally {
+            if (process.isAlive()) {
+                process.destroyForcibly();
+            }
+        }
     }
 
     private Path candidateManifest() throws IOException {

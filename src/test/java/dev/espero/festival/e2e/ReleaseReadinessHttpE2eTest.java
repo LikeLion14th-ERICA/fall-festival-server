@@ -3,6 +3,7 @@ package dev.espero.festival.e2e;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jayway.jsonpath.JsonPath;
+import com.zaxxer.hikari.HikariDataSource;
 import dev.espero.festival.CatalogCliApplication;
 import dev.espero.festival.CatalogCliRunner;
 import java.net.URI;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "festival.admin-auth.jwt-signing-secret=backend-e2e-test-signing-secret-32-bytes",
         "festival.admin-auth.allowed-origin=https://admin.e2e.test",
         "festival.admin-auth.bootstrap-username=release-e2e-admin",
-        "festival.admin-auth.bootstrap-password=release-e2e-password"
+        "festival.admin-auth.bootstrap-password=release-e2e-password",
+        "spring.flyway.enabled=false",
+        "spring.autoconfigure.exclude="
+            + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
+            + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
+            + "org.springframework.boot.jdbc.autoconfigure.JndiDataSourceAutoConfiguration"
     }
 )
 @ActiveProfiles("db")
@@ -94,6 +101,9 @@ class ReleaseReadinessHttpE2eTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.datasource.hikari.jdbc-url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.hikari.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.hikari.password", POSTGRES::getPassword);
         registry.add("spring.flyway.placeholders.festivalId", FESTIVAL_ID::toString);
     }
 
@@ -106,6 +116,9 @@ class ReleaseReadinessHttpE2eTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private DataSource dataSource;
+
     @Test
     void candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys() throws Exception {
         PreparedCandidate candidate = prepared();
@@ -117,6 +130,153 @@ class ReleaseReadinessHttpE2eTest {
         assertTicketAndStampJourney(candidate);
         assertAnonymousAdminRequestsAreRejected();
         assertCrowdingAndAdministratorSessionJourney(candidate);
+    }
+
+    @Test
+    void publicQueriesRejectUnpublishedLocalesAndDuplicateParametersWithReleaseMetadata() throws Exception {
+        PreparedCandidate candidate = prepared();
+        clock.set(candidate.verificationInstant());
+
+        HttpResponse<String> unpublishedLocale = send(HttpRequest.newBuilder(uri("/api/v2/config?locale=ja"))
+            .GET()
+            .build());
+        assertThat(unpublishedLocale.statusCode()).isEqualTo(400);
+        assertThat(jsonString(unpublishedLocale.body(), "$.error.code")).isEqualTo("LOCALE_NOT_READY");
+        assertCandidateMeta(unpublishedLocale.body(), candidate);
+        assertThat(jsonString(unpublishedLocale.body(), "$.error.message")).isNotBlank();
+        assertThat(jsonValue(unpublishedLocale.body(), "$.error.details")).isEqualTo(List.of());
+
+        HttpResponse<String> unknownLocale = send(HttpRequest.newBuilder(uri("/api/v2/config?locale=fr"))
+            .GET()
+            .build());
+        assertThat(unknownLocale.statusCode()).isEqualTo(400);
+        assertThat(jsonString(unknownLocale.body(), "$.error.code")).isEqualTo("INVALID_QUERY");
+        assertCandidateMeta(unknownLocale.body(), candidate);
+
+        HttpResponse<String> duplicateLocale = send(HttpRequest.newBuilder(
+            uri("/api/v2/config?locale=ko&locale=en")
+        ).GET().build());
+        assertThat(duplicateLocale.statusCode()).isEqualTo(400);
+        assertThat(jsonString(duplicateLocale.body(), "$.error.code")).isEqualTo("INVALID_QUERY");
+        assertCandidateMeta(duplicateLocale.body(), candidate);
+    }
+
+    @Test
+    void publicConditionalReadsAcceptWeakAndMultiValueValidators() throws Exception {
+        PreparedCandidate candidate = prepared();
+        clock.set(candidate.verificationInstant());
+
+        HttpResponse<String> first = send(HttpRequest.newBuilder(uri("/api/v2/ticket-guide"))
+            .GET()
+            .build());
+        assertThat(first.statusCode()).isEqualTo(200);
+        assertCandidateMeta(first.body(), candidate);
+        String etag = requiredHeader(first, "ETag");
+        assertThat(etag).matches("\"[0-9a-f]{64}\"");
+
+        HttpResponse<String> revalidated = send(HttpRequest.newBuilder(uri("/api/v2/ticket-guide"))
+            .header("If-None-Match", "\"stale\", W/" + etag)
+            .GET()
+            .build());
+        assertThat(revalidated.statusCode()).isEqualTo(304);
+        assertThat(revalidated.body()).isEmpty();
+        assertThat(requiredHeader(revalidated, "ETag")).isEqualTo(etag);
+        assertThat(requiredHeader(revalidated, "Cache-Control")).contains("private", "no-cache");
+        assertThat(requiredHeader(revalidated, "X-Request-Id")).isNotEqualTo(
+            requiredHeader(first, "X-Request-Id")
+        );
+    }
+
+    @Test
+    void adminSessionBoundaryRejectsForeignOriginsBadCredentialsAndMalformedAccessTokens() throws Exception {
+        PreparedCandidate candidate = prepared();
+        clock.set(candidate.verificationInstant());
+
+        HttpResponse<String> foreignOrigin = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions"))
+            .header("Origin", "https://evil.e2e.test")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(
+                "{\"username\":\"release-e2e-admin\",\"password\":\"release-e2e-password\"}"
+            ))
+            .build());
+        assertThat(foreignOrigin.statusCode()).isEqualTo(403);
+        // Spring CORS rejects a disallowed Origin before the API error writer;
+        // the browser-facing contract is the status and absence of credentials.
+        assertThat(foreignOrigin.body()).isEqualTo("Invalid CORS request");
+        assertThat(foreignOrigin.headers().allValues("Set-Cookie")).isEmpty();
+
+        HttpResponse<String> badCredentials = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions"))
+            .header("Origin", ADMIN_ORIGIN)
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(
+                "{\"username\":\"release-e2e-admin\",\"password\":\"wrong-password\"}"
+            ))
+            .build());
+        assertThat(badCredentials.statusCode()).isEqualTo(401);
+        assertThat(jsonString(badCredentials.body(), "$.error.code"))
+            .isEqualTo("ADMIN_AUTHENTICATION_FAILED");
+        assertThat(badCredentials.headers().allValues("Set-Cookie")).isEmpty();
+
+        HttpResponse<String> malformedToken = send(HttpRequest.newBuilder(uri("/api/v2/admin/me"))
+            .header("Authorization", "Bearer definitely-not-a-jwt")
+            .GET()
+            .build());
+        assertThat(malformedToken.statusCode()).isEqualTo(401);
+        assertThat(jsonString(malformedToken.body(), "$.error.code")).isEqualTo("UNAUTHORIZED");
+        assertThat(jsonNumber(malformedToken.body(), "$.meta.revision").longValue()).isZero();
+    }
+
+    @Test
+    void releaseCliChildCannotBeRedirectedByAHostileDatasourceOverride() throws Exception {
+        prepared();
+        String hikariProperty = "spring.datasource.hikari.jdbc-url";
+        String dataSourceClassProperty = "spring.datasource.hikari.data-source-class-name";
+        String dataSourceUrlProperty = "spring.datasource.hikari.data-source-properties.URL";
+        String flywayUrlProperty = "spring.flyway.url";
+        String jndiProperty = "spring.datasource.jndi-name";
+        String previousHikari = System.getProperty(hikariProperty);
+        String previousDataSourceClass = System.getProperty(dataSourceClassProperty);
+        String previousDataSourceUrl = System.getProperty(dataSourceUrlProperty);
+        String previousFlywayUrl = System.getProperty(flywayUrlProperty);
+        String previousJndi = System.getProperty(jndiProperty);
+        System.setProperty(hikariProperty, "jdbc:unsupported:release-e2e-no-remote-access");
+        System.setProperty(dataSourceClassProperty, "dev.espero.e2e.UnsupportedDataSource");
+        System.setProperty(dataSourceUrlProperty, "jdbc:unsupported:release-e2e-no-remote-access");
+        System.setProperty(flywayUrlProperty, "jdbc:unsupported:release-e2e-no-remote-access");
+        System.setProperty(jndiProperty, "java:comp/env/jdbc/remote-release-db");
+        try (Connection serverConnection = dataSource.getConnection();
+             ConfigurableApplicationContext cli = startCatalogCli()) {
+            assertThat(serverConnection.getMetaData().getURL()).isEqualTo(POSTGRES.getJdbcUrl());
+            try (Connection connection = cli.getBean(DataSource.class).getConnection()) {
+                assertThat(connection.getMetaData().getURL()).isEqualTo(POSTGRES.getJdbcUrl());
+            }
+        } finally {
+            if (previousHikari == null) {
+                System.clearProperty(hikariProperty);
+            } else {
+                System.setProperty(hikariProperty, previousHikari);
+            }
+            if (previousDataSourceClass == null) {
+                System.clearProperty(dataSourceClassProperty);
+            } else {
+                System.setProperty(dataSourceClassProperty, previousDataSourceClass);
+            }
+            if (previousDataSourceUrl == null) {
+                System.clearProperty(dataSourceUrlProperty);
+            } else {
+                System.setProperty(dataSourceUrlProperty, previousDataSourceUrl);
+            }
+            if (previousFlywayUrl == null) {
+                System.clearProperty(flywayUrlProperty);
+            } else {
+                System.setProperty(flywayUrlProperty, previousFlywayUrl);
+            }
+            if (previousJndi == null) {
+                System.clearProperty(jndiProperty);
+            } else {
+                System.setProperty(jndiProperty, previousJndi);
+            }
+        }
     }
 
     private String assertCandidateStartupJourney(PreparedCandidate candidate) throws Exception {
@@ -195,6 +355,107 @@ class ReleaseReadinessHttpE2eTest {
             assertThat(jsonString(performance, "$.data.id")).isEqualTo(performanceId);
         }
         candidateResponse("/api/v2/prohibited-items", candidate);
+    }
+
+    @Test
+    void traversesEveryDeclaredDateCategoryAndExposedSpaceFilter() throws Exception {
+        PreparedCandidate candidate = prepared();
+        clock.set(candidate.verificationInstant());
+
+        HttpResponse<String> config = candidateResponse("/api/v2/config", candidate);
+        List<String> festivalDates = jsonStringList(config.body(), "$.data.festival.dates[*]");
+        List<String> lineupCategories = List.of("ARTIST", "CONTEST");
+        Map<String, String> artistBodies = new LinkedHashMap<>();
+        Map<String, String> performanceBodies = new LinkedHashMap<>();
+
+        for (String date : festivalDates) {
+            for (String category : lineupCategories) {
+                String path = "/api/v2/lineup?date=" + encodedQuery(date)
+                    + "&category=" + encodedQuery(category);
+                HttpResponse<String> first = candidateResponse(path, candidate);
+                HttpResponse<String> repeated = candidateResponse(path, candidate);
+                assertThat(jsonString(first.body(), "$.data.date")).isEqualTo(date);
+                assertThat(jsonString(first.body(), "$.data.category")).isEqualTo(category);
+                assertThat(jsonValue(repeated.body(), "$.data.items"))
+                    .as("stable lineup for %s/%s", date, category)
+                    .isEqualTo(jsonValue(first.body(), "$.data.items"));
+
+                List<String> artistIds = jsonStringList(first.body(), "$.data.items[*].artistId");
+                List<String> performanceIds = jsonStringList(first.body(), "$.data.items[*].performanceId");
+                assertThat(artistIds).hasSameSizeAs(performanceIds);
+                assertContinuousOrder(jsonNumberList(first.body(), "$.data.items[*].order"));
+
+                for (int index = 0; index < artistIds.size(); index++) {
+                    String artistId = artistIds.get(index);
+                    String performanceId = performanceIds.get(index);
+                    String artist = artistBodies.get(artistId);
+                    if (artist == null) {
+                        artist = candidateResponse("/api/v2/artists/" + artistId, candidate).body();
+                        artistBodies.put(artistId, artist);
+                    }
+                    assertThat(jsonString(artist, "$.data.id")).isEqualTo(artistId);
+                    assertThat(jsonString(artist, "$.data.category")).isEqualTo(category);
+                    assertThat(jsonStringList(artist, "$.data.performances[*].id")).contains(performanceId);
+
+                    String performance = performanceBodies.get(performanceId);
+                    if (performance == null) {
+                        performance = candidateResponse(
+                            "/api/v2/performances/" + performanceId, candidate
+                        ).body();
+                        performanceBodies.put(performanceId, performance);
+                    }
+                    assertThat(jsonString(performance, "$.data.id")).isEqualTo(performanceId);
+                    assertThat(jsonString(performance, "$.data.date")).isEqualTo(date);
+                    assertThat(jsonStringList(performance, "$.data.artists[*].id")).contains(artistId);
+                }
+            }
+        }
+
+        HttpResponse<String> allSpaces = candidateResponse("/api/v2/spaces", candidate);
+        List<Map<?, ?>> allSpaceItems = jsonObjects(allSpaces.body(), "$.data.items");
+        List<String> allSpaceIds = allSpaceItems.stream()
+            .map(item -> requiredString(item, "id"))
+            .toList();
+        assertUniqueIds(allSpaceIds, "all public spaces");
+
+        Map<String, String> spaceBodies = new LinkedHashMap<>();
+        for (Map<?, ?> item : allSpaceItems) {
+            String spaceId = requiredString(item, "id");
+            String category = requiredString(item, "category");
+            String detail = candidateResponse("/api/v2/spaces/" + spaceId, candidate).body();
+            spaceBodies.put(spaceId, detail);
+            assertThat(jsonString(detail, "$.data.id")).isEqualTo(spaceId);
+            assertThat(jsonString(detail, "$.data.category")).isEqualTo(category);
+        }
+
+        LinkedHashSet<String> exposedSpaceCategories = allSpaceItems.stream()
+            .map(item -> requiredString(item, "category"))
+            .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+        for (String category : exposedSpaceCategories) {
+            String path = "/api/v2/spaces?category=" + encodedQuery(category);
+            HttpResponse<String> first = candidateResponse(path, candidate);
+            HttpResponse<String> repeated = candidateResponse(path, candidate);
+            assertThat(jsonValue(repeated.body(), "$.data.items"))
+                .as("stable spaces filter for %s", category)
+                .isEqualTo(jsonValue(first.body(), "$.data.items"));
+
+            List<Map<?, ?>> filteredItems = jsonObjects(first.body(), "$.data.items");
+            List<String> filteredIds = filteredItems.stream()
+                .map(item -> requiredString(item, "id"))
+                .toList();
+            assertUniqueIds(filteredIds, "spaces filtered by " + category);
+            assertThat(filteredItems)
+                .as("spaces filtered by %s", category)
+                .allSatisfy(item -> assertThat(requiredString(item, "category")).isEqualTo(category));
+            List<String> expectedIds = allSpaceItems.stream()
+                .filter(item -> category.equals(requiredString(item, "category")))
+                .map(item -> requiredString(item, "id"))
+                .toList();
+            assertThat(filteredIds).containsExactlyElementsOf(expectedIds);
+            for (String spaceId : filteredIds) {
+                assertThat(spaceBodies).containsKey(spaceId);
+            }
+        }
     }
 
     private void assertSpaceAndMapJourney(PreparedCandidate candidate) throws Exception {
@@ -663,6 +924,10 @@ class ReleaseReadinessHttpE2eTest {
         }
     }
 
+    private static void assertUniqueIds(List<String> ids, String description) {
+        assertThat(new LinkedHashSet<>(ids)).as(description).hasSize(ids.size());
+    }
+
     private static String encodedQuery(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
@@ -764,17 +1029,7 @@ class ReleaseReadinessHttpE2eTest {
     }
 
     private static UUID importAndPublish(Path manifest, UUID baseline) {
-        try (ConfigurableApplicationContext cli = new SpringApplicationBuilder(CatalogCliApplication.class)
-            .profiles("db", "catalog-cli")
-            .web(WebApplicationType.NONE)
-            .run(
-                "--spring.datasource.url=" + POSTGRES.getJdbcUrl(),
-                "--spring.datasource.username=" + POSTGRES.getUsername(),
-                "--spring.datasource.password=" + POSTGRES.getPassword(),
-                "--spring.flyway.enabled=false",
-                "--festival.id=" + FESTIVAL_ID,
-                "--spring.main.banner-mode=off"
-            )) {
+        try (ConfigurableApplicationContext cli = startCatalogCli()) {
             CatalogCliRunner runner = cli.getBean(CatalogCliRunner.class);
             runner.run(new DefaultApplicationArguments(
                 "import",
@@ -898,6 +1153,49 @@ class ReleaseReadinessHttpE2eTest {
         }
     }
 
+    private static ConfigurableApplicationContext startCatalogCli(String... arguments) {
+        String[] options = new String[] {
+            "--spring.datasource.url=" + POSTGRES.getJdbcUrl(),
+            "--spring.datasource.username=" + POSTGRES.getUsername(),
+            "--spring.datasource.password=" + POSTGRES.getPassword(),
+            // Command-line properties outrank inherited shell/JVM settings,
+            // including Hikari and JNDI redirects, for this release gate.
+            "--spring.datasource.hikari.jdbc-url=" + POSTGRES.getJdbcUrl(),
+            "--spring.datasource.hikari.username=" + POSTGRES.getUsername(),
+            "--spring.datasource.hikari.password=" + POSTGRES.getPassword(),
+            "--spring.config.import=",
+            "--spring.autoconfigure.exclude="
+                + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
+                + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
+                + "org.springframework.boot.jdbc.autoconfigure.JndiDataSourceAutoConfiguration",
+            "--spring.flyway.enabled=false",
+            "--festival.id=" + FESTIVAL_ID,
+            "--spring.main.banner-mode=off"
+        };
+        String[] command = java.util.stream.Stream.concat(
+            java.util.Arrays.stream(options), java.util.Arrays.stream(arguments)
+        ).toArray(String[]::new);
+        return new SpringApplicationBuilder(CatalogCliApplication.class, ReleaseCliDataSourceConfiguration.class)
+            .profiles("db", "catalog-cli")
+            .web(WebApplicationType.NONE)
+            .run(command);
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    @org.springframework.context.annotation.Profile("catalog-cli")
+    static class ReleaseCliDataSourceConfiguration {
+
+        @Bean(name = "dataSource")
+        @Primary
+        DataSource releaseCliDataSource() {
+            HikariDataSource dataSource = new HikariDataSource();
+            dataSource.setJdbcUrl(POSTGRES.getJdbcUrl());
+            dataSource.setUsername(POSTGRES.getUsername());
+            dataSource.setPassword(POSTGRES.getPassword());
+            return dataSource;
+        }
+    }
+
     @TestConfiguration(proxyBeanMethods = false)
     static class ClockConfiguration {
 
@@ -905,6 +1203,16 @@ class ReleaseReadinessHttpE2eTest {
         @Primary
         MutableClock releaseE2eClock() {
             return new MutableClock(prepared().verificationInstant());
+        }
+
+        @Bean(name = "dataSource")
+        @Primary
+        DataSource releaseE2eDataSource() {
+            HikariDataSource dataSource = new HikariDataSource();
+            dataSource.setJdbcUrl(POSTGRES.getJdbcUrl());
+            dataSource.setUsername(POSTGRES.getUsername());
+            dataSource.setPassword(POSTGRES.getPassword());
+            return dataSource;
         }
     }
 
