@@ -29,6 +29,8 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -345,6 +347,171 @@ class OperatorToolProcessE2eTest {
         assertThat(invalid.exitCode()).isEqualTo(2);
         assertThat(invalid.output()).contains("status=STOP_AND_REVIEW", "finding=CONFIGURATION_INVALID")
             .doesNotContain(secretUrl, "secret-user", "secret-password");
+    }
+
+    @ParameterizedTest(name = "{0} rolls back if its final audit write fails")
+    @ValueSource(strings = {"IMPORT", "PUBLISH", "ROLLBACK"})
+    void catalogCliRollsBackLateAuditFailureAndCanRetry(String operation) throws Exception {
+        UUID initial = currentPublishedRevision();
+        Path manifest = candidateManifest();
+        if (operation.equals("ROLLBACK")) {
+            // Restore a complete operator-published catalog, not the sparse migration fixture.
+            initial = importCandidate(manifest, initial);
+            success(catalog("publish", "--revision=" + initial));
+        }
+        UUID draft = null;
+        UUID published = initial;
+        if (!operation.equals("IMPORT")) {
+            draft = importCandidate(manifest, initial);
+        }
+        if (operation.equals("ROLLBACK")) {
+            success(catalog("publish", "--revision=" + draft));
+            published = draft;
+        }
+        String[] command = switch (operation) {
+            case "IMPORT" -> new String[] {"import", "--manifest=" + manifest,
+                "--festival-id=" + FESTIVAL_ID, "--baseline-revision=" + initial};
+            case "PUBLISH" -> new String[] {"publish", "--revision=" + draft};
+            default -> new String[] {"rollback", "--revision=" + initial, "--expected-current=" + published};
+        };
+        Map<String, Long> rowsBefore = catalogRowCounts();
+        String stateBefore = revisionState(initial);
+        // In rollback, fail PUBLISH after copying all content and inserting the ROLLBACK audit.
+        String failingAction = operation.equals("IMPORT") ? "IMPORT" : "PUBLISH";
+        try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+            statement.execute("""
+                CREATE FUNCTION e2e_fail_catalog_audit() RETURNS trigger LANGUAGE plpgsql AS $$
+                BEGIN
+                  IF NEW.action = '%s' THEN RAISE EXCEPTION 'e2e late audit failure'; END IF;
+                  RETURN NEW;
+                END; $$
+                """.formatted(failingAction));
+            statement.execute("CREATE TRIGGER e2e_fail_audit BEFORE INSERT ON catalog_revision_audit "
+                + "FOR EACH ROW EXECUTE FUNCTION e2e_fail_catalog_audit()");
+        }
+        try {
+            ProcessResult failed = catalog(command);
+            assertFailure(failed, "catalog-cli: CATALOG_CLI_UNAVAILABLE");
+            assertThat(failed.output()).doesNotContain("e2e late audit failure", databaseUrl, POSTGRES.getPassword());
+            assertThat(currentPublishedRevision()).isEqualTo(published);
+            assertThat(revisionState(initial)).isEqualTo(stateBefore);
+            if (operation.equals("PUBLISH")) {
+                assertThat(revisionState(draft)).isEqualTo("draft");
+            }
+            assertThat(catalogRowCounts()).isEqualTo(rowsBefore);
+        } finally {
+            try (Connection connection = connection(); Statement statement = connection.createStatement()) {
+                statement.execute("DROP TRIGGER e2e_fail_audit ON catalog_revision_audit");
+                statement.execute("DROP FUNCTION e2e_fail_catalog_audit()");
+            }
+        }
+        UUID recovered = printedRevision(success(catalog(command)));
+        if (operation.equals("IMPORT")) {
+            assertThat(currentPublishedRevision()).isEqualTo(published);
+            assertThat(revisionState(recovered)).isEqualTo("draft");
+            assertThat(auditCount(recovered, "IMPORT")).isOne();
+        } else {
+            assertThat(currentPublishedRevision()).isEqualTo(recovered);
+            assertThat(auditCount(recovered, "PUBLISH")).isOne();
+            if (operation.equals("ROLLBACK")) {
+                assertThat(auditCount(recovered, "ROLLBACK")).isOne();
+                assertThat(baseRevision(recovered)).isEqualTo(published);
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "concurrent publish versus rollback={0} serializes at the festival lock")
+    @ValueSource(booleans = {false, true})
+    void catalogCliSerializesCompetingProcessesWithoutLosingTheWinner(boolean competeWithRollback) throws Exception {
+        UUID initial = currentPublishedRevision();
+        Path manifest = candidateManifest();
+        UUID source = initial;
+        if (competeWithRollback) {
+            source = importCandidate(manifest, initial);
+            success(catalog("publish", "--revision=" + source));
+        }
+        UUID baseline = importCandidate(manifest, source);
+        success(catalog("publish", "--revision=" + baseline));
+        UUID first = importCandidate(manifest, baseline);
+        UUID second = competeWithRollback ? source : importCandidate(manifest, baseline);
+        long auditBefore = totalCatalogAuditCount();
+        long revisionsBefore = accountScalar("SELECT count(*) FROM festival_revisions");
+        FutureTask<ProcessResult> firstRun = new FutureTask<>(
+            () -> catalog("publish", "--revision=" + first));
+        FutureTask<ProcessResult> secondRun = new FutureTask<>(() -> competeWithRollback
+            ? catalog("rollback", "--revision=" + second, "--expected-current=" + baseline)
+            : catalog("publish", "--revision=" + second));
+        try {
+            try (Connection blocker = connection()) {
+                blocker.setAutoCommit(false);
+                try (PreparedStatement lock = blocker.prepareStatement("SELECT id FROM festivals WHERE id = ? FOR UPDATE")) {
+                    lock.setObject(1, FESTIVAL_ID);
+                    lock.executeQuery().close();
+                }
+                Thread.ofVirtual().start(firstRun);
+                Thread.ofVirtual().start(secondRun);
+                try {
+                    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+                    long waiting = 0;
+                    while (waiting < 2 && System.nanoTime() < deadline) {
+                        waiting = accountScalar("""
+                            SELECT count(*) FROM pg_stat_activity
+                            WHERE datname = current_database() AND wait_event_type = 'Lock'
+                              AND query LIKE '%FROM festivals WHERE id =%FOR UPDATE%'
+                            """);
+                        if (waiting < 2) Thread.sleep(50);
+                    }
+                    assertThat(waiting).as("both real CLI processes reach the locked festival row").isEqualTo(2);
+                } finally {
+                    blocker.rollback();
+                }
+            }
+            ProcessResult firstResult = firstRun.get(30, TimeUnit.SECONDS);
+            ProcessResult secondResult = secondRun.get(30, TimeUnit.SECONDS);
+            assertThat(List.of(firstResult.exitCode(), secondResult.exitCode())).containsExactlyInAnyOrder(0, 1);
+            ProcessResult winner = firstResult.exitCode() == 0 ? firstResult : secondResult;
+            ProcessResult loser = firstResult.exitCode() == 1 ? firstResult : secondResult;
+            assertFailure(loser, "catalog-cli: BASE_REVISION_CONFLICT");
+            UUID winnerId = printedRevision(winner);
+            assertThat(currentPublishedRevision()).isEqualTo(winnerId);
+            assertThat(revisionState(baseline)).isEqualTo("archived");
+            assertThat(accountScalar("SELECT count(*) FROM festival_revisions WHERE state = 'published' "
+                + "AND festival_id = ?", FESTIVAL_ID)).isOne();
+            assertThat(auditCount(winnerId, "PUBLISH")).isOne();
+            boolean rollbackWon = competeWithRollback && secondResult.exitCode() == 0;
+            assertThat(totalCatalogAuditCount()).isEqualTo(auditBefore + (rollbackWon ? 2 : 1));
+            assertThat(accountScalar("SELECT count(*) FROM festival_revisions"))
+                .isEqualTo(revisionsBefore + (rollbackWon ? 1 : 0));
+            if (firstResult.exitCode() != 0) assertThat(revisionState(first)).isEqualTo("draft");
+            if (!competeWithRollback && secondResult.exitCode() != 0) {
+                assertThat(revisionState(second)).isEqualTo("draft");
+            }
+        } finally {
+            firstRun.cancel(true);
+            secondRun.cancel(true);
+        }
+    }
+
+    private UUID importCandidate(Path manifest, UUID baseline) throws Exception {
+        return printedRevision(success(catalog("import", "--manifest=" + manifest,
+            "--festival-id=" + FESTIVAL_ID, "--baseline-revision=" + baseline)));
+    }
+
+    private Map<String, Long> catalogRowCounts() throws SQLException {
+        Map<String, Long> counts = new java.util.TreeMap<>();
+        try (Connection connection = connection(); Statement statement = connection.createStatement();
+             ResultSet tables = statement.executeQuery("""
+                 SELECT DISTINCT table_name FROM information_schema.columns
+                 WHERE table_schema = 'public' AND column_name = 'festival_revision_id'
+                 UNION SELECT 'festival_revisions' UNION SELECT 'catalog_revision_audit'
+                 """)) {
+            while (tables.next()) {
+                String table = tables.getString(1);
+                // Table identifiers come only from the fresh container's migration-created schema.
+                counts.put(table, accountScalar("SELECT count(*) FROM \"" + table + "\""));
+            }
+        }
+        return counts;
     }
 
     private void deletePerformanceTranslations(UUID revisionId) throws SQLException {
