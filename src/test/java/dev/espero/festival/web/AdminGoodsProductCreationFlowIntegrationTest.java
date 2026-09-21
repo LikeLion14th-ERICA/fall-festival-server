@@ -311,6 +311,34 @@ class AdminGoodsProductCreationFlowIntegrationTest {
     }
 
     @Test
+    void replaysStoredProductResponsesWithFieldsFromAnAdjacentDeployment() throws Exception {
+        UUID mediaId = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
+        JsonNode body = singleProduct(mediaId);
+        MvcResult first = postProduct(body.toString(), "product-response-compat")
+            .andExpect(status().isCreated())
+            .andReturn();
+        tools.jackson.databind.node.ObjectNode stored =
+            (tools.jackson.databind.node.ObjectNode) response(first);
+        tools.jackson.databind.node.ObjectNode storedData =
+            (tools.jackson.databind.node.ObjectNode) stored.path("data");
+        storedData.put("newerField", true);
+        ((tools.jackson.databind.node.ObjectNode) storedData.path("price")).put("newerPriceField", true);
+        assertThat(jdbc.update(
+            "UPDATE admin_idempotency_records SET response_body = :body",
+            Map.of("body", objectMapper.writeValueAsString(stored))
+        )).isOne();
+
+        MvcResult replay = postProduct(body.toString(), "product-response-compat")
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        assertThat(response(replay).path("data").path("id").asString())
+            .isEqualTo(response(first).path("data").path("id").asString());
+        assertThat(productAuditCount()).isOne();
+    }
+
+    @Test
     void rejectsMissingOrInvalidIdempotencyKeysWithoutProductSideEffects() throws Exception {
         UUID mediaId = UUID.randomUUID();
         insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
@@ -356,6 +384,20 @@ class AdminGoodsProductCreationFlowIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{")))
             .andExpect(status().isBadRequest());
+
+        assertNoCreatedProductState();
+    }
+
+    @Test
+    void rejectsUnknownNestedJsonFieldsWithoutProductSideEffects() throws Exception {
+        UUID mediaId = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
+        JsonNode body = singleProduct(mediaId);
+        ((tools.jackson.databind.node.ObjectNode) body.path("price")).put("unexpected", true);
+
+        postProduct(body.toString(), "unexpected-product-field")
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"));
 
         assertNoCreatedProductState();
     }
