@@ -30,6 +30,22 @@
 병렬 구현을 맡길 때는 각 하위 작업의 성격과 위 행을 함께 기록한다. 현재 공통
 cleanup과 혼잡도 구현은 마지막 조합을 사용한다.
 
+## Backend release E2E · 2026-09-21
+
+`src/test/java/dev/espero/festival/e2e/ReleaseReadinessHttpE2eTest.java`는 후보 catalog
+manifest를 미래 릴리스 전에 독립적으로 검증하는 backend 게이트다. Testcontainers PostgreSQL에
+Flyway를 적용하고, 실제 Catalog CLI로 import·publish한 다음 랜덤 포트 서버를 기동한다.
+원격 개발·운영 DB나 그 자격증명에는 연결하지 않는다.
+
+기본 후보는 `dev/catalog/development-catalog.json`이고, 다른 후보는
+`-Dfestival.release-e2e.manifest=<path>`로 준다. 이 테스트는 readiness와 후보 revision,
+공개 공간·지도·핀·장소·티켓·스탬프 경로, 조건부 응답, 그리고 혼잡도 관리자 인증·동시성·감사
+경계를 HTTP로 확인한다. 목록에 실제 ID가 있으면 상세 경로도 순회한다. 빈 공간·지도와
+`UNCONFIGURED` 티켓은 현재 계약상 유효한 표현으로 다룬다.
+
+이 게이트는 공지·굿즈 담당자의 API·미디어 검증, 원격 DB preflight·role provisioning,
+실제 배포 smoke와 운영 자료 승인을 대체하지 않는다. 후속 작업자는 이 경계를 유지하고,
+변경 뒤 focused E2E와 전체 `mvnw.cmd verify` 결과를 아래 검증 기록에 추가한다.
 ## 재개 절차
 
 1. `AGENTS.md`, 이 문서, 해당 단계의 작업별 위키·API 계약을 읽는다.
@@ -137,6 +153,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 
 | 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
 |---|---|---|---|
+| 2026-09-21 | 후보 backend E2E | 기본 후보와 `festival.release-e2e.manifest` 지정 경로가 임시 PostgreSQL에서 각각 1개 통과. `mvnw.cmd clean verify`는 601개 통과, 실패·오류 0, 기존 환경 의존 skip 9개 | 실제 출시 후보 manifest에 같은 property를 지정하고, 공지·굿즈·배포 전용 게이트를 별도로 통과시킨다. |
 | 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |
 | 2026-09-18 | CORS·Maven wrapper focused test | `AdminCorsConfigurationTest` 1개 통과 | 전체 suite는 통합 뒤 실행한다. |
 | 2026-09-18 | conditional response subtask | agent branch에서 Maven 261개 통과 | `282c84a`로 통합했다. |

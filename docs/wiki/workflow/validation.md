@@ -27,6 +27,35 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 실행 명령, 읽기 전용 환경변수, 중단 판정과 로컬 PostgreSQL 검증 명령은
 [DB 사전 점검 runbook](../engineering/database-preflight.md)에 있다.
 
+### 릴리스 후보 backend E2E
+
+`ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는
+Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·publish한 뒤,
+랜덤 포트의 서버를 새로 기동한다. `/readyz`와 published snapshot, 후보 revision을
+가진 공개 catalog 경로(공간·지도·핀·장소·반입 금지 물품·티켓·스탬프), strong ETag·304·서버
+생성 request ID, 익명 관리자 거부, 관리자 로그인·CORS·refresh cookie, 혼잡도
+`If-Match`·idempotency·감사 기록을 하나의 릴리스 게이트로 확인한다. 후보에 실제
+공간·지도·장소가 있으면 목록에서 ID를 읽어 각 상세와 핀 경로까지 순회한다. 빈 목록과
+`UNCONFIGURED` 티켓 상태는 계약상 유효한 후보 표현으로 검사한다.
+Docker 엔진이 없으면 이 테스트는 skip하지 않고 실패한다.
+
+기본 개발 후보로 단독 실행하려면 다음을 사용한다.
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest test"
+```
+
+출시 후보 manifest를 검증할 때는 경로를 시스템 프로퍼티로 준다. 공백이 있는 경로는
+PowerShell에서 값을 따옴표로 감싼다.
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dfestival.release-e2e.manifest=<candidate-manifest-path> -Dtest=ReleaseReadinessHttpE2eTest test"
+```
+
+이 검사는 원격 개발 DB, 계정, 배포 환경을 읽거나 변경하지 않는다. 원격 DB의
+`DatabasePreflightApplication`, 제공자 role provisioning, 실제 배포 smoke 검증과
+운영 승인 절차는 별도 릴리스 조건으로 유지한다.
+
 ## 기존 실기기 검증 환경
 
 기존 실행 코드는 `test/frontend`의 Next.js 애플리케이션, `test/backend`의
