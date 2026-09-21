@@ -67,7 +67,7 @@ public class CatalogSnapshotProvider implements ApplicationRunner {
             log.info("Published locales: {}", publishedLocales());
         } catch (RuntimeException exception) {
             unavailableReason.set("Published catalog could not be loaded.");
-            log.error("Published catalog snapshot was not loaded: error_type={}", exception.getClass().getSimpleName());
+            log.error("Published catalog snapshot was not loaded.", exception);
         }
     }
 
@@ -78,11 +78,7 @@ public class CatalogSnapshotProvider implements ApplicationRunner {
             findings = new ArrayList<>(completeness.findings(korean.context().revisionId(), locale));
             snapshot = store.loadRevision(korean.context().revisionId(), locale);
         } catch (RuntimeException exception) {
-            log.warn(
-                "Locale {} is not published: its catalog could not be loaded: error_type={}",
-                locale,
-                exception.getClass().getSimpleName()
-            );
+            log.warn("Locale {} is not published: its catalog could not be loaded ({}).", locale, exception.getMessage());
             return Optional.empty();
         }
         if (!findings.isEmpty()) {

@@ -17,8 +17,6 @@
     <properties>
         <java.version>21</java.version>
         <testcontainers.version>1.21.4</testcontainers.version>
-        <!-- Keep all managed Tomcat modules on the security-fixed patch line. -->
-        <tomcat.version>11.0.25</tomcat.version>
         <swagger-ui.version>5.32.15</swagger-ui.version>
     </properties>
     <dependencies>

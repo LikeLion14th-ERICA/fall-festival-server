@@ -70,7 +70,7 @@ public class CleanupJob {
             logResult(nonNullResult);
             return nonNullResult;
         } catch (RuntimeException exception) {
-            log.error("cleanup_run_failed mode={} error_type={}", mode, exception.getClass().getSimpleName());
+            log.error("cleanup_run_failed mode={}", mode, exception);
             throw exception;
         }
     }

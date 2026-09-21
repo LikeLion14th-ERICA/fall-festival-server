@@ -17,12 +17,9 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 루트 backend 변경의 최소 검증 명령이며 테스트와 실행 가능한 JAR 패키징을 포함한다.
 테스트 위치는 `src/test/java`다. DB 및 운영 배포는 아직 구성하지 않았다.
 
-`.github/workflows/backend-ci.yml`의 검사 이름은 `backend-verify (Java 21)`,
-`backend-verify (Java 25)`, `docker-build`다. `docker-build`는 Trivy로 저장소의
-의존성·비밀값과 루트 런타임 이미지를 각각 검사하고, 수정 여부와 관계없이 high/critical
-finding이 있으면 실패한다. 저장소 검사는 `test/`의 manifest도 포함하지만 이미지는 루트
-`Dockerfile` 결과만 다룬다. GitHub에서 실행된 후 저장소 관리자가 세 검사를 보호 규칙의
-필수 검사로 지정해야 한다. 로컬 실행이 GitHub CI 성공을 뜻하지 않는다.
+`.github/workflows/backend-ci.yml`의 검사 이름은 `backend-verify (Java 21)`과
+`backend-verify (Java 25)`다. GitHub에서 실행된 후 저장소 관리자가 두 검사를
+보호 규칙의 필수 검사로 지정해야 한다. 로컬 실행이 GitHub CI 성공을 뜻하지 않는다.
 실행과 환경변수는 [루트 README](../../../README.md)를 따른다.
 초기 구성의 실제 결과와 미실행 항목은 [개발 준비 기록](../../backend-setup-verification.md)에 있다.
 
@@ -203,6 +200,4 @@ docker compose build
 - frontend 변경은 최소 `npm run check`, backend 변경은 최소 `mvn verify`, 통합 실행
   환경 변경은 최소 `docker compose config --quiet`와 `docker compose build`를 실행한다.
 - CI 구성 시 위 검사를 필수로 등록하고 의존성·SAST·secret 검사 등 서비스 위험도에
-  맞는 검사를 추가한다. 현재 `docker-build`의 Trivy filesystem·image scan은 SARIF를
-  업로드하지 않으므로 `contents: read` 외의 GitHub 권한을 요구하지 않는다. 검사 이름이나
-  명령이 바뀌면 이 문서도 같은 PR에서 갱신한다.
+  맞는 검사를 추가한다. 검사 이름이나 명령이 바뀌면 이 문서도 같은 PR에서 갱신한다.

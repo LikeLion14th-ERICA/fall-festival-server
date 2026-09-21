@@ -24,33 +24,29 @@ public class NoticeViewService {
 
     private final NoticeStore store;
     private final FestivalProperties properties;
-    private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
     private final Clock clock;
 
     public NoticeViewService(
         NoticeStore store,
         FestivalProperties properties,
-        CatalogSnapshotProvider snapshots,
         ApiMetaSupport metaSupport,
         Clock clock
     ) {
         this.store = store;
         this.properties = properties;
-        this.snapshots = snapshots;
         this.metaSupport = metaSupport;
         this.clock = clock;
     }
 
     public NoticeListSnapshot list(HttpServletRequest request) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
+        String requestedLocale = ContentLocale.requestedLocale(request);
         UUID festivalId = properties.configuredFestivalId();
         LocalDate today = LocalDate.now(clock.withZone(TIMEZONE));
         ZonedDateTime windowStart = today.atStartOfDay(TIMEZONE);
         ZonedDateTime windowEnd = windowStart.plusDays(1);
         List<Notice> notices = store.findVisible(festivalId, windowStart.toInstant(), windowEnd.toInstant());
         List<NoticeResponse> items = notices.stream()
-            .filter(notice -> isReadyForLocale(notice, requestedLocale))
             .map(notice -> toResponse(notice, requestedLocale))
             .toList();
         List<String> visibleIds = items.stream().map(NoticeResponse::id).toList();
@@ -60,26 +56,20 @@ public class NoticeViewService {
     }
 
     private NoticeResponse toResponse(Notice notice, String requestedLocale) {
-        NoticeTranslation translation = notice.translations().get(requestedLocale);
+        String contentLocale = ContentLocale.resolve(notice.translations(), requestedLocale);
+        NoticeTranslation translation = notice.translations().get(contentLocale);
         List<NoticeLinkResponse> links = notice.links().stream()
-            .map(link -> new NoticeLinkResponse(link.url(), link.labels().get(requestedLocale), "_blank"))
+            .map(link -> new NoticeLinkResponse(link.url(), link.labels().get(contentLocale), "_blank"))
             .toList();
         return new NoticeResponse(
             notice.id().toString(),
             notice.category().name(),
-            requestedLocale,
+            contentLocale,
             translation.title(),
             translation.body(),
             links,
             OffsetDateTime.ofInstant(notice.createdAt(), TIMEZONE)
         );
-    }
-
-    private static boolean isReadyForLocale(Notice notice, String locale) {
-        return ContentLocale.hasTranslation(notice.translations(), locale)
-            && notice.links().stream().allMatch(link ->
-                NoticeInputValidator.isHttpsUri(link.url()) && ContentLocale.hasTranslation(link.labels(), locale)
-            );
     }
 
     public record NoticeListSnapshot(NoticesResponse response, ApiMeta meta) {}

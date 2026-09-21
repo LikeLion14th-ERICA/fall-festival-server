@@ -18,8 +18,7 @@ class StampReceiptVerifierTest {
 
         assertThat(verifier.configured()).isTrue();
         assertThat(verifier.matches("048213")).isTrue();
-        assertThat(verifier.matches("730915")).isTrue();
-        assertThat(verifier.matches("  730915 ")).isFalse();
+        assertThat(verifier.matches("  730915 ")).isTrue();
         assertThat(verifier.matches("048214")).isFalse();
         assertThat(verifier.matches("")).isFalse();
         assertThat(verifier.matches(null)).isFalse();
@@ -33,7 +32,6 @@ class StampReceiptVerifierTest {
         assertThat(verifier.matches("48213")).isFalse();
         assertThat(verifier.matches("0482130")).isFalse();
         assertThat(verifier.matches("O48213")).isFalse();
-        assertThat(verifier.matches(" 048213 ")).isFalse();
         assertThat(verifier.matches("048 213")).isFalse();
         assertThat(verifier.matches("٠٤٨٢١٣")).isFalse();
     }

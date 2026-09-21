@@ -136,5 +136,4 @@ export function applyAdminContract(s,ops){
     {operationId:'deleteCurrentAdminSession',method:'DELETE',path:'/api/v2/admin/sessions/current',schema:'AdminLogout',summary:'현재 관리자 세션 로그아웃·refresh cookie가 없어도 성공',screens:[],scenarios:['normal','invalid-origin','error'],admin:true,authRequired:true,security:[{AdminBearer:[]}],parameters:[],provisional:false},
     {operationId:'getCurrentAdmin',method:'GET',path:'/api/v2/admin/me',schema:'AdminIdentity',summary:'현재 인증 관리자 확인',screens:[],scenarios:['normal','disabled','error'],admin:true,authRequired:true,parameters:[],provisional:false},
   );
-  for(const operation of ops)if(operation.admin)operation.cacheControl='no-store';
 }

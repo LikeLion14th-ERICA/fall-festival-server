@@ -31,7 +31,6 @@ public class GoodsViewService {
 
     private final GoodsStore store;
     private final FestivalProperties properties;
-    private final CatalogSnapshotProvider snapshots;
     private final OperationalAccountSettingsService accountSettings;
     private final ApiMetaSupport metaSupport;
     private final GoodsMediaUrlSupport mediaUrls;
@@ -39,72 +38,56 @@ public class GoodsViewService {
     public GoodsViewService(
         GoodsStore store,
         FestivalProperties properties,
-        CatalogSnapshotProvider snapshots,
         OperationalAccountSettingsService accountSettings,
         ApiMetaSupport metaSupport,
         GoodsMediaUrlSupport mediaUrls
     ) {
         this.store = store;
         this.properties = properties;
-        this.snapshots = snapshots;
         this.accountSettings = accountSettings;
         this.metaSupport = metaSupport;
         this.mediaUrls = mediaUrls;
     }
 
     public GoodsListSnapshot list(HttpServletRequest request) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
+        String requestedLocale = ContentLocale.requestedLocale(request);
         List<Goods> goods = store.findAll(properties.configuredFestivalId());
         GoodsListResponse response = new GoodsListResponse(
-            goods.stream()
-                .filter(good -> isReadyForLocale(good, requestedLocale))
-                .map(good -> toResponse(good, requestedLocale))
-                .toList()
+            goods.stream().map(g -> toResponse(g, requestedLocale)).toList()
         );
         ApiMeta meta = metaSupport.unscopedMeta(request, requestedLocale);
         return new GoodsListSnapshot(response, meta);
     }
 
     public GoodsSnapshot find(HttpServletRequest request, UUID goodsId) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
-        Goods goods = requireReadyForLocale(
-            store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound),
-            requestedLocale
-        );
+        String requestedLocale = ContentLocale.requestedLocale(request);
+        Goods goods = store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound);
         ApiMeta meta = metaSupport.unscopedMeta(request, requestedLocale);
         return new GoodsSnapshot(toResponse(goods, requestedLocale), meta);
     }
 
     public GoodsAvailabilityListSnapshot availabilityList(HttpServletRequest request) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
+        String requestedLocale = ContentLocale.requestedLocale(request);
         List<Goods> goods = store.findAll(properties.configuredFestivalId());
         GoodsAvailabilityListResponse response = new GoodsAvailabilityListResponse(
-            goods.stream()
-                .filter(good -> isReadyForLocale(good, requestedLocale))
-                .map(good -> toAvailabilityResponse(good, requestedLocale))
-                .toList()
+            goods.stream().map(this::toAvailabilityResponse).toList()
         );
         ApiMeta meta = metaSupport.unscopedMeta(request, requestedLocale);
         return new GoodsAvailabilityListSnapshot(response, meta);
     }
 
     public GoodsAvailabilitySnapshot availability(HttpServletRequest request, UUID goodsId) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
-        Goods goods = requireReadyForLocale(
-            store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound),
-            requestedLocale
-        );
+        String requestedLocale = ContentLocale.requestedLocale(request);
+        Goods goods = store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound);
         ApiMeta meta = metaSupport.unscopedMeta(request, requestedLocale);
-        return new GoodsAvailabilitySnapshot(toAvailabilityResponse(goods, requestedLocale), meta);
+        return new GoodsAvailabilitySnapshot(toAvailabilityResponse(goods), meta);
     }
 
     public GoodsPaymentGuideSnapshot paymentGuide(HttpServletRequest request, UUID goodsId) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
-        Goods goods = requireReadyForLocale(
-            store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound),
-            requestedLocale
-        );
-        GoodsTranslation translation = goods.translations().get(requestedLocale);
+        String requestedLocale = ContentLocale.requestedLocale(request);
+        Goods goods = store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound);
+        String contentLocale = ContentLocale.resolve(goods.translations(), requestedLocale);
+        GoodsTranslation translation = goods.translations().get(contentLocale);
         Optional<OperationalAccountSetting> setting = accountSettings.findCurrent(
             properties.configuredFestivalId(), OperationalAccountPurpose.GOODS
         );
@@ -125,19 +108,20 @@ public class GoodsViewService {
     }
 
     private GoodsResponse toResponse(Goods goods, String requestedLocale) {
-        GoodsTranslation translation = goods.translations().get(requestedLocale);
+        String contentLocale = ContentLocale.resolve(goods.translations(), requestedLocale);
+        GoodsTranslation translation = goods.translations().get(contentLocale);
         List<GoodsColorResponse> colors = goods.colors().stream()
-            .map(color -> new GoodsColorResponse(color.id().toString(), color.translations().get(requestedLocale).name()))
+            .map(color -> new GoodsColorResponse(color.id().toString(), color.translations().get(contentLocale).name()))
             .toList();
         List<GoodsSizeResponse> sizes = goods.sizes().stream()
-            .map(size -> new GoodsSizeResponse(size.id().toString(), size.translations().get(requestedLocale).label()))
+            .map(size -> new GoodsSizeResponse(size.id().toString(), size.translations().get(contentLocale).label()))
             .toList();
         List<GoodsImageResponse> images = goods.images().stream()
-            .map(image -> toImageResponse(image, requestedLocale))
+            .map(image -> toImageResponse(image, contentLocale))
             .toList();
         return new GoodsResponse(
             goods.id().toString(),
-            requestedLocale,
+            contentLocale,
             translation.name(),
             translation.description(),
             new GoodsResponse.Money(goods.priceAmount(), CURRENCY),
@@ -162,7 +146,7 @@ public class GoodsViewService {
         );
     }
 
-    private GoodsAvailabilityResponse toAvailabilityResponse(Goods goods, String requestedLocale) {
+    private GoodsAvailabilityResponse toAvailabilityResponse(Goods goods) {
         List<GoodsCombinationStatusResponse> combinations = goods.combinations().stream()
             .map(combo -> new GoodsCombinationStatusResponse(
                 combo.id().toString(),
@@ -179,7 +163,7 @@ public class GoodsViewService {
             .orElse(null);
         return new GoodsAvailabilityResponse(
             goods.id().toString(),
-            goods.translations().get(requestedLocale).name(),
+            goods.translations().get("ko").name(),
             combinations,
             allSoldOut,
             latestUpdate == null ? null : OffsetDateTime.ofInstant(latestUpdate, TIMEZONE)
@@ -192,20 +176,6 @@ public class GoodsViewService {
                 current.bankName(), current.accountNumber(), current.accountHolder()
             ))
             .orElse(null);
-    }
-
-    private static Goods requireReadyForLocale(Goods goods, String locale) {
-        if (!isReadyForLocale(goods, locale)) {
-            throw notFound();
-        }
-        return goods;
-    }
-
-    private static boolean isReadyForLocale(Goods goods, String locale) {
-        return ContentLocale.hasTranslation(goods.translations(), locale)
-            && goods.images().stream().allMatch(image -> ContentLocale.hasTranslation(image.translations(), locale))
-            && goods.colors().stream().allMatch(color -> ContentLocale.hasTranslation(color.translations(), locale))
-            && goods.sizes().stream().allMatch(size -> ContentLocale.hasTranslation(size.translations(), locale));
     }
 
     private static ApiException notFound() {

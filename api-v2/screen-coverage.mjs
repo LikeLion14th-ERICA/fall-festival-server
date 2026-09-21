@@ -6,7 +6,7 @@ const groups={
   'MAP-AREA':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Space.mapTarget','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)'],
   'MAP-POPUP':['Place.name','Place.hoursText','Place.description','Place.locationText','Place.usage','Place.spaceId'],
   'HOME':['Crowding.savedLevel','Crowding.status','Crowding.updatedAt + Crowding.timeBasis','Crowding.opensAt','Crowding.closesAt','프런트 고정 UI: Crowding.colorToken → 디자인 색상','프런트 번역: Crowding.status; Crowding.message는 참고','Config.languages','브라우저: 선택 언어, 기본 ko','Notices.items[0].title','Config.links.universityNotices','Config.links.faq','Config.links.welcomeDay','Config.links.officialChannels','Channel.label + Channel.iconKey','브라우저: 당일 stamp.started'],
-  'NOTICE-LIST':['Notice.title','Notice.createdAt','Notice.body','Notice.links','Notice.type','서버: 요청 공개 언어 번역이 완결된 공지만 Notices.items에 반환','브라우저: Notices.visibleIds와 현재 목록 차이 비교'],
+  'NOTICE-LIST':['Notice.title','Notice.createdAt','Notice.body','Notice.links','Notice.type','서버: Notice.contentLocale 대체 해석 후 Notices.items 반환','브라우저: Notices.visibleIds와 현재 목록 차이 비교'],
   'GOODS-LIST':['보류: 이미지 필드는 별도 마이그레이션','Goods.name','Goods.price','Goods.colors','Goods.sizes','Availability.combinations'],
   'GOODS-DETAIL':['보류: 이미지 필드는 별도 마이그레이션','Goods.name','Goods.price','Goods.colors','Goods.sizes','Availability.combinations','프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내'],
   'GOODS-PAYMENT':['PaymentGuide.name','PaymentGuide.price','BankAccount.bankName','BankAccount.accountNumber','BankAccount.holder','PaymentGuide.instructions'],

@@ -1508,7 +1508,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "서버: 요청 공개 언어 번역이 완결된 공지만 Notices.items에 반환",
+      "target": "서버: Notice.contentLocale 대체 해석 후 Notices.items 반환",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/notice.md"

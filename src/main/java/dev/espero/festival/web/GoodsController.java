@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,9 +64,7 @@ public class GoodsController {
     ) {
         validateQuery(request);
         GoodsViewService.GoodsPaymentGuideSnapshot snapshot = views.paymentGuide(request, goodsId);
-        return ResponseEntity.ok()
-            .cacheControl(CacheControl.noStore())
-            .body(new ApiResponse<>(snapshot.response(), snapshot.meta()));
+        return ResponseEntity.ok(new ApiResponse<>(snapshot.response(), snapshot.meta()));
     }
 
     private void validateQuery(HttpServletRequest request) {

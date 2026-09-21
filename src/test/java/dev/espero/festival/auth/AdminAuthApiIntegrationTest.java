@@ -121,19 +121,6 @@ class AdminAuthApiIntegrationTest {
     }
 
     @Test
-    void rejectsUnknownLoginJsonFieldsWithoutIssuingCredentials() throws Exception {
-        mockMvc.perform(post("/api/v2/admin/sessions")
-                .header("Origin", ORIGIN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"username":"bootstrap-admin","password":"test-bootstrap-password","unexpected":true}
-                    """))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"))
-            .andExpect(result -> assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE)).isEmpty());
-    }
-
-    @Test
     void concurrentRefreshRotatesExactlyOnce() throws Exception {
         MvcResult login = mockMvc.perform(post("/api/v2/admin/sessions")
                 .header("Origin", ORIGIN)

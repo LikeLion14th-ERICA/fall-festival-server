@@ -1,9 +1,6 @@
 spring:
   application:
     name: fall-festival-server
-  jackson:
-    deserialization:
-      fail-on-unknown-properties: true
   # No classpath static files are served implicitly. The opt-in /docs page
   # serves the few Swagger UI assets it needs itself.
   web:

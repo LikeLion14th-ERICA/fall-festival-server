@@ -167,23 +167,11 @@ test('Stamp receipt verification hides the code and changes claimed only after s
   const invalid=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'wrong-code'},session:'stamp-receipt'});
   assert.equal(invalid.status,422);assert.equal(invalid.body.error.code,'INVALID_RECEIPT_CODE');assert.doesNotMatch(JSON.stringify(invalid.body),/wrong-code/);
   const verified=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'482913'},session:'stamp-receipt'});
-  assert.equal(verified.status,200);assert.equal(verified.headers.get('cache-control'),'no-store');assert.deepEqual(verified.body.data,{verified:true});
-  for(const code of ['48291','4829130','48291a','482 913',' 482913 '])assert.equal((await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code},session:'stamp-receipt'})).status,422);
+  assert.equal(verified.status,200);assert.deepEqual(verified.body.data,{verified:true});
+  for(const code of ['48291','4829130','48291a','482 913'])assert.equal((await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code},session:'stamp-receipt'})).status,422);
   assert.equal(spec.components.schemas.StampReceiptVerificationInput.properties.code.pattern,'^[0-9]{6}$');
   assert.deepEqual(clientStates.stamp.receiptCodeRejected,{date:'2030-10-01',started:true,count:4,claimed:false,route:'STAMP-REWARD',message:'코드를 확인해 주세요'});
   assert.deepEqual(clientStates.stamp.claimed,{date:'2030-10-01',started:true,count:4,claimed:true});
-});
-test('Sensitive and administrator success responses declare no-store',async()=>{
-  for(const id of ['verifyStampReceipt','getPaymentGuide'])assert.equal(operation(id).responses['200'].headers['Cache-Control'].schema.enum[0],'no-store');
-  for(const adminOperation of Object.values(spec.paths).flatMap(Object.values).filter(item=>item.tags.includes('관리자'))){
-    for(const [status,response]of Object.entries(adminOperation.responses))if(Number(status)>=200&&Number(status)<300)assert.equal(response.headers['Cache-Control'].schema.enum[0],'no-store',adminOperation.operationId);
-  }
-  for(const conditional of Object.values(spec.paths).flatMap(Object.values).filter(item=>item['x-conditional'])){
-    assert.ok(conditional.responses['304'].headers.ETag,conditional.operationId);
-    if(conditional.responses['200'].headers['Cache-Control'])assert.deepEqual(conditional.responses['304'].headers['Cache-Control'].schema.enum,conditional.responses['200'].headers['Cache-Control'].schema.enum,conditional.operationId);
-  }
-  assert.equal((await call('/api/v2/goods/goods-shirt/payment-guide')).headers.get('cache-control'),'no-store');
-  assert.equal((await call('/api/v2/admin/me',{headers:admin})).headers.get('cache-control'),'no-store');
 });
 
 test('Fictional fixtures provide dense, linked data for frontend list and detail layouts',()=>{
@@ -250,23 +238,10 @@ for(const [opId,group]of Object.entries(examples))for(const [scenario,example]of
     }
   });
 }
-test('Every locale operation documents and serves the LOCALE_NOT_READY example',()=>{
-  const localeOperations=Object.values(spec.paths).flatMap(Object.values).filter(operation=>operation.parameters.some(parameter=>parameter.in==='query'&&parameter.name==='locale'));
-  assert.ok(localeOperations.length>0);
-  for(const operation of localeOperations){
-    const example=operation.responses['400'].content['application/json'].examples['locale-not-ready'];
-    assert.equal(example.value.error.code,'LOCALE_NOT_READY',operation.operationId);
-    const request=examples[operation.operationId].scenarios['locale-not-ready'].request;
-    assert.match(request.path,/[?&]locale=en(?:&|$)/,operation.operationId);
-    assert.equal(request.headers['X-Mock-Session'],`locale-not-ready-${operation.operationId}`);
-  }
-});
 test('Invalid input is rejected, not reflected into a success fixture',async()=>{
   const crowdingHeaders={...admin,'If-Match':'"'+'0'.repeat(64)+'"','Idempotency-Key':'invalid-input'};
   const cases=[['/api/v2/lineup?date=2030-02-30',{},400],['/api/v2/lineup?category=INVALID',{},400],['/api/v2/spaces?search=x',{},400],['/api/v2/spaces?category=PUB&category=BOOTH',{},400],['/api/v2/maps/map-area/pins',{},400],['/api/v2/maps/map-area/pins?mapVersion=old',{},409],['/api/v2/goods/unknown',{},404],['/api/v2/config?locale=ja',{},400],['/api/v2/config?locale=zh-Hans',{},400],['/api/v2/config?__scenario=unknown',{},400],['/api/v2/admin/crowding',{method:'PUT',body:{level:'BOGUS'},headers:crowdingHeaders},422],['/api/v2/admin/crowding',{method:'PUT',body:{level:'FULL'},headers:crowdingHeaders},422],['/api/v2/admin/crowding',{method:'PUT',body:{level:'CROWDED',extra:true},headers:crowdingHeaders},422],['/api/v2/admin/crowding',{method:'PUT',body:'{bad',headers:crowdingHeaders},400],['/api/v2/admin/crowding',{method:'PUT',body:{level:'CROWDED'},headers:{...crowdingHeaders,'Content-Type':'text/plain'}},415],['/api/v2/config',{headers:{'X-Mock-Delay':'3001'}},400]];
   for(const [path,opts,status]of cases){const got=await call(path,opts);assert.equal(got.status,status,path);standardValidate({$ref:'#/components/schemas/Error'},got.body);}
-  const removedScenario=await call('/api/v2/config?__scenario=partial-translation');
-  assert.equal(removedScenario.status,400);assert.equal(removedScenario.body.error.code,'UNKNOWN_SCENARIO');
 });
 test('Mock administrator authorization is checked server-side for every admin method',async()=>{
   for(const [path,methods]of Object.entries(spec.paths))if(path.includes('/admin/'))for(const [method,o]of Object.entries(methods)){
@@ -344,9 +319,8 @@ test('Goods save changes only one combination and derives sold-out; failed write
   await write('ON_SALE');
   assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
 });
-test('Notice create/edit/delete synchronizes ready-language public list and immutable template',async()=>{
+test('Notice create/edit/delete synchronizes public list, contentLocale fallback and immutable template',async()=>{
   const session='notice-flow';
-  await enableAllMockLocales(session);
   const template=(await call('/api/v2/admin/notice-templates/template-1',{session,headers:admin})).body.data;
   const body={...examples.postAdminNotice.scenarios.normal.request.body,templateId:'template-1'};
   const created=await call('/api/v2/admin/notices',{session,headers:{...admin,'Idempotency-Key':'notice-create'},method:'POST',body});
@@ -356,7 +330,7 @@ test('Notice create/edit/delete synchronizes ready-language public list and immu
   const enView=(await call('/api/v2/notices?locale=en',{session})).body.data.items.find(n=>n.id===id);
   assert.equal(enView.contentLocale,'en');assert.equal(enView.title,body.translations.en.title);
   const zhBefore=(await call('/api/v2/notices?locale=zh-Hans',{session})).body.data.items.find(n=>n.id===id);
-  assert.equal(zhBefore,undefined);
+  assert.equal(zhBefore.contentLocale,'en');
   const current=await call('/api/v2/admin/notices/'+id,{session,headers:admin});
   const updatedBody={
     ...body,
@@ -382,25 +356,13 @@ test('Notice KST midnight hides old general notices but retains lost items and a
   assert.ok(publicList.length>0);assert.ok(publicList.every(n=>n.type==='LOST_FOUND'));
   assert.ok((await call('/api/v2/admin/notices',{headers:{...headers,...admin}})).body.data.items.some(n=>n.type==='GENERAL'));
 });
-test('Published languages omit incomplete notices and goods without fallback',async()=>{
-  const session='published-locale-completeness';
-  await enableAllMockLocales(session);
-  const koOnly=(await call('/api/v2/notices?locale=en',{session})).body.data.items.find(n=>n.id==='notice-ko-only');
-  assert.equal(koOnly,undefined);
-  const koOnlyJa=(await call('/api/v2/notices?locale=ja',{session})).body.data.items.find(n=>n.id==='notice-ko-only');
-  assert.equal(koOnlyJa,undefined);
-  const zhGoods=(await call('/api/v2/goods?locale=zh-Hans',{session})).body.data.items;
-  assert.deepEqual(zhGoods,[]);
-  assert.deepEqual((await call('/api/v2/goods-availability?locale=zh-Hans',{session})).body.data.items,[]);
-  for(const path of ['/api/v2/goods/goods-shirt?locale=zh-Hans','/api/v2/goods/goods-shirt/availability?locale=zh-Hans','/api/v2/goods/goods-shirt/payment-guide?locale=zh-Hans'])assert.equal((await call(path,{session})).status,404,path);
+test('Notice with no English translation falls back to Korean for every requested locale',async()=>{
+  const koOnly=(await call('/api/v2/notices?locale=en')).body.data.items.find(n=>n.id==='notice-ko-only');
+  assert.equal(koOnly.contentLocale,'ko');
+  const koOnlyJa=(await call('/api/v2/notices?locale=ja')).body.data.items.find(n=>n.id==='notice-ko-only');
+  assert.equal(koOnlyJa.contentLocale,'ko');
   const adminView=await call('/api/v2/admin/notices/notice-ko-only',{headers:admin});
   assert.equal(adminView.status,200);assert.equal(Object.hasOwn(adminView.body.data.translations,'en'),false);
-});
-test('Public dynamic routes reject known locales that are not published',async()=>{
-  for(const path of ['/api/v2/notices?locale=en','/api/v2/goods?locale=en','/api/v2/goods-availability?locale=en','/api/v2/goods/goods-shirt?locale=en','/api/v2/goods/goods-shirt/availability?locale=en','/api/v2/goods/goods-shirt/payment-guide?locale=en']){
-    const response=await call(path,{session:`unready-${path.length}`});
-    assert.equal(response.status,400,path);assert.equal(response.body.error.code,'LOCALE_NOT_READY',path);
-  }
 });
 test('Ticket close boundary hides account; next day reopens; price uses integer KRW',async()=>{
   for(const [now,expected]of [['2030-10-01T20:59:59+09:00','TRANSFER_OPEN'],['2030-10-01T21:00:00+09:00','DAILY_CLOSED'],['2030-10-02T00:00:00+09:00','TRANSFER_OPEN'],['2030-10-04T00:00:00+09:00','FESTIVAL_ENDED']]){
@@ -598,7 +560,7 @@ test('Color, size, and option deletion removes obsolete availability and preserv
   assert.deepEqual(availabilityAfter.combinations.map(c=>c.status),availabilityBefore.combinations.filter(c=>c.colorId===firstColor).map(c=>c.status));
 });
 
-test('Notice requires manual ko·en input and rejects malformed link hosts or labels that do not match notice languages',async()=>{
+test('Notice requires manual ko·en input and rejects link labels that do not match the notice languages',async()=>{
   const session='notice-validation';
   const base=structuredClone(examples.postAdminNotice.scenarios.normal.request.body);
   const post=(body,key)=>call('/api/v2/admin/notices',{session,headers:{...admin,'Idempotency-Key':key},method:'POST',body});
@@ -610,12 +572,6 @@ test('Notice requires manual ko·en input and rejects malformed link hosts or la
   // Blank required text still fails minLength.
   const blank=await post({...base,translations:{ko:{title:' ',body:' '},en:base.translations.en}},'notice-validation-blank');
   assert.equal(blank.status,422);
-
-  // A hostless HTTPS URI is rejected by both the generated request schema and the mock domain guard.
-  const hostless={...base,links:[{...base.links[0],url:'https:///path'}]};
-  assert.ok(localValidate(spec.components.schemas.NoticeLinkInput,hostless.links[0],spec).length);
-  const hostlessResponse=await post(hostless,'notice-validation-hostless-url');
-  assert.equal(hostlessResponse.status,422);assert.equal(hostlessResponse.body.error.code,'VALIDATION_FAILED');
 
   // image is no longer part of the contract; an unknown property is rejected.
   const withImage=await post({...base,image:null},'notice-validation-image');

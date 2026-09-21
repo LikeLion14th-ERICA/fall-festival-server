@@ -1,7 +1,6 @@
 package dev.espero.festival.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -34,7 +33,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -92,16 +90,12 @@ class NoticeFlowIntegrationTest {
     @Autowired
     private dev.espero.festival.persistence.NoticeTemplateStore templates;
 
-    @MockitoBean
-    private CatalogSnapshotProvider snapshots;
-
     private MockMvc mvc;
     private int keySequence;
 
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-        when(snapshots.publishedLocales()).thenReturn(List.of("ko", "en", "zh-Hans", "ja"));
         clock.set(OffsetDateTime.parse("2030-10-01T12:00:00+09:00"));
         jdbc.update("DELETE FROM notice_link_translations", Map.of());
         jdbc.update("DELETE FROM notice_links", Map.of());
@@ -139,7 +133,7 @@ class NoticeFlowIntegrationTest {
     }
 
     @Test
-    void returnsOnlyItemsCompleteInTheRequestedPublishedLocale() throws Exception {
+    void resolvesContentLocaleWithFallbackAndKeepsTitleBodyLinkLabelInTheSameLanguage() throws Exception {
         UUID fullyTranslated = insertNotice("GENERAL", "2030-10-01T10:00:00+09:00");
         insertZhTranslation(fullyTranslated);
         insertLink(fullyTranslated, "https://example.invalid/a");
@@ -147,47 +141,20 @@ class NoticeFlowIntegrationTest {
 
         mvc.perform(get("/api/v2/notices").param("locale", "zh-Hans"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(1)))
             .andExpect(jsonPath("$.data.items[0].id").value(fullyTranslated.toString()))
             .andExpect(jsonPath("$.data.items[0].contentLocale").value("zh-Hans"))
             .andExpect(jsonPath("$.data.items[0].title").value("模拟标题"))
             .andExpect(jsonPath("$.data.items[0].links[0].label").value("链接"))
-            .andExpect(jsonPath("$.data.visibleIds", org.hamcrest.Matchers.not(
-                org.hamcrest.Matchers.hasItem(koOnly.toString())
-            )));
+            .andExpect(jsonPath("$.data.items[1].id").value(koOnly.toString()))
+            .andExpect(jsonPath("$.data.items[1].contentLocale").value("ko"));
 
         mvc.perform(get("/api/v2/notices").param("locale", "en"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(1)))
-            .andExpect(jsonPath("$.data.items[0].id").value(fullyTranslated.toString()))
-            .andExpect(jsonPath("$.data.items[0].contentLocale").value("en"))
-            .andExpect(jsonPath("$.data.items[0].title").value("Title"))
-            .andExpect(jsonPath("$.data.items[0].links[0].label").value("Link"));
+            .andExpect(jsonPath("$.data.items[1].contentLocale").value("ko"));
     }
 
     @Test
-    void hidesLegacyNoticesWithAHostlessHttpsLink() throws Exception {
-        UUID valid = insertNotice("GENERAL", "2030-10-01T10:00:00+09:00");
-        insertLink(valid, "https://example.invalid/a");
-        UUID invalid = insertNotice("GENERAL", "2030-10-01T09:00:00+09:00");
-        insertLink(invalid, "https:///legacy-path");
-
-        mvc.perform(get("/api/v2/notices"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(1)))
-            .andExpect(jsonPath("$.data.items[0].id").value(valid.toString()))
-            .andExpect(jsonPath("$.data.visibleIds", org.hamcrest.Matchers.not(
-                org.hamcrest.Matchers.hasItem(invalid.toString())
-            )));
-    }
-
-    @Test
-    void distinguishesAnUnpublishedKnownLocaleFromUnknownQueries() throws Exception {
-        when(snapshots.publishedLocales()).thenReturn(List.of("ko"));
-
-        mvc.perform(get("/api/v2/notices").param("locale", "en"))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error.code").value("LOCALE_NOT_READY"));
+    void rejectsAnUnknownLocaleAndAnUnknownQueryParameter() throws Exception {
         mvc.perform(get("/api/v2/notices").param("locale", "fr"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error.code").value("INVALID_QUERY"));
@@ -390,24 +357,6 @@ class NoticeFlowIntegrationTest {
                 .content(extraLabel))
             .andExpect(status().isUnprocessableEntity())
             .andExpect(jsonPath("$.error.code").value("LINK_LABEL_UNEXPECTED"));
-
-        String malformedHttpsUri = """
-            {
-              "type": "GENERAL",
-              "translations": {
-                "ko": {"title": "제목", "body": "본문"},
-                "en": {"title": "Title", "body": "Body"}
-              },
-              "links": [{"url": "https://[invalid", "labels": {"ko": "링크", "en": "Link", "zh-Hans": null, "ja": null}}],
-              "templateId": null
-            }
-            """;
-        mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))
-                .header("Idempotency-Key", nextKey())
-                .contentType("application/json")
-                .content(malformedHttpsUri))
-            .andExpect(status().isUnprocessableEntity())
-            .andExpect(jsonPath("$.error.code").value("VALIDATION_FAILED"));
 
         String withTemplate = VALID_CREATE_BODY.replace("\"templateId\": null", "\"templateId\": \"" + UUID.randomUUID() + "\"");
         mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))

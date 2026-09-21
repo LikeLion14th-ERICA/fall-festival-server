@@ -67,7 +67,7 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | NOTICE-LIST-D03 | 본문 텍스트 | API | Notice.body | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D04 | 본문 링크 | API | Notice.links | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D05 | 공지 유형 | API | Notice.type | [위키](../docs/wiki/product/notice.md) |
-| NOTICE-LIST-D06 | 언어별 번역 완료 여부 | API | 서버: 요청 공개 언어 번역이 완결된 공지만 Notices.items에 반환 | [위키](../docs/wiki/product/notice.md) |
+| NOTICE-LIST-D06 | 언어별 번역 완료 여부 | API | 서버: Notice.contentLocale 대체 해석 후 Notices.items 반환 | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D07 | 새 공지 존재 여부 | 브라우저 | 브라우저: Notices.visibleIds와 현재 목록 차이 비교 | [위키](../docs/wiki/product/notice.md) |
 | GOODS-LIST-D01 | 상품 이미지 | 보류 | 보류: 이미지 필드는 별도 마이그레이션 | [위키](../docs/wiki/product/goods.md) |
 | GOODS-LIST-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/goods.md) |

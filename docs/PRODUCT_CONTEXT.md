@@ -26,7 +26,6 @@
 - [결정 대기 목록](wiki/product/decisions.md)
 - [Design / Wireframe Reference](wiki/design/README.md)
 - [익명 접근·보안·개인정보](wiki/engineering/security.md)
-- [백엔드 보안 출시 체크리스트](wiki/engineering/security-release-checklist.md)
 - [다국어](wiki/engineering/i18n.md)
 - [API와 저장소 구조](wiki/engineering/api.md)
 - [데이터 모델·ERD 설계 검토](wiki/engineering/data-model.md)

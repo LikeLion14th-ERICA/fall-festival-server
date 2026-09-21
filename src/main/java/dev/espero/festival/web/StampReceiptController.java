@@ -4,10 +4,8 @@ import dev.espero.festival.domain.CatalogSnapshot;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +38,7 @@ public class StampReceiptController {
     }
 
     @PostMapping(path = "/stamp-receipt-verifications", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse<Verification>> verify(HttpServletRequest request, @RequestBody Input input) {
+    public ApiResponse<Verification> verify(HttpServletRequest request, @RequestBody Input input) {
         CatalogSnapshot snapshot = snapshots.required();
         metaSupport.setContext(request, snapshot.context(), PublicContentLocale.KOREAN);
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
@@ -65,9 +63,7 @@ public class StampReceiptController {
                 false
             );
         }
-        return ResponseEntity.ok()
-            .cacheControl(CacheControl.noStore())
-            .body(new ApiResponse<>(new Verification(true), metaSupport.meta(request, snapshot.context(), locale)));
+        return new ApiResponse<>(new Verification(true), metaSupport.meta(request, snapshot.context(), locale));
     }
 
     /** The code is write-only: it never appears in toString, logs or responses. */

@@ -142,12 +142,7 @@ public class GlobalApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
-        log.error(
-            "Unhandled API exception: method={} path={} error_type={}",
-            request.getMethod(),
-            request.getRequestURI(),
-            exception.getClass().getSimpleName()
-        );
+        log.error("Unhandled API exception: method={} path={}", request.getMethod(), request.getRequestURI(), exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("INTERNAL_ERROR", "처리 중 오류가 발생했습니다.", List.of(), true),
             metaSupport.metaForError(request)

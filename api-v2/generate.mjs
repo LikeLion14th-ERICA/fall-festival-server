@@ -35,16 +35,14 @@ const unscopedOperations=new Set([
 for(const op of operations){
   const responseName=op.schema?`${op.schema}${op.conditional?'Conditional':''}Response`:null;
   if(responseName)spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');
-  const hasLocale=op.parameters.some(parameter=>parameter.in==='query'&&parameter.name==='locale');
-  const scenarios=[...new Set([...op.scenarios,...(hasLocale?['locale-not-ready']:[]),'bad-request','rate-limited',...(op.admin&&op.authRequired!==false?['unauthorized','forbidden']:[])])];
+  const scenarios=[...op.scenarios,'bad-request','rate-limited',...(op.admin&&op.authRequired!==false?['unauthorized','forbidden']:[])];
   const successStatus=op.successStatus??(op.method==='POST'?201:200);
   const statuses=[...(successStatus===200?[200]:[]),400,403,404,405,409,429,500,503,...(op.input||op.multipartInput?[413,415,422]:[]),...(op.admin?[401]:[]),...(op.ifMatchRequired||op.idempotencyKeyRequired?[428]:[]),...(op.conditional?[304]:[]),successStatus].filter((status,index,array)=>array.indexOf(status)===index);
   const responses=Object.fromEntries(statuses.map(status=>{
-    const conditionalHeaders=op.conditional&&(status<300||status===304)?{ETag:strongEtagHeader,...(op.binaryResponse?{}:{'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'}})}:{};
-    const cacheControlHeaders=op.cacheControl&&(status<300||(op.conditional&&status===304))?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:op.cacheControl==='no-store'?'브라우저와 중간 캐시가 응답을 저장하지 못하게 한다.':op.binaryResponse?'응답에 적용되는 캐시 지시문.':'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{};
+    const conditionalHeaders=op.conditional&&(status<300||(op.binaryResponse&&status===304))?{ETag:strongEtagHeader,...(op.binaryResponse?{}:{'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'}}),...(op.cacheControl?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:op.binaryResponse?'응답에 적용되는 캐시 지시문.':'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{})}:{};
     const binaryHeaders=op.binaryResponse&&status===200?{'Content-Disposition':{schema:{type:'string',enum:['inline']},description:'브라우저 inline 표시'},'X-Content-Type-Options':{schema:{type:'string',enum:['nosniff']},description:'MIME sniffing 차단'}}:{};
     const responseOverride=op.responseOverrides?.[status];
-    const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{...(op.binaryResponse?{}:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'}}),...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders,...cacheControlHeaders,...binaryHeaders}};
+    const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{...(op.binaryResponse?{}:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'}}),...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders,...binaryHeaders}};
     if(op.binaryResponse&&status===200)response.content={'image/webp':{schema:{type:'string',format:'binary'}}};
     else if(!noBodyStatuses.has(status))response.content={'application/json':{schema:{$ref:`#/components/schemas/${status<300?responseName:'Error'}`},examples:{}}};
     return [status,response];
@@ -62,7 +60,7 @@ for(const op of operations){
   examples[op.operationId]={screens:op.screens,method:op.method,path:op.path,scenarios:{}};
   for(const scenario of scenarios){
     const state=createState();let status=successStatus,response;
-    const query={...(op.operationId==='getPins'?{mapVersion:'mock-map-1'}:{}),...(scenario==='locale-not-ready'?{locale:'en'}:{})};
+    const query=op.operationId==='getPins'?{mapVersion:'mock-map-1'}:{};
     let body=op.input?structuredClone(inputExamples[op.input]):undefined;
     if(op.operationId==='putAdminCrowding'&&scenario==='full')body={level:'FULL',confirmFull:true};
     if(op.operationId==='putAdminAvailability'&&scenario==='sold-out')body={status:'SOLD_OUT'};
@@ -92,8 +90,7 @@ for(const op of operations){
     const qs=new URLSearchParams(query).toString();
     const cookieEndpoint=['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId);
     const mutationHeaders={...(op.ifMatchRequired?{'If-Match':'"'+'0'.repeat(64)+'"'}:{}),...(op.idempotencyKeyRequired?{'Idempotency-Key':`mock-${op.operationId}-${scenario}`}:{})};
-    const session=scenario==='locale-not-ready'?`locale-not-ready-${op.operationId}`:'frontend-demo';
-    examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':session,...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(body?{'Content-Type':'application/json'}:{}),...(op.multipartInput?{'Content-Type':scenario==='unsupported-media-type'?'application/json':'multipart/form-data; boundary=<generated>'}:{}),...mutationHeaders},...(body?{body}:{}),...(op.multipartInput&&scenario!=='unsupported-media-type'?{multipart:{file:'<binary>'}}:{})},status,response};
+    examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':'frontend-demo',...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(body?{'Content-Type':'application/json'}:{}),...(op.multipartInput?{'Content-Type':scenario==='unsupported-media-type'?'application/json':'multipart/form-data; boundary=<generated>'}:{}),...mutationHeaders},...(body?{body}:{}),...(op.multipartInput&&scenario!=='unsupported-media-type'?{multipart:{file:'<binary>'}}:{})},status,response};
   }
 }
 const source=JSON.parse(await readFile(new URL('./source-screen-requirements.json',import.meta.url),'utf8'));

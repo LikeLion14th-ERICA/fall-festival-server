@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,11 +29,6 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    AdminNoStoreFilter adminNoStoreFilter() {
-        return new AdminNoStoreFilter();
-    }
-
-    @Bean
     UserDetailsService noFormLoginUserDetailsService() {
         return username -> {
             throw new UsernameNotFoundException("Form login is not supported");
@@ -45,7 +39,6 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(
         HttpSecurity http,
         ObjectProvider<AdminJwtAuthenticationFilter> jwtFilterProvider,
-        AdminNoStoreFilter adminNoStoreFilter,
         AdminCookieCsrfFilter cookieCsrfFilter,
         ApiSecurityErrorWriter errorWriter,
         CorsConfigurationSource corsConfigurationSource
@@ -72,7 +65,6 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST, "/api/v2/admin/sessions/refresh").permitAll()
                 .requestMatchers("/api/v2/admin/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll())
-            .addFilterBefore(adminNoStoreFilter, HeaderWriterFilter.class)
             .addFilterBefore(cookieCsrfFilter, UsernamePasswordAuthenticationFilter.class);
 
         AdminJwtAuthenticationFilter jwtFilter = jwtFilterProvider.getIfAvailable();

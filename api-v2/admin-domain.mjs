@@ -14,7 +14,7 @@ export function hoursFor(state,operatingDay){
   if(!day)throw new Error(`Missing mock FestivalDay for ${operatingDay}`);
   return day;
 }
-export function inventoryFor(state,goodsId,{admin=false,sold=false,locale='ko',failure}={}){
+export function inventoryFor(state,goodsId,{admin=false,sold=false,failure}={}){
   const g=state.goods.find(g=>g.id===goodsId);if(!g)failure(404,'NOT_FOUND','상품이 없습니다.');
   const stock=state.inventory[goodsId];
   const combinations=g.combinations.map(combo=>({
@@ -23,7 +23,7 @@ export function inventoryFor(state,goodsId,{admin=false,sold=false,locale='ko',f
     sizeId:combo.sizeId,
     status:sold?'SOLD_OUT':stock.statuses[combo.id],
   }));
-  return {goodsId:g.id,name:g.translations[admin?'ko':locale].name,combinations,allSoldOut:combinations.length>0&&combinations.every(v=>v.status==='SOLD_OUT'),updatedAt:stock.updatedAt};
+  return {goodsId:g.id,name:g.translations.ko.name,combinations,allSoldOut:combinations.length>0&&combinations.every(v=>v.status==='SOLD_OUT'),updatedAt:stock.updatedAt};
 }
 function toAdminGoods(state,g){
   const stock=state.inventory[g.id];
@@ -176,10 +176,6 @@ export function validateProduct(body,failure){
 // for the locales that have a body translation.
 export function validateNotice(body,failure){
   const filled=t=>typeof t?.title==='string'&&t.title.trim()&&typeof t?.body==='string'&&t.body.trim();
-  const hasHttpsHost=value=>{
-    if(typeof value!=='string'||!/^https:\/\/[^/?#\s]+/.test(value))return false;
-    try{const url=new URL(value);return url.protocol==='https:'&&Boolean(url.hostname);}catch{return false;}
-  };
   if(!filled(body.translations.ko))failure(422,'KOREAN_REQUIRED','한국어 제목·본문은 필수입니다.');
   if(!filled(body.translations.en))failure(422,'ENGLISH_REQUIRED','영어 제목·본문은 필수입니다.');
   const present=new Set(Object.keys(body.translations));
@@ -187,7 +183,6 @@ export function validateNotice(body,failure){
     if(present.has(locale)&&!filled(body.translations[locale]))failure(422,'TRANSLATION_CONTENT_REQUIRED','입력한 번역은 제목과 본문이 필요합니다.');
   }
   for(const link of body.links){
-    if(!hasHttpsHost(link.url))failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.');
     for(const locale of ['zh-Hans','ja']){
       const hasBody=present.has(locale);
       const label=link.labels[locale];

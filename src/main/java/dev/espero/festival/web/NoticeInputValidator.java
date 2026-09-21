@@ -1,7 +1,6 @@
 package dev.espero.festival.web;
 
 import dev.espero.festival.domain.NoticeCategory;
-import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -64,7 +63,7 @@ final class NoticeInputValidator {
     private static void validateLink(NoticeInput.LinkInput link, Set<String> presentLocales) {
         if (link == null
             || link.url() == null
-            || !isHttpsUri(link.url())
+            || !link.url().matches("^https://\\S+$")
             || link.labels() == null
             || !link.labels().keySet().equals(KNOWN_LOCALES)) {
             throw validationFailed();
@@ -88,15 +87,6 @@ final class NoticeInputValidator {
                     false
                 );
             }
-        }
-    }
-
-    static boolean isHttpsUri(String value) {
-        try {
-            URI uri = URI.create(value);
-            return "https".equals(uri.getScheme()) && uri.getHost() != null;
-        } catch (IllegalArgumentException exception) {
-            return false;
         }
     }
 
