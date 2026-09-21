@@ -115,6 +115,8 @@ class SecurityConfigurationTest {
                 .content(body))
             .andExpect(status().isPayloadTooLarge())
             .andExpect(header().string("Cache-Control", "no-store"))
+            .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+            .andExpect(header().string("X-Frame-Options", "DENY"))
             .andExpect(jsonPath("$.error.code").value("PAYLOAD_TOO_LARGE"))
             .andExpect(jsonPath("$.error.message").value("요청 본문은 64KiB 이하입니다."))
             .andExpect(jsonPath("$.meta.requestId").isNotEmpty());

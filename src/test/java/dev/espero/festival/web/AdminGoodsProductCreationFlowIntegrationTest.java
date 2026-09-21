@@ -361,6 +361,20 @@ class AdminGoodsProductCreationFlowIntegrationTest {
     }
 
     @Test
+    void rejectsUnknownNestedJsonFieldsWithoutProductSideEffects() throws Exception {
+        UUID mediaId = UUID.randomUUID();
+        insertUnattachedMediaWithFiles(FESTIVAL_ID, mediaId);
+        JsonNode body = singleProduct(mediaId);
+        ((tools.jackson.databind.node.ObjectNode) body.path("price")).put("unexpected", true);
+
+        postProduct(body.toString(), "unexpected-product-field")
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"));
+
+        assertNoCreatedProductState();
+    }
+
+    @Test
     void updatesOptionsDifferentiallyAndReordersStableColorsSizesAndImages() throws Exception {
         UUID firstMedia = UUID.randomUUID();
         UUID secondMedia = UUID.randomUUID();

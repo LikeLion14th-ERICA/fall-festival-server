@@ -19,6 +19,9 @@
 - 공지는 plain string과 HTTPS 링크를 사용한다. 서버가 임의 외부 URL을 fetch하지 않으므로
   metadata endpoint SSRF 테스트는 적용하지 않는다. 클라이언트는 공지 문자열을 HTML로 렌더하지
   않는지 별도 프런트 검증으로 확인한다.
+- 공지 제목·본문·링크의 길이·개수 정책은 아직 [API v2 결정 대기](../../../api-v2/DECISIONS.md)에
+  남아 있다. 원천 계약의 200/10,000 값은 목 입력 검증 제안이므로 운영 제한으로 추측해 적용하지
+  않으며, 현재는 JSON 본문 64KiB 경계만 강제한다.
 
 ## P0 자동 회귀 대상
 
@@ -28,12 +31,13 @@
 | JWT·세션 | 변조·만료·다른 서명 JWT, disabled 계정, refresh 회전·재사용·logout | `AdminTokenServiceTest`, `AdminJwtAuthenticationFilterTest`, `AdminAuthApiIntegrationTest` |
 | Cookie CSRF·CORS | login·refresh·logout의 정확한 `Origin`, 단일 `ADMIN_ALLOWED_ORIGIN` | `AdminCookieCsrfFilterTest`, `AdminCorsConfigurationTest`, `AdminAuthStartupValidatorTest` |
 | 현재 회차 리소스 경계 | notice, goods, option, media와 catalog revision의 교차 회차 접근 은닉 | 관리자 goods·media flow와 `CatalogWorkbenchIntegrationTest` |
-| 입력·미디어 | unknown/invalid input, 상품 이미지 magic bytes·decode·크기·pixel·animated WebP·경로 | `GoodsInputValidatorTest`, `GoodsImageInspectorTest`, media storage tests |
+| 입력·미디어 | API 계약의 `additionalProperties: false`와 invalid input, 상품 이미지 magic bytes·decode·크기·pixel·animated WebP·경로 | `AdminAuthApiIntegrationTest`, `AdminGoodsProductCreationFlowIntegrationTest`, `GoodsInputValidatorTest`, `GoodsImageInspectorTest`, media storage tests |
+| SQL 입력 경계 | SQL 형태의 관리자 공지 제목이 parameter binding을 거쳐 원문 그대로 저장·재조회되고 기존 공지를 바꾸지 않음 | `AdminSessionReleaseE2eTest` |
 | 요청 제한 | public/admin/login/stamp token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After` | `RateLimitTest`, release E2E HTTP-21·22 |
 | idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match` | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest` |
-| JSON 본문 경계 | `application/json` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
+| JSON 본문 경계 | `/api/v2`의 JSON `POST`·`PUT`·`PATCH`·`DELETE` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |
-| 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; 기본 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest` |
+| 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; Spring Security와 선행 rate/JSON 거부 오류도 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest`, `RateLimitTest` |
 | 오류·로그 | 오류 envelope와 startup/cleanup/API 오류 로그에 connection string·비밀값·stack trace를 넣지 않음 | `GlobalApiExceptionHandlerTest`, `CatalogSnapshotProviderTest`, `CleanupJobSafetyTest` |
 | 의존성·비밀값·이미지 | 저장소 manifest와 root runtime image의 high/critical 취약점, 저장소 비밀값 | `docker-build`의 Trivy filesystem·image scan |
 
@@ -50,7 +54,6 @@
 - [ ] runtime·catalog·account·cleanup role의 DB 최소 권한, 인터넷 비노출, DB TLS 정책을 확인했다.
 - [ ] DB와 media volume을 같은 recovery set으로 백업했고, 격리 환경 restore 결과를 기록했다.
 - [ ] `docker-build`의 Trivy filesystem·root image high/critical 결과와 대응을 release 기록에 남겼다.
-- [ ] 실제 HTTP 요청으로 SQL injection 성격의 값이 parameter binding·안전 오류로 처리되는지 확인했다.
 - [ ] 긴 query/header, slow request의 서버·proxy 제한을 실제 설정과 함께 확인했다.
 - [ ] 공지·링크를 소비하는 프런트가 raw HTML이나 `javascript:` URL을 실행하지 않는지 확인했다.
 

@@ -95,6 +95,8 @@ class RateLimitTest {
             mvc.perform(get("/api/v2/lineup").with(remote("198.51.100.10")))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().exists("Retry-After"))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("X-Frame-Options", "DENY"))
                 .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"))
                 .andExpect(jsonPath("$.error.retryable").value(true));
             // Another client and unlimited routes are unaffected.
