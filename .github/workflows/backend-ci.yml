@@ -57,7 +57,7 @@ jobs:
       - name: Build Docker image
         run: docker build --pull --build-arg VCS_REF="$GITHUB_SHA" -t fall-festival-server:ci .
       - name: Scan candidate image for High and Critical vulnerabilities
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: fall-festival-server:ci
           format: sarif
@@ -80,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Scan source, dependencies, secrets, and configuration
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scanners: vuln,secret,misconfig
