@@ -153,7 +153,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 
 | 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
 |---|---|---|---|
-| 2026-09-21 | 후보 backend E2E | 기본 후보와 `festival.release-e2e.manifest` 지정 경로가 임시 PostgreSQL에서 각각 1개 통과. `mvnw.cmd clean verify`는 601개 통과, 실패·오류 0, 기존 환경 의존 skip 9개 | 실제 출시 후보 manifest에 같은 property를 지정하고, 공지·굿즈·배포 전용 게이트를 별도로 통과시킨다. |
+| 2026-09-21 | 후보 backend E2E | 기본 후보와 `festival.release-e2e.manifest` 지정 경로가 임시 PostgreSQL에서 각각 1개 통과. 최신 `origin/main` 병합 뒤 `mvnw.cmd clean verify`는 603개 통과, 실패·오류 0, 기존 환경 의존 skip 9개 | 실제 출시 후보 manifest에 같은 property를 지정하고, 공지·굿즈·배포 전용 게이트를 별도로 통과시킨다. |
 | 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |
 | 2026-09-18 | CORS·Maven wrapper focused test | `AdminCorsConfigurationTest` 1개 통과 | 전체 suite는 통합 뒤 실행한다. |
 | 2026-09-18 | conditional response subtask | agent branch에서 Maven 261개 통과 | `282c84a`로 통합했다. |
