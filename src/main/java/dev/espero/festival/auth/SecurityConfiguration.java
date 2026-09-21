@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -71,7 +72,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST, "/api/v2/admin/sessions/refresh").permitAll()
                 .requestMatchers("/api/v2/admin/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll())
-            .addFilterBefore(adminNoStoreFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(adminNoStoreFilter, HeaderWriterFilter.class)
             .addFilterBefore(cookieCsrfFilter, UsernamePasswordAuthenticationFilter.class);
 
         AdminJwtAuthenticationFilter jwtFilter = jwtFilterProvider.getIfAvailable();

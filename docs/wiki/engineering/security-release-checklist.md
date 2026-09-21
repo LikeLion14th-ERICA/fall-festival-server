@@ -31,8 +31,9 @@
 | 입력·미디어 | unknown/invalid input, 상품 이미지 magic bytes·decode·크기·pixel·animated WebP·경로 | `GoodsInputValidatorTest`, `GoodsImageInspectorTest`, media storage tests |
 | 요청 제한 | public/admin/login/stamp token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After` | `RateLimitTest`, release E2E HTTP-21·22 |
 | idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match` | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest` |
+| JSON 본문 경계 | `application/json` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |
-| 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CSRF 오류 응답은 `Cache-Control: no-store` | `SecurityConfigurationTest` |
+| 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; 기본 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest` |
 | 오류·로그 | 오류 envelope와 startup/cleanup/API 오류 로그에 connection string·비밀값·stack trace를 넣지 않음 | `GlobalApiExceptionHandlerTest`, `CatalogSnapshotProviderTest`, `CleanupJobSafetyTest` |
 
 미디어는 UUID 기반 저장 경로와 WebP 재인코딩을 쓴다. 확장자 검사·malware scan·signed upload URL은
@@ -49,7 +50,7 @@
 - [ ] DB와 media volume을 같은 recovery set으로 백업했고, 격리 환경 restore 결과를 기록했다.
 - [ ] secret, Maven dependency, container image 취약점 scan 결과와 high/critical 대응을 기록했다.
 - [ ] 실제 HTTP 요청으로 SQL injection 성격의 값이 parameter binding·안전 오류로 처리되는지 확인했다.
-- [ ] JSON body 64 KiB, 긴 query/header, slow request의 서버·proxy 제한을 실제 설정과 함께 확인했다.
+- [ ] 긴 query/header, slow request의 서버·proxy 제한을 실제 설정과 함께 확인했다.
 - [ ] 공지·링크를 소비하는 프런트가 raw HTML이나 `javascript:` URL을 실행하지 않는지 확인했다.
 
 현재 요청 제한은 단일 인스턴스 in-memory token bucket이다. 수평 확장 또는 다른 proxy 경로를
