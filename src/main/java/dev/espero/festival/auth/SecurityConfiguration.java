@@ -29,6 +29,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    AdminNoStoreFilter adminNoStoreFilter() {
+        return new AdminNoStoreFilter();
+    }
+
+    @Bean
     UserDetailsService noFormLoginUserDetailsService() {
         return username -> {
             throw new UsernameNotFoundException("Form login is not supported");
@@ -39,6 +44,7 @@ public class SecurityConfiguration {
     SecurityFilterChain securityFilterChain(
         HttpSecurity http,
         ObjectProvider<AdminJwtAuthenticationFilter> jwtFilterProvider,
+        AdminNoStoreFilter adminNoStoreFilter,
         AdminCookieCsrfFilter cookieCsrfFilter,
         ApiSecurityErrorWriter errorWriter,
         CorsConfigurationSource corsConfigurationSource
@@ -65,6 +71,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.POST, "/api/v2/admin/sessions/refresh").permitAll()
                 .requestMatchers("/api/v2/admin/**").hasAuthority("ADMIN")
                 .anyRequest().permitAll())
+            .addFilterBefore(adminNoStoreFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(cookieCsrfFilter, UsernamePasswordAuthenticationFilter.class);
 
         AdminJwtAuthenticationFilter jwtFilter = jwtFilterProvider.getIfAvailable();

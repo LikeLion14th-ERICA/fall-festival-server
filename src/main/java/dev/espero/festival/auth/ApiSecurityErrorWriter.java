@@ -45,6 +45,7 @@ public class ApiSecurityErrorWriter {
         response.setStatus(status);
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setHeader("Cache-Control", "no-store");
         response.setHeader("X-Request-Id", meta.requestId());
         objectMapper.writeValue(response.getOutputStream(), new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody(code, message, List.of(), retryable), meta

@@ -4,6 +4,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +46,7 @@ class SecurityConfigurationTest {
     void rejectsUnauthenticatedAdminRequestWithApiEnvelope() throws Exception {
         mockMvc.perform(get("/api/v2/admin/security-probe"))
             .andExpect(status().isUnauthorized())
+            .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
             .andExpect(jsonPath("$.meta.revision").value(0))
             .andExpect(jsonPath("$.meta.requestId").isNotEmpty());
@@ -54,6 +56,7 @@ class SecurityConfigurationTest {
     void permitsAdminAuthority() throws Exception {
         mockMvc.perform(get("/api/v2/admin/security-probe").with(user("admin").authorities(() -> "ADMIN")))
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(content().string("admin"));
     }
 
@@ -61,6 +64,7 @@ class SecurityConfigurationTest {
     void rejectsInsufficientAuthorityWithApiEnvelope() throws Exception {
         mockMvc.perform(get("/api/v2/admin/security-probe").with(user("viewer").authorities(() -> "VIEWER")))
             .andExpect(status().isForbidden())
+            .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(jsonPath("$.error.code").value("FORBIDDEN"));
     }
 
