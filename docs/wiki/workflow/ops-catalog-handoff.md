@@ -163,7 +163,7 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 
 | 날짜 | 변경 또는 확인 | 결과 | 다음 행동 |
 |---|---|---|---|
-| 2026-09-21 | 후보 backend E2E | 기본 후보와 `festival.release-e2e.manifest` 지정 경로가 임시 PostgreSQL에서 각각 1개 통과. 최신 `origin/main` 병합 뒤 `mvnw.cmd clean verify`는 603개 통과, 실패·오류 0, 기존 환경 의존 skip 9개 | 실제 출시 후보 manifest에 같은 property를 지정하고, 공지·굿즈·배포 전용 게이트를 별도로 통과시킨다. |
+| 2026-09-21 | 상세 사용자 흐름 backend E2E | `frontend-mock-catalog.json` strict 흐름 1개와 `development-catalog.json` sparse 후보 1개가 각각 임시 PostgreSQL에서 통과했다. 공간·지도·핀·장소, 공연·타임테이블, 티켓·스탬프, 관리자 refresh/logout, 혼잡도 동시성 흐름을 포함한다. 최신 `origin/main` 확인 뒤 `mvnw.cmd clean verify`는 603개 통과, 실패·오류 0, 기존 환경 의존 skip 9개였다. | 실제 출시 후보에는 strict property를 지정하고, 공지·굿즈·브라우저·배포 전용 게이트를 별도로 통과시킨다. |
 | 2026-09-18 | 최신 원격 기준 확인 | `origin/main`은 `d3a3e8e`(PR #28) | PR 1 구현을 시작한다. |
 | 2026-09-18 | CORS·Maven wrapper focused test | `AdminCorsConfigurationTest` 1개 통과 | 전체 suite는 통합 뒤 실행한다. |
 | 2026-09-18 | conditional response subtask | agent branch에서 Maven 261개 통과 | `282c84a`로 통합했다. |
@@ -206,6 +206,9 @@ PR #29는 `main`에 병합됐지만 #30·#31은 stack의 중간 branch로 병합
 | 계좌: trigger·direct SQL 이력, history 변경 차단, dry-run, last-four·version 거절, restore/clear, role 차단, 민감값 로그 부재 | `OperationalAccountSettingsIntegrationTest`, `AccountSettingsCliRunnerTest` |
 | 티켓: `UNCONFIGURED`, 송금 경계 ETag 변경, 304 흐름, 계좌 수정 뒤 15초 안 반영, legacy 열 미접근 | `TicketGuideAccountFlowIntegrationTest`, `TicketGuideControllerTest`, `TicketGuideStoreIntegrationTest`, provisioning role 검증(`OperationalAccountSettingsIntegrationTest`) |
 | export/publish: 끼어든 게시·rollback 충돌 차단, semantic round-trip, legacy 차단, 최신 공연 catalog 보존 | `CatalogRevisionServiceIntegrationTest` |
+| 사용자 흐름: 공간·지도·공연·티켓·스탬프·관리자 세션·혼잡도 연계 | `ReleaseReadinessHttpE2eTest`의 HTTP-01~09. 실제 candidate의 ID를 응답에서 읽어 관계를 검증한다. |
+| 출시 후보 콘텐츠 관계 | `ReleaseReadinessHttpE2eTest`에 `festival.release-e2e.require-user-journey-content=true`를 지정한다. |
+| 브라우저·proxy·실기기 동작 | backend E2E 범위 밖이며 web 저장소와 실기기 acceptance gate에서 검증한다. |
 | 67 RPS 부하와 지표 기록 | `tools/load-test/run.ps1`의 `rate-67` 단계. 결과와 heap·GC·DB 지표는 `tools/load-test/README.md`에 있다. 로컬 결과이며 원격 용량은 확정하지 않았다. |
 
 ## 외부 의존성
