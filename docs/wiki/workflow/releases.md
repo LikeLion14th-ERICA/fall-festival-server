@@ -2,6 +2,9 @@
 
 [위키 홈](../README.md) · 읽는 때: 긴급 복구·릴리스 준비·태그 작업
 
+릴리스 후보의 staging 검증 결과와 복구·on-call 인수인계 증거는 [릴리스 증거 runbook](release-evidence-runbook.md)에
+기록한다. 필수 gate, RPO/RTO, alert 또는 담당자가 확정되지 않으면 그 기준에 따라 릴리스를 block한다.
+
 ### 2.6 Hotfix
 
 - `hotfix/*`는 현재 운영 중인 서비스의 중대한 장애, 보안 취약점, 데이터 훼손 위험을

@@ -2,6 +2,10 @@
 
 [위키 홈](../README.md) · 읽는 때: 코드·의존성·배포 변경 검증
 
+릴리스 후보의 staging evidence bundle 연결, candidate digest·OpenAPI hash·migration checksum,
+coverage·scan·PostgreSQL 17·E2E·load·recovery·browser handoff gate는 [릴리스 증거 runbook](release-evidence-runbook.md)을
+따른다. 이 문서는 아래 명령의 결과를 대체하지 않고 후보별 판정과 보호된 운영 기록 연결을 정의한다.
+
 ## 서비스 백엔드
 
 이 저장소는 `LikeLion14th-ERICA/fall-festival-server` 백엔드 저장소다.

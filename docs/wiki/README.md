@@ -36,14 +36,14 @@
 | 데이터 정리·보관 기간 enforcement | [데이터 정리](engineering/cleanup.md), [보안](engineering/security.md) | 실제 대상 추가 시 해당 schema·운영 runbook |
 | 콘텐츠·번역 게시·예약·revision | [게시](engineering/publishing.md), [운영](engineering/operations.md) | 관리자 콘텐츠 API |
 | 로컬 워크벤치로 catalog export·검증·비교·게시 | [로컬 카탈로그 워크벤치](engineering/catalog-workbench.md), [게시](engineering/publishing.md), [DB 읽기 전용 사전 점검](engineering/database-preflight.md) | role provisioning은 [계좌 운영 설정](engineering/operational-account-settings.md) |
-| 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md) | 변경 대상 runbook |
+| 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md) | 변경 대상 runbook |
 | branch·worktree·동기화·push | [작업 절차](workflow/task.md), [브랜치](workflow/branches.md) | PR 규칙 |
 | 운영·카탈로그 장기 구현 이어받기 | [운영·카탈로그 구현 인수인계](workflow/ops-catalog-handoff.md) | 현재 미완료 단계와 검증 기록 |
-| 행사 당일 콘텐츠 수정·계좌/스탬프 코드 교체·장애 롤백 | [행사 당일 운영 절차서](workflow/festival-day-runbook.md) | 계좌는 [계좌 운영 설정](engineering/operational-account-settings.md), catalog rollback은 [게시](engineering/publishing.md) |
+| 행사 당일 콘텐츠 수정·계좌/스탬프 코드 교체·장애 롤백 | [행사 당일 운영 절차서](workflow/festival-day-runbook.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md) | 계좌는 [계좌 운영 설정](engineering/operational-account-settings.md), catalog rollback은 [게시](engineering/publishing.md) |
 | commit·squash 메시지 | [커밋](workflow/commits.md) | breaking change 계약 |
 | 검증·완료 보고 | [검증](workflow/validation.md), [완료 조건](workflow/done.md) | 해당 항목만 적용 |
 | PR·리뷰·병합 | [PR](workflow/pull-requests.md), [완료 조건](workflow/done.md) | PR 템플릿 |
-| hotfix·release·tag | [릴리스](workflow/releases.md), [PR](workflow/pull-requests.md), [운영](engineering/operations.md) | 배포 runbook |
+| hotfix·release·tag | [릴리스](workflow/releases.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md), [PR](workflow/pull-requests.md), [운영](engineering/operations.md) | 배포 runbook |
 | 위키·컨텍스트 문서 | [위키 관리](MAINTENANCE.md) | 변경하는 주제 페이지 |
 
 ## 원문과 목차

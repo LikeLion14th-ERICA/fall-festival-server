@@ -2,6 +2,9 @@
 
 [위키 홈](../README.md) · 읽는 때: 캐시·배포·장애·복원·게시 전파 변경
 
+릴리스 전 staging gate와 복구 증거의 필수 항목·RPO/RTO·on-call·alert 차단 기준은 [릴리스 증거 runbook](../workflow/release-evidence-runbook.md)을
+따른다. 실제 host·credential·dump·media archive·Caddy 설정은 보호된 운영 기록에 두고 저장소에는 reference ID와 검증 결과만 남긴다.
+
 - 캐시 키에는 축제 회차, revision, locale, map version과 필터 등 응답을 바꾸는 값을
   포함한다.
 - 초기 배포는 단일 인스턴스이며 CDN을 두지 않는다. 해시 또는 version이 고정된 지도·이미지
