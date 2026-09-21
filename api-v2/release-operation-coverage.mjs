@@ -209,7 +209,7 @@ const expectedScenarioIds = [
 
 export const releaseScenarioIds = Object.freeze(expectedScenarioIds);
 export const releaseTestAnchor = 'Postgresql17MigrationReleaseTest';
-export const releaseTestAnchorFile = 'src/test/java/dev/espero/festival/preflight/Postgresql17MigrationReleaseTest.java';
+export const releaseTestAnchorFile = 'src/test/java/dev/espero/festival/persistence/Postgresql17MigrationReleaseTest.java';
 
 const testClassName = file => file.split(/[\\/]/).pop().replace(/\.java$/, '');
 
