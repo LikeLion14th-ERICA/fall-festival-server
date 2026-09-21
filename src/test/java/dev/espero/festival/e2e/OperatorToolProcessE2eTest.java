@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.espero.festival.AccountSettingsCliApplication;
 import dev.espero.festival.CatalogCliApplication;
+import dev.espero.festival.CatalogExportService;
 import dev.espero.festival.preflight.DatabasePreflightApplication;
 import java.io.File;
 import java.io.IOException;
@@ -272,8 +273,7 @@ class OperatorToolProcessE2eTest {
             new String[] {"publish", "--revision=" + legacy}
         )) {
             ProcessResult rejected = catalog(command);
-            assertFailure(rejected, "import".equals(command[0])
-                ? "LEGACY_TICKET_SCHEDULE_UNCONFIGURED" : "TicketGuide schedule must be complete.");
+            assertFailure(rejected, CatalogExportService.LEGACY_TICKET_SCHEDULE_UNCONFIGURED);
             assertThat(rejected.output()).doesNotContain(databaseUrl, POSTGRES.getPassword(), "Exception in thread");
             assertThat(currentPublishedRevision()).isEqualTo(baseline);
             assertThat(revisionState(legacy)).isEqualTo("draft");
