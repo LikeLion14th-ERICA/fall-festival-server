@@ -1,0 +1,122 @@
+name: Release validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_image:
+        description: Immutable candidate image reference (must include @sha256:)
+        required: true
+        type: string
+      candidate_commit:
+        description: Commit SHA represented by the candidate image
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate-candidate-input:
+    name: validate-release-candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      image: ${{ steps.candidate.outputs.image }}
+      commit: ${{ steps.candidate.outputs.commit }}
+    steps:
+      - id: candidate
+        env:
+          CANDIDATE_IMAGE: ${{ inputs.candidate_image }}
+          CANDIDATE_COMMIT: ${{ inputs.candidate_commit }}
+        run: |
+          if [[ ! "$CANDIDATE_IMAGE" =~ ^.+@sha256:[0-9a-f]{64}$ ]]; then
+            echo "candidate_image must be an immutable @sha256 reference" >&2
+            exit 1
+          fi
+          if [[ ! "$CANDIDATE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "candidate_commit must be a 40-character hexadecimal commit SHA" >&2
+            exit 1
+          fi
+          printf 'image=%s\n' "$CANDIDATE_IMAGE" >> "$GITHUB_OUTPUT"
+          printf 'commit=%s\n' "$CANDIDATE_COMMIT" >> "$GITHUB_OUTPUT"
+
+  api-v2-contract:
+    name: release-api-v2-contract
+    needs: validate-candidate-input
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-candidate-input.outputs.commit }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: api-v2/package-lock.json
+      - working-directory: api-v2
+        run: npm ci && npm run check
+      - name: Verify redacted release evidence guardrails
+        run: node --test tools/release-validation/validate-evidence.test.mjs
+
+  pg17-release-e2e:
+    name: release-pg17-http-and-ops-e2e
+    needs: validate-candidate-input
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-candidate-input.outputs.commit }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: pom.xml
+      - name: Run required PostgreSQL 17 migration and release HTTP/OPS tests
+        env:
+          FESTIVAL_RELEASE_POSTGRES_IMAGE: postgres:17.11-alpine
+        run: >-
+          sh ./mvnw --batch-mode --no-transfer-progress -Prelease-pg17
+          -Dtest=Postgresql17MigrationReleaseTest,ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,OperatorToolProcessE2eTest
+          test
+
+  candidate-image:
+    name: rebuild-and-scan-candidate-source
+    needs: validate-candidate-input
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate-candidate-input.outputs.commit }}
+      - name: Rebuild source used by candidate
+        run: docker build --pull -t fall-festival-server:release-source .
+      - name: Scan rebuilt source image for High and Critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: fall-festival-server:release-source
+          format: sarif
+          output: trivy-release-image.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: false
+          exit-code: '1'
+      - name: Upload rebuilt image scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-release-image-report
+          path: trivy-release-image.sarif
+          if-no-files-found: error
+
+  staging-handoff:
+    name: staging-handoff-required
+    needs: [api-v2-contract, pg17-release-e2e, candidate-image]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require protected staging runbook evidence
+        run: |
+          echo "This workflow intentionally never receives staging or production credentials."
+          echo "Run the protected staging-only procedure in tools/release-validation and attach its evidence manifest before release approval."

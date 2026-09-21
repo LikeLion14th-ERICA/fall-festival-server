@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "staging-20260922-example",
+  "environment": "staging",
+  "generatedAt": "2026-09-22T00:00:00.000Z",
+  "candidate": {
+    "commit": "0123456789abcdef0123456789abcdef01234567",
+    "imageDigest": "registry.example.invalid/espero/fall-festival-server@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "openapiSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "migrationChecksumSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "coverageSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "gates": {
+    "apiContract": "passed", "securityFilesystem": "passed", "securityImage": "passed", "codeql": "blocked", "pg17": "not-run", "httpOps": "not-run", "stagingSmoke": "not-run", "loadRate67": "not-run", "recovery": "not-run", "rollback": "not-run", "browserHandoff": "blocked"
+  },
+  "recovery": {
+    "sourceDestinationSeparated": true,
+    "destinationVerifiedEmpty": true,
+    "evidenceReference": "protected:recovery-run-pending",
+    "measuredRpoMinutes": 0,
+    "measuredRtoMinutes": 0
+  },
+  "observability": {
+    "sloReference": "protected:slo-pending",
+    "alertReceiptReference": "protected:alert-pending",
+    "onCallReference": "protected:oncall-pending"
+  },
+  "releaseDecision": "blocked"
+}
