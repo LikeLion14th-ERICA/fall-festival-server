@@ -4,9 +4,11 @@
 
 이 문서는 명령을 실행하는 절차만 다룬다. 각 CLI·API의 설계 근거는
 [게시](../engineering/publishing.md), [계좌 운영 설정](../engineering/operational-account-settings.md),
-[운영](../engineering/operations.md)을 따른다. A1 서버의 실제 접속 방법(SSH, 배포 경로)은
-[원격 개발 환경 결정](../../dev-deployment-decision.md)에 A1 실행 정보가 채워진 뒤 이 문서에 절 링크를
-추가한다.
+[운영](../engineering/operations.md)을 따른다. A1은 root `Dockerfile`의 단일 `docker run`으로
+실행하고 Caddy가 reverse proxy, Cloudflare가 edge를 맡는 것으로 확인됐다. 실제 SSH 접속,
+host port/network, Caddy upstream과 TLS 설정은 아직 확인되지 않았으므로 이 문서에 명령이나
+운영값을 추측해 적지 않는다. 해당 상태는 [원격 개발 환경 결정](../../dev-deployment-decision.md)에
+기록한다.
 
 ## 1. 콘텐츠 수정은 재시작이 있어야 반영된다
 
@@ -85,18 +87,34 @@ catalog 전체를 롤백할 필요 없이 관리자 API로 바로 고친다.
 ### 4.3 backend 자체가 응답하지 않을 때
 
 A1은 root `Dockerfile`을 단일 `docker run`으로 실행하고(compose 아님), 앞단에 Caddy reverse
-proxy, 그 앞에 Cloudflare가 있다. 정확한 `docker run` 커맨드와 `Caddyfile` 내용은 아직 공유받지
-않아 재시작·이미지 롤백의 정확한 명령은 이 절에 채우지 못했다([원격 개발 환경 결정](../../dev-deployment-decision.md)의
-"A1 확인 답변"·"여전히 확인 필요" 참고). 그 전까지 확인된 원칙만 남긴다.
+proxy, 그 앞에 Cloudflare가 있다. 정확한 `docker run` 커맨드, Caddy upstream, host port/network와
+Cloudflare TLS/proxy 설정은 아직 확인되지 않았으므로 아래 절차의 `<운영자가 확인한 값>`을 실제
+값으로 치환하기 전에는 재시작·이미지 교체를 실행하지 않는다.
 
-- 새 이미지로 교체할 때는 `-v espero-media:/var/lib/espero/media` named volume을 반드시
-  다시 붙인다. volume 없이 재생성하면 굿즈 이미지가 사라지고 DB 기록만 남아 조회가 503이 된다.
-- 컨테이너를 내리고 다시 올리는 동안 Caddy가 어떻게 반응하는지(502를 그대로 보여주는지, 재시도
-  하는지)는 `Caddyfile` 확인 후 채운다.
-- DB migration 상태가 아직 미확정이므로, 장애 복구 중이라도 원격 DB에 새 migration을 적용하지
-  않는다. Flyway는 기본적으로 시작 시 자동 적용되므로, 확정 전 backend를 재시작하면 의도치
-  않게 migration이 실행될 수 있다는 점을 인지한다 — 이 위험이 해소될 때까지는 재시작 전 DB
-  상태를 먼저 확인한다.
+1. 현재 이미지 digest/container ID와 `GET /healthz`, `GET /readyz` 결과를 기록한다. Caddy와
+   Cloudflare를 통한 공개 URL에서 같은 probe를 확인한다.
+2. **DB와 media volume을 같은 시점에 함께 백업한다.** PostgreSQL 백업과 named volume
+   `espero-media`(`/var/lib/espero/media`)의 파일 아카이브를 각각 만들되 동일한 백업 시각·artifact
+   ID를 기록한다. 한쪽만 복구하면 DB의 media 기록과 파일이 어긋난다. 실제 백업 도구·저장
+   위치·보존 기간은 A1 운영자가 정한 값만 기록한다.
+3. 새 이미지로 교체할 때는 기존에 확인한 `espero-media` volume을 반드시 다시 mount하고,
+   DB 접속 환경변수와 `FESTIVAL_ID`를 유지한다. volume 없이 컨테이너를 재생성하지 않는다.
+4. Flyway는 애플리케이션 시작 시 자동 실행될 수 있다. 현재 사전 점검 결과는 PostgreSQL
+   17.11, `public` schema, V1~V26 전부 `success`이며 현재 SQL과 checksum이 일치한다.
+   새 artifact가 추가 migration을 포함하거나 이력·checksum이 다르면 재시작하지 말고 DB
+   담당자와 먼저 검토한다. Flyway migration을 수동으로 되돌리거나 장애 복구 중 임의로
+   migrate/import/publish하지 않는다.
+5. 재기동 후 `/healthz`가 200이고 `/readyz`가 200인지, 공개 API의 `meta.revision`이 의도한
+   published snapshot인지 확인한다. 이미지가 등록된 상태라면 기존 이미지 한 건을 조회해
+   volume 보존도 확인한다.
+6. Caddy가 컨테이너 중단 중 502를 반환하는지 재시도하는지는 실제 `Caddyfile` 확인 전까지
+   단정하지 않는다. 공개 smoke가 통과하기 전에는 행사 운영을 재개했다고 보고하지 않는다.
+
+DB 복구가 필요하면 같은 백업 artifact ID의 DB와 media volume을 함께 복원하고, 복원 대상이
+운영 DB인지 별도 검증 대상인지 먼저 확인한다. 복원 뒤 Flyway history와 checksum, published
+revision, media 파일 조회를 확인한 뒤에만 트래픽을 재개한다. 현재 A1 사전 점검은 이미 데이터가
+있는 DB에서 `STOP_AND_REVIEW`로 끝났으므로 복구 중에도 새 migration이나 catalog 게시를
+자동으로 실행하지 않는다.
 
 최소한 다음은 항상 확인한다.
 
@@ -112,7 +130,7 @@ proxy, 그 앞에 Cloudflare가 있다. 정확한 `docker run` 커맨드와 `Cad
 
 | 역할 | 담당 | 권한 필요 |
 |---|---|---|
-| 혼잡도 입력 | (미정) | 관리자 계정 (현재 `PUT /admin/crowding` 자체가 미구현 — 아래 주의 참고, 구현 전까지는 운영 불가) |
+| 혼잡도 입력 | (미정) | `ADMIN` 권한 관리자 계정, access JWT |
 | 공지 게시·수정·삭제 | (미정) | 관리자 계정 |
 | 굿즈 재고(판매중/품절) 전환 | (미정) | 관리자 계정 |
 | 굿즈 상품 등록·수정 | (미정) | 관리자 계정 |
@@ -121,10 +139,27 @@ proxy, 그 앞에 Cloudflare가 있다. 정확한 `docker run` 커맨드와 `Cad
 | catalog 게시·rollback(CLI) | (미정) | DB catalog publish role |
 | A1 서버 재시작·장애 대응 1차 | (미정) | A1 접근 권한 (제원 님 또는 위임자) |
 
-> **주의:** 관리자 혼잡도 저장(`PUT /api/v2/admin/crowding`)은 관리자 인증·권한 기반이 아직
-> 없어 의도적으로 만들지 않았다(무인증으로 열면 누구나 혼잡도를 조작할 수 있는 구멍이 생김).
-> 인증 기반이 나오면 바로 이어서 구현한다. 그 전까지 혼잡도는 공개 조회만 가능하고 운영자가
-> 값을 저장할 방법이 없다 — 행사 전 역할 분담표를 확정하기 전에 먼저 이 기능부터 구현해야 한다.
+혼잡도 저장은 구현된 인증 관리자 API다. 먼저 관리자 인증 access JWT로
+`GET /api/v2/admin/crowding`을 호출해 현재 상태의 `ETag`를 얻는다. 이어서 같은 관리자
+인증으로 다음 요청을 보낸다.
+
+```http
+PUT /api/v2/admin/crowding
+Authorization: Bearer <access-jwt>
+If-Match: "<현재 상태의 64자리 hex ETag>"
+Idempotency-Key: <재시도에 재사용할 1~128자 키>
+Content-Type: application/json
+
+{"level":"CROWDED"}
+```
+
+성공과 동일 요청 재시도는 `204 No Content`다. `FULL`은 `{"level":"FULL",
+"confirmFull":true}`로만 저장한다. `If-Match` 또는 `Idempotency-Key`가 없으면 `428`, 형식이
+잘못되면 `400`, 다른 운영자가 먼저 저장해 ETag가 바뀌었으면 `409`다. `409`에서는 현재 GET을
+다시 호출해 새 ETag를 확인하고, 의도한 최신 상태를 검토한 뒤 새로운 Idempotency-Key로 다시
+요청한다. 인증 실패는 `401`이며 관리자 계정·권한을 확인한다. 성공 후 공개 `GET /api/v2/crowding`
+의 ETag와 상태가 바뀌었는지 다음 polling 또는 즉시 조회로 확인한다. 혼잡도 저장은 동적
+운영 데이터이므로 backend 재시작이나 catalog rollback이 필요 없다.
 
 ## 6. 체크리스트 요약
 
@@ -133,4 +168,7 @@ proxy, 그 앞에 Cloudflare가 있다. 정확한 `docker run` 커맨드와 `Cad
 - [ ] 스탬프 코드를 바꿨으면 환경변수 변경 후 재시작했고, 교체 시점엔 두 코드를 함께 열어뒀다.
 - [ ] 롤백은 catalog와 계좌를 구분해서 실행했다(계좌는 catalog rollback으로 되돌아가지 않는다).
 - [ ] `/healthz`·`/readyz`로 재시작 뒤 정상 기동을 확인했다.
+- [ ] 재기동·이미지 교체 전 DB와 `espero-media` volume을 같은 백업 artifact ID로 함께 보관했다.
+- [ ] 복구 시 Flyway V1~V26 history/checksum, published revision, media 이미지 조회를 확인했다.
+- [ ] 혼잡도 저장은 관리자 JWT, 최신 `If-Match`, `Idempotency-Key`를 사용했고 204 및 공개 조회 반영을 확인했다.
 - [ ] 이 문서의 역할 분담표가 채워져 있다.
