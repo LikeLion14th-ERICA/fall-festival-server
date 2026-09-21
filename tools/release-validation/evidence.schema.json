@@ -13,10 +13,14 @@
     "candidate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["commit", "imageDigest", "openapiSha256", "migrationChecksumSha256", "coverageSha256"],
+      "required": ["commit", "imageDigest", "ociRevision", "provenanceReference", "scannedImageDigest", "imageScanReference", "openapiSha256", "migrationChecksumSha256", "coverageSha256"],
       "properties": {
         "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-        "imageDigest": { "type": "string", "pattern": "^.+@sha256:[0-9a-f]{64}$" },
+        "imageDigest": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[0-9a-f]{64}$" },
+        "ociRevision": { "type": "string", "pattern": "^[0-9a-f]{40}$", "$comment": "validate-evidence.mjs requires equality with candidate.commit." },
+        "provenanceReference": { "type": "string", "pattern": "^protected:[A-Za-z0-9][A-Za-z0-9._/-]{2,255}$" },
+        "scannedImageDigest": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[0-9a-f]{64}$", "$comment": "validate-evidence.mjs requires equality with candidate.imageDigest." },
+        "imageScanReference": { "type": "string", "pattern": "^protected:[A-Za-z0-9][A-Za-z0-9._/-]{2,255}$" },
         "openapiSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "migrationChecksumSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "coverageSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
@@ -25,8 +29,9 @@
     "gates": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["apiContract", "securityFilesystem", "securityImage", "codeql", "pg17", "httpOps", "stagingSmoke", "loadRate67", "recovery", "rollback", "browserHandoff"],
+      "required": ["candidateProvenance", "apiContract", "securityFilesystem", "securityImage", "codeql", "pg17", "httpOps", "stagingSmoke", "loadRate67", "recovery", "rollback", "browserHandoff"],
       "properties": {
+        "candidateProvenance": { "$ref": "#/$defs/gate" },
         "apiContract": { "$ref": "#/$defs/gate" }, "securityFilesystem": { "$ref": "#/$defs/gate" },
         "securityImage": { "$ref": "#/$defs/gate" }, "codeql": { "$ref": "#/$defs/gate" },
         "pg17": { "$ref": "#/$defs/gate" }, "httpOps": { "$ref": "#/$defs/gate" },

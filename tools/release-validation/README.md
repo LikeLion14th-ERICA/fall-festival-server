@@ -7,8 +7,25 @@ backend only; the `test/` PWA/Web Push project remains outside this procedure.
 
 ## Candidate identity
 
-Use an immutable container reference and the commit that produced it. Before a
-staging run, generate a local candidate record from the checked-out candidate:
+Use an immutable container reference and the commit that produced it. Build and
+publish the candidate with the root Dockerfile's `--build-arg VCS_REF=<full-commit-sha>`;
+backend CI supplies its checked-out GitHub SHA. A build without that value cannot
+pass the release provenance gate.
+
+The release workflow pulls the exact input digest, checks its
+`org.opencontainers.image.revision` label against `candidate_commit`, and scans
+that same digest. It runs the verifier from the reviewed workflow revision, not
+the candidate checkout. The candidate-image job uses the protected `staging`
+environment. Before dispatch, the infrastructure lead must configure its protection
+rules and approved runner registry access; private registries require read-only,
+short-lived authentication before the pull. The default hosted runner has no
+preconfigured private registry credentials. Missing access fails the job; this
+repository supplies no registry host, credentials, or application/DB secrets.
+
+An OCI label is self-declared, not cryptographic build attestation. Keep the build
+record linking commit to pushed digest and the digest-specific scan report in the
+protected operations record. Before a staging run, generate a local candidate
+record from the checked-out candidate:
 
 ```powershell
 node tools/release-validation/build-candidate-manifest.mjs `
@@ -20,7 +37,14 @@ node tools/release-validation/build-candidate-manifest.mjs `
 
 The command hashes the current OpenAPI, ordered Flyway migrations, coverage
 matrix, and optional candidate catalog fixture. It does not contact a registry,
-database, or staging environment.
+database, or staging environment. Keep this candidate manifest local; do not
+upload it as a CI artifact. For a protected Docker inspect export, check the label
+without printing the full inspection (which can include private environment data):
+
+```powershell
+node tools/release-validation/validate-image-provenance.mjs <docker-inspect.json> <40-character-commit-sha>
+node --test tools/release-validation/validate-image-provenance.test.mjs tools/release-validation/validate-evidence.test.mjs
+```
 
 ## Protected staging sequence
 
@@ -69,6 +93,13 @@ An `approved` evidence file requires every gate to pass, separate/empty restore
 targets, measured and approved RPO/RTO, and SLO, alert receipt, and on-call
 references. Without those inputs the correct decision is `blocked`, not approval.
 The validator rejects credential-like keys and database connection strings.
+
+Candidate evidence requires `ociRevision` equal to `commit`,
+`scannedImageDigest` equal to `imageDigest`, and `protected:` references in
+`provenanceReference` and `imageScanReference`. `gates.candidateProvenance` and
+`gates.securityImage` must both pass for approval. The validator checks this
+binding and reference syntax; the release reviewer must verify the referenced
+build/scan results. A reference alone does not prove provenance or scan success.
 
 Validate the separately redacted recovery plan before any capture or restore:
 

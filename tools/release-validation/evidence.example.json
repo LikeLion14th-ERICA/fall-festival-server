@@ -6,12 +6,16 @@
   "candidate": {
     "commit": "0123456789abcdef0123456789abcdef01234567",
     "imageDigest": "registry.example.invalid/espero/fall-festival-server@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "ociRevision": "0123456789abcdef0123456789abcdef01234567",
+    "provenanceReference": "protected:candidate-build-pending",
+    "scannedImageDigest": "registry.example.invalid/espero/fall-festival-server@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "imageScanReference": "protected:candidate-scan-pending",
     "openapiSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     "migrationChecksumSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     "coverageSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
   },
   "gates": {
-    "apiContract": "passed", "securityFilesystem": "passed", "securityImage": "passed", "codeql": "blocked", "pg17": "not-run", "httpOps": "not-run", "stagingSmoke": "not-run", "loadRate67": "not-run", "recovery": "not-run", "rollback": "not-run", "browserHandoff": "blocked"
+    "candidateProvenance": "not-run", "apiContract": "passed", "securityFilesystem": "passed", "securityImage": "not-run", "codeql": "blocked", "pg17": "not-run", "httpOps": "not-run", "stagingSmoke": "not-run", "loadRate67": "not-run", "recovery": "not-run", "rollback": "not-run", "browserHandoff": "blocked"
   },
   "recovery": {
     "sourceDestinationSeparated": true,

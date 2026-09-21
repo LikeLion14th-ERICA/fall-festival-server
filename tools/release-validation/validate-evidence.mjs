@@ -4,10 +4,11 @@ import { readFile } from "node:fs/promises";
 
 const digestPattern = /^[0-9a-f]{64}$/;
 const commitPattern = /^[0-9a-f]{40}$/;
-const imagePattern = /^.+@sha256:[0-9a-f]{64}$/;
+const imagePattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[0-9a-f]{64}$/;
+const protectedReferencePattern = /^protected:[A-Za-z0-9][A-Za-z0-9._\/-]{2,255}$/;
 const statusValues = new Set(["passed", "failed", "blocked", "not-run"]);
 const requiredGates = [
-  "apiContract", "securityFilesystem", "securityImage", "codeql", "pg17", "httpOps",
+  "candidateProvenance", "apiContract", "securityFilesystem", "securityImage", "codeql", "pg17", "httpOps",
   "stagingSmoke", "loadRate67", "recovery", "rollback", "browserHandoff"
 ];
 const forbiddenKey = /(password|secret|token|authorization|cookie|jdbc|databaseUrl|connectionString)/i;
@@ -55,6 +56,12 @@ function validate(evidence) {
   } else {
     string(candidate.commit, errors, "candidate.commit", commitPattern);
     string(candidate.imageDigest, errors, "candidate.imageDigest", imagePattern);
+    string(candidate.ociRevision, errors, "candidate.ociRevision", commitPattern);
+    if (candidate.ociRevision !== candidate.commit) fail(errors, "candidate.ociRevision must equal candidate.commit");
+    string(candidate.provenanceReference, errors, "candidate.provenanceReference", protectedReferencePattern);
+    string(candidate.scannedImageDigest, errors, "candidate.scannedImageDigest", imagePattern);
+    if (candidate.scannedImageDigest !== candidate.imageDigest) fail(errors, "candidate.scannedImageDigest must equal candidate.imageDigest");
+    string(candidate.imageScanReference, errors, "candidate.imageScanReference", protectedReferencePattern);
     string(candidate.openapiSha256, errors, "candidate.openapiSha256", digestPattern);
     string(candidate.migrationChecksumSha256, errors, "candidate.migrationChecksumSha256", digestPattern);
     string(candidate.coverageSha256, errors, "candidate.coverageSha256", digestPattern);

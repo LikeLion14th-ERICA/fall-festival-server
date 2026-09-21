@@ -46,6 +46,9 @@ WORKDIR /app
 COPY --from=build --chown=app:app \
     /workspace/target/fall-festival-server-*.jar app.jar
 
+ARG VCS_REF
+LABEL org.opencontainers.image.revision=$VCS_REF
+
 # Goods images are stored here. Mount a named volume at this path so the files
 # survive the container being recreated; a new named volume copies this
 # directory's ownership. The fixed UID/GID 10001 lets a host directory be
