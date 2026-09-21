@@ -8,9 +8,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -35,6 +38,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "festival.admin-auth.bootstrap-username=auth-e2e-admin",
         "festival.admin-auth.bootstrap-password=auth-e2e-password",
         "spring.flyway.enabled=false",
+        "festival.cleanup.schedule-enabled=false",
+        "festival.cleanup.dry-run=true",
+        "festival.cleanup.datasource.url=",
+        "festival.cleanup.datasource.username=",
+        "festival.cleanup.datasource.password=",
+        "festival.cleanup.datasource.role=",
         "spring.autoconfigure.exclude="
             + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
             + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
@@ -48,6 +57,7 @@ class AdminSessionReleaseE2eTest {
 
     private static final String ORIGIN = "https://admin.auth-e2e.test";
     private static final String COOKIE = "__Host-festival-admin-refresh";
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -71,6 +81,7 @@ class AdminSessionReleaseE2eTest {
     private final HttpClient client = HttpClient.newBuilder().build();
 
     @Test
+    @Timeout(value = 60, unit = TimeUnit.SECONDS)
     void userSessionLifecycleRotatesAndRevokesRefreshCredentials() throws Exception {
         HttpResponse<String> anonymous = send(get("/api/v2/admin/me").build());
         assertError(anonymous, 401, "UNAUTHORIZED");
@@ -122,6 +133,7 @@ class AdminSessionReleaseE2eTest {
     }
 
     @Test
+    @Timeout(value = 60, unit = TimeUnit.SECONDS)
     void sessionBoundaryRejectsBadOriginCredentialsTokensAndMalformedBodies() throws Exception {
         HttpResponse<String> noOrigin = send(post("/api/v2/admin/sessions")
             .header("Content-Type", "application/json")
@@ -154,16 +166,21 @@ class AdminSessionReleaseE2eTest {
     }
 
     private HttpRequest.Builder get(String path) {
-        return HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).GET();
+        return request(path).GET();
     }
 
     private HttpRequest.Builder post(String path) {
-        return HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).POST(
+        return request(path).POST(
             HttpRequest.BodyPublishers.noBody());
     }
 
     private HttpRequest.Builder delete(String path) {
-        return HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path)).DELETE();
+        return request(path).DELETE();
+    }
+
+    private HttpRequest.Builder request(String path) {
+        return HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path))
+            .timeout(REQUEST_TIMEOUT);
     }
 
     private HttpResponse<String> send(HttpRequest request) throws Exception {

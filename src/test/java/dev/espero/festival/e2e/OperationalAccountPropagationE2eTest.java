@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -27,6 +28,7 @@ import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,6 +56,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf",
         "server.address=127.0.0.1",
         "spring.flyway.enabled=false",
+        "festival.cleanup.schedule-enabled=false",
+        "festival.cleanup.dry-run=true",
+        "festival.cleanup.datasource.url=",
+        "festival.cleanup.datasource.username=",
+        "festival.cleanup.datasource.password=",
+        "festival.cleanup.datasource.role=",
         "spring.autoconfigure.exclude="
             + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
             + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
@@ -63,11 +71,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles("db")
 @Import(OperationalAccountPropagationE2eTest.ClockConfiguration.class)
 @Testcontainers
+@Timeout(value = 90, unit = TimeUnit.SECONDS)
 class OperationalAccountPropagationE2eTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
     private static final OffsetDateTime IN_WINDOW = OffsetDateTime.parse("2026-09-29T12:00:00+09:00");
     private static final String ACCOUNT_NUMBER = "110-0000-9876";
+    private static final Duration HTTP_REQUEST_TIMEOUT = Duration.ofSeconds(10);
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
 
@@ -124,15 +134,7 @@ class OperationalAccountPropagationE2eTest {
         assertThat(nullableJsonValue(initial.body(), "$.data.paymentSettingsVersion")).isNull();
         String initialEtag = strongEtag(initial);
 
-        Path input = tempDirectory.resolve("ticket-account.json");
-        Files.writeString(input, """
-            {"bankName":"Test Bank","accountNumber":"110-0000-9876","accountHolder":"Test Holder","transferLinkUrl":null}
-            """, StandardCharsets.UTF_8);
-        ProcessResult set = accountCli(
-            "set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET", "--expected-version=0",
-            "--input-file=" + input, "--last-four=9876", "--confirm",
-            "--actor=account-propagation-e2e", "--reason=release-verification", "--evidence-id=OPS-E2E-PROP-1"
-        );
+        ProcessResult set = configureTicketAccount("OPS-E2E-PROP-1");
         assertSuccess(set);
         assertThat(set.output()).contains("mode=APPLIED", "state=CONFIGURED", "resultVersion=1", "accountLastFour=9876")
             .doesNotContain(ACCOUNT_NUMBER, "Test Bank", "Test Holder", POSTGRES.getPassword(), POSTGRES.getJdbcUrl());
@@ -180,6 +182,60 @@ class OperationalAccountPropagationE2eTest {
         assertThat(ticketGuide(clearedEtag).statusCode()).isEqualTo(304);
     }
 
+    @Test
+    void transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds() throws Exception {
+        assertSuccess(configureTicketAccount("OPS-E2E-TICKET-BOUNDARY"));
+
+        clock.set(OffsetDateTime.parse("2026-09-29T09:59:59+09:00").toInstant());
+        HttpResponse<String> beforeOpen = ticketGuide();
+        assertTicketExposure(beforeOpen, "DAILY_CLOSED", false);
+        String beforeOpenEtag = strongEtag(beforeOpen);
+
+        clock.set(OffsetDateTime.parse("2026-09-29T10:00:00+09:00").toInstant());
+        HttpResponse<String> opened = ticketGuide();
+        assertTicketExposure(opened, "TRANSFER_OPEN", true);
+        String openEtag = strongEtag(opened);
+        assertThat(openEtag).isNotEqualTo(beforeOpenEtag);
+        assertThat(ticketGuide(beforeOpenEtag).statusCode()).isEqualTo(200);
+        assertThat(ticketGuide(openEtag).statusCode()).isEqualTo(304);
+
+        clock.set(OffsetDateTime.parse("2026-09-29T17:59:59+09:00").toInstant());
+        HttpResponse<String> beforeClose = ticketGuide();
+        assertTicketExposure(beforeClose, "TRANSFER_OPEN", true);
+        assertThat(strongEtag(beforeClose)).isEqualTo(openEtag);
+
+        clock.set(OffsetDateTime.parse("2026-09-29T18:00:00+09:00").toInstant());
+        HttpResponse<String> closed = ticketGuide();
+        assertTicketExposure(closed, "DAILY_CLOSED", false);
+        String closedEtag = strongEtag(closed);
+        assertThat(closedEtag).isNotEqualTo(openEtag);
+        assertThat(ticketGuide(openEtag).statusCode()).isEqualTo(200);
+        assertThat(ticketGuide(closedEtag).statusCode()).isEqualTo(304);
+    }
+
+    private ProcessResult configureTicketAccount(String evidenceId) throws Exception {
+        Path input = tempDirectory.resolve("ticket-account.json");
+        Files.writeString(input, """
+            {"bankName":"Test Bank","accountNumber":"110-0000-9876","accountHolder":"Test Holder","transferLinkUrl":null}
+            """, StandardCharsets.UTF_8);
+        return accountCli(
+            "set", "--festival-id=" + FESTIVAL_ID, "--purpose=TICKET", "--expected-version=0",
+            "--input-file=" + input, "--last-four=9876", "--confirm",
+            "--actor=account-propagation-e2e", "--reason=release-verification", "--evidence-id=" + evidenceId
+        );
+    }
+
+    private void assertTicketExposure(HttpResponse<String> response, String status, boolean exposesAccount) {
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(jsonString(response.body(), "$.data.status")).isEqualTo(status);
+        assertThat(jsonNumber(response.body(), "$.data.paymentSettingsVersion").longValue()).isEqualTo(1L);
+        if (exposesAccount) {
+            assertThat(jsonString(response.body(), "$.data.account.accountNumber")).isEqualTo(ACCOUNT_NUMBER);
+        } else {
+            assertThat(nullableJsonValue(response.body(), "$.data.account")).isNull();
+        }
+    }
+
     private void publishTicketFixture() throws Exception {
         String manifest = Files.readString(Path.of("dev", "catalog", "development-catalog.json"))
             .replace("\"unitPriceAmount\": null", "\"unitPriceAmount\": 5000")
@@ -209,11 +265,14 @@ class OperationalAccountPropagationE2eTest {
 
     private HttpResponse<String> ticketGuide(String etag) throws Exception {
         HttpRequest.Builder request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v2/ticket-guide"))
+            .timeout(HTTP_REQUEST_TIMEOUT)
             .GET();
         if (etag != null) {
             request.header("If-None-Match", etag);
         }
-        return HttpClient.newHttpClient().send(request.build(), HttpResponse.BodyHandlers.ofString());
+        try (HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build()) {
+            return client.send(request.build(), HttpResponse.BodyHandlers.ofString());
+        }
     }
 
     private ProcessResult accountCli(String... arguments) throws Exception {
@@ -238,7 +297,9 @@ class OperationalAccountPropagationE2eTest {
         environment.put("SPRING_DATASOURCE_HIKARI_JDBC_URL", POSTGRES.getJdbcUrl());
         environment.put("SPRING_DATASOURCE_HIKARI_USERNAME", POSTGRES.getUsername());
         environment.put("SPRING_DATASOURCE_HIKARI_PASSWORD", POSTGRES.getPassword());
-        environment.put("SPRING_FLYWAY_ENABLED", "true");
+        environment.put("SPRING_CONFIG_LOCATION", "classpath:/application.yml");
+        environment.put("SPRING_CONFIG_IMPORT", "");
+        environment.put("SPRING_FLYWAY_ENABLED", "false");
         environment.put("FESTIVAL_ID", FESTIVAL_ID.toString());
         Process process = builder.start();
         FutureTask<String> outputTask = new FutureTask<>(

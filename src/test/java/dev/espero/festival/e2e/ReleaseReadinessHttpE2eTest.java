@@ -6,6 +6,9 @@ import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.espero.festival.CatalogCliApplication;
 import dev.espero.festival.CatalogCliRunner;
+import dev.espero.festival.cleanup.CleanupDataSourceProvider;
+import dev.espero.festival.cleanup.CleanupProperties;
+import dev.espero.festival.cleanup.CleanupScheduler;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -21,6 +24,7 @@ import java.sql.ResultSet;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -30,9 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.WebApplicationType;
@@ -41,6 +48,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -71,6 +79,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "festival.admin-auth.bootstrap-username=release-e2e-admin",
         "festival.admin-auth.bootstrap-password=release-e2e-password",
         "spring.flyway.enabled=false",
+        "festival.cleanup.schedule-enabled=false",
+        "festival.cleanup.dry-run=true",
+        "festival.cleanup.datasource.url=",
+        "festival.cleanup.datasource.username=",
+        "festival.cleanup.datasource.password=",
+        "festival.cleanup.datasource.role=",
         "spring.autoconfigure.exclude="
             + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
             + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
@@ -80,6 +94,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles("db")
 @Import(ReleaseReadinessHttpE2eTest.ClockConfiguration.class)
 @Testcontainers
+@Timeout(120)
 class ReleaseReadinessHttpE2eTest {
 
     static final String CANDIDATE_MANIFEST_PROPERTY = "festival.release-e2e.manifest";
@@ -88,6 +103,7 @@ class ReleaseReadinessHttpE2eTest {
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
     private static final String ADMIN_ORIGIN = "https://admin.e2e.test";
     private static final String REFRESH_COOKIE_NAME = "__Host-festival-admin-refresh";
+    private static final Duration HTTP_REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private static final Object PREPARATION_LOCK = new Object();
 
     @Container
@@ -116,8 +132,28 @@ class ReleaseReadinessHttpE2eTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    private final HttpClient client = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(5))
+        .build();
+
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private CleanupProperties cleanupProperties;
+
+    @Autowired
+    private CleanupDataSourceProvider cleanupDataSourceProvider;
+
+    @Test
+    void releaseHarnessDisablesInheritedCleanupConfiguration() {
+        assertThat(cleanupProperties.hasDedicatedDataSourceAndRole()).isFalse();
+        assertThat(cleanupDataSourceProvider.hasDedicatedDataSourceAndRole()).isFalse();
+        assertThat(applicationContext.getBeansOfType(CleanupScheduler.class)).isEmpty();
+    }
 
     @Test
     void candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys() throws Exception {
@@ -159,6 +195,58 @@ class ReleaseReadinessHttpE2eTest {
         assertThat(duplicateLocale.statusCode()).isEqualTo(400);
         assertThat(jsonString(duplicateLocale.body(), "$.error.code")).isEqualTo("INVALID_QUERY");
         assertCandidateMeta(duplicateLocale.body(), candidate);
+    }
+
+    @Test
+    void publicInputFailuresStaySafeAndDoNotBlockAnonymousCatalogNavigation() throws Exception {
+        PreparedCandidate candidate = prepared();
+        clock.set(candidate.verificationInstant());
+
+        for (ExpectedError expected : List.of(
+            new ExpectedError("/api/v2/lineup?date=not-a-date", 400, "INVALID_QUERY"),
+            new ExpectedError("/api/v2/lineup?date=2099-01-01", 400, "INVALID_DATE"),
+            new ExpectedError("/api/v2/lineup?category=UNKNOWN", 400, "INVALID_QUERY"),
+            new ExpectedError("/api/v2/maps?mapVersion=unexpected", 400, "INVALID_QUERY"),
+            new ExpectedError("/api/v2/maps/missing-release-map", 404, "NOT_FOUND"),
+            new ExpectedError("/api/v2/maps/missing-release-map/pins?mapVersion=1", 404, "NOT_FOUND"),
+            new ExpectedError("/api/v2/spaces/missing-release-space", 404, "NOT_FOUND"),
+            new ExpectedError("/api/v2/places/missing-release-place", 404, "NOT_FOUND"),
+            new ExpectedError("/api/v2/artists/missing-release-artist", 404, "NOT_FOUND"),
+            new ExpectedError("/api/v2/performances/missing-release-performance", 404, "NOT_FOUND")
+        )) {
+            HttpResponse<String> response = send(HttpRequest.newBuilder(uri(expected.path())).GET().build());
+            assertThat(response.statusCode()).as(expected.path()).isEqualTo(expected.status());
+            assertThat(jsonString(response.body(), "$.error.code")).isEqualTo(expected.code());
+            assertThat(jsonValue(response.body(), "$.error.retryable")).isEqualTo(Boolean.FALSE);
+            assertCandidateMeta(response.body(), candidate);
+        }
+
+        HttpResponse<String> publicRouteWithMalformedAdminToken = send(HttpRequest.newBuilder(uri("/api/v2/config"))
+            .header("Authorization", "Bearer malformed-admin-token")
+            .GET()
+            .build());
+        assertThat(publicRouteWithMalformedAdminToken.statusCode()).isEqualTo(200);
+        assertCandidateMeta(publicRouteWithMalformedAdminToken.body(), candidate);
+
+        HttpResponse<String> recoveredNavigation = candidateResponse("/api/v2/config", candidate);
+        assertThat(jsonString(recoveredNavigation.body(), "$.data.festival.id")).isEqualTo(FESTIVAL_ID.toString());
+    }
+
+    @Test
+    void defaultDateAndLineupStayAlignedBeforeAndAfterTheFestivalCalendar() throws Exception {
+        PreparedCandidate candidate = prepared();
+        HttpResponse<String> initial = candidateResponse("/api/v2/config", candidate);
+        List<String> dates = jsonStringList(initial.body(), "$.data.festival.dates[*]");
+        assertThat(dates).isNotEmpty();
+        LocalDate first = LocalDate.parse(dates.getFirst());
+        LocalDate last = LocalDate.parse(dates.getLast());
+        ZoneId festivalZone = ZoneId.of("Asia/Seoul");
+
+        clock.set(first.atStartOfDay(festivalZone).minusSeconds(1).toInstant());
+        assertDefaultDateAndLineup(candidate, first.toString());
+
+        clock.set(last.plusDays(1).atStartOfDay(festivalZone).toInstant());
+        assertDefaultDateAndLineup(candidate, last.toString());
     }
 
     @Test
@@ -803,6 +891,13 @@ class ReleaseReadinessHttpE2eTest {
         return response;
     }
 
+    private void assertDefaultDateAndLineup(PreparedCandidate candidate, String expectedDate) throws Exception {
+        HttpResponse<String> config = candidateResponse("/api/v2/config", candidate);
+        assertThat(jsonString(config.body(), "$.data.festival.defaultDate")).isEqualTo(expectedDate);
+        HttpResponse<String> lineup = candidateResponse("/api/v2/lineup", candidate);
+        assertThat(jsonString(lineup.body(), "$.data.date")).isEqualTo(expectedDate);
+    }
+
     private HttpRequest adminCrowdingUpdate(
         String accessToken,
         String etag,
@@ -951,8 +1046,11 @@ class ReleaseReadinessHttpE2eTest {
     }
 
     private HttpResponse<String> send(HttpRequest request) throws Exception {
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            return client.send(request, HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        try {
+            return response.get(HTTP_REQUEST_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+        } finally {
+            response.cancel(true);
         }
     }
 
@@ -1152,6 +1250,8 @@ class ReleaseReadinessHttpE2eTest {
             return "AdminSession[accessToken=[REDACTED], refreshCookie=[REDACTED]]";
         }
     }
+
+    private record ExpectedError(String path, int status, String code) {}
 
     private static ConfigurableApplicationContext startCatalogCli(String... arguments) {
         String[] options = new String[] {

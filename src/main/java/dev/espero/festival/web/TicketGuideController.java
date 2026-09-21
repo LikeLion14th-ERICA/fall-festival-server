@@ -121,7 +121,7 @@ public class TicketGuideController {
             status = TicketGuideResponse.Status.BEFORE_FESTIVAL;
         } else if (today.isAfter(guide.festivalEndDate())) {
             status = TicketGuideResponse.Status.FESTIVAL_ENDED;
-        } else if (!now.isBefore(guide.dailyTransferCloseTime())) {
+        } else if (now.isBefore(guide.dailyTransferOpenTime()) || !now.isBefore(guide.dailyTransferCloseTime())) {
             status = TicketGuideResponse.Status.DAILY_CLOSED;
         } else {
             status = TicketGuideResponse.Status.TRANSFER_OPEN;

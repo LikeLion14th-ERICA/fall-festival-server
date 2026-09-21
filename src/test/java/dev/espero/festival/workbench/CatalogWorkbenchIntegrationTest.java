@@ -39,7 +39,7 @@ import tools.jackson.databind.node.ObjectNode;
  * export and publish roles, and drives it over HTTP the way the browser UI
  * does.
  */
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
 class CatalogWorkbenchIntegrationTest {
 
     private static final String FESTIVAL_ID = "ec00912b-763f-4f8f-8f57-4bdfc389ccbf";

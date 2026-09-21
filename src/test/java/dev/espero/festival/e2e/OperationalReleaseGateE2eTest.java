@@ -22,12 +22,13 @@ import java.util.concurrent.TimeUnit;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /** Release gates for read-only operational roles in real child JVMs. */
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
 class OperationalReleaseGateE2eTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
@@ -38,6 +39,9 @@ class OperationalReleaseGateE2eTest {
 
     private String databaseUrl;
     private String databaseName;
+
+    @TempDir
+    Path processDirectory;
 
     @BeforeEach
     void migrateFreshDatabase() throws SQLException {
@@ -132,7 +136,9 @@ class OperationalReleaseGateE2eTest {
                 + File.pathSeparator + Path.of(Class.forName("org.postgresql.Driver").getProtectionDomain()
                     .getCodeSource().getLocation().toURI()),
             DatabasePreflightApplication.class.getName());
-        ProcessBuilder builder = new ProcessBuilder(command).redirectErrorStream(true);
+        ProcessBuilder builder = new ProcessBuilder(command)
+            .directory(processDirectory.toFile())
+            .redirectErrorStream(true);
         Map<String, String> environment = builder.environment();
         Map<String, String> inherited = new HashMap<>(environment);
         environment.clear();
@@ -153,7 +159,9 @@ class OperationalReleaseGateE2eTest {
             "-cp", System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")),
             AccountSettingsCliApplication.class.getName()));
         command.addAll(List.of(arguments));
-        ProcessBuilder builder = new ProcessBuilder(command).redirectErrorStream(true);
+        ProcessBuilder builder = new ProcessBuilder(command)
+            .directory(processDirectory.toFile())
+            .redirectErrorStream(true);
         Map<String, String> environment = builder.environment();
         Map<String, String> inherited = new HashMap<>(environment);
         environment.clear();
@@ -161,7 +169,10 @@ class OperationalReleaseGateE2eTest {
         environment.put("SPRING_DATASOURCE_URL", databaseUrl);
         environment.put("SPRING_DATASOURCE_USERNAME", role);
         environment.put("SPRING_DATASOURCE_PASSWORD", READ_ONLY_PASSWORD);
-        environment.put("SPRING_FLYWAY_ENABLED", "true");
+        // Ignore machine-local application-db files that could replace this test datasource.
+        environment.put("SPRING_CONFIG_LOCATION", "classpath:/application.yml");
+        environment.put("SPRING_CONFIG_IMPORT", "");
+        environment.put("SPRING_FLYWAY_ENABLED", "false");
         environment.put("FESTIVAL_ID", FESTIVAL_ID.toString());
         environment.put("LOGGING_LEVEL_ROOT", "OFF");
         return runProcess(builder);

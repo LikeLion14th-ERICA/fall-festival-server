@@ -40,6 +40,10 @@ E2E는 응답에서 ID를 읽어 다음 흐름을 HTTP로 검사한다.
 - 실행 중인 server에서 별도 계좌 CLI set·clear의 ticket guide 반영과 transfer close 계좌 비노출
 - 실제 동시 혼잡도 PUT의 단일 변경·감사·idempotency 재사용 거절
 - 게시 A/B, 제어된 server restart, expected-current rollback 뒤 새 revision A 복원과 동적 상태 보존
+- 공개 입력 오류 뒤의 config 복구와 malformed admin bearer가 공개 경로를 막지 않는지
+- 첫 FestivalDay 전·마지막 FestivalDay 후 config와 lineup의 같은 기본 날짜 선택
+- 선택 회차에 게시본이 없는 deploy의 health/readiness·`CATALOG_NOT_READY` 경계와 공개·login rate limit의 client 분리·refill 회복
+- 별도 관리자 session server에서 누락 Origin·malformed JSON·token 없는 logout의 안전한 거절
 
 빈 목록과 `UNCONFIGURED` 티켓은 non-strict 후보에서 현재 계약상 유효한 표현으로 다룬다.
 strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀·AREA 핀·공연·타임테이블 관계를
@@ -51,7 +55,7 @@ strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀�
 navigation/back 상태, Secure·SameSite cookie, 관리자 proxy, 모바일 네트워크 복귀와 polling은
 web 저장소와 실기기 acceptance gate에서 확인한다.
 
-현재 release E2E 시나리오는 HTTP-01~17과 OPS-01~12, 총 **29개**다. 이 수는 관련 요청을
+현재 release E2E 시나리오는 HTTP-01~22와 OPS-01~17, 총 **39개**다. 이 수는 관련 요청을
 한 lifecycle 안에 묶는 JUnit method 수와 다르며, 각 시나리오의 상세 매핑은
 [검증 명령](validation.md#릴리스-후보-backend-e2e)에 둔다.
 
@@ -73,6 +77,13 @@ web 저장소와 실기기 acceptance gate에서 확인한다.
 - 추가 process 경계는 손상된 draft publish 뒤 정상 replacement 복구, Catalog·계좌 CLI의
   read-only role 거절, 계좌 입력·expected-version 무결성, standalone preflight의 설정 오류
   redaction, hostile logging 환경의 JDBC URL·비밀번호·stack trace 비노출까지 확인한다.
+- Catalog CLI의 마지막 audit insert를 PostgreSQL trigger로 실패시키면 import·publish·rollback의
+  draft·복제 행·published pointer·audit이 각각 같은 transaction에서 rollback되고 재시도만
+  성공하는지 확인한다. 두 real child JVM의 publish/publish·publish/rollback도 festival 행 잠금에서
+  실제로 대기한 뒤 승자 하나만 state·audit을 남기는지 확인한다.
+- `OperationalReleaseGateE2eTest`는 별도 SELECT-only role로 preflight를 실행해 Flyway history를
+  바꾸지 않는지, 같은 role의 Account CLI clear·restore가 current setting·version·history를
+  바꾸지 못하는지 확인한다.
 
 이 E2E는 test classpath의 main entry point를 실행한다. 배포 JAR의 `PropertiesLauncher` 명령은
 package 뒤 운영 runbook대로 별도로 실행한다. 단, 이 검증도 원격 DB, SSH tunnel, 실제 계좌 또는
@@ -81,8 +92,8 @@ package 뒤 운영 runbook대로 별도로 실행한다. 단, 이 검증도 원�
 ## E2E 재개·출시 후보 확인
 
 1. Docker가 실행 중인지 확인하고, 원격 DB에는 연결하지 않는다.
-2. HTTP release E2E는 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest test"`를 실행한다.
-3. 운영자·개발자 도구 확인은 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"`를 실행한다.
+2. HTTP release E2E는 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest test"`를 실행한다.
+3. 운영자·개발자 도구 확인은 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,OperationalReleaseGateE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"`를 실행한다.
 4. 실제 출시 후보는 `-Dfestival.release-e2e.manifest=<path>`와
    `-Dfestival.release-e2e.require-user-journey-content=true`를 지정해 실행한다.
 5. focused E2E가 통과하면 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress clean verify"`를 실행한다.

@@ -53,14 +53,19 @@ Docker 엔진이 없으면 이 테스트는 skip하지 않고 실패한다.
 | HTTP-09 | 충돌·확인 처리 | stale `If-Match`의 409, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |
 | HTTP-10 | locale·query 오류 | 미게시 locale의 `LOCALE_NOT_READY`, 미지원·중복 query의 `INVALID_QUERY`, 후보 meta와 안전한 오류 envelope |
 | HTTP-11 | 조건부 읽기 호환성 | ticket guide의 strong ETag에 weak validator와 다중 `If-None-Match` 값을 보내도 304·새 request ID·cache 지시자가 일관됨 |
-| HTTP-12 | 관리자 입력 경계 | 허용하지 않은 Origin의 credential 발급 거절, 잘못된 비밀번호와 손상 access token의 안전한 401 |
+| HTTP-12 | 관리자 입력 경계 | 허용하지 않거나 누락된 Origin의 credential 발급 거절, 잘못된 비밀번호·손상 access token·malformed JSON·access token 없는 logout의 안전한 오류 |
 | HTTP-13 | release E2E datasource 격리 | Hikari·JNDI override가 있어도 후보 import helper와 HTTP context가 Testcontainers datasource만 사용 |
 | HTTP-14 | 전체 후보 탐색 | 모든 선언 날짜·ARTIST/CONTEST 목록의 반복 응답·순서·상세 관계와 노출된 모든 공간 category filter·중복 없음 |
 | HTTP-15 | 계좌 CLI의 즉시 반영 | 별도 Account CLI의 TICKET set·clear가 실행 중 server의 ticket guide·version·ETag/304에 즉시 반영되고 마감 시 계좌를 숨김 |
 | HTTP-16 | 혼잡도 동시 변경 | 실제 admin HTTP 요청 두 개의 같은 key/ETag 경쟁에서 한 번만 저장·감사되고 replay·key 재사용 거절이 보존됨 |
 | HTTP-17 | 게시·재시작·rollback lifecycle | A 게시 → 실행 server의 A snapshot 유지 → 재시작의 B 노출 → expected-current rollback → 재시작의 새 revision A 복원과 동적 상태 보존 |
+| HTTP-18 | 공개 입력 오류 후 복구 | 잘못된 날짜·분류·지도 query와 존재하지 않는 공간·지도·장소·출연진·공연이 안정 오류·후보 meta를 내고, 잘못된 admin bearer가 공개 탐색을 막지 않으며 다음 config 조회가 복구됨 |
+| HTTP-19 | 축제 날짜 경계 | 첫 FestivalDay 전과 마지막 FestivalDay 후에 config 기본 날짜와 기본 lineup 날짜가 각각 첫째·마지막 날로 함께 고정됨 |
+| HTTP-20 | 미게시 축제 배포 | 다른 축제의 seed가 있어도 선택 회차에 published revision이 없으면 `/healthz`는 살아 있고 `/readyz`·공개 config는 안전한 `CATALOG_NOT_READY`로 실패 |
+| HTTP-21 | 공개 읽기 rate limit | trusted proxy client 단위 429·`Retry-After`·안전 envelope, 다른 client의 독립 bucket, clock 회복 뒤 재조회와 서버 생성 request ID를 실제 HTTP로 확인 |
+| HTTP-22 | 관리자 로그인 rate limit | 잘못된 비밀번호 추측이 trusted proxy client 단위로 제한되고 다른 client·refill 뒤에는 다시 인증 오류로 처리되며 cookie를 발급하지 않음 |
 
-위 HTTP-01~17은 서로 다른 출시 위험을 나타내는 **17개 시나리오**다. JUnit test
+위 HTTP-01~22는 서로 다른 출시 위험을 나타내는 **22개 시나리오**다. JUnit test
 method는 관계된 요청을 한 transaction·server lifecycle 안에서 묶으므로 시나리오 수와
 method 수가 같지 않다.
 
@@ -74,7 +79,7 @@ cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessH
 E2E는 다음 명령으로 실행한다.
 
 ```powershell
-cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest test"
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest test"
 ```
 
 다른 후보 manifest는 경로를 시스템 프로퍼티로 준다. 이 기본 모드에서는 빈 공간·지도와
@@ -109,25 +114,30 @@ main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource�
 | ID | 운영 흐름 | 주요 검증 |
 | --- | --- | --- |
 | OPS-01 | Catalog CLI 정상 흐름 | import → validate → publish → export가 실제 exit code와 PostgreSQL published pointer·감사 기록을 함께 만족 |
-| OPS-02 | 게시·rollback 충돌 | 같은 baseline의 A/B draft 중 A 게시 뒤 B의 publish 거절, archived A의 rollback 성공, stale expected-current rollback 거절 |
+| OPS-02 | 순차 게시·rollback 충돌 | 같은 baseline의 A/B draft 중 A 게시 뒤 B의 publish 거절, archived A의 rollback 성공, stale expected-current rollback 거절 |
 | OPS-03 | Catalog CLI 안전 실패 | malformed revision이 exit 1과 안정 오류를 내고 stack trace·DB URL·비밀번호를 출력하지 않음 |
 | OPS-04 | 계좌 CLI 변경 | set dry-run 무변경, confirm set, 잘못된 끝 네 자리 거절, clear·restore-version의 증가 version·trigger history·민감값 redaction |
-| OPS-05 | DB 사전 점검 | `DatabasePreflightIntegrationTest`가 JDK+PostgreSQL driver만의 별도 JVM에서 read-only 조사와 `STOP_AND_REVIEW`를 검증 |
+| OPS-05 | DB 사전 점검 | `DatabasePreflightIntegrationTest`와 read-only role child JVM이 JDK+PostgreSQL driver만의 read-only 조사·`STOP_AND_REVIEW`·Flyway history 무변경을 검증 |
 | OPS-06 | 로컬 workbench | `CatalogWorkbenchIntegrationTest`가 HTTP token·Host·Origin·role 경계와 다른 축제 revision의 export·diff·publish 거절을 검증 |
 | OPS-07 | 손상 draft 복구 | 불완전 draft publish가 pointer·감사를 바꾸지 않고, 같은 baseline의 정상 replacement가 다음 별도 process에서 게시됨 |
 | OPS-08 | Catalog write role 경계 | SELECT-only PostgreSQL role의 import가 실패하고 draft·catalog audit을 남기지 않음 |
 | OPS-09 | 계좌 입력·version 무결성 | 예상 밖 JSON field와 stale expected-version이 무변경으로 거절되고, 같은 값 set은 version·history를 늘리지 않음 |
-| OPS-10 | 계좌 write role 경계 | SELECT-only role이 Account CLI set을 실행해도 current setting·history를 만들 수 없음 |
+| OPS-10 | 계좌 write role 경계 | SELECT-only role이 Account CLI set·clear·restore를 실행해도 current setting·version·history를 바꾸지 못함 |
 | OPS-11 | standalone preflight 실패 | 기존 catalog의 `STOP_AND_REVIEW`와 잘못된 datasource 설정의 `CONFIGURATION_INVALID`가 별도 process에서 비밀값 없이 출력됨 |
 | OPS-12 | hostile logging 환경 | Hikari·Spring package DEBUG 환경에서도 CLI가 JDBC URL·비밀번호·stack trace를 출력하지 않음 |
+| OPS-13 | import 감사 실패 원자성 | import의 마지막 audit insert가 실패하면 draft·모든 revision 하위 행·audit이 함께 rollback되고, trigger 해제 뒤 재시도는 성공 |
+| OPS-14 | publish 감사 실패 원자성 | publish의 마지막 audit insert가 실패하면 기존 published pointer·draft state·catalog row가 보존되고, 재시도만 새 published revision을 만듦 |
+| OPS-15 | rollback 감사 실패 원자성 | rollback 중 새 revision 복제와 ROLLBACK audit 뒤의 publish audit이 실패하면 복제·두 audit·pointer가 함께 rollback되고 재시도는 성공 |
+| OPS-16 | 독립 CLI publish 경쟁 | 실제 두 JVM이 같은 festival 행 잠금에서 대기한 뒤 한 publish만 승리하고 다른 draft는 `BASE_REVISION_CONFLICT`·부수 audit 없음으로 끝남 |
+| OPS-17 | 독립 CLI publish/rollback 경쟁 | 실제 publish와 rollback JVM이 같은 잠금에서 직렬화되어 승자만 새 published revision·필요 audit을 남기고 패자는 기준 revision 충돌로 끝남 |
 
-위 OPS-01~12는 **12개 시나리오**다. HTTP 17개와 합쳐 현재 backend release
-E2E 시나리오는 **29개**다.
+위 OPS-01~17은 **17개 시나리오**다. HTTP 22개와 합쳐 현재 backend release
+E2E 시나리오는 **39개**다.
 
 운영 도구 focused 검증은 다음 명령으로 실행한다.
 
 ```powershell
-cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,OperationalReleaseGateE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"
 ```
 
 이 검사는 실제 원격 DB의 preflight 승인, provider role provisioning, SSH tunnel, 배포된 JAR와

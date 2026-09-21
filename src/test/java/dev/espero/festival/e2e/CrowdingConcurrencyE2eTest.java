@@ -65,12 +65,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "festival.admin-auth.jwt-signing-secret=backend-e2e-test-signing-secret-32-bytes",
         "festival.admin-auth.allowed-origin=https://admin.e2e.test",
         "festival.admin-auth.bootstrap-username=release-e2e-admin",
-        "festival.admin-auth.bootstrap-password=release-e2e-password"
+        "festival.admin-auth.bootstrap-password=release-e2e-password",
+        "festival.cleanup.schedule-enabled=false",
+        "festival.cleanup.dry-run=true",
+        "festival.cleanup.datasource.url=",
+        "festival.cleanup.datasource.username=",
+        "festival.cleanup.datasource.password=",
+        "festival.cleanup.datasource.role="
     }
 )
 @ActiveProfiles("db")
 @Import(CrowdingConcurrencyE2eTest.ClockConfiguration.class)
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
 class CrowdingConcurrencyE2eTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");

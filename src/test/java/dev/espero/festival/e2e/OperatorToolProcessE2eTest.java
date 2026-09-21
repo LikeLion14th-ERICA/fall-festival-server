@@ -40,7 +40,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * Testcontainers database. This verifies process exit behavior and the actual
  * catalog/account transaction boundaries used for a release.
  */
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
 class OperatorToolProcessE2eTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");

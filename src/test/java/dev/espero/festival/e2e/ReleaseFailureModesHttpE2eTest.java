@@ -18,6 +18,7 @@ import java.util.UUID;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -53,6 +54,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         "festival.rate-limit.public-read.refill-per-second=1.0",
         "festival.rate-limit.admin-login.capacity=1",
         "festival.rate-limit.admin-login.refill-per-second=1.0",
+        "festival.cleanup.schedule-enabled=false",
+        "festival.cleanup.dry-run=true",
+        "festival.cleanup.datasource.url=",
+        "festival.cleanup.datasource.username=",
+        "festival.cleanup.datasource.password=",
+        "festival.cleanup.datasource.role=",
         "spring.autoconfigure.exclude="
             + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
             + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration,"
@@ -68,6 +75,7 @@ class ReleaseFailureModesHttpE2eTest {
     private static final String ADMIN_ORIGIN = "https://admin.e2e.test";
     private static final String ADMIN_USERNAME = "release-e2e-admin";
     private static final String ADMIN_PASSWORD = "release-e2e-password";
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private static final Object MIGRATION_LOCK = new Object();
     private static volatile boolean migrated;
 
@@ -97,12 +105,13 @@ class ReleaseFailureModesHttpE2eTest {
         .build();
 
     @Test
+    @Timeout(60)
     void unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable() throws Exception {
-        HttpResponse<String> health = send(HttpRequest.newBuilder(uri("/healthz")).GET().build());
+        HttpResponse<String> health = send(request("/healthz").GET().build());
         assertThat(health.statusCode()).isEqualTo(200);
         assertThat(health.body()).isEqualTo("{\"status\":\"ok\"}");
 
-        HttpResponse<String> readiness = send(HttpRequest.newBuilder(uri("/readyz")).GET().build());
+        HttpResponse<String> readiness = send(request("/readyz").GET().build());
         assertThat(readiness.statusCode()).isEqualTo(503);
         assertThat(readiness.body()).isEqualTo("{\"status\":\"not_ready\"}");
 
@@ -139,7 +148,7 @@ class ReleaseFailureModesHttpE2eTest {
     }
 
     private HttpResponse<String> publicConfig(String forwardedFor, String requestId) throws Exception {
-        return send(HttpRequest.newBuilder(uri("/api/v2/config"))
+        return send(request("/api/v2/config")
             .header("X-Forwarded-For", forwardedFor)
             .header("X-Request-Id", requestId)
             .GET()
@@ -147,7 +156,7 @@ class ReleaseFailureModesHttpE2eTest {
     }
 
     private HttpResponse<String> login(String forwardedFor, String password) throws Exception {
-        return send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions"))
+        return send(request("/api/v2/admin/sessions")
             .header("Origin", ADMIN_ORIGIN)
             .header("X-Forwarded-For", forwardedFor)
             .header("Content-Type", "application/json")
@@ -198,6 +207,10 @@ class ReleaseFailureModesHttpE2eTest {
 
     private URI uri(String path) {
         return URI.create("http://127.0.0.1:" + port + path);
+    }
+
+    private HttpRequest.Builder request(String path) {
+        return HttpRequest.newBuilder(uri(path)).timeout(REQUEST_TIMEOUT);
     }
 
     private static void migrateEmptyDatabase() {

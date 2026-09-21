@@ -17,12 +17,14 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /** Ensures standalone preflight never bootstraps an empty database as a side effect. */
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
+@Timeout(90)
 class DatabasePreflightEmptyDatabaseE2eTest {
 
     @Container
