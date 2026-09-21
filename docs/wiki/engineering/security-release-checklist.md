@@ -69,7 +69,7 @@ refresh session-family revoke, `Sec-Fetch-Site`, malware scan은 현재 계약 �
   rollback되는지 운영 역할로 확인한다. 실패한 write의 audit은 현재 계약상 남기지 않는다.
 - [ ] `/healthz`·`/readyz` 응답이 DB host, credential, stack trace를 내보내지 않는지 release
   smoke에서 확인한다.
-- [ ] root Dockerfile의 non-root runtime, media volume mount와 `.env` build-context 제외를 image
+- [ ] root Dockerfile의 non-root runtime, `/healthz` liveness healthcheck, media volume mount와 `.env` build-context 제외를 image
   build 결과로 확인한다. `test/docker-compose.yml`은 이 운영 gate를 대체하지 않는다.
 - [ ] capacity 측정과 별도로 rate limiter를 켠 로그인·public-read 흐름을 실제 proxy/NAT 조건에서
   확인한다. 현재 load-test 목표를 임의의 5,000 동시 사용자 요구로 바꾸지 않는다.
