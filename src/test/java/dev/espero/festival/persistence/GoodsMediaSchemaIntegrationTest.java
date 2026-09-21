@@ -3,6 +3,7 @@ package dev.espero.festival.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
@@ -29,7 +30,7 @@ class GoodsMediaSchemaIntegrationTest {
     private static final String SHA256 = "a".repeat(64);
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

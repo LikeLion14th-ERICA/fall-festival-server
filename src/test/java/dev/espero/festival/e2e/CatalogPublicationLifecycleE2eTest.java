@@ -2,6 +2,7 @@ package dev.espero.festival.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.CatalogCliApplication;
 import dev.espero.festival.CatalogCliRunner;
 import dev.espero.festival.FallFestivalServerApplication;
@@ -59,7 +60,7 @@ class CatalogPublicationLifecycleE2eTest {
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @TempDir
     Path temporaryDirectory;

@@ -18,6 +18,7 @@
         <java.version>21</java.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <swagger-ui.version>5.32.15</swagger-ui.version>
+        <festival.test.excluded-groups>release-pg17</festival.test.excluded-groups>
     </properties>
     <dependencies>
         <dependency>
@@ -111,6 +112,13 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>${festival.test.excluded-groups}</excludedGroups>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
@@ -133,4 +141,76 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>release-pg17</id>
+            <activation>
+                <property>
+                    <name>festival.test.postgres.release</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <festival.test.postgres.release>true</festival.test.postgres.release>
+                <festival.test.excluded-groups></festival.test.excluded-groups>
+                <test>Postgresql17MigrationReleaseTest</test>
+                <skipTests>false</skipTests>
+                <maven.test.skip>false</maven.test.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <failIfNoTests>true</failIfNoTests>
+                            <reportsDirectory>${project.build.directory}/surefire-reports/release-pg17</reportsDirectory>
+                            <systemPropertyVariables>
+                                <festival.test.postgres.release>${festival.test.postgres.release}</festival.test.postgres.release>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-pg17-release-reports</id>
+                                <phase>initialize</phase>
+                                <goals><goal>run</goal></goals>
+                                <configuration>
+                                    <target>
+                                        <delete dir="${project.build.directory}/surefire-reports/release-pg17"/>
+                                        <fail message="The PG17 release gate cannot skip tests.">
+                                            <condition>
+                                                <or>
+                                                    <istrue value="${skipTests}"/>
+                                                    <istrue value="${maven.test.skip}"/>
+                                                </or>
+                                            </condition>
+                                        </fail>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>verify-pg17-release-reports</id>
+                                <phase>test</phase>
+                                <goals><goal>run</goal></goals>
+                                <configuration>
+                                    <target>
+                                        <java classname="dev.espero.festival.support.ReleaseTestReportGate"
+                                              fork="true" failonerror="true">
+                                            <classpath refid="maven.test.classpath"/>
+                                            <arg value="${project.build.directory}/surefire-reports/release-pg17"/>
+                                            <arg value="${test}"/>
+                                        </java>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

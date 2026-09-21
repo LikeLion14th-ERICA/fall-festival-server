@@ -3,6 +3,7 @@ package dev.espero.festival.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -27,7 +28,7 @@ class DesignMapFilterMigrationIntegrationTest {
     private static final String REVISION_ID = "f109dca2-8b28-4e09-8114-beebc2bd3ea2";
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @Test
     void clearsTheEarlierGroupsAndAcceptsOnlyTheDesignFilters() throws SQLException {

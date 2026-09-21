@@ -3,6 +3,7 @@ package dev.espero.festival.workbench;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -50,7 +51,7 @@ class CatalogWorkbenchIntegrationTest {
     private static final Path DEVELOPMENT_CATALOG = Path.of("dev", "catalog", "development-catalog.json");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     private final JsonMapper json = JsonMapper.builder().build();
     private final HttpClient client = HttpClient.newHttpClient();

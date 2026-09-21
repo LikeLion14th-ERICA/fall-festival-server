@@ -2,6 +2,7 @@ package dev.espero.festival.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -25,7 +26,7 @@ class SpaceAccountMigrationIntegrationTest {
     private static final String SCHEMA = "space_account_upgrade";
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @Test
     void keepsAnExistingTicketAccountAndItsHistoryThroughTheUpgrade() throws SQLException {

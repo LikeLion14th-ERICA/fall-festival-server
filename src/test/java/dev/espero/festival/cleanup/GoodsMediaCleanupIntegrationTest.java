@@ -3,6 +3,7 @@ package dev.espero.festival.cleanup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.media.MediaStorage;
 import dev.espero.festival.media.MediaVariant;
 import java.io.IOException;
@@ -52,7 +53,7 @@ class GoodsMediaCleanupIntegrationTest {
     );
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {

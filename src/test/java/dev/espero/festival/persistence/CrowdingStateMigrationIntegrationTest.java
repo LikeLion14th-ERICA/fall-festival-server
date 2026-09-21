@@ -3,6 +3,7 @@ package dev.espero.festival.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -29,7 +30,7 @@ class CrowdingStateMigrationIntegrationTest {
     private static final String DAY_ID = "7a1c3e5f-2b4d-4f6a-8c0e-1d3f5a7b9c2e";
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @Test
     void emptyLegacyTableMigratesWithoutAFestivalId() throws SQLException {

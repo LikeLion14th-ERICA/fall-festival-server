@@ -2,6 +2,7 @@ package dev.espero.festival.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class GoodsMediaMigrationIntegrationTest {
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

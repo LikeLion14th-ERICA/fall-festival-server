@@ -3,6 +3,7 @@ package dev.espero.festival.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.auth.AdminAuditService;
 import dev.espero.festival.auth.AdminPrincipal;
 import dev.espero.festival.domain.AdminAuditAction;
@@ -46,7 +47,7 @@ class AdminAuditEventStoreIntegrationTest {
     private static final Instant CHANGED_AT = Instant.parse("2030-09-29T02:00:00Z");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

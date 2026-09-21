@@ -2,6 +2,7 @@ package dev.espero.festival.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.HikariDataSource;
 import java.net.URI;
@@ -80,7 +81,7 @@ class ReleaseFailureModesHttpE2eTest {
     private static volatile boolean migrated;
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

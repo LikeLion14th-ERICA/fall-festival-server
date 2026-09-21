@@ -27,6 +27,37 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 실행 명령, 읽기 전용 환경변수, 중단 판정과 로컬 PostgreSQL 검증 명령은
 [DB 사전 점검 runbook](../engineering/database-preflight.md)에 있다.
 
+### PostgreSQL 17 릴리스 migration 게이트
+
+일반 루트 테스트의 PostgreSQL 이미지는 `postgres:16-alpine`을 유지한다. 명시적인
+`release-pg17` Maven profile 또는 `-Dfestival.test.postgres.release=true`에서만 공통
+`PostgresTestImages`가 승인된 `postgres:17.11`을 선택한다. 기존 PG17 preflight 테스트도
+동일한 고정 이미지를 사용한다. `test/` 실기기 검증 환경의 PostgreSQL 설정은 별개다.
+
+`Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의
+새 임시 database에 V1~V26을 적용하는 경우와, V23에서 지도·안내·굿즈·공지·계좌 이력의
+fixture를 만든 뒤 V24 → V25 → V26을 차례로 적용하는 경우를 검사한다. 각 단계는
+Flyway history·checksum, 기존 데이터의 전체 행 보존, 번역·미디어·템플릿 제약을
+검증하고 새 Flyway 인스턴스의 재기동에서 migration 0건·history/데이터 무변경을 확인한다.
+기존 migration SQL을 그대로 사용하며 원격 DB나 staging·prod 설정을 읽지 않는다.
+
+migration 게이트만 실행하는 focused 명령은 다음과 같다.
+
+```powershell
+.\mvnw.cmd --batch-mode --no-transfer-progress -Prelease-pg17 "-Dtest=Postgresql17MigrationReleaseTest" test
+```
+
+추가 backend release E2E도 PG17로 실행하려면 `-Dtest=`에 쉼표로 구분한 **전체 class명**을
+지정하고 `Postgresql17MigrationReleaseTest`를 반드시 포함한다. method selector·wildcard는
+게이트 근거로 허용하지 않는다. profile은 매 실행 전에 전용
+`target/surefire-reports/release-pg17` 결과를 비우고 test phase의 마지막에 모든 지정
+class의 결과를 검사한다. 필수 class 누락, 0건, migration 시나리오 2건 미만, skip·failure·error가
+있으면 실패한다. `skipTests`와 `maven.test.skip`도 거절한다. Docker 부재는 migration
+테스트 오류이며 출시 성공으로 취급하지 않는다.
+
+이 검사는 실제 PG16 데이터 디렉터리의 major upgrade, 원격 DB preflight, 운영 backup/restore,
+배포 후 smoke를 대신하지 않는다. 운영 검증과 원격 환경 승인은 기존 runbook을 따른다.
+
 ### 릴리스 후보 backend E2E
 
 `ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.auth.AdminPrincipal;
 import java.nio.file.Path;
 import java.util.List;
@@ -45,7 +46,7 @@ class GoodsImageRepresentationFlowIntegrationTest {
     );
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {

@@ -3,6 +3,7 @@ package dev.espero.festival;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.persistence.CatalogSnapshotStore;
 import dev.espero.festival.persistence.LocaleCompletenessStore;
@@ -47,7 +48,7 @@ class CatalogRevisionServiceIntegrationTest {
     private static final UUID INITIAL_REVISION_ID = UUID.fromString("f109dca2-8b28-4e09-8114-beebc2bd3ea2");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

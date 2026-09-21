@@ -3,6 +3,7 @@ package dev.espero.festival.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -34,7 +35,7 @@ class PerformanceCatalogSchemaIntegrationTest {
     private static final LocalDate DAY_THREE = LocalDate.parse("2026-10-01");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

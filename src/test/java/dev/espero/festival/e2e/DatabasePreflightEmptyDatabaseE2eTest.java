@@ -2,6 +2,7 @@ package dev.espero.festival.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.preflight.DatabasePreflightApplication;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +29,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class DatabasePreflightEmptyDatabaseE2eTest {
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @TempDir
     Path temporaryDirectory;

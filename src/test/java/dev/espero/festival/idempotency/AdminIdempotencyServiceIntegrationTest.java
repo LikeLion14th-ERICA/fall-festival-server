@@ -3,6 +3,7 @@ package dev.espero.festival.idempotency;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.web.ApiException;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,7 +40,7 @@ class AdminIdempotencyServiceIntegrationTest {
     private static final UUID ADMIN_ID = UUID.fromString("7309ad07-bdf0-42ff-a547-155ce180e117");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
