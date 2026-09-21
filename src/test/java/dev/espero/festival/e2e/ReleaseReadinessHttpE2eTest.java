@@ -6,9 +6,11 @@ import com.jayway.jsonpath.JsonPath;
 import dev.espero.festival.CatalogCliApplication;
 import dev.espero.festival.CatalogCliRunner;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -21,6 +23,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,9 +76,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class ReleaseReadinessHttpE2eTest {
 
     static final String CANDIDATE_MANIFEST_PROPERTY = "festival.release-e2e.manifest";
+    static final String REQUIRE_USER_JOURNEY_CONTENT_PROPERTY = "festival.release-e2e.require-user-journey-content";
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
     private static final String ADMIN_ORIGIN = "https://admin.e2e.test";
+    private static final String REFRESH_COOKIE_NAME = "__Host-festival-admin-refresh";
     private static final Object PREPARATION_LOCK = new Object();
 
     @Container
@@ -102,10 +107,19 @@ class ReleaseReadinessHttpE2eTest {
     private JdbcTemplate jdbc;
 
     @Test
-    void candidatePublishesBeforeStartupAndPassesPublicAndAdminHttpReleaseChecks() throws Exception {
+    void candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys() throws Exception {
         PreparedCandidate candidate = prepared();
         clock.set(candidate.verificationInstant());
 
+        String config = assertCandidateStartupJourney(candidate);
+        assertPerformanceDiscoveryJourney(config, candidate);
+        assertSpaceAndMapJourney(candidate);
+        assertTicketAndStampJourney(candidate);
+        assertAnonymousAdminRequestsAreRejected();
+        assertCrowdingAndAdministratorSessionJourney(candidate);
+    }
+
+    private String assertCandidateStartupJourney(PreparedCandidate candidate) throws Exception {
         HttpResponse<String> health = send(HttpRequest.newBuilder(uri("/healthz")).GET().build());
         assertThat(health.statusCode()).isEqualTo(200);
         assertThat(health.body()).isEqualTo("{\"status\":\"ok\"}");
@@ -119,10 +133,226 @@ class ReleaseReadinessHttpE2eTest {
         assertCandidateMeta(config.body(), candidate);
         assertThat(jsonString(config.body(), "$.data.festival.id")).isEqualTo(FESTIVAL_ID.toString());
         assertThat(jsonString(config.body(), "$.data.festival.title")).isNotBlank();
+        assertThat(jsonString(config.body(), "$.data.festival.defaultDate")).isNotBlank();
+        return config.body();
+    }
 
-        assertPublicCatalogRoutes(candidate);
-        assertAnonymousAdminRequestsAreRejected();
+    private void assertPerformanceDiscoveryJourney(String config, PreparedCandidate candidate) throws Exception {
+        String defaultDate = jsonString(config, "$.data.festival.defaultDate");
+        HttpResponse<String> lineup = candidateResponse("/api/v2/lineup", candidate);
+        assertThat(jsonString(lineup.body(), "$.data.date")).isEqualTo(defaultDate);
+        assertThat(jsonString(lineup.body(), "$.data.category")).isEqualTo("ARTIST");
 
+        HttpResponse<String> explicitLineup = candidateResponse(
+            "/api/v2/lineup?date=" + encodedQuery(defaultDate) + "&category=ARTIST", candidate
+        );
+        assertThat(jsonValue(explicitLineup.body(), "$.data.items"))
+            .isEqualTo(jsonValue(lineup.body(), "$.data.items"));
+
+        List<String> artistIds = jsonStringList(lineup.body(), "$.data.items[*].artistId");
+        List<String> performanceIds = jsonStringList(lineup.body(), "$.data.items[*].performanceId");
+        assertThat(artistIds).hasSameSizeAs(performanceIds);
+        assertContinuousOrder(jsonNumberList(lineup.body(), "$.data.items[*].order"));
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(artistIds).isNotEmpty();
+        }
+
+        Map<String, String> artistBodies = new LinkedHashMap<>();
+        Map<String, String> performanceBodies = new LinkedHashMap<>();
+        for (int index = 0; index < artistIds.size(); index++) {
+            String artistId = artistIds.get(index);
+            String performanceId = performanceIds.get(index);
+            String artist = artistBodies.get(artistId);
+            if (artist == null) {
+                artist = candidateResponse("/api/v2/artists/" + artistId, candidate).body();
+                artistBodies.put(artistId, artist);
+            }
+            assertThat(jsonString(artist, "$.data.id")).isEqualTo(artistId);
+            assertThat(jsonStringList(artist, "$.data.performances[*].id")).contains(performanceId);
+
+            String performance = performanceBodies.get(performanceId);
+            if (performance == null) {
+                performance = candidateResponse("/api/v2/performances/" + performanceId, candidate).body();
+                performanceBodies.put(performanceId, performance);
+            }
+            assertThat(jsonString(performance, "$.data.id")).isEqualTo(performanceId);
+            assertThat(jsonString(performance, "$.data.date")).isEqualTo(defaultDate);
+            assertThat(jsonStringList(performance, "$.data.artists[*].id")).contains(artistId);
+        }
+
+        HttpResponse<String> timetable = candidateResponse("/api/v2/timetable", candidate);
+        List<String> timetablePerformanceIds = jsonStringList(timetable.body(), "$.data.items[*].id");
+        assertThat(timetablePerformanceIds).containsAll(new LinkedHashSet<>(performanceIds));
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(timetablePerformanceIds).isNotEmpty();
+        }
+        for (String performanceId : new LinkedHashSet<>(timetablePerformanceIds)) {
+            String performance = performanceBodies.get(performanceId);
+            if (performance == null) {
+                performance = candidateResponse("/api/v2/performances/" + performanceId, candidate).body();
+                performanceBodies.put(performanceId, performance);
+            }
+            assertThat(jsonString(performance, "$.data.id")).isEqualTo(performanceId);
+        }
+        candidateResponse("/api/v2/prohibited-items", candidate);
+    }
+
+    private void assertSpaceAndMapJourney(PreparedCandidate candidate) throws Exception {
+        HttpResponse<String> spaces = candidateResponse("/api/v2/spaces", candidate);
+        List<String> spaceIds = jsonStringList(spaces.body(), "$.data.items[*].id");
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(spaceIds).isNotEmpty();
+        }
+
+        Map<String, String> spaceBodies = new LinkedHashMap<>();
+        List<SpaceMapTarget> spaceTargets = new java.util.ArrayList<>();
+        for (String spaceId : spaceIds) {
+            String detail = candidateResponse("/api/v2/spaces/" + spaceId, candidate).body();
+            spaceBodies.put(spaceId, detail);
+            assertThat(jsonString(detail, "$.data.id")).isEqualTo(spaceId);
+            Map<?, ?> target = nullableObject(detail, "$.data.mapTarget");
+            if (target != null) {
+                spaceTargets.add(new SpaceMapTarget(
+                    spaceId,
+                    requiredString(target, "mapId"),
+                    requiredString(target, "placeId"),
+                    requiredString(target, "pinId"),
+                    requiredString(target, "mapVersion")
+                ));
+            }
+        }
+        if (!spaceIds.isEmpty()) {
+            String category = jsonString(spaces.body(), "$.data.items[0].category");
+            HttpResponse<String> filtered = candidateResponse("/api/v2/spaces?category=" + encodedQuery(category), candidate);
+            assertThat(jsonStringList(filtered.body(), "$.data.items[*].category")).allMatch(category::equals);
+        }
+
+        HttpResponse<String> maps = candidateResponse("/api/v2/maps", candidate);
+        List<String> mapIds = jsonStringList(maps.body(), "$.data.items[*].id");
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(mapIds).isNotEmpty();
+        }
+        Map<String, String> mapBodies = new LinkedHashMap<>();
+        Map<String, String> pinsBodies = new LinkedHashMap<>();
+        Set<String> placeIds = new LinkedHashSet<>();
+        boolean hasAreaPin = false;
+        for (String mapId : mapIds) {
+            String detail = candidateResponse("/api/v2/maps/" + mapId, candidate).body();
+            mapBodies.put(mapId, detail);
+            assertThat(jsonString(detail, "$.data.id")).isEqualTo(mapId);
+        }
+        for (String mapId : mapIds) {
+            String detail = mapBodies.get(mapId);
+            String mapVersion = jsonString(detail, "$.data.version");
+            String pins = candidateResponse(mapPinsPath(mapId, mapVersion), candidate).body();
+            pinsBodies.put(mapId, pins);
+            assertThat(jsonString(pins, "$.data.mapId")).isEqualTo(mapId);
+            assertThat(jsonString(pins, "$.data.mapVersion")).isEqualTo(mapVersion);
+
+            Set<String> filterIds = new LinkedHashSet<>(jsonStringList(pins, "$.data.filters[*].id"));
+            for (Map<?, ?> pin : jsonObjects(pins, "$.data.items")) {
+                String filterGroup = nullableString(pin, "filterGroup");
+                if (filterGroup != null) {
+                    assertThat(filterIds).contains(filterGroup);
+                }
+                Map<?, ?> target = requiredObject(pin, "target");
+                String kind = requiredString(target, "kind");
+                if (kind.equals("PLACE")) {
+                    placeIds.add(requiredString(target, "placeId"));
+                } else {
+                    assertThat(kind).isEqualTo("AREA");
+                    String areaMapId = requiredString(target, "mapId");
+                    assertThat(mapBodies).containsKey(areaMapId);
+                    assertThat(jsonString(mapBodies.get(areaMapId), "$.data.kind")).isEqualTo("AREA");
+                    hasAreaPin = true;
+                }
+            }
+        }
+        String overviewId = nullableJsonString(maps.body(), "$.data.overviewId");
+        if (overviewId != null) {
+            assertThat(mapBodies).containsKey(overviewId);
+        }
+
+        Map<String, String> placeBodies = new LinkedHashMap<>();
+        for (String placeId : placeIds) {
+            String detail = candidateResponse("/api/v2/places/" + placeId, candidate).body();
+            placeBodies.put(placeId, detail);
+            assertThat(jsonString(detail, "$.data.id")).isEqualTo(placeId);
+        }
+        for (SpaceMapTarget target : spaceTargets) {
+            assertThat(mapBodies).containsKey(target.mapId());
+            assertThat(jsonString(mapBodies.get(target.mapId()), "$.data.kind")).isEqualTo("AREA");
+            assertThat(jsonString(mapBodies.get(target.mapId()), "$.data.version")).isEqualTo(target.mapVersion());
+            Map<?, ?> pin = findById(jsonObjects(pinsBodies.get(target.mapId()), "$.data.items"), target.pinId());
+            Map<?, ?> pinTarget = requiredObject(pin, "target");
+            assertThat(requiredString(pinTarget, "kind")).isEqualTo("PLACE");
+            assertThat(requiredString(pinTarget, "placeId")).isEqualTo(target.placeId());
+            assertThat(placeBodies).containsKey(target.placeId());
+            assertThat(jsonString(placeBodies.get(target.placeId()), "$.data.spaceId")).isEqualTo(target.spaceId());
+        }
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(spaceTargets).isNotEmpty();
+            assertThat(placeIds).isNotEmpty();
+            assertThat(hasAreaPin).isTrue();
+        }
+        if (!mapIds.isEmpty()) {
+            String mapId = mapIds.getFirst();
+            String mapVersion = jsonString(mapBodies.get(mapId), "$.data.version");
+            HttpResponse<String> stalePins = send(HttpRequest.newBuilder(uri(mapPinsPath(mapId, mapVersion + "-stale"))).GET().build());
+            assertThat(stalePins.statusCode()).isEqualTo(409);
+            assertThat(jsonString(stalePins.body(), "$.error.code")).isEqualTo("MAP_VERSION_MISMATCH");
+            assertCandidateMeta(stalePins.body(), candidate);
+            HttpResponse<String> recoveredPins = candidateResponse(mapPinsPath(mapId, mapVersion), candidate);
+            assertThat(jsonString(recoveredPins.body(), "$.data.mapVersion")).isEqualTo(mapVersion);
+        }
+    }
+
+    private void assertTicketAndStampJourney(PreparedCandidate candidate) throws Exception {
+        HttpResponse<String> ticketGuide = candidateResponse("/api/v2/ticket-guide", candidate);
+        assertThat(requiredHeader(ticketGuide, "Cache-Control")).contains("private", "no-cache");
+        assertThat(jsonString(ticketGuide.body(), "$.data.status")).isEqualTo("UNCONFIGURED");
+        assertThat(jsonValue(ticketGuide.body(), "$.data.account")).isNull();
+        assertThat(jsonValue(ticketGuide.body(), "$.data.paymentSettingsVersion")).isNull();
+        Map<?, ?> ticketTarget = nullableObject(ticketGuide.body(), "$.data.mapTarget");
+        if (ticketTarget != null) {
+            assertTicketMapTargetJourney(candidate, ticketTarget);
+        }
+        String ticketEtag = requiredHeader(ticketGuide, "ETag");
+        HttpResponse<String> ticketNotModified = send(HttpRequest.newBuilder(uri("/api/v2/ticket-guide"))
+            .header("If-None-Match", ticketEtag)
+            .GET()
+            .build());
+        assertThat(ticketNotModified.statusCode()).isEqualTo(304);
+        assertThat(ticketNotModified.body()).isEmpty();
+        assertThat(requiredHeader(ticketNotModified, "ETag")).isEqualTo(ticketEtag);
+
+        HttpResponse<String> stampGuide = candidateResponse("/api/v2/stamp-guide", candidate);
+        assertThat(jsonString(stampGuide.body(), "$.data.title")).isNotBlank();
+        assertThat(jsonString(stampGuide.body(), "$.data.reward.name")).isNotBlank();
+        assertThat(jsonNumber(stampGuide.body(), "$.data.dailyLimit").intValue()).isEqualTo(4);
+        assertThat(jsonString(stampGuide.body(), "$.data.timezone")).isEqualTo("Asia/Seoul");
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(jsonStringList(stampGuide.body(), "$.data.dates")).isNotEmpty();
+        }
+    }
+
+    private void assertTicketMapTargetJourney(PreparedCandidate candidate, Map<?, ?> target) throws Exception {
+        String mapId = requiredString(target, "mapId");
+        String mapVersion = requiredString(target, "mapVersion");
+        String pinId = requiredString(target, "pinId");
+        String placeId = requiredString(target, "placeId");
+        String map = candidateResponse("/api/v2/maps/" + mapId, candidate).body();
+        assertThat(jsonString(map, "$.data.version")).isEqualTo(mapVersion);
+        String pins = candidateResponse(mapPinsPath(mapId, mapVersion), candidate).body();
+        Map<?, ?> pin = findById(jsonObjects(pins, "$.data.items"), pinId);
+        Map<?, ?> pinTarget = requiredObject(pin, "target");
+        assertThat(requiredString(pinTarget, "kind")).isEqualTo("PLACE");
+        assertThat(requiredString(pinTarget, "placeId")).isEqualTo(placeId);
+        String place = candidateResponse("/api/v2/places/" + placeId, candidate).body();
+        assertThat(jsonString(place, "$.data.id")).isEqualTo(placeId);
+    }
+
+    private void assertCrowdingAndAdministratorSessionJourney(PreparedCandidate candidate) throws Exception {
         HttpResponse<String> firstPublic = send(HttpRequest.newBuilder(uri("/api/v2/crowding"))
             .header("X-Request-Id", "client-controlled-id")
             .GET()
@@ -147,6 +377,79 @@ class ReleaseReadinessHttpE2eTest {
         assertThat(requiredHeader(notModified, "ETag")).isEqualTo(publicEtag);
         assertThat(requiredHeader(notModified, "X-Request-Id")).isNotEqualTo(publicRequestId);
 
+        AdminSession session = loginAndRefreshAdministrator();
+        HttpResponse<String> adminRead = send(HttpRequest.newBuilder(uri("/api/v2/admin/crowding"))
+            .header("Authorization", "Bearer " + session.accessToken())
+            .header("Origin", ADMIN_ORIGIN)
+            .GET()
+            .build());
+        assertThat(adminRead.statusCode()).isEqualTo(200);
+        String initialAdminEtag = requiredHeader(adminRead, "ETag");
+
+        HttpRequest updateRequest = adminCrowdingUpdate(
+            session.accessToken(), initialAdminEtag, "release-e2e-crowding-1", "CROWDED", false
+        );
+        HttpResponse<String> update = send(updateRequest);
+        assertThat(update.statusCode()).isEqualTo(204);
+        assertThat(update.body()).isEmpty();
+
+        HttpResponse<String> replay = send(updateRequest);
+        assertThat(replay.statusCode()).isEqualTo(204);
+        assertThat(replay.body()).isEmpty();
+        assertThat(crowdingAuditCount()).isEqualTo(1L);
+
+        HttpResponse<String> changedPublic = send(HttpRequest.newBuilder(uri("/api/v2/crowding")).GET().build());
+        assertThat(changedPublic.statusCode()).isEqualTo(200);
+        assertThat(jsonString(changedPublic.body(), "$.data.status")).isEqualTo("CROWDED");
+        assertThat(requiredHeader(changedPublic, "ETag")).isNotEqualTo(publicEtag);
+
+        HttpResponse<String> savedAdmin = send(HttpRequest.newBuilder(uri("/api/v2/admin/crowding"))
+            .header("Authorization", "Bearer " + session.accessToken())
+            .header("Origin", ADMIN_ORIGIN)
+            .GET()
+            .build());
+        String savedEtag = requiredHeader(savedAdmin, "ETag");
+        String savedUpdatedAt = jsonString(savedAdmin.body(), "$.data.updatedAt");
+        clock.set(candidate.verificationInstant().plusSeconds(1));
+        HttpResponse<String> sameLevel = send(adminCrowdingUpdate(
+            session.accessToken(), savedEtag, "release-e2e-crowding-2", "CROWDED", false
+        ));
+        assertThat(sameLevel.statusCode()).isEqualTo(204);
+        HttpResponse<String> unchangedAdmin = send(HttpRequest.newBuilder(uri("/api/v2/admin/crowding"))
+            .header("Authorization", "Bearer " + session.accessToken())
+            .header("Origin", ADMIN_ORIGIN)
+            .GET()
+            .build());
+        assertThat(jsonString(unchangedAdmin.body(), "$.data.updatedAt")).isEqualTo(savedUpdatedAt);
+        assertThat(crowdingAuditCount()).isEqualTo(1L);
+
+        HttpResponse<String> staleUpdate = send(adminCrowdingUpdate(
+            session.accessToken(), initialAdminEtag, "release-e2e-crowding-3", "MODERATE", false
+        ));
+        assertThat(staleUpdate.statusCode()).isEqualTo(409);
+        assertThat(jsonString(staleUpdate.body(), "$.error.code")).isEqualTo("EDIT_CONFLICT");
+        assertThat(crowdingAuditCount()).isEqualTo(1L);
+
+        String currentEtag = requiredHeader(unchangedAdmin, "ETag");
+        HttpResponse<String> unconfirmedFull = send(adminCrowdingUpdate(
+            session.accessToken(), currentEtag, "release-e2e-crowding-4", "FULL", false
+        ));
+        assertThat(unconfirmedFull.statusCode()).isEqualTo(422);
+        assertThat(jsonString(unconfirmedFull.body(), "$.error.code")).isEqualTo("CONFIRMATION_REQUIRED");
+        assertThat(crowdingAuditCount()).isEqualTo(1L);
+
+        HttpResponse<String> full = send(adminCrowdingUpdate(
+            session.accessToken(), currentEtag, "release-e2e-crowding-5", "FULL", true
+        ));
+        assertThat(full.statusCode()).isEqualTo(204);
+        HttpResponse<String> fullPublic = send(HttpRequest.newBuilder(uri("/api/v2/crowding")).GET().build());
+        assertThat(jsonString(fullPublic.body(), "$.data.status")).isEqualTo("FULL");
+        assertThat(crowdingAuditCount()).isEqualTo(2L);
+
+        assertLogoutRevokesRefresh(session);
+    }
+
+    private AdminSession loginAndRefreshAdministrator() throws Exception {
         HttpResponse<String> login = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions"))
             .header("Origin", ADMIN_ORIGIN)
             .header("Content-Type", "application/json")
@@ -157,85 +460,60 @@ class ReleaseReadinessHttpE2eTest {
         assertThat(login.statusCode()).isEqualTo(200);
         assertThat(requiredHeader(login, "Access-Control-Allow-Origin")).isEqualTo(ADMIN_ORIGIN);
         assertThat(requiredHeader(login, "Set-Cookie")).contains(
-            "__Host-festival-admin-refresh=", "Secure", "HttpOnly", "SameSite=Strict"
+            REFRESH_COOKIE_NAME + "=", "Secure", "HttpOnly", "SameSite=Strict"
         );
-        String accessToken = jsonString(login.body(), "$.data.accessToken");
-        assertThat(accessToken).isNotBlank();
+        String initialAccessToken = jsonString(login.body(), "$.data.accessToken");
+        String initialRefreshCookie = refreshCookie(login);
+        assertThat(initialAccessToken).isNotBlank();
 
-        HttpResponse<String> adminRead = send(HttpRequest.newBuilder(uri("/api/v2/admin/crowding"))
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Origin", ADMIN_ORIGIN)
+        HttpResponse<String> me = send(HttpRequest.newBuilder(uri("/api/v2/admin/me"))
+            .header("Authorization", "Bearer " + initialAccessToken)
             .GET()
             .build());
-        assertThat(adminRead.statusCode()).isEqualTo(200);
-        String adminEtag = requiredHeader(adminRead, "ETag");
+        assertThat(me.statusCode()).isEqualTo(200);
+        assertThat(jsonString(me.body(), "$.data.username")).isEqualTo("release-e2e-admin");
+        assertThat(jsonString(me.body(), "$.data.authority")).isEqualTo("ADMIN");
+        assertThat(jsonValue(me.body(), "$.data.enabled")).isEqualTo(Boolean.TRUE);
 
-        HttpRequest updateRequest = adminCrowdingUpdate(accessToken, adminEtag, "release-e2e-crowding-1", "CROWDED");
-        HttpResponse<String> update = send(updateRequest);
-        assertThat(update.statusCode()).isEqualTo(204);
-        assertThat(update.body()).isEmpty();
+        HttpResponse<String> refreshed = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions/refresh"))
+            .header("Origin", ADMIN_ORIGIN)
+            .header("Cookie", initialRefreshCookie)
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build());
+        assertThat(refreshed.statusCode()).isEqualTo(200);
+        assertThat(requiredHeader(refreshed, "Access-Control-Allow-Origin")).isEqualTo(ADMIN_ORIGIN);
+        String refreshedAccessToken = jsonString(refreshed.body(), "$.data.accessToken");
+        String refreshedCookie = refreshCookie(refreshed);
+        assertThat(refreshedAccessToken).isNotBlank();
 
-        HttpResponse<String> replay = send(updateRequest);
-        assertThat(replay.statusCode()).isEqualTo(204);
-        assertThat(replay.body()).isEmpty();
-        assertThat(jdbc.queryForObject(
-            "SELECT count(*) FROM admin_audit_events WHERE action = 'CROWDING_UPDATED'", Long.class
-        )).isEqualTo(1L);
-
-        HttpResponse<String> changedPublic = send(HttpRequest.newBuilder(uri("/api/v2/crowding")).GET().build());
-        assertThat(changedPublic.statusCode()).isEqualTo(200);
-        assertThat(jsonString(changedPublic.body(), "$.data.status")).isEqualTo("CROWDED");
-        assertThat(requiredHeader(changedPublic, "ETag")).isNotEqualTo(publicEtag);
-
-        HttpResponse<String> staleUpdate = send(adminCrowdingUpdate(
-            accessToken, adminEtag, "release-e2e-crowding-2", "MODERATE"
-        ));
-        assertThat(staleUpdate.statusCode()).isEqualTo(409);
-        assertThat(jsonString(staleUpdate.body(), "$.error.code")).isEqualTo("EDIT_CONFLICT");
+        HttpResponse<String> replayedRefresh = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions/refresh"))
+            .header("Origin", ADMIN_ORIGIN)
+            .header("Cookie", initialRefreshCookie)
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build());
+        assertThat(replayedRefresh.statusCode()).isEqualTo(401);
+        assertThat(jsonString(replayedRefresh.body(), "$.error.code")).isEqualTo("ADMIN_REFRESH_TOKEN_INVALID");
+        return new AdminSession(refreshedAccessToken, refreshedCookie);
     }
 
-    private void assertPublicCatalogRoutes(PreparedCandidate candidate) throws Exception {
-        HttpResponse<String> spaces = candidateResponse("/api/v2/spaces", candidate);
-        for (String spaceId : jsonStringList(spaces.body(), "$.data.items[*].id")) {
-            HttpResponse<String> detail = candidateResponse("/api/v2/spaces/" + spaceId, candidate);
-            assertThat(jsonString(detail.body(), "$.data.id")).isEqualTo(spaceId);
-        }
-
-        HttpResponse<String> maps = candidateResponse("/api/v2/maps", candidate);
-        Set<String> placeIds = new LinkedHashSet<>();
-        for (String mapId : jsonStringList(maps.body(), "$.data.items[*].id")) {
-            HttpResponse<String> detail = candidateResponse("/api/v2/maps/" + mapId, candidate);
-            assertThat(jsonString(detail.body(), "$.data.id")).isEqualTo(mapId);
-            String mapVersion = jsonString(detail.body(), "$.data.version");
-            HttpResponse<String> pins = candidateResponse(
-                "/api/v2/maps/" + mapId + "/pins?mapVersion=" + mapVersion,
-                candidate
-            );
-            assertThat(jsonString(pins.body(), "$.data.mapId")).isEqualTo(mapId);
-            assertThat(jsonString(pins.body(), "$.data.mapVersion")).isEqualTo(mapVersion);
-            placeIds.addAll(placeIdsFor(pins.body()));
-        }
-        for (String placeId : placeIds) {
-            HttpResponse<String> detail = candidateResponse("/api/v2/places/" + placeId, candidate);
-            assertThat(jsonString(detail.body(), "$.data.id")).isEqualTo(placeId);
-        }
-
-        candidateResponse("/api/v2/prohibited-items", candidate);
-
-        HttpResponse<String> ticketGuide = candidateResponse("/api/v2/ticket-guide", candidate);
-        assertThat(jsonString(ticketGuide.body(), "$.data.status")).isIn(
-            "BEFORE_FESTIVAL", "TRANSFER_OPEN", "DAILY_CLOSED", "FESTIVAL_ENDED", "UNCONFIGURED"
-        );
-        String ticketEtag = requiredHeader(ticketGuide, "ETag");
-        HttpResponse<String> ticketNotModified = send(HttpRequest.newBuilder(uri("/api/v2/ticket-guide"))
-            .header("If-None-Match", ticketEtag)
-            .GET()
+    private void assertLogoutRevokesRefresh(AdminSession session) throws Exception {
+        HttpResponse<String> logout = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions/current"))
+            .header("Authorization", "Bearer " + session.accessToken())
+            .header("Origin", ADMIN_ORIGIN)
+            .header("Cookie", session.refreshCookie())
+            .DELETE()
             .build());
-        assertThat(ticketNotModified.statusCode()).isEqualTo(304);
-        assertThat(ticketNotModified.body()).isEmpty();
-        assertThat(requiredHeader(ticketNotModified, "ETag")).isEqualTo(ticketEtag);
+        assertThat(logout.statusCode()).isEqualTo(200);
+        assertThat(jsonValue(logout.body(), "$.data.loggedOut")).isEqualTo(Boolean.TRUE);
+        assertThat(requiredHeader(logout, "Set-Cookie")).contains(REFRESH_COOKIE_NAME + "=", "Max-Age=0");
 
-        candidateResponse("/api/v2/stamp-guide", candidate);
+        HttpResponse<String> revokedRefresh = send(HttpRequest.newBuilder(uri("/api/v2/admin/sessions/refresh"))
+            .header("Origin", ADMIN_ORIGIN)
+            .header("Cookie", session.refreshCookie())
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build());
+        assertThat(revokedRefresh.statusCode()).isEqualTo(401);
+        assertThat(jsonString(revokedRefresh.body(), "$.error.code")).isEqualTo("ADMIN_REFRESH_TOKEN_INVALID");
     }
 
     private void assertAnonymousAdminRequestsAreRejected() throws Exception {
@@ -264,14 +542,23 @@ class ReleaseReadinessHttpE2eTest {
         return response;
     }
 
-    private HttpRequest adminCrowdingUpdate(String accessToken, String etag, String key, String level) {
+    private HttpRequest adminCrowdingUpdate(
+        String accessToken,
+        String etag,
+        String key,
+        String level,
+        boolean confirmFull
+    ) {
+        String body = confirmFull
+            ? "{\"level\":\"" + level + "\",\"confirmFull\":true}"
+            : "{\"level\":\"" + level + "\"}";
         return HttpRequest.newBuilder(uri("/api/v2/admin/crowding"))
             .header("Authorization", "Bearer " + accessToken)
             .header("Origin", ADMIN_ORIGIN)
             .header("Content-Type", "application/json")
             .header("If-Match", etag)
             .header("Idempotency-Key", key)
-            .PUT(HttpRequest.BodyPublishers.ofString("{\"level\":\"" + level + "\"}"))
+            .PUT(HttpRequest.BodyPublishers.ofString(body))
             .build();
     }
 
@@ -284,10 +571,21 @@ class ReleaseReadinessHttpE2eTest {
         assertRevision(body, candidate.revisionNumber());
         assertThat(jsonString(body, "$.meta.festivalId")).isEqualTo(FESTIVAL_ID.toString());
         assertThat(jsonString(body, "$.meta.locale")).isEqualTo("ko");
+        assertThat(jsonString(body, "$.meta.timezone")).isEqualTo("Asia/Seoul");
+        assertThat(jsonValue(body, "$.meta.mock")).isEqualTo(Boolean.FALSE);
     }
 
     private static String jsonString(String body, String path) {
         return (String) JsonPath.read(body, path);
+    }
+
+    private static String nullableJsonString(String body, String path) {
+        Object value = jsonValue(body, path);
+        return value == null ? null : (String) value;
+    }
+
+    private static Object jsonValue(String body, String path) {
+        return JsonPath.read(body, path);
     }
 
     private static Number jsonNumber(String body, String path) {
@@ -298,18 +596,93 @@ class ReleaseReadinessHttpE2eTest {
         return ((List<?>) JsonPath.read(body, path)).stream().map(String.class::cast).toList();
     }
 
-    private static Set<String> placeIdsFor(String body) {
-        Set<String> placeIds = new LinkedHashSet<>();
-        for (Object pin : (List<?>) JsonPath.read(body, "$.data.items")) {
-            if (!(pin instanceof Map<?, ?> pinObject) || !(pinObject.get("target") instanceof Map<?, ?> target)) {
+    private static List<Number> jsonNumberList(String body, String path) {
+        return ((List<?>) JsonPath.read(body, path)).stream().map(Number.class::cast).toList();
+    }
+
+    private static List<Map<?, ?>> jsonObjects(String body, String path) {
+        List<Map<?, ?>> objects = new java.util.ArrayList<>();
+        for (Object value : (List<?>) jsonValue(body, path)) {
+            if (value instanceof Map<?, ?> object) {
+                objects.add(object);
                 continue;
             }
-            Object placeId = target.get("placeId");
-            if (placeId instanceof String value) {
-                placeIds.add(value);
-            }
+            throw new AssertionError("Expected JSON object at " + path);
         }
-        return placeIds;
+        return List.copyOf(objects);
+    }
+
+    private static Map<?, ?> nullableObject(String body, String path) {
+        Object value = jsonValue(body, path);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Map<?, ?> object) {
+            return object;
+        }
+        throw new AssertionError("Expected JSON object at " + path);
+    }
+
+    private static Map<?, ?> requiredObject(Map<?, ?> object, String key) {
+        Object value = object.get(key);
+        if (value instanceof Map<?, ?> nested) {
+            return nested;
+        }
+        throw new AssertionError("Expected JSON object field " + key);
+    }
+
+    private static String requiredString(Map<?, ?> object, String key) {
+        String value = nullableString(object, key);
+        if (value == null || value.isBlank()) {
+            throw new AssertionError("Expected nonblank JSON string field " + key);
+        }
+        return value;
+    }
+
+    private static String nullableString(Map<?, ?> object, String key) {
+        Object value = object.get(key);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String text) {
+            return text;
+        }
+        throw new AssertionError("Expected JSON string field " + key);
+    }
+
+    private static Map<?, ?> findById(List<Map<?, ?>> objects, String id) {
+        return objects.stream()
+            .filter(object -> id.equals(object.get("id")))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Expected JSON object id " + id));
+    }
+
+    private static void assertContinuousOrder(List<Number> orders) {
+        for (int index = 0; index < orders.size(); index++) {
+            assertThat(orders.get(index).intValue()).isEqualTo(index + 1);
+        }
+    }
+
+    private static String encodedQuery(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private static String mapPinsPath(String mapId, String mapVersion) {
+        return "/api/v2/maps/" + mapId + "/pins?mapVersion=" + encodedQuery(mapVersion);
+    }
+
+    private long crowdingAuditCount() {
+        return jdbc.queryForObject(
+            "SELECT count(*) FROM admin_audit_events WHERE action = 'CROWDING_UPDATED'", Long.class
+        );
+    }
+
+    private String refreshCookie(HttpResponse<?> response) {
+        return response.headers().allValues("Set-Cookie").stream()
+            .filter(value -> value.startsWith(REFRESH_COOKIE_NAME + "="))
+            .map(value -> value.substring(0, value.indexOf(';')))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Expected refresh cookie on HTTP " + response.statusCode()));
     }
 
     private HttpResponse<String> send(HttpRequest request) throws Exception {
@@ -352,7 +725,8 @@ class ReleaseReadinessHttpE2eTest {
                 UUID revision = importAndPublish(manifest, baseline);
                 preparedCandidate = new PreparedCandidate(
                     revisionNumber(revision),
-                    midpointOfFirstOperatingWindow(revision)
+                    midpointOfFirstOperatingWindow(revision),
+                    requiresUserJourneyContent()
                 );
             } catch (Exception exception) {
                 throw new IllegalStateException(
@@ -366,12 +740,18 @@ class ReleaseReadinessHttpE2eTest {
     private static Path candidateManifest() {
         String configured = System.getProperty(CANDIDATE_MANIFEST_PROPERTY);
         Path path = configured == null || configured.isBlank()
-            ? Path.of("dev", "catalog", "development-catalog.json")
+            ? Path.of("dev", "catalog", "frontend-mock-catalog.json")
             : Path.of(configured);
         if (!Files.isRegularFile(path)) {
             throw new IllegalStateException("Release candidate manifest does not exist: " + path);
         }
         return path.toAbsolutePath().normalize();
+    }
+
+    private static boolean requiresUserJourneyContent() {
+        String configuredManifest = System.getProperty(CANDIDATE_MANIFEST_PROPERTY);
+        return configuredManifest == null || configuredManifest.isBlank()
+            || Boolean.parseBoolean(System.getProperty(REQUIRE_USER_JOURNEY_CONTENT_PROPERTY, "false"));
     }
 
     private static void migrate() {
@@ -503,7 +883,20 @@ class ReleaseReadinessHttpE2eTest {
         return DriverManager.getConnection(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
     }
 
-    private record PreparedCandidate(long revisionNumber, Instant verificationInstant) {}
+    private record PreparedCandidate(
+        long revisionNumber,
+        Instant verificationInstant,
+        boolean requireUserJourneyContent
+    ) {}
+
+    private record SpaceMapTarget(String spaceId, String mapId, String placeId, String pinId, String mapVersion) {}
+
+    private record AdminSession(String accessToken, String refreshCookie) {
+        @Override
+        public String toString() {
+            return "AdminSession[accessToken=[REDACTED], refreshCookie=[REDACTED]]";
+        }
+    }
 
     @TestConfiguration(proxyBeanMethods = false)
     static class ClockConfiguration {

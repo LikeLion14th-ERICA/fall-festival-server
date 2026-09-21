@@ -20,15 +20,43 @@ manifest를 미래 릴리스 전에 독립적으로 검증하는 backend 게이�
 Flyway를 적용하고, 실제 Catalog CLI로 import·publish한 다음 랜덤 포트 서버를 기동한다.
 원격 개발·운영 DB나 그 자격증명에는 연결하지 않는다.
 
-기본 후보는 `dev/catalog/development-catalog.json`이고, 다른 후보는
-`-Dfestival.release-e2e.manifest=<path>`로 준다. 이 테스트는 readiness와 후보 revision,
-공개 공간·지도·핀·장소·티켓·스탬프 경로, 조건부 응답, 그리고 혼잡도 관리자 인증·동시성·감사
-경계를 HTTP로 확인한다. 목록에 실제 ID가 있으면 상세 경로도 순회한다. 빈 공간·지도와
-`UNCONFIGURED` 티켓은 현재 계약상 유효한 표현으로 다룬다.
+기본 후보는 사용자 흐름 검증용 `dev/catalog/frontend-mock-catalog.json`이다. 이 fixture는
+로컬 Testcontainers 전용이며 원격 개발 DB나 운영 데이터로 import·publish하지 않는다. 빈
+catalog 또는 실제 출시 후보는 `-Dfestival.release-e2e.manifest=<path>`로 지정한다. 실제
+콘텐츠 관계까지 요구하려면
+`-Dfestival.release-e2e.require-user-journey-content=true`를 함께 지정한다.
+
+E2E는 응답에서 ID를 읽어 다음 흐름을 HTTP로 검사한다.
+
+- 서비스 health/readiness와 published revision의 config
+- 공간 목록·분류·상세와 대표 `mapTarget`에서 AREA 지도·핀·장소로의 이동
+- overview의 AREA 핀에서 대상 구역 지도 이동, stale `mapVersion` 409 뒤의 재조회
+- 기본 날짜의 lineup에서 artist·performance·timetable로의 연결
+- ticket guide의 조건부 응답과 지도 target, stamp 안내의 보상·기간·일일 한도
+- 관리자 login·`/admin/me`·refresh rotation·logout
+- 혼잡도 변경, idempotency replay, 같은 단계 no-op, stale ETag, FULL 확인
+
+빈 목록과 `UNCONFIGURED` 티켓은 non-strict 후보에서 현재 계약상 유효한 표현으로 다룬다.
+strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀·AREA 핀·공연·타임테이블 관계를
+요구한다.
 
 이 게이트는 공지·굿즈 담당자의 API·미디어 검증, 원격 DB preflight·role provisioning,
 실제 배포 smoke와 운영 자료 승인을 대체하지 않는다. 후속 작업자는 이 경계를 유지하고,
-변경 뒤 focused E2E와 전체 `mvnw.cmd verify` 결과를 아래 검증 기록에 추가한다.
+변경 뒤 focused E2E와 전체 `mvnw.cmd verify` 결과를 아래 검증 기록에 추가한다. 브라우저의
+navigation/back 상태, Secure·SameSite cookie, 관리자 proxy, 모바일 네트워크 복귀와 polling은
+web 저장소와 실기기 acceptance gate에서 확인한다.
+
+## E2E 재개·출시 후보 확인
+
+1. Docker가 실행 중인지 확인하고, 원격 DB에는 연결하지 않는다.
+2. 기본 흐름 확인은 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest test"`를 실행한다.
+3. 실제 출시 후보는 `-Dfestival.release-e2e.manifest=<path>`와
+   `-Dfestival.release-e2e.require-user-journey-content=true`를 지정해 실행한다.
+4. focused E2E가 통과하면 `cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress clean verify"`를 실행한다.
+5. 실패하면 fixture를 완화하지 않는다. 끊어진 catalog 관계, 계약, 서버 동작 중 어느 층이
+   원인인지 기록하고 수정한다.
+6. 원격 개발 DB 검증은 별도의 `DatabasePreflightApplication`과 운영 승인 절차로 수행한다.
+
 ## 재개 절차
 
 1. `AGENTS.md`, 이 문서, 해당 단계의 작업별 위키·API 계약을 읽는다.

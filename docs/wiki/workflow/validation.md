@@ -32,29 +32,52 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 `ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는
 Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·publish한 뒤,
 랜덤 포트의 서버를 새로 기동한다. `/readyz`와 published snapshot, 후보 revision을
-가진 공개 catalog 경로(공간·지도·핀·장소·반입 금지 물품·티켓·스탬프), strong ETag·304·서버
-생성 request ID, 익명 관리자 거부, 관리자 로그인·CORS·refresh cookie, 혼잡도
-`If-Match`·idempotency·감사 기록을 하나의 릴리스 게이트로 확인한다. 후보에 실제
-공간·지도·장소가 있으면 목록에서 ID를 읽어 각 상세와 핀 경로까지 순회한다. 빈 목록과
-`UNCONFIGURED` 티켓 상태는 계약상 유효한 후보 표현으로 검사한다.
+가진 공개 catalog 경로와 관리자 경계를 하나의 릴리스 게이트로 확인한다. 응답에서 ID를
+읽으므로 후보 데이터의 ID가 바뀌어도 관계가 보존되면 검사가 유지된다.
 Docker 엔진이 없으면 이 테스트는 skip하지 않고 실패한다.
 
-기본 개발 후보로 단독 실행하려면 다음을 사용한다.
+기본 흐름 fixture는 `dev/catalog/frontend-mock-catalog.json`이다. 공간·전체/구역 지도·핀·장소·
+공연·타임테이블·티켓·스탬프의 연결을 검사하는 로컬 전용 fixture이며, 원격 개발 DB나 운영
+데이터로 import·publish하지 않는다.
+
+| ID | 사용자 흐름 | 주요 검증 |
+| --- | --- | --- |
+| HTTP-01 | 서비스 진입 | `/healthz` → `/readyz` → `/api/v2/config`, published revision, `mock=false`, KST 메타데이터 |
+| HTTP-02 | 부스·공간 탐색 | 공간 목록 → 분류 필터 → 공간 상세 |
+| HTTP-03 | 공간에서 지도 이동 | 공간 `mapTarget` → AREA 지도 → 현재 버전 핀 → 장소 상세 → 원래 공간 |
+| HTTP-04 | 전체·구역 지도 탐색 | overview의 AREA 핀 → 대상 AREA 지도, 필터와 PLACE 핀 관계, stale `mapVersion` 409 후 최신 핀 재조회 |
+| HTTP-05 | 공연 탐색 | config 기본 날짜 → lineup → artist → performance → timetable, 출연진·공연 ID와 순서 관계 |
+| HTTP-06 | 티켓·스탬프 확인 | ticket guide의 `UNCONFIGURED`·strong ETag/304·map target, stamp 제목·보상·기간·일일 한도 |
+| HTTP-07 | 관리자 세션 | 로그인 → `/admin/me` → refresh rotation → 이전 refresh 거부 → logout 뒤 refresh 거부 |
+| HTTP-08 | 혼잡도 운영 | 공개 조회 → 관리자 변경 → 같은 idempotency key replay → 공개 반영 → 같은 단계 재선택의 no-op |
+| HTTP-09 | 충돌·확인 처리 | stale `If-Match`의 409, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |
+
+기본 흐름 fixture를 단독 실행하려면 다음을 사용한다.
 
 ```powershell
 cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest test"
 ```
 
-출시 후보 manifest를 검증할 때는 경로를 시스템 프로퍼티로 준다. 공백이 있는 경로는
-PowerShell에서 값을 따옴표로 감싼다.
+다른 후보 manifest는 경로를 시스템 프로퍼티로 준다. 이 기본 모드에서는 빈 공간·지도와
+`UNCONFIGURED` 티켓처럼 계약상 유효한 sparse 후보도 검사한다. 실제 사용자 흐름 콘텐츠가
+필수인 출시 후보에는 `festival.release-e2e.require-user-journey-content=true`를 추가한다.
+이 strict 모드는 최소 하나의 공간·대표 지도 경로·PLACE 핀·AREA 핀·공연·타임테이블 관계가
+없으면 실패한다. 공백이 있는 경로는 PowerShell에서 값을 따옴표로 감싼다.
 
 ```powershell
 cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dfestival.release-e2e.manifest=<candidate-manifest-path> -Dtest=ReleaseReadinessHttpE2eTest test"
 ```
 
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dfestival.release-e2e.manifest=<candidate-manifest-path> -Dfestival.release-e2e.require-user-journey-content=true -Dtest=ReleaseReadinessHttpE2eTest test"
+```
+
 이 검사는 원격 개발 DB, 계정, 배포 환경을 읽거나 변경하지 않는다. 원격 DB의
 `DatabasePreflightApplication`, 제공자 role provisioning, 실제 배포 smoke 검증과
-운영 승인 절차는 별도 릴리스 조건으로 유지한다.
+운영 승인 절차는 별도 릴리스 조건으로 유지한다. 공지·굿즈 API·UI·미디어는 이 게이트의
+범위가 아니다. 실제 브라우저의 navigation/back 상태, Secure·SameSite cookie 동작, 관리자
+proxy와 CORS, 모바일 viewport, 온라인 복귀·polling backoff는 web 저장소와 실기기 acceptance
+gate에서 검증한다.
 
 ## 기존 실기기 검증 환경
 
