@@ -31,39 +31,35 @@ const link = (label,path='mock-link') => ({ label, url: `https://example.invalid
 const noticeLink = (labels,path='mock-notice-link') => ({ url: `https://example.invalid/${path}`, labels: { ko: null, en: null, 'zh-Hans': null, ja: null, ...labels } });
 // Goods (unlike notice) always carries all 4 locale keys, null for absent ones.
 const goodsTranslations = (ko,en) => ({ ko, en, 'zh-Hans': null, ja: null });
-// ko always resolves to ko. en falls back to ko when a (legacy) notice/goods
-// entry has no English translation. zh-Hans/ja use their own translation only
-// when present for THIS entry, otherwise en, then ko. No per-field mixed
-// fallback. Shared by notice and goods, which use the same rule.
-function resolveContentLocale(translations,requested) {
-  if (requested === 'ko') return 'ko';
-  if (requested === 'en') return translations.en ? 'en' : 'ko';
-  return translations[requested] ? requested : (translations.en ? 'en' : 'ko');
+function hasContentLocale(translations,locale) {
+  return translations?.[locale] != null;
 }
 export const isoKst = time => new Date(new Date(time).getTime() + 9 * 3600000).toISOString().replace('Z', '+09:00');
 export const dayKst = time => isoKst(time).slice(0,10);
 
-// Colors/sizes follow the product's own resolved contentLocale (validated at
-// write time to always have an entry for every locale the product itself
-// supports), so no separate per-item fallback is needed here.
-function resolveGoodsResponse(g, requestedLocale) {
-  const contentLocale = resolveContentLocale(g.translations, requestedLocale);
-  const t = g.translations[contentLocale];
+function goodsReadyForLocale(g,locale) {
+  return hasContentLocale(g.translations,locale)
+    && g.images.every(image=>hasContentLocale(image.alt,locale))
+    && g.colors.every(color=>hasContentLocale(color.translations,locale))
+    && g.sizes.every(size=>hasContentLocale(size.translations,locale));
+}
+function resolveGoodsResponse(g,locale) {
+  const t = g.translations[locale];
   return {
     id: g.id,
-    contentLocale,
+    contentLocale:locale,
     name: t.name,
     description: t.description ?? null,
     price: g.price,
     optionMode: g.optionMode,
     images: g.images.map(image => ({
-      alt: image.alt[contentLocale],
+      alt: image.alt[locale],
       masterUrl: image.masterUrl,
       thumbnail320Url: image.thumbnail320Url,
       thumbnail640Url: image.thumbnail640Url,
     })),
-    colors: g.colors.map(c => ({ id: c.id, name: c.translations[contentLocale].name })),
-    sizes: g.sizes.map(s => ({ id: s.id, label: s.translations[contentLocale].label })),
+    colors: g.colors.map(c => ({ id: c.id, name: c.translations[locale].name })),
+    sizes: g.sizes.map(s => ({ id: s.id, label: s.translations[locale].label })),
   };
 }
 
@@ -189,7 +185,7 @@ export function createState() {
     {id:'notice-1',type:'GENERAL',translations:{ko:translation('예시 공지','개발용 공지 본문입니다.'),en:translation('Sample notice','Mock content only.')},links:[noticeLink({ko:'예시 안내',en:'Sample link'})],templateId:null,createdAt:'2030-10-01T16:00:00+09:00',updatedAt:'2030-10-01T16:00:00+09:00'},
     {id:'notice-lost',type:'LOST_FOUND',translations:{ko:translation('예시 분실물','실제 분실물이 아닙니다.'),en:translation('Sample lost item','Mock item, not a real report.')},links:[],templateId:null,createdAt:'2030-09-30T16:00:00+09:00',updatedAt:'2030-09-30T16:00:00+09:00'},
     {id:'notice-old',type:'GENERAL',translations:{ko:translation('지난 예시 공지','사용자 목록에서는 제외합니다.'),en:translation('Past sample notice','Excluded from the user list.')},links:[],templateId:null,createdAt:'2030-09-30T18:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
-    {id:'notice-ko-only',type:'GENERAL',translations:{ko:translation('영어 미번역 예시','과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.')},links:[],templateId:null,createdAt:'2030-10-01T17:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
+    {id:'notice-ko-only',type:'GENERAL',translations:{ko:translation('영어 미번역 예시','과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다.')},links:[],templateId:null,createdAt:'2030-10-01T17:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
     {id:'notice-route',type:'GENERAL',translations:{ko:translation('목 구역 이동 안내','가상 구역 이동 동선을 확인하는 개발용 공지입니다.'),en:translation('Mock route notice','A fictional route notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:10:00+09:00',updatedAt:'2030-10-01T17:10:00+09:00'},
     {id:'notice-stage',type:'GENERAL',translations:{ko:translation('목 공연 대기 안내','가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.'),en:translation('Mock stage notice','A fictional stage notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:20:00+09:00',updatedAt:'2030-10-01T17:20:00+09:00'},
     {id:'notice-weather',type:'GENERAL',translations:{ko:translation('목 날씨 대비 안내','가상 날씨 안내 카드 표시를 위한 개발용 공지입니다.'),en:translation('Mock weather notice','A fictional weather notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:30:00+09:00',updatedAt:'2030-10-01T17:30:00+09:00'},
@@ -284,6 +280,11 @@ export class ApiFailure extends Error {
 export function failure(status,code,message,details=[]) { throw new ApiFailure(status,code,message,details); }
 const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
 function find(items,id) { const item=items.find(x=>x.id===id);if(!item)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');return structuredClone(item); }
+function findPublicGoods(state,goodsId,locale) {
+  const goods=state.goods.find(item=>item.id===goodsId);
+  if(!goods||!goodsReadyForLocale(goods,locale))failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+  return goods;
+}
 const defaultDate = date => date < DATES[0] ? DATES[0] : date > DATES.at(-1) ? DATES.at(-1) : date;
 export const crowdingDayFor = now => defaultDate(dayKst(now));
 // Approved crowd messages (docs/wiki/product/translations.md). Japanese has no approved copy yet.
@@ -321,15 +322,9 @@ function localize(value,locale) {
 }
 export function execute(op,state,{params={},query={},body,scenario='normal',now=MOCK_NOW}={}) {
   now=scenarioTime(scenario,now);
-  if(scenario==='all-languages'||scenario==='partial-translation')state.languages=['ko','en','zh-Hans','ja'];
+  if(scenario==='all-languages')state.languages=['ko','en','zh-Hans','ja'];
   const locale=query.locale||'ko';
-  // Notice and goods resolve their own per-item contentLocale fallback
-  // (ko/en required, zh-Hans/ja best-effort) instead of the site-wide
-  // "language not launched yet" gate the rest of the catalog still uses.
-  const NOTICE_LIKE_OPERATIONS=new Set(['getNotices','getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide']);
-  if(NOTICE_LIKE_OPERATIONS.has(op.operationId)){
-    if(!KNOWN_LOCALES.has(locale))failure(400,'INVALID_QUERY','요청 파라미터를 확인해 주세요.');
-  }else if(!state.languages.includes(locale)){
+  if(!state.languages.includes(locale)){
     failure(400,KNOWN_LOCALES.has(locale)?'LOCALE_NOT_READY':'INVALID_QUERY',KNOWN_LOCALES.has(locale)?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
   }
   if(scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
@@ -341,7 +336,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   const date=dayKst(now);
   let data,status=200;
   const mutate=()=>{state.revision++;now=isoKst(+new Date(now)+state.revision);return now;};
-  const getAvailability=goodsId=>inventoryFor(state,goodsId,{failure,sold});
+  const getAvailability=goodsId=>inventoryFor(state,goodsId,{failure,sold,locale});
   const extra=adminExecute(op,state,{params,body,scenario,mutate,failure,DATES});
   if(extra)return {status:extra.status||200,data:extra.data,now,locale};
   switch(op.operationId){
@@ -355,31 +350,33 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       return {status:204,data:null,now,locale};
     }
     case 'getNotices':{
-      let items=state.notices.filter(n=>!state.deleted.has(n.id)&&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)).map(n=>{
-        const contentLocale=resolveContentLocale(n.translations,locale);
-        const t=n.translations[contentLocale];
-        return {id:n.id,type:n.type,contentLocale,title:t.title,body:t.body,links:n.links.map(l=>({url:l.url,label:l.labels[contentLocale],target:'_blank'})),createdAt:n.createdAt};
+      let items=state.notices.filter(n=>!state.deleted.has(n.id)
+        &&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)
+        &&hasContentLocale(n.translations,locale)
+        &&n.links.every(link=>hasContentLocale(link.labels,locale))).map(n=>{
+        const t=n.translations[locale];
+        return {id:n.id,type:n.type,contentLocale:locale,title:t.title,body:t.body,links:n.links.map(l=>({url:l.url,label:l.labels[locale],target:'_blank'})),createdAt:n.createdAt};
       });
-      if(scenario==='new-notice')items.push({id:'notice-new',type:'GENERAL',contentLocale:locale==='ko'?'ko':'en',title:locale==='ko'?'추가 예시 공지':'New sample',body:locale==='ko'?'새 공지 버튼 검증용':'Mock new content',links:[],createdAt:now});
+      if(scenario==='new-notice'&&['ko','en'].includes(locale))items.push({id:'notice-new',type:'GENERAL',contentLocale:locale,title:locale==='ko'?'추가 예시 공지':'New sample',body:locale==='ko'?'새 공지 버튼 검증용':'Mock new content',links:[],createdAt:now});
       if(scenario==='deleted')items=items.filter(n=>n.id!=='notice-1');
       if(empty)items=[];
       items.sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)||a.id.localeCompare(b.id));
       if(missing)items.forEach(n=>n.links=[]);
       data={items,visibleIds:items.map(n=>n.id),asOfDate:date};break;
     }
-    case 'getGoods':data={items:empty?[]:state.goods.map(g=>resolveGoodsResponse(g,locale))};break;
+    case 'getGoods':data={items:empty?[]:state.goods.filter(g=>goodsReadyForLocale(g,locale)).map(g=>resolveGoodsResponse(g,locale))};break;
     case 'getGoodsImage':data=null;break;
-    case 'getGoodsAvailability':data={items:empty?[]:state.goods.map(g=>getAvailability(g.id))};break;
+    case 'getGoodsAvailability':data={items:empty?[]:state.goods.filter(g=>goodsReadyForLocale(g,locale)).map(g=>getAvailability(g.id))};break;
     case 'getAdminGoods':data={items:empty?[]:state.goods.map(g=>inventoryFor(state,g.id,{admin:true,sold,failure}))};break;
     case 'getGood':{
-      const g=state.goods.find(g=>g.id===params.goodsId);if(!g)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+      const g=findPublicGoods(state,params.goodsId,locale);
       data=resolveGoodsResponse(g,locale);
       if(missing)data.description=null;
       break;
     }
-    case 'getGoodAvailability':data=getAvailability(params.goodsId);break;
+    case 'getGoodAvailability':data=getAvailability(findPublicGoods(state,params.goodsId,locale).id);break;
     case 'getPaymentGuide':{
-      const g=state.goods.find(g=>g.id===params.goodsId);if(!g)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+      const g=findPublicGoods(state,params.goodsId,locale);
       const resolved=resolveGoodsResponse(g,locale);
       data={goodsId:g.id,name:resolved.name,price:g.price,account:missing?null:{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'},transferLink:null,instructions:['현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.','목 응답은 실제 송금을 지원하지 않습니다.'],locationText:missing?null:'예시 판매 장소',hoursText:missing?null:'예시 운영 시간'};
       break;
@@ -422,7 +419,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       data={date,status:ticketStatus,unitPrice:unconfigured?null:money(1500),transferOpensAt:unconfigured?null:`${schedule}T00:00:00+09:00`,transferClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,pickupOpensAt:unconfigured?null:`${schedule}T13:00:00+09:00`,pickupClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,account:open?{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'}:null,transferLink:null,paymentSettingsVersion:unconfigured?null:1,mapTarget:unconfigured?null:{mapId:'map-overview',placeId:'place-ticket',pinId:'pin-ticket',mapVersion:'mock-map-1'},instructions:['실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.','입금과 지급 여부는 현장에서 확인합니다.']};break;
     }
     case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['START는 참여 시작만 기록합니다.','공통 QR 인식 1회당 1개, 하루 4개 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
-    case 'verifyStampReceipt':if(scenario==='invalid-code'||typeof body.code!=='string'||body.code.trim()!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');data={verified:true};break;
+    case 'verifyStampReceipt':if(scenario==='invalid-code'||typeof body.code!=='string'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');data={verified:true};break;
     case 'getAdminNotices':data={items:empty?[]:structuredClone(state.notices).filter(n=>!state.deleted.has(n.id)).sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)||a.id.localeCompare(b.id))};break;
     case 'getAdminNotice':if(state.deleted.has(params.noticeId))failure(404,'NOT_FOUND','삭제된 공지입니다.');data=find(state.notices,params.noticeId);if(missing)Object.assign(data,{templateId:null,links:[]});break;
     case 'postAdminNotice':case 'putAdminNotice':{

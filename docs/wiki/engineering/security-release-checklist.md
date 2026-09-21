@@ -16,7 +16,7 @@
   게시 뒤 controlled restart가 있어야 공개 snapshot에 반영된다.
 - 챗봇, 관리자 공연·지도 편집, CDN purge와 다중 인스턴스 전파는 활성 기능이 아니다.
   Cloudflare/Caddy의 실제 cache 정책은 배포 실측 게이트로만 다룬다.
-- 공지는 plain string과 HTTPS 링크를 사용한다. 서버가 임의 외부 URL을 fetch하지 않으므로
+- 공지는 plain string과 host가 있는 `https` URI 링크만 사용한다. 서버가 임의 외부 URL을 fetch하지 않으므로
   metadata endpoint SSRF 테스트는 적용하지 않는다. 클라이언트는 공지 문자열을 HTML로 렌더하지
   않는지 별도 프런트 검증으로 확인한다.
 - 공지 제목·본문·링크의 길이·개수 정책은 아직 [API v2 결정 대기](../../../api-v2/DECISIONS.md)에
@@ -36,6 +36,7 @@
 | 요청 제한 | public/admin/login/stamp token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After` | `RateLimitTest`, release E2E HTTP-21·22 |
 | idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match` | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest` |
 | JSON 본문 경계 | `/api/v2`의 JSON `POST`·`PUT`·`PATCH`·`DELETE` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
+| 수령 인증·동적 결제 안내 | 수령 코드는 공백을 제거하지 않은 정확한 6자리 숫자만 허용하고, 성공 수령 인증과 `GET /api/v2/goods/{goodsId}/payment-guide`는 `Cache-Control: no-store` | `StampReceiptVerifierTest`, `CatalogControllerOpenApiTest`, `GoodsFlowIntegrationTest` |
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |
 | 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; Spring Security와 선행 rate/JSON 거부 오류도 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest`, `RateLimitTest` |
 | 오류·로그 | 오류 envelope와 startup/cleanup/API 오류 로그에 connection string·비밀값·stack trace를 넣지 않음 | `GlobalApiExceptionHandlerTest`, `CatalogSnapshotProviderTest`, `CleanupJobSafetyTest` |
