@@ -44,7 +44,7 @@ class OperationalCatalogDraftTest {
         for (JsonNode day : draft.path("festivalDays")) {
             String date = day.path("festivalDate").asString();
             gaps.add(fill((ObjectNode) day, "opensAt", date + "T11:00:00+09:00"));
-            gaps.add(fill((ObjectNode) day, "closesAt", nextDay(date) + "T00:00:00+09:00"));
+            gaps.add(fill((ObjectNode) day, "closesAt", date + "T23:00:00+09:00"));
         }
         fillImages(draft.path("spaces"), gaps);
         fillImages(draft.path("artists"), gaps);
@@ -87,7 +87,4 @@ class OperationalCatalogDraftTest {
         return field;
     }
 
-    private static String nextDay(String date) {
-        return java.time.LocalDate.parse(date).plusDays(1).toString();
-    }
 }
