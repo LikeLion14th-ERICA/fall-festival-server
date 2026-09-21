@@ -203,9 +203,10 @@ tag, 대응 Docker image digest와 이미지 보존 여부를 확인하고 D가 
 
 혼잡도 저장은 구현된 인증 관리자 API다. 먼저 관리자 인증 access JWT로
 `GET /api/v2/admin/crowding`을 호출해 현재 상태의 `ETag`와 `data.operatingDay`를 얻는다.
-`data.operatingDay`가 이번 저장의 의도된 운영일인지 먼저 확인한다. 축제 전·운영일 사이
-공백일에는 다음 운영일, 축제 종료 뒤에는 마지막 운영일이 대상일 수 있다. 의도한 운영일이
-아니면 `PUT`하지 않는다. 확인 뒤 같은 관리자 인증으로 다음 요청을 보낸다.
+Asia/Seoul의 오늘이 실제 published `FestivalDay`이고 `data.operatingDay`도 오늘과 같은지 먼저
+확인한다. 축제 전·운영일 사이 공백일에는 다음 운영일, 축제 종료 뒤에는 마지막 운영일이
+응답될 수 있지만 그 날짜를 저장 대상으로 사용하지 않고 `PUT`하지 않는다. 확인 뒤 같은 관리자
+인증으로 다음 요청을 보낸다.
 
 ```http
 PUT /api/v2/admin/crowding
@@ -219,11 +220,12 @@ Content-Type: application/json
 
 성공과 동일 요청 재시도는 `204 No Content`다. `FULL`은 `{"level":"FULL",
 "confirmFull":true}`로만 저장한다. `If-Match` 또는 `Idempotency-Key`가 없으면 `428`, 형식이
-잘못되면 `400`, 다른 운영자가 먼저 저장해 ETag가 바뀌었으면 `409`다. `409`에서는 현재 GET을
-다시 호출해 새 ETag를 확인하고, 의도한 최신 상태를 검토한 뒤 새로운 Idempotency-Key로 다시
-요청한다. 인증 실패는 `401`이며 관리자 계정·권한을 확인한다. 성공 후 공개 `GET /api/v2/crowding`
-의 ETag와 상태가 바뀌었는지 다음 polling 또는 즉시 조회로 확인한다. 혼잡도 저장은 동적
-운영 데이터이므로 backend 재시작이나 catalog rollback이 필요 없다.
+잘못되면 `400`이다. `409 EDIT_CONFLICT`이면 다른 운영자가 먼저 저장해 ETag가 바뀐 것이므로
+현재 GET을 다시 호출해 새 ETag를 확인하고, 의도한 최신 상태를 검토한 뒤 새로운
+Idempotency-Key로 다시 요청한다. `409 NOT_FESTIVAL_DAY`이면 저장을 중단하고 재시도하지 않는다.
+인증 실패는 `401`이며 관리자 계정·권한을 확인한다. 성공 후 공개 `GET /api/v2/crowding`의
+ETag와 상태가 바뀌었는지 다음 polling 또는 즉시 조회로 확인한다. 혼잡도 저장은 동적 운영
+데이터이므로 backend 재시작이나 catalog rollback이 필요 없다.
 
 ## 6. 체크리스트 요약
 
@@ -236,6 +238,6 @@ Content-Type: application/json
 - [ ] backup recovery set의 보존 기간과 삭제 예정 시점이 정책에 맞고, DB·media가 함께 관리된다.
 - [ ] 복구 시 Flyway V1~V26 history/checksum, published revision, media 이미지 조회를 확인했다.
 - [ ] 재기동 뒤 실제로 연결된 굿즈 이미지의 확인된 공개 URL이 `200`을 반환했다(이미지가 없으면 이 항목은 미완료다).
-- [ ] 혼잡도 저장 전 GET 응답의 `data.operatingDay`가 의도한 운영일인지 확인했고, 관리자 JWT, 최신 `If-Match`, `Idempotency-Key`를 사용해 204 및 공개 조회 반영을 확인했다.
+- [ ] 혼잡도 저장 전 Asia/Seoul의 오늘이 실제 `FestivalDay`이고 GET의 `data.operatingDay`도 오늘인지 확인했다. 관리자 JWT, 최신 `If-Match`, `Idempotency-Key`를 사용해 204 및 공개 조회 반영을 확인했으며, `NOT_FESTIVAL_DAY`이면 중단했다.
 - [ ] A1 접속·container/image·실행 옵션·Caddy·Flyway·복구 세트의 실제 증거와 중단 판단을 작업 기록에 남겼다.
 - [ ] 이 문서의 역할 분담표에 모든 작업의 주 담당·대체 담당·실제 연락 채널·인수인계 시각이 기록돼 있다.
