@@ -67,7 +67,7 @@ report hash를 반드시 연결한다. registry 주소, credential, secret, host
 | OpenAPI contract | 후보 계약과 생성 artifact가 일치하는지 | `api-v2/openapi.json` SHA-256, source revision, contract check 결과 |
 | Migration | Flyway history와 후보 SQL checksum이 일치하는지 | migration 목록·checksum, schema 대상, `mutationAuthorized` 판정 |
 | Operation mapping | 44개 OpenAPI operation classification과 provider·scenario mapping이 후보와 일치하는지 | classification/provider·scenario mapping hash, check 결과, 누락·중복 0 판정 |
-| Scan | dependency, container, SAST/secret/license scan 결과 | scanner·database version, Trivy image scan evidence, 결과 요약, report hash, waiver 승인 ID |
+| Scan | dependency/container vulnerability, secret, misconfiguration 결과와 CodeQL Java/Kotlin 분석 | Trivy image/filesystem scan evidence, `HIGH,CRITICAL` fail-closed 결과, CodeQL report·check reference, report hash, waiver 승인 ID |
 | PostgreSQL 17 | 지원 PostgreSQL 17 staging에서 preflight와 migration 확인 | server version, schema, Flyway result/checksum, read-only preflight 결과 |
 | Automated release E2E | disposable Testcontainers DB에서 후보 import/publish, 공개 흐름, admin 경계, rollback/restart 관계 | 실행 ID, exit code, scenario summary, `/healthz`, `/readyz`, `meta.revision` |
 | Staging smoke | 실제 staging 후보 image의 공개·관리자 경계와 readiness 확인 | staging target reference, image digest, smoke 결과, `/healthz`, `/readyz`, `meta.revision` |
@@ -107,6 +107,13 @@ migrationChecksums: <protected-report-id>
 배포·smoke·load·browser handoff·recovery는 이 자동 E2E와 별도 실행이며, 각각의 실제 target과
 artifact ID를 protected record에 연결한다. Docker 부재로 테스트를 skip했거나 실행 중인 서버
 없이 명령 형식만 확인한 경우도 PASS가 아니다.
+
+Trivy image·filesystem scan은 `HIGH,CRITICAL`을 fail-closed로 처리하고 `ignore-unfixed=false`,
+`exit-code=1`을 사용한다. CodeQL Java/Kotlin 분석 결과도 evidence에 연결한다. GitHub CodeQL
+workflow만으로는 alert severity의 merge 차단이 자동 설정되지 않으므로, repository admin이
+`main` 보호 ruleset에서 CodeQL security alerts `High or higher`와 관련 CI checks를 required로
+설정해야 `codeql` gate를 `passed`로 판정할 수 있다. 이 조건이 확인되지 않으면 release를
+block하며, 저장소에는 실제 ruleset·registry·secret·host 값을 기록하지 않는다.
 
 부하 결과에는 profile, 대상 endpoint와 dataset, 실행 시간, 성공·실패·timeout, latency
 percentile, JVM·DB 자원, rate limit 응답을 함께 기록한다. 운영 용량을 staging 한 번의 결과로

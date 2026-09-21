@@ -6,6 +6,15 @@
 coverage·scan·PostgreSQL 17·E2E·load·recovery·browser handoff gate는 [릴리스 증거 runbook](release-evidence-runbook.md)을
 따른다. 이 문서는 아래 명령의 결과를 대체하지 않고 후보별 판정과 보호된 운영 기록 연결을 정의한다.
 
+CI의 Trivy image·filesystem vulnerability/secret/misconfiguration scan은 `HIGH,CRITICAL`을
+fail-closed로 처리한다(`ignore-unfixed=false`, `exit-code=1`). release candidate image는
+immutable digest를 대상으로 같은 High/Critical 기준의 Trivy evidence를 남겨야 한다.
+CodeQL workflow는 Java/Kotlin 분석 결과를 생성한다. GitHub CodeQL workflow만으로는 alert
+severity를 merge 차단으로 병합하지 않으므로, repository admin이 `main` 보호 ruleset에서
+CodeQL security alerts `High or higher`와 관련 CI checks를 required로 설정해야 evidence의
+`codeql` gate를 `passed`로 판정할 수 있다. 이 조건이 승인 기록에 확인되지 않으면 release를
+block한다. 이 문서는 현재 repository ruleset의 존재 여부를 판정하지 않는다.
+
 ## 서비스 백엔드
 
 이 저장소는 `LikeLion14th-ERICA/fall-festival-server` 백엔드 저장소다.
