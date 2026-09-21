@@ -144,4 +144,24 @@ class CrowdingControllerTest {
                 assertThat(api.code()).isEqualTo("CROWDING_SCHEDULE_UNCONFIGURED");
             });
     }
+
+    @Test
+    void rejectsAScheduleWhoseCloseFallsOnTheNextLocalDate() {
+        when(contextService.currentPublished()).thenReturn(ApiMetaTestFixtures.PUBLISHED_CONTEXT);
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(
+                java.time.LocalDate.parse("2030-10-01"),
+                OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
+                OffsetDateTime.parse("2030-10-02T00:00:00+09:00")
+            )
+        ));
+
+        assertThatThrownBy(() -> serviceAt("2030-10-01T05:00:00Z").current(request))
+            .isInstanceOf(ApiException.class)
+            .satisfies(exception -> {
+                ApiException api = (ApiException) exception;
+                assertThat(api.status().value()).isEqualTo(503);
+                assertThat(api.code()).isEqualTo("CROWDING_SCHEDULE_UNCONFIGURED");
+            });
+    }
 }
