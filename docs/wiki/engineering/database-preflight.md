@@ -99,5 +99,6 @@ JDBC URL·credential·서버 예외 메시지·stack trace를 출력하지 않�
 `postgres:17-alpine` 검증은 빈 schema에서 preflight가 mutation 없이 완료되는지와 현재 포함된
 모든 versioned migration 적용 후 실제 checksum 대조, 읽기 전용 SELECT·rollback, 감사·카탈로그·공지
 table 무변경을 확인한다. 지원 major는 정확히 16과 17이며 다른 major는 계속
-`POSTGRESQL_VERSION_REQUIRES_REVIEW`로 중단한다. Docker가 없으면 통합 검증이 skip되므로 실행
-결과의 skipped 개수를 반드시 보고한다.
+`POSTGRESQL_VERSION_REQUIRES_REVIEW`로 중단한다. release preflight E2E와 PostgreSQL 16
+통합 검증은 Docker가 없으면 skip하지 않고 실패한다. PostgreSQL 17 호환성 검증만 환경 의존
+선택 검증으로 skip될 수 있으므로 전체 suite 결과에서는 skipped 개수를 함께 보고한다.

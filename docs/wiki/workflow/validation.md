@@ -34,7 +34,8 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 랜덤 포트의 서버를 새로 기동한다. `/readyz`와 published snapshot, 후보 revision을
 가진 공개 catalog 경로와 관리자 경계를 하나의 릴리스 게이트로 확인한다. 응답에서 ID를
 읽으므로 후보 데이터의 ID가 바뀌어도 관계가 보존되면 검사가 유지된다.
-Docker 엔진이 없으면 이 테스트는 skip하지 않고 실패한다.
+ 이 표의 release E2E는 Docker 엔진이 없으면 skip하지 않고 실패한다. Docker가 없는
+ focused 실행의 성공을 출시 검증 성공으로 취급하지 않는다.
 
 기본 흐름 fixture는 `dev/catalog/frontend-mock-catalog.json`이다. 공간·전체/구역 지도·핀·장소·
 공연·타임테이블·티켓·스탬프의 연결을 검사하는 로컬 전용 fixture이며, 원격 개발 DB나 운영
@@ -61,11 +62,13 @@ Docker 엔진이 없으면 이 테스트는 skip하지 않고 실패한다.
 | HTTP-17 | 게시·재시작·rollback lifecycle | A 게시 → 실행 server의 A snapshot 유지 → 재시작의 B 노출 → expected-current rollback → 재시작의 새 revision A 복원과 동적 상태 보존 |
 | HTTP-18 | 공개 입력 오류 후 복구 | 잘못된 날짜·분류·지도 query와 존재하지 않는 공간·지도·장소·출연진·공연이 안정 오류·후보 meta를 내고, 잘못된 admin bearer가 공개 탐색을 막지 않으며 다음 config 조회가 복구됨 |
 | HTTP-19 | 축제 날짜 경계 | 첫 FestivalDay 전과 마지막 FestivalDay 후에 config 기본 날짜와 기본 lineup 날짜가 각각 첫째·마지막 날로 함께 고정됨 |
-| HTTP-20 | 미게시 축제 배포 | 다른 축제의 seed가 있어도 선택 회차에 published revision이 없으면 `/healthz`는 살아 있고 `/readyz`·공개 config는 안전한 `CATALOG_NOT_READY`로 실패 |
+| HTTP-20 | 미게시 축제 배포 | 다른 축제의 seed가 있어도 선택 회차에 published revision이 없으면 `/healthz`는 살아 있고 `/readyz`는 `not_ready`, 공개 config는 안전한 `CATALOG_NOT_READY`로 실패 |
 | HTTP-21 | 공개 읽기 rate limit | trusted proxy client 단위 429·`Retry-After`·안전 envelope, 다른 client의 독립 bucket, clock 회복 뒤 재조회와 서버 생성 request ID를 실제 HTTP로 확인 |
 | HTTP-22 | 관리자 로그인 rate limit | 잘못된 비밀번호 추측이 trusted proxy client 단위로 제한되고 다른 client·refill 뒤에는 다시 인증 오류로 처리되며 cookie를 발급하지 않음 |
+| HTTP-23 | 티켓 송금 초 경계 | `09:59:59`·`10:00:00`·`17:59:59`·`18:00:00` KST에서 `DAILY_CLOSED`/`TRANSFER_OPEN`, 계좌 노출, settings version, 이전·현재 ETag의 200/304가 정확히 전환됨 |
+| HTTP-24 | 혼잡도 일정 경계 | 첫 축제일 전·중간 공백일·마지막 날 뒤와 개장·마감 시각의 `operatingStatus`, 비축제일 PUT 409, 운영 시간 밖 축제일 저장, 누락·stale `If-Match`의 428/409을 실제 HTTP로 확인 |
 
-위 HTTP-01~22는 서로 다른 출시 위험을 나타내는 **22개 시나리오**다. JUnit test
+위 HTTP-01~24는 서로 다른 출시 위험을 나타내는 **24개 시나리오**다. JUnit test
 method는 관계된 요청을 한 transaction·server lifecycle 안에서 묶으므로 시나리오 수와
 method 수가 같지 않다.
 
@@ -95,6 +98,10 @@ cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dfestival.release-e2e.m
 ```powershell
 cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dfestival.release-e2e.manifest=<candidate-manifest-path> -Dfestival.release-e2e.require-user-journey-content=true -Dtest=ReleaseReadinessHttpE2eTest test"
 ```
+
+Spring HTTP E2E는 cleanup scheduler를 명시적으로 끄고 전용 cleanup datasource 값을
+비운다. `ReleaseReadinessHttpE2eTest`는 scheduler bean과 전용 pool이 없는지도 확인한다.
+따라서 개발 PC의 cleanup 환경변수가 Testcontainers 밖 DB 정리를 시작할 수 없다.
 
 이 검사는 원격 개발 DB, 계정, 배포 환경을 읽거나 변경하지 않는다. 원격 DB의
 `DatabasePreflightApplication`, 제공자 role provisioning, 실제 배포 smoke 검증과
@@ -130,14 +137,18 @@ main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource�
 | OPS-15 | rollback 감사 실패 원자성 | rollback 중 새 revision 복제와 ROLLBACK audit 뒤의 publish audit이 실패하면 복제·두 audit·pointer가 함께 rollback되고 재시도는 성공 |
 | OPS-16 | 독립 CLI publish 경쟁 | 실제 두 JVM이 같은 festival 행 잠금에서 대기한 뒤 한 publish만 승리하고 다른 draft는 `BASE_REVISION_CONFLICT`·부수 audit 없음으로 끝남 |
 | OPS-17 | 독립 CLI publish/rollback 경쟁 | 실제 publish와 rollback JVM이 같은 잠금에서 직렬화되어 승자만 새 published revision·필요 audit을 남기고 패자는 기준 revision 충돌로 끝남 |
+| OPS-18 | 빈 DB preflight 반복 | JDK+PostgreSQL driver child JVM이 빈 DB를 두 번 읽어도 `READ_ONLY_DATABASE_PREFLIGHT_COMPLETE`, read-only transaction, relation/Flyway/festival/audit 미생성을 보존 |
+| OPS-19 | Catalog semantic 왕복 | 실제 CLI의 draft export → import → validate → draft export → publish가 generated ID·감사 시각 외 의미 단위에서 동일하고 번역·과거 지도 자산·공연·티켓·스탬프·null PLACE filter를 보존하며 source draft는 draft로 남음 |
+| OPS-20 | legacy 티켓 일정 복구 | 날짜·송금·수령의 필수 일정 6개 각각 누락 시 export finding과 import/validate/publish 차단·무변경을 확인하고, 값을 복구한 retry만 게시 가능 |
 
-위 OPS-01~17은 **17개 시나리오**다. HTTP 22개와 합쳐 현재 backend release
-E2E 시나리오는 **39개**다.
+`null` PLACE filter는 현재 계약상 정상이며 OPS-19에서 lossless로 보존한다. 위
+OPS-01~20은 **20개 시나리오**다. HTTP 24개와 합쳐 현재 backend release E2E 시나리오는
+**44개**다.
 
 운영 도구 focused 검증은 다음 명령으로 실행한다.
 
 ```powershell
-cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,OperationalReleaseGateE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,OperationalReleaseGateE2eTest,DatabasePreflightEmptyDatabaseE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"
 ```
 
 이 검사는 실제 원격 DB의 preflight 승인, provider role provisioning, SSH tunnel, 배포된 JAR와

@@ -35,6 +35,7 @@ import java.util.concurrent.TimeoutException;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -80,6 +81,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles("db")
 @Import(CrowdingConcurrencyE2eTest.ClockConfiguration.class)
 @Testcontainers
+@Timeout(value = 90, unit = TimeUnit.SECONDS)
 class CrowdingConcurrencyE2eTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
