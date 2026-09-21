@@ -57,7 +57,7 @@ jobs:
       - working-directory: api-v2
         run: npm ci && npm run check
       - name: Verify redacted release evidence guardrails
-        run: node --test tools/release-validation/validate-evidence.test.mjs
+        run: node --test tools/release-validation/validate-evidence.test.mjs tools/release-validation/validate-recovery-plan.test.mjs
 
   pg17-release-e2e:
     name: release-pg17-http-and-ops-e2e
@@ -75,8 +75,6 @@ jobs:
           cache: maven
           cache-dependency-path: pom.xml
       - name: Run required PostgreSQL 17 migration and release HTTP/OPS tests
-        env:
-          FESTIVAL_RELEASE_POSTGRES_IMAGE: postgres:17.11-alpine
         run: >-
           sh ./mvnw --batch-mode --no-transfer-progress -Prelease-pg17
           -Dtest=Postgresql17MigrationReleaseTest,ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,OperatorToolProcessE2eTest

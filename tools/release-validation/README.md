@@ -69,3 +69,15 @@ An `approved` evidence file requires every gate to pass, separate/empty restore
 targets, measured and approved RPO/RTO, and SLO, alert receipt, and on-call
 references. Without those inputs the correct decision is `blocked`, not approval.
 The validator rejects credential-like keys and database connection strings.
+
+Validate the separately redacted recovery plan before any capture or restore:
+
+```powershell
+node tools/release-validation/validate-recovery-plan.mjs <redacted-recovery-plan.json>
+```
+
+It requires a staging-only environment, different source and empty destination
+identities, a quiescent writer window, paired DB/media archive checksums, and
+baseline checks before a write probe. It intentionally does not run `pg_dump`
+or `pg_restore`: those commands and the actual targets remain in the protected
+operator procedure.

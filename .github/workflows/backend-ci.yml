@@ -46,7 +46,7 @@ jobs:
         working-directory: api-v2
         run: npm run check
       - name: Verify redacted release evidence guardrails
-        run: node --test tools/release-validation/validate-evidence.test.mjs
+        run: node --test tools/release-validation/validate-evidence.test.mjs tools/release-validation/validate-recovery-plan.test.mjs
 
   docker-build:
     name: docker-build
