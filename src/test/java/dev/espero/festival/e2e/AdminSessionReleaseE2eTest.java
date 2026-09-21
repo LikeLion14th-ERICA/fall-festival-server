@@ -166,6 +166,40 @@ class AdminSessionReleaseE2eTest {
         assertError(logoutWithoutAccess, 401, "UNAUTHORIZED");
     }
 
+    @Test
+    @Timeout(value = 60, unit = TimeUnit.SECONDS)
+    void storesSqlShapedNoticeInputLiterallyWithoutChangingAnExistingNotice() throws Exception {
+        HttpResponse<String> login = send(post("/api/v2/admin/sessions")
+            .header("Origin", ORIGIN)
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(
+                "{\"username\":\"auth-e2e-admin\",\"password\":\"auth-e2e-password\"}"
+            ))
+            .build());
+        assertThat(login.statusCode()).isEqualTo(200);
+        String access = json(login, "$.data.accessToken");
+
+        HttpResponse<String> baseline = createNotice(access, "notice-sql-baseline", "기존 공지", "Baseline notice");
+        assertThat(baseline.statusCode()).isEqualTo(201);
+        String baselineId = json(baseline, "$.data.id");
+
+        String injectedTitle = "제목', '대체 본문'); DELETE FROM notices; --";
+        HttpResponse<String> injected = createNotice(access, "notice-sql-shaped", injectedTitle, "SQL-shaped notice");
+        assertThat(injected.statusCode()).isEqualTo(201);
+        String injectedId = json(injected, "$.data.id");
+        assertThat(json(injected, "$.data.translations.ko.title")).isEqualTo(injectedTitle);
+
+        HttpResponse<String> existing = send(get("/api/v2/admin/notices/" + baselineId)
+            .header("Authorization", "Bearer " + access).build());
+        assertThat(existing.statusCode()).isEqualTo(200);
+        assertThat(json(existing, "$.data.translations.ko.title")).isEqualTo("기존 공지");
+
+        HttpResponse<String> stored = send(get("/api/v2/admin/notices/" + injectedId)
+            .header("Authorization", "Bearer " + access).build());
+        assertThat(stored.statusCode()).isEqualTo(200);
+        assertThat(json(stored, "$.data.translations.ko.title")).isEqualTo(injectedTitle);
+    }
+
     private HttpRequest.Builder get(String path) {
         return request(path).GET();
     }
@@ -177,6 +211,19 @@ class AdminSessionReleaseE2eTest {
 
     private HttpRequest.Builder delete(String path) {
         return request(path).DELETE();
+    }
+
+    private HttpResponse<String> createNotice(String access, String idempotencyKey, String koreanTitle, String englishTitle)
+        throws Exception {
+        String body = """
+            {"type":"GENERAL","translations":{"ko":{"title":"%s","body":"본문"},"en":{"title":"%s","body":"Body"}},"links":[],"templateId":null}
+            """.formatted(koreanTitle, englishTitle);
+        return send(post("/api/v2/admin/notices")
+            .header("Authorization", "Bearer " + access)
+            .header("Content-Type", "application/json")
+            .header("Idempotency-Key", idempotencyKey)
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build());
     }
 
     private HttpRequest.Builder request(String path) {

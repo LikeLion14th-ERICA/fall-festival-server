@@ -62,7 +62,7 @@
           },
           {
             "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
-            "test": "resolvesContentLocaleWithFallbackAndKeepsTitleBodyLinkLabelInTheSameLanguage"
+            "test": "returnsOnlyItemsCompleteInTheRequestedPublishedLocale"
           }
         ]
       },

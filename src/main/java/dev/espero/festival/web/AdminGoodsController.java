@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 
 /** Authenticated administrator mutations for goods availability. */
@@ -340,20 +341,23 @@ public class AdminGoodsController {
     }
 
     private AdminGoodsResponse storedGoods(IdempotencyResponse response) {
-        try {
-            String data = objectMapper.readTree(response.body()).path("data").toString();
-            return objectMapper.readValue(data, AdminGoodsResponse.class);
-        } catch (RuntimeException exception) {
-            throw new IllegalStateException("Stored product creation response is invalid", exception);
-        }
+        return storedResponse(response, AdminGoodsResponse.class, "Stored product creation response is invalid");
     }
 
     private GoodsDeletedResponse storedDeleted(IdempotencyResponse response) {
+        return storedResponse(response, GoodsDeletedResponse.class, "Stored product deletion response is invalid");
+    }
+
+    private <T> T storedResponse(IdempotencyResponse response, Class<T> type, String errorMessage) {
         try {
             String data = objectMapper.readTree(response.body()).path("data").toString();
-            return objectMapper.readValue(data, GoodsDeletedResponse.class);
+            // HTTP input follows the current contract strictly, but a short-lived
+            // persisted replay may have been written by an adjacent deployment.
+            return objectMapper.readerFor(type)
+                .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .readValue(data);
         } catch (RuntimeException exception) {
-            throw new IllegalStateException("Stored product deletion response is invalid", exception);
+            throw new IllegalStateException(errorMessage, exception);
         }
     }
 

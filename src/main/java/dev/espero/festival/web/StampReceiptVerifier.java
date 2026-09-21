@@ -54,11 +54,10 @@ public class StampReceiptVerifier {
         if (code == null) {
             return false;
         }
-        String normalized = code.strip();
-        if (!CODE.matcher(normalized).matches()) {
+        if (!CODE.matcher(code).matches()) {
             return false;
         }
-        byte[] candidate = sha256(normalized);
+        byte[] candidate = sha256(code);
         boolean matched = false;
         for (byte[] hash : hashes) {
             matched |= MessageDigest.isEqual(hash, candidate);

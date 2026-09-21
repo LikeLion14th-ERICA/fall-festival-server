@@ -38,7 +38,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -374,6 +374,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "홈 공통 설정: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "홈 공통 설정: bad-request",
                     "value": {
@@ -593,6 +613,7 @@
           "welcome-ready",
           "error",
           "all-languages",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -623,7 +644,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "If-None-Match",
@@ -775,6 +796,20 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
               }
             }
           },
@@ -794,6 +829,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "홈 재학생존 혼잡도: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "홈 재학생존 혼잡도: bad-request",
                     "value": {
@@ -1032,6 +1087,7 @@
           "unmodified",
           "unconfigured",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ],
@@ -1063,7 +1119,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "If-None-Match",
@@ -1168,7 +1224,7 @@
                             "type": "GENERAL",
                             "contentLocale": "ko",
                             "title": "영어 미번역 예시",
-                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
@@ -1300,7 +1356,7 @@
                             "type": "GENERAL",
                             "contentLocale": "ko",
                             "title": "영어 미번역 예시",
-                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
@@ -1424,7 +1480,7 @@
                             "type": "GENERAL",
                             "contentLocale": "ko",
                             "title": "영어 미번역 예시",
-                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
@@ -1546,7 +1602,7 @@
                             "type": "GENERAL",
                             "contentLocale": "ko",
                             "title": "영어 미번역 예시",
-                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다.",
+                            "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다.",
                             "links": [],
                             "createdAt": "2030-10-01T17:00:00+09:00"
                           },
@@ -1611,6 +1667,29 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "private, no-cache, must-revalidate"
+                  ]
+                },
+                "description": "공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다."
               }
             }
           },
@@ -1630,6 +1709,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "사용자 공지 전체: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "사용자 공지 전체: bad-request",
                     "value": {
@@ -1849,6 +1948,7 @@
           "new-notice",
           "deleted",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ],
@@ -1880,7 +1980,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -1994,6 +2094,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "상품 목록: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "상품 목록: bad-request",
                     "value": {
@@ -2209,6 +2329,7 @@
           "normal",
           "empty",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -2239,7 +2360,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "If-None-Match",
@@ -2403,6 +2524,29 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "private, no-cache, must-revalidate"
+                  ]
+                },
+                "description": "공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다."
               }
             }
           },
@@ -2422,6 +2566,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "상품 목록의 판매 상태: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "상품 목록의 판매 상태: bad-request",
                     "value": {
@@ -2638,6 +2802,7 @@
           "empty",
           "sold-out",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ],
@@ -2669,7 +2834,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "goodsId",
@@ -2827,6 +2992,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "상품 상세: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "상품 상세: bad-request",
                     "value": {
@@ -3064,6 +3249,7 @@
           "missing-optional",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -3094,7 +3280,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "goodsId",
@@ -3226,6 +3412,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "상품 상세의 판매 상태: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "상품 상세의 판매 상태: bad-request",
                     "value": {
@@ -3463,6 +3669,7 @@
           "sold-out",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -3493,7 +3700,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "goodsId",
@@ -3517,6 +3724,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -3609,6 +3825,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "굿즈 계좌 안내: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "굿즈 계좌 안내: bad-request",
                     "value": {
@@ -3846,6 +4082,7 @@
           "missing-optional",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -3876,7 +4113,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "date",
@@ -4042,6 +4279,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "날짜·분류별 라인업: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "날짜·분류별 라인업: bad-request",
                     "value": {
@@ -4257,6 +4514,7 @@
           "normal",
           "empty",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -4287,7 +4545,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "artistId",
@@ -4433,6 +4691,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "출연진 상세: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "출연진 상세: bad-request",
                     "value": {
@@ -4670,6 +4948,7 @@
           "missing-optional",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -4700,7 +4979,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -5129,6 +5408,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "3일 타임테이블: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "3일 타임테이블: bad-request",
                     "value": {
@@ -5344,6 +5643,7 @@
           "normal",
           "empty",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -5374,7 +5674,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "performanceId",
@@ -5482,6 +5782,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "공연 정보 팝업: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "공연 정보 팝업: bad-request",
                     "value": {
@@ -5719,6 +6039,7 @@
           "missing-optional",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -5749,7 +6070,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -5827,6 +6148,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "고정 반입 금지 물품 안내: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "고정 반입 금지 물품 안내: bad-request",
                     "value": {
@@ -6042,6 +6383,7 @@
           "normal",
           "empty",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -6072,7 +6414,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "category",
@@ -7579,6 +7921,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "부스&마켓 목록: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "부스&마켓 목록: bad-request",
                     "value": {
@@ -7794,6 +8156,7 @@
           "normal",
           "empty",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -7824,7 +8187,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "spaceId",
@@ -7958,6 +8321,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "부스·주점·플리마켓 상세: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "부스·주점·플리마켓 상세: bad-request",
                     "value": {
@@ -8195,6 +8578,7 @@
           "missing-optional",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -8225,7 +8609,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -8386,6 +8770,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "지도 목록: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "지도 목록: bad-request",
                     "value": {
@@ -8602,6 +9006,7 @@
           "normal",
           "empty",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -8632,7 +9037,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "mapId",
@@ -8710,6 +9115,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "지도 이미지·버전: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "지도 이미지·버전: bad-request",
                     "value": {
@@ -8947,6 +9372,7 @@
           "normal",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -8977,7 +9403,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "mapVersion",
@@ -9298,6 +9724,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "지도별 핀: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "지도별 핀: bad-request",
                     "value": {
@@ -9558,6 +10004,7 @@
           "not-found",
           "version-conflict",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -9588,7 +10035,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "placeId",
@@ -9688,6 +10135,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "장소 팝업: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "장소 팝업: bad-request",
                     "value": {
@@ -9925,6 +10392,7 @@
           "missing-optional",
           "not-found",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -9955,7 +10423,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           },
           {
             "name": "If-None-Match",
@@ -10201,6 +10669,29 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "private, no-cache"
+                  ]
+                },
+                "description": "공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다."
               }
             }
           },
@@ -10220,6 +10711,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "외부인 티켓 안내: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "외부인 티켓 안내: bad-request",
                     "value": {
@@ -10438,6 +10949,7 @@
           "ended",
           "unconfigured",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ],
@@ -10469,7 +10981,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -10579,6 +11091,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "스탬프 안내·공통 QR: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "스탬프 안내·공통 QR: bad-request",
                     "value": {
@@ -10796,6 +11328,7 @@
           "normal",
           "missing-optional",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ]
@@ -10826,7 +11359,7 @@
               "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
               "default": "ko"
             },
-            "description": "config.languages의 준비 완료 언어만 요청. Accept-Language는 사용하지 않음."
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
           }
         ],
         "responses": {
@@ -10838,6 +11371,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -10883,6 +11425,26 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "locale-not-ready": {
+                    "summary": "스탬프 상품 수령 인증: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "bad-request": {
                     "summary": "스탬프 상품 수령 인증: bad-request",
                     "value": {
@@ -11176,6 +11738,7 @@
           "normal",
           "invalid-code",
           "error",
+          "locale-not-ready",
           "bad-request",
           "rate-limited"
         ],
@@ -11243,6 +11806,15 @@
                   "format": "date-time"
                 },
                 "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -11359,6 +11931,29 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             }
           },
@@ -11729,6 +12324,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             }
           },
@@ -12189,6 +12793,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -12290,7 +12903,7 @@
                             "translations": {
                               "ko": {
                                 "title": "영어 미번역 예시",
-                                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 요청 시 ko로 대체됩니다."
+                                "body": "과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다."
                               }
                             },
                             "links": [],
@@ -12765,6 +13378,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -13316,6 +13938,15 @@
                   "format": "date-time"
                 },
                 "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -13406,6 +14037,29 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             }
           },
@@ -13787,6 +14441,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -14400,6 +15063,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -14835,6 +15507,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -15231,6 +15912,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -15639,6 +16329,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -16110,6 +16809,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -16658,6 +17366,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -17150,6 +17867,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -17900,6 +18626,15 @@
                   "format": "date-time"
                 },
                 "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -18044,6 +18779,29 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             }
           },
@@ -18421,6 +19179,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -19486,6 +20253,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -19956,6 +20732,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -20807,6 +21592,15 @@
                 },
                 "description": "응답 meta.requestId와 동일"
               },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              },
               "Set-Cookie": {
                 "schema": {
                   "type": "string"
@@ -21261,6 +22055,15 @@
                 },
                 "description": "응답 meta.requestId와 동일"
               },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              },
               "Set-Cookie": {
                 "schema": {
                   "type": "string"
@@ -21685,6 +22488,15 @@
                 },
                 "description": "응답 meta.requestId와 동일"
               },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              },
               "Set-Cookie": {
                 "schema": {
                   "type": "string"
@@ -22059,6 +22871,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -23076,7 +23897,7 @@
               "zh-Hans",
               "ja"
             ],
-            "description": "실제 응답에 쓰인 언어. ko→ko. en→en, 과거 자료에 en 번역이 없으면 ko. zh-Hans·ja→이 공지에 해당 번역이 있을 때만 사용, 없으면 en, 그다음 ko. 필드별 혼합 대체는 하지 않음."
+            "description": "요청한 공개 언어와 동일. 해당 언어의 제목·본문과 모든 링크 label이 준비되지 않은 공지는 목록에서 제외하며 다른 언어로 대체하지 않음."
           },
           "title": {
             "type": "string",
@@ -23271,7 +24092,7 @@
           "alt": {
             "type": "string",
             "minLength": 1,
-            "description": "상품의 contentLocale과 같은 언어로 해석된 이미지 대체 텍스트"
+            "description": "상품의 요청 공개 언어와 같은 이미지 대체 텍스트"
           },
           "masterUrl": {
             "type": "string",
@@ -23318,7 +24139,7 @@
               "zh-Hans",
               "ja"
             ],
-            "description": "실제 응답에 쓰인 언어. 공지와 같은 대체 규칙."
+            "description": "요청한 공개 언어와 동일. 상품·이미지·색상·사이즈 번역이 모두 준비되지 않은 상품은 목록에서 제외하고 상세는 404이며 다른 언어로 대체하지 않음."
           },
           "name": {
             "type": "string",
@@ -23452,7 +24273,7 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "description": "상품명. 관리자 목록 표시용."
+            "description": "공개 응답은 선택 공개 언어의 상품명이고, 관리자 응답은 한국어 상품명. 공개 언어 번역이 미완료인 상품은 목록에서 제외."
           },
           "combinations": {
             "type": "array",
@@ -23499,7 +24320,7 @@
             "items": {
               "$ref": "#/components/schemas/Goods"
             },
-            "description": "상품 전체. 품절 상품도 유지."
+            "description": "요청 공개 언어 번역이 완결된 상품 전체. 품절 상품도 유지."
           }
         },
         "required": [
@@ -23516,7 +24337,7 @@
             "items": {
               "$ref": "#/components/schemas/Availability"
             },
-            "description": "상품 전체의 조합 상태. 실패 시 상품 목록과 독립적으로 오류 처리."
+            "description": "공개 응답은 요청 공개 언어 번역이 완결된 상품의 조합 상태이고, 관리자 응답은 전체 상품의 조합 상태. 실패 시 상품 목록과 독립적으로 오류 처리."
           }
         },
         "required": [
@@ -23564,7 +24385,7 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "description": "상품명"
+            "description": "요청 공개 언어의 상품명. 해당 언어 번역이 미완료이면 404."
           },
           "price": {
             "$ref": "#/components/schemas/Money"
@@ -24967,9 +25788,9 @@
           "url": {
             "type": "string",
             "minLength": 1,
-            "description": "외부 HTTPS 주소. 언어 공통.",
+            "description": "host가 있는 외부 HTTPS 주소. 언어 공통.",
             "format": "uri",
-            "pattern": "^https://"
+            "pattern": "^https://[^/?#\\s]+"
           },
           "labels": {
             "type": "object",

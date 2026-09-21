@@ -86,7 +86,7 @@ const scenarioTests = {
 const providerTests = {
   getConfig: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesTheConfigPayloadAgainstOpenApi'),
   getCrowding: provider('src/test/java/dev/espero/festival/web/CrowdingControllerOpenApiTest.java', 'validatesPublicSuccessAndConditionalNotModifiedResponses'),
-  getNotices: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'listsTodaysGeneralNoticeAndAnyDayLostFoundOrderedNewestFirst', 'resolvesContentLocaleWithFallbackAndKeepsTitleBodyLinkLabelInTheSameLanguage'),
+  getNotices: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'listsTodaysGeneralNoticeAndAnyDayLostFoundOrderedNewestFirst', 'returnsOnlyItemsCompleteInTheRequestedPublishedLocale'),
   getGoods: provider('src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java', 'listsGoodsWithResolvedColorsAndSizes'),
   getGoodsAvailability: provider('src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java', 'returnsAvailabilityWithCombinationsAndAllSoldOut'),
   getGood: provider('src/test/java/dev/espero/festival/web/AdminGoodsProductCreationFlowIntegrationTest.java', 'createsOpenApiShapedOptionsProductAndExposesEveryReadModel'),

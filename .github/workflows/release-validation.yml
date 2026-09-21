@@ -105,7 +105,7 @@ jobs:
           docker image inspect "$CANDIDATE_IMAGE" > "$inspection"
           node tools/release-validation/validate-image-provenance.mjs "$inspection" "$CANDIDATE_COMMIT"
       - name: Scan candidate digest for High and Critical vulnerabilities
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ needs.validate-candidate-input.outputs.image }}
           format: sarif

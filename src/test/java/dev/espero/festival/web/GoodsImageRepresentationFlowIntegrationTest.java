@@ -1,6 +1,7 @@
 package dev.espero.festival.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +25,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -62,11 +64,15 @@ class GoodsImageRepresentationFlowIntegrationTest {
     @Autowired
     private NamedParameterJdbcTemplate jdbc;
 
+    @MockitoBean
+    private CatalogSnapshotProvider snapshots;
+
     private MockMvc mvc;
 
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        when(snapshots.publishedLocales()).thenReturn(List.of("ko", "en", "zh-Hans", "ja"));
         jdbc.update("DELETE FROM goods_image_translations", Map.of());
         jdbc.update("DELETE FROM goods_images", Map.of());
         jdbc.update("DELETE FROM media_assets", Map.of());
@@ -85,7 +91,7 @@ class GoodsImageRepresentationFlowIntegrationTest {
         UUID first = insertImage(goodsId, 0, "앞면", "Front");
         UUID second = insertImage(goodsId, 1, "뒷면", "Back");
 
-        mvc.perform(get("/api/v2/goods").queryParam("locale", "zh-Hans"))
+        mvc.perform(get("/api/v2/goods").queryParam("locale", "en"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.items[0].contentLocale").value("en"))
             .andExpect(jsonPath("$.data.items[0].images[0].alt").value("Front"))
@@ -103,6 +109,20 @@ class GoodsImageRepresentationFlowIntegrationTest {
             .andExpect(jsonPath("$.data.images[0].alt").value("앞면"))
             .andExpect(jsonPath("$.data.images[1].masterUrl")
                 .value("/api/v2/media/goods-images/" + second + "/master"));
+    }
+
+    @Test
+    void hidesGoodsWhoseImageAltIsIncompleteForTheRequestedPublishedLocale() throws Exception {
+        UUID goodsId = insertGoods();
+        insertGoodsTranslation(goodsId, "zh-Hans", "商品");
+        insertImage(goodsId, 0, "앞면", "Front");
+
+        mvc.perform(get("/api/v2/goods").queryParam("locale", "zh-Hans"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.empty()));
+        mvc.perform(get("/api/v2/goods/" + goodsId).queryParam("locale", "zh-Hans"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
     }
 
     @Test
@@ -162,6 +182,11 @@ class GoodsImageRepresentationFlowIntegrationTest {
         jdbc.update("INSERT INTO goods_translations (goods_id, locale, name) VALUES (:id, 'en', 'Goods')",
             Map.of("id", goodsId));
         return goodsId;
+    }
+
+    private void insertGoodsTranslation(UUID goodsId, String locale, String name) {
+        jdbc.update("INSERT INTO goods_translations (goods_id, locale, name) VALUES (:id, :locale, :name)",
+            Map.of("id", goodsId, "locale", locale, "name", name));
     }
 
     private UUID insertImage(UUID goodsId, int sortOrder, String koAlt, String enAlt) {

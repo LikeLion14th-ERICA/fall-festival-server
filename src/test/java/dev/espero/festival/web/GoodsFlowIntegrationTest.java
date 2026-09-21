@@ -1,11 +1,13 @@
 package dev.espero.festival.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import dev.espero.festival.support.PostgresTestImages;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -48,11 +51,15 @@ class GoodsFlowIntegrationTest {
     @Autowired
     private NamedParameterJdbcTemplate jdbc;
 
+    @MockitoBean
+    private CatalogSnapshotProvider snapshots;
+
     private MockMvc mvc;
 
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).build();
+        when(snapshots.publishedLocales()).thenReturn(List.of("ko", "en", "zh-Hans", "ja"));
         jdbc.update("DELETE FROM goods_combinations", Map.of());
         jdbc.update("DELETE FROM goods_color_translations", Map.of());
         jdbc.update("DELETE FROM goods_colors", Map.of());
@@ -86,6 +93,10 @@ class GoodsFlowIntegrationTest {
     void returnsAvailabilityWithCombinationsAndAllSoldOut() throws Exception {
         UUID goodsId = insertOptionsGoods();
 
+        mvc.perform(get("/api/v2/goods-availability").param("locale", "en"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items[0].name").value("Mock T-Shirt"));
+
         mvc.perform(get("/api/v2/goods/" + goodsId + "/availability"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.combinations", org.hamcrest.Matchers.hasSize(1)))
@@ -105,6 +116,7 @@ class GoodsFlowIntegrationTest {
 
         mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide"))
             .andExpect(status().isOk())
+            .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(jsonPath("$.data.account").doesNotExist());
 
         jdbc.update("""
@@ -116,8 +128,37 @@ class GoodsFlowIntegrationTest {
             """, new MapSqlParameterSource("festivalId", FESTIVAL_ID));
 
         mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide"))
+            .andExpect(header().string("Cache-Control", "no-store"))
             .andExpect(jsonPath("$.data.account.bankName").value("목 은행"))
             .andExpect(jsonPath("$.data.transferLink").doesNotExist());
+    }
+
+    @Test
+    void rejectsUnpublishedLocalesAndHidesGoodsWithIncompletePublishedTranslations() throws Exception {
+        UUID goodsId = insertOptionsGoods();
+        insertGoodsTranslation(goodsId, "zh-Hans", "模拟T恤");
+        when(snapshots.publishedLocales()).thenReturn(List.of("ko"));
+
+        mvc.perform(get("/api/v2/goods").param("locale", "en"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("LOCALE_NOT_READY"));
+
+        when(snapshots.publishedLocales()).thenReturn(List.of("ko", "en", "zh-Hans", "ja"));
+        mvc.perform(get("/api/v2/goods").param("locale", "zh-Hans"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.empty()));
+        mvc.perform(get("/api/v2/goods-availability").param("locale", "zh-Hans"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.empty()));
+        mvc.perform(get("/api/v2/goods/" + goodsId).param("locale", "zh-Hans"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+        mvc.perform(get("/api/v2/goods/" + goodsId + "/availability").param("locale", "zh-Hans"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+        mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide").param("locale", "zh-Hans"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
     }
 
     @Test
@@ -163,5 +204,10 @@ class GoodsFlowIntegrationTest {
             VALUES (:id, :goodsId, :colorId, :sizeId, 'ON_SALE', CURRENT_TIMESTAMP)
             """, Map.of("id", UUID.randomUUID(), "goodsId", goodsId, "colorId", colorId, "sizeId", sizeId));
         return goodsId;
+    }
+
+    private void insertGoodsTranslation(UUID goodsId, String locale, String name) {
+        jdbc.update("INSERT INTO goods_translations (goods_id, locale, name) VALUES (:id, :locale, :name)",
+            Map.of("id", goodsId, "locale", locale, "name", name));
     }
 }

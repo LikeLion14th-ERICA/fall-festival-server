@@ -2,6 +2,7 @@ package dev.espero.festival.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import dev.espero.festival.media.GoodsImageUploadTooLargeException;
 import dev.espero.festival.media.GoodsImageValidationException;
@@ -16,6 +17,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,6 +30,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+@ExtendWith(OutputCaptureExtension.class)
 class GlobalApiExceptionHandlerTest {
 
     private final Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC);
@@ -177,11 +182,20 @@ class GlobalApiExceptionHandlerTest {
     }
 
     @Test
-    void mapsUnexpectedExceptionTo500WithoutLeakingDetails() {
-        ResponseEntity<ApiErrorResponse> response = handler.handleUnexpected(new IllegalStateException("boom"), request);
+    void mapsUnexpectedExceptionTo500WithoutLeakingDetails(CapturedOutput output) {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/api/v2/config");
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleUnexpected(
+            new IllegalStateException("jdbc:postgresql://user:secret@db.invalid/festival"),
+            request
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error().code()).isEqualTo("INTERNAL_ERROR");
-        assertThat(response.getBody().error().message()).doesNotContain("boom");
+        assertThat(response.getBody().error().message()).doesNotContain("jdbc:", "secret");
+        assertThat(output)
+            .contains("Unhandled API exception: method=GET path=/api/v2/config error_type=IllegalStateException")
+            .doesNotContain("jdbc:postgresql://user:secret@db.invalid/festival");
     }
 }

@@ -17,8 +17,11 @@ JWT가 필요하며, refresh token은 브라우저가 관리하는 Secure·HttpO
 실제 서버는 `/healthz`로 process liveness를 확인합니다. `db` profile에서는 `/readyz`가 설정한
 festival의 published catalog 준비 상태를 나타냅니다. `/readyz`가 200인 뒤 실제 공개 API를
 호출하고 응답의 `meta.revision`을 확인하세요. DB 없는 profile에는 `/readyz`가 등록되지 않습니다.
-locale은 생략하면 `ko`이며 현재 실제 공개 언어도 `ko`입니다. 성공은 `{ data, meta }`, 오류는
-`{ error, meta }`이고 응답 `X-Request-Id`와 `meta.requestId`로 요청을 추적합니다.
+locale은 생략하면 `ko`이며 현재 실제 공개 언어도 `ko`입니다. 공개 목록에 없는 알려진 locale은
+`LOCALE_NOT_READY`, 알 수 없는 locale은 `INVALID_QUERY`입니다. 공지와 굿즈는 요청 언어의 번역이
+준비되지 않은 항목을 다른 언어로 대체하지 않습니다. 공지는 목록에서 제외하고, 굿즈는 목록과
+판매 상태 목록에서 제외하며 상세·판매 상태·결제 안내 요청은 404입니다. 성공은 `{ data, meta }`,
+오류는 `{ error, meta }`이고 응답 `X-Request-Id`와 `meta.requestId`로 요청을 추적합니다.
 
 현재 실제 서버의 CORS 설정은 관리자 경로에만 명시되어 있습니다. 초기 원격 개발 환경은 browser가
 상대 경로 `/api/v2`를 호출하고 Next.js가 backend로 rewrite하는 same-origin proxy를 기본안으로
@@ -118,6 +121,12 @@ null입니다. `transferLink`는 표시명 출처가 정해질 때까지 항상 
 `If-None-Match`, `Cache-Control`, 304 상태를 그대로 전달해야 하며 자체 캐시를 추가하지
 않습니다. 이 proxy 동작의 확인은 웹 저장소의 integration acceptance 범위입니다.
 
+### 굿즈 결제 안내
+
+`GET /goods/{goodsId}/payment-guide`는 운영 `GOODS` 계좌를 매 요청 반영하므로 성공 응답에도
+`Cache-Control: no-store`가 붙습니다. 결제 안내를 열 때 다시 조회해 현재 계좌를 사용하고,
+same-origin proxy도 이 헤더를 보존하며 응답을 저장하지 않습니다.
+
 ### 부스 계좌 송금 안내
 
 부스 상세(`GET /spaces/{spaceId}`)의 `bankTransfer`로 계좌를 표시합니다. 목록에서는 항상 null이고,
@@ -128,7 +137,7 @@ null입니다. `transferLink`는 표시명 출처가 정해질 때까지 항상 
 `tossLinkEnabled`가 true일 때만 토스 버튼을 보이고, 계좌·금액 복사는 항상 제공합니다. `bankId`를
 토스 링크의 은행 파라미터로 그대로 쓰지 않습니다. 토스 송금 URL 규격은 아직 실기기 검증 전입니다.
 
-부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계, 스탬프 누적은 프런트 상태입니다. 스탬프는 로그인 없이 공통 QR을 사용하므로 엄격한 중복 참여 차단을 약속할 수 없습니다. 4칸을 모은 사용자의 수령 안내 창에는 `상품 수령` 버튼을 만들지 말고 수령 인증 코드 입력칸과 `확인` 버튼을 둡니다. 코드는 6자리 숫자이므로 입력칸은 `inputmode="numeric"`로 6자리만 받습니다. 멋사 부스 담당자가 입력한 코드만 `POST /stamp-receipt-verifications`로 보내며, `verified: true`일 때만 로컬 `stamp.claimed=true`로 바꾸고 입력값은 저장하지 않습니다. `INVALID_RECEIPT_CODE`·통신 오류에서는 미수령 상태와 안내 창을 유지합니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
+부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계, 스탬프 누적은 프런트 상태입니다. 스탬프는 로그인 없이 공통 QR을 사용하므로 엄격한 중복 참여 차단을 약속할 수 없습니다. 4칸을 모은 사용자의 수령 안내 창에는 `상품 수령` 버튼을 만들지 말고 수령 인증 코드 입력칸과 `확인` 버튼을 둡니다. 코드는 공백을 제거하거나 숫자를 정규화하지 않은 ASCII 숫자 6자리여야 하므로 입력칸은 `inputmode="numeric"`로 6자리만 받습니다. 멋사 부스 담당자가 입력한 코드만 `POST /stamp-receipt-verifications`로 보내며, 성공 응답은 `Cache-Control: no-store`이고 `verified: true`일 때만 로컬 `stamp.claimed=true`로 바꾸며 입력값은 저장하지 않습니다. `INVALID_RECEIPT_CODE`·통신 오류에서는 미수령 상태와 안내 창을 유지합니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
 
 ## 새 관리자 계약 연동
 
@@ -138,7 +147,7 @@ null입니다. `transferLink`는 표시명 출처가 정해질 때까지 항상 
 - 신규 상품·옵션 조합은 ON_SALE로 생성합니다. 색상·사이즈·조합 삭제도 허용하며, 삭제한 조합의 판매 상태는 제거하고 유지 조합의 상태는 그대로 둡니다.
 - 상품명·가격·실제 제공 색상·사이즈·조합은 비어 있지 않아야 합니다. 빈 구성은 422로 거절하며 저장 전후 상품과 판매 상태를 바꾸지 않습니다. 이미지 개수·배치·업로드 방식과 옵션 없는 상품 입력 방식은 미정이고, 이미지 없는 저장은 409 IMAGE_CONFIGURATION_UNRESOLVED로 공개 상태 반영을 막습니다.
 - 영어 PENDING/FAILED에서도 한국어 저장은 성공합니다. 미리보기 canSave는 한국어 필수값 기준입니다. 템플릿 원문을 바꾸면 게시 전 기존 번역을 READY로 재사용하지 말고 변경 원문 기준으로 준비합니다. 늦은 미리보기 응답은 source와 현재 입력을 비교해 폐기합니다.
-- 현재 공개 언어는 한국어뿐입니다. all-languages는 프런트 검증용 목 세션의 준비 언어를 바꾸며 partial-translation은 중·일 실패를 재현합니다. english-failed는 영어 실패와 한국어 게시를 함께 확인합니다. 실제 공개 전에는 모든 필수 콘텐츠·정렬·필터 label이 완결돼야 하며 한국어 fallback은 없습니다.
+- 현재 공개 언어는 한국어뿐입니다. `all-languages`는 프런트 검증용 목 세션의 준비 언어를 바꿉니다. 이 세션에서 중·일 번역이 없는 fixture는 공개 목록에서 제외되어 번역 미완료 상태를 검증할 수 있습니다. 실제 공개 전에는 모든 필수 콘텐츠·정렬·필터 label이 완결돼야 하며 한국어 fallback은 없습니다.
 - /prohibited-items의 items·message는 상시 안내입니다. 기존 /performance-alert를 교체하세요.
 
 ## 계약 검증
