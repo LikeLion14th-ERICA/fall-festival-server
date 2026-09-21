@@ -23,6 +23,9 @@
 
 ### 2.7 Release와 태그
 
+릴리스 후보의 HTTP 범위, 현재 자동 검증과 별도 staging gate는
+[릴리스 HTTP E2E 시나리오](release-http-e2e.md)를 따른다.
+
 - 버전은 Semantic Versioning을 따라 `MAJOR.MINOR.PATCH`로 관리하고 태그는
   `vMAJOR.MINOR.PATCH` 형식을 사용한다.
 - 기본적으로 검증된 `main` commit에서 릴리스한다. 별도 안정화 기간이 필요할 때만

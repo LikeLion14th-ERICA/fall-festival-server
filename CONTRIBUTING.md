@@ -5,6 +5,7 @@
 - [작업 절차와 워크트리](docs/wiki/workflow/task.md)
 - [브랜치와 동기화](docs/wiki/workflow/branches.md)
 - [Hotfix·릴리스·태그](docs/wiki/workflow/releases.md)
+- [릴리스 HTTP E2E 시나리오](docs/wiki/workflow/release-http-e2e.md)
 - [커밋 메시지](docs/wiki/workflow/commits.md)
 - [PR·리뷰·병합](docs/wiki/workflow/pull-requests.md)
 - [완료 조건](docs/wiki/workflow/done.md)

@@ -73,6 +73,9 @@ class의 결과를 검사한다. 필수 class 누락, 0건, migration 시나리�
 
 ### 릴리스 후보 backend E2E
 
+현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-24`의 범위, 아직 구현하지 않은
+보강 후보와 staging gate는 [릴리스 HTTP E2E 시나리오](release-http-e2e.md)에 정리한다.
+
 `ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는
 Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·publish한 뒤,
 랜덤 포트의 서버를 새로 기동한다. `/readyz`와 published snapshot, 후보 revision을
