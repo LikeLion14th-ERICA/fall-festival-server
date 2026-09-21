@@ -91,6 +91,29 @@ class CatalogCliRunnerTest {
     }
 
     @Test
+    void rejectsMalformedRevisionForEachRevisionCommand() {
+        for (String command : List.of("export", "validate", "publish", "rollback")) {
+            assertThatThrownBy(() -> runner.run(new DefaultApplicationArguments(
+                command, "malformed", "--out=" + tempDir.resolve("revision.json"),
+                "--expected-current=none"
+            )))
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessage("Option --revision must be a valid UUID.");
+        }
+        verifyNoInteractions(revisions, exports);
+    }
+
+    @Test
+    void rejectsMalformedExpectedCurrentRevision() {
+        assertThatThrownBy(() -> runner.run(new DefaultApplicationArguments(
+            "rollback", "11111111-1111-1111-1111-111111111111", "--expected-current=malformed"
+        )))
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessage("Option --expected-current must be a valid UUID.");
+        verifyNoInteractions(revisions);
+    }
+
+    @Test
     void requiresTheExpectedCurrentRevisionForARollback() {
         UUID source = UUID.fromString("11111111-1111-1111-1111-111111111111");
 

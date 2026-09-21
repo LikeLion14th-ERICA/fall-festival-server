@@ -25,6 +25,8 @@
 - **역할 분리:** export role은 read-only pool로, publish role은 별도 context·pool로 연결한다.
   두 사용자 이름이 같으면 시작하지 않는다. publish 정보가 없으면 **export 전용**으로 뜨고
   가져오기·게시는 `403 PUBLISH_ROLE_NOT_CONFIGURED`다.
+- **축제 경계:** export·diff·publish에 준 revision UUID는 configured `FESTIVAL_ID` 소속이어야 한다.
+  다른 축제의 revision은 catalog를 읽거나 바꾸기 전에 `422 REVISION_FESTIVAL_MISMATCH`로 거절한다.
 - **catalog 밖 테이블:** [role provisioning script](../../../tools/database/provision-operational-account-roles.sql)가
   catalog export·publish role에서 계좌·티켓 계좌 열·혼잡도·공지 테이블 권한을 회수한다.
   provider가 schema 전체를 먼저 grant했어도 적용된다. catalog 밖 테이블을 추가하는
@@ -78,6 +80,7 @@ rollback은 워크벤치 범위가 아니다. [게시](publishing.md)의 CLI `ro
   백엔드 URL 제한.
 - `CatalogWorkbenchIntegrationTest`: 실제 워크벤치를 PostgreSQL과 분리된 export·publish role로
   띄워 검증·비교·가져오기·게시·재export 무차이·끼어든 게시 거절·게시 후 확인, token·Origin
-  없는 요청 거절, export 전용 모드, 같은 role·원격 DB URL로 시작 거부를 확인한다.
+  없는 요청 거절, export 전용 모드, 같은 role·원격 DB URL로 시작 거부와 다른 축제 revision의
+  export·diff·publish 거절을 확인한다.
 - `OperationalAccountSettingsIntegrationTest`: provider가 schema 전체를 grant한 뒤에도 catalog
   role이 계좌·혼잡도·공지 테이블을 읽지 못한다.

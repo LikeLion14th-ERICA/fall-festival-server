@@ -44,6 +44,8 @@ class CatalogWorkbenchIntegrationTest {
 
     private static final String FESTIVAL_ID = "ec00912b-763f-4f8f-8f57-4bdfc389ccbf";
     private static final String INITIAL_REVISION_ID = "f109dca2-8b28-4e09-8114-beebc2bd3ea2";
+    private static final String OTHER_FESTIVAL_ID = "f9f0db0e-7d2c-4d58-9b84-3f06eb4d2e3a";
+    private static final String OTHER_REVISION_ID = "e1b8c4a1-4c74-4f70-8a1f-2e4b6d9c7a10";
     private static final Path DEVELOPMENT_CATALOG = Path.of("dev", "catalog", "development-catalog.json");
 
     @Container
@@ -74,6 +76,11 @@ class CatalogWorkbenchIntegrationTest {
                 "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO workbench_publish"
             );
             statement.execute("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO workbench_publish");
+            statement.execute("INSERT INTO festivals (id, title, timezone, created_at, updated_at) VALUES "
+                + "('" + OTHER_FESTIVAL_ID + "', 'Other festival', 'Asia/Seoul', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+            statement.execute("INSERT INTO festival_revisions "
+                + "(id, festival_id, revision_number, state, published_at, created_at, updated_at) VALUES "
+                + "('" + OTHER_REVISION_ID + "', '" + OTHER_FESTIVAL_ID + "', 1, 'published', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
         }
     }
 
@@ -187,6 +194,27 @@ class CatalogWorkbenchIntegrationTest {
     }
 
     @Test
+    void rejectsARevisionFromAnotherFestivalBeforeExportDiffOrPublish() throws Exception {
+        Workbench workbench = start(true, null);
+        ObjectNode manifest = (ObjectNode) json.readTree(Files.readString(DEVELOPMENT_CATALOG));
+        OtherFestivalState before = otherFestivalState();
+
+        Response exported = workbench.post("/api/export", Map.of("revisionId", OTHER_REVISION_ID));
+        Response diff = workbench.post("/api/diff", Map.of(
+            "manifest", manifest, "againstRevisionId", OTHER_REVISION_ID
+        ));
+        Response published = workbench.post("/api/publish", Map.of(
+            "revisionId", OTHER_REVISION_ID, "actor", "release operator"
+        ));
+
+        for (Response response : List.of(exported, diff, published)) {
+            assertThat(response.status()).isEqualTo(422);
+            assertThat(response.body().path("error").asString()).isEqualTo("REVISION_FESTIVAL_MISMATCH");
+        }
+        assertThat(otherFestivalState()).isEqualTo(before);
+    }
+
+    @Test
     void runsExportOnlyWithoutPublishCredentials() throws Exception {
         Workbench workbench = start(false, null);
         ObjectNode manifest = (ObjectNode) json.readTree(Files.readString(DEVELOPMENT_CATALOG));
@@ -255,6 +283,30 @@ class CatalogWorkbenchIntegrationTest {
         return actors;
     }
 
+    private OtherFestivalState otherFestivalState() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(
+            POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+             PreparedStatement revision = connection.prepareStatement(
+                 "SELECT state, revision_number FROM festival_revisions WHERE id = ?");
+             PreparedStatement pointer = connection.prepareStatement(
+                 "SELECT id FROM festival_revisions WHERE festival_id = ? AND state = 'published'");
+             PreparedStatement audits = connection.prepareStatement(
+                 "SELECT COUNT(*) FROM catalog_revision_audit WHERE festival_id = ?")) {
+            revision.setObject(1, java.util.UUID.fromString(OTHER_REVISION_ID));
+            pointer.setObject(1, java.util.UUID.fromString(OTHER_FESTIVAL_ID));
+            audits.setObject(1, java.util.UUID.fromString(OTHER_FESTIVAL_ID));
+            try (var revisionRows = revision.executeQuery(); var pointerRows = pointer.executeQuery();
+                 var auditRows = audits.executeQuery()) {
+                revisionRows.next();
+                pointerRows.next();
+                auditRows.next();
+                return new OtherFestivalState(
+                    pointerRows.getString(1), revisionRows.getString(1), revisionRows.getLong(2), auditRows.getLong(1)
+                );
+            }
+        }
+    }
+
     private void deletePerformanceTranslations(String revisionId) throws SQLException {
         try (Connection connection = DriverManager.getConnection(
             POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword()
@@ -281,6 +333,8 @@ class CatalogWorkbenchIntegrationTest {
     }
 
     private record Response(int status, JsonNode body) {}
+
+    private record OtherFestivalState(String publishedRevisionId, String state, long revisionNumber, long auditCount) {}
 
     private final class Workbench {
 

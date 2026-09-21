@@ -79,6 +79,32 @@ cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dfestival.release-e2e.m
 proxy와 CORS, 모바일 viewport, 온라인 복귀·polling backoff는 web 저장소와 실기기 acceptance
 gate에서 검증한다.
 
+### 운영자·개발자 도구 E2E
+
+`OperatorToolProcessE2eTest`는 Docker의 새 PostgreSQL database마다 실제 별도 JVM으로
+`CatalogCliApplication`과 `AccountSettingsCliApplication`을 실행한다. 테스트 classpath로
+main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource·계좌값을 사용하지 않는다.
+패키징된 JAR의 `PropertiesLauncher` 명령은 [각 운영 runbook](../engineering/catalog-workbench.md)에서
+따로 확인한다.
+
+| ID | 운영 흐름 | 주요 검증 |
+| --- | --- | --- |
+| OPS-01 | Catalog CLI 정상 흐름 | import → validate → publish → export가 실제 exit code와 PostgreSQL published pointer·감사 기록을 함께 만족 |
+| OPS-02 | 게시·rollback 충돌 | 같은 baseline의 A/B draft 중 A 게시 뒤 B의 publish 거절, archived A의 rollback 성공, stale expected-current rollback 거절 |
+| OPS-03 | Catalog CLI 안전 실패 | malformed revision이 exit 1과 안정 오류를 내고 stack trace·DB URL·비밀번호를 출력하지 않음 |
+| OPS-04 | 계좌 CLI 변경 | set dry-run 무변경, confirm set, 잘못된 끝 네 자리 거절, clear·restore-version의 증가 version·trigger history·민감값 redaction |
+| OPS-05 | DB 사전 점검 | `DatabasePreflightIntegrationTest`가 JDK+PostgreSQL driver만의 별도 JVM에서 read-only 조사와 `STOP_AND_REVIEW`를 검증 |
+| OPS-06 | 로컬 workbench | `CatalogWorkbenchIntegrationTest`가 HTTP token·Host·Origin·role 경계와 다른 축제 revision의 export·diff·publish 거절을 검증 |
+
+운영 도구 focused 검증은 다음 명령으로 실행한다.
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperatorToolProcessE2eTest,CatalogCliRunnerTest,CliFlywayIsolationIntegrationTest,DatabasePreflightIntegrationTest,CatalogWorkbenchIntegrationTest test"
+```
+
+이 검사는 실제 원격 DB의 preflight 승인, provider role provisioning, SSH tunnel, 배포된 JAR와
+backend restart·`/readyz` 확인을 대신하지 않는다. 그 절차는 운영 runbook의 변경 gate로 남는다.
+
 ## 기존 실기기 검증 환경
 
 기존 실행 코드는 `test/frontend`의 Next.js 애플리케이션, `test/backend`의

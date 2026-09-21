@@ -38,6 +38,16 @@ class WorkbenchRevisionQueries {
             """, festivalId).stream().findFirst();
     }
 
+    Optional<UUID> festivalForRevision(UUID revisionId) {
+        return jdbc.query("""
+            SELECT festival_id
+            FROM festival_revisions
+            WHERE id = :revisionId
+            """, new MapSqlParameterSource("revisionId", revisionId),
+            (resultSet, rowNumber) -> resultSet.getObject("festival_id", UUID.class))
+            .stream().findFirst();
+    }
+
     private List<RevisionSummary> query(String sql, UUID festivalId) {
         return jdbc.query(sql, new MapSqlParameterSource("festivalId", festivalId), (resultSet, rowNumber) ->
             new RevisionSummary(
