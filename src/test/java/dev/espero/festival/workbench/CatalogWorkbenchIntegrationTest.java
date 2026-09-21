@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -226,6 +227,48 @@ class CatalogWorkbenchIntegrationTest {
     }
 
     @Test
+    void ignoresInheritedDatasourceVariantsAndConfigSources() throws Exception {
+        Map<String, String> hostile = Map.ofEntries(
+            Map.entry("spring.datasource.url", "jdbc:unsupported:workbench-isolation"),
+            Map.entry("spring.datasource.username", "remote-user"),
+            Map.entry("spring.datasource.password", "remote-password"),
+            Map.entry("spring.datasource.hikari.jdbc-url", "jdbc:unsupported:workbench-hikari"),
+            Map.entry("spring.datasource.hikari.username", "remote-hikari-user"),
+            Map.entry("spring.datasource.hikari.password", "remote-hikari-password"),
+            Map.entry("spring.datasource.hikari.data-source-class-name", "org.postgresql.ds.PGSimpleDataSource"),
+            Map.entry(
+                "spring.datasource.hikari.data-source-properties.URL",
+                "jdbc:unsupported:workbench-data-source"
+            ),
+            Map.entry("spring.datasource.jndi-name", "java:comp/env/jdbc/remote-workbench"),
+            Map.entry(
+                "spring.autoconfigure.exclude",
+                "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"
+            ),
+            Map.entry("spring.config.location", "optional:file:/missing-workbench-config.properties"),
+            Map.entry("spring.config.import", "optional:file:/missing-workbench-import.properties"),
+            Map.entry("spring.profiles.active", "remote-workbench"),
+            Map.entry("spring.profiles.include", "remote-workbench")
+        );
+        Map<String, String> previous = new HashMap<>();
+        hostile.keySet().forEach(key -> previous.put(key, System.getProperty(key)));
+        hostile.forEach(System::setProperty);
+        try {
+            Workbench workbench = start(true, null);
+            JsonNode status = workbench.get("/api/status").body();
+            assertThat(status.path("published").path("id").asString()).isEqualTo(publishedRevisionId());
+        } finally {
+            previous.forEach((key, value) -> {
+                if (value == null) {
+                    System.clearProperty(key);
+                } else {
+                    System.setProperty(key, value);
+                }
+            });
+        }
+    }
+
+    @Test
     void refusesToStartWithASharedRoleOrANonLoopbackDatabase() {
         assertThatThrownBy(() -> CatalogWorkbenchApplication.run(
             "--CATALOG_WORKBENCH_PORT=0",
@@ -250,6 +293,26 @@ class CatalogWorkbenchIntegrationTest {
         List<String> args = new ArrayList<>(List.of(
             "--CATALOG_WORKBENCH_PORT=0",
             "--festival.id=" + FESTIVAL_ID,
+            "--spring.config.location=classpath:/application.yml",
+            "--spring.config.import=",
+            "--spring.config.additional-location=",
+            "--spring.profiles.active=",
+            "--spring.profiles.include=",
+            "--spring.datasource.url=" + POSTGRES.getJdbcUrl(),
+            "--spring.datasource.username=" + POSTGRES.getUsername(),
+            "--spring.datasource.password=" + POSTGRES.getPassword(),
+            "--spring.datasource.type=com.zaxxer.hikari.HikariDataSource",
+            "--spring.datasource.driver-class-name=org.postgresql.Driver",
+            "--spring.datasource.hikari.jdbc-url=" + POSTGRES.getJdbcUrl(),
+            "--spring.datasource.hikari.username=" + POSTGRES.getUsername(),
+            "--spring.datasource.hikari.password=" + POSTGRES.getPassword(),
+            "--spring.datasource.hikari.data-source-class-name=",
+            "--spring.datasource.hikari.data-source-properties.URL=",
+            "--spring.datasource.hikari.data-source-properties.url=",
+            "--spring.datasource.hikari.data-source-properties.user=",
+            "--spring.datasource.hikari.data-source-properties.password=",
+            "--spring.datasource.jndi-name=",
+            "--spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.JndiDataSourceAutoConfiguration",
             "--catalog.workbench.export.url=" + POSTGRES.getJdbcUrl(),
             "--catalog.workbench.export.username=workbench_export",
             "--catalog.workbench.export.password=export-test-password"
@@ -281,6 +344,19 @@ class CatalogWorkbenchIntegrationTest {
             }
         }
         return actors;
+    }
+
+    private String publishedRevisionId() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(
+            POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+             PreparedStatement statement = connection.prepareStatement(
+                 "SELECT id FROM festival_revisions WHERE festival_id = ? AND state = 'published'")) {
+            statement.setObject(1, java.util.UUID.fromString(FESTIVAL_ID));
+            try (var rows = statement.executeQuery()) {
+                rows.next();
+                return rows.getString(1);
+            }
+        }
     }
 
     private OtherFestivalState otherFestivalState() throws SQLException {
