@@ -705,7 +705,9 @@ class CatalogRevisionServiceIntegrationTest {
         );
 
         assertThatThrownBy(() -> revisions.validateRevision(revisionId, "validator-bot"))
-            .isInstanceOf(dev.espero.festival.persistence.CatalogIntegrityException.class);
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("performances")
+            .hasCauseInstanceOf(dev.espero.festival.persistence.CatalogIntegrityException.class);
 
         assertThat(auditActions(revisionId)).containsExactly("IMPORT");
     }
@@ -764,7 +766,9 @@ class CatalogRevisionServiceIntegrationTest {
         );
 
         assertThatThrownBy(() -> revisions.publish(revisionId, "release-bot"))
-            .isInstanceOf(dev.espero.festival.persistence.CatalogIntegrityException.class);
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("performances")
+            .hasCauseInstanceOf(dev.espero.festival.persistence.CatalogIntegrityException.class);
 
         assertThat(revisionState(INITIAL_REVISION_ID)).isEqualTo("published");
         assertThat(revisionState(revisionId)).isEqualTo("draft");
@@ -911,8 +915,9 @@ class CatalogRevisionServiceIntegrationTest {
         long auditsBefore = auditCount();
 
         assertThatThrownBy(() -> importManifest("qr-drift", "/assets/maps/different.png"))
-            .isInstanceOf(dev.espero.festival.persistence.CatalogIntegrityException.class)
-            .hasMessageContaining("different image data");
+            .isInstanceOf(CatalogCliException.class)
+            .hasMessageContaining("different image data")
+            .hasCauseInstanceOf(dev.espero.festival.persistence.CatalogIntegrityException.class);
 
         assertThat(revisionCount()).isEqualTo(2);
         assertThat(auditCount()).isEqualTo(auditsBefore);
