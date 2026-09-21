@@ -2,18 +2,17 @@
 
 ## Status
 
-- 상태: backend는 A1 인스턴스에 Docker로 이미 배포돼 있음. 이 문서의 Render 관련 절은 실제
-  배포를 설명하지 않으며, A1 구성 확인 답변을 받는 대로 전체를 다시 쓴다(아래 "A1 확인 대기"
-  참고).
-- 기준: `main` `9357409` (2026-09-19, Flyway V1~V26)
+- 상태: backend는 A1 인스턴스에 Docker로 이미 배포돼 있다. 이 문서는 확인된 A1 사실과
+  아직 확인하지 못한 운영 값을 구분한다.
+- 기준: 2026-09-20 읽기 전용 사전 점검 결과와 현재 `main`의 Flyway V1~V26 SQL
 - Provider 정책 확인일: 2026-09-17 (Render 기본안 검토 당시. A1로 바뀐 뒤에는 해당 없음)
 - 범위: remote development only; production hosting 결정이 아님
 - 검증 게이트: `READ_ONLY_DATABASE_PREFLIGHT`, `DEPLOYMENT_VALIDATION_REQUIRED`
 
-> **2026-09-19 갱신:** backend는 Render가 아니라 A1 인스턴스에 Docker로 이미 올라가 있다.
-> 아래의 Render 관련 결정(Backend, Topology의 Render 표기, 포트·health check·Known limitations의
-> Render 수치)은 더 이상 현재 배포를 설명하지 않는다. A1 구성(실행 방식, reverse proxy, DB 접근)은
-> 확인 후 이 문서를 다시 쓴다. 이미지 저장소는 아래 [굿즈 이미지 저장소](#굿즈-이미지-저장소)를 따른다.
+> **2026-09-20 갱신:** backend는 Render가 아니라 A1 인스턴스에서 root `Dockerfile`의
+> 이미지를 단일 `docker run`으로 실행한다. Caddy reverse proxy와 Cloudflare edge 연결은
+> 확인했지만 SSH 접속·host port·Caddy upstream·TLS 발급 방식·Cloudflare proxy 모드는
+> 확인하지 못했다. 확인되지 않은 운영값은 추정해 채우지 않는다.
 
 ### A1 확인 답변 (2026-09-20, 제원)
 
@@ -28,12 +27,12 @@
 
 - PostgreSQL 17.11, schema `public`. migration은 **V1~V26 전부 적용, 전부 success, 현재
   `main`의 SQL과 checksum 완전 일치**(drift 없음).
-- festival 1개 존재: `id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf`, timezone `Asia/Seoul` — 로컬
-  테스트에서 쓰는 것과 같은 UUID다.
+- festival 1개 존재: `id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf`, timezone `Asia/Seoul`이다.
+  이 값은 해당 DB에서 확인된 값이며 새 환경의 기본값으로 가정하지 않는다.
 - revision 4개: 1·2 archived, **3 published**, 4 draft. `goods`·`notices` 테이블은 0행(아직
   상품·공지 없음).
-- 다른 client session 10개 감지됨 — A1에서 실행 중인 backend 자신일 가능성이 높다(즉 A1이
-  이미 이 DB에 붙어 실제로 떠 있는 상태로 보인다).
+- 다른 client session 10개 감지됨. preflight만으로 A1 backend인지 다른 서비스인지 식별할 수
+  없으므로 DB 단독 사용이나 A1 연결의 증거로 해석하지 않는다.
 - 결과는 예정대로 `status=STOP_AND_REVIEW`, `mutationAuthorized=false`다. 이미 festival·게시된
   revision이 있기 때문에 자동으로 뜨는 판정이며, 여기서 새 migration·import·publish를 함부로
   실행하지 않는다는 뜻이다. **이 조사 자체는 SELECT만 사용했고 아무것도 바꾸지 않았다.**
@@ -58,11 +57,11 @@
 
 ## Context
 
-원격 프런트엔드와 백엔드는 아직 배포되지 않았다. 프런트엔드 저장소
+원격 프런트엔드는 아직 배포되지 않았다. backend는 A1에 이미 배포돼 있다. 프런트엔드 저장소
 `LikeLion14th-ERICA/fall-festival-web`은 Next.js 16 App Router에서
 `NEXT_PUBLIC_API_BASE_URL=/api/v2`와 `API_PROXY_TARGET=<backend-origin>`을 사용해
 API 요청을 rewrite할 수 있다. 백엔드는 루트 `Dockerfile`, PostgreSQL과 `db` profile을
-지원하지만 provider resource, remote URL과 production runbook은 아직 없다.
+지원하며 A1에 배포돼 있다. frontend provider와 public frontend origin은 아직 정해지지 않았다.
 
 ## Decision
 
@@ -72,7 +71,9 @@ API 요청을 rewrite할 수 있다. 백엔드는 루트 `Dockerfile`, PostgreSQ
 - Backend: A1 인스턴스에서 root `Dockerfile`을 단일 `docker run`으로 실행하고, Caddy가
   reverse proxy, Cloudflare가 edge를 맡는다(이미 이 방식으로 올라가 있다).
 - Database: 팀에서 remote development 용도로 사용을 승인한 PostgreSQL database를 사용한다.
-  A1에 실제 적용된 migration 버전은 별도 확인 중이며 확정 전에는 mutation을 실행하지 않는다.
+  2026-09-20 preflight에서 PostgreSQL 17.11, public schema, V1~V26 success와 checksum 일치를
+  확인했다. 기존 데이터와 동시 사용 여부가 남아 있어 `STOP_AND_REVIEW`이며 승인 전 mutation을
+  실행하지 않는다.
 - Development catalog: repository에서 추적하는 synthetic development manifest를 사용한다.
 - Browser/API: same-origin proxy를 우선하며 public API CORS는 추가하지 않는다.
 - Health check candidate: `/readyz`.
@@ -128,10 +129,10 @@ Backend는 A1 인스턴스에서 root `Dockerfile`로 빌드한 이미지를 **�
 직접 호출하지 않는다.
 
 루트 image는 `SERVER_ADDRESS=0.0.0.0`, `SERVER_PORT=8080`을 기본값으로 둔다(Dockerfile
-`ENV`, `EXPOSE 8080`). Render 전용이었던 `PORT=10000` override는 더 이상 필요 없다 — A1에서는
-Dockerfile 기본값 그대로 8080에서 듣고, Caddy가 그 port로 proxy한다고 가정한다. 실제
-`docker run`이 host port를 어떻게 매핑하는지, Caddy가 어떤 upstream(host port 또는 docker
-network 내부 hostname)을 쓰는지는 `Caddyfile`을 확인한 뒤 이 절에 정확한 값을 채운다.
+`ENV`, `EXPOSE 8080`). Render 전용이었던 `PORT=10000` override는 현재 A1 실행 방식의
+근거가 아니다. 애플리케이션 컨테이너의 Dockerfile 기본 listen port는 `8080`이지만 실제
+host 매핑과 Caddy upstream은 확인 전까지 미확정으로 둔다. `Caddyfile`과 A1 실행 정보를
+확보한 뒤에만 정확한 port·network 값을 기록한다.
 
 ## Database
 
@@ -356,16 +357,23 @@ migration 상태에서 이어간다. 상태가 불명확하거나 공유 schema�
 `STOP_AND_REVIEW`한다. Production 또는 multi-instance 배포에서는 별도 migration gate를 다시
 결정한다.
 
+현재 확인 결과는 PostgreSQL 17.11, public schema, V1~V26 success 및 현재 SQL과 checksum
+일치다. 그러나 기존 festival·revision과 다른 client session이 있으므로 이 결과만으로
+Flyway migrate, catalog import/publish 또는 role 변경을 승인하지 않는다. 롤백이 필요하면
+행사 당일 운영 절차서의 백업·복구와 revision rollback 절차를 따르고, migration을 임의로
+되돌리거나 `flyway_schema_history`를 수정하지 않는다.
+
 ## Known limitations
 
 - A1 사양(CPU/RAM)과 실측 메모리·기동 시간은 아직 이 문서에 기록되지 않았다. `db` profile과
   게시 catalog를 적재한 상태로 실측해 채운다.
-- Idle/sleep: A1은 항상 켜져 있는 인스턴스로 보이지만(Render Free의 15분 sleep과 달리), 실제
-  동작은 확인 후 채운다.
+- Idle/sleep: A1의 가동 lifecycle과 재시작 정책은 확인되지 않았다. Render Free의 동작을
+  A1에 적용해 추정하지 않는다.
 - Filesystem: 굿즈 이미지는 named volume([굿즈 이미지 저장소](#굿즈-이미지-저장소))에만
   유지된다. volume 없이 container를 재생성하면 파일이 사라진다.
-- Database: A1에서의 network access, 실제 적용된 migration 버전(V26까지인지)이 아직
-  미확정이다. 확정 전 mutation 금지.
+- Database: preflight에서 PostgreSQL 17.11, public schema, V1~V26 success와 checksum 일치를
+  확인했다. A1의 접속 주체와 다른 session의 소유자는 미확정이며, 기존 data가 있어
+  `STOP_AND_REVIEW`를 해소하기 전에는 mutation을 실행하지 않는다.
 - Frontend: remote provider와 public frontend 실제 origin이 아직 `TBD`다.
 - Admin: `admin-festival.likelionerica.com`이 아직 배포 전이다. 배포되면 remote UI의
   refresh-cookie/session proxy integration을 검증한다.
@@ -376,15 +384,17 @@ migration 상태에서 이어간다. 상태가 불명확하거나 공유 schema�
 
 ## Deployment validation checklist
 
-backend는 이미 A1에 떠 있으므로 아래는 "최초 provision" 검증이 아니라, migration 상태가
-확정된 뒤 **재확인**할 목록이다. 실제 로그와 응답으로 검증한다.
+backend는 이미 A1에 떠 있으므로 아래는 최초 provision이 아니라 배포·복구·콘텐츠 변경 전에
+실제 로그와 응답으로 재확인할 목록이다.
 
-- [ ] `READ_ONLY_DATABASE_PREFLIGHT`에서 PostgreSQL version, database, user와 accessible schema 확인
-- [ ] 기존 table, `flyway_schema_history`, migration version과 festival table 확인 — **현재
-  미확정, 제원 확인 대기**
+- [x] `READ_ONLY_DATABASE_PREFLIGHT`에서 PostgreSQL 17.11, public schema와 접근 가능한
+  database/table을 확인 — 2026-09-20 실행 결과는 `STOP_AND_REVIEW`, `mutationAuthorized=false`
+- [x] 기존 table, `flyway_schema_history`, migration version과 festival table 확인 —
+  2026-09-20 preflight에서 V1~V26 success/checksum 일치, festival 1개, revision 1~4 확인
 - [ ] 현재 data와 동일 database/schema를 사용하는 다른 서비스·팀 여부 확인
-- [ ] A1에서 team-provided PostgreSQL로 network access 가능한지 확인
-- [ ] V1~V26 migration compatibility 검토와 mutation 승인 기록
+- [ ] A1의 DB network access와 session 소유자 확인
+- [ ] V1~V26 migration compatibility와 mutation 승인 기록 — checksum은 확인했으나
+  `STOP_AND_REVIEW`/`mutationAuthorized=false`이므로 승인 전 변경 금지
 - [ ] role 생성과 권한 부여는 [DB 역할 설계](wiki/engineering/db-role-design.md)의 권한표를
   따른다. 그 문서의 `CREATE ROLE`은 아직 실행하지 않은 초안이다.
 - [ ] 역할 provisioning script 적용과 catalog 역할의 계좌·혼잡도·공지·굿즈 접근 거부 확인
@@ -392,7 +402,7 @@ backend는 이미 A1에 떠 있으므로 아래는 "최초 provision" 검증이 
 - [ ] 실제 festival/revision과 `FESTIVAL_ID` 확인
 - [ ] 기존 catalog data가 있으면 자동 변경 없이 `STOP_AND_REVIEW`
 - [ ] Compatibility 확인 후 manifest `import → validate → publish`와 revision 기록
-- [ ] `0.0.0.0:8080` bind 확인 (Caddy가 이 port로 proxy하는지 `Caddyfile`로 재확인)
+- [ ] 컨테이너 listen 주소와 host port/Caddy upstream 확인 (`Caddyfile` 및 A1 실행 정보 필요)
 - [ ] Web backend 최초 시작 또는 controlled restart 뒤 `/healthz` 200 확인
 - [ ] `/readyz` 200 확인
 - [ ] `/api/v2/lineup`이 valid envelope를 반환하는지 확인
@@ -428,7 +438,8 @@ migration strategy는 [행사 당일 운영 절차서](wiki/workflow/festival-da
 
 ## Follow-ups
 
-- migration 상태 확인(제원) → 확인되는 대로 위 checklist를 실제로 실행하고 결과를 기록한다.
+- 기존 DB 사용 범위와 mutation 승인 → `STOP_AND_REVIEW` 해소 전까지 Flyway migrate,
+  import, publish를 실행하지 않는다.
 - `Caddyfile` 확보 → Backend/Health checks/Environment 절의 port·proxy 관련 빈칸을 채운다.
 - `admin-festival.likelionerica.com` 실제 배포 → `ADMIN_ALLOWED_ORIGIN`을 그 값으로 바꾸고
   로그인 → refresh → logout 전체 흐름을 그 origin에서 검증한다.
