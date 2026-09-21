@@ -109,6 +109,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `RATE_LIMIT_TRUSTED_PROXY_HOPS` | 선택 | `0` | 전체 | 앞단에서 `X-Forwarded-For`를 붙이는 신뢰 proxy 수. Next.js proxy와 호스팅 load balancer 뒤면 `2` |
 | `PUBLIC_LOCALES` | 선택 | `ko` | `db` | 공개할 언어, 쉼표 구분(`ko,en,zh-Hans`). 한국어는 항상 공개. 나열한 언어도 게시 catalog의 번역이 모두 있어야 공개되고, 빠지면 시작 로그에 이유를 남기고 `LOCALE_NOT_READY` 유지 |
 | `FESTIVAL_MEDIA_STORAGE_ROOT` | 굿즈 이미지에 필수 | (없음, Docker image는 `/var/lib/espero/media`) | `db` | 굿즈 이미지 원본·변환본을 저장할 쓰기 가능한 디렉터리. 없으면 이미지 업로드·조회가 `503 MEDIA_STORAGE_UNCONFIGURED`이고 상품을 등록할 수 없음. 빈 값이나 쓸 수 없는 경로는 startup 실패 |
+| `ACCOUNT_TRANSFER_LINK_ALLOWED_HOSTS` | 선택 | (없음) | `db` | 계좌 안내 transfer link에 허용할 정확한 HTTPS host 목록. 쉼표 구분 host만 사용하며 scheme·path·port는 넣지 않음. 비어 있으면 transfer link를 등록할 수 없음 |
 | `API_DOCS_ENABLED` | 선택 | `false` | 전체 | `true`면 `/docs`에서 Swagger UI 제공. 로컬·개발 서버 전용, 운영에서는 끔 |
 
 예를 들어 포트가 사용 중이라면 PowerShell에서 다음과 같이 실행합니다.
