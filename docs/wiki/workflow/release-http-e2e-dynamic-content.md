@@ -130,7 +130,7 @@ variant cache/security header와 detach lifecycle을 검증한다.
 | 27.3 | 같은 key에 다른 bytes | `409 IDEMPOTENCY_KEY_REUSED` | 추가 media/audit/final/staging side effect가 없다. |
 | 27.4 | 연결 전 `GET /api/v2/media/goods-images/{mediaId}/master` | `404 NOT_FOUND` | unattached asset은 public으로 스트리밍할 수 없다. |
 | 27.5 | 27.1 mediaId를 가진 상품을 `POST /api/v2/admin/products`로 생성한 뒤 `master`, `320`, `640` GET | 각 `200`, `image/webp`, `Content-Disposition: inline`, `X-Content-Type-Options: nosniff`, immutable cache control·strong ETag | 상품 응답 URL과 요청 variant가 일치하고 association/attached lifecycle이 설정된다. |
-| 27.6 | 각 variant의 strong ETag로 strong·weak·multi·wildcard `If-None-Match` 재요청 | `304`, 같은 cache/security header, body 없음 | variant가 실제로 열리므로 missing file은 conditional 요청도 `503`이어야 한다. |
+| 27.6 | 각 variant의 strong ETag로 strong·weak·multi·wildcard `If-None-Match` 재요청 | `304`, body 없음, 같은 `ETag`·immutable cache control·`X-Content-Type-Options`·request ID | `Content-Type`과 `Content-Disposition`은 `200` representation에서만 요구한다. variant가 실제로 열리므로 missing file은 conditional 요청도 `503`이어야 한다. |
 | 27.7a | 두 번째 image bytes를 새 key로 실제 upload하여 unattached mediaId B를 얻고, 현재 ETag+새 key의 `PUT /api/v2/admin/products/{goodsId}`로 27.1 mediaId A를 B로 교체 | B의 public variant GET은 `200`, A의 public variant GET은 `404 NOT_FOUND` | A association만 제거되고 A의 `detached_at`은 설정된다. A/B final variants는 보존되고 B association/attached lifecycle이 설정되며 staging은 비어 있다. |
 | 27.7b | 27.7a 뒤 새 ETag+새 key로 `DELETE /api/v2/admin/products/{goodsId}`하고 B public variant를 GET | DELETE `200`, B public GET `404 NOT_FOUND` | B association도 제거되고 `detached_at`이 설정된다. goods dependent row는 hard delete되지만 A/B final variants는 보존되고 staging은 비어 있다. |
 | 27.8 | unknown variant와 query가 붙은 public media URL | unknown variant `404`, query `400 INVALID_QUERY` | DB·association·final variants·staging이 기준과 같다. |
@@ -146,7 +146,8 @@ variant cache/security header와 detach lifecycle을 검증한다.
 | missing/empty/multiple/extra file part 또는 form field | `422 VALIDATION_FAILED` | final/staging file과 media row 없음 |
 | oversized application stream 또는 multipart parser limit 초과 | `413 PAYLOAD_TOO_LARGE` | final/staging file, media row, audit가 모두 없음 |
 | processor backpressure | `429 RATE_LIMITED` + `Retry-After` | media/audit/final/staging 없음 |
-| storage finalize 또는 processor infrastructure failure | `503 SERVICE_UNAVAILABLE` | DB transaction rollback, final cleanup, staging discard가 모두 끝난다 |
+| processor infrastructure failure | `503 SERVICE_UNAVAILABLE` | media·audit·idempotency record·final/staging file이 모두 없다 |
+| storage finalize failure | `503 SERVICE_UNAVAILABLE` | business DB transaction rollback, final cleanup, staging discard가 끝난다. 독립 idempotency reservation은 `IN_PROGRESS`로 남으며 lease 전 같은 key는 `409 IDEMPOTENCY_IN_PROGRESS`, lease 만료 뒤 같은 payload 재시도만 정상 완료할 수 있다. |
 
 **중단·정리.** final DB row는 있지만 variant가 열리지 않는 경우와 attachment가 없는 public
 `200`은 즉시 실패다. cleanup scheduler의 retention 동작은 별도 cleanup test의 범위이며,
@@ -168,8 +169,9 @@ variant cache/security header와 detach lifecycle을 검증한다.
 | HTTP-27 인프라 실패 | `processorBackpressureAndInfrastructureFailuresRollbackAndAllowRecovery` |
 
 인프라 실패 메서드만 spy에 실패를 주입한다. processor backpressure, 실제 staging 일부를
-쓴 뒤 실패, 실제 final move 직후 실패를 분리하며 매번 DB·감사·멱등 record·final·staging의
-무변경/정리를 확인하고 정상 upload 복구로 끝낸다. parser 상한은 이 테스트에서 11 MiB,
+쓴 뒤 실패, 실제 final move 직후 실패를 분리한다. finalization 뒤 실패만 독립된
+`IN_PROGRESS` idempotency reservation 1건을 남기고, business DB·감사·완료 record·final·staging은
+무변경이어야 한다. 같은 key는 lease 전 거절되고 만료 뒤 같은 payload로 정상 복구한다. parser 상한은 이 테스트에서 11 MiB,
 request 상한은 12 MiB로 두어 10 MiB application spool 상한과 parser 초과를 따로 검증한다.
 
 Docker와 Java 21 이상을 준비한 뒤 저장소 루트에서 실행할 focused 명령은 다음과 같다.

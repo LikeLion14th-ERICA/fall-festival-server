@@ -280,7 +280,7 @@ class DynamicContentReleaseHttpE2eTest {
         HttpResponse<String> adminGoods = send(admin("/api/v2/admin/goods").GET().build());
         success(adminGoods, 200);
         JsonNode adminGoodsItem = body(adminGoods).path("data").path("items").get(0);
-        assertThat(adminGoodsItem.path("id").asString()).isEqualTo(id);
+        assertThat(adminGoodsItem.path("goodsId").asString()).isEqualTo(id);
         assertThat(adminGoodsItem.path("allSoldOut").asBoolean()).isFalse();
         assertThat(adminGoodsItem.path("combinations")).hasSize(3);
         assertThat(adminGoodsItem.path("combinations")).allSatisfy(combination ->
@@ -483,10 +483,17 @@ class DynamicContentReleaseHttpE2eTest {
             invocation.callRealMethod();
             throw new IOException("synthetic release finalization failure");
         }).when(storage).finalizeStaging(any(), any(), any());
-        error(send(multipart(token, key(), List.of(new Part("file", image)), false)), 503, "SERVICE_UNAVAILABLE");
-        assertNoMediaMutation();
+        String finalizationKey = key();
+        error(send(multipart(token, finalizationKey, List.of(new Part("file", image)), false)),
+            503, "SERVICE_UNAVAILABLE");
+        // Reservation is committed independently before finalization; business state still rolls back.
+        assertNoMediaMutation(1);
         reset(storage);
-        upload(image, key());
+        error(send(multipart(token, finalizationKey, List.of(new Part("file", image)), false)),
+            409, "IDEMPOTENCY_IN_PROGRESS");
+        assertNoMediaMutation(1);
+        CLOCK.advance(Duration.ofMinutes(2).plusSeconds(1));
+        upload(image, finalizationKey);
         assertThat(count("media_assets")).isOne();
         assertThat(completions()).isOne();
         assertFiles(3);
@@ -587,7 +594,7 @@ class DynamicContentReleaseHttpE2eTest {
             assertThat(image.path(field).asString()).isEqualTo(url);
             HttpResponse<byte[]> first = binary(url, null);
             assertThat(first.statusCode()).isEqualTo(200);
-            assertMediaHeaders(first);
+            assertMediaHeaders(first, true);
             assertThat(first.body()).isEqualTo(Files.readAllBytes(finalFile(media, variant)));
             assertThat(first.body().length).isPositive();
             String tag = header(first, "ETag");
@@ -597,14 +604,16 @@ class DynamicContentReleaseHttpE2eTest {
                 assertThat(cached.statusCode()).isEqualTo(304);
                 assertThat(cached.body()).isEmpty();
                 assertThat(header(cached, "ETag")).isEqualTo(tag);
-                assertMediaHeaders(cached);
+                assertMediaHeaders(cached, false);
             }
         }
     }
 
-    private void assertMediaHeaders(HttpResponse<?> response) {
-        assertThat(header(response, "Content-Type")).isEqualTo("image/webp");
-        assertThat(header(response, "Content-Disposition")).isEqualTo("inline");
+    private void assertMediaHeaders(HttpResponse<?> response, boolean representation) {
+        if (representation) {
+            assertThat(header(response, "Content-Type")).isEqualTo("image/webp");
+            assertThat(header(response, "Content-Disposition")).isEqualTo("inline");
+        }
         assertThat(header(response, "X-Content-Type-Options")).isEqualTo("nosniff");
         assertThat(header(response, "Cache-Control")).contains("public", "max-age=31536000", "immutable");
         assertThat(header(response, "X-Request-Id")).isNotBlank();
@@ -629,10 +638,14 @@ class DynamicContentReleaseHttpE2eTest {
     }
 
     private void assertNoMediaMutation() throws IOException {
+        assertNoMediaMutation(0);
+    }
+
+    private void assertNoMediaMutation(long inProgressReservations) throws IOException {
         assertThat(count("media_assets")).isZero();
         assertThat(count("goods_images")).isZero();
         assertThat(count("admin_audit_events")).isZero();
-        assertThat(count("admin_idempotency_records")).isZero();
+        assertThat(count("admin_idempotency_records")).isEqualTo(inProgressReservations);
         assertThat(completions()).isZero();
         assertFiles(0);
     }
@@ -915,6 +928,7 @@ class DynamicContentReleaseHttpE2eTest {
     private static final class MutableClock extends Clock {
         private volatile Instant now = Instant.parse("2026-09-29T08:00:00Z");
         void advance() { now = now.plusSeconds(2); }
+        void advance(Duration duration) { now = now.plus(duration); }
         @Override public ZoneId getZone() { return ZoneId.of("Asia/Seoul"); }
         @Override public Clock withZone(ZoneId zone) { return Clock.fixed(now, zone); }
         @Override public Instant instant() { return now; }
