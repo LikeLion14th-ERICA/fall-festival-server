@@ -172,6 +172,7 @@ public class AdminGoodsController {
         AdminGoodsResponse data = storedGoods(execution.response());
         return ResponseEntity.status(HttpStatus.CREATED)
             .contentType(MediaType.APPLICATION_JSON)
+            .header("Location", PRODUCT_ITEM_ROUTE.replace("{goodsId}", data.id()))
             .body(new ApiResponse<>(data, metaSupport.unscopedMeta(request, "ko")));
     }
 

@@ -17,27 +17,25 @@
 | --- | --- | ---: |
 | `ReleaseReadinessHttpE2eTest` | 후보 catalog·공개 사용자·관리자 기본 여정과 격리 | 9 |
 | `ReleaseFailureModesHttpE2eTest` | 미게시 후보, readiness, rate limit·request ID 복구 | 1 |
-| `AdminSessionReleaseE2eTest` | 로그인·refresh rotation·logout·인증 경계 | 2 |
+| `AdminSessionReleaseE2eTest` | 로그인·refresh rotation·logout·인증 경계 | 3 |
 | `CrowdingConcurrencyE2eTest` | 혼잡도 동시 저장·멱등·시간 경계 | 5 |
 | `OperationalAccountPropagationE2eTest` | TICKET 계좌 CLI → HTTP 반영·송금 시간 경계 | 2 |
 | `CatalogPublicationLifecycleE2eTest` | 게시·재시작·rollback의 HTTP 노출 | 1 |
+| DynamicContentReleaseHttpE2eTest | 공지·상품·판매 상태·미디어 lifecycle과 실패 복구 | 5 |
+| OperationalBoundariesHttpE2eTest | 수령 제한, GOODS account/template CLI, 관리자 mutation 경계 | 4 |
 
-따라서 현재 실제 HTTP E2E는 **6개 class, 20개 JUnit method**다. 하나의 method가 관계된
-요청을 함께 묶으므로 [검증 명령과 CI](validation.md)의 위험 시나리오 기준 수는
-`HTTP-01`–`HTTP-24`, 즉 **24개**다. 운영자·개발자 도구 시나리오
-`OPS-01`–`OPS-20`은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
+따라서 현재 실제 HTTP E2E는 8개 class, 30개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-31, 즉 31개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
 
 ## 출시 준비 판단
 
-현재 gate는 catalog 탐색, 지도·공연 관계, 티켓, 관리자 세션, 혼잡도, 게시·rollback,
-조건부 읽기와 제한을 폭넓게 검증한다. 공지·굿즈·굿즈 이미지와 스탬프 수령 확인은
-MockMvc, 단위 또는 DB 통합 검증이 있어도 실제 HTTP server·security filter·serialization·runtime
-storage를 한 흐름으로 확인하지 않는다.
+기존 gate는 catalog 탐색, 지도·공연 관계, 티켓, 관리자 세션, 혼잡도, 게시·rollback,
+조건부 읽기와 제한을 검증한다. 여기에 공지·굿즈·굿즈 이미지·스탬프 수령 확인과 운영
+boundary를 실제 HTTP server·security filter·serialization·runtime storage 흐름으로 추가했다.
 
-그래서 현재 suite는 **catalog 중심 위험의 자동 검증 증거**다. 전체 릴리스 승인은 아래
-계획 케이스의 구현·통과뿐 아니라 제품 공개 gate, required CI, migration/운영 승인과 실제
-staging 증거를 함께 판단한다. 계획 ID는 구현과 실행 명령 등록 전까지 현재 24개 수에 더하지
-않는다.
+HTTP-25–30은 구현됐지만 실행 증거가 없고, HTTP-31은 명시된 인증·idempotency·notice
+boundary만 부분 구현됐다. 따라서 이 suite는 31개 HTTP 위험에 대한 작성된 자동 검증
+근거이며, 전체 릴리스 승인은 실제 실행, 제품 공개 gate, required CI, migration/운영 승인과
+staging 증거를 함께 요구한다.
 
 ## 상세 케이스와 상태
 
@@ -86,7 +84,7 @@ staging/운영 리허설은 다음 목표를 모두 포함한다. 단계별 입�
 | STAGE-02 | 관리자 browser cookie/CORS와 익명 공개 접근 |
 | STAGE-03 | public image delivery, media mount, dynamic state, recovery set |
 | STAGE-04 | mobile polling (notice/goods/availability/crowding), offline recovery, navigation, accessibility |
-| STAGE-05 | rate-67, 관측 지표, rollback rehearsal |
+| STAGE-05 | rate-67와 warm/cold cache·activation spike·receipt limit 부하, 관측 지표, rollback rehearsal |
 
 `readyz`는 해당 festival의 published snapshot 적재를 보는 readiness probe이며 지속적인 DB
 health check가 아니다. 연결된 image fixture가 없으면 image delivery stage는 미완료다.
@@ -95,6 +93,9 @@ set을 함께 사용하고 revision·Flyway·media·public smoke를 재확인한
 
 ## 구현·실행 기록
 
-`HTTP-25`–`HTTP-31`을 실제 release E2E에 포함한 시점에만
-[검증 명령과 CI](validation.md)의 class 목록·scenario 수·focused command를 갱신한다.
-문서만 바뀌는 현재 변경은 scenario 설계이며 앱·E2E 명령을 실행하지 않는다.
+HTTP-25–27은 DynamicContentReleaseHttpE2eTest, HTTP-28–31은
+OperationalBoundariesHttpE2eTest에 매핑했다. 중앙 OpenAPI release coverage와 focused class
+선택기는 HTTP-01–31·OPS-01–20, 총 51개 시나리오를 사용한다.
+
+이 변경에서는 사용자 지시에 따라 Maven, Docker, CI, k6와 모든 테스트를 실행하지 않았다.
+실행 명령과 candidate별 PASS/BLOCKED 기록은 검증 명령과 CI 및 각 상세 시나리오 문서를 따른다.

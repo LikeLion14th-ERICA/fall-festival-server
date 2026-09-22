@@ -74,6 +74,8 @@ test('Product create contract is runtime-ready, UUID-safe, and create-specific',
   const create=operation('postAdminProduct');
   const response=(status,scenario)=>create.responses[status].content['application/json'].examples[scenario].value;
   assert.ok(create.responses['201']);
+  assert.equal(create.responses['201'].headers.Location.schema.format,'uri-reference');
+  assert.equal(create.responses['201'].headers.Location.schema.pattern,'^/api/v2/admin/products/[^/]+$');
   assert.equal(response(428,'idempotency-key-required').error.code,'IDEMPOTENCY_KEY_REQUIRED');
   assert.equal(response(428,'idempotency-key-required').error.message,'Idempotency-Key 헤더가 필요합니다.');
   assert.doesNotMatch(JSON.stringify(create.responses['428']),/PRECONDITION_REQUIRED|If-Match|최신 상태/);
@@ -125,10 +127,14 @@ test('Goods image read representations and binary endpoint are explicit and immu
   assert.deepEqual(media.security,[]);
   assert.deepEqual(media.parameters.find(parameter=>parameter.name==='variant').schema.enum,['master','320','640']);
   assert.deepEqual(media.responses['200'].content['image/webp'].schema,{type:'string',format:'binary'});
+  assert.equal(media.responses['200'].headers['X-Request-Id'].schema.type,'string');
   assert.equal(media.responses['200'].headers['Content-Disposition'].schema.enum[0],'inline');
   assert.equal(media.responses['200'].headers['X-Content-Type-Options'].schema.enum[0],'nosniff');
   assert.equal(media.responses['200'].headers['Cache-Control'].schema.enum[0],'public, max-age=31536000, immutable');
   assert.ok(media.responses['304']);
+  assert.equal(media.responses['304'].headers['X-Request-Id'].schema.type,'string');
+  assert.equal(media.responses['304'].headers['Content-Disposition'].schema.enum[0],'inline');
+  assert.equal(media.responses['304'].headers['X-Content-Type-Options'].schema.enum[0],'nosniff');
   assert.ok(media.responses['400']);
   assert.ok(media.responses['404']);
   assert.ok(media.responses['503']);
@@ -150,8 +156,11 @@ test('Goods image read representations and binary endpoint are explicit and immu
   const etag=first.headers.get('etag');
   const notModified=await call(publicGoods.images[0].masterUrl,{headers:{'If-None-Match':'W/'+etag}});
   assert.equal(notModified.status,304);
+  assert.match(notModified.headers.get('x-request-id'),/^[0-9a-f-]{36}$/);
   assert.equal(notModified.headers.get('etag'),etag);
   assert.equal(notModified.headers.get('cache-control'),'public, max-age=31536000, immutable');
+  assert.equal(notModified.headers.get('content-disposition'),'inline');
+  assert.equal(notModified.headers.get('x-content-type-options'),'nosniff');
   assert.equal((await call(publicGoods.images[0].masterUrl+'?download=true')).status,400);
   assert.equal((await call(publicGoods.images[0].masterUrl.replace('/master','/original'))).status,404);
 });
@@ -239,12 +248,14 @@ for(const [opId,group]of Object.entries(examples))for(const [scenario,example]of
     if(operation(opId)['x-binary-response']&&example.status===200)assert.equal(example.response,null);
     else if(example.status===204||example.status===304)assert.equal(example.response,null);
     else standardValidate(operation(opId).responses[example.status].content['application/json'].schema,example.response);
-    if(got.body && !binary && !operation(opId)['x-conditional'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
+    if(got.body && !binary && !operation(opId)['x-conditional']&&!operation(opId)['x-conditional-meta'])assert.equal(got.headers.get('x-request-id'),got.body.meta.requestId);
     if(got.body && !binary){
       assert.equal(got.body.meta.mock,true);
-      if(operation(opId)['x-conditional']&&got.status===200){
-        assert.match(got.headers.get('x-request-id'),/^[0-9a-f-]{36}$/);
-        assert.ok(got.headers.get('x-server-time'));
+      if(got.status>=200&&got.status<300&&(operation(opId)['x-conditional']||operation(opId)['x-conditional-meta'])){
+        if(operation(opId)['x-conditional']){
+          assert.match(got.headers.get('x-request-id'),/^[0-9a-f-]{36}$/);
+          assert.ok(got.headers.get('x-server-time'));
+        }
         assert.deepEqual(got.body,example.response);
       }else assert.deepEqual({...got.body,meta:{...got.body.meta,requestId:'mock-example-request'}},example.response);
     }
@@ -346,11 +357,21 @@ test('Goods save changes only one combination and derives sold-out; failed write
 });
 test('Notice create/edit/delete synchronizes ready-language public list and immutable template',async()=>{
   const session='notice-flow';
+  const noticeCreate=operation('postAdminNotice');
+  const noticeUpdate=operation('putAdminNotice');
+  assert.equal(noticeCreate.responses['201'].content['application/json'].schema.$ref,'#/components/schemas/AdminNoticeConditionalResponse');
+  assert.equal(noticeUpdate.responses['200'].content['application/json'].schema.$ref,'#/components/schemas/AdminNoticeConditionalResponse');
+  for(const noticeOperation of [noticeCreate,noticeUpdate]){
+    assert.equal(noticeOperation['x-conditional'],undefined);
+    assert.equal(noticeOperation.responses['304'],undefined);
+    assert.equal(noticeOperation.parameters.some(parameter=>parameter.name==='If-None-Match'),false);
+  }
+  assert.equal(noticeCreate.responses['201'].headers.Location.schema.pattern,'^/api/v2/admin/notices/[^/]+$');
   await enableAllMockLocales(session);
   const template=(await call('/api/v2/admin/notice-templates/template-1',{session,headers:admin})).body.data;
   const body={...examples.postAdminNotice.scenarios.normal.request.body,templateId:'template-1'};
   const created=await call('/api/v2/admin/notices',{session,headers:{...admin,'Idempotency-Key':'notice-create'},method:'POST',body});
-  assert.equal(created.status,201);assert.ok(created.headers.get('location'));
+  assert.equal(created.status,201);assert.equal(created.headers.get('location'),`/api/v2/admin/notices/${created.body.data.id}`);
   const id=created.body.data.id;
   assert.ok((await call('/api/v2/notices',{session})).body.data.visibleIds.includes(id));
   const enView=(await call('/api/v2/notices?locale=en',{session})).body.data.items.find(n=>n.id===id);

@@ -153,6 +153,8 @@ class AdminGoodsProductCreationFlowIntegrationTest {
             .andExpect(jsonPath("$.meta.locale").value("ko"))
             .andReturn();
         UUID goodsId = createdGoodsId(result);
+        assertThat(result.getResponse().getHeader("Location"))
+            .isEqualTo(ROUTE + "/" + goodsId);
 
         assertThat(count("goods", "id", goodsId)).isOne();
         assertThat(count("goods_translations", "goods_id", goodsId)).isEqualTo(2);

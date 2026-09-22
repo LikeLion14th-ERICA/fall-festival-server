@@ -8797,8 +8797,6 @@
             "updatedAt": "2030-10-01T18:00:00.002+09:00"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -9493,8 +9491,6 @@
             "updatedAt": "2030-10-01T18:00:00.002+09:00"
           },
           "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.002+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,

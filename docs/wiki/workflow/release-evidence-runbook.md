@@ -75,7 +75,7 @@ report hash를 반드시 연결한다. registry 주소, credential, secret, host
 | Recovery | DB와 media를 같은 recovery set으로 복원하고 검증 | recovery set ID, dump/media checksum, restore 시각, revision/media smoke |
 | Browser handoff | 지원 브라우저·viewport에서 운영자와 사용자 흐름 인수인계 | browser/version/viewport, run ID, navigation/back·cookie·CORS 결과, owner sign-off |
 
-자동 release E2E의 HTTP-01~24와 OPS-01~20은 disposable Testcontainers PostgreSQL DB 전용이다.
+자동 release E2E의 HTTP-01~31와 OPS-01~20은 disposable Testcontainers PostgreSQL DB 전용이다.
 이 자동 검사는 실제 staging datasource·운영 DB·원격 개발 DB를 사용하지 않으며, Docker가 없으면
 성공으로 취급하지 않는다. 실제 staging은 별도 후보 image를 배포해 smoke, load, browser handoff,
 recovery를 실행하고 그 결과를 별도 gate evidence로 연결한다. 각 절차와 기존 시나리오·load 기준은

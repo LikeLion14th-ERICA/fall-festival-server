@@ -114,7 +114,7 @@ Network timing은 browser trace로 기록한다. 적용 대상 screen은 15초 p
 수용 조건을 충족해야 한다. 구현이 없으면 FAIL 또는 BLOCKED로 기록하고, 승인되지 않았거나
 화면 계약에 매핑되지 않은 screen만 근거와 함께 `N/A`로 남긴다.
 
-## STAGE-05 · rate-67 부하·관측·rollback rehearsal
+## STAGE-05 · staging k6 부하 프로필·관측·rollback rehearsal
 
 **목적.** 초기 500 concurrent viewer 가정과 dynamic polling 부하, rollback 가능성을 실제
 candidate/environment 지표로 판단한다. local load fixture 성공은 운영 capacity 증명이 아니다.
@@ -125,14 +125,28 @@ candidate/environment 지표로 판단한다. local load fixture 성공은 운�
 | --- | --- |
 | traffic | 60초 동안 crowding 34 RPS + ticket guide 33 RPS, total 67 RPS |
 | latency | route별 p95 ≤ 300 ms, p99 ≤ 1 s |
-| error | transport·timeout + 429를 제외한 non-2xx 비율 ≤ 0.1%, achieved rate ≥ 95% |
+| error | 200/304 성공률 ≥ 99.9%, 429 비율 ≤ 0.1%, transport·timeout·그 밖의 예상 밖 상태 비율 ≤ 0.1%, dropped iteration 0 |
 | evidence | 5xx·429·transport·timeout 분리 count, heap·GC, PostgreSQL connection/active/lock wait, candidate/cache/fixture conditions |
 | scale | 1×, 2×, 5×와 500 concurrent viewer 가정의 결과를 actual environment에서 별도로 기록 |
+[release-scenarios.js](../../../tools/load-test/release-scenarios.js)는 승인된 staging에서만 쓰는
+warm-cache, cold-cache, activation-spike, public-polling-mix, sustained-load,
+dynamic-mutation-interleaving, receipt-rate-limit-mix 프로필을 제공한다. 기본 public 부하는
+승인된 limiter mode와 client identity strategy, candidate reference, 보호된 외부 evidence
+경로가 없으면 시작하지 않는다. cold-cache는 500 VU가 각각 한 bundle을 실행하며 cache purge를
+수행하지 않는다. mutation은 disposable fixture에서만 허용하며 initial admin read가 writable savedLevel을 돌려주고 final read-back·원복 증거가 있어야 한다. 하나라도 없으면 FAIL이다. 강제 중단으로 teardown이 보장되지 않으면 해당 run은 FAIL로 기록하고
+수동 recovery·audit 확인을 먼저 끝낸다.
+
+| 추가 profile | 필수 판정 |
+| --- | --- |
+| warm/cold cache | 200/304 성공률, route별 p95/p99, 허용 429 상한과 cache preparation reference를 함께 남긴다. |
+| activation spike/public polling/sustained | public polling은 crowding/notices/goods/goods availability를 17/17/17/16 RPS로 분리하고, activation은 같은 비율로 67/134/335 RPS를 만든다. route별 success/429/5xx/timeout/transport, dropped iteration과 heap·GC·DB 관측을 분리한다. |
+| dynamic mutation | opt-in bearer/origin·FestivalDay·writable fixture, initial admin savedLevel 확인, 원래 savedLevel의 read-back 복원과 cleanup audit를 요구한다. |
+| receipt rate-limit mix | valid/invalid 결과, RATE_LIMITED envelope·Retry-After·request ID, public/other client 분리와 refill 회복을 기록한다. |
 
 | 단계 | 실행·관측 | 통과·중단 기준 |
 | --- | --- | --- |
 | 05.1 | candidate artifact와 STAGE-01 probe가 통과한 동일 환경에서 rate-67 실행 | 모든 rate-67 기준과 관측 evidence가 충족해야 한다. 429/5xx를 합쳐 숨기지 않는다. |
-| 05.2 | 1×/2×/5× 및 500 viewer 가정 결과를 비교 | saturation point, DB lock/connection pressure, cache condition을 기록한다. 결과 하나로 production capacity를 확정하지 않는다. |
+| 05.2 | rate-67과 warm/cold cache, 1×/2×/5× activation, public polling, sustained, receipt limit 중 후보에 적용되는 승인 profile을 비교 | saturation point, DB lock/connection pressure, cache/limiter/client identity condition을 기록한다. 결과 하나로 production capacity를 확정하지 않는다. |
 | 05.3 | 승인된 별도 recovery 대상에서 documented rollback/recovery를 rehearsal | agreed RPO/RTO 판단, Flyway/revision/media/public smoke를 모두 재확인한다. |
 | 05.4 | rehearsal failure 또는 health/core smoke failure | release를 진행하지 않고 known-good artifact/config 또는 대상별 recovery로 전환한다. |
 

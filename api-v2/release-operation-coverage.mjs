@@ -35,6 +35,8 @@ const failure = 'src/test/java/dev/espero/festival/e2e/ReleaseFailureModesHttpE2
 const operator = 'src/test/java/dev/espero/festival/e2e/OperatorToolProcessE2eTest.java';
 const releaseGate = 'src/test/java/dev/espero/festival/e2e/OperationalReleaseGateE2eTest.java';
 const emptyPreflight = 'src/test/java/dev/espero/festival/e2e/DatabasePreflightEmptyDatabaseE2eTest.java';
+const dynamicContent = 'src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java';
+const operationalBoundaries = 'src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java';
 
 const scenarioTests = {
   'HTTP-01': [{ file: web, test: 'candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys' }],
@@ -61,6 +63,17 @@ const scenarioTests = {
   'HTTP-22': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
   'HTTP-23': [{ file: account, test: 'transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds' }],
   'HTTP-24': [{ file: crowdingE2e, test: 'loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours' }],
+  'HTTP-25': [{ file: dynamicContent, test: 'noticeLifecycleReplaysOnceRejectsStaleWritesAndRemovesPublicVisibility' }],
+  'HTTP-26': [{ file: dynamicContent, test: 'goodsAvailabilityAndOptionEditsPreserveRetainedStateThenDetachOnHardDelete' }],
+  'HTTP-27': [
+    { file: dynamicContent, test: 'mediaUploadReplayDeliveryValidatorsReplacementAndDetachHaveNoOrphanFiles' },
+    { file: dynamicContent, test: 'multipartAuthenticationValidationAndBothSizeLimitsLeaveNoPersistentState' },
+    { file: dynamicContent, test: 'processorBackpressureAndInfrastructureFailuresRollbackAndAllowRecovery' },
+  ],
+  'HTTP-28': [{ file: operationalBoundaries, test: 'receiptRotationRateLimitsAndUnconfiguredServerPreserveDatabaseAndSecrets' }],
+  'HTTP-29': [{ file: operationalBoundaries, test: 'goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects' }],
+  'HTTP-30': [{ file: operationalBoundaries, test: 'templateCliReplacementIsAtomicAndPreservesNoticesFromRemovedTemplates' }],
+  'HTTP-31': [{ file: operationalBoundaries, test: 'administratorMutationMatrixRejectsBeforeSideEffectsAndNoticeReplayIsExactlyOnce' }],
   'OPS-01': [{ file: operator, test: 'catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain' }],
   'OPS-02': [{ file: operator, test: 'catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain' }],
   'OPS-03': [{ file: operator, test: 'catalogCliRejectsCorruptDraftAndRecoversWithAValidReplacementThroughSeparateProcesses' }],
@@ -133,12 +146,12 @@ const providerTests = {
 const operationScenarios = {
   getConfig: ['HTTP-01', 'HTTP-10', 'HTTP-19', 'HTTP-20'],
   getCrowding: ['HTTP-08', 'HTTP-10', 'HTTP-18', 'HTTP-21', 'HTTP-24'],
-  getNotices: ['HTTP-10', 'HTTP-18'],
-  getGoods: ['HTTP-18'],
-  getGoodsAvailability: ['HTTP-18'],
-  getGood: ['HTTP-18'],
-  getGoodAvailability: ['HTTP-18'],
-  getPaymentGuide: ['HTTP-18'],
+  getNotices: ['HTTP-10', 'HTTP-18', 'HTTP-25'],
+  getGoods: ['HTTP-18', 'HTTP-26'],
+  getGoodsAvailability: ['HTTP-18', 'HTTP-26'],
+  getGood: ['HTTP-18', 'HTTP-26'],
+  getGoodAvailability: ['HTTP-18', 'HTTP-26'],
+  getPaymentGuide: ['HTTP-18', 'HTTP-29'],
   getLineup: ['HTTP-05', 'HTTP-14', 'HTTP-18', 'HTTP-19'],
   getArtist: ['HTTP-05', 'HTTP-14', 'HTTP-18'],
   getTimetable: ['HTTP-05', 'HTTP-14', 'HTTP-18', 'HTTP-19'],
@@ -149,61 +162,38 @@ const operationScenarios = {
   getMaps: ['HTTP-03', 'HTTP-04', 'HTTP-14', 'HTTP-18'],
   getMap: ['HTTP-04', 'HTTP-18'],
   getPins: ['HTTP-03', 'HTTP-04', 'HTTP-18'],
-  getPlace: ['HTTP-03', 'HTTP-04', 'HTTP-18'],
+  getPlace: ['HTTP-03', 'HTTP-18'],
   getTicketGuide: ['HTTP-06', 'HTTP-11', 'HTTP-18', 'HTTP-23'],
   getStampGuide: ['HTTP-06'],
-  verifyStampReceipt: ['HTTP-06'],
+  verifyStampReceipt: ['HTTP-06', 'HTTP-28'],
   getAdminCrowding: ['HTTP-08', 'HTTP-09', 'HTTP-12', 'HTTP-16', 'HTTP-24'],
   putAdminCrowding: ['HTTP-08', 'HTTP-09', 'HTTP-12', 'HTTP-16', 'HTTP-24'],
-  getAdminNotices: [],
-  postAdminNotice: [],
-  getAdminNotice: [],
-  putAdminNotice: [],
-  deleteAdminNotice: [],
-  getTemplates: [],
-  getTemplate: [],
-  getAdminGoods: [],
-  putAdminAvailability: [],
-  getAdminProducts: [],
-  postAdminProduct: [],
-  getAdminProduct: [],
-  putAdminProduct: [],
-  deleteAdminProduct: [],
-  postAdminGoodsImage: [],
-  getGoodsImage: [],
+  getAdminNotices: ['HTTP-25'],
+  postAdminNotice: ['HTTP-25'],
+  getAdminNotice: ['HTTP-25'],
+  putAdminNotice: ['HTTP-25'],
+  deleteAdminNotice: ['HTTP-25'],
+  getTemplates: ['HTTP-30'],
+  getTemplate: ['HTTP-30'],
+  getAdminGoods: ['HTTP-26'],
+  putAdminAvailability: ['HTTP-26'],
+  getAdminProducts: ['HTTP-26'],
+  postAdminProduct: ['HTTP-26'],
+  getAdminProduct: ['HTTP-26'],
+  putAdminProduct: ['HTTP-26'],
+  deleteAdminProduct: ['HTTP-26'],
+  postAdminGoodsImage: ['HTTP-27'],
+  getGoodsImage: ['HTTP-27'],
   createAdminSession: ['HTTP-07', 'HTTP-12', 'HTTP-22'],
   refreshAdminSession: ['HTTP-07', 'HTTP-12'],
   deleteCurrentAdminSession: ['HTTP-07', 'HTTP-12'],
   getCurrentAdmin: ['HTTP-07', 'HTTP-12'],
 };
 
-const operationUnresolvedReasons = {
-  getNotices: 'No release scenario currently traverses the notice list; the provider integration test remains the source of live coverage.',
-  getGoods: 'No release scenario currently traverses the goods catalog; the provider integration test remains the source of live coverage.',
-  getGoodsAvailability: 'No release scenario currently traverses goods availability; the provider integration test remains the source of live coverage.',
-  getGood: 'No release scenario currently traverses a goods detail; the provider integration test remains the source of live coverage.',
-  getGoodAvailability: 'No release scenario currently traverses a goods availability detail; the provider integration test remains the source of live coverage.',
-  getPaymentGuide: 'No release scenario currently traverses the goods payment guide; the provider integration test remains the source of live coverage.',
-  getAdminNotices: 'No HTTP/OPS release scenario currently covers admin notice reads.',
-  postAdminNotice: 'No HTTP/OPS release scenario currently covers admin notice creation; provider tests cover success, authorization boundaries, idempotency, and invalid input.',
-  getAdminNotice: 'No HTTP/OPS release scenario currently covers an admin notice detail.',
-  putAdminNotice: 'No HTTP/OPS release scenario currently covers admin notice updates; provider tests cover success, If-Match conflicts, authorization boundaries, and invalid input.',
-  deleteAdminNotice: 'No HTTP/OPS release scenario currently covers admin notice deletion.',
-  getTemplates: 'No HTTP/OPS release scenario currently covers admin notice templates.',
-  getTemplate: 'No HTTP/OPS release scenario currently covers an admin notice template detail.',
-  getAdminGoods: 'No HTTP/OPS release scenario currently covers admin goods reads.',
-  putAdminAvailability: 'No HTTP/OPS release scenario currently covers admin availability writes; provider tests cover success, idempotency, validation, authorization, and unknown combinations.',
-  getAdminProducts: 'No HTTP/OPS release scenario currently covers admin product reads.',
-  postAdminProduct: 'No HTTP/OPS release scenario currently covers admin product creation.',
-  getAdminProduct: 'No HTTP/OPS release scenario currently covers an admin product detail.',
-  putAdminProduct: 'No HTTP/OPS release scenario currently covers admin product updates.',
-  deleteAdminProduct: 'No HTTP/OPS release scenario currently covers admin product deletion.',
-  postAdminGoodsImage: 'No HTTP/OPS release scenario currently covers admin goods media upload.',
-  getGoodsImage: 'No HTTP/OPS release scenario currently covers goods media retrieval.',
-};
+const operationUnresolvedReasons = {};
 
 const expectedScenarioIds = [
-  ...Array.from({ length: 24 }, (_, index) => `HTTP-${String(index + 1).padStart(2, '0')}`),
+  ...Array.from({ length: 31 }, (_, index) => `HTTP-${String(index + 1).padStart(2, '0')}`),
   ...Array.from({ length: 20 }, (_, index) => `OPS-${String(index + 1).padStart(2, '0')}`),
 ];
 
@@ -315,7 +305,7 @@ export const validateReleaseOperationCoverage = (spec, metadata, { repositoryRoo
   for (const row of rows) if (!specKeys.has(expectedOperationKey(row))) issue(issues, `coverage row is not in OpenAPI: ${expectedOperationKey(row)}`);
   if (rows.length !== specOperations.length) issue(issues, `coverage has ${rows.length} rows for ${specOperations.length} OpenAPI operations`);
   const scenarios = Array.isArray(metadata?.scenarios) ? metadata.scenarios : [];
-  if (metadata?.scenarioCount !== expectedScenarioIds.length || scenarios.length !== expectedScenarioIds.length) issue(issues, 'scenario inventory must contain HTTP-01..24 and OPS-01..20 exactly once');
+  if (metadata?.scenarioCount !== expectedScenarioIds.length || scenarios.length !== expectedScenarioIds.length) issue(issues, 'scenario inventory must contain HTTP-01..31 and OPS-01..20 exactly once');
   const scenarioIds = new Set();
   for (const scenario of scenarios) {
     if (scenarioIds.has(scenario.id)) issue(issues, `duplicate scenario ${scenario.id}`);

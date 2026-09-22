@@ -37,6 +37,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -212,7 +213,7 @@ class NoticeFlowIntegrationTest {
 
     @Test
     void createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi() throws Exception {
-        String created = mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))
+        MvcResult createdResult = mvc.perform(asAdmin(post(ADMIN_LIST_ROUTE))
                 .header("Idempotency-Key", nextKey())
                 .contentType("application/json")
                 .content(VALID_CREATE_BODY))
@@ -220,8 +221,11 @@ class NoticeFlowIntegrationTest {
             .andExpect(jsonPath("$.data.type").value("GENERAL"))
             .andExpect(jsonPath("$.data.translations.ko.title").value("관리자 공지"))
             .andExpect(jsonPath("$.data.templateId").doesNotExist())
-            .andReturn().getResponse().getContentAsString();
+            .andReturn();
+        String created = createdResult.getResponse().getContentAsString();
         String id = objectMapper.readTree(created).path("data").path("id").asString();
+        assertThat(createdResult.getResponse().getHeader("Location"))
+            .isEqualTo(ADMIN_LIST_ROUTE + "/" + id);
 
         mvc.perform(asAdmin(get(ADMIN_LIST_ROUTE)))
             .andExpect(status().isOk())

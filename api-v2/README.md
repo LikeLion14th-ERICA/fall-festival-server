@@ -29,8 +29,8 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 릴리스 coverage metadata도 `openapi.json`에서 자동 inventory합니다. 원천 매핑은
 `release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 44개 operation이
 정확히 한 번 분류되는지, 각 live operation의 provider test와
-HTTP-01~24·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
-live provider와 44개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
+HTTP-01~31·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
+live provider와 51개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
 정렬된 Maven `-Dtest` CSV로 출력합니다. 이 검사는 제품 route를 활성화하지 않습니다.
 
 현재 Spring Boot 서버에는 공개 공연 조회인 `GET /api/v2/lineup`,
@@ -42,7 +42,7 @@ live provider와 44개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17Mi
 
 기본 경로는 `/api/v2`입니다. 공개 GET 요청은 인증이 없습니다. `/admin/` 요청은 서버에서 관리자 권한을 확인합니다. 목의 고정 토큰은 실제 인증 규격이 아닙니다. API v2가 제품의 유일한 계약이며, 실제 Spring Boot 적용 범위는 경로별 구현 상태와 함께 관리합니다.
 
-성공은 `{ data, meta }`, 오류는 `{ error, meta }`입니다. 일반 `meta`는 `requestId`, `serverTime`, `timezone`, `festivalId`, `revision`, `locale`, `mock`을 포함합니다. `X-Request-Id`도 같은 요청 ID입니다. 특정 published `FestivalRevision`에 귀속된 콘텐츠의 `revision`은 실제 `FestivalRevision.revision_number`인 1 이상입니다. 인증·시스템·오류와 같이 특정 published revision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용합니다. 혼잡도는 published FestivalDay 일정과 revision-independent 상태를 조합하므로 `revision: 0`을 사용하며, 조건부 성공 응답은 ETag 안정성을 위해 `requestId`·`serverTime`을 본문 meta에서 제외하고 응답 헤더로 제공합니다. 스탬프·티켓 안내는 해당 revision ID로 조회하므로 1 이상을 사용합니다. 오류 `code`로 분기하고 `message`는 진단에 사용합니다. 화면 문구는 프런트 번역에서 선택합니다.
+성공은 `{ data, meta }`, 오류는 `{ error, meta }`입니다. 일반 `meta`는 `requestId`, `serverTime`, `timezone`, `festivalId`, `revision`, `locale`, `mock`을 포함합니다. `X-Request-Id`도 같은 요청 ID입니다. 특정 published `FestivalRevision`에 귀속된 콘텐츠의 `revision`은 실제 `FestivalRevision.revision_number`인 1 이상입니다. 인증·시스템·오류와 같이 특정 published revision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용합니다. 혼잡도는 published FestivalDay 일정과 revision-independent 상태를 조합하므로 revision 0을 사용한다. 조건부 GET과 idempotency 재생이 가능한 공지 POST/PUT은 안정 body meta를 위해 requestId·serverTime을 본문에서 제외한다. 조건부 GET만 ETag와 X-Server-Time을 함께 제공하고, 공지 mutation은 X-Request-Id로 요청을 추적한다. 스탬프·티켓 안내는 해당 revision ID로 조회하므로 1 이상을 사용합니다. 오류 `code`로 분기하고 `message`는 진단에 사용합니다. 화면 문구는 프런트 번역에서 선택합니다.
 
 ```json
 {

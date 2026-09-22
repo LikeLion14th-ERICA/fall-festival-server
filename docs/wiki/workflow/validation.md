@@ -79,7 +79,7 @@ class의 결과를 검사한다. 필수 class 누락, 0건, migration 시나리�
 
 ### 릴리스 후보 backend E2E
 
-현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-24`의 범위, 아직 구현하지 않은
+현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-31`의 범위, 아직 구현하지 않은
 보강 후보와 staging gate는 [릴리스 HTTP E2E 시나리오](release-http-e2e.md)에 정리한다.
 
 `ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는
@@ -120,8 +120,15 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-22 | 관리자 로그인 rate limit | 잘못된 비밀번호 추측이 trusted proxy client 단위로 제한되고 다른 client·refill 뒤에는 다시 인증 오류로 처리되며 cookie를 발급하지 않음 |
 | HTTP-23 | 티켓 송금 초 경계 | `09:59:59`·`10:00:00`·`17:59:59`·`18:00:00` KST에서 `DAILY_CLOSED`/`TRANSFER_OPEN`, 계좌 노출, settings version, 이전·현재 ETag의 200/304가 정확히 전환됨 |
 | HTTP-24 | 혼잡도 일정 경계 | 첫 축제일 전·중간 공백일·마지막 날 뒤와 개장·마감 시각의 `operatingStatus`, 비축제일 PUT 409, 운영 시간 밖 축제일 저장, 누락·stale `If-Match`의 428/409을 실제 HTTP로 확인 |
+| HTTP-25 | 공지 lifecycle | 실제 관리자 생성 Location·replay·key reuse·If-Match stale·수정·삭제와 공개 목록 반영·conditional read를 확인 |
+| HTTP-26 | 상품·판매 상태 lifecycle | 상품 생성 Location·replay·목록/상세/관리자 목록·조합 ON_SALE/SOLD_OUT·옵션 변경·hard delete와 media detach를 확인 |
+| HTTP-27 | 이미지 upload/delivery | multipart 인증·상한·유형·replay·media 공개 200/304 header·replacement/detach·processor/storage 실패 rollback을 확인 |
+| HTTP-28 | 수령 code·rate limit | 이전/신규 hash, 앞자리 0, 잘못된 code, 5회 이후 429, spoofing, refill, unconfigured 상태와 DB/secret 무변경을 확인 |
+| HTTP-29 | GOODS account CLI | 실제 child JVM dry-run/set/stale/clear/restart가 payment-guide에 반영되고 TICKET state를 바꾸지 않음을 확인 |
+| HTTP-30 | notice template CLI | preview·전체 교체·관리자 목록/상세·template 삭제 뒤 notice 보존·malformed/duplicate 무변경을 확인 |
+| HTTP-31 | 관리자 mutation boundary | 8개 mutation route의 auth/key/precondition 거절과 notice replay/stale/key reuse side effect를 부분 범위로 확인 |
 
-위 HTTP-01~24는 서로 다른 출시 위험을 나타내는 **24개 시나리오**다. JUnit test
+위 HTTP-01~31은 서로 다른 출시 위험을 나타내는 **31개 시나리오**다. JUnit test
 method는 관계된 요청을 한 transaction·server lifecycle 안에서 묶으므로 시나리오 수와
 method 수가 같지 않다.
 
@@ -135,7 +142,7 @@ cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessH
 E2E는 다음 명령으로 실행한다.
 
 ```powershell
-cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest test"
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,DynamicContentReleaseHttpE2eTest,OperationalBoundariesHttpE2eTest test"
 ```
 
 다른 후보 manifest는 경로를 시스템 프로퍼티로 준다. 이 기본 모드에서는 빈 공간·지도와
@@ -195,8 +202,8 @@ main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource�
 | OPS-20 | legacy 티켓 일정 복구 | 날짜·송금·수령의 필수 일정 6개 각각 누락 시 export finding과 import/validate/publish 차단·무변경을 확인하고, 값을 복구한 retry만 게시 가능 |
 
 `null` PLACE filter는 현재 계약상 정상이며 OPS-19에서 lossless로 보존한다. 위
-OPS-01~20은 **20개 시나리오**다. HTTP 24개와 합쳐 현재 backend release E2E 시나리오는
-**44개**다.
+OPS-01~20은 **20개 시나리오**다. HTTP 31개와 합쳐 현재 backend release E2E 시나리오는
+**51개**다.
 
 운영 도구 focused 검증은 다음 명령으로 실행한다.
 

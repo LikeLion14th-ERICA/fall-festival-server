@@ -34,8 +34,9 @@ const unscopedOperations=new Set([
   'postAdminGoodsImage','getGoodsImage'
 ]);
 for(const op of operations){
-  const responseName=op.schema?`${op.schema}${op.conditional?'Conditional':''}Response`:null;
-  if(responseName)spec.components.schemas[responseName]=envelopeSchema(op.schema,op.conditional?'ConditionalMeta':'Meta');
+  const usesConditionalMeta=op.conditional||op.conditionalMeta;
+  const responseName=op.schema?`${op.schema}${usesConditionalMeta?'Conditional':''}Response`:null;
+  if(responseName)spec.components.schemas[responseName]=envelopeSchema(op.schema,usesConditionalMeta?'ConditionalMeta':'Meta');
   const hasLocale=op.parameters.some(parameter=>parameter.in==='query'&&parameter.name==='locale');
   const scenarios=[...new Set([...op.scenarios,...(hasLocale?['locale-not-ready']:[]),'bad-request','rate-limited',...(op.admin&&op.authRequired!==false?['unauthorized','forbidden']:[])])];
   const successStatus=op.successStatus??(op.method==='POST'?201:200);
@@ -43,9 +44,11 @@ for(const op of operations){
   const responses=Object.fromEntries(statuses.map(status=>{
     const conditionalHeaders=op.conditional&&(status<300||status===304)?{ETag:strongEtagHeader,...(op.binaryResponse?{}:{'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'}})}:{};
     const cacheControlHeaders=op.cacheControl&&(status<300||(op.conditional&&status===304))?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:op.cacheControl==='no-store'?'브라우저와 중간 캐시가 응답을 저장하지 못하게 한다.':op.binaryResponse?'응답에 적용되는 캐시 지시문.':'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{};
-    const binaryHeaders=op.binaryResponse&&status===200?{'Content-Disposition':{schema:{type:'string',enum:['inline']},description:'브라우저 inline 표시'},'X-Content-Type-Options':{schema:{type:'string',enum:['nosniff']},description:'MIME sniffing 차단'}}:{};
+    const binaryHeaders=op.binaryResponse&&(status===200||status===304)?{'Content-Disposition':{schema:{type:'string',enum:['inline']},description:'브라우저 inline 표시'},'X-Content-Type-Options':{schema:{type:'string',enum:['nosniff']},description:'MIME sniffing 차단'}}:{};
+    const locationHeaders=op.locationHeader&&status===successStatus?{Location:{schema:{type:'string',format:'uri-reference',pattern:`^${op.path}/[^/]+$`},description:`생성된 리소스의 상세 경로(${op.path}/{id})`}}:{};
+    const requestIdHeader={'X-Request-Id':{schema:{type:'string'},description:op.binaryResponse||usesConditionalMeta?'요청 추적 ID':'응답 meta.requestId와 동일'}};
     const responseOverride=op.responseOverrides?.[status];
-    const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{...(op.binaryResponse?{}:{'X-Request-Id':{schema:{type:'string'},description:'응답 meta.requestId와 동일'}}),...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...conditionalHeaders,...cacheControlHeaders,...binaryHeaders}};
+    const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{...requestIdHeader,...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...locationHeaders,...conditionalHeaders,...cacheControlHeaders,...binaryHeaders}};
     if(op.binaryResponse&&status===200)response.content={'image/webp':{schema:{type:'string',format:'binary'}}};
     else if(!noBodyStatuses.has(status))response.content={'application/json':{schema:{$ref:`#/components/schemas/${status<300?responseName:'Error'}`},examples:{}}};
     return [status,response];
@@ -56,7 +59,7 @@ for(const op of operations){
     ...(op.ifMatchRequired?[{name:'If-Match',in:'header',required:true,schema:strongEtagHeader.schema,description:'현재 표현의 strong ETag. 누락 시 428, 불일치 시 409.'}]:[]),
     ...(op.idempotencyKeyRequired?[{name:'Idempotency-Key',in:'header',required:true,schema:{type:'string',minLength:1,maxLength:128,pattern:'^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'},description:op.idempotencyKeyDescription??'같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428.'}]:[]),
   ];
-  const operation={operationId:op.operationId,summary:op.summary,description:`연결 화면: ${op.screens.join(', ')||'관리자 공통 인증'}. ${op.provisional?'미정 기획을 위한 검토 필요 계약. ':''}목의 인증/시나리오 헤더는 연동 안내를 참고.`,tags:[op.admin?'관리자':'공개'],security:op.security??(op.admin?[{AdminBearer:[]}]:[]),parameters:[...op.parameters,...headerParameters],responses,'x-screen-ids':op.screens,'x-contract-status':op.provisional?'provisional':'screen-specified','x-mock-scenarios':scenarios,...(op.conditional?{'x-conditional':true}: {}),...(op.binaryResponse?{'x-binary-response':true}: {})};
+  const operation={operationId:op.operationId,summary:op.summary,description:`연결 화면: ${op.screens.join(', ')||'관리자 공통 인증'}. ${op.provisional?'미정 기획을 위한 검토 필요 계약. ':''}목의 인증/시나리오 헤더는 연동 안내를 참고.`,tags:[op.admin?'관리자':'공개'],security:op.security??(op.admin?[{AdminBearer:[]}]:[]),parameters:[...op.parameters,...headerParameters],responses,'x-screen-ids':op.screens,'x-contract-status':op.provisional?'provisional':'screen-specified','x-mock-scenarios':scenarios,...(op.conditional?{'x-conditional':true}: {}),...(op.conditionalMeta?{'x-conditional-meta':true}: {}),...(op.binaryResponse?{'x-binary-response':true}: {})};
   if(op.input)operation.requestBody={required:true,description:op.provisional?'목 연동용 입력 초안. 기획 합의 전 운영 구현 금지.':'저장할 변경값',content:{'application/json':{schema:{$ref:`#/components/schemas/${op.input}`},example:inputExamples[op.input]}}};
   if(op.multipartInput)operation.requestBody={required:true,description:'10 MiB 이하의 JPEG, PNG 또는 WebP 원본. 파일명과 client MIME은 format 판정에 사용하지 않는다.',content:{'multipart/form-data':{schema:{type:'object',properties:{file:{type:'string',format:'binary'}},required:['file'],additionalProperties:false}}}};
   spec.paths[op.path]??={};spec.paths[op.path][op.method.toLowerCase()]=operation;
@@ -85,7 +88,7 @@ for(const op of operations){
       const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure,'precondition-required':[428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.'],'idempotency-key-required':[428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.'],'invalid-media-reference':[422,'INVALID_MEDIA_REFERENCE','사용할 수 없는 상품 이미지가 포함되어 있습니다.'],...(op.multipartInput?{'validation-failed':[422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.'],'payload-too-large':[413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.'],'unsupported-media-type':[415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.']}:{}),'edit-conflict':[409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.']}[scenario];
       if(special)throw new ApiFailure(...special);
       if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
-      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)||op.binaryResponse?null:{data:result.data,meta:op.conditional?conditionalMeta(responseRevision):meta(responseRevision)};
+      const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)||op.binaryResponse?null:{data:result.data,meta:usesConditionalMeta?conditionalMeta(responseRevision):meta(responseRevision)};
     }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;const override=op.responseOverrides?.[status];response={error:{code:override?.code??e.code,message:override?.message??e.message,details:e.details,retryable:override?.retryable??[429,500,503].includes(status)},meta:meta(0)};}
     if(!responses[status])throw new Error(`Missing response ${op.operationId} ${status}`);
     if(responses[status].content?.['application/json'])responses[status].content['application/json'].examples[scenario]={summary:`${op.summary}: ${scenario}`,value:response};
