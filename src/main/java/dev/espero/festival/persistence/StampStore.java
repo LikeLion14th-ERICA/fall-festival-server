@@ -15,8 +15,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 /**
- * Booth stamp data (V27). Booth tokens are read from the published catalog
- * revision; participants, collections and rewards are festival-scoped
+ * Booth stamp data (V27, daily START V28). Booth tokens are read from the published catalog
+ * revision; participants, start days, collections and rewards are festival-scoped
  * operational rows. Callers that change a participant's card lock the
  * participant row first so the daily limit holds under concurrent scans.
  */
@@ -78,6 +78,27 @@ public class StampStore {
             SELECT id FROM stamp_participants WHERE festival_id = :festivalId AND token_sha256 = :tokenSha256
             """, new MapSqlParameterSource().addValue("festivalId", festivalId).addValue("tokenSha256", tokenSha256),
             (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class)).stream().findFirst();
+    }
+
+    /** Records today's START (V28); returns false when the participant already started today. */
+    public boolean startDay(UUID participantId, LocalDate date, Instant now) {
+        return jdbc.update("""
+            INSERT INTO stamp_participant_days (participant_id, operating_date, started_at)
+            VALUES (:participantId, :date, :startedAt)
+            ON CONFLICT DO NOTHING
+            """, new MapSqlParameterSource()
+            .addValue("participantId", participantId)
+            .addValue("date", date)
+            .addValue("startedAt", atUtc(now))) == 1;
+    }
+
+    public boolean startedOn(UUID participantId, LocalDate date) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+            SELECT EXISTS (
+                SELECT 1 FROM stamp_participant_days WHERE participant_id = :participantId AND operating_date = :date
+            )
+            """, new MapSqlParameterSource().addValue("participantId", participantId).addValue("date", date),
+            Boolean.class));
     }
 
     /** Must run inside the caller's transaction. */

@@ -24,10 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Booth stamp rules (STAMP-001). A participant is an anonymous browser that
- * holds a random cookie value; the server stores only its SHA-256. On each
- * festival day (in the festival's time zone) a participant collects at most
- * one stamp per booth and {@link #DAILY_LIMIT} stamps, and claims the reward
- * once after collecting all of them.
+ * holds a random cookie value; the server stores only its SHA-256. A
+ * participant presses START once per festival day (in the festival's time
+ * zone); until then the card is not started and booth QRs collect nothing.
+ * After START it collects at most one stamp per booth and {@link #DAILY_LIMIT}
+ * stamps that day, and claims the reward once after collecting all of them.
  */
 @Service
 @Profile("db")
@@ -55,24 +56,32 @@ public class StampCardService {
         this.clock = clock;
     }
 
-    /** A started card, and the new cookie value when this call created the participant. */
-    public record Started(StampCardResponse card, String newParticipantToken) {}
+    /**
+     * Today's card. {@code startedNow} is true when this call recorded today's
+     * START; {@code cookieToken} is then the cookie value to (re)issue, so the
+     * cookie lifetime counts from the latest START.
+     */
+    public record Started(StampCardResponse card, boolean startedNow, String cookieToken) {}
 
-    /** Returns the existing card for a known cookie, otherwise starts a new participant. */
+    /** Records today's START, creating the participant for a browser without a valid cookie. */
     @Transactional
     public Started start(String participantToken) {
+        LocalDate today = today(snapshots.required());
         Optional<UUID> existing = participant(participantToken);
-        if (existing.isPresent()) {
-            return new Started(card(existing.get()), null);
-        }
-        String token = newParticipantToken();
-        UUID participant = store.createParticipant(festival.configuredFestivalId(), sha256(token), clock.instant());
-        return new Started(card(participant), token);
+        String token = existing.isPresent() ? participantToken : newParticipantToken();
+        UUID participant = existing.orElseGet(
+            () -> store.createParticipant(festival.configuredFestivalId(), sha256(token), clock.instant())
+        );
+        boolean startedNow = store.startDay(participant, today, clock.instant());
+        return new Started(card(participant), startedNow, startedNow ? token : null);
     }
 
+    /** Today's card; {@code STAMP_NOT_STARTED} until today's START, which shows the start screen. */
     @Transactional(readOnly = true)
     public StampCardResponse current(String participantToken) {
-        return card(participant(participantToken).orElseThrow(StampCardService::notStarted));
+        UUID participant = participant(participantToken).orElseThrow(StampCardService::notStarted);
+        requireStartedToday(participant, today(snapshots.required()));
+        return card(participant);
     }
 
     @Transactional
@@ -81,6 +90,7 @@ public class StampCardService {
         store.lockParticipant(participant);
         CatalogSnapshot snapshot = snapshots.required();
         LocalDate today = today(snapshot);
+        requireStartedToday(participant, today);
         StampStore.BoothToken booth = boothToken == null || !BOOTH_TOKEN.matcher(boothToken).matches()
             ? null
             : store.findBoothToken(snapshot.context().revisionId(), sha256(boothToken)).orElse(null);
@@ -133,6 +143,12 @@ public class StampCardService {
             ))
             .toList();
         return new StampCardResponse(today, DAILY_LIMIT, stamps, store.rewardClaimed(participant, today));
+    }
+
+    private void requireStartedToday(UUID participant, LocalDate today) {
+        if (!store.startedOn(participant, today)) {
+            throw notStarted();
+        }
     }
 
     private Optional<UUID> participant(String participantToken) {

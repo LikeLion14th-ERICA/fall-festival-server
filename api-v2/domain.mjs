@@ -434,19 +434,20 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const schedule=defaultDate(date),open=ticketStatus==='TRANSFER_OPEN';
       data={date,status:ticketStatus,unitPrice:unconfigured?null:money(1500),transferOpensAt:unconfigured?null:`${schedule}T00:00:00+09:00`,transferClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,pickupOpensAt:unconfigured?null:`${schedule}T13:00:00+09:00`,pickupClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,account:open?{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'}:null,transferLink:null,paymentSettingsVersion:unconfigured?null:1,mapTarget:unconfigured?null:{mapId:'map-overview',placeId:'place-ticket',pinId:'pin-ticket',mapVersion:'mock-map-1'},instructions:['실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.','입금과 지급 여부는 현장에서 확인합니다.']};break;
     }
-    case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['START를 누르면 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
+    case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['축제일마다 START를 누르면 그날 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
     case 'startStampParticipation':
-      if(scenario==='already-started'&&!state.stampCard)mockStampCard(state,date,0);
-      status=state.stampCard?200:201;
-      if(!state.stampCard)mockStampCard(state,date,0);
+      // START is once per festival day: a card from an earlier day means not started today.
+      if(scenario==='already-started'&&state.stampCard?.date!==date)mockStampCard(state,date,0);
+      status=state.stampCard?.date===date?200:201;
+      if(status===201)mockStampCard(state,date,0);
       data=stampCardData(state,date);break;
     case 'getStampCard':
       if(!state.stampCard&&scenario!=='not-started')mockStampCard(state,date,scenario==='empty'?0:2);
-      if(scenario==='not-started'||!state.stampCard)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
+      if(scenario==='not-started'||state.stampCard?.date!==date)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
       data=stampCardData(state,date);break;
     case 'collectStamp':{
       if(!state.stampCard&&scenario!=='not-started')mockStampCard(state,date,0);
-      if(scenario==='not-started'||!state.stampCard)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
+      if(scenario==='not-started'||state.stampCard?.date!==date)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
       const booth=MOCK_STAMP_BOOTHS.find(candidate=>candidate.token===body.token);
       if(scenario==='invalid-token'||!booth)failure(422,'INVALID_STAMP_TOKEN','스탬프투어 QR이 아니에요.');
       const card=stampCardData(state,date);

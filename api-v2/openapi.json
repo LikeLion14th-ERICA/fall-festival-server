@@ -11012,7 +11012,7 @@
                           "2030-10-03"
                         ],
                         "instructions": [
-                          "START를 누르면 참여가 시작됩니다.",
+                          "축제일마다 START를 누르면 그날 참여가 시작됩니다.",
                           "부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다."
                         ],
                         "reward": {
@@ -11047,7 +11047,7 @@
                           "2030-10-03"
                         ],
                         "instructions": [
-                          "START를 누르면 참여가 시작됩니다.",
+                          "축제일마다 START를 누르면 그날 참여가 시작됩니다.",
                           "부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다."
                         ],
                         "reward": {
@@ -11337,7 +11337,7 @@
     "/api/v2/stamp-participants": {
       "post": {
         "operationId": "startStampParticipation",
-        "summary": "스탬프투어 시작·익명 참여 쿠키 발급",
+        "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급",
         "description": "연결 화면: STAMP-START. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -11389,7 +11389,7 @@
                 },
                 "examples": {
                   "already-started": {
-                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: already-started",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: already-started",
                     "value": {
                       "data": {
                         "date": "2030-10-01",
@@ -11434,7 +11434,7 @@
                 "schema": {
                   "type": "string"
                 },
-                "description": "__Host-festival-stamp 익명 참여자 쿠키. Secure; HttpOnly; SameSite=Lax; Path=/; Max-Age 30일. 이미 참여 중이면 200과 함께 보내지 않는다."
+                "description": "__Host-festival-stamp 익명 참여자 쿠키. Secure; HttpOnly; SameSite=Lax; Path=/; Max-Age 30일(마지막 START부터). 오늘 처음 START하면(201) 발급·갱신하고, 오늘 이미 START했으면 200과 함께 보내지 않는다."
               }
             },
             "content": {
@@ -11444,7 +11444,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: normal",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: normal",
                     "value": {
                       "data": {
                         "date": "2030-10-01",
@@ -11484,7 +11484,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: locale-not-ready",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -11504,7 +11504,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: bad-request",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -11627,7 +11627,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: rate-limited",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -11686,7 +11686,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: error",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -27125,7 +27125,7 @@
           "date": {
             "type": "string",
             "minLength": 1,
-            "description": "축제 시간대(Asia/Seoul) 기준 오늘 날짜. 자정에 새 스탬프판이 된다.",
+            "description": "축제 시간대(Asia/Seoul) 기준 오늘 날짜. 자정이 지나면 다시 START해야 새 스탬프판이 열린다.",
             "format": "date"
           },
           "dailyLimit": {
@@ -27155,7 +27155,7 @@
           "rewardClaimed"
         ],
         "additionalProperties": false,
-        "description": "이 브라우저의 익명 참여자(HttpOnly 쿠키)의 오늘 스탬프판. 계정·복구 없음."
+        "description": "이 브라우저의 익명 참여자(HttpOnly 쿠키)의 오늘 스탬프판. 오늘 START(POST /stamp-participants) 뒤에만 있고, 그 전에는 STAMP_NOT_STARTED(404)이므로 시작 화면을 보여 준다. 계정·복구 없음."
       },
       "StampCardStamp": {
         "type": "object",

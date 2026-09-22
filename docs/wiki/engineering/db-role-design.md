@@ -67,7 +67,7 @@ role이 앱을 실제로 돌리는 데 필요한 나머지 테이블 권한(카�
 | 테이블 | 권한 |
 |---|---|
 | `crowding_state_dynamic` | SELECT, INSERT, UPDATE |
-| `stamp_participants`, `stamp_collections`, `stamp_rewards` | SELECT, INSERT (부스 스탬프 V27, `StampStore` 기준) |
+| `stamp_participants`, `stamp_participant_days`, `stamp_collections`, `stamp_rewards` | SELECT, INSERT (부스 스탬프 V27·일일 START V28, `StampStore` 기준) |
 | `notices`, `notice_translations`, `notice_links`, `notice_link_translations` | SELECT, INSERT, UPDATE, DELETE |
 | `notice_templates`, `notice_template_translations` | SELECT, INSERT, DELETE (템플릿 CLI가 전체 교체; `NoticeTemplateStore` 기준) |
 | `goods`, `goods_translations`, `goods_colors`, `goods_color_translations`, `goods_sizes`, `goods_size_translations`, `goods_combinations` | SELECT, INSERT, UPDATE, DELETE |

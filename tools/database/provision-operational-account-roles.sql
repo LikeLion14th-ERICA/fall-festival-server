@@ -78,6 +78,8 @@ REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_export_rol
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".stamp_participants FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".stamp_participants FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".stamp_participant_days FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".stamp_participant_days FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".stamp_collections FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".stamp_collections FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".stamp_rewards FROM :"catalog_export_role";
