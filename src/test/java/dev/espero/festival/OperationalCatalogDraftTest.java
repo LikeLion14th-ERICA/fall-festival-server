@@ -47,6 +47,7 @@ class OperationalCatalogDraftTest {
             gaps.add(fill((ObjectNode) day, "closesAt", date + "T23:00:00+09:00"));
         }
         fillImages(draft.path("spaces"), gaps);
+        fillImages(draft.path("artists"), gaps);
         for (JsonNode item : draft.path("spaceMenuItems")) {
             gaps.add(fill((ObjectNode) item, "priceAmount", 1));
         }

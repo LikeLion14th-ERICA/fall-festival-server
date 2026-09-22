@@ -1027,58 +1027,58 @@
     {
       "id": "nct-wish",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/nct-wish.png",
-      "imageWidth": 2000,
-      "imageHeight": 3000
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "nowimyoung",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/nowimyoung.png",
-      "imageWidth": 2730,
-      "imageHeight": 4096
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "kim-haon",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/kim-haon.png",
-      "imageWidth": 2730,
-      "imageHeight": 4096
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "lucenne",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/lucenne.png",
-      "imageWidth": 3277,
-      "imageHeight": 4096
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "heegyu",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/heegyu.png",
-      "imageWidth": 1080,
-      "imageHeight": 1440
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "ahof",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/ahof.png",
-      "imageWidth": 4096,
-      "imageHeight": 2731
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "alphadriveone",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/alphadriveone.png",
-      "imageWidth": 1830,
-      "imageHeight": 4096
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     },
     {
       "id": "fromis-9",
       "category": "ARTIST",
-      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/artists/fromis-9.png",
-      "imageWidth": 2925,
-      "imageHeight": 4096
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     }
   ],
   "artistTranslations": [
