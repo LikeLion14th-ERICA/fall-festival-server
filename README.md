@@ -103,7 +103,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `ADMIN_JWT_SIGNING_SECRET` | 필수 | (없음) | `db` | access JWT 서명 비밀; UTF-8 32바이트 미만이면 startup 실패 |
 | `ADMIN_ALLOWED_ORIGIN` | 필수 | (없음) | `db` | 관리자 credential 요청용 단일 HTTP(S) origin; wildcard·경로·query 불가 |
 | `ADMIN_BOOTSTRAP_USERNAME` | 선택 | (없음) | `db` | 최초 관리자 username; 양쪽 값이 있을 때 공백 제거 후 100자 이하 |
-| `ADMIN_BOOTSTRAP_PASSWORD` | 선택 | (없음) | `db` | 최초 관리자 비밀번호; 양쪽 값이 있을 때 UTF-8 72바이트 이하 |
+| `ADMIN_BOOTSTRAP_PASSWORD` | 선택 | (없음) | `db` | 최초 관리자 비밀번호; 양쪽 값이 있을 때 15개 이상의 Unicode code point 및 UTF-8 72바이트 이하 |
 | `STAMP_RECEIPT_CODE_SHA256` | 선택 | (없음) | `db` | 스탬프 수령 인증 코드(6자리 숫자)의 SHA-256 hex. 교체 중에는 쉼표로 여러 개. 없으면 인증 API가 503 |
 | `RATE_LIMIT_ENABLED` | 선택 | `true` | 전체 | `/api/v2` 클라이언트별 요청 수 제한. 초과 시 `429 RATE_LIMITED`와 `Retry-After` |
 | `RATE_LIMIT_TRUSTED_PROXY_HOPS` | 선택 | `0` | 전체 | 앞단에서 `X-Forwarded-For`를 붙이는 신뢰 proxy 수. Next.js proxy와 호스팅 load balancer 뒤면 `2` |
@@ -175,7 +175,7 @@ ADMIN_BOOTSTRAP_PASSWORD=<bootstrap-password>
 
 둘 중 하나라도 누락되거나 공백이면 bootstrap을 건너뜁니다. 둘 다 있더라도 기존 관리자 계정이
 하나라도 있으면 아무것도 변경하지 않습니다. username은 공백 제거 후 100자 이하, password는
-BCrypt 입력 한계인 UTF-8 72바이트 이하여야 합니다. 로그인과 `GET /api/v2/admin/me`로 생성을
+15개 이상의 Unicode code point이면서 BCrypt 입력 한계인 UTF-8 72바이트 이하여야 합니다. 로그인과 `GET /api/v2/admin/me`로 생성을
 확인한 뒤 runtime 환경에서 두 bootstrap credential을 제거하고 서버를 다시 시작합니다.
 
 ### 기동 확인과 API 호출

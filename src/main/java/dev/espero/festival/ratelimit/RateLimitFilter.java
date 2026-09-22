@@ -6,8 +6,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,6 +24,7 @@ class RateLimitFilter extends OncePerRequestFilter {
 
     static final String STAMP_RECEIPT_PATH = "/api/v2/stamp-receipt-verifications";
 
+    private static final HexFormat HEX = HexFormat.of();
     private final RateLimitProperties properties;
     private final RequestRateLimiter limiter;
     private final ApiSecurityErrorWriter errors;
@@ -81,12 +85,12 @@ class RateLimitFilter extends OncePerRequestFilter {
      * Each trusted proxy appends the address it received the request from, so
      * with {@code n} trusted hops the client is the {@code n}-th entry from the
      * right. A shorter chain did not pass through every trusted proxy; the
-     * socket address is used then.
+     * socket address is used then. IPv6 literals are keyed by their /64 prefix.
      */
     String client(HttpServletRequest request) {
         int hops = properties.trustedProxyHops();
         if (hops == 0) {
-            return request.getRemoteAddr();
+            return clientKey(request.getRemoteAddr());
         }
         List<String> chain = new ArrayList<>();
         for (String header : Collections.list(request.getHeaders("X-Forwarded-For"))) {
@@ -96,6 +100,35 @@ class RateLimitFilter extends OncePerRequestFilter {
                 }
             }
         }
-        return chain.size() >= hops ? chain.get(chain.size() - hops) : request.getRemoteAddr();
+        String address = chain.size() >= hops ? chain.get(chain.size() - hops) : request.getRemoteAddr();
+        return clientKey(address);
+    }
+
+    private static String clientKey(String address) {
+        if (address.indexOf(':') < 0 || !isIpv6LiteralCandidate(address)) {
+            return address;
+        }
+        try {
+            byte[] bytes = InetAddress.getByName(address).getAddress();
+            if (bytes.length == 4) {
+                return InetAddress.getByAddress(bytes).getHostAddress();
+            }
+            return "ipv6/64:" + HEX.formatHex(bytes, 0, 8);
+        } catch (UnknownHostException ignored) {
+            return address;
+        }
+    }
+
+    private static boolean isIpv6LiteralCandidate(String address) {
+        for (int index = 0; index < address.length(); index++) {
+            char character = address.charAt(index);
+            if (!((character >= '0' && character <= '9')
+                || (character >= 'a' && character <= 'f')
+                || (character >= 'A' && character <= 'F')
+                || character == ':' || character == '.')) {
+                return false;
+            }
+        }
+        return true;
     }
 }

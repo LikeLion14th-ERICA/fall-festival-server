@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 class AdminAuthStartupValidator {
 
     private static final int MINIMUM_HS256_SECRET_BYTES = 32;
+    private static final int MINIMUM_BOOTSTRAP_PASSWORD_CODE_POINTS = 15;
+    private static final int MAXIMUM_BCRYPT_PASSWORD_UTF8_BYTES = 72;
 
     AdminAuthStartupValidator(AdminAuthProperties properties) {
         if (properties.accessTokenTtl() == null || properties.accessTokenTtl().isNegative()
@@ -41,7 +43,14 @@ class AdminAuthStartupValidator {
             if (bootstrapUsername.strip().length() > 100) {
                 throw new IllegalStateException("ADMIN_BOOTSTRAP_USERNAME is too long");
             }
-            if (bootstrapPassword.getBytes(StandardCharsets.UTF_8).length > 72) {
+            if (bootstrapPassword.codePointCount(0, bootstrapPassword.length())
+                < MINIMUM_BOOTSTRAP_PASSWORD_CODE_POINTS) {
+                throw new IllegalStateException(
+                    "ADMIN_BOOTSTRAP_PASSWORD must contain at least 15 Unicode code points"
+                );
+            }
+            if (bootstrapPassword.getBytes(StandardCharsets.UTF_8).length
+                > MAXIMUM_BCRYPT_PASSWORD_UTF8_BYTES) {
                 throw new IllegalStateException("ADMIN_BOOTSTRAP_PASSWORD exceeds the BCrypt input limit");
             }
         }
