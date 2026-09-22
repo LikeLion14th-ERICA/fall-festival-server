@@ -101,9 +101,12 @@ class OperationalBoundariesHttpE2eTest {
         List<String> secrets = List.of(oldCode, newCode, wrongCode, sha256(oldCode), sha256(newCode));
         try (HttpClient http = client(); ConfigurableApplicationContext server = start(true, sha256(oldCode) + "," + sha256(newCode), true)) {
             JdbcTemplate jdbc = server.getBean(JdbcTemplate.class);
+            // A correct code claims the reward of a full stamp card, so each success needs its own card.
+            List<String> cards = List.of(fullCard(jdbc), fullCard(jdbc), fullCard(jdbc));
             Map<String, String> before = state(jdbc);
+            int card = 0;
             for (String code : List.of(oldCode, newCode)) {
-                HttpResponse<String> response = receipt(http, server, code, "198.51.100.1");
+                HttpResponse<String> response = receipt(http, server, code, "198.51.100.1", cards.get(card++));
                 assertThat(response.statusCode()).isEqualTo(200);
                 assertThat(body(response).at("/data/verified").asBoolean()).isTrue();
                 assertThat(response.headers().firstValue("Cache-Control")).contains("no-store");
@@ -125,16 +128,21 @@ class OperationalBoundariesHttpE2eTest {
             error(spoofed, 429, "RATE_LIMITED", true);
             error(receipt(http, server, wrongCode, "203.0.113.21"), 422, "INVALID_RECEIPT_CODE", false);
             server.getBean(MutableClock.class).advance(Duration.ofSeconds(12));
-            HttpResponse<String> recovered = receipt(http, server, newCode, "203.0.113.20");
+            HttpResponse<String> recovered = receipt(http, server, newCode, "203.0.113.20", cards.get(card));
             assertThat(recovered.statusCode()).isEqualTo(200);
             safe(limited, secrets);
             safe(spoofed, secrets);
             safe(recovered, secrets);
-            assertThat(state(jdbc)).isEqualTo(before);
+            Map<String, String> after = state(jdbc);
+            before.remove("stamp_rewards");
+            after.remove("stamp_rewards");
+            assertThat(after).isEqualTo(before);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_rewards", Integer.class)).isEqualTo(3);
         }
         try (HttpClient http = client(); ConfigurableApplicationContext server = start(true, sha256(newCode), true)) {
             error(receipt(http, server, oldCode, "198.51.100.30"), 422, "INVALID_RECEIPT_CODE", false);
-            assertThat(receipt(http, server, newCode, "198.51.100.31").statusCode()).isEqualTo(200);
+            String card = fullCard(server.getBean(JdbcTemplate.class));
+            assertThat(receipt(http, server, newCode, "198.51.100.31", card).statusCode()).isEqualTo(200);
         }
         try (HttpClient http = client(); ConfigurableApplicationContext server = start(true, "", true)) {
             Map<String, String> before = state(server.getBean(JdbcTemplate.class));
@@ -493,13 +501,42 @@ class OperationalBoundariesHttpE2eTest {
     }
 
     private HttpResponse<String> receipt(HttpClient http, ConfigurableApplicationContext server, String code, String client) throws Exception {
-        return receiptChain(http, server, code, "192.0.2.1, " + client + ", 192.0.2.2");
+        return receipt(http, server, code, client, null);
+    }
+
+    private HttpResponse<String> receipt(HttpClient http, ConfigurableApplicationContext server, String code, String client,
+        String participant) throws Exception {
+        return receiptChain(http, server, code, "192.0.2.1, " + client + ", 192.0.2.2", participant);
     }
 
     private HttpResponse<String> receiptChain(HttpClient http, ConfigurableApplicationContext server, String code, String chain) throws Exception {
-        return http.send(request(server, "/api/v2/stamp-receipt-verifications").header("X-Forwarded-For", chain)
+        return receiptChain(http, server, code, chain, null);
+    }
+
+    private HttpResponse<String> receiptChain(HttpClient http, ConfigurableApplicationContext server, String code, String chain,
+        String participant) throws Exception {
+        HttpRequest.Builder request = request(server, "/api/v2/stamp-receipt-verifications").header("X-Forwarded-For", chain)
             .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(
-                JSON.writeValueAsString(Map.of("code", code)))).build(), HttpResponse.BodyHandlers.ofString());
+                JSON.writeValueAsString(Map.of("code", code))));
+        if (participant != null) {
+            request.header("Cookie", "__Host-festival-stamp=" + participant);
+        }
+        return http.send(request.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
+    /** Seeds an anonymous participant holding today's four stamps and returns its cookie value. */
+    private String fullCard(JdbcTemplate jdbc) throws Exception {
+        byte[] value = new byte[32];
+        new SecureRandom().nextBytes(value);
+        String token = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(value);
+        UUID participant = UUID.randomUUID();
+        jdbc.update("INSERT INTO stamp_participants (id, festival_id, token_sha256, created_at) VALUES (?, ?, ?, now())",
+            participant, FESTIVAL_ID, sha256(token));
+        for (int booth = 1; booth <= 4; booth++) {
+            jdbc.update("INSERT INTO stamp_collections (participant_id, operating_date, booth_id, collected_at)"
+                + " VALUES (?, DATE '2026-09-29', ?, now())", participant, "booth-" + booth);
+        }
+        return token;
     }
 
     private HttpResponse<String> mutate(HttpClient http, ConfigurableApplicationContext server, String method,

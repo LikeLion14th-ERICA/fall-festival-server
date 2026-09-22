@@ -14,8 +14,7 @@
       "browserData": [
         "HOME-D06",
         "HOME-D07",
-        "HOME-D09",
-        "HOME-D16"
+        "HOME-D09"
       ],
       "legacySource": {
         "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
@@ -216,7 +215,8 @@
       "id": "STAMP-START",
       "name": "스탬프 시작",
       "operations": [
-        "getStampGuide"
+        "getStampGuide",
+        "startStampParticipation"
       ],
       "browserData": [],
       "legacySource": {
@@ -227,14 +227,11 @@
       "id": "STAMP-COLLECT",
       "name": "스탬프 수집",
       "operations": [
-        "getStampGuide"
+        "getStampGuide",
+        "getStampCard",
+        "collectStamp"
       ],
-      "browserData": [
-        "STAMP-COLLECT-D01",
-        "STAMP-COLLECT-D02",
-        "STAMP-COLLECT-D03",
-        "STAMP-COLLECT-D04"
-      ],
+      "browserData": [],
       "legacySource": {
         "pendingIds": "STAMP-START-Q01, STAMP-START-Q02"
       }
@@ -244,6 +241,7 @@
       "name": "스탬프 수령 안내",
       "operations": [
         "getStampGuide",
+        "getStampCard",
         "verifyStampReceipt"
       ],
       "browserData": [
@@ -1399,8 +1397,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "브라우저",
-      "target": "브라우저: 당일 stamp.started",
+      "owner": "API",
+      "target": "StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/home.md"
@@ -2569,8 +2567,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "브라우저",
-      "target": "브라우저: stamp.started",
+      "owner": "API",
+      "target": "StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/stamp.md"
@@ -2587,8 +2585,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "브라우저",
-      "target": "브라우저: stamp.count (0~4)",
+      "owner": "API",
+      "target": "StampCard.stamps (부스당 하루 1개, 최대 StampCard.dailyLimit)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/stamp.md"
@@ -2605,8 +2603,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "브라우저",
-      "target": "브라우저: stamp.claimed",
+      "owner": "API",
+      "target": "StampCard.rewardClaimed",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/stamp.md"
@@ -2623,8 +2621,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "브라우저",
-      "target": "브라우저: stamp.date (KST 자정 초기화)",
+      "owner": "API",
+      "target": "StampCard.date (축제 시간대 자정 초기화)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/stamp.md"
@@ -2642,7 +2640,7 @@
         "requiredInScreen": "필수"
       },
       "owner": "API",
-      "target": "StampGuide.qrValue (제공 책임·배포 방식은 검토 필요)",
+      "target": "StampCollectionInput.token ← 부스 QR 링크의 b 값",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/stamp.md"

@@ -25,7 +25,10 @@
 | GET | `/api/v2/places/{placeId}` | 장소 팝업 | MAP-POPUP | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/ticket-guide` | 외부인 티켓 안내 | TICKET | normal, before-open, closed, ended, unconfigured, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/stamp-guide` | 스탬프 안내·공통 QR | STAMP-START, STAMP-COLLECT, STAMP-REWARD | normal, missing-optional, error, locale-not-ready, bad-request, rate-limited |
-| POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/stamp-participants` | 스탬프투어 시작·익명 참여 쿠키 발급 | STAMP-START | normal, already-started, error, locale-not-ready, bad-request, rate-limited |
+| GET | `/api/v2/stamp-card` | 오늘의 스탬프판 | STAMP-COLLECT, STAMP-REWARD | normal, empty, not-started, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/stamp-collections` | 부스 QR 스탬프 적립(부스당 하루 1회) | STAMP-COLLECT | normal, not-started, invalid-token, already-collected, card-full, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, card-incomplete, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, unconfigured, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/crowding` | 실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지 | ADM-CROWD | normal, full, not-festival-day, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |

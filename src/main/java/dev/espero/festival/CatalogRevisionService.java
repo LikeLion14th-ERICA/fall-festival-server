@@ -390,6 +390,28 @@ public class CatalogRevisionService {
         insertPerformanceCatalog(revisionId, manifest);
         insertFestivalLinks(revisionId, manifest);
         insertTextTranslations(revisionId, manifest);
+        insertStampBooths(revisionId, manifest);
+    }
+
+    private void insertStampBooths(UUID revisionId, CatalogManifest manifest) {
+        batch("""
+            INSERT INTO stamp_booths (festival_revision_id, id, name, sort_order)
+            VALUES (:revisionId, :id, :name, :sortOrder)
+            """, manifest.stampBooths().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("id", row.id())
+            .addValue("name", row.name())
+            .addValue("sortOrder", row.sortOrder())
+        ).toList());
+        batch("""
+            INSERT INTO stamp_booth_tokens (festival_revision_id, booth_id, valid_date, token_sha256)
+            VALUES (:revisionId, :boothId, :validDate, :tokenSha256)
+            """, manifest.stampBoothTokens().stream().map(row -> new MapSqlParameterSource()
+            .addValue("revisionId", revisionId)
+            .addValue("boothId", row.boothId())
+            .addValue("validDate", row.validDate())
+            .addValue("tokenSha256", row.tokenSha256())
+        ).toList());
     }
 
     private void insertTextTranslations(UUID revisionId, CatalogManifest manifest) {
@@ -882,6 +904,16 @@ public class CatalogRevisionService {
             ) SELECT :newRevisionId, id, locale, title, instructions, reward_name,
                      reward_location_text, reward_hours_text, reward_notice
               FROM stamp_guide_translations WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO stamp_booths (festival_revision_id, id, name, sort_order)
+            SELECT :newRevisionId, id, name, sort_order
+            FROM stamp_booths WHERE festival_revision_id = :sourceRevisionId
+            """, sourceRevisionId, newRevisionId);
+        copy("""
+            INSERT INTO stamp_booth_tokens (festival_revision_id, booth_id, valid_date, token_sha256)
+            SELECT :newRevisionId, booth_id, valid_date, token_sha256
+            FROM stamp_booth_tokens WHERE festival_revision_id = :sourceRevisionId
             """, sourceRevisionId, newRevisionId);
     }
 

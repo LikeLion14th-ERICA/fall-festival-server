@@ -56,7 +56,9 @@ public record CatalogManifest(
     List<FestivalTitleTranslation> festivalTitleTranslations,
     List<MapAssetTranslation> mapAssetTranslations,
     List<TicketGuideTranslation> ticketGuideTranslations,
-    List<StampGuideTranslation> stampGuideTranslations
+    List<StampGuideTranslation> stampGuideTranslations,
+    List<StampBooth> stampBooths,
+    List<StampBoothToken> stampBoothTokens
 ) {
 
     public CatalogManifest {
@@ -98,6 +100,9 @@ public record CatalogManifest(
         mapAssetTranslations = optionalList(mapAssetTranslations);
         ticketGuideTranslations = optionalList(ticketGuideTranslations);
         stampGuideTranslations = optionalList(stampGuideTranslations);
+        // Booth stamps arrived after the first manifests, which may omit them.
+        stampBooths = optionalList(stampBooths);
+        stampBoothTokens = optionalList(stampBoothTokens);
     }
 
     /** Manifest without home links; they default to empty. */
@@ -170,6 +175,8 @@ public record CatalogManifest(
             prohibitedMessages,
             ticketGuide,
             stampGuide,
+            List.of(),
+            List.of(),
             List.of(),
             List.of(),
             List.of(),
@@ -250,6 +257,24 @@ public record CatalogManifest(
             instructions = optionalList(instructions);
         }
     }
+
+    /** A booth that shows its own stamp QR (STAMP-001). */
+    public record StampBooth(
+        String id,
+        String name,
+        int sortOrder
+    ) {}
+
+    /**
+     * The SHA-256 (lowercase hex) of the random token in a booth's QR link.
+     * {@code validDate} null means every festival day; a date limits the
+     * token to that day.
+     */
+    public record StampBoothToken(
+        String boothId,
+        java.time.LocalDate validDate,
+        String tokenSha256
+    ) {}
 
     public record FestivalDay(
         LocalDate festivalDate,

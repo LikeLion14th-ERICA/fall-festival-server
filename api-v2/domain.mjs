@@ -5,6 +5,17 @@ export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
 // Fictional six-digit reward code used only by the mock server.
 const MOCK_STAMP_RECEIPT_CODE = '482913';
+// Fictional booth QR tokens; the link is https://festival.likelionerica.com/stamps?b=<token>.
+export const MOCK_STAMP_BOOTHS = [['likelion','멋사 부스'],['booth-mock-1','예시 부스 1'],['booth-mock-2','예시 부스 2'],['booth-mock-3','예시 부스 3'],['booth-mock-4','예시 부스 4']]
+  .map(([id,name],index)=>({id,name,token:`mock-booth-token-${String(index+1).padStart(4,'0')}`}));
+/**
+ * Seeds a session's stamp card: the first `count` booths, collected today. A
+ * session without a card gets the demo card its example scenario describes;
+ * once a session has started, its real card is used.
+ */
+export function mockStampCard(state,date,count,rewardClaimed=false) {
+  state.stampCard={date,rewardClaimed,stamps:MOCK_STAMP_BOOTHS.slice(0,count).map((booth,index)=>({boothId:booth.id,boothName:booth.name,collectedAt:`${date}T1${index}:00:00+09:00`}))};
+}
 const MAP_VERSION = 'mock-map-1';
 // Design filter chips (docs/wiki/product/translations.md). Japanese labels are mock-only until approved.
 const PIN_FILTER_GROUP_ORDER = ['RESTROOM','PHOTO_BOOTH','SMOKING_AREA','TRASH_BIN'];
@@ -320,6 +331,11 @@ function localize(value,locale) {
   };
   return walk(value);
 }
+/** Today's card of the session; a new festival day starts an empty card. */
+function stampCardData(state,date) {
+  if(state.stampCard.date!==date)state.stampCard={date,rewardClaimed:false,stamps:[]};
+  return {date,dailyLimit:4,stamps:structuredClone(state.stampCard.stamps),rewardClaimed:state.stampCard.rewardClaimed};
+}
 export function execute(op,state,{params={},query={},body,scenario='normal',now=MOCK_NOW}={}) {
   now=scenarioTime(scenario,now);
   if(scenario==='all-languages')state.languages=['ko','en','zh-Hans','ja'];
@@ -418,8 +434,37 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const schedule=defaultDate(date),open=ticketStatus==='TRANSFER_OPEN';
       data={date,status:ticketStatus,unitPrice:unconfigured?null:money(1500),transferOpensAt:unconfigured?null:`${schedule}T00:00:00+09:00`,transferClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,pickupOpensAt:unconfigured?null:`${schedule}T13:00:00+09:00`,pickupClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,account:open?{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'}:null,transferLink:null,paymentSettingsVersion:unconfigured?null:1,mapTarget:unconfigured?null:{mapId:'map-overview',placeId:'place-ticket',pinId:'pin-ticket',mapVersion:'mock-map-1'},instructions:['실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.','입금과 지급 여부는 현장에서 확인합니다.']};break;
     }
-    case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['START는 참여 시작만 기록합니다.','공통 QR 인식 1회당 1개, 하루 4개 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
-    case 'verifyStampReceipt':if(scenario==='invalid-code'||typeof body.code!=='string'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');data={verified:true};break;
+    case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['START를 누르면 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
+    case 'startStampParticipation':
+      if(scenario==='already-started'&&!state.stampCard)mockStampCard(state,date,0);
+      status=state.stampCard?200:201;
+      if(!state.stampCard)mockStampCard(state,date,0);
+      data=stampCardData(state,date);break;
+    case 'getStampCard':
+      if(!state.stampCard&&scenario!=='not-started')mockStampCard(state,date,scenario==='empty'?0:2);
+      if(scenario==='not-started'||!state.stampCard)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
+      data=stampCardData(state,date);break;
+    case 'collectStamp':{
+      if(!state.stampCard&&scenario!=='not-started')mockStampCard(state,date,0);
+      if(scenario==='not-started'||!state.stampCard)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
+      const booth=MOCK_STAMP_BOOTHS.find(candidate=>candidate.token===body.token);
+      if(scenario==='invalid-token'||!booth)failure(422,'INVALID_STAMP_TOKEN','스탬프투어 QR이 아니에요.');
+      const card=stampCardData(state,date);
+      if(scenario==='reward-claimed'||card.rewardClaimed)failure(409,'STAMP_REWARD_CLAIMED','오늘은 이미 상품을 받았어요.');
+      if(scenario==='already-collected'||card.stamps.some(stamp=>stamp.boothId===booth.id))failure(409,'STAMP_ALREADY_COLLECTED','이 부스의 스탬프는 오늘 이미 받았어요.');
+      if(scenario==='card-full'||card.stamps.length>=4)failure(409,'STAMP_CARD_FULL','오늘 받을 수 있는 스탬프를 모두 모았어요.');
+      state.stampCard.stamps.push({boothId:booth.id,boothName:booth.name,collectedAt:isoKst(now)});
+      data=stampCardData(state,date);break;
+    }
+    case 'verifyStampReceipt':{
+      if(scenario==='invalid-code'||typeof body.code!=='string'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');
+      if(!state.stampCard&&scenario==='normal')mockStampCard(state,date,4);
+      const card=state.stampCard?stampCardData(state,date):null;
+      if(scenario==='reward-claimed'||card?.rewardClaimed)failure(409,'STAMP_REWARD_CLAIMED','오늘은 이미 상품을 받았어요.');
+      if(scenario==='card-incomplete'||!card||card.stamps.length<4)failure(409,'STAMP_CARD_INCOMPLETE','스탬프 4개를 모두 모아야 상품을 받을 수 있어요.');
+      state.stampCard.rewardClaimed=true;
+      data={verified:true};break;
+    }
     case 'getAdminNotices':data={items:empty?[]:structuredClone(state.notices).filter(n=>!state.deleted.has(n.id)).sort((a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)||a.id.localeCompare(b.id))};break;
     case 'getAdminNotice':if(state.deleted.has(params.noticeId))failure(404,'NOT_FOUND','삭제된 공지입니다.');data=find(state.notices,params.noticeId);if(missing)Object.assign(data,{templateId:null,links:[]});break;
     case 'postAdminNotice':case 'putAdminNotice':{

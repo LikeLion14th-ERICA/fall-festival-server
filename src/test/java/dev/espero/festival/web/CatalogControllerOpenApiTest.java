@@ -59,6 +59,7 @@ class CatalogControllerOpenApiTest {
 
     private final ObjectMapper json = new ObjectMapper();
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
+    private final StampCardService stampCards = mock(StampCardService.class);
     private final OperationalAccountSettingsService accountSettings =
         mock(OperationalAccountSettingsService.class);
     private JsonNode openApi;
@@ -88,7 +89,8 @@ class CatalogControllerOpenApiTest {
             new ConfigController(snapshots, metaSupport, clock),
             new StampReceiptController(snapshots, metaSupport, new StampReceiptVerifier(
                 java.util.HexFormat.of().formatHex(StampReceiptVerifier.sha256("048213"))
-            )),
+            ), stampCards),
+            new StampCardController(snapshots, metaSupport, stampCards),
             new TicketGuideController(
                 snapshots,
                 accountSettings,
@@ -139,6 +141,33 @@ class CatalogControllerOpenApiTest {
         assertThat(refused.getResponse().getContentAsString()).doesNotContain("48213");
         mvc.perform(post("/api/v2/stamp-receipt-verifications").contentType("application/json").content("{\"code\":\"   \"}"))
             .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void validatesStampCardEndpointsAgainstOpenApi() throws Exception {
+        when(snapshots.required()).thenReturn(snapshot());
+        StampCardResponse card = new StampCardResponse(java.time.LocalDate.parse("2030-10-01"), 4, List.of(
+            new StampCardResponse.Stamp("likelion", "멋사 부스", java.time.OffsetDateTime.parse("2030-10-01T18:00:00+09:00")),
+            new StampCardResponse.Stamp("removed-booth", null, java.time.OffsetDateTime.parse("2030-10-01T18:05:00+09:00"))
+        ), false);
+        when(stampCards.start(org.mockito.ArgumentMatchers.any())).thenReturn(new StampCardService.Started(card, null));
+        when(stampCards.current(org.mockito.ArgumentMatchers.any())).thenReturn(card);
+        when(stampCards.collect(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(card);
+
+        assertMatchesSchema("/api/v2/stamp-participants", post("/api/v2/stamp-participants"));
+        assertMatchesSchema("/api/v2/stamp-card", get("/api/v2/stamp-card"));
+        assertMatchesSchema("/api/v2/stamp-collections", post("/api/v2/stamp-collections")
+            .contentType("application/json").content("{\"token\":\"mock-booth-token-0001\"}"));
+
+        when(stampCards.current(org.mockito.ArgumentMatchers.any())).thenThrow(new ApiException(
+            org.springframework.http.HttpStatus.NOT_FOUND, "STAMP_NOT_STARTED", "스탬프투어를 먼저 시작해 주세요.", false
+        ));
+        assertMatchesErrorSchema("/api/v2/stamp-card", "404", "STAMP_NOT_STARTED", 3, get("/api/v2/stamp-card"));
+        when(stampCards.collect(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenThrow(
+            new ApiException(org.springframework.http.HttpStatus.CONFLICT, "STAMP_ALREADY_COLLECTED", "이 부스의 스탬프는 오늘 이미 받았어요.", false)
+        );
+        assertMatchesErrorSchema("/api/v2/stamp-collections", "409", "STAMP_ALREADY_COLLECTED", 3,
+            post("/api/v2/stamp-collections").contentType("application/json").content("{\"token\":\"mock-booth-token-0001\"}"));
     }
 
     @Test

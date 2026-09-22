@@ -92,7 +92,9 @@ public class CatalogExportService {
             festivalTitleTranslations(revisionId),
             mapAssetTranslations(revisionId),
             ticketGuideTranslations(revisionId),
-            stampGuideTranslations(revisionId)
+            stampGuideTranslations(revisionId),
+            stampBooths(revisionId),
+            stampBoothTokens(revisionId)
         );
         return new ExportResult(manifest, findings(manifest));
     }
@@ -566,6 +568,28 @@ public class CatalogExportService {
             resultSet.getString("reward_location_text"),
             resultSet.getString("reward_hours_text"),
             resultSet.getString("reward_notice")
+        ));
+    }
+
+    private List<CatalogManifest.StampBooth> stampBooths(UUID revisionId) {
+        return query("""
+            SELECT id, name, sort_order FROM stamp_booths
+            WHERE festival_revision_id = :revisionId ORDER BY sort_order, id
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.StampBooth(
+            resultSet.getString("id"),
+            resultSet.getString("name"),
+            resultSet.getInt("sort_order")
+        ));
+    }
+
+    private List<CatalogManifest.StampBoothToken> stampBoothTokens(UUID revisionId) {
+        return query("""
+            SELECT booth_id, valid_date, token_sha256 FROM stamp_booth_tokens
+            WHERE festival_revision_id = :revisionId ORDER BY booth_id, valid_date NULLS FIRST, token_sha256
+            """, revisionId, (resultSet, rowNumber) -> new CatalogManifest.StampBoothToken(
+            resultSet.getString("booth_id"),
+            localDate(resultSet, "valid_date"),
+            resultSet.getString("token_sha256")
         ));
     }
 

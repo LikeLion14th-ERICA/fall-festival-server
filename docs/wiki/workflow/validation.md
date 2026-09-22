@@ -101,7 +101,7 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-03 | 공간에서 지도 이동 | 공간 `mapTarget` → AREA 지도 → 현재 버전 핀 → 장소 상세 → 원래 공간 |
 | HTTP-04 | 전체·구역 지도 탐색 | overview의 AREA 핀 → 대상 AREA 지도, 필터와 PLACE 핀 관계, stale `mapVersion` 409 후 최신 핀 재조회 |
 | HTTP-05 | 공연 탐색 | config 기본 날짜 → lineup → artist → performance → timetable, 출연진·공연 ID와 순서 관계 |
-| HTTP-06 | 티켓·스탬프 확인 | ticket guide의 `UNCONFIGURED`·strong ETag/304·map target, stamp 제목·보상·기간·일일 한도 |
+| HTTP-06 | 티켓·스탬프 확인 | ticket guide의 `UNCONFIGURED`·strong ETag/304·map target, stamp 제목·보상·기간·일일 한도, 부스 QR 적립(참여 쿠키·부스당 하루 1회·4개 제한)과 가득 찬 판의 수령 1회 |
 | HTTP-07 | 관리자 세션 | 로그인 → `/admin/me` → refresh rotation → 이전 refresh 거부 → logout 뒤 refresh 거부 |
 | HTTP-08 | 혼잡도 운영 | 공개 조회 → 관리자 변경 → 같은 idempotency key replay → 공개 반영 → 같은 단계 재선택의 no-op |
 | HTTP-09 | 충돌·확인 처리 | stale `If-Match`의 409, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |

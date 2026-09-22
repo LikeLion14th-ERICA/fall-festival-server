@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Implements GET /api/v2/stamp-guide per api-v2/contract-source.mjs (StampGuide
- * schema). Only this read-only guide is server-backed: participation start,
- * daily stamp count and redemption stay browser-local (api-v2/README.md,
- * "화면 계약의 주요 결정" and docs/wiki/engineering/data-model.md, both dated
- * 2026-09-14). Do not add session/participation endpoints here.
+ * schema): the read-only guide text. Participation, booth stamps and the
+ * daily reward are server-side since the 2026-09-22 booth QR change and live
+ * in {@link StampCardController}.
  *
  * It reads the same immutable published snapshot as catalog requests. Korean
  * is the only published locale until every guide translation is approved; no

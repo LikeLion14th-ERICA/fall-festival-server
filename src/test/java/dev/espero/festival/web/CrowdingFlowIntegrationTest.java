@@ -360,6 +360,8 @@ class CrowdingFlowIntegrationTest {
             "festival_title_translations",
             "ticket_guide_translations",
             "stamp_guide_translations",
+            "stamp_booth_tokens",
+            "stamp_booths",
             "map_asset_translations",
             "ticket_guide_revisions",
             "stamp_guide_revisions",

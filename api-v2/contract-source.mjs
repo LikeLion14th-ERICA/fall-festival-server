@@ -61,9 +61,12 @@ export const schemas = {
   Pins: object({ mapId: id, mapVersion: text('요청한 이미지 버전과 동일'), filters: array(ref('PinFilter'), '현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 필터만 반환. 화장실·포토부스·흡연구역·쓰레기통 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외.'), items: array(ref('Pin'), '핀 목록. 서버 필터 query는 제공하지 않으며 클라이언트가 PLACE의 filterGroup으로 표시를 제어하고 AREA는 항상 표시.') }),
   Place: object({ id, kind: enumeration(['SPACE', 'FACILITY', 'LANDMARK'], '유형별 팝업 구성'), name: optionalText, locationText: optionalText, hoursText: optionalText, description: optionalText, usage: optionalText, spaceId: nullable(id, 'SPACE 유형만 상세 연결. 나머지는 null.') }),
   TicketGuide: object({ date, status: enumeration(['BEFORE_FESTIVAL', 'TRANSFER_OPEN', 'DAILY_CLOSED', 'FESTIVAL_ENDED', 'UNCONFIGURED'], '시간별 송금 안내 상태. 일정이 없거나 TICKET 계좌 설정이 없으면 UNCONFIGURED다.'), unitPrice: nullable(ref('Money'), '가격 자료 대기 시 null. 0원과 다름.'), transferOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), transferClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), account: nullable(ref('BankAccount'), 'catalog revision 밖의 TICKET 계좌 설정에서 제공. 계좌 설정이 없거나 송금 제공 시간 밖이면 null.'), transferLink: nullable(ref('Link'), '링크 표시명 출처가 정해지기 전까지 항상 null. 계좌 설정은 URL만 보관한다.'), paymentSettingsVersion: nullable(integer('현재 TICKET 계좌 설정의 version. 값이 바뀌면 계좌 설정이 바뀐 것이며 응답 ETag도 함께 바뀐다.', 1), '계좌를 한 번도 설정하지 않았으면 null. 설정을 해제한 뒤에도 version은 남는다.'), mapTarget: nullable(ref('MapTarget'), mapTargetDescription), instructions: array(text('안내'), '승인된 현장 안내. 목에서 환불 정책을 임의로 확정하지 않음.') }),
-  StampGuide: object({ title: text('행사 제목'), dates: array(date, '실제 행사 기간'), instructions: array(text('참여·상품 안내'), '없으면 []'), reward: object({ name: text('경품명'), locationText: optionalText, hoursText: optionalText, notice: text('당일 1회·소진 시 현장 안내') }), dailyLimit: enumeration([4], '당일 최대 적립'), timezone: enumeration(['Asia/Seoul'], '자정 초기화'), qrValue: nullable(text('공통 QR 비교값. 비밀키가 아님.'), '배포 방식·책임 미합의 시 null. 서명·부스별 고유값 없음.') }),
+  StampGuide: object({ title: text('행사 제목'), dates: array(date, '실제 행사 기간'), instructions: array(text('참여·상품 안내'), '없으면 []'), reward: object({ name: text('경품명'), locationText: optionalText, hoursText: optionalText, notice: text('당일 1회·소진 시 현장 안내') }), dailyLimit: enumeration([4], '당일 최대 적립'), timezone: enumeration(['Asia/Seoul'], '자정 초기화'), qrValue: nullable(text('스탬프투어 시작 안내용 공통 주소. 적립에는 쓰지 않으며 비밀키가 아님.'), '배포 방식·책임 미합의 시 null. 적립은 부스별 QR 링크의 토큰(StampCollectionInput.token)으로 한다.') }),
+  StampCard: object({ date: text('축제 시간대(Asia/Seoul) 기준 오늘 날짜. 자정에 새 스탬프판이 된다.', { format: 'date' }), dailyLimit: enumeration([4], '하루 최대 적립 개수'), stamps: array(ref('StampCardStamp'), '오늘 적립한 부스. 부스당 하루 1개, 적립 시각순.', { maxItems: 4 }), rewardClaimed: bool('오늘 상품을 받았는지. 서버가 수령 인증 성공 때 기록한다.') }, undefined, '이 브라우저의 익명 참여자(HttpOnly 쿠키)의 오늘 스탬프판. 계정·복구 없음.'),
+  StampCardStamp: object({ boothId: id, boothName: nullable(text('부스 표시명'), '게시 catalog에서 사라진 부스면 null'), collectedAt: timestamp }),
+  StampCollectionInput: object({ token: text('부스 QR 링크의 b 쿼리 값. 그대로 보내며 저장·로그하지 않는다. 형식이 다르거나 없는 토큰은 INVALID_STAMP_TOKEN.', { pattern: '^[A-Za-z0-9_-]{16,128}$', minLength: 16, maxLength: 128, writeOnly: true }) }),
   StampReceiptVerificationInput: object({ code: text('멋사 부스 담당자가 현장에서 입력하는 6자리 숫자 수령 인증 코드. 서버는 hash만 보관하며 클라이언트·로그에 저장하지 않음. 형식이 다르거나 틀리면 같은 INVALID_RECEIPT_CODE로 거절.', { pattern: '^[0-9]{6}$', minLength: 6, maxLength: 6, writeOnly: true }) }),
-  StampReceiptVerification: object({ verified: enumeration([true], '서버가 현장 수령 인증 코드를 확인했음을 뜻함. 사용자 참여·지급 이력은 만들지 않음.') }),
+  StampReceiptVerification: object({ verified: enumeration([true], '서버가 현장 수령 인증 코드와 오늘 스탬프 4개를 확인하고 오늘 수령을 기록했음을 뜻함.') }),
   Translation: object({ title: text('제목. 200자는 목 입력 검증 제안.', { maxLength: 200 }), body: text('본문. 10000자는 목 입력 검증 제안.', { maxLength: 10000 }) }),
   Translations: object({ ko: ref('Translation'), en: ref('Translation'), 'zh-Hans': ref('Translation'), ja: ref('Translation') }, ['ko'], 'ko는 필수. 나머지 언어는 준비된 경우만 property로 포함하고 없으면 생략한다.'),
   NoticeTranslations: object({ ko: ref('Translation'), en: ref('Translation'), 'zh-Hans': ref('Translation'), ja: ref('Translation') }, ['ko', 'en'], '공지는 ko·en 필수 수동 입력. 자동 번역 없음. zh-Hans·ja는 준비된 경우만 property로 포함하고 없으면 생략한다.'),
@@ -104,7 +107,10 @@ export const operations = [
   ['getPlace','GET','/places/{placeId}','Place','장소 팝업',['MAP-POPUP'],[],['normal','missing-optional','not-found','error']],
   ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 안내',['TICKET'],[],['normal','before-open','closed','ended','unconfigured','error']],
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
-  ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','error'],'StampReceiptVerificationInput'],
+  ['startStampParticipation','POST','/stamp-participants','StampCard','스탬프투어 시작·익명 참여 쿠키 발급',['STAMP-START'],[],['normal','already-started','error']],
+  ['getStampCard','GET','/stamp-card','StampCard','오늘의 스탬프판',['STAMP-COLLECT','STAMP-REWARD'],[],['normal','empty','not-started','error']],
+  ['collectStamp','POST','/stamp-collections','StampCard','부스 QR 스탬프 적립(부스당 하루 1회)',['STAMP-COLLECT'],[],['normal','not-started','invalid-token','already-collected','card-full','reward-claimed','error'],'StampCollectionInput'],
+  ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','card-incomplete','reward-claimed','error'],'StampReceiptVerificationInput'],
   ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','unconfigured','error']],
   ['putAdminCrowding','PUT','/admin/crowding','Crowding','실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지',['ADM-CROWD'],[],['normal','full','not-festival-day','error'],'CrowdingInput'],
   ['getAdminNotices','GET','/admin/notices','AdminNotices','관리자 공지 목록',['ADM-NOTICE-LIST'],[],['normal','empty','error']],
@@ -122,6 +128,17 @@ Object.assign(operations.find(operation=>operation.operationId==='verifyStampRec
   cacheControl: 'no-store',
 });
 operations.find(operation=>operation.operationId==='getPaymentGuide').cacheControl='no-store';
+// Booth stamps: an anonymous HttpOnly participant cookie, never cached.
+Object.assign(operations.find(operation=>operation.operationId==='startStampParticipation'), {
+  successStatus: 201,
+  additionalSuccessStatuses: [200],
+  cacheControl: 'no-store',
+});
+operations.find(operation=>operation.operationId==='getStampCard').cacheControl='no-store';
+Object.assign(operations.find(operation=>operation.operationId==='collectStamp'), {
+  successStatus: 200,
+  cacheControl: 'no-store',
+});
 // The ticket guide combines static catalog content with the current TICKET
 // account setting, so clients poll it and revalidate with If-None-Match.
 Object.assign(operations.find(operation=>operation.operationId==='getTicketGuide'), {

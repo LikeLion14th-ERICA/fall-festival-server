@@ -61,7 +61,7 @@ GRANT SELECT (
         daily_pickup_open_time, daily_pickup_close_time, updated_at
     ) ON TABLE :"schema".ticket_guide_revisions TO :"catalog_publish_role";
 
--- Crowding and notices are operated outside the catalog. The local catalog
+-- Crowding, notices and stamp participation are operated outside the catalog. The local catalog
 -- workbench connects with these catalog roles, so they get no access to
 -- those tables even when the provider granted the whole schema.
 REVOKE ALL ON TABLE :"schema".crowding_state FROM :"catalog_export_role";
@@ -76,6 +76,12 @@ REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_links FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_link_translations FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".stamp_participants FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".stamp_participants FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".stamp_collections FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".stamp_collections FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".stamp_rewards FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".stamp_rewards FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_templates FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notice_templates FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_template_translations FROM :"catalog_export_role";
