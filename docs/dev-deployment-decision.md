@@ -50,6 +50,21 @@
   이미 개발용 카탈로그가 게시된 상태로 떠 있고, 실제 2026 한양 축제 데이터는 아직 들어가지
   않았다(아래 "여전히 확인 필요"와 노션 체크리스트 3번 "운영 데이터 입력"이 그대로 필요하다).
 
+### 배포·운영 확인 답변 (2026-09-22, 팀 체크리스트)
+
+- 사용자 웹(public frontend)의 실제 URL이 나왔다: `festival.likelionerica.com`. 배포는 됐지만
+  프런트 자체는 아직 완성 전이다. [Frontend](#frontend) 절의 `TBD`는 이 URL 기준으로 다시
+  확인한다(hosting provider·proxy 설정 확정 여부는 별도).
+- 최초 관리자 계정 생성과 기동 확인(`/healthz` 200, 카탈로그 게시 후 `/readyz` 200, 시작 로그
+  경고 없음)을 완료했다. bootstrap 환경변수 두 개(`ADMIN_BOOTSTRAP_USERNAME`,
+  `ADMIN_BOOTSTRAP_PASSWORD`)를 실제로 제거했는지는 이 확인만으로는 알 수 없으므로
+  [Environment / secrets](#environment--secrets) 절차대로 다시 확인한다.
+- DB·media backup은 아직 실제로 만들어진 적이 없다(제원 확인, 2026-09-22). [DB·media 복구
+  세트와 보존](wiki/workflow/festival-day-runbook.md#dbmedia-복구-세트와-보존) 정책은 문서화만
+  돼 있을 뿐 실행 증거가 없다.
+- [역할 provisioning](#역할-provisioning) 실행은 우선순위가 낮다고 보고 당장 진행하지 않기로
+  했다. 단일 계정 상태가 이어지므로, 운영 배포를 승인하기 전에는 이 보류를 다시 검토한다.
+
 ### 여전히 확인 필요
 
 - [ ] `Caddyfile` 실제 내용(어떤 host/port를 backend container로 proxy하는지, TLS 발급을
@@ -58,9 +73,11 @@
   `CF-Connecting-IP`/`X-Forwarded-For`로 오므로 `RATE_LIMIT_TRUSTED_PROXY_HOPS` 산정에 영향
 - [ ] container가 host의 어떤 port에 바인딩되는지, Caddy가 그 port로 proxy하는지 docker
   network로 묶여 있는지
-- [ ] [역할 provisioning](#역할-provisioning) 실행 여부, 단일 계정인지 분리됐는지
+- [ ] [역할 provisioning](#역할-provisioning) 실제 실행 여부 — 보류 결정과 별개로 현재 단일
+  계정인지 분리됐는지는 여전히 미확인
 - [ ] `admin-festival.likelionerica.com` 실제 배포 시점 (배포 전까지 `ADMIN_ALLOWED_ORIGIN`은
   운영 값으로 바꾸지 않는다)
+- [ ] DB·media backup 실제 생성 절차와 저장 위치 — 아직 아무것도 실행되지 않았다
 
 ### 확정된 운영 책임·보존 정책 (2026-09-22)
 
@@ -397,7 +414,9 @@ Flyway migrate, catalog import/publish 또는 role 변경을 승인하지 않는
 - Database: preflight에서 PostgreSQL 17.11, public schema, V1~V26 success와 checksum 일치를
   확인했다. A1의 접속 주체와 다른 session의 소유자는 미확정이며, 기존 data가 있어
   `STOP_AND_REVIEW`를 해소하기 전에는 mutation을 실행하지 않는다.
-- Frontend: remote provider와 public frontend 실제 origin이 아직 `TBD`다.
+- Frontend: public frontend origin은 `festival.likelionerica.com`으로 나왔고 배포는 됐지만
+  아직 완성 전이다. hosting provider와 `API_PROXY_TARGET` 등 실제 proxy 설정은 여전히
+  `TBD`다.
 - Admin: `admin-festival.likelionerica.com`이 아직 배포 전이다. 배포되면 remote UI의
   refresh-cookie/session proxy integration을 검증한다.
 - Reverse proxy: `Caddyfile` 실제 내용과 Cloudflare proxy 모드 여부가 아직 미확인이다.
@@ -473,3 +492,8 @@ migration strategy는 [행사 당일 운영 절차서](wiki/workflow/festival-da
 - `admin-festival.likelionerica.com` 실제 배포 → `ADMIN_ALLOWED_ORIGIN`을 그 값으로 바꾸고
   로그인 → refresh → logout 전체 흐름을 그 origin에서 검증한다.
 - A1 사양(CPU/RAM) 확인 → Known limitations의 실측치를 채운다.
+- DB·media backup 실제 생성 → 첫 backup을 만들고 [행사 당일 운영 절차서](wiki/workflow/festival-day-runbook.md#dbmedia-복구-세트와-보존)의 보존 정책대로 recovery set ID·복원 검증 결과를 작업 기록에 남긴다.
+- `festival.likelionerica.com` hosting provider·`API_PROXY_TARGET` 확정 → Frontend 절의
+  `TBD`를 실제 값으로 채우고 same-origin proxy 동작을 검증한다.
+- 역할 provisioning 보류 재검토 → 운영 배포 승인 전 단일 계정 상태를 그대로 둘지 다시
+  결정한다.

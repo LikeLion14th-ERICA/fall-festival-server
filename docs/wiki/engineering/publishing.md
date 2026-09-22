@@ -33,10 +33,11 @@
   `LEGACY_TICKET_SCHEDULE_UNCONFIGURED` finding으로 보고하며, 그 manifest의 import·publish는
   승인된 값을 넣기 전까지 같은 코드로 실패한다. filter group이 없는 `PLACE` 핀은 디자인 필터
   (화장실·포토부스·흡연구역·쓰레기통)에 속하지 않는 정상 핀이므로 finding이 아니다.
-- 홈 링크는 `festivalLinks`(`UNIVERSITY_NOTICES`·`FAQ`·`WELCOME_DAY`는 하나씩,
+- 홈 링크는 `festivalLinks`(`UNIVERSITY_NOTICES`·`FAQ`는 하나씩,
   `OFFICIAL_CHANNEL`은 `iconKey`와 고유 `sortOrder`)와 `festivalLinkTranslations`(한국어 필수)로
   revision에 넣는다(V22). 이전 manifest에는 두 field가 없어도 되며 빈 목록으로 읽는다. 공개
   `GET /api/v2/config`는 게시 snapshot의 축제명·축제일·링크를 반환하고, 없는 링크는 `null`이다.
+  `WELCOME_DAY`는 2026-09-22 결정으로 허용 kind 목록에서 뺐다(V29).
 - 한 언어로만 저장하던 축제명·지도 이미지 대체 텍스트·티켓 안내·스탬프 안내의 다른 언어는
   `festivalTitleTranslations`·`mapAssetTranslations`·`ticketGuideTranslations`·
   `stampGuideTranslations`로 넣는다(V24, 한국어 행 금지). 안내 번역은 한국어와 instruction 수가

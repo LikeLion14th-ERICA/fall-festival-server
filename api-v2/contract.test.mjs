@@ -499,7 +499,7 @@ test('Runtime validator rejects representative schema violations independently o
 });
 
 test('v5 removes operating-hour and quantity writes and map crowd consumers',async()=>{
-  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,177);
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,176);
   for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
   assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
   for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);

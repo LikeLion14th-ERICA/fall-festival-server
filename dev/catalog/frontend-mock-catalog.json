@@ -2191,13 +2191,6 @@
       "sortOrder": 1
     },
     {
-      "id": "mock-welcome",
-      "kind": "WELCOME_DAY",
-      "url": "https://example.invalid/mock/welcome",
-      "iconKey": null,
-      "sortOrder": 1
-    },
-    {
       "id": "instagram",
       "kind": "OFFICIAL_CHANNEL",
       "url": "https://www.instagram.com/hanyang_erica_stu/",
@@ -2229,11 +2222,6 @@
       "linkId": "mock-faq",
       "locale": "ko",
       "label": "[목] FAQ"
-    },
-    {
-      "linkId": "mock-welcome",
-      "locale": "ko",
-      "label": "[목] 에리카 웰컴 데이"
     },
     {
       "linkId": "instagram",

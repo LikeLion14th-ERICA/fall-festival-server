@@ -356,7 +356,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   const extra=adminExecute(op,state,{params,body,scenario,mutate,failure,DATES});
   if(extra)return {status:extra.status||200,data:extra.data,now,locale};
   switch(op.operationId){
-    case 'getConfig':data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:DATES,defaultDate:empty?null:defaultDate(date)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}],welcomeDay:scenario==='welcome-ready'?link('에리카 웰컴 데이'):null}};break;
+    case 'getConfig':data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:DATES,defaultDate:empty?null:defaultDate(date)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}]}};break;
     case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale,op.operationId==='getAdminCrowding');break;
     case 'putAdminCrowding':{
       if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');

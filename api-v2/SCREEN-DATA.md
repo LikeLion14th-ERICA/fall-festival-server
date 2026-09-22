@@ -1,6 +1,6 @@
 # 화면 데이터 → API 필드
 
-Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
+Product Context v5 기준 26개 화면의 데이터 176개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
 
 | 데이터 ID | 항목 | 처리 | 계약/프런트 책임 | 위키 근거 |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | HOME-D10 | 최신 공지 제목 | API | Notices.items[0].title | [위키](../docs/wiki/product/home.md) |
 | HOME-D11 | 공지사항 URL | API | Config.links.universityNotices | [위키](../docs/wiki/product/home.md) |
 | HOME-D12 | FAQ 연결 대상 | API | Config.links.faq | [위키](../docs/wiki/product/home.md) |
-| HOME-D13 | 웰컴 데이 URL | API | Config.links.welcomeDay | [위키](../docs/wiki/product/home.md) |
+| HOME-D13 | 웰컴 데이 URL | 제외 | 제외: 웰컴데이(WELCOME-001) 기능 제거(2026-09-22) | [위키](../docs/wiki/product/home.md) |
 | HOME-D14 | 공식 채널 링크 | API | Config.links.officialChannels | [위키](../docs/wiki/product/home.md) |
 | HOME-D15 | 공식 채널 표시명·아이콘 | API | Channel.label + Channel.iconKey | [위키](../docs/wiki/product/home.md) |
 | HOME-D16 | 당일 참여 시작 여부 | API | StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여) | [위키](../docs/wiki/product/home.md) |

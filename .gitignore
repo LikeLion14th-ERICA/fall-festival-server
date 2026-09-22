@@ -36,5 +36,8 @@ Thumbs.db
 # Linked worktrees used by parallel agents
 .worktrees/
 
+# Local-only staging for media pulled from Figma before admin-API upload
+ops/catalog/hanyang-2026/local/
+
 # Empty metadata backup created while normalizing repository ownership
 .git-sandbox-init-backup/

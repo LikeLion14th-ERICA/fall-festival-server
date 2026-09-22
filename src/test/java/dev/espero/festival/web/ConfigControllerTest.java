@@ -52,7 +52,6 @@ class ConfigControllerTest {
             .andExpect(jsonPath("$.data.links.faq.label").value("FAQ"))
             .andExpect(jsonPath("$.data.links.officialChannels[*].id", Matchers.contains("instagram", "youtube")))
             .andExpect(jsonPath("$.data.links.officialChannels[0].iconKey").value("instagram"))
-            .andExpect(jsonPath("$.data.links.welcomeDay").value(Matchers.nullValue()))
             .andExpect(jsonPath("$.meta.revision").value(3));
     }
 
@@ -64,8 +63,7 @@ class ConfigControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.links.universityNotices").value(Matchers.nullValue()))
             .andExpect(jsonPath("$.data.links.faq").value(Matchers.nullValue()))
-            .andExpect(jsonPath("$.data.links.officialChannels").isEmpty())
-            .andExpect(jsonPath("$.data.links.welcomeDay").value(Matchers.nullValue()));
+            .andExpect(jsonPath("$.data.links.officialChannels").isEmpty());
     }
 
     @Test
