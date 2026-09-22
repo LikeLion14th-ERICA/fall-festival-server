@@ -98,7 +98,7 @@ public class SecurityConfiguration {
         configuration.setAllowedHeaders(List.of(
             "Authorization", "Content-Type", "X-Request-Id", "If-Match", "If-None-Match", "Idempotency-Key"
         ));
-        configuration.setExposedHeaders(List.of("ETag", "X-Request-Id", "X-Server-Time"));
+        configuration.setExposedHeaders(List.of("X-Request-Id", "Retry-After", "Location", "ETag", "X-Server-Time"));
         configuration.setAllowCredentials(true);
         source.registerCorsConfiguration("/api/v2/admin/**", configuration);
         return source;

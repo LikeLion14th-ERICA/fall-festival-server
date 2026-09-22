@@ -150,7 +150,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         res.writeHead(200,mediaHeaders);return res.end(Buffer.from(`MOCK-WEBP:${params.mediaId}:${params.variant}`));
       }
       const responseRevision=unscopedOperations.has(route.operationId)?0:state.revision;
-      const responseMeta=route.definition['x-conditional']
+      const responseMeta=route.definition['x-conditional']||route.definition['x-conditional-meta']
         ? {timezone:'Asia/Seoul',festivalId:'festival-mock',revision:responseRevision,locale,mock:true}
         : meta(responseRevision);
       const response=noBodyStatuses.has(result.status)?null:{data:result.data,meta:responseMeta};

@@ -76,9 +76,12 @@ export function applyAdminContract(s,ops){
   find('getGoodsAvailability').cacheControl='private, no-cache, must-revalidate';
   const noticePost=find('postAdminNotice');
   noticePost.idempotencyKeyRequired=true;
+  noticePost.locationHeader=true;
+  noticePost.conditionalMeta=true;
   const noticePut=find('putAdminNotice');
   noticePut.ifMatchRequired=true;
   noticePut.idempotencyKeyRequired=true;
+  noticePut.conditionalMeta=true;
   noticePut.scenarios.push('precondition-required','edit-conflict');
   const noticeDelete=find('deleteAdminNotice');
   noticeDelete.ifMatchRequired=true;
@@ -124,6 +127,7 @@ export function applyAdminContract(s,ops){
   find('getAdminProduct').conditional=true;
   const productPost=find('postAdminProduct');
   productPost.idempotencyKeyRequired=true;
+  productPost.locationHeader=true;
   const productPut=find('putAdminProduct');
   productPut.ifMatchRequired=true;
   productPut.idempotencyKeyRequired=true;
