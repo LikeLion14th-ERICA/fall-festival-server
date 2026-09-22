@@ -10,6 +10,7 @@
 | [`../../tools/stamp/generate-booth-stamps.mjs`](../../tools/stamp/generate-booth-stamps.mjs) | 토큰·링크 생성과 manifest 병합 | 예 |
 | `out/stamp-qr-links.csv` | 부스별 QR 링크(원문 토큰) | **아니오 — 비밀** |
 | `out/manifest-with-stamps.json` | 게시본 + 부스·토큰 hash | 아니오(git이 무시) |
+| `out/*.dryrun.*` | `-DryRun`이 만든 확인용 파일. 게시되지 않으므로 QR로 쓰지 않는다 | 아니오 |
 
 `out/`은 `.gitignore`의 `out/` 규칙으로 커밋되지 않는다. QR 링크를 가진 사람은 그 부스에 가지 않고도
 적립할 수 있으므로 링크 파일은 부스 운영자에게 QR 이미지로만 전달한다.
@@ -30,8 +31,11 @@
 2. **부스 목록**: `booths.example.json`을 `booths.json`으로 복사해 id·이름을 채운다. id는
    `^[a-z0-9][a-z0-9-]{0,63}$`, 순서가 표시 순서다. 부스 이름을 아직 모르면 자리표시 이름으로 먼저
    게시해도 된다(아래 "이름만 바꾸기").
-3. **jar 빌드**: `.\mvnw.cmd --batch-mode --no-transfer-progress -DskipTests package`
-4. **확인 실행**: 게시하지 않고 파일만 만든다.
+3. **jar 빌드**: `.\mvnw.cmd --batch-mode --no-transfer-progress -DskipTests package`. 브랜치를 바꾸거나
+   pull한 뒤에는 다시 빌드한다. 스크립트는 jar가 마지막 소스 커밋보다 오래됐거나 부스 스탬프를 모르는
+   버전이면 토큰을 만들기 전에 멈춘다.
+4. **확인 실행**: 게시하지 않고 `*.dryrun.*` 파일만 만든다. 확인 실행 파일은 실제 실행을 막지 않고,
+   다시 확인 실행하면 덮어쓴다.
 
    ```powershell
    .\ops\stamp\Publish-BoothStamps.ps1 -DatabaseUrl '<jdbc url>' -Username '<catalog publish 역할>' -FestivalId '<축제 UUID>' -BaselineRevision '<현재 published revision id>' -Actor '<이름>' -DryRun

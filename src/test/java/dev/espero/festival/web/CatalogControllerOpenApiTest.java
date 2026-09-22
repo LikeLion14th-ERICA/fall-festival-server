@@ -150,7 +150,7 @@ class CatalogControllerOpenApiTest {
             new StampCardResponse.Stamp("likelion", "멋사 부스", java.time.OffsetDateTime.parse("2030-10-01T18:00:00+09:00")),
             new StampCardResponse.Stamp("removed-booth", null, java.time.OffsetDateTime.parse("2030-10-01T18:05:00+09:00"))
         ), false);
-        when(stampCards.start(org.mockito.ArgumentMatchers.any())).thenReturn(new StampCardService.Started(card, null));
+        when(stampCards.start(org.mockito.ArgumentMatchers.any())).thenReturn(new StampCardService.Started(card, false, null));
         when(stampCards.current(org.mockito.ArgumentMatchers.any())).thenReturn(card);
         when(stampCards.collect(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(card);
 

@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Booth stamp endpoints (STAMP-001). START hands the browser an anonymous
- * participant cookie; scanning a booth QR posts the token from its link. The
+ * Booth stamp endpoints (STAMP-001). START (once per festival day) hands the
+ * browser an anonymous participant cookie and returns 201; a second START on
+ * the same day returns 200. Until today's START the card answers
+ * {@code STAMP_NOT_STARTED}, which the frontend shows as the start screen.
+ * Scanning a booth QR posts the token from its link. The
  * cookie is HttpOnly, so the frontend never stores or reads the participant
  * id; every response is {@code no-store}.
  */
@@ -47,10 +50,10 @@ public class StampCardController {
         String locale = validate(request);
         StampCardService.Started started = cards.start(participantToken(request));
         ResponseEntity.BodyBuilder response = ResponseEntity
-            .status(started.newParticipantToken() == null ? HttpStatus.OK : HttpStatus.CREATED)
+            .status(started.startedNow() ? HttpStatus.CREATED : HttpStatus.OK)
             .cacheControl(CacheControl.noStore());
-        if (started.newParticipantToken() != null) {
-            response.header(HttpHeaders.SET_COOKIE, ResponseCookie.from(PARTICIPANT_COOKIE, started.newParticipantToken())
+        if (started.cookieToken() != null) {
+            response.header(HttpHeaders.SET_COOKIE, ResponseCookie.from(PARTICIPANT_COOKIE, started.cookieToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")

@@ -2,6 +2,7 @@ package dev.espero.festival;
 
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import tools.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,6 +60,10 @@ public class CatalogManifestReader {
                 throw new CatalogCliException("Manifest validation failed: " + exception.getMessage(), exception);
             }
             return new ManifestDocument(manifest, festivalId, sha256(bytes));
+        } catch (UnrecognizedPropertyException exception) {
+            throw new CatalogCliException("Manifest has an unknown field \"" + exception.getPropertyName()
+                + "\". The manifest and this catalog CLI jar may come from different versions:"
+                + " rebuild the jar from the current source, or remove the field.", exception);
         } catch (JacksonException exception) {
             throw new CatalogCliException("Manifest could not be read as valid JSON.", exception);
         } catch (IOException exception) {

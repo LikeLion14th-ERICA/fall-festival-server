@@ -118,7 +118,8 @@ class CatalogManifestReaderTest {
 
             assertThatThrownBy(() -> new CatalogManifestReader(new CatalogManifestValidator()).read(file))
                 .isInstanceOf(CatalogCliException.class)
-                .hasMessageContaining("valid JSON");
+                .hasMessageContaining("unknown field \"accountBankName\"")
+                .hasMessageContaining("rebuild the jar");
         } finally {
             Files.deleteIfExists(file);
         }
@@ -216,7 +217,8 @@ class CatalogManifestReaderTest {
 
             assertThatThrownBy(() -> new CatalogManifestReader(new CatalogManifestValidator()).read(file))
                 .isInstanceOf(CatalogCliException.class)
-                .hasMessageContaining("valid JSON");
+                .hasMessageContaining("unknown field \"receiptCode\"")
+                .hasMessageNotContaining("secret");
         } finally {
             Files.deleteIfExists(file);
         }

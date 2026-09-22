@@ -37,7 +37,8 @@ param(
     [switch]$Daily,
     # Replaces booth tokens the published catalog already has. Every printed QR stops working.
     [switch]$Rotate,
-    # Stops after generating the files; the database is not changed.
+    # Stops after generating the files; the database is not changed. Writes *.dryrun.* files that a
+    # later real run neither reads nor is blocked by.
     [switch]$DryRun,
     # Skips the confirmation prompt and overwrites an existing link list.
     [switch]$Force
@@ -55,9 +56,26 @@ function Invoke-CatalogCli {
     return $output
 }
 
+$build = '.\mvnw.cmd --batch-mode --no-transfer-progress -DskipTests package'
 if (-not (Test-Path $Jar)) {
-    throw "$Jar not found. Build it first: .\mvnw.cmd --batch-mode --no-transfer-progress -DskipTests package"
+    throw "$Jar not found. Build it first: $build"
 }
+# An older jar rejects the stampBooths fields at import, after the tokens were already generated.
+$jarTime = (Get-Item $Jar).LastWriteTimeUtc
+$sourceCommit = git log -1 --format=%ct -- src/main pom.xml 2>$null
+if ($LASTEXITCODE -eq 0 -and $sourceCommit) {
+    $sourceTime = [DateTimeOffset]::FromUnixTimeSeconds([long]$sourceCommit).UtcDateTime
+    if ($jarTime -lt $sourceTime) {
+        throw "$Jar ($($jarTime.ToLocalTime())) is older than the latest source commit ($($sourceTime.ToLocalTime())). Rebuild it: $build"
+    }
+}
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $Jar))
+try {
+    $hasStamps = $archive.Entries.FullName -contains 'BOOT-INF/classes/dev/espero/festival/CatalogManifest$StampBooth.class'
+}
+finally { $archive.Dispose() }
+if (-not $hasStamps) { throw "$Jar has no booth stamp support (built before V27). Rebuild it: $build" }
 if (-not (Test-Path $Booths)) { throw "$Booths not found. Copy ops/stamp/booths.example.json and fill in the booths." }
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js 18 or later is required.' }
 if (-not $Password) { $Password = Read-Host -AsSecureString 'DB 비밀번호' }
@@ -71,8 +89,9 @@ $env:SPRING_FLYWAY_ENABLED = 'false'
 function Invoke-BoothStampPublish {
     New-Item -ItemType Directory -Force $OutDir | Out-Null
     $published = Join-Path $OutDir "published-$BaselineRevision.json"
-    $merged = Join-Path $OutDir 'manifest-with-stamps.json'
-    $links = Join-Path $OutDir 'stamp-qr-links.csv'
+    $suffix = if ($DryRun) { '.dryrun' } else { '' }
+    $merged = Join-Path $OutDir "manifest-with-stamps$suffix.json"
+    $links = Join-Path $OutDir "stamp-qr-links$suffix.csv"
 
     Write-Host '게시본 내보내는 중(export)...' -ForegroundColor Cyan
     Invoke-CatalogCli @('export', "--revision=$BaselineRevision", "--out=$published") | Out-Null
@@ -82,7 +101,8 @@ function Invoke-BoothStampPublish {
         '--manifest-out', $merged, '--links-out', $links, '--base-url', $BaseUrl)
     if ($Daily) { $generator += '--daily' }
     if ($Rotate) { $generator += '--rotate' }
-    if ($Force) { $generator += '--force' }
+    # Dry-run links are never published, so each dry run replaces the previous one.
+    if ($Force -or $DryRun) { $generator += '--force' }
     & node @generator
     if ($LASTEXITCODE -ne 0) { throw 'token generation failed' }
 
@@ -91,7 +111,7 @@ function Invoke-BoothStampPublish {
     Write-Host ("manifest     : {0}" -f $merged)
     Write-Host ("QR 링크      : {0}  (비밀. 커밋·공유 금지)" -f $links)
     if ($DryRun) {
-        Write-Host 'DryRun이므로 여기서 멈춥니다. DB는 바뀌지 않았습니다.' -ForegroundColor Yellow
+        Write-Host 'DryRun이므로 여기서 멈춥니다. DB는 바뀌지 않았습니다. 이 링크는 게시되지 않으므로 QR로 만들지 마세요.' -ForegroundColor Yellow
         return 0
     }
     if (-not $Force) {

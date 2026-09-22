@@ -42,7 +42,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Booth stamps end to end: an anonymous participant cookie, one stamp per
+ * Booth stamps end to end: an anonymous participant cookie, a START every
+ * festival day, one stamp per
  * booth per day, four per day, dated tokens, the daily reset and a reward
  * that needs a full card and is claimed once a day.
  */
@@ -90,7 +91,7 @@ class StampCardFlowIntegrationTest {
             List.of(), List.of(), List.of(), Map.of(), null
         ));
         when(snapshots.publishedLocales()).thenReturn(List.of("ko"));
-        for (String table : List.of("stamp_rewards", "stamp_collections", "stamp_participants",
+        for (String table : List.of("stamp_rewards", "stamp_collections", "stamp_participant_days", "stamp_participants",
             "stamp_booth_tokens", "stamp_booths")) {
             jdbc.update("DELETE FROM " + table, Map.of());
         }
@@ -143,6 +144,30 @@ class StampCardFlowIntegrationTest {
     }
 
     @Test
+    void asksForStartAgainOnTheNextDayWithTheSameParticipant() throws Exception {
+        Cookie participant = start();
+        mvc.perform(get("/api/v2/stamp-card").cookie(participant)).andExpect(status().isOk());
+        clock.set(OffsetDateTime.parse("2030-10-01T23:59:59+09:00"));
+        mvc.perform(get("/api/v2/stamp-card").cookie(participant)).andExpect(status().isOk());
+
+        clock.set(OffsetDateTime.parse("2030-10-02T00:00:00+09:00"));
+        expectError(mvc.perform(get("/api/v2/stamp-card").cookie(participant)), 404, "STAMP_NOT_STARTED");
+        expectError(mvc.perform(collect(participant, token("likelion"))), 404, "STAMP_NOT_STARTED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_collections", Map.of(), Long.class)).isZero();
+
+        MvcResult restarted = mvc.perform(post("/api/v2/stamp-participants").cookie(participant))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.date").value("2030-10-02"))
+            .andReturn();
+        assertThat(participantCookie(restarted).getValue()).isEqualTo(participant.getValue());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_participants", Map.of(), Long.class)).isEqualTo(1);
+        mvc.perform(post("/api/v2/stamp-participants").cookie(participant))
+            .andExpect(status().isOk())
+            .andExpect(header().doesNotExist("Set-Cookie"));
+        mvc.perform(collect(participant, token("likelion"))).andExpect(status().isOk());
+    }
+
+    @Test
     void collectsOneStampPerBoothPerDayAndFourADay() throws Exception {
         mvc.perform(collect(null, token("likelion")))
             .andExpect(status().isNotFound())
@@ -167,6 +192,7 @@ class StampCardFlowIntegrationTest {
         expectError(mvc.perform(collect(participant, token("starbucks"))), 409, "STAMP_CARD_FULL");
 
         clock.set(OffsetDateTime.parse("2030-10-02T00:00:05+09:00"));
+        start(participant);
         mvc.perform(collect(participant, token("likelion")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.date").value("2030-10-02"))
@@ -194,6 +220,7 @@ class StampCardFlowIntegrationTest {
         expectError(mvc.perform(collect(participant, token("starbucks"))), 409, "STAMP_REWARD_CLAIMED");
 
         clock.set(OffsetDateTime.parse("2030-10-02T10:00:00+09:00"));
+        start(participant);
         mvc.perform(get("/api/v2/stamp-card").cookie(participant))
             .andExpect(jsonPath("$.data.stamps").isEmpty())
             .andExpect(jsonPath("$.data.rewardClaimed").value(false));
@@ -202,6 +229,11 @@ class StampCardFlowIntegrationTest {
     private Cookie start() throws Exception {
         return participantCookie(mvc.perform(post("/api/v2/stamp-participants"))
             .andExpect(status().isCreated()).andReturn());
+    }
+
+    /** Today's START for a returning participant. */
+    private void start(Cookie participant) throws Exception {
+        mvc.perform(post("/api/v2/stamp-participants").cookie(participant)).andExpect(status().isCreated());
     }
 
     private static Cookie participantCookie(MvcResult result) {
