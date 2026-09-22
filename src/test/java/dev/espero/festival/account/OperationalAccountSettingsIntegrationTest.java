@@ -375,7 +375,8 @@ class OperationalAccountSettingsIntegrationTest {
             for (String role : List.of(EXPORT_ROLE, PUBLISH_ROLE)) {
                 for (String table : List.of(
                     "crowding_state", "crowding_state_dynamic", "notices", "notice_translations",
-                    "notice_links", "notice_link_translations", "notice_templates", "notice_template_translations",
+                    "notice_links", "notice_link_translations", "notice_templates", "notice_template_translations", "stamp_participants", "stamp_collections",
+                    "stamp_rewards",
                     "goods", "goods_translations", "goods_colors",
                     "goods_color_translations", "goods_sizes", "goods_size_translations", "goods_combinations"
                 )) {

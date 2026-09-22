@@ -7313,8 +7313,8 @@
               "2030-10-03"
             ],
             "instructions": [
-              "START는 참여 시작만 기록합니다.",
-              "공통 QR 인식 1회당 1개, 하루 4개 적립합니다."
+              "START를 누르면 참여가 시작됩니다.",
+              "부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다."
             ],
             "reward": {
               "name": "몬스터",
@@ -7356,8 +7356,8 @@
               "2030-10-03"
             ],
             "instructions": [
-              "START는 참여 시작만 기록합니다.",
-              "공통 QR 인식 1회당 1개, 하루 4개 적립합니다."
+              "START를 누르면 참여가 시작됩니다.",
+              "부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다."
             ],
             "reward": {
               "name": "몬스터",
@@ -7494,6 +7494,735 @@
       }
     }
   },
+  "startStampParticipation": {
+    "screens": [
+      "STAMP-START"
+    ],
+    "method": "POST",
+    "path": "/api/v2/stamp-participants",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-participants",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 201,
+        "response": {
+          "data": {
+            "date": "2030-10-01",
+            "dailyLimit": 4,
+            "stamps": [],
+            "rewardClaimed": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "already-started": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-participants",
+          "headers": {
+            "X-Mock-Scenario": "already-started",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "date": "2030-10-01",
+            "dailyLimit": 4,
+            "stamps": [],
+            "rewardClaimed": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-participants",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-participants?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-startStampParticipation"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-participants",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-participants",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getStampCard": {
+    "screens": [
+      "STAMP-COLLECT",
+      "STAMP-REWARD"
+    ],
+    "method": "GET",
+    "path": "/api/v2/stamp-card",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "date": "2030-10-01",
+            "dailyLimit": 4,
+            "stamps": [
+              {
+                "boothId": "likelion",
+                "boothName": "멋사 부스",
+                "collectedAt": "2030-10-01T10:00:00+09:00"
+              },
+              {
+                "boothId": "booth-mock-1",
+                "boothName": "예시 부스 1",
+                "collectedAt": "2030-10-01T11:00:00+09:00"
+              }
+            ],
+            "rewardClaimed": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "empty": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card",
+          "headers": {
+            "X-Mock-Scenario": "empty",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "date": "2030-10-01",
+            "dailyLimit": 4,
+            "stamps": [],
+            "rewardClaimed": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "not-started": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card",
+          "headers": {
+            "X-Mock-Scenario": "not-started",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "STAMP_NOT_STARTED",
+            "message": "스탬프투어를 먼저 시작해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-getStampCard"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/stamp-card",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "collectStamp": {
+    "screens": [
+      "STAMP-COLLECT"
+    ],
+    "method": "POST",
+    "path": "/api/v2/stamp-collections",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "date": "2030-10-01",
+            "dailyLimit": 4,
+            "stamps": [
+              {
+                "boothId": "likelion",
+                "boothName": "멋사 부스",
+                "collectedAt": "2030-10-01T18:00:00.000+09:00"
+              }
+            ],
+            "rewardClaimed": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 1,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "not-started": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "not-started",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "STAMP_NOT_STARTED",
+            "message": "스탬프투어를 먼저 시작해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "invalid-token": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "invalid-token",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-unknown-token-0000"
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "INVALID_STAMP_TOKEN",
+            "message": "스탬프투어 QR이 아니에요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "already-collected": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "already-collected",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "STAMP_ALREADY_COLLECTED",
+            "message": "이 부스의 스탬프는 오늘 이미 받았어요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "card-full": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "card-full",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "STAMP_CARD_FULL",
+            "message": "오늘 받을 수 있는 스탬프를 모두 모았어요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "reward-claimed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "reward-claimed",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "STAMP_REWARD_CLAIMED",
+            "message": "오늘은 이미 상품을 받았어요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-collectStamp",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-collections",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "token": "mock-booth-token-0001"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
   "verifyStampReceipt": {
     "screens": [
       "STAMP-REWARD"
@@ -7548,6 +8277,70 @@
           "error": {
             "code": "INVALID_RECEIPT_CODE",
             "message": "수령 인증 코드를 확인해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "card-incomplete": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-receipt-verifications",
+          "headers": {
+            "X-Mock-Scenario": "card-incomplete",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "code": "482913"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "STAMP_CARD_INCOMPLETE",
+            "message": "스탬프 4개를 모두 모아야 상품을 받을 수 있어요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "reward-claimed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-receipt-verifications",
+          "headers": {
+            "X-Mock-Scenario": "reward-claimed",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "code": "482913"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "STAMP_REWARD_CLAIMED",
+            "message": "오늘은 이미 상품을 받았어요.",
             "details": [],
             "retryable": false
           },

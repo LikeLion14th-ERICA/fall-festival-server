@@ -108,6 +108,8 @@ class CatalogRevisionServiceIntegrationTest {
             "festival_title_translations",
             "ticket_guide_translations",
             "stamp_guide_translations",
+            "stamp_booth_tokens",
+            "stamp_booths",
             "map_asset_translations",
             "ticket_guide_revisions",
             "stamp_guide_revisions",
@@ -538,7 +540,7 @@ class CatalogRevisionServiceIntegrationTest {
             m.performances(), m.performanceTranslations(), m.performanceArtists(), m.timetableConfig(),
             m.prohibitedItems(), m.prohibitedItemTranslations(), m.prohibitedMessages(), m.ticketGuide(),
             m.stampGuide(), m.festivalLinks(), m.festivalLinkTranslations(), titles, m.mapAssetTranslations(),
-            m.ticketGuideTranslations(), stamps
+            m.ticketGuideTranslations(), stamps, m.stampBooths(), m.stampBoothTokens()
         );
     }
 
@@ -614,7 +616,8 @@ class CatalogRevisionServiceIntegrationTest {
             List.of(new CatalogManifest.StampGuideTranslation(locale, t.apply(m.stampGuide().title()),
                 m.stampGuide().instructions().stream().map(t).toList(), t.apply(m.stampGuide().rewardName()),
                 t.apply(m.stampGuide().rewardLocationText()), t.apply(m.stampGuide().rewardHoursText()),
-                t.apply(m.stampGuide().rewardNotice())))
+                t.apply(m.stampGuide().rewardNotice()))),
+            m.stampBooths(), m.stampBoothTokens()
         );
     }
 
@@ -633,6 +636,77 @@ class CatalogRevisionServiceIntegrationTest {
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException(exception);
         }
+    }
+
+    @Test
+    void importsBoothStampsAndKeepsThemThroughExportAndRollback() throws IOException {
+        UUID first = importManifest("qr-stamps-a", "/assets/maps/overview-v1.png");
+        revisions.publish(first, "release-bot");
+        String hashA = "a".repeat(64);
+        String hashB = "b".repeat(64);
+        UUID withStamps = importJson(withStampBooths(
+            manifestJson("qr-stamps-b", "/assets/maps/overview-v1.png", currentPublishedRevision()),
+            """
+            [{"id": "likelion", "name": "멋사 부스", "sortOrder": 1},
+             {"id": "photo", "name": "포토부스", "sortOrder": 2}]
+            """,
+            """
+            [{"boothId": "likelion", "validDate": null, "tokenSha256": "%s"},
+             {"boothId": "photo", "validDate": "2026-10-01", "tokenSha256": "%s"}]
+            """.formatted(hashA, hashB)
+        ));
+        revisions.publish(withStamps, "release-bot");
+
+        CatalogManifest exported = exports.export(withStamps).manifest();
+        assertThat(exported.stampBooths()).extracting(CatalogManifest.StampBooth::id).containsExactly("likelion", "photo");
+        assertThat(exported.stampBoothTokens()).extracting(CatalogManifest.StampBoothToken::tokenSha256)
+            .containsExactly(hashA, hashB);
+        assertThat(exports.export(importExportedManifest(exported)).manifest().stampBoothTokens())
+            .isEqualTo(exported.stampBoothTokens());
+
+        UUID rollback = revisions.rollback(first, withStamps, "incident-bot");
+        assertThat(exports.export(rollback).manifest().stampBooths()).isEmpty();
+        UUID restored = revisions.rollback(withStamps, rollback, "incident-bot");
+        assertThat(exports.export(restored).manifest().stampBoothTokens()).hasSize(2);
+    }
+
+    @Test
+    void rejectsBoothStampsThatBreakTheTokenRules() throws IOException {
+        String base = manifestJson("qr-stamp-rules", "/assets/maps/overview-v1.png", currentPublishedRevision());
+        String booths = """
+            [{"id": "likelion", "name": "멋사 부스", "sortOrder": 1}]
+            """;
+        String hash = "c".repeat(64);
+        Map<String, String[]> cases = new LinkedHashMap<>();
+        cases.put("stampBoothTokens references an unknown booth", new String[] {booths,
+            "[{\"boothId\": \"nobody\", \"validDate\": null, \"tokenSha256\": \"" + hash + "\"}]"});
+        cases.put("64 lowercase hex characters", new String[] {booths,
+            "[{\"boothId\": \"likelion\", \"validDate\": null, \"tokenSha256\": \"" + hash.toUpperCase() + "\"}]"});
+        cases.put("Every stamp booth needs a token", new String[] {booths, "[]"});
+        cases.put("validDate must be a festival day", new String[] {booths,
+            "[{\"boothId\": \"likelion\", \"validDate\": \"2026-12-25\", \"tokenSha256\": \"" + hash + "\"}]"});
+        cases.put("either one all-day token or dated tokens", new String[] {booths,
+            "[{\"boothId\": \"likelion\", \"validDate\": null, \"tokenSha256\": \"" + hash + "\"},"
+                + " {\"boothId\": \"likelion\", \"validDate\": \"2026-10-01\", \"tokenSha256\": \"" + "d".repeat(64) + "\"}]"});
+        cases.put("Duplicate stampBoothTokens.tokenSha256", new String[] {
+            "[{\"id\": \"likelion\", \"name\": \"멋사 부스\", \"sortOrder\": 1},"
+                + " {\"id\": \"photo\", \"name\": \"포토부스\", \"sortOrder\": 2}]",
+            "[{\"boothId\": \"likelion\", \"validDate\": null, \"tokenSha256\": \"" + hash + "\"},"
+                + " {\"boothId\": \"photo\", \"validDate\": null, \"tokenSha256\": \"" + hash + "\"}]"});
+
+        for (Map.Entry<String, String[]> entry : cases.entrySet()) {
+            String json = withStampBooths(base, entry.getValue()[0], entry.getValue()[1]);
+            assertThatThrownBy(() -> importJson(json))
+                .as(entry.getKey())
+                .isInstanceOf(CatalogCliException.class)
+                .hasMessageContaining(entry.getKey());
+        }
+    }
+
+    private static String withStampBooths(String manifestJson, String booths, String tokens) {
+        int end = manifestJson.lastIndexOf('}');
+        return manifestJson.substring(0, end)
+            + ", \"stampBooths\": " + booths + ", \"stampBoothTokens\": " + tokens + "}";
     }
 
     private UUID importExportedManifest(CatalogManifest manifest) throws IOException {

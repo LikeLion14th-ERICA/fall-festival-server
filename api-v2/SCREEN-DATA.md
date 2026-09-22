@@ -61,7 +61,7 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | HOME-D13 | 웰컴 데이 URL | API | Config.links.welcomeDay | [위키](../docs/wiki/product/home.md) |
 | HOME-D14 | 공식 채널 링크 | API | Config.links.officialChannels | [위키](../docs/wiki/product/home.md) |
 | HOME-D15 | 공식 채널 표시명·아이콘 | API | Channel.label + Channel.iconKey | [위키](../docs/wiki/product/home.md) |
-| HOME-D16 | 당일 참여 시작 여부 | 브라우저 | 브라우저: 당일 stamp.started | [위키](../docs/wiki/product/home.md) |
+| HOME-D16 | 당일 참여 시작 여부 | API | StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여) | [위키](../docs/wiki/product/home.md) |
 | NOTICE-LIST-D01 | 제목 | API | Notice.title | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D02 | 등록 시각 | API | Notice.createdAt | [위키](../docs/wiki/product/notice.md) |
 | NOTICE-LIST-D03 | 본문 텍스트 | API | Notice.body | [위키](../docs/wiki/product/notice.md) |
@@ -126,11 +126,11 @@ Product Context v5 기준 26개 화면의 데이터 177개를 추적합니다. �
 | STAMP-START-D02 | 행사 기간 | API | StampGuide.dates | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-START-D03 | 참여 방법 | API | StampGuide.instructions | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-START-D04 | 지급 조건 | API | StampGuide.reward.notice | [위키](../docs/wiki/product/stamp.md) |
-| STAMP-COLLECT-D01 | 참여 시작 여부 | 브라우저 | 브라우저: stamp.started | [위키](../docs/wiki/product/stamp.md) |
-| STAMP-COLLECT-D02 | 당일 스탬프 개수 | 브라우저 | 브라우저: stamp.count (0~4) | [위키](../docs/wiki/product/stamp.md) |
-| STAMP-COLLECT-D03 | 상품 수령 여부 | 브라우저 | 브라우저: stamp.claimed | [위키](../docs/wiki/product/stamp.md) |
-| STAMP-COLLECT-D04 | 기록 기준 날짜 | 브라우저 | 브라우저: stamp.date (KST 자정 초기화) | [위키](../docs/wiki/product/stamp.md) |
-| STAMP-COLLECT-D05 | 공통 QR 식별값 | API | StampGuide.qrValue (제공 책임·배포 방식은 검토 필요) | [위키](../docs/wiki/product/stamp.md) |
+| STAMP-COLLECT-D01 | 참여 시작 여부 | API | StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여) | [위키](../docs/wiki/product/stamp.md) |
+| STAMP-COLLECT-D02 | 당일 스탬프 개수 | API | StampCard.stamps (부스당 하루 1개, 최대 StampCard.dailyLimit) | [위키](../docs/wiki/product/stamp.md) |
+| STAMP-COLLECT-D03 | 상품 수령 여부 | API | StampCard.rewardClaimed | [위키](../docs/wiki/product/stamp.md) |
+| STAMP-COLLECT-D04 | 기록 기준 날짜 | API | StampCard.date (축제 시간대 자정 초기화) | [위키](../docs/wiki/product/stamp.md) |
+| STAMP-COLLECT-D05 | 공통 QR 식별값 | API | StampCollectionInput.token ← 부스 QR 링크의 b 값 | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-REWARD-D01 | 담당자 제시·수령 인증 코드 입력 안내 | 프런트 | 프런트 고정 UI: 담당자에게 제시·수령 인증 코드 입력·확인 버튼; 상품 수령 버튼 없음 | [위키](../docs/wiki/product/stamp.md) |
 | ADM-CROWD-D01 | 저장 혼잡도 | API | Crowding.savedLevel | [위키](../docs/wiki/product/admin/crowd.md) |
 | ADM-CROWD-D02 | 운영 상태 | API | Crowding.operatingStatus | [위키](../docs/wiki/product/admin/crowd.md) |

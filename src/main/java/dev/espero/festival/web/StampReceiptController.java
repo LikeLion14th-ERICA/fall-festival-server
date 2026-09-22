@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * POST /api/v2/stamp-receipt-verifications (STAMP-001). The LIKELION booth
- * staff type the reward code on the visitor's phone; a match only answers
- * {@code verified: true}. No participation or reward history is recorded, and
- * a wrong code is refused without saying why. Requests are rate limited per
- * client ahead of this controller.
+ * staff type the reward code on the visitor's phone. A matching code then
+ * needs today's full stamp card of that browser (its participant cookie) and
+ * records the day's reward, so a card claims one reward per day. A wrong code
+ * is refused without saying why. Requests are rate limited per client ahead
+ * of this controller.
  */
 @RestController
 @RequestMapping("/api/v2")
@@ -28,15 +29,18 @@ public class StampReceiptController {
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
     private final StampReceiptVerifier verifier;
+    private final StampCardService cards;
 
     public StampReceiptController(
         CatalogSnapshotProvider snapshots,
         ApiMetaSupport metaSupport,
-        StampReceiptVerifier verifier
+        StampReceiptVerifier verifier,
+        StampCardService cards
     ) {
         this.snapshots = snapshots;
         this.metaSupport = metaSupport;
         this.verifier = verifier;
+        this.cards = cards;
     }
 
     @PostMapping(path = "/stamp-receipt-verifications", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -65,6 +69,7 @@ public class StampReceiptController {
                 false
             );
         }
+        cards.claimReward(StampCardController.participantToken(request));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .body(new ApiResponse<>(new Verification(true), metaSupport.meta(request, snapshot.context(), locale)));

@@ -11012,8 +11012,8 @@
                           "2030-10-03"
                         ],
                         "instructions": [
-                          "START는 참여 시작만 기록합니다.",
-                          "공통 QR 인식 1회당 1개, 하루 4개 적립합니다."
+                          "START를 누르면 참여가 시작됩니다.",
+                          "부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다."
                         ],
                         "reward": {
                           "name": "몬스터",
@@ -11047,8 +11047,8 @@
                           "2030-10-03"
                         ],
                         "instructions": [
-                          "START는 참여 시작만 기록합니다.",
-                          "공통 QR 인식 1회당 1개, 하루 4개 적립합니다."
+                          "START를 누르면 참여가 시작됩니다.",
+                          "부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다."
                         ],
                         "reward": {
                           "name": "몬스터",
@@ -11334,6 +11334,1304 @@
         ]
       }
     },
+    "/api/v2/stamp-participants": {
+      "post": {
+        "operationId": "startStampParticipation",
+        "summary": "스탬프투어 시작·익명 참여 쿠키 발급",
+        "description": "연결 화면: STAMP-START. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ko",
+                "en",
+                "zh-Hans",
+                "ja"
+              ],
+              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
+              "default": "ko"
+            },
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampCardResponse"
+                },
+                "examples": {
+                  "already-started": {
+                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: already-started",
+                    "value": {
+                      "data": {
+                        "date": "2030-10-01",
+                        "dailyLimit": 4,
+                        "stamps": [],
+                        "rewardClaimed": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "__Host-festival-stamp 익명 참여자 쿠키. Secure; HttpOnly; SameSite=Lax; Path=/; Max-Age 30일. 이미 참여 중이면 200과 함께 보내지 않는다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampCardResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: normal",
+                    "value": {
+                      "data": {
+                        "date": "2030-10-01",
+                        "dailyLimit": 4,
+                        "stamps": [],
+                        "rewardClaimed": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "locale-not-ready": {
+                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "bad-request": {
+                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "스탬프투어 시작·익명 참여 쿠키 발급: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "STAMP-START"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "already-started",
+          "error",
+          "locale-not-ready",
+          "bad-request",
+          "rate-limited"
+        ]
+      }
+    },
+    "/api/v2/stamp-card": {
+      "get": {
+        "operationId": "getStampCard",
+        "summary": "오늘의 스탬프판",
+        "description": "연결 화면: STAMP-COLLECT, STAMP-REWARD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ko",
+                "en",
+                "zh-Hans",
+                "ja"
+              ],
+              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
+              "default": "ko"
+            },
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampCardResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "오늘의 스탬프판: normal",
+                    "value": {
+                      "data": {
+                        "date": "2030-10-01",
+                        "dailyLimit": 4,
+                        "stamps": [
+                          {
+                            "boothId": "likelion",
+                            "boothName": "멋사 부스",
+                            "collectedAt": "2030-10-01T10:00:00+09:00"
+                          },
+                          {
+                            "boothId": "booth-mock-1",
+                            "boothName": "예시 부스 1",
+                            "collectedAt": "2030-10-01T11:00:00+09:00"
+                          }
+                        ],
+                        "rewardClaimed": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "empty": {
+                    "summary": "오늘의 스탬프판: empty",
+                    "value": {
+                      "data": {
+                        "date": "2030-10-01",
+                        "dailyLimit": 4,
+                        "stamps": [],
+                        "rewardClaimed": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "locale-not-ready": {
+                    "summary": "오늘의 스탬프판: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "bad-request": {
+                    "summary": "오늘의 스탬프판: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not-started": {
+                    "summary": "오늘의 스탬프판: not-started",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_NOT_STARTED",
+                        "message": "스탬프투어를 먼저 시작해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "오늘의 스탬프판: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "오늘의 스탬프판: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "STAMP-COLLECT",
+          "STAMP-REWARD"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "empty",
+          "not-started",
+          "error",
+          "locale-not-ready",
+          "bad-request",
+          "rate-limited"
+        ]
+      }
+    },
+    "/api/v2/stamp-collections": {
+      "post": {
+        "operationId": "collectStamp",
+        "summary": "부스 QR 스탬프 적립(부스당 하루 1회)",
+        "description": "연결 화면: STAMP-COLLECT. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ko",
+                "en",
+                "zh-Hans",
+                "ja"
+              ],
+              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
+              "default": "ko"
+            },
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StampCardResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): normal",
+                    "value": {
+                      "data": {
+                        "date": "2030-10-01",
+                        "dailyLimit": 4,
+                        "stamps": [
+                          {
+                            "boothId": "likelion",
+                            "boothName": "멋사 부스",
+                            "collectedAt": "2030-10-01T18:00:00.000+09:00"
+                          }
+                        ],
+                        "rewardClaimed": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 1,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "locale-not-ready": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "bad-request": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not-started": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): not-started",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_NOT_STARTED",
+                        "message": "스탬프투어를 먼저 시작해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "already-collected": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): already-collected",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_ALREADY_COLLECTED",
+                        "message": "이 부스의 스탬프는 오늘 이미 받았어요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "card-full": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): card-full",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_CARD_FULL",
+                        "message": "오늘 받을 수 있는 스탬프를 모두 모았어요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "reward-claimed": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): reward-claimed",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_REWARD_CLAIMED",
+                        "message": "오늘은 이미 상품을 받았어요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "요청 본문은 64KiB 이하입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "415": {
+            "description": "application/json 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "422": {
+            "description": "요청 필드를 확인해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid-token": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): invalid-token",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_STAMP_TOKEN",
+                        "message": "스탬프투어 QR이 아니에요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "STAMP-COLLECT"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "not-started",
+          "invalid-token",
+          "already-collected",
+          "card-full",
+          "reward-claimed",
+          "error",
+          "locale-not-ready",
+          "bad-request",
+          "rate-limited"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "저장할 변경값",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StampCollectionInput"
+              },
+              "example": {
+                "token": "mock-booth-token-0001"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/stamp-receipt-verifications": {
       "post": {
         "operationId": "verifyStampReceipt",
@@ -11541,7 +12839,48 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "card-incomplete": {
+                    "summary": "스탬프 상품 수령 인증: card-incomplete",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_CARD_INCOMPLETE",
+                        "message": "스탬프 4개를 모두 모아야 상품을 받을 수 있어요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "reward-claimed": {
+                    "summary": "스탬프 상품 수령 인증: reward-claimed",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_REWARD_CLAIMED",
+                        "message": "오늘은 이미 상품을 받았어요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -11737,6 +13076,8 @@
         "x-mock-scenarios": [
           "normal",
           "invalid-code",
+          "card-incomplete",
+          "reward-claimed",
           "error",
           "locale-not-ready",
           "bad-request",
@@ -25757,13 +27098,13 @@
               {
                 "type": "string",
                 "minLength": 1,
-                "description": "공통 QR 비교값. 비밀키가 아님."
+                "description": "스탬프투어 시작 안내용 공통 주소. 적립에는 쓰지 않으며 비밀키가 아님."
               },
               {
                 "type": "null"
               }
             ],
-            "description": "배포 방식·책임 미합의 시 null. 서명·부스별 고유값 없음."
+            "description": "배포 방식·책임 미합의 시 null. 적립은 부스별 QR 링크의 토큰(StampCollectionInput.token)으로 한다."
           }
         },
         "required": [
@@ -25774,6 +27115,100 @@
           "dailyLimit",
           "timezone",
           "qrValue"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "StampCard": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "minLength": 1,
+            "description": "축제 시간대(Asia/Seoul) 기준 오늘 날짜. 자정에 새 스탬프판이 된다.",
+            "format": "date"
+          },
+          "dailyLimit": {
+            "type": "integer",
+            "enum": [
+              4
+            ],
+            "description": "하루 최대 적립 개수"
+          },
+          "stamps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StampCardStamp"
+            },
+            "description": "오늘 적립한 부스. 부스당 하루 1개, 적립 시각순.",
+            "maxItems": 4
+          },
+          "rewardClaimed": {
+            "type": "boolean",
+            "description": "오늘 상품을 받았는지. 서버가 수령 인증 성공 때 기록한다."
+          }
+        },
+        "required": [
+          "date",
+          "dailyLimit",
+          "stamps",
+          "rewardClaimed"
+        ],
+        "additionalProperties": false,
+        "description": "이 브라우저의 익명 참여자(HttpOnly 쿠키)의 오늘 스탬프판. 계정·복구 없음."
+      },
+      "StampCardStamp": {
+        "type": "object",
+        "properties": {
+          "boothId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "boothName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "description": "부스 표시명"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "게시 catalog에서 사라진 부스면 null"
+          },
+          "collectedAt": {
+            "type": "string",
+            "minLength": 1,
+            "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
+          }
+        },
+        "required": [
+          "boothId",
+          "boothName",
+          "collectedAt"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "StampCollectionInput": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "minLength": 16,
+            "description": "부스 QR 링크의 b 쿼리 값. 그대로 보내며 저장·로그하지 않는다. 형식이 다르거나 없는 토큰은 INVALID_STAMP_TOKEN.",
+            "pattern": "^[A-Za-z0-9_-]{16,128}$",
+            "maxLength": 128,
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "token"
         ],
         "additionalProperties": false,
         "description": ""
@@ -25804,7 +27239,7 @@
             "enum": [
               true
             ],
-            "description": "서버가 현장 수령 인증 코드를 확인했음을 뜻함. 사용자 참여·지급 이력은 만들지 않음."
+            "description": "서버가 현장 수령 인증 코드와 오늘 스탬프 4개를 확인하고 오늘 수령을 기록했음을 뜻함."
           }
         },
         "required": [
@@ -27199,6 +28634,23 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/StampGuide"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "StampCardResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/StampCard"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

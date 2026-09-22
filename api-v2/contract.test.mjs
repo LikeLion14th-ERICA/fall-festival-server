@@ -182,6 +182,25 @@ test('Stamp receipt verification hides the code and changes claimed only after s
   assert.deepEqual(clientStates.stamp.receiptCodeRejected,{date:'2030-10-01',started:true,count:4,claimed:false,route:'STAMP-REWARD',message:'코드를 확인해 주세요'});
   assert.deepEqual(clientStates.stamp.claimed,{date:'2030-10-01',started:true,count:4,claimed:true});
 });
+test('Booth stamps: one per booth per day, four a day, reward once for a full card',async()=>{
+  const session='stamp-flow',tokens=['mock-booth-token-0001','mock-booth-token-0002','mock-booth-token-0003','mock-booth-token-0004','mock-booth-token-0005'];
+  const collect=token=>call('/api/v2/stamp-collections',{method:'POST',body:{token},session});
+  assert.equal((await call('/api/v2/stamp-participants',{method:'POST',session})).status,201);
+  assert.equal((await call('/api/v2/stamp-participants',{method:'POST',session})).status,200);
+  assert.equal((await collect(tokens[0])).body.data.stamps.length,1);
+  const duplicate=await collect(tokens[0]);assert.equal(duplicate.status,409);assert.equal(duplicate.body.error.code,'STAMP_ALREADY_COLLECTED');
+  const unknown=await collect('mock-unknown-token-0000');assert.equal(unknown.status,422);assert.equal(unknown.body.error.code,'INVALID_STAMP_TOKEN');
+  const malformed=await collect('bad');assert.equal(malformed.status,422);assert.equal(malformed.body.error.code,'INVALID_STAMP_TOKEN');
+  const early=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'482913'},session});assert.equal(early.body.error.code,'STAMP_CARD_INCOMPLETE');
+  for(const token of tokens.slice(1,4))assert.equal((await collect(token)).status,200);
+  assert.equal((await collect(tokens[4])).body.error.code,'STAMP_CARD_FULL');
+  assert.equal((await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'482913'},session})).status,200);
+  assert.equal((await call('/api/v2/stamp-card',{session})).body.data.rewardClaimed,true);
+  assert.equal((await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'482913'},session})).body.error.code,'STAMP_REWARD_CLAIMED');
+  for(const id of ['startStampParticipation','getStampCard','collectStamp'])for(const [status,response]of Object.entries(operation(id).responses))if(Number(status)>=200&&Number(status)<300)assert.equal(response.headers['Cache-Control'].schema.enum[0],'no-store',id);
+  assert.equal(spec.components.schemas.StampCollectionInput.properties.token.writeOnly,true);
+  assert.ok(operation('startStampParticipation').responses['201'].headers['Set-Cookie']);
+});
 test('Sensitive and administrator success responses declare no-store',async()=>{
   for(const id of ['verifyStampReceipt','getPaymentGuide'])assert.equal(operation(id).responses['200'].headers['Cache-Control'].schema.enum[0],'no-store');
   for(const adminOperation of Object.values(spec.paths).flatMap(Object.values).filter(item=>item.tags.includes('관리자'))){

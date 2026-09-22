@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 44,
+  "operationCount": 47,
   "operations": [
     {
       "operationId": "getConfig",
@@ -451,6 +451,63 @@
           {
             "file": "src/test/java/dev/espero/festival/web/StampGuideControllerTest.java",
             "test": "rejectsUnreadyAndUnknownLocalesWithoutFallingBack"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-06"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "startStampParticipation",
+      "path": "/api/v2/stamp-participants",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesStampCardEndpointsAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-06"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getStampCard",
+      "path": "/api/v2/stamp-card",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java",
+            "test": "validatesStampCardEndpointsAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-06"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "collectStamp",
+      "path": "/api/v2/stamp-collections",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/StampCardFlowIntegrationTest.java",
+            "test": "collectsOneStampPerBoothPerDayAndFourADay"
           }
         ]
       },
@@ -1046,6 +1103,9 @@
       "operationIds": [
         "getTicketGuide",
         "getStampGuide",
+        "startStampParticipation",
+        "getStampCard",
+        "collectStamp",
         "verifyStampReceipt"
       ]
     },

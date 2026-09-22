@@ -59,7 +59,7 @@ role이 앱을 실제로 돌리는 데 필요한 나머지 테이블 권한(카�
 `artist_song_translations`, `performances`, `performance_translations`, `performance_artists`,
 `timetable_configs`, `prohibited_items`, `prohibited_item_translations`, `prohibited_messages`,
 `ticket_guide_revisions`, `ticket_guide_translations`, `stamp_guide_revisions`,
-`stamp_guide_translations`. (`ticket_guide`/`stamp_guide` legacy singleton 테이블은 `TicketGuideStore`
+`stamp_guide_translations`, `stamp_booths`, `stamp_booth_tokens`. (`ticket_guide`/`stamp_guide` legacy singleton 테이블은 `TicketGuideStore`
 등이 여전히 읽는지 확인 후 포함 여부 결정 — ⚠️)
 
 **운영 데이터(직접 CRUD, ✅ `*Store.java`에서 확인)**
@@ -67,6 +67,7 @@ role이 앱을 실제로 돌리는 데 필요한 나머지 테이블 권한(카�
 | 테이블 | 권한 |
 |---|---|
 | `crowding_state_dynamic` | SELECT, INSERT, UPDATE |
+| `stamp_participants`, `stamp_collections`, `stamp_rewards` | SELECT, INSERT (부스 스탬프 V27, `StampStore` 기준) |
 | `notices`, `notice_translations`, `notice_links`, `notice_link_translations` | SELECT, INSERT, UPDATE, DELETE |
 | `notice_templates`, `notice_template_translations` | SELECT, INSERT, DELETE (템플릿 CLI가 전체 교체; `NoticeTemplateStore` 기준) |
 | `goods`, `goods_translations`, `goods_colors`, `goods_color_translations`, `goods_sizes`, `goods_size_translations`, `goods_combinations` | SELECT, INSERT, UPDATE, DELETE |
@@ -101,8 +102,8 @@ role이 앱을 실제로 돌리는 데 필요한 나머지 테이블 권한(카�
 
 ### `catalog_export` — export만
 
-`runtime`의 "카탈로그(SELECT만)" 목록과 거의 같지만, **계좌·혼잡도·공지·굿즈는 절대 포함하지
-않는다** — provisioning script가 명시적으로 이걸 막는다. `ticket_guide_revisions`는 계좌 컬럼이
+`runtime`의 "카탈로그(SELECT만)" 목록과 거의 같지만, **계좌·혼잡도·공지·굿즈·스탬프 참여 기록은
+절대 포함하지 않는다** — provisioning script가 명시적으로 이걸 막는다. `ticket_guide_revisions`는 계좌 컬럼이
 애초에 없으므로 전체 컬럼 SELECT 가능(레거시 `ticket_guide`/`ticket_guide_revisions`의 옛 계좌
 컬럼이 남아있다면 그 컬럼만 제외 — provisioning script의 컬럼 목록 참고).
 

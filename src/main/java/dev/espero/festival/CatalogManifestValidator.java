@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 public final class CatalogManifestValidator {
 
     private static final Pattern API_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
+    private static final Pattern TOKEN_SHA256 = Pattern.compile("^[0-9a-f]{64}$");
     private static final Set<String> LOCALES = Set.of("ko", "en", "zh-Hans", "ja");
     private static final Set<String> ARTIST_CATEGORIES = Set.of("ARTIST", "CONTEST");
     private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
@@ -224,6 +225,50 @@ public final class CatalogManifestValidator {
         validateTicketGuide(manifest.ticketGuide(), maps, places, pins, currentVersions);
         validateStampGuide(manifest.stampGuide());
         validateTextTranslations(manifest);
+        validateStampBooths(manifest);
+    }
+
+    /**
+     * Booth stamp QRs: every booth needs at least one token, a booth uses
+     * either one token for all days or one token per festival day (never
+     * both), and a token hash is used once in the revision.
+     */
+    private void validateStampBooths(CatalogManifest manifest) {
+        Map<String, CatalogManifest.StampBooth> booths = unique(
+            "stampBooths", manifest.stampBooths(), CatalogManifest.StampBooth::id
+        );
+        Set<Integer> sortOrders = new HashSet<>();
+        for (CatalogManifest.StampBooth booth : booths.values()) {
+            id(booth.id(), "stampBooths.id");
+            text(booth.name(), "stampBooths.name");
+            require(booth.sortOrder() > 0, "stampBooths.sortOrder must be positive");
+            require(sortOrders.add(booth.sortOrder()), "Duplicate stampBooths.sortOrder value");
+        }
+        Set<java.time.LocalDate> days = new HashSet<>();
+        manifest.festivalDays().forEach(day -> days.add(day.festivalDate()));
+        Set<String> hashes = new HashSet<>();
+        Map<String, Set<java.time.LocalDate>> datedTokens = new HashMap<>();
+        Set<String> allDayTokens = new HashSet<>();
+        for (CatalogManifest.StampBoothToken token : manifest.stampBoothTokens()) {
+            require(token != null && booths.containsKey(token.boothId()),
+                "stampBoothTokens references an unknown booth");
+            require(token.tokenSha256() != null && TOKEN_SHA256.matcher(token.tokenSha256()).matches(),
+                "stampBoothTokens.tokenSha256 must be 64 lowercase hex characters");
+            require(hashes.add(token.tokenSha256()), "Duplicate stampBoothTokens.tokenSha256 value");
+            if (token.validDate() == null) {
+                require(allDayTokens.add(token.boothId()), "A stamp booth has more than one all-day token");
+            } else {
+                require(days.contains(token.validDate()), "stampBoothTokens.validDate must be a festival day");
+                require(datedTokens.computeIfAbsent(token.boothId(), key -> new HashSet<>()).add(token.validDate()),
+                    "A stamp booth has more than one token for the same day");
+            }
+        }
+        for (String booth : booths.keySet()) {
+            require(allDayTokens.contains(booth) || datedTokens.containsKey(booth),
+                "Every stamp booth needs a token: " + booth);
+            require(!(allDayTokens.contains(booth) && datedTokens.containsKey(booth)),
+                "A stamp booth uses either one all-day token or dated tokens: " + booth);
+        }
     }
 
     /**
