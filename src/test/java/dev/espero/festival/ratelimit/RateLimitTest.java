@@ -40,6 +40,43 @@ class RateLimitTest {
     }
 
     @Test
+    void keepsActiveBucketsWhenTheClientTableIsFull() {
+        MutableClock clock = new MutableClock();
+        RequestRateLimiter limiter = new RequestRateLimiter(clock, 2, 10_000_000_000L);
+        RateLimitProperties.Policy policy = new RateLimitProperties.Policy(1, 0.000_001);
+
+        assertThat(limiter.acquire("p", policy, "a")).isZero();
+        assertThat(limiter.acquire("p", policy, "b")).isZero();
+        assertThat(limiter.acquire("p", policy, "c")).isZero();
+
+        assertThat(limiter.size()).isEqualTo(2);
+        assertThat(limiter.acquire("p", policy, "a")).isPositive();
+        assertThat(limiter.acquire("p", policy, "b")).isPositive();
+        assertThat(limiter.acquire("p", policy, "d")).isPositive();
+        assertThat(limiter.acquire("other-policy", policy, "d")).isZero();
+        assertThat(limiter.acquire("other-policy", policy, "e")).isPositive();
+        assertThat(limiter.size()).isEqualTo(2);
+    }
+
+    @Test
+    void replacesOnlyIdleBucketsWhenTheClientTableIsFull() {
+        MutableClock clock = new MutableClock();
+        RequestRateLimiter limiter = new RequestRateLimiter(clock, 2, 10_000_000_000L);
+        RateLimitProperties.Policy policy = new RateLimitProperties.Policy(1, 0.000_001);
+
+        assertThat(limiter.acquire("p", policy, "active")).isZero();
+        assertThat(limiter.acquire("p", policy, "idle")).isZero();
+        clock.advanceMillis(9_000);
+        assertThat(limiter.acquire("p", policy, "active")).isPositive();
+        clock.advanceMillis(2_000);
+
+        assertThat(limiter.acquire("p", policy, "replacement")).isZero();
+        assertThat(limiter.size()).isEqualTo(2);
+        assertThat(limiter.acquire("p", policy, "active")).isPositive();
+        assertThat(limiter.acquire("p", policy, "idle")).isZero();
+    }
+
+    @Test
     void mapsRoutesToTheirPolicies() {
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/stamp-receipt-verifications")).isEqualTo("stamp-receipt");
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/admin/sessions")).isEqualTo("admin-login");
@@ -61,6 +98,33 @@ class RateLimitTest {
         assertThat(filter(2).client(request)).isEqualTo("203.0.113.7");
         // A chain shorter than the trusted hops did not pass every proxy.
         assertThat(filter(3).client(request)).isEqualTo("10.0.0.9");
+    }
+
+    @Test
+    void groupsIpv6ClientsBy64AfterSelectingTheTrustedProxyAddress() {
+        MockHttpServletRequest first = new MockHttpServletRequest();
+        first.setRemoteAddr("2001:db8:1:2:3:4:5:6");
+        MockHttpServletRequest sameSubnet = new MockHttpServletRequest();
+        sameSubnet.setRemoteAddr("2001:0db8:0001:0002:ffff:ffff:ffff:ffff");
+        MockHttpServletRequest otherSubnet = new MockHttpServletRequest();
+        otherSubnet.setRemoteAddr("2001:db8:1:3::1");
+
+        assertThat(filter(0).client(first)).isEqualTo(filter(0).client(sameSubnet));
+        assertThat(filter(0).client(first)).isNotEqualTo(filter(0).client(otherSubnet));
+
+        MockHttpServletRequest mappedIpv4 = new MockHttpServletRequest();
+        mappedIpv4.setRemoteAddr("::ffff:192.0.2.1");
+        MockHttpServletRequest ipv4 = new MockHttpServletRequest();
+        ipv4.setRemoteAddr("192.0.2.1");
+        assertThat(filter(0).client(mappedIpv4)).isEqualTo(filter(0).client(ipv4));
+
+        MockHttpServletRequest forwarded = new MockHttpServletRequest();
+        forwarded.setRemoteAddr("10.0.0.9");
+        forwarded.addHeader("X-Forwarded-For", "2001:db8:1:2::1, 198.51.100.2");
+        assertThat(filter(2).client(forwarded)).isEqualTo(filter(0).client(first));
+        // A short chain still falls back to the socket address, which is also grouped.
+        forwarded.setRemoteAddr("2001:db8:1:2::7");
+        assertThat(filter(3).client(forwarded)).isEqualTo(filter(0).client(first));
     }
 
     private static RateLimitFilter filter(int hops) {

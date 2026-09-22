@@ -23,7 +23,11 @@
   이를 사용자 계정이나 영구 개인 프로필로 확장하지 않는다.
 - 관리자 기능은 별도 진입점과 서버 측 `ADMIN` 권한 검사를 갖춘 보안 경계에 둔다. access
   token은 짧은 수명의 JWT, refresh token은 회전되는 Secure·HttpOnly cookie를
-  사용하고 세션 만료, 계정 복구와 긴급 권한 회수는 API v2 계약과 운영 runbook을 따른다.
+  사용한다. logout은 현재 refresh session만 revoke하며 이미 발급된 access JWT는 최대 15분까지
+  유효하다. JWT 서명 secret 교체는 access JWT만 무효화하므로 모든 자격증명 차단은 별도 auth
+  lifecycle 절차로 다룬다.
+- 최초 `ADMIN` bootstrap password는 15개 이상의 Unicode code point이면서 BCrypt 입력 한계인
+  UTF-8 72바이트 이하여야 한다. 비밀번호 설정·변경 API는 현재 Product 범위에 없다.
 - 모든 입력은 서버에서 검증하고 출력은 사용 맥락에 맞게 이스케이프한다. 공개 쓰기
   요청에는 속도 제한과 남용 방지를 적용하며 CORS, CSRF, 보안 헤더, 파일 업로드 정책을
   배포 환경에 맞게 명시한다.
@@ -62,8 +66,10 @@
 load balancer를 거치므로 소켓 주소는 proxy다. 0으로 두면 모든 사용자가 한 bucket을 쓰게 되므로
 배포 환경에서는 실제 hop 수(보통 2)를 설정하고 `X-Forwarded-For` 구성을 실측한다. 백엔드 주소로
 직접 들어오는 요청은 `X-Forwarded-For`를 위조할 수 있으므로 공개 URL을 proxy만 부르도록 제한하는
-것이 좋다. 요청 수 제한 로그에는 IP를 남기지 않는다. 부하 시험(`tools/load-test`)은 서버 용량을
-재기 위해 제한을 끈다.
+것이 좋다. 요청 수 제한 로그에는 IP를 남기지 않는다. IPv6 literal은 `/64` prefix를 하나의
+client key로 쓰며, client bucket table이 가득 차도 active bucket을 지우지 않고 policy별
+공유 overflow bucket을 쓴다. idle bucket은 주기적으로만 회수해 table sweep 자체가 요청 폭주를
+만들지 않게 한다. 부하 시험(`tools/load-test`)은 서버 용량을 재기 위해 제한을 끈다.
 
 ## 관리자 감사 이력
 

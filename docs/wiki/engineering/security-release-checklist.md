@@ -51,7 +51,9 @@
 
 - [ ] 운영 admin origin에서 HTTPS login → refresh → logout을 실제 browser cookie 속성까지 확인했다.
 - [ ] Cloudflare/Caddy의 TLS, HTTP redirect, security headers, backend host port 비노출과 실제
-  `RATE_LIMIT_TRUSTED_PROXY_HOPS`를 확인했다. 검증용 `test/Caddyfile`은 운영 증거가 아니다.
+  `RATE_LIMIT_TRUSTED_PROXY_HOPS`를 확인했다. 제한을 켠 public-read·admin-login·stamp-receipt를
+  실제 proxy chain과 예상 shared NAT/mobile network 조건에서 실행해 정상 사용자를 막지 않는지도
+  확인했다. 검증용 `test/Caddyfile`은 운영 증거가 아니다.
 - [ ] runtime·catalog·account·cleanup role의 DB 최소 권한, 인터넷 비노출, DB TLS 정책을 확인했다.
 - [ ] DB와 media volume을 같은 recovery set으로 백업했고, 격리 환경 restore 결과를 기록했다.
 - [ ] `security-filesystem`과 `docker-build`의 Trivy filesystem·root image high/critical 결과와 대응을 release 기록에 남겼다.
@@ -71,8 +73,6 @@ refresh session-family revoke, `Sec-Fetch-Site`, malware scan은 현재 계약 �
   smoke에서 확인한다.
 - [ ] root Dockerfile의 non-root runtime, `/healthz` liveness healthcheck, media volume mount와 `.env` build-context 제외를 image
   build 결과로 확인한다. `test/docker-compose.yml`은 이 운영 gate를 대체하지 않는다.
-- [ ] capacity 측정과 별도로 rate limiter를 켠 로그인·public-read 흐름을 실제 proxy/NAT 조건에서
-  확인한다. 현재 load-test 목표를 임의의 5,000 동시 사용자 요구로 바꾸지 않는다.
 - [ ] CDN이나 다중 인스턴스를 도입하면 cache key, invalidation, shared limiter, revision 전파와
   rollback 반영을 새 release gate로 추가한다.
 
