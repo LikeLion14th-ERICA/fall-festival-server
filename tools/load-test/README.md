@@ -119,6 +119,46 @@ completed their 500-VU stages with 1,011,491 / 999,795 requests, 113.255 / 104.0
 maximum endpoint p95 values, and zero non-2xx responses, timeouts and transport errors.
 These are machine-specific localhost observations and have no production SLA meaning.
 
+## Staging release scenarios (k6)
+
+release-scenarios.js supplements the local Java harness with approved staging checks. It
+does not start a server, prepare catalog data, clear a cache, obtain credentials, or alter
+a rate limiter. The operator supplies only protected references and test-only values through
+environment variables. It must never target production.
+
+Before any run, record these values outside the repository: LOAD_TEST_APPROVED=true,
+TARGET_ENV=staging, BASE_URL as an approved HTTPS staging URL, TARGET_REFERENCE,
+CANDIDATE_REFERENCE, an absolute EVIDENCE_PATH, and EVIDENCE_STORAGE=protected-external.
+PUBLIC_RATE_LIMIT_MODE must be either disabled-for-approved-load or
+isolated-client-identities. The latter requires an approved load injector that proves
+separate client identities; a single sender cannot claim that mode. ROUTE_EVIDENCE_REFERENCES
+contains only protected dashboard/report IDs. Run k6 only after the release owner approves
+the target, fixture, timing, operator, observer, and rollback path.
+
+| LOAD_SCENARIO | Traffic and mandatory acceptance |
+| --- | --- |
+| warm-cache | Primes crowding and ticket guide, then uses the 34 + 33 RPS split for 60 seconds. CACHE_STATE=warm is required. |
+| cold-cache | ACTIVATION_CLIENTS VUs each execute exactly one bundle of crowding, notices, goods, and availability. CACHE_STATE=cold and CACHE_PREPARED_REFERENCE are required; the script never purges a cache. |
+| activation-spike | Uses an exact 17/17/17/16 RPS split for crowding/notices/goods/goods availability, ramps that mix through 67, 134 and 335 RPS, holds the peaks, then returns to 67 RPS. |
+| public-polling-mix | Sends an exact 17/17/17/16 RPS split across crowding, notices, goods and goods availability for five minutes. |
+| sustained-load | Uses the 34 + 33 RPS split for 30 minutes. |
+| dynamic-mutation-interleaving | Runs the exact public mix while changing crowding four times per minute. It requires ENABLE_ADMIN_MUTATIONS=true, a disposable bearer/origin, approved writable fixture and FestivalDay references; the initial admin read must return an existing writable savedLevel. Teardown restores the original level, including FULL confirmation, then verifies admin and public readback. |
+| receipt-rate-limit-mix | Runs public reads while a dedicated synthetic client proves valid and invalid receipt outcomes, the fifth invalid attempt followed by 429, Retry-After/request ID/error envelope, another client and public bucket isolation, and recovery after RECEIPT_REFILL_WAIT_SECONDS. It requires RATE_LIMIT_ENABLED=true, two distinct approved receipt client identities, and synthetic codes. |
+
+All public profiles require 200 or 304 success rate at least 99.9 percent, 429 rate at
+most 0.1 percent, route p95 no more than 300 ms, route p99 no more than one second, and
+zero dropped scheduled iterations. A public 429 is a failed public load outcome; it cannot
+be used to hide a saturated service. The receipt profile alone expects its dedicated
+receipt bucket to return 429 after the documented synthetic sequence.
+
+Mutation and receipt values must be test-only and omitted from evidence. The JSON report
+contains only redacted target/candidate/cache/route references plus per-route success,
+rate-limit, unexpected-error, latency, cleanup, and receipt outcome metrics. Attach heap,
+GC, PostgreSQL connection/active-query/lock-wait and ingress evidence separately.
+
+A forced interruption can skip k6 teardown. Record that run as FAIL, stop further mutation,
+and use the approved staging recovery runbook to restore the named fixture, verify admin
+and public readback, and inspect the audit trail before another run or release decision.
 The first run with the dynamic stage completed on 2026-09-18 with the same toolchain. The
 100/200/500 VU stages completed 459,764 / 444,885 / 458,197 requests with zero non-2xx
 responses, timeouts and transport errors. `/api/v2/ticket-guide` now reads the current

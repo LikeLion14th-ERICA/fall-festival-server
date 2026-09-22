@@ -68,7 +68,8 @@
       },
       "scenarioIds": [
         "HTTP-10",
-        "HTTP-18"
+        "HTTP-18",
+        "HTTP-25"
       ],
       "unresolvedReason": null
     },
@@ -87,7 +88,8 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-18"
+        "HTTP-18",
+        "HTTP-26"
       ],
       "unresolvedReason": null
     },
@@ -106,7 +108,8 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-18"
+        "HTTP-18",
+        "HTTP-26"
       ],
       "unresolvedReason": null
     },
@@ -125,7 +128,8 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-18"
+        "HTTP-18",
+        "HTTP-26"
       ],
       "unresolvedReason": null
     },
@@ -144,7 +148,8 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-18"
+        "HTTP-18",
+        "HTTP-26"
       ],
       "unresolvedReason": null
     },
@@ -163,7 +168,8 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-18"
+        "HTTP-18",
+        "HTTP-29"
       ],
       "unresolvedReason": null
     },
@@ -396,7 +402,6 @@
       },
       "scenarioIds": [
         "HTTP-03",
-        "HTTP-04",
         "HTTP-18"
       ],
       "unresolvedReason": null
@@ -469,7 +474,8 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-06"
+        "HTTP-06",
+        "HTTP-28"
       ],
       "unresolvedReason": null
     },
@@ -533,8 +539,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice reads."
+      "scenarioIds": [
+        "HTTP-25"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "postAdminNotice",
@@ -558,8 +566,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice creation; provider tests cover success, authorization boundaries, idempotency, and invalid input."
+      "scenarioIds": [
+        "HTTP-25"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getAdminNotice",
@@ -575,8 +585,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers an admin notice detail."
+      "scenarioIds": [
+        "HTTP-25"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "putAdminNotice",
@@ -604,8 +616,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice updates; provider tests cover success, If-Match conflicts, authorization boundaries, and invalid input."
+      "scenarioIds": [
+        "HTTP-25"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "deleteAdminNotice",
@@ -621,8 +635,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice deletion."
+      "scenarioIds": [
+        "HTTP-25"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getTemplates",
@@ -638,8 +654,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin notice templates."
+      "scenarioIds": [
+        "HTTP-30"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getTemplate",
@@ -655,8 +673,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers an admin notice template detail."
+      "scenarioIds": [
+        "HTTP-30"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getAdminGoods",
@@ -672,8 +692,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin goods reads."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "putAdminAvailability",
@@ -701,8 +723,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin availability writes; provider tests cover success, idempotency, validation, authorization, and unknown combinations."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getAdminProducts",
@@ -718,8 +742,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product reads."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "postAdminProduct",
@@ -735,8 +761,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product creation."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getAdminProduct",
@@ -752,8 +780,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers an admin product detail."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "putAdminProduct",
@@ -769,8 +799,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product updates."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "deleteAdminProduct",
@@ -786,8 +818,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin product deletion."
+      "scenarioIds": [
+        "HTTP-26"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "postAdminGoodsImage",
@@ -803,8 +837,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers admin goods media upload."
+      "scenarioIds": [
+        "HTTP-27"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getGoodsImage",
@@ -820,8 +856,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS release scenario currently covers goods media retrieval."
+      "scenarioIds": [
+        "HTTP-27"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "createAdminSession",
@@ -905,7 +943,7 @@
       "unresolvedReason": null
     }
   ],
-  "scenarioCount": 44,
+  "scenarioCount": 51,
   "scenarios": [
     {
       "id": "HTTP-01",
@@ -972,8 +1010,7 @@
         "getSpaces",
         "getMaps",
         "getMap",
-        "getPins",
-        "getPlace"
+        "getPins"
       ]
     },
     {
@@ -1316,6 +1353,134 @@
         "getAdminCrowding",
         "putAdminCrowding"
       ]
+    },
+    {
+      "id": "HTTP-25",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java",
+            "test": "noticeLifecycleReplaysOnceRejectsStaleWritesAndRemovesPublicVisibility"
+          }
+        ]
+      },
+      "operationIds": [
+        "getNotices",
+        "getAdminNotices",
+        "postAdminNotice",
+        "getAdminNotice",
+        "putAdminNotice",
+        "deleteAdminNotice"
+      ]
+    },
+    {
+      "id": "HTTP-26",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java",
+            "test": "goodsAvailabilityAndOptionEditsPreserveRetainedStateThenDetachOnHardDelete"
+          }
+        ]
+      },
+      "operationIds": [
+        "getGoods",
+        "getGoodsAvailability",
+        "getGood",
+        "getGoodAvailability",
+        "getAdminGoods",
+        "putAdminAvailability",
+        "getAdminProducts",
+        "postAdminProduct",
+        "getAdminProduct",
+        "putAdminProduct",
+        "deleteAdminProduct"
+      ]
+    },
+    {
+      "id": "HTTP-27",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java",
+            "test": "mediaUploadReplayDeliveryValidatorsReplacementAndDetachHaveNoOrphanFiles"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java",
+            "test": "multipartAuthenticationValidationAndBothSizeLimitsLeaveNoPersistentState"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java",
+            "test": "processorBackpressureAndInfrastructureFailuresRollbackAndAllowRecovery"
+          }
+        ]
+      },
+      "operationIds": [
+        "postAdminGoodsImage",
+        "getGoodsImage"
+      ]
+    },
+    {
+      "id": "HTTP-28",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java",
+            "test": "receiptRotationRateLimitsAndUnconfiguredServerPreserveDatabaseAndSecrets"
+          }
+        ]
+      },
+      "operationIds": [
+        "verifyStampReceipt"
+      ]
+    },
+    {
+      "id": "HTTP-29",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java",
+            "test": "goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects"
+          }
+        ]
+      },
+      "operationIds": [
+        "getPaymentGuide"
+      ]
+    },
+    {
+      "id": "HTTP-30",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java",
+            "test": "templateCliReplacementIsAtomicAndPreservesNoticesFromRemovedTemplates"
+          }
+        ]
+      },
+      "operationIds": [
+        "getTemplates",
+        "getTemplate"
+      ]
+    },
+    {
+      "id": "HTTP-31",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java",
+            "test": "administratorMutationMatrixRejectsBeforeSideEffectsAndNoticeReplayIsExactlyOnce"
+          }
+        ]
+      },
+      "operationIds": []
     },
     {
       "id": "OPS-01",

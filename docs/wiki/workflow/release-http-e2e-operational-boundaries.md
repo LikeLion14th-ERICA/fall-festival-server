@@ -2,10 +2,47 @@
 
 [릴리스 HTTP E2E 개요](release-http-e2e.md) · [위키 홈](../README.md) · 읽는 때: 스탬프 수령 확인, 운영 계좌·템플릿 process, 관리자 mutation 경계를 릴리스 후보에서 구현·검토할 때
 
-이 문서는 계획된 HTTP-28–HTTP-31의 실행 가능한 수용 조건이다. 상태는 모두
-**계획**이며 아직 테스트 코드나 실행 결과가 아니다. 계좌와 스탬프 값은 모두 test-only
+이 문서는 HTTP-28–HTTP-31의 수용 조건과 구현 범위를 기록한다. HTTP-28–30은
+**코드 작성·미실행**, HTTP-31은 **부분 구현·미실행**이다. 컴파일·테스트를 실행하지 않았으므로
+통과 또는 출시 완료의 증거가 아니다. 계좌와 스탬프 값은 모두 test-only
 fixture로 만들고, 비밀 원문을 source, assertion message, child process 출력 캡처, PR 본문에
 남기지 않는다.
+
+## 구현 연결과 남은 범위
+
+구현 파일은 `src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java`다.
+각 method는 별도 Testcontainers PostgreSQL과 실제 catalog CLI로 게시한 후보를 사용한다.
+실제 loopback Spring HTTP 서버, 고정 KST clock과 실제 별도 CLI JVM을 사용하며 mock bean은 없다.
+
+| ID | JUnit method | 코드 작성 범위 |
+| --- | --- | --- |
+| HTTP-28 | `receiptRotationRateLimitsAndUnconfiguredServerPreserveDatabaseAndSecrets` | 이전·신규 코드 및 앞자리 0, 잘못된 형식, 5회 이후 429, XFF 왼쪽 위조 방어·다른 client·12초 refill, 이전 코드 제거 후 재기동, 미설정 503, 전체 DB 무변경·응답/로그 비밀 비노출 |
+| HTTP-29 | `goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects` | 실제 두 상품 payment-guide에 별도 GOODS CLI dry-run/set/stale/clear 즉시 반영, 이력/version·TICKET 격리, 재기동 뒤 clear 보존, CLI redaction |
+| HTTP-30 | `templateCliReplacementIsAtomicAndPreservesNoticesFromRemovedTemplates` | preview 무변경, 전체 교체·관리자 HTTP 목록/상세, 인증/query 경계, 템플릿 기반 공지 생성, 템플릿 삭제 후 공지/감사 보존, malformed/duplicate preview·confirm 실패 무변경 |
+| HTTP-31 | `administratorMutationMatrixRejectsBeforeSideEffectsAndNoticeReplayIsExactlyOnce` | 8개 mutation route의 무인증/손상 bearer·key 누락/형식/중복, notice/product If-Match 누락/형식, notice 생성/수정/삭제 replay·stale·key 재사용, DB·파일 상태 |
+
+HTTP-31의 정상 상품·판매 상태·실제 이미지 업로드 및 replay·교체·detach는 HTTP-26/27의
+동적 콘텐츠 lifecycle 검증과 함께 판단한다. 이 클래스의 product/media header 검사는
+구조상 유효한 최소 payload와 존재하지 않는 ID, nonempty multipart를 사용해 **header/auth 경계만**
+검사하며 이를 정상 media decode·upload·product 생성의 증거로 사용하지 않는다. 상품 stale ETag,
+잘못된 enum/media reference, processor/storage failure의 HTTP matrix는 이 클래스에 구현하지 않았다.
+HTTP-29의 상품은 계좌 reader 검증용 DB fixture이며 상품 생성 경로 검증은 HTTP-26의 책임이다.
+
+중요한 구현 차이: `NoticeController`의 If-Match 검사는 `AdminIdempotencyService`의 별도
+reservation transaction 이후다. 따라서 notice의 missing/malformed/stale If-Match 실패는
+`IN_PROGRESS` 예약 1건을 남길 수 있으며 업무·감사·`COMPLETED` 응답은 남기지 않는다.
+테스트는 이 실제 상태를 구분해 검사한다. 모든 거절이 reservation 자체까지 무변경이라는
+아래 원래 설계의 기대는 현재 notice 구현과 맞지 않으므로, 이를 강화하려면 별도 구현 결정이 필요하다.
+
+등록할 focused 명령은 다음과 같다. **이번 작업에서는 실행하지 않았다.**
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperationalBoundariesHttpE2eTest test"
+```
+
+HTTP-28–30은 중앙 release 시나리오 inventory에 구현 상태로 포함되며 HTTP-31은 위 명시 범위의
+부분 구현으로 포함된다. 어떤 ID도 후보별 실행 증거가 없으므로 PASS 수는 늘지 않는다. HTTP-26/27
+연결과 위 잔여 matrix를 확인한 뒤 최종 gate 통과 여부를 판단한다.
 
 ## 공통 harness·격리
 
@@ -126,9 +163,9 @@ state를 각각 폐기한다.
 | Authorization 없음 또는 malformed bearer | `401 UNAUTHORIZED` | route·payload·media bytes와 무관하게 business/audit/idempotency/file/association이 기준과 같다. |
 | key 누락 | `428 IDEMPOTENCY_KEY_REQUIRED` | reservation/completed record가 생기지 않는다. |
 | key duplicate 또는 format 오류 | `400 INVALID_IDEMPOTENCY_KEY` | 동일하다. |
-| notice/product update/delete의 If-Match 누락 | `428 PRECONDITION_REQUIRED` | 동일하다. |
-| notice/product update/delete의 malformed If-Match | `400 INVALID_IF_MATCH` | 동일하다. |
-| notice/product current representation을 바꾼 뒤 오래된 strong If-Match | `409 EDIT_CONFLICT` | 오래된 request는 새 data·audit·idempotency completion을 만들지 않는다. |
+| notice/product update/delete의 If-Match 누락 | 428 PRECONDITION_REQUIRED | product는 기준과 같다. notice는 business·audit·file·association·COMPLETED 응답이 기준과 같고, 구현상 별도 IN_PROGRESS reservation 1건이 남을 수 있다. |
+| notice/product update/delete의 malformed If-Match | 400 INVALID_IF_MATCH | product는 기준과 같다. notice는 business·audit·file·association·COMPLETED 응답이 기준과 같고, 구현상 별도 IN_PROGRESS reservation 1건이 남을 수 있다. |
+| notice/product current representation을 바꾼 뒤 오래된 strong If-Match | 409 EDIT_CONFLICT | 오래된 request는 새 data·audit·idempotency completion을 만들지 않는다. notice는 구현상 별도 IN_PROGRESS reservation 1건이 남을 수 있다. |
 | 잘못된 JSON/enum/media reference 또는 media multipart shape/content type | 계약의 `400/415/422` | parser/storage 실패가 final media file과 DB transaction을 남기지 않는다. |
 | 같은 key의 다른 payload | `409 IDEMPOTENCY_KEY_REUSED` | 첫 유효 mutation의 결과만 존재한다. |
 
@@ -146,6 +183,7 @@ state를 각각 폐기한다.
 - error response와 captured logs에 bearer/cookie, account, upload body, media storage path가
   나오지 않는지 확인한다. token·binary를 assertion failure에 출력하지 않는다.
 
-**중단·정리.** 어느 reject라도 audit/idempotency/file count를 바꾸면 실패다. notice/product
-동시성 오류를 availability에 적용하거나, session CSRF 정책을 bearer write 결과로 오해하면
-잘못된 test이므로 구현 전에 matrix를 수정한다.
+**중단·정리.** 어느 reject라도 business·audit·file·association 또는 COMPLETED idempotency
+상태를 바꾸면 실패다. notice update/delete의 If-Match reject는 위에 명시한 별도
+IN_PROGRESS reservation만 허용한다. notice/product 동시성 오류를 availability에 적용하거나,
+session CSRF 정책을 bearer write 결과로 오해하면 잘못된 test이므로 구현 전에 matrix를 수정한다.

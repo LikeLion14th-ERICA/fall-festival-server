@@ -2,8 +2,10 @@
 
 [릴리스 HTTP E2E 개요](release-http-e2e.md) · [위키 홈](../README.md) · 읽는 때: 공지·굿즈·굿즈 이미지의 릴리스 후보 HTTP E2E를 구현·검토할 때
 
-이 문서는 계획된 `HTTP-25`–`HTTP-27`의 구현 가능한 수용 조건이다. 상태는 모두
-**계획**이며, 코드를 추가하거나 실행한 결과가 아니다. 공통 HTTP 계약은
+이 문서는 `HTTP-25`–`HTTP-27`의 수용 조건과 구현 범위다. 상태는 모두
+**구현 · 실행 미확인**이다. `DynamicContentReleaseHttpE2eTest`의 5개 JUnit method가
+실제 HTTP 경계와 DB·파일 불변식을 검증한다. 이번 작업에서는 사용자 지시에 따라
+사용자 지시에 따라 Maven·Docker·CI 기반 테스트는 실행하지 않았으므로 PASS 증거는 없다. 공통 HTTP 계약은
 [API v2 endpoint index](../../../api-v2/ENDPOINTS.md)와
 [관리자 변경 계약](../../../api-v2/ADMIN-CHANGES.md)을 정본으로 삼는다.
 
@@ -12,11 +14,20 @@
 - 각 케이스는 Testcontainers PostgreSQL, 후보 catalog를 실제 CLI로 게시한 랜덤 포트 서버,
   고정된 Asia/Seoul clock, 실제 관리자 login을 사용한다. 원격 DB·계정·운영 media volume은
   사용하지 않는다.
+- catalog CLI는 셸·JVM 환경 property source를 제거하고 전용 Testcontainers datasource를
+  직접 구성한다. HTTP context도 같은 전용 datasource를 사용하고 cleanup scheduler와
+  전용 cleanup datasource는 비활성화한다. media root와 multipart directory는 run별 임시 경로다.
+- 이미지 입력 검사·PNG decode·resize·processor orchestration·`FileSystemMediaStorage`는 실제
+  구현을 사용한다. `ReleaseMediaTestConfiguration`은 기존 `GoodsImageProcessorTest`의
+  deterministic `WebpTools` 경계를 재사용하므로 외부 `/usr/bin/cwebp`를 호출하지 않는다.
+  출력은 전달·캐시 검증용 fixture bytes이며 유효한 WebP 인코딩 증거가 아니다. 네이티브 codec은
+  기존 opt-in `GoodsImageProcessorAlpineIntegrationTest`와 `STAGE-03`에서 별도로 확인한다.
 - 테스트용 festival·관리자·idempotency key·URL·이미지와 임시 media root에는 case run ID를
   넣어 서로 구분한다. 실운영 제목, 링크, 수령 코드, 계좌, 토큰을 fixture·assertion·로그에
   복사하지 않는다.
 - 성공·실패 모두 status, 안정 error code와 request ID를 검증한다. 일반 응답과 error
-  envelope는 `X-Request-Id`와 body의 `meta.requestId`가 같아야 한다. 저장된 raw
+  envelope는 `X-Request-Id`와 body의 `meta.requestId`가 같아야 한다. conditional representation과
+  공지 생성·수정의 `ConditionalApiMeta`에는 request-specific field가 없으므로 header를 확인한다. 저장된 raw
   response를 재생하는 멱등 replay는 새 `X-Request-Id`와 저장된 body meta를 각각
   기록하고 둘의 byte 동일성을 요구하지 않는다. 사람용 오류 문구나 server time의 byte
   동일성은 비교하지 않는다.
@@ -48,7 +59,7 @@
 | 단계 | 요청·입력 | HTTP 수용 조건 | 영속·공개 불변식 |
 | --- | --- | --- | --- |
 | 25.1 | baseline 공개 목록과 같은 `If-None-Match` 재조회 | 첫 요청 `200`, 미변경 요청 `304` | baseline은 이후 공개 ETag 비교용이며 다른 fixture 공지를 삭제하지 않는다. |
-| 25.2 | `POST /api/v2/admin/notices` + bearer, JSON, 새 key | `201`, `Location: /api/v2/admin/notices/{id}`, 응답 id 일치 | notice 1건, translation·link 행, `NOTICE_CREATED` audit 1건과 completed idempotency 1건만 증가한다. |
+| 25.2 | `POST /api/v2/admin/notices` + bearer, JSON, 새 key; 인증된 `GET /api/v2/admin/notices` | POST `201`, `Location: /api/v2/admin/notices/{id}`, 응답 id 일치; 목록 `200`과 생성 notice id·`GENERAL`·ko title 확인 | notice 1건, translation·link 행, `NOTICE_CREATED` audit 1건과 completed idempotency 1건만 증가한다. |
 | 25.3 | 25.2와 정확히 같은 POST·key 재전송 | `201`, 같은 id·Location·business data | 새 `X-Request-Id`와 저장된 body `meta.requestId`를 각각 기록하며 둘의 일치를 요구하지 않는다. notice·audit·idempotency 행은 추가되지 않는다. |
 | 25.4 | 같은 POST key에 title 또는 link만 바꾼 payload | `409 IDEMPOTENCY_KEY_REUSED` | 25.2 상태와 public ETag가 변하지 않고 추가 audit이 없다. |
 | 25.5 | 공개 목록 재조회 후 새 ETag로 conditional GET | `200`에 새 id와 ko 내용, 이어서 `304` | create 전 ETag와 달라야 한다. `visibleIds`와 items가 같은 id를 포함한다. |
@@ -77,14 +88,13 @@ hard delete와 media lifecycle을 실제 HTTP에서 함께 검증한다.
   `GET /api/v2/goods-availability`, `GET /api/v2/goods/{id}/availability`이고,
   관리자 route는 `/api/v2/admin/products*`와
   `/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability`다.
-- API v2 공통 계약은 creation의 `Location`을 요구하지만 현재
-  `AdminGoodsController` POST 구현은 `201`만 반환한다. 구현 시작 전에 header를 추가하거나
-  계약을 바꾸는 결정을 내린다. 결정 전에는 이 사례를 완화해 PASS로 처리하지 않는다.
+- API v2 공통 계약의 creation `Location`에 맞춰 `AdminGoodsController` POST와 replay에
+  `/api/v2/admin/products/{id}` header를 추가했다. 테스트는 둘의 id·Location 일치를 요구한다.
 
 | 단계 | 요청·입력 | HTTP 수용 조건 | 영속·공개 불변식 |
 | --- | --- | --- | --- |
 | 26.1 | 익명 `GET /api/v2/goods`와 `GET /api/v2/goods-availability` baseline, 후자의 ETag로 같은 endpoint conditional GET | 두 baseline은 `200`, `GET /api/v2/goods-availability`의 미변경 conditional read는 `304` | `/goods`는 이 사례에서 ordinary `200` baseline만 확인한다. 기존 상품과 test 상품을 id로 구분한다. |
-| 26.2 | 유효 OPTIONS 상품을 새 key로 `POST /api/v2/admin/products`하고 동일 request/key replay | 두 응답 `201`, 같은 goods id·business data, 계약 결정 후 Location 일치 | create audit·상품/옵션/연결 행은 1회만 생긴다. replay의 requestId/server time은 새로워질 수 있으므로 data와 side effect만 비교한다. |
+| 26.2 | 유효 OPTIONS 상품을 새 key로 `POST /api/v2/admin/products`하고 인증된 `GET /api/v2/admin/products`, `GET /api/v2/admin/goods`, 동일 request/key replay | POST·replay `201`, 같은 goods id·business data·Location; 두 목록 `200`과 생성 goods id·상품명·세 조합·`ON_SALE` 상태 확인 | create audit·상품/옵션/연결 행은 1회만 생긴다. replay의 requestId/server time은 새로워질 수 있으므로 data와 side effect만 비교한다. |
 | 26.3 | 26.2의 `POST /api/v2/admin/products` key에 다른 가격 또는 option payload를 보낸다 | `409 IDEMPOTENCY_KEY_REUSED` | 상품·audit·media association은 26.2 후와 같다. |
 | 26.4 | 공개 `GET /api/v2/goods`·`GET /api/v2/goods/{goodsId}`·`GET /api/v2/goods-availability`와 `GET /api/v2/admin/products/{goodsId}`를 읽는다 | 모두 익명/관리자 계약대로 `200`; `GET /api/v2/goods-availability` ETag를 얻는다 | 상품·이미지 URL·세 조합이 보이고 모두 `ON_SALE`, `allSoldOut=false`다. |
 | 26.5 | 각 조합을 서로 다른 key로 `PUT /api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability`의 `SOLD_OUT`으로 바꾸고, 마지막 조합은 같은 key replay한다 | availability PUT은 `If-Match` 없이 `200`; replay도 `200` | replay는 새 `X-Request-Id`와 저장된 body meta를 기록한다. 대상 조합의 status/timestamp만 바뀌고 상품 `updated_at`과 다른 조합은 유지된다. 마지막 변경 뒤 `allSoldOut=true`, audit은 유효 변경당 1건이다. |
@@ -105,7 +115,8 @@ variant cache/security header와 detach lifecycle을 검증한다.
 ### 준비물
 
 - `festival.media.storage-root`를 case 전용 임시 directory로 설정하고, production과 같은
-  image processor 경로가 실제로 동작하게 한다. 이 property가 없으면 controller가 `503
+  image processor·storage 경로가 실제로 동작하게 한다. codec 실행만 위 deterministic test seam으로
+  대체한다. 이 property가 없으면 controller가 `503
   MEDIA_STORAGE_UNCONFIGURED`을 내므로 이 happy path를 대체하지 않는다.
 - 관리자 bearer session, 유효한 작은 test image, 비어 있는 `media_assets`·audit·`.staging`
   기준 상태를 만든다. replacement 검증용 두 번째 유효 image bytes도 준비한다. 업로드는
@@ -114,7 +125,7 @@ variant cache/security header와 detach lifecycle을 검증한다.
 
 | 단계 | 요청·입력 | HTTP 수용 조건 | DB·파일 불변식 |
 | --- | --- | --- | --- |
-| 27.1 | `POST /api/v2/admin/media/goods-images` multipart + 새 key | `201`, opaque mediaId | media asset 1건, `GOODS_IMAGE_UPLOADED` audit 1건, master/320/640 WebP set 1개, empty staging이다. creation response에 Location은 요구하지 않는다. |
+| 27.1 | `POST /api/v2/admin/media/goods-images` multipart + 새 key | `201`, opaque mediaId | media asset 1건, `GOODS_IMAGE_UPLOADED` audit 1건, master/320/640 variant set 1개, empty staging이다. 자동 HTTP 검증의 파일 내용은 codec fixture이며 creation response에 Location은 요구하지 않는다. |
 | 27.2 | 27.1과 같은 bytes/key replay | `201`, 같은 mediaId | inspection/processing은 replay 전에 다시 일어날 수 있다. processor 호출 횟수는 비교하지 않고 DB·final variant·audit가 각각 1개이고 staging이 비었는지만 확인한다. |
 | 27.3 | 같은 key에 다른 bytes | `409 IDEMPOTENCY_KEY_REUSED` | 추가 media/audit/final/staging side effect가 없다. |
 | 27.4 | 연결 전 `GET /api/v2/media/goods-images/{mediaId}/master` | `404 NOT_FOUND` | unattached asset은 public으로 스트리밍할 수 없다. |
@@ -143,3 +154,31 @@ variant cache/security header와 detach lifecycle을 검증한다.
 실제 login으로 발급되는 bearer는 ADMIN authority뿐이므로, 발급 불가능한 non-admin bearer의
 `403` branch는 이 real-login HTTP E2E에 억지로 만들지 않고 security lower-level coverage에서
 다룬다.
+
+## 구현과 실행 명령
+
+`src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java`의 메서드 매핑은 다음과 같다.
+
+| ID | JUnit method |
+| --- | --- |
+| HTTP-25 | `noticeLifecycleReplaysOnceRejectsStaleWritesAndRemovesPublicVisibility` |
+| HTTP-26 | `goodsAvailabilityAndOptionEditsPreserveRetainedStateThenDetachOnHardDelete` |
+| HTTP-27 | `mediaUploadReplayDeliveryValidatorsReplacementAndDetachHaveNoOrphanFiles` |
+| HTTP-27 입력 실패 | `multipartAuthenticationValidationAndBothSizeLimitsLeaveNoPersistentState` |
+| HTTP-27 인프라 실패 | `processorBackpressureAndInfrastructureFailuresRollbackAndAllowRecovery` |
+
+인프라 실패 메서드만 spy에 실패를 주입한다. processor backpressure, 실제 staging 일부를
+쓴 뒤 실패, 실제 final move 직후 실패를 분리하며 매번 DB·감사·멱등 record·final·staging의
+무변경/정리를 확인하고 정상 upload 복구로 끝낸다. parser 상한은 이 테스트에서 11 MiB,
+request 상한은 12 MiB로 두어 10 MiB application spool 상한과 parser 초과를 따로 검증한다.
+
+Docker와 Java 21 이상을 준비한 뒤 저장소 루트에서 실행할 focused 명령은 다음과 같다.
+이 명령은 이번 작업에서 실행하지 않았다.
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=DynamicContentReleaseHttpE2eTest test"
+```
+
+네이티브 codec·런타임 이미지·실제 WebP decode 호환성, 브라우저 polling과 운영 media mount
+증거는 이 class의 결과에 포함하지 않는다. [staging gate](release-http-e2e-staging.md)와 기존
+media compatibility 검증을 별도로 완료해야 한다.
