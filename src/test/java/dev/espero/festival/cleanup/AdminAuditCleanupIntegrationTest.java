@@ -2,6 +2,7 @@ package dev.espero.festival.cleanup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -36,7 +37,7 @@ class AdminAuditCleanupIntegrationTest {
 
     private static final UUID ADMIN_ID = UUID.fromString("b88b190d-ab07-42af-9ac2-9ea03b5aab5b");
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.media.MediaStorage;
 import dev.espero.festival.media.MediaVariant;
 import java.io.IOException;
@@ -52,7 +53,7 @@ class GoodsMediaControllerIntegrationTest {
     );
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {

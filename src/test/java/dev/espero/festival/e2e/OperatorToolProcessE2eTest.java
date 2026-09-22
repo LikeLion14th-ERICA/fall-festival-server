@@ -2,6 +2,7 @@ package dev.espero.festival.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.AccountSettingsCliApplication;
 import dev.espero.festival.CatalogCliApplication;
 import dev.espero.festival.CatalogExportService;
@@ -54,7 +55,7 @@ class OperatorToolProcessE2eTest {
         + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @TempDir
     Path temporaryDirectory;

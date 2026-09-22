@@ -2,6 +2,7 @@ package dev.espero.festival.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import com.jayway.jsonpath.JsonPath;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.espero.festival.CatalogRevisionService;
@@ -79,7 +80,7 @@ class OperationalAccountPropagationE2eTest {
     private static final String ACCOUNT_NUMBER = "110-0000-9876";
     private static final Duration HTTP_REQUEST_TIMEOUT = Duration.ofSeconds(10);
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

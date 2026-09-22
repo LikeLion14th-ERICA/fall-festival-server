@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.CatalogRevisionService;
 import dev.espero.festival.auth.AdminPrincipal;
 import java.nio.file.Files;
@@ -64,7 +65,7 @@ class CrowdingFlowIntegrationTest {
     private static final String ADMIN_ROUTE = "/api/v2/admin/crowding";
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

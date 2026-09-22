@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0",
+  "environment": "staging",
+  "recoverySetId": "protected:staging-recovery-example",
+  "sourceIdentity": "protected:staging-source-identity",
+  "destinationIdentity": "protected:staging-empty-restore-identity",
+  "destinationVerifiedEmpty": true,
+  "writersQuiesced": true,
+  "databaseArchive": {
+    "reference": "protected:db-archive-example",
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "sizeBytes": 1
+  },
+  "mediaArchive": {
+    "reference": "protected:media-archive-example",
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "sizeBytes": 1
+  },
+  "baselineVerification": {
+    "beforeWriteProbe": true,
+    "flywayChecksumVerified": true,
+    "mediaFileDigestsCaptured": true,
+    "ownerAclVerified": true
+  },
+  "status": "planned"
+}

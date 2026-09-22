@@ -2,6 +2,21 @@
 
 [위키 홈](../README.md) · 읽는 때: 코드·의존성·배포 변경 검증
 
+릴리스 후보의 staging evidence bundle 연결, candidate digest·OpenAPI hash·migration checksum,
+coverage·scan·PostgreSQL 17·E2E·load·recovery·browser handoff gate는 [릴리스 증거 runbook](release-evidence-runbook.md)을
+따른다. 이 문서는 아래 명령의 결과를 대체하지 않고 후보별 판정과 보호된 운영 기록 연결을 정의한다.
+
+CI의 Trivy image·filesystem vulnerability/secret/misconfiguration scan은 `HIGH,CRITICAL`을
+fail-closed로 처리한다(`ignore-unfixed=false`, `exit-code=1`). release candidate image는
+immutable digest를 대상으로 같은 High/Critical 기준의 Trivy evidence를 남겨야 한다.
+filesystem scan은 루트 backend 대상(`scan-ref: .`)이며, 별도 실기기 검증 프로젝트인 최상위 `test/`만
+`skip-dirs`로 제외한다. 루트 `src/test`, `api-v2`, `tools`, Dockerfile, workflow와 설정 파일은 계속 검사한다.
+CodeQL workflow는 Java/Kotlin 분석 결과를 생성한다. GitHub CodeQL workflow만으로는 alert
+severity를 merge 차단으로 병합하지 않으므로, repository admin이 `main` 보호 ruleset에서
+CodeQL security alerts `High or higher`와 관련 CI checks를 required로 설정해야 evidence의
+`codeql` gate를 `passed`로 판정할 수 있다. 이 조건이 승인 기록에 확인되지 않으면 release를
+block한다. 이 문서는 현재 repository ruleset의 존재 여부를 판정하지 않는다.
+
 ## 서비스 백엔드
 
 이 저장소는 `LikeLion14th-ERICA/fall-festival-server` 백엔드 저장소다.
@@ -17,18 +32,50 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 루트 backend 변경의 최소 검증 명령이며 테스트와 실행 가능한 JAR 패키징을 포함한다.
 테스트 위치는 `src/test/java`다. DB 및 운영 배포는 아직 구성하지 않았다.
 
-`.github/workflows/backend-ci.yml`의 검사 이름은 `backend-verify (Java 21)`,
-`backend-verify (Java 25)`, `docker-build`다. `docker-build`는 Trivy로 저장소의
-의존성·비밀값과 루트 런타임 이미지를 각각 검사하고, 수정 여부와 관계없이 high/critical
-finding이 있으면 실패한다. 저장소 검사는 `test/`의 manifest도 포함하지만 이미지는 루트
-`Dockerfile` 결과만 다룬다. GitHub에서 실행된 후 저장소 관리자가 세 검사를 보호 규칙의
-필수 검사로 지정해야 한다. 로컬 실행이 GitHub CI 성공을 뜻하지 않는다.
+`.github/workflows/backend-ci.yml`의 릴리스 관련 검사 이름은 `backend-verify (Java 21)`,
+`backend-verify (Java 25)`, `api-v2-contract`, `docker-build`, `security-filesystem`이다.
+`security-filesystem`은 루트 backend의 의존성·비밀값·설정을 검사하고, 별도 실기기 검증
+프로젝트인 최상위 `test/`만 제외한다. `docker-build`는 root `Dockerfile`로 만든 런타임
+이미지를 별도로 검사한다. 두 Trivy 검사는 수정 여부와 관계없이 high/critical finding에서
+실패하고 SARIF artifact를 남긴다. GitHub에서 실행된 후 저장소 관리자가 이 릴리스 관련
+검사를 보호 규칙의 필수 검사로 지정해야 한다. 로컬 실행이 GitHub CI 성공을 뜻하지 않는다.
 실행과 환경변수는 [루트 README](../../../README.md)를 따른다.
 초기 구성의 실제 결과와 미실행 항목은 [개발 준비 기록](../../backend-setup-verification.md)에 있다.
 
 원격 DB 조사에는 웹 앱·catalog CLI 대신 독립된 `DatabasePreflightApplication`을 사용한다.
 실행 명령, 읽기 전용 환경변수, 중단 판정과 로컬 PostgreSQL 검증 명령은
 [DB 사전 점검 runbook](../engineering/database-preflight.md)에 있다.
+
+### PostgreSQL 17 릴리스 migration 게이트
+
+일반 루트 테스트의 PostgreSQL 이미지는 `postgres:16-alpine`을 유지한다. 명시적인
+`release-pg17` Maven profile 또는 `-Dfestival.test.postgres.release=true`에서만 공통
+`PostgresTestImages`가 승인된 `postgres:17.11`을 선택한다. 기존 PG17 preflight 테스트도
+동일한 고정 이미지를 사용한다. `test/` 실기기 검증 환경의 PostgreSQL 설정은 별개다.
+
+`Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의
+새 임시 database에 V1~V26을 적용하는 경우와, V23에서 지도·안내·굿즈·공지·계좌 이력의
+fixture를 만든 뒤 V24 → V25 → V26을 차례로 적용하는 경우를 검사한다. 각 단계는
+Flyway history·checksum, 기존 데이터의 전체 행 보존, 번역·미디어·템플릿 제약을
+검증하고 새 Flyway 인스턴스의 재기동에서 migration 0건·history/데이터 무변경을 확인한다.
+기존 migration SQL을 그대로 사용하며 원격 DB나 staging·prod 설정을 읽지 않는다.
+
+migration 게이트만 실행하는 focused 명령은 다음과 같다.
+
+```powershell
+.\mvnw.cmd --batch-mode --no-transfer-progress -Prelease-pg17 "-Dtest=Postgresql17MigrationReleaseTest" test
+```
+
+추가 backend release E2E도 PG17로 실행하려면 `-Dtest=`에 쉼표로 구분한 **전체 class명**을
+지정하고 `Postgresql17MigrationReleaseTest`를 반드시 포함한다. method selector·wildcard는
+게이트 근거로 허용하지 않는다. profile은 매 실행 전에 전용
+`target/surefire-reports/release-pg17` 결과를 비우고 test phase의 마지막에 모든 지정
+class의 결과를 검사한다. 필수 class 누락, 0건, migration 시나리오 2건 미만, skip·failure·error가
+있으면 실패한다. `skipTests`와 `maven.test.skip`도 거절한다. Docker 부재는 migration
+테스트 오류이며 출시 성공으로 취급하지 않는다.
+
+이 검사는 실제 PG16 데이터 디렉터리의 major upgrade, 원격 DB preflight, 운영 backup/restore,
+배포 후 smoke를 대신하지 않는다. 운영 검증과 원격 환경 승인은 기존 runbook을 따른다.
 
 ### 릴리스 후보 backend E2E
 
@@ -203,6 +250,6 @@ docker compose build
 - frontend 변경은 최소 `npm run check`, backend 변경은 최소 `mvn verify`, 통합 실행
   환경 변경은 최소 `docker compose config --quiet`와 `docker compose build`를 실행한다.
 - CI 구성 시 위 검사를 필수로 등록하고 의존성·SAST·secret 검사 등 서비스 위험도에
-  맞는 검사를 추가한다. 현재 `docker-build`의 Trivy filesystem·image scan은 SARIF를
-  업로드하지 않으므로 `contents: read` 외의 GitHub 권한을 요구하지 않는다. 검사 이름이나
-  명령이 바뀌면 이 문서도 같은 PR에서 갱신한다.
+  맞는 검사를 추가한다. 현재 `security-filesystem`과 `docker-build`는 각각 filesystem·image
+  Trivy SARIF artifact를 업로드하며 `contents: read` 외의 GitHub 권한을 요구하지 않는다.
+  검사 이름이나 명령이 바뀌면 이 문서도 같은 PR에서 갱신한다.

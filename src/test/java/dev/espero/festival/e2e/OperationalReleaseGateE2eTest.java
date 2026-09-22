@@ -2,6 +2,7 @@ package dev.espero.festival.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.AccountSettingsCliApplication;
 import dev.espero.festival.preflight.DatabasePreflightApplication;
 import java.io.File;
@@ -35,7 +36,7 @@ class OperationalReleaseGateE2eTest {
     private static final String READ_ONLY_PASSWORD = "release-read-only-password";
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     private String databaseUrl;
     private String databaseName;

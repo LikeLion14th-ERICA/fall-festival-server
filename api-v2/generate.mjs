@@ -3,6 +3,7 @@ import { schemas,operations,envelopeSchema } from './contract-source.mjs';
 import { createState,execute,MOCK_NOW,isoKst,scenarioTime,ApiFailure } from './domain.mjs';
 import { validate } from './validate.mjs';
 import { buildCoverage } from './screen-coverage.mjs';
+import { buildReleaseOperationCoverage } from './release-operation-coverage.mjs';
 
 export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',combinationId:'combo-shirt-a-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1',mediaId:'00000000-0000-4000-8000-000000000050',variant:'master'};
 const noticeInput={type:'GENERAL',translations:{ko:{title:'개발용 새 공지',body:'개발용 본문'},en:{title:'New mock notice',body:'Mock body'}},links:[{url:'https://example.invalid/mock-notice-link',labels:{ko:'예시 링크',en:'Sample link','zh-Hans':null,ja:null}}],templateId:null};
@@ -98,10 +99,11 @@ for(const op of operations){
 }
 const source=JSON.parse(await readFile(new URL('./source-screen-requirements.json',import.meta.url),'utf8'));
 const coverage=buildCoverage(source,operations);
+const releaseOperationCoverage=buildReleaseOperationCoverage(spec);
 const clientExamples={stamp:{notStarted:{date:'2030-10-01',started:false,count:0,claimed:false},directQrBeforeStart:{date:'2030-10-01',started:false,count:0,claimed:false,route:'STAMP-START',startRecorded:false,stampAdded:false},collecting:{date:'2030-10-01',started:true,count:2,claimed:false},complete:{date:'2030-10-01',started:true,count:4,claimed:false},receiptCodeRejected:{date:'2030-10-01',started:true,count:4,claimed:false,route:'STAMP-REWARD',message:'코드를 확인해 주세요'},claimed:{date:'2030-10-01',started:true,count:4,claimed:true},afterMidnight:{date:'2030-10-02',started:false,count:0,claimed:false}},failures:{cameraDenied:'QR을 찍으려면 카메라 접근을 허용해 주세요',wrongQr:'스탬프투어 QR이 아니에요',language:'언어를 변경하지 못했어요. 다시 시도해 주세요'},note:'브라우저 상태 예시이며 HTTP 응답이 아니다. START 전 기본 카메라 QR 직접 진입은 시작 화면으로 이동한다. 상품 수령은 현장 담당자가 입력한 코드를 서버가 확인해 verified:true를 돌려줄 때만 claimed를 브라우저에 저장하며, 코드 자체는 저장하지 않는다.'};
 const endpointMarkdown='# API v2 경로·시나리오 목록\n\n자동 생성 문서입니다. 필드별 계약은 [OpenAPI](openapi.json), 요청·응답 원문은 [examples.json](examples.json)을 확인하세요.\n\n| 메서드 | 경로 | 내용 | 화면 | 시나리오 |\n|---|---|---|---|---|\n'+operations.map(op=>`| ${op.method} | \`${op.path}\` | ${op.summary} | ${op.screens.join(', ')} | ${examples[op.operationId]?Object.keys(examples[op.operationId].scenarios).join(', '):''} |`).join('\n')+'\n';
 const dataMarkdown=`# 화면 데이터 → API 필드\n\nProduct Context v5 기준 ${coverage.screens.length}개 화면의 데이터 ${coverage.data.filter(d=>d.owner!=='제외').length}개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.\n\n| 데이터 ID | 항목 | 처리 | 계약/프런트 책임 | 위키 근거 |\n|---|---|---|---|---|\n`+coverage.data.map(d=>`| ${d.id} | ${d.label} | ${d.owner} | ${d.target} | ${'[위키]('+d.wikiSource+')'} |`).join('\n')+'\n';
-for(const [name,value]of Object.entries({'openapi.json':spec,'examples.json':examples,'screen-coverage.json':coverage,'client-state-examples.json':clientExamples,'ENDPOINTS.md':endpointMarkdown,'SCREEN-DATA.md':dataMarkdown})){
+for(const [name,value]of Object.entries({'openapi.json':spec,'examples.json':examples,'screen-coverage.json':coverage,'client-state-examples.json':clientExamples,'release-operation-coverage.json':releaseOperationCoverage,'ENDPOINTS.md':endpointMarkdown,'SCREEN-DATA.md':dataMarkdown})){
   const content=typeof value==='string'?value:JSON.stringify(value,null,2)+'\n';const file=new URL(name,import.meta.url);
   if(process.argv.includes('--check')){if(await readFile(file,'utf8')!==content)throw new Error(`${name} is stale. Run npm run generate.`);}else await writeFile(file,content,'utf8');
 }

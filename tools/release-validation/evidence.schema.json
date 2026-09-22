@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://espero.invalid/schemas/release-evidence-1.0.json",
+  "title": "EsperO staging release evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "environment", "generatedAt", "candidate", "gates", "recovery", "observability", "releaseDecision"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "runId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{5,127}$" },
+    "environment": { "const": "staging" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "imageDigest", "ociRevision", "provenanceReference", "scannedImageDigest", "imageScanReference", "openapiSha256", "migrationChecksumSha256", "coverageSha256"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "imageDigest": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[0-9a-f]{64}$" },
+        "ociRevision": { "type": "string", "pattern": "^[0-9a-f]{40}$", "$comment": "validate-evidence.mjs requires equality with candidate.commit." },
+        "provenanceReference": { "type": "string", "pattern": "^protected:[A-Za-z0-9][A-Za-z0-9._/-]{2,255}$" },
+        "scannedImageDigest": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[0-9a-f]{64}$", "$comment": "validate-evidence.mjs requires equality with candidate.imageDigest." },
+        "imageScanReference": { "type": "string", "pattern": "^protected:[A-Za-z0-9][A-Za-z0-9._/-]{2,255}$" },
+        "openapiSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "migrationChecksumSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "coverageSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateProvenance", "apiContract", "securityFilesystem", "securityImage", "codeql", "pg17", "httpOps", "stagingSmoke", "loadRate67", "recovery", "rollback", "browserHandoff"],
+      "properties": {
+        "candidateProvenance": { "$ref": "#/$defs/gate" },
+        "apiContract": { "$ref": "#/$defs/gate" }, "securityFilesystem": { "$ref": "#/$defs/gate" },
+        "securityImage": { "$ref": "#/$defs/gate" }, "codeql": { "$ref": "#/$defs/gate" },
+        "pg17": { "$ref": "#/$defs/gate" }, "httpOps": { "$ref": "#/$defs/gate" },
+        "stagingSmoke": { "$ref": "#/$defs/gate" }, "loadRate67": { "$ref": "#/$defs/gate" },
+        "recovery": { "$ref": "#/$defs/gate" }, "rollback": { "$ref": "#/$defs/gate" },
+        "browserHandoff": { "$ref": "#/$defs/gate" }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceDestinationSeparated", "destinationVerifiedEmpty", "evidenceReference", "measuredRpoMinutes", "measuredRtoMinutes"],
+      "properties": {
+        "sourceDestinationSeparated": { "const": true }, "destinationVerifiedEmpty": { "const": true },
+        "evidenceReference": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$" },
+        "measuredRpoMinutes": { "type": "number", "minimum": 0 }, "measuredRtoMinutes": { "type": "number", "minimum": 0 },
+        "targetRpoMinutes": { "type": "number", "minimum": 0 }, "targetRtoMinutes": { "type": "number", "minimum": 0 }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sloReference", "alertReceiptReference", "onCallReference"],
+      "properties": {
+        "sloReference": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$" },
+        "alertReceiptReference": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$" },
+        "onCallReference": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{2,255}$" }
+      }
+    },
+    "releaseDecision": { "enum": ["draft", "blocked", "approved"] }
+  },
+  "$defs": { "gate": { "enum": ["passed", "failed", "blocked", "not-run"] } }
+}

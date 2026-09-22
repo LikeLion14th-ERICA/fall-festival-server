@@ -2,6 +2,7 @@ package dev.espero.festival;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import java.sql.DriverManager;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class CliFlywayIsolationIntegrationTest {
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @Test
     void accountCliStructurallyExcludesFlywayWhenTheEnvironmentEnablesIt() throws Exception {

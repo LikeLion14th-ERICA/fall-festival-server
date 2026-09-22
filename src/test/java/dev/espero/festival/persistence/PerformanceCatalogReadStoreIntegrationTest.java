@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.persistence.PerformanceCatalogReadStore.Artist;
 import dev.espero.festival.support.ApiMetaTestFixtures;
@@ -50,7 +51,7 @@ class PerformanceCatalogReadStoreIntegrationTest {
     private static final LocalDate DAY_THREE = LocalDate.parse("2030-10-03");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

@@ -28,7 +28,7 @@ RUN ./mvnw --batch-mode --no-transfer-progress -DskipTests package
 
 FROM eclipse-temurin:21-jre-alpine-3.24 AS runtime
 
-RUN apk add --no-cache libwebp-tools \
+RUN apk add --no-cache libwebp-tools wget \
     && command -v cwebp \
     && command -v dwebp \
     && command -v webpinfo \
@@ -46,6 +46,9 @@ WORKDIR /app
 COPY --from=build --chown=app:app \
     /workspace/target/fall-festival-server-*.jar app.jar
 
+ARG VCS_REF
+LABEL org.opencontainers.image.revision=$VCS_REF
+
 # Goods images are stored here. Mount a named volume at this path so the files
 # survive the container being recreated; a new named volume copies this
 # directory's ownership. The fixed UID/GID 10001 lets a host directory be
@@ -57,5 +60,9 @@ VOLUME ["/var/lib/espero/media"]
 
 USER app
 EXPOSE 8080
+
+# Container liveness only; catalog readiness remains the DB-backed /readyz probe.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+  CMD wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

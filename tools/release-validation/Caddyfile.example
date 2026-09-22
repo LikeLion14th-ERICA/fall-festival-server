@@ -1,0 +1,13 @@
+# Template only. Keep the real hostname, upstream, TLS issuer, Cloudflare mode,
+# and Caddy deployment file in protected operations records.
+#
+# Do not add trusted_proxies from this template. Validate the real X-Forwarded-For
+# handling, direct-backend access, and client bucket separation in staging.
+
+{$STAGING_HOSTNAME} {
+    reverse_proxy {$BACKEND_UPSTREAM} {
+        header_up Host {host}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}

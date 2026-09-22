@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.CatalogRevisionService;
 import dev.espero.festival.account.OperationalAccountAuditMetadata;
 import dev.espero.festival.account.OperationalAccountChange;
@@ -58,7 +59,7 @@ class TicketGuideAccountFlowIntegrationTest {
     private static final String ROUTE = "/api/v2/ticket-guide";
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

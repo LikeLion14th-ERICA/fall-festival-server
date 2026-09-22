@@ -2,6 +2,7 @@ package dev.espero.festival.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.domain.TicketGuideConfig;
 import java.time.LocalTime;
 import java.util.Map;
@@ -30,7 +31,7 @@ class TicketGuideStoreIntegrationTest {
     private static final UUID OTHER_REVISION_ID = UUID.fromString("e822e93f-f13d-4994-af15-e41722cccf4c");
 
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {

@@ -10,7 +10,9 @@
     "start": "node server.mjs",
     "generate": "node generate.mjs",
     "test": "node --test contract.test.mjs",
-    "check": "node generate.mjs --check && node --test contract.test.mjs"
+    "check": "node generate.mjs --check && node release-operation-coverage-check.mjs && node --test contract.test.mjs",
+    "check:release-coverage": "node release-operation-coverage-check.mjs",
+    "release:test-selection": "node release-test-selection.mjs"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.0.0",

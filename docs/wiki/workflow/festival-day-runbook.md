@@ -10,6 +10,9 @@ host port/network, Caddy upstream과 TLS 설정은 아직 확인되지 않았으
 운영값을 추측해 적지 않는다. 해당 상태는 [원격 개발 환경 결정](../../dev-deployment-decision.md)에
 기록한다.
 
+릴리스 후보를 행사 환경으로 넘기기 전 staging 검증 결과와 복구·브라우저 인수인계 증거는
+[릴리스 증거 runbook](release-evidence-runbook.md)의 evidence bundle과 block 기준을 따른다.
+
 ## 1. 콘텐츠 수정은 재시작이 있어야 반영된다
 
 이 서버는 단일 인스턴스이며 CDN이 없다. 두 가지 콘텐츠 경로를 구분한다.
