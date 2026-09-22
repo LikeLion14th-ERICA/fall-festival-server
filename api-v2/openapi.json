@@ -93,8 +93,7 @@
                               "target": "_blank",
                               "iconKey": "website"
                             }
-                          ],
-                          "welcomeDay": null
+                          ]
                         }
                       },
                       "meta": {
@@ -131,8 +130,7 @@
                             "target": "_blank"
                           },
                           "faq": null,
-                          "officialChannels": [],
-                          "welcomeDay": null
+                          "officialChannels": []
                         }
                       },
                       "meta": {
@@ -169,8 +167,7 @@
                         "links": {
                           "universityNotices": null,
                           "faq": null,
-                          "officialChannels": [],
-                          "welcomeDay": null
+                          "officialChannels": []
                         }
                       },
                       "meta": {
@@ -223,62 +220,7 @@
                               "target": "_blank",
                               "iconKey": "website"
                             }
-                          ],
-                          "welcomeDay": null
-                        }
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "welcome-ready": {
-                    "summary": "홈 공통 설정: welcome-ready",
-                    "value": {
-                      "data": {
-                        "festival": {
-                          "id": "festival-mock",
-                          "title": "개발용 가상 축제",
-                          "dates": [
-                            "2030-10-01",
-                            "2030-10-02",
-                            "2030-10-03"
-                          ],
-                          "defaultDate": "2030-10-01"
-                        },
-                        "languages": [
-                          {
-                            "code": "ko",
-                            "label": "한국어"
-                          }
-                        ],
-                        "links": {
-                          "universityNotices": {
-                            "label": "예시 학교 공지",
-                            "url": "https://example.invalid/mock-link",
-                            "target": "_blank"
-                          },
-                          "faq": null,
-                          "officialChannels": [
-                            {
-                              "id": "channel-mock",
-                              "label": "예시 공식 채널",
-                              "url": "https://example.invalid/mock-link",
-                              "target": "_blank",
-                              "iconKey": "website"
-                            }
-                          ],
-                          "welcomeDay": {
-                            "label": "에리카 웰컴 데이",
-                            "url": "https://example.invalid/mock-link",
-                            "target": "_blank"
-                          }
+                          ]
                         }
                       },
                       "meta": {
@@ -339,8 +281,7 @@
                               "target": "_blank",
                               "iconKey": "website"
                             }
-                          ],
-                          "welcomeDay": null
+                          ]
                         }
                       },
                       "meta": {
@@ -610,7 +551,6 @@
           "empty",
           "missing-optional",
           "faq-ready",
-          "welcome-ready",
           "error",
           "all-languages",
           "locale-not-ready",
@@ -25156,24 +25096,12 @@
                   "$ref": "#/components/schemas/Channel"
                 },
                 "description": "선정·준비 완료 채널만 제공"
-              },
-              "welcomeDay": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/Link"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "description": "외부 새 탭 연결. 자료·공개 확인 전 null."
               }
             },
             "required": [
               "universityNotices",
               "faq",
-              "officialChannels",
-              "welcomeDay"
+              "officialChannels"
             ],
             "additionalProperties": false,
             "description": ""

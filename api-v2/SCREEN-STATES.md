@@ -7,7 +7,7 @@
 
 | 화면 ID | 정상 조회·동작 | 빈 데이터·선택 누락·오류·특수 상태 |
 |---|---|---|
-| HOME | config + crowding + notices | 공지 없음이어도 전체보기 유지. 혼잡도 최초 실패는 확인 불가, 갱신 실패는 마지막 정상 상태 유지. `faq`와 `welcomeDay`는 null이면 임의 이동하지 않고, 값이 있으면 외부 새 탭으로 연다. 언어 저장은 브라우저 |
+| HOME | config + crowding + notices | 공지 없음이어도 전체보기 유지. 혼잡도 최초 실패는 확인 불가, 갱신 실패는 마지막 정상 상태 유지. `faq`는 null이면 임의 이동하지 않고, 값이 있으면 외부 새 탭으로 연다. 언어 저장은 브라우저. 웰컴 데이(`welcomeDay`)는 2026-09-22 제거 |
 | NOTICE-LIST | notices, 최초 등록 최신순 | 빈 목록 안내. 선택 언어 READY만 표시. 새 ID는 새 공지 버튼으로 추가, visibleIds에서 사라진 ID는 자동 제거. 자정 일반 공지 제외, 분실물 유지 |
 | GOODS-LIST | goods + goods-availability 독립 조회 | 상품 없음과 상태 조회 실패 구분. 전 조합 품절이어도 상품 유지 |
 | GOODS-DETAIL | goods/{id} + availability | null 선택 영역 숨김. options의 실제 조합만 표시. 상세 오류와 상태 오류 분리. 전체 품절이어도 계좌 확인 진입 유지. 색상 선택 이미지 전환 없음 |

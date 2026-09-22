@@ -208,7 +208,6 @@ def build():
     m["festivalLinks"] = [
         {"id": "mock-notices", "kind": "UNIVERSITY_NOTICES", "url": link("notices"), "iconKey": None, "sortOrder": 1},
         {"id": "mock-faq", "kind": "FAQ", "url": link("faq"), "iconKey": None, "sortOrder": 1},
-        {"id": "mock-welcome", "kind": "WELCOME_DAY", "url": link("welcome"), "iconKey": None, "sortOrder": 1},
         {"id": "instagram", "kind": "OFFICIAL_CHANNEL", "url": "https://www.instagram.com/hanyang_erica_stu/",
          "iconKey": "instagram", "sortOrder": 1},
         {"id": "youtube", "kind": "OFFICIAL_CHANNEL", "url": "https://www.youtube.com/@hanyang_erica_stu",
@@ -218,7 +217,6 @@ def build():
     m["festivalLinkTranslations"] = [
         {"linkId": "mock-notices", "locale": "ko", "label": "[목] 학교 공지사항"},
         {"linkId": "mock-faq", "locale": "ko", "label": "[목] FAQ"},
-        {"linkId": "mock-welcome", "locale": "ko", "label": "[목] 에리카 웰컴 데이"},
         {"linkId": "instagram", "locale": "ko", "label": "Instagram"},
         {"linkId": "youtube", "locale": "ko", "label": "YouTube"},
         {"linkId": "student-council", "locale": "ko", "label": "총학생회 홈페이지"}]

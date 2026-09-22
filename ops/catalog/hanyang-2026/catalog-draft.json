@@ -1568,7 +1568,7 @@
   "prohibitedItemTranslations": [],
   "prohibitedMessages": [],
   "ticketGuide": {
-    "unitPriceAmount": null,
+    "unitPriceAmount": 25000,
     "mapId": null,
     "placeId": null,
     "pinId": null,
@@ -1588,7 +1588,7 @@
   },
   "stampGuide": {
     "title": "스탬프 투어",
-    "dates": [],
+    "dates": ["2026-09-29", "2026-09-30", "2026-10-01"],
     "instructions": [
       "멋사 부스에서 QR을 스캔해 시작 스탬프 1개 적립",
       "다른 부스 체험 후 운영자가 보여주는 QR 스캔",

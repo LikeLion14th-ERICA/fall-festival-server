@@ -14,7 +14,8 @@
       "browserData": [
         "HOME-D06",
         "HOME-D07",
-        "HOME-D09"
+        "HOME-D09",
+        "HOME-D13"
       ],
       "legacySource": {
         "pendingIds": "HOME-Q01, ADM-CROWD-Q01, ADM-CROWD-Q02, ADM-CROWD-Q03, HOME-Q05, HOME-Q03, HOME-Q06, HOME-Q07, HOME-Q08, HOME-Q11"
@@ -1343,8 +1344,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "Config.links.welcomeDay",
+      "owner": "제외",
+      "target": "제외: 웰컴데이(WELCOME-001) 기능 제거(2026-09-22)",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/home.md"

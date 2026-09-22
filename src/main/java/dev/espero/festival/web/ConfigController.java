@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * GET /api/v2/config: the home screen's festival title and days, the
  * published languages and the external home links (HOME-002, HOME-004,
- * HOME-005, HOME-008, WELCOME-001). Everything but the languages comes from
- * the published catalog revision.
+ * HOME-005, HOME-008). Everything but the languages comes from the
+ * published catalog revision.
  */
 @RestController
 @Profile("db")
@@ -97,8 +97,7 @@ public class ConfigController {
                 .filter(link -> link.kind().equals("OFFICIAL_CHANNEL"))
                 .sorted(Comparator.comparingInt(HomeLink::sortOrder))
                 .map(link -> new ConfigResponse.Channel(link.id(), link.label(), link.url(), TARGET, link.iconKey()))
-                .toList(),
-            single(links, "WELCOME_DAY")
+                .toList()
         );
     }
 

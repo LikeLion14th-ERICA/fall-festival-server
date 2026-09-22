@@ -26,7 +26,7 @@ public final class CatalogManifestValidator {
     private static final Set<String> PLACE_KINDS = Set.of("SPACE", "FACILITY", "LANDMARK");
     private static final Set<String> MAP_KINDS = Set.of("OVERVIEW", "AREA");
     private static final Set<String> FESTIVAL_LINK_KINDS = Set.of(
-        "UNIVERSITY_NOTICES", "FAQ", "OFFICIAL_CHANNEL", "WELCOME_DAY"
+        "UNIVERSITY_NOTICES", "FAQ", "OFFICIAL_CHANNEL"
     );
     private static final Pattern ICON_KEY = Pattern.compile("^[a-z0-9][a-z0-9-]{0,31}$");
     private static final Set<String> FILTER_GROUPS = Set.of(

@@ -35,7 +35,7 @@
 | 축제일 운영 시작·종료 시각 | `festivalDays[].opensAt/closesAt` | 재학생존 혼잡도 운영 시간으로도 쓰인다. 주간 11:00~17:00, 야간 18:00~익일 00:00 중 무엇을 기준으로 할지 정해야 한다. 종료 시각이 다음 날로 넘어가면(익일 00:00) catalog 검증은 통과하지만 혼잡도 API가 `503 CROWDING_SCHEDULE_UNCONFIGURED`가 되므로 같은 날 23:59 이전으로 넣는다. |
 | 부스·주점 대표 이미지 | `spaces[].imageUrl/imageWidth/imageHeight` | 28곳 모두 |
 | 주점 메뉴 가격 | `spaceMenuItems[].priceAmount` | 13개 메뉴. 0원은 무료로 표시되므로 넣지 않는다. |
-| 아티스트 사진 | `artists[].imageUrl/imageWidth/imageHeight` | 8팀. 사용처를 총학생회에 보고한 뒤 사용한다. |
+| 아티스트 사진 | `artists[].imageUrl/imageWidth/imageHeight` | 8팀. 총학생회 사용 승인은 받았다(2026-09-22). [전달용 Figma 파일](https://www.figma.com/design/gdfK54CAKgOgV6jAmLiIKl/)의 라인업 포스터 프레임엔 있지만 전부 다른 비율의 원본(최대 15MB)이라 그대로 못 쓴다 — 굿즈 미디어 규격(정사각형 1024~4096px)과 안 맞고 새로 처리 파이프라인을 만들기엔 시간이 없어서, 디자인팀에 라인업 카드용으로 크롭·최적화된 이미지를 요청했다. `lucenne`은 Figma 프레임명이 `RESCENE`으로 다르다(2026-09-22 확인, 같은 팀 맞음). |
 | 공연 시각 | `performances[].startsAt/endsAt` | 아티스트 8팀 모두. 스개팅은 시작 17:30만 확인되었다. |
 
 굿즈 7종은 실제 관리자 API로 상품과 이미지를 등록 완료했다(2026-09-21). 업로드 이미지는 원본이
@@ -48,8 +48,15 @@
 ## 비워 둔 선택 값
 
 - 지도·핀·지도 목표: 지도 이미지와 좌표가 없다. 주점존 시설 13곳은 핀 없이 `places`에만 넣었다.
-- 타임테이블 축(`timetableConfig`), 반입 금지 물품, 티켓 가격·송금 시간, 스탬프 투어 날짜
-  (QR값은 `https://festival.likelionerica.com/stamps`로 확정 반영했다)
+- 타임테이블 축(`timetableConfig`), 반입 금지 물품
+  (QR값은 `https://festival.likelionerica.com/stamps`로, 스탬프 투어 날짜는 축제 3일
+  전체(`2026-09-29`~`10-01`)로 확정 반영했다. 현장 상품 수령 운영 시간은 아직 없다.)
+- 티켓 송금 가능시간·현장 수령 정확한 종료 시각: 티켓 가격은 25,000원으로 확정해 반영했다
+  (`ticketGuide.unitPriceAmount`). 현장 수령(티켓부스) 운영은 13:00 시작이 확정됐지만, 종료는
+  "마지막 무대 종료 30분 전"으로 공연 타임테이블이 확정돼야 정해지는 값이라 아직 고정 시각을
+  넣지 않았다. `dailyTransferOpenTime/CloseTime`·`dailyPickupOpenTime/CloseTime` 네 값은
+  검증기가 전부 채워야만 통과시키므로(all-or-nothing), 공연 시각이 정해지기 전에는 하나만
+  채우지 않는다.
 - 포토부스·타로부스 운영 시간, 푸드트럭 업체·메뉴, 외부 셀러 플리마켓 목록
 - 영어·중국어 공간·아티스트 번역: 공개 조건을 채우지 못하므로 한국어만 넣었다. 주점 이름·운영
   주체·메뉴의 승인 번역은 번역표에 있다.

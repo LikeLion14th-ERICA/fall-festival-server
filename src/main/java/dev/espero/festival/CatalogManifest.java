@@ -198,9 +198,9 @@ public record CatalogManifest(
     }
 
     /**
-     * A home link. {@code UNIVERSITY_NOTICES}, {@code FAQ} and
-     * {@code WELCOME_DAY} appear at most once; {@code OFFICIAL_CHANNEL} rows are
-     * ordered by {@code sortOrder} and carry the frontend icon key.
+     * A home link. {@code UNIVERSITY_NOTICES} and {@code FAQ} appear at most
+     * once; {@code OFFICIAL_CHANNEL} rows are ordered by {@code sortOrder}
+     * and carry the frontend icon key.
      */
     public record FestivalLink(
         String id,

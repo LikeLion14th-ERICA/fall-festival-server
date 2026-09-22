@@ -10,7 +10,7 @@ public record ConfigResponse(Festival festival, List<Language> languages, Links 
 
     public record Language(String code, String label) {}
 
-    public record Links(Link universityNotices, Link faq, List<Channel> officialChannels, Link welcomeDay) {}
+    public record Links(Link universityNotices, Link faq, List<Channel> officialChannels) {}
 
     public record Link(String label, String url, String target) {}
 
