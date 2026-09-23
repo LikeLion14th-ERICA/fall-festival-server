@@ -227,7 +227,7 @@ class LoveLetterFlowIntegrationTest {
                 .cookie(invitedBrowser.cookie()).header("Origin", ORIGIN)
                 .header("X-Love-Letter-CSRF", invitedBrowser.csrf()).contentType("application/json")
                 .content("{\"invitationToken\":\"" + femaleInvite + "\"}"))
-            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_INVITATION_INVALID"));
+            .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.error.code").value("LOVE_SESSION_REQUIRED"));
     }
 
     @Test
@@ -545,7 +545,7 @@ class LoveLetterFlowIntegrationTest {
         adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":null}")
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
         adminPut("/api/v2/admin/love-letters/settings", "null")
-            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"));
         assertThat(jdbc.queryForObject("SELECT enabled FROM love_letter_settings", Map.of(), Boolean.class)).isTrue();
 
         String restrictionPath = "/api/v2/admin/love-letters/participants/" + participant + "/restriction";
@@ -554,7 +554,7 @@ class LoveLetterFlowIntegrationTest {
         adminPut(restrictionPath, "{\"restricted\":null}").andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
         adminPut(restrictionPath, "null").andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+            .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"));
         assertThat(jdbc.queryForObject("SELECT restricted FROM love_letter_participants WHERE id=:id",
             Map.of("id", participant), Boolean.class)).isTrue();
     }

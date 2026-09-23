@@ -601,7 +601,8 @@ class LoveLetterReleaseHttpE2eTest {
     }
 
     private static void assertNoStore(HttpResponse<?> response) {
-        assertThat(response.headers().firstValue("Cache-Control")).contains("no-store");
+        assertThat(response.headers().firstValue("Cache-Control")).isPresent();
+        assertThat(response.headers().firstValue("Cache-Control").orElseThrow()).contains("no-store");
     }
 
     private static void assertNoStoreContains(HttpResponse<String> response, Iterable<String> privateValues) {

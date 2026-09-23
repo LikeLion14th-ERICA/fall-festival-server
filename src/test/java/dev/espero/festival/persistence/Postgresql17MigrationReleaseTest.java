@@ -245,7 +245,10 @@ class Postgresql17MigrationReleaseTest {
             INSERT INTO stamp_booth_tokens (festival_revision_id, booth_id, valid_date, token_sha256)
             VALUES ('%1$s', 'release-booth', '2030-10-01', 'bad-hash')
             """.formatted(REVISION_ID), "23514");
-        assertThat(text("SELECT count(*) FROM stamp_participant_days")).isEqualTo("0");
+        assertThat(text("""
+            SELECT count(*) FROM pg_catalog.pg_tables
+            WHERE schemaname = current_schema() AND tablename = 'stamp_participant_days'
+            """)).isEqualTo("0");
     }
 
     private void verifyStampDailyBackfill() throws SQLException {
