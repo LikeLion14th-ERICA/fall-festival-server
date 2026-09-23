@@ -1043,7 +1043,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "nextDayRestoresWritingAndNewDrawReplacesPreviousResult"
           }
         ]
       },
@@ -1094,7 +1094,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "emptyPoolKeepsRegisteredLetterAndSeededInvitationDrawsOnlyOnce"
           }
         ]
       },
@@ -1128,7 +1128,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse"
           }
         ]
       },
@@ -1145,7 +1145,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration"
           }
         ]
       },
@@ -1179,7 +1179,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration"
           }
         ]
       },
@@ -1196,7 +1196,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse"
           }
         ]
       },
@@ -1213,7 +1213,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+            "test": "anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse"
           }
         ]
       },

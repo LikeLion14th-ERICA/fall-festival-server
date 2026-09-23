@@ -146,15 +146,27 @@ const providerTests = {
   getCurrentAdmin: provider('src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java', 'meUsesAuthenticatedPrincipalWithoutParsingJwt'),
 };
 
-for (const operationId of [
-  'getLoveLetterGuide','startLoveLetterParticipant','getLoveLetterStatus','registerLoveLetter','drawLoveLetter',
-  'drawSeededLoveLetter','openLoveLetter','reportLoveLetter','claimLoveLetterInvitation',
-  'seedLoveLetter','reissueLoveLetterInvitation','getLoveLetterReports','getLoveLetterReport','blockLoveLetter',
-  'restrictLoveLetterParticipant','configureLoveLetters','enableLoveLetters',
-]) providerTests[operationId] = provider(
-  'src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java',
-  'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate'
-);
+const loveProviderMethods = {
+  getLoveLetterGuide:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  startLoveLetterParticipant:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  getLoveLetterStatus:'nextDayRestoresWritingAndNewDrawReplacesPreviousResult',
+  registerLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  drawLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  drawSeededLoveLetter:'emptyPoolKeepsRegisteredLetterAndSeededInvitationDrawsOnlyOnce',
+  openLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  reportLoveLetter:'anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse',
+  claimLoveLetterInvitation:'reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration',
+  seedLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  reissueLoveLetterInvitation:'reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration',
+  getLoveLetterReports:'anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse',
+  getLoveLetterReport:'anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse',
+  blockLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  restrictLoveLetterParticipant:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  configureLoveLetters:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  enableLoveLetters:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+};
+for (const [operationId, method] of Object.entries(loveProviderMethods))
+  providerTests[operationId] = provider('src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java', method);
 
 const operationScenarios = {
   getConfig: ['HTTP-01', 'HTTP-10', 'HTTP-19', 'HTTP-20'],

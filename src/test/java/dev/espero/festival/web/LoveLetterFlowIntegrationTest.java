@@ -1,12 +1,15 @@
 package dev.espero.festival.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import dev.espero.festival.auth.AdminPrincipal;
@@ -97,6 +100,9 @@ class LoveLetterFlowIntegrationTest {
         String female = seed("FEMALE");
         assertThat(male).isNotEqualTo(female);
         adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":true}").andExpect(status().isOk());
+        mvc.perform(get("/api/v2/love-letter-guide"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.enabled").value(true))
+            .andExpect(jsonPath("$.data.drawDelaySeconds").value(60));
 
         MvcResult start = mvc.perform(post("/api/v2/love-letter-participants").header("Origin", ORIGIN))
             .andExpect(status().isCreated()).andReturn();
@@ -109,10 +115,12 @@ class LoveLetterFlowIntegrationTest {
                 .header("X-Love-Letter-CSRF", csrf).header("Idempotency-Key", "love-test-key-0001")
                 .contentType("application/json").content(body))
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("WAITING"))
-            .andExpect(jsonPath("$.data.drawAvailableAt").exists());
+            .andExpect(jsonPath("$.data.drawAvailableAt").exists())
+            .andExpect(header().string("Cache-Control", containsString("no-store")));
         mvc.perform(post("/api/v2/love-letter-draws").cookie(cookie).header("Origin", ORIGIN)
                 .header("X-Love-Letter-CSRF", csrf).header("Idempotency-Key", "draw-test-key-0001"))
-            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_WAITING"));
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_WAITING"))
+            .andExpect(header().string("Cache-Control", containsString("no-store")));
         mvc.perform(get("/api/v2/love-letter-status").cookie(cookie))
             .andExpect(jsonPath("$.data.state").value("WAITING"))
             .andExpect(jsonPath("$.data.canDraw").value(false));
@@ -127,8 +135,18 @@ class LoveLetterFlowIntegrationTest {
         String exchange = mapper.readTree(drawn.getResponse().getContentAsString()).path("data").path("exchangeId").asText();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class)).isEqualTo(1L);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(3L);
-        String cipher = jdbc.queryForObject("SELECT contact_cipher FROM love_letters WHERE created_date='2030-10-01' AND author_id IN (SELECT id FROM love_letter_participants WHERE token_sha256 IS NOT NULL)", Map.of(), String.class);
-        assertThat(cipher).doesNotContain("@mock-contact");
+        var ciphertext = jdbc.queryForMap("""
+            SELECT name_cipher,body_cipher,contact_cipher FROM love_letters
+            WHERE created_date='2030-10-01' AND author_id IN
+              (SELECT id FROM love_letter_participants WHERE token_sha256 IS NOT NULL)
+            """, Map.of());
+        assertThat(ciphertext.get("name_cipher").toString()).doesNotContain("개발용 별명");
+        assertThat(ciphertext.get("body_cipher").toString()).doesNotContain("한 줄 쪽지");
+        assertThat(ciphertext.get("contact_cipher").toString()).doesNotContain("@mock-contact");
+        assertThat(jdbc.queryForObject("""
+            SELECT l.gender FROM love_letter_exchanges e JOIN love_letters l ON l.id=e.letter_id
+            WHERE e.id=:id AND l.author_id<>e.receiver_id
+            """, Map.of("id", UUID.fromString(exchange)), String.class)).isEqualTo("FEMALE");
 
         mvc.perform(post("/api/v2/love-letter-draws").cookie(cookie).header("Origin", ORIGIN)
                 .header("X-Love-Letter-CSRF", csrf).header("Idempotency-Key", "draw-test-key-0001"))
@@ -150,6 +168,22 @@ class LoveLetterFlowIntegrationTest {
         mvc.perform(get("/api/v2/love-letter-status").cookie(cookie))
             .andExpect(jsonPath("$.data.state").value("RESULT_BLOCKED"))
             .andExpect(jsonPath("$.data.contact").doesNotExist());
+        UUID receiver = jdbc.queryForObject("SELECT receiver_id FROM love_letter_exchanges WHERE id=:id",
+            Map.of("id", UUID.fromString(exchange)), UUID.class);
+        adminPut("/api/v2/admin/love-letters/participants/" + receiver + "/restriction", "{\"restricted\":true}")
+            .andExpect(status().isOk());
+        mvc.perform(get("/api/v2/love-letter-status").cookie(cookie))
+            .andExpect(jsonPath("$.data.state").value("RESTRICTED"));
+        adminPut("/api/v2/admin/love-letters/participants/" + receiver + "/restriction", "{\"restricted\":false}")
+            .andExpect(status().isOk());
+        mvc.perform(get("/api/v2/love-letter-status").cookie(cookie))
+            .andExpect(jsonPath("$.data.state").value("RESULT_BLOCKED"));
+        adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":false}").andExpect(status().isOk());
+        mvc.perform(get("/api/v2/love-letter-status").cookie(cookie))
+            .andExpect(jsonPath("$.data.state").value("CLOSED"));
+        mvc.perform(post("/api/v2/love-letter-results/" + exchange + "/open").cookie(cookie)
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", csrf))
+            .andExpect(status().isServiceUnavailable());
     }
 
     @Test
@@ -212,6 +246,184 @@ class LoveLetterFlowIntegrationTest {
     private record Session(Cookie cookie, String csrf) {}
 
     @Test
+    void nextDayRestoresWritingAndNewDrawReplacesPreviousResult() throws Exception {
+        enableWithSeeds();
+        Session visitor = startSession();
+        mvc.perform(post("/api/v2/love-letters").cookie(visitor.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", visitor.csrf()).header("Idempotency-Key", "day-one-register")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isOk());
+        clock.set(OffsetDateTime.parse("2030-10-01T12:01:00+09:00"));
+        MvcResult first = mvc.perform(post("/api/v2/love-letter-draws").cookie(visitor.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", visitor.csrf()).header("Idempotency-Key", "day-one-draw"))
+            .andExpect(status().isOk()).andReturn();
+        String firstId = mapper.readTree(first.getResponse().getContentAsString()).path("data").path("exchangeId").asText();
+        mvc.perform(post("/api/v2/love-letter-results/" + firstId + "/open").cookie(visitor.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", visitor.csrf()))
+            .andExpect(status().isOk());
+        clock.set(OffsetDateTime.parse("2030-10-02T00:00:00+09:00"));
+        mvc.perform(get("/api/v2/love-letter-status").cookie(visitor.cookie()))
+            .andExpect(jsonPath("$.data.canParticipate").value(true))
+            .andExpect(jsonPath("$.data.contact").value("@mock-contact"));
+        clock.set(OffsetDateTime.parse("2030-10-02T12:00:00+09:00"));
+        mvc.perform(post("/api/v2/love-letters").cookie(visitor.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", visitor.csrf()).header("Idempotency-Key", "day-two-register")
+                .contentType("application/json").content(letter("FEMALE")))
+            .andExpect(status().isOk());
+        mvc.perform(get("/api/v2/love-letter-status").cookie(visitor.cookie()))
+            .andExpect(jsonPath("$.data.state").value("WAITING"))
+            .andExpect(jsonPath("$.data.contact").doesNotExist());
+        clock.set(OffsetDateTime.parse("2030-10-02T12:01:00+09:00"));
+        MvcResult second = mvc.perform(post("/api/v2/love-letter-draws").cookie(visitor.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", visitor.csrf()).header("Idempotency-Key", "day-two-draw"))
+            .andExpect(status().isOk()).andReturn();
+        String secondId = mapper.readTree(second.getResponse().getContentAsString()).path("data").path("exchangeId").asText();
+        assertThat(secondId).isNotEqualTo(firstId);
+        assertThat(jdbc.queryForObject("""
+            SELECT l.gender FROM love_letter_exchanges e JOIN love_letters l ON l.id=e.letter_id
+            WHERE e.id=:id AND l.author_id<>e.receiver_id
+            """, Map.of("id", UUID.fromString(secondId)), String.class)).isEqualTo("MALE");
+        mvc.perform(post("/api/v2/love-letter-results/" + firstId + "/open").cookie(visitor.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", visitor.csrf()))
+            .andExpect(status().isNotFound());
+        mvc.perform(get("/api/v2/love-letter-status").cookie(visitor.cookie()))
+            .andExpect(jsonPath("$.data.exchangeId").value(secondId))
+            .andExpect(jsonPath("$.data.state").value("SEALED"));
+        clock.set(OffsetDateTime.parse("2030-10-03T22:00:00+09:00"));
+        mvc.perform(get("/api/v2/love-letter-status").cookie(visitor.cookie()))
+            .andExpect(jsonPath("$.data.state").value("CLOSED"));
+        mvc.perform(post("/api/v2/love-letter-results/" + secondId + "/open").cookie(visitor.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", visitor.csrf()))
+            .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    void anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse() throws Exception {
+        enableWithSeeds();
+        Session owner = startSession();
+        Session stranger = startSession();
+        mvc.perform(post("/api/v2/love-letters").cookie(owner.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", owner.csrf()).header("Idempotency-Key", "register-once")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isOk());
+        mvc.perform(post("/api/v2/love-letters").cookie(owner.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", owner.csrf()).header("Idempotency-Key", "register-once")
+                .contentType("application/json").content(letter("FEMALE")))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_IDEMPOTENCY_CONFLICT"));
+        mvc.perform(post("/api/v2/love-letters").cookie(owner.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", "wrong").header("Idempotency-Key", "bad-csrf")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isForbidden()).andExpect(jsonPath("$.error.code").value("LOVE_CSRF_INVALID"));
+        mvc.perform(post("/api/v2/love-letters").cookie(owner.cookie()).header("Origin", "https://invalid.example")
+                .header("X-Love-Letter-CSRF", owner.csrf()).header("Idempotency-Key", "bad-origin")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isForbidden());
+        clock.set(OffsetDateTime.parse("2030-10-01T12:01:00+09:00"));
+        MvcResult draw = mvc.perform(post("/api/v2/love-letter-draws").cookie(owner.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", owner.csrf()).header("Idempotency-Key", "owner-draw"))
+            .andExpect(status().isOk()).andReturn();
+        String exchange = mapper.readTree(draw.getResponse().getContentAsString()).path("data").path("exchangeId").asText();
+        mvc.perform(post("/api/v2/love-letter-results/" + exchange + "/open").cookie(stranger.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", stranger.csrf()))
+            .andExpect(status().isNotFound());
+        mvc.perform(post("/api/v2/love-letter-results/" + exchange + "/reports").cookie(stranger.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", stranger.csrf()))
+            .andExpect(status().isNotFound());
+        mvc.perform(post("/api/v2/love-letter-results/" + exchange + "/reports").cookie(owner.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", owner.csrf()))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.reported").value(true));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_reports", Map.of(), Long.class)).isEqualTo(1L);
+        MvcResult reports = mvc.perform(asAdmin(get("/api/v2/admin/love-letters/reports")))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").exists()).andReturn();
+        String reportId = mapper.readTree(reports.getResponse().getContentAsString()).path("data").get(0).path("id").asText();
+        mvc.perform(asAdmin(get("/api/v2/admin/love-letters/reports/" + reportId)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.contact").value("@mock-contact"));
+        for (int attempt = 0; attempt < 11; attempt++) {
+            mvc.perform(post("/api/v2/love-letter-results/" + exchange + "/reports").cookie(owner.cookie())
+                    .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", owner.csrf()))
+                .andExpect(status().isOk());
+        }
+        mvc.perform(post("/api/v2/love-letter-results/" + exchange + "/reports").cookie(owner.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", owner.csrf()))
+            .andExpect(status().isTooManyRequests())
+            .andExpect(jsonPath("$.error.code").value("LOVE_RATE_LIMITED"));
+    }
+
+    @Test
+    void failedExchangeInsertRollsBackDrawAndAllowsSameKeyRetry() throws Exception {
+        enableWithSeeds();
+        String token = service.start(null).cookie();
+        var input = new LoveLetterService.Input("MALE", "별명", "한 줄", "@mock-contact", true, true, "v1");
+        service.register(token, input, "rollback-register");
+        clock.set(OffsetDateTime.parse("2030-10-01T12:01:00+09:00"));
+        jdbc.getJdbcTemplate().execute("""
+            CREATE FUNCTION love_test_fail_exchange() RETURNS trigger AS $$
+            BEGIN RAISE EXCEPTION 'forced exchange failure'; END; $$ LANGUAGE plpgsql
+            """);
+        jdbc.getJdbcTemplate().execute("""
+            CREATE TRIGGER love_test_fail_exchange BEFORE INSERT ON love_letter_exchanges
+            FOR EACH ROW EXECUTE FUNCTION love_test_fail_exchange()
+            """);
+        try {
+            assertThatThrownBy(() -> service.draw(token, "rollback-draw"))
+                .isInstanceOf(org.springframework.dao.DataAccessException.class);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class)).isZero();
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_participation_days WHERE state='PENDING'", Map.of(), Long.class))
+                .isEqualTo(1L);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_requests WHERE idempotency_key='rollback-draw'", Map.of(), Long.class))
+                .isZero();
+        } finally {
+            jdbc.getJdbcTemplate().execute("DROP TRIGGER love_test_fail_exchange ON love_letter_exchanges");
+            jdbc.getJdbcTemplate().execute("DROP FUNCTION love_test_fail_exchange()");
+        }
+        assertThat(service.draw(token, "rollback-draw").state()).isEqualTo("SEALED");
+    }
+
+    @Test
+    void reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration() throws Exception {
+        adminPut("/api/v2/admin/love-letters/configuration", """
+            {"opensAt":"2030-10-01T09:00:00+09:00","closesAt":"2030-10-03T22:00:00+09:00","consentVersion":"v1"}
+            """).andExpect(status().isOk());
+        seed("MALE");
+        var initial = seedResult("FEMALE");
+        String oldToken = initial.path("invitationToken").asText();
+        UUID invitedId = UUID.fromString(initial.path("participantId").asText());
+        adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":true}").andExpect(status().isOk());
+        MvcResult reissued = mvc.perform(asAdmin(post("/api/v2/admin/love-letters/participants/" + invitedId + "/invitation")))
+            .andExpect(status().isOk()).andReturn();
+        String newToken = mapper.readTree(reissued.getResponse().getContentAsString())
+            .path("data").path("invitationToken").asText();
+        assertThat(newToken).isNotEqualTo(oldToken);
+        Session registeredBrowser = startSession();
+        mvc.perform(post("/api/v2/love-letter-invitations/claim").cookie(registeredBrowser.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", registeredBrowser.csrf())
+                .contentType("application/json").content("{\"invitationToken\":\"" + oldToken + "\"}"))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_INVITATION_INVALID"));
+        mvc.perform(post("/api/v2/love-letters").cookie(registeredBrowser.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", registeredBrowser.csrf()).header("Idempotency-Key", "occupy-day")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isOk());
+        mvc.perform(post("/api/v2/love-letter-invitations/claim").cookie(registeredBrowser.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", registeredBrowser.csrf())
+                .contentType("application/json").content("{\"invitationToken\":\"" + newToken + "\"}"))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_ALREADY_PARTICIPATED"));
+        Session freshBrowser = startSession();
+        mvc.perform(post("/api/v2/love-letter-invitations/claim").cookie(freshBrowser.cookie())
+                .header("Origin", ORIGIN).header("X-Love-Letter-CSRF", freshBrowser.csrf())
+                .contentType("application/json").content("{\"invitationToken\":\"" + newToken + "\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("SEEDED"));
+    }
+
+    private void enableWithSeeds() throws Exception {
+        adminPut("/api/v2/admin/love-letters/configuration", """
+            {"opensAt":"2030-10-01T09:00:00+09:00","closesAt":"2030-10-03T22:00:00+09:00","consentVersion":"v1"}
+            """).andExpect(status().isOk());
+        seed("MALE");
+        seed("FEMALE");
+        adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":true}").andExpect(status().isOk());
+    }
+
+    @Test
     void closedFestivalDeletesEncryptedParticipantTreesAfterSevenDays() throws Exception {
         adminPut("/api/v2/admin/love-letters/configuration", """
             {"opensAt":"2030-10-01T09:00:00+09:00","closesAt":"2030-10-03T22:00:00+09:00","consentVersion":"v1"}
@@ -224,6 +436,22 @@ class LoveLetterFlowIntegrationTest {
         assertThat(cleanup.run(dry).eligibleCount()).isEqualTo(2);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(2L);
         var deleting = new CleanupTargetContext(jdbc, Instant.parse("2030-10-10T13:00:01Z"), 100, false);
+        jdbc.getJdbcTemplate().execute("""
+            CREATE FUNCTION love_test_fail_cleanup() RETURNS trigger AS $$
+            BEGIN RAISE EXCEPTION 'forced cleanup failure'; END; $$ LANGUAGE plpgsql
+            """);
+        jdbc.getJdbcTemplate().execute("""
+            CREATE TRIGGER love_test_fail_cleanup BEFORE DELETE ON love_letter_participants
+            FOR EACH ROW EXECUTE FUNCTION love_test_fail_cleanup()
+            """);
+        try {
+            assertThatThrownBy(() -> cleanup.run(deleting))
+                .isInstanceOf(org.springframework.dao.DataAccessException.class);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(2L);
+        } finally {
+            jdbc.getJdbcTemplate().execute("DROP TRIGGER love_test_fail_cleanup ON love_letter_participants");
+            jdbc.getJdbcTemplate().execute("DROP FUNCTION love_test_fail_cleanup()");
+        }
         assertThat(cleanup.run(deleting).deletedCount()).isEqualTo(2);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_invitations", Map.of(), Long.class)).isZero();
@@ -265,11 +493,15 @@ class LoveLetterFlowIntegrationTest {
     }
 
     private String seed(String gender) throws Exception {
+        return seedResult(gender).path("invitationToken").asText();
+    }
+
+    private tools.jackson.databind.JsonNode seedResult(String gender) throws Exception {
         MvcResult result = mvc.perform(asAdmin(post("/api/v2/admin/love-letters/seeds"))
                 .contentType("application/json")
                 .content("{\"operatingDate\":\"2030-10-01\",\"consentAt\":\"2030-09-30T12:00:00+09:00\",\"letter\":" + letter(gender) + "}"))
             .andExpect(status().isOk()).andReturn();
-        return mapper.readTree(result.getResponse().getContentAsString()).path("data").path("invitationToken").asText();
+        return mapper.readTree(result.getResponse().getContentAsString()).path("data");
     }
 
     private static String letter(String gender) {
