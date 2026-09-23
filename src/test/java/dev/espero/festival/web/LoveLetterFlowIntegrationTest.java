@@ -54,6 +54,7 @@ import tools.jackson.databind.ObjectMapper;
     "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf",
     "festival.love-letter.allowed-origin=http://localhost:5173",
     "festival.love-letter.key-base64=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+    "festival.love-letter.seed-retry-enabled=true",
     "festival.love-letter.seed-initial-delay-ms=3600000"
 })
 @ActiveProfiles("db")

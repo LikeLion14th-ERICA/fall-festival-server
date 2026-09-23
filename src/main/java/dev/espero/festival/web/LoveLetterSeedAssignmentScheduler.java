@@ -1,6 +1,7 @@
 package dev.espero.festival.web;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 @Configuration(proxyBeanMethods = false)
 @EnableScheduling
 @Profile("db")
+@ConditionalOnProperty(prefix = "festival.love-letter", name = "seed-retry-enabled", havingValue = "true")
 public class LoveLetterSeedAssignmentScheduler {
     private static final Logger log = LoggerFactory.getLogger(LoveLetterSeedAssignmentScheduler.class);
     private final LoveLetterService service;

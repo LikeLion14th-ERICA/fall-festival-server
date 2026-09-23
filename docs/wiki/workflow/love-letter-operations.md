@@ -9,7 +9,7 @@
 3. `LOVE_LETTER_ALLOWED_ORIGIN`을 실제 사용자 앱 HTTPS origin 하나로 설정한다. CORS와 Origin 검증에 동일하게 적용된다. 리버스 프록시는 `Origin`과 전용 쿠키를 그대로 전달하고, 러브레터 응답을 공유 캐시에 저장하지 않는다.
 4. 최종 동의문 문안·버전, 개인정보 문의 경로, 행사 시작·종료일, 남·여 초기 참여자의 동의 확보를 확인한다. 운영은 매일 09:00~24:00 KST다. 관리자 `PUT /api/v2/admin/love-letters/configuration`에는 첫날 09:00 KST와 마지막 날 **다음 날 00:00 KST**를 보내며, 저장하면 기능은 비활성화된다.
 5. 운영자가 동의받은 실제 쪽지를 `POST /api/v2/admin/love-letters/seeds`로 개별 등록한다. 이름·연락처 파일을 저장소나 요청 로그에 보관하지 않는다. 링크 토큰은 성공 응답에서 한 번만 표시하고 지정 참여자에게 별도 안전한 경로로 전달한다. URL에는 query 대신 fragment를 쓰고 서버에 토큰 원문을 보내는 시점은 연결 POST만으로 제한한다.
-6. 양쪽 성별의 미배정 쪽지, 디자인·번역, 관리자 신고 처리, 백업·정리 절차를 확인한 뒤 `PUT /api/v2/admin/love-letters/settings`에 `{"enabled":true}`를 보낸다. 서버도 양쪽 초기 풀과 암호화 키를 검사한다. 공개 프런트 화면과 실제 링크 발송은 이 백엔드 변경 밖의 작업이다.
+6. 양쪽 성별의 미배정 쪽지, 디자인·번역, 관리자 신고 처리, 백업·정리 절차와 `LOVE_LETTER_SEED_RETRY_ENABLED=true`(운영 기본값)를 확인한 뒤 `PUT /api/v2/admin/love-letters/settings`에 `{"enabled":true}`를 보낸다. 서버도 양쪽 초기 풀과 암호화 키를 검사한다. 공개 프런트 화면과 실제 링크 발송은 이 백엔드 변경 밖의 작업이다.
 
 ## 사용자 앱 연동
 

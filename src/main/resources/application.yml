@@ -49,6 +49,7 @@ festival:
     key-base64: ${LOVE_LETTER_KEY_BASE64:}
     key-version: ${LOVE_LETTER_KEY_VERSION:v1}
     allowed-origin: ${LOVE_LETTER_ALLOWED_ORIGIN:}
+    seed-retry-enabled: ${LOVE_LETTER_SEED_RETRY_ENABLED:true}
   # Per-client limits on /api/v2. trusted-proxy-hops is the number of proxies in
   # front of the server that append X-Forwarded-For (0 = the socket address).
   rate-limit:
