@@ -213,16 +213,17 @@ public class LoveLetterService {
 
     @Transactional
     public Seeded seed(SeedInput seed, String requestId) {
+        store.lockFestival(festivalId());
         Settings settings = store.settings(festivalId()).orElseThrow(() -> conflict("LOVE_UNCONFIGURED", "운영 설정이 없습니다."));
-        if (!clock.instant().isBefore(settings.closesAt())) throw conflict("LOVE_CLOSED", "운영이 종료되었습니다.");
+        Instant now = clock.instant();
+        if (!now.isBefore(settings.closesAt())) throw conflict("LOVE_CLOSED", "운영이 종료되었습니다.");
         if (seed == null || seed.operatingDate() == null || seed.consentAt() == null ||
-            seed.consentAt().isAfter(clock.instant()) ||
+            seed.consentAt().isAfter(now) ||
             !seed.operatingDate().plusDays(1).atStartOfDay(SEOUL).toInstant().isAfter(settings.opensAt()) ||
             !seed.operatingDate().atStartOfDay(SEOUL).toInstant().isBefore(settings.closesAt()))
             throw badInput();
         validate(seed.letter(), settings.consentVersion());
-        store.lockFestival(festivalId());
-        UUID participant = store.seedParticipant(festivalId(), clock.instant());
+        UUID participant = store.seedParticipant(festivalId(), now);
         UUID letter = UUID.randomUUID();
         Input input = seed.letter();
         store.insertLetter(letter, festivalId(), participant, seed.operatingDate(), input.gender(),
@@ -230,7 +231,7 @@ public class LoveLetterService {
             crypto.encrypt(input.contact().strip()), crypto.version(), settings.consentVersion(), seed.consentAt());
         store.seedDay(participant, seed.operatingDate(), letter);
         String invitation = token();
-        store.invite(participant, sha256(invitation), seed.operatingDate(), clock.instant());
+        store.invite(participant, sha256(invitation), seed.operatingDate(), now);
         audit.record(AdminAuditAction.LOVE_SEEDED, AdminAuditResourceType.LOVE_PARTICIPANT, participant.toString(), requestId);
         return new Seeded(participant, invitation);
     }
@@ -274,6 +275,8 @@ public class LoveLetterService {
             .orElseThrow(() -> conflict("LOVE_INVITATION_INVALID", "연결 링크가 유효하지 않습니다."));
         if (invited.restricted() || invited.bound()) throw conflict("LOVE_INVITATION_INVALID", "연결 링크가 유효하지 않습니다.");
         if (!store.consumeInvitation(invitation.id(), clock.instant())) throw conflict("LOVE_INVITATION_INVALID", "연결 링크가 유효하지 않습니다.");
+        if (!store.releaseParticipantToken(festivalId(), current.id(), sha256(currentToken)))
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "LOVE_SESSION_REQUIRED", "참여 브라우저 세션이 필요합니다.", false);
         String newToken = token();
         if (!store.bindParticipant(invitation.participantId(), sha256(newToken)))
             throw conflict("LOVE_INVITATION_INVALID", "이미 연결되었습니다.");

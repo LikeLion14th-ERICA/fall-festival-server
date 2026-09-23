@@ -136,16 +136,17 @@ public class LoveLetterController {
         return response(request, Map.of("blocked", true));
     }
 
-    public record RestrictionInput(boolean restricted) {}
+    public record RestrictionInput(Boolean restricted) {}
 
     @PutMapping(path="/admin/love-letters/participants/{id}/restriction", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> restrict(HttpServletRequest request,
         @PathVariable UUID id, @RequestBody RestrictionInput input) {
+        if (input == null || input.restricted() == null) throw invalidInput();
         service.restrict(id, input.restricted(), ApiMetaSupport.resolveRequestId(request));
         return response(request, Map.of("restricted", input.restricted()));
     }
 
-    public record EnabledInput(boolean enabled) {}
+    public record EnabledInput(Boolean enabled) {}
 
     public record SettingsInput(java.time.Instant opensAt, java.time.Instant closesAt, String consentVersion) {}
 
@@ -157,8 +158,13 @@ public class LoveLetterController {
 
     @PutMapping(path="/admin/love-letters/settings", consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<Map<String, Boolean>>> enabled(HttpServletRequest request, @RequestBody EnabledInput input) {
+        if (input == null || input.enabled() == null) throw invalidInput();
         service.enabled(input.enabled(), ApiMetaSupport.resolveRequestId(request));
         return response(request, Map.of("enabled", input.enabled()));
+    }
+
+    private static ApiException invalidInput() {
+        return new ApiException(HttpStatus.BAD_REQUEST, "LOVE_INVALID_INPUT", "입력을 확인해 주세요.", false);
     }
 
     private void protect(HttpServletRequest request, String csrf) {

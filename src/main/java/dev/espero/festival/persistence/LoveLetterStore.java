@@ -97,6 +97,14 @@ public class LoveLetterStore {
             new MapSqlParameterSource().addValue("id", id).addValue("hash", hash)) == 1;
     }
 
+    public boolean releaseParticipantToken(UUID festivalId, UUID participantId, String expectedHash) {
+        return jdbc.update("""
+            UPDATE love_letter_participants SET token_sha256=NULL
+            WHERE festival_id=:festival AND id=:participant AND token_sha256=:hash
+            """, new MapSqlParameterSource().addValue("festival", festivalId)
+                .addValue("participant", participantId).addValue("hash", expectedHash)) == 1;
+    }
+
     public boolean participated(UUID participant, LocalDate date) {
         return Boolean.TRUE.equals(jdbc.queryForObject("""
             SELECT EXISTS (SELECT 1 FROM love_letter_participation_days WHERE participant_id=:participant

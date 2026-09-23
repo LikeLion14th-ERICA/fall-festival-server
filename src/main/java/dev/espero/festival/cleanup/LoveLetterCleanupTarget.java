@@ -17,7 +17,7 @@ public class LoveLetterCleanupTarget implements CleanupTarget {
     private static final String ELIGIBLE = """
         FROM love_letter_participants p
         JOIN love_letter_settings s ON s.festival_id=p.festival_id
-        WHERE s.closes_at < :cutoff
+        WHERE s.closes_at <= :cutoff
         """;
 
     @Override public String name() { return NAME; }
@@ -35,7 +35,7 @@ public class LoveLetterCleanupTarget implements CleanupTarget {
                 SELECT p.id
                 FROM love_letter_participants p
                 JOIN love_letter_settings s ON s.festival_id=p.festival_id
-                WHERE s.closes_at < :cutoff
+                WHERE s.closes_at <= :cutoff
                 ORDER BY p.created_at,p.id
                 LIMIT :batchSize
                 FOR UPDATE OF p SKIP LOCKED

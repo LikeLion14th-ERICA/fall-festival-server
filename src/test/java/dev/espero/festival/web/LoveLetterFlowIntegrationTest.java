@@ -487,6 +487,78 @@ class LoveLetterFlowIntegrationTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("WAITING"));
     }
 
+    @Test
+    void claimingAnInvitationInvalidatesThePreviousBrowserTokenForRegistration() throws Exception {
+        adminPut("/api/v2/admin/love-letters/configuration", """
+            {"opensAt":"2030-10-01T09:00:00+09:00","closesAt":"2030-10-04T00:00:00+09:00","consentVersion":"v1"}
+            """).andExpect(status().isOk());
+        seed("MALE");
+        String invitation = seed("FEMALE");
+        seed("FEMALE"); // Remains available if the pre-claim cookie is still accepted after success.
+        adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":true}").andExpect(status().isOk());
+
+        Session browserBeforeClaim = startSession();
+        MvcResult claim = mvc.perform(post("/api/v2/love-letter-invitations/claim")
+                .cookie(browserBeforeClaim.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", browserBeforeClaim.csrf()).contentType("application/json")
+                .content("{\"invitationToken\":\"" + invitation + "\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("WAITING")).andReturn();
+        String claimedCookieValue = claim.getResponse().getHeader("Set-Cookie").split(";", 2)[0].split("=", 2)[1];
+        Cookie claimedCookie = new Cookie("__Host-festival-love", claimedCookieValue);
+        String claimedCsrf = mapper.readTree(claim.getResponse().getContentAsString()).path("data").path("csrfToken").asText();
+        long lettersBeforeStaleRequest = jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class);
+        long exchangesBeforeStaleRequest = jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class);
+        long requestsBeforeStaleRequest = jdbc.queryForObject("SELECT count(*) FROM love_letter_requests", Map.of(), Long.class);
+        long participationDaysBeforeStaleRequest = jdbc.queryForObject(
+            "SELECT count(*) FROM love_letter_participation_days", Map.of(), Long.class);
+
+        mvc.perform(post("/api/v2/love-letters").cookie(browserBeforeClaim.cookie()).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", browserBeforeClaim.csrf()).header("Idempotency-Key", "stale-after-claim")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.error.code").value("LOVE_SESSION_REQUIRED"));
+        mvc.perform(get("/api/v2/love-letter-status").cookie(claimedCookie))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("WAITING"));
+        mvc.perform(post("/api/v2/love-letters").cookie(claimedCookie).header("Origin", ORIGIN)
+                .header("X-Love-Letter-CSRF", claimedCsrf).header("Idempotency-Key", "claim-day-already-used")
+                .contentType("application/json").content(letter("MALE")))
+            .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("LOVE_ALREADY_PARTICIPATED"));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(lettersBeforeStaleRequest);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class))
+            .isEqualTo(exchangesBeforeStaleRequest);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_requests", Map.of(), Long.class))
+            .isEqualTo(requestsBeforeStaleRequest);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_participation_days", Map.of(), Long.class))
+            .isEqualTo(participationDaysBeforeStaleRequest);
+    }
+
+    @Test
+    void adminBooleanInputsRejectMissingAndNullValuesWithoutChangingState() throws Exception {
+        enableWithSeeds();
+        UUID participant = jdbc.queryForObject("SELECT id FROM love_letter_participants ORDER BY created_at LIMIT 1",
+            Map.of(), UUID.class);
+        adminPut("/api/v2/admin/love-letters/participants/" + participant + "/restriction", "{\"restricted\":true}")
+            .andExpect(status().isOk());
+
+        adminPut("/api/v2/admin/love-letters/settings", "{}")
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+        adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":null}")
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+        adminPut("/api/v2/admin/love-letters/settings", "null")
+            .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+        assertThat(jdbc.queryForObject("SELECT enabled FROM love_letter_settings", Map.of(), Boolean.class)).isTrue();
+
+        String restrictionPath = "/api/v2/admin/love-letters/participants/" + participant + "/restriction";
+        adminPut(restrictionPath, "{}").andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+        adminPut(restrictionPath, "{\"restricted\":null}").andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+        adminPut(restrictionPath, "null").andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error.code").value("LOVE_INVALID_INPUT"));
+        assertThat(jdbc.queryForObject("SELECT restricted FROM love_letter_participants WHERE id=:id",
+            Map.of("id", participant), Boolean.class)).isTrue();
+    }
+
     private void enableWithSeeds() throws Exception {
         adminPut("/api/v2/admin/love-letters/configuration", """
             {"opensAt":"2030-10-01T09:00:00+09:00","closesAt":"2030-10-04T00:00:00+09:00","consentVersion":"v1"}
@@ -503,11 +575,26 @@ class LoveLetterFlowIntegrationTest {
             """).andExpect(status().isOk());
         seed("MALE");
         seed("FEMALE");
+        adminPut("/api/v2/admin/love-letters/settings", "{\"enabled\":true}").andExpect(status().isOk());
+        String participantToken = service.start(null).cookie();
+        var input = new LoveLetterService.Input("MALE", "별명", "한 줄", "@mock-contact", true, true, "v1");
+        service.register(participantToken, input, "cleanup-tree-request");
+        clock.set(OffsetDateTime.parse("2030-10-01T12:01:00+09:00"));
+        var exchangeId = service.status(participantToken).exchangeId();
+        assertThat(exchangeId).isNotNull();
+        service.report(participantToken, exchangeId);
+
         var before = new CleanupTargetContext(jdbc, Instant.parse("2030-10-10T14:59:59Z"), 100, true);
         assertThat(cleanup.run(before).eligibleCount()).isZero();
+        var exactRetentionBoundary = new CleanupTargetContext(jdbc, Instant.parse("2030-10-10T15:00:00Z"), 100, true);
+        assertThat(cleanup.run(exactRetentionBoundary).eligibleCount()).isEqualTo(3);
         var dry = new CleanupTargetContext(jdbc, Instant.parse("2030-10-10T15:00:01Z"), 100, true);
-        assertThat(cleanup.run(dry).eligibleCount()).isEqualTo(2);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(2L);
+        assertThat(cleanup.run(dry).eligibleCount()).isEqualTo(3);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(3L);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class)).isEqualTo(1L);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_reports", Map.of(), Long.class)).isEqualTo(1L);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_requests WHERE idempotency_key='cleanup-tree-request'",
+            Map.of(), Long.class)).isEqualTo(1L);
         var deleting = new CleanupTargetContext(jdbc, Instant.parse("2030-10-10T15:00:01Z"), 100, false);
         jdbc.getJdbcTemplate().execute("""
             CREATE FUNCTION love_test_fail_cleanup() RETURNS trigger AS $$
@@ -520,14 +607,22 @@ class LoveLetterFlowIntegrationTest {
         try {
             assertThatThrownBy(() -> cleanup.run(deleting))
                 .isInstanceOf(org.springframework.dao.DataAccessException.class);
-            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(2L);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isEqualTo(3L);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class)).isEqualTo(1L);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_reports", Map.of(), Long.class)).isEqualTo(1L);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_requests WHERE idempotency_key='cleanup-tree-request'",
+                Map.of(), Long.class)).isEqualTo(1L);
         } finally {
             jdbc.getJdbcTemplate().execute("DROP TRIGGER love_test_fail_cleanup ON love_letter_participants");
             jdbc.getJdbcTemplate().execute("DROP FUNCTION love_test_fail_cleanup()");
         }
-        assertThat(cleanup.run(deleting).deletedCount()).isEqualTo(2);
+        assertThat(cleanup.run(deleting).deletedCount()).isEqualTo(3);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letters", Map.of(), Long.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_invitations", Map.of(), Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_participation_days", Map.of(), Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_exchanges", Map.of(), Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_reports", Map.of(), Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM love_letter_requests", Map.of(), Long.class)).isZero();
     }
 
     @Test
