@@ -26,6 +26,35 @@ async function enableAllMockLocales(session){
 const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
+test('love letter mock preassigns at registration and reveals only after one minute',async()=>{
+  const session='love-preassigned-minute';
+  const origin='http://localhost:5173';
+  const started=await call('/api/v2/love-letter-participants',{method:'POST',session,headers:{Origin:origin,'X-Mock-Time':'2030-10-01T12:00:00+09:00'}});
+  assert.equal(started.status,201);
+  const privateHeaders={Origin:origin,Cookie:'__Host-festival-love=MOCK-LOVE-TOKEN','X-Love-Letter-CSRF':started.body.data.csrfToken};
+  const registered=await call('/api/v2/love-letters',{method:'POST',session,headers:{...privateHeaders,'Idempotency-Key':'love-minute-1','X-Mock-Time':'2030-10-01T12:00:00+09:00'},body:{gender:'MALE',name:'별명',message:'안녕',contact:'@mock-only-contact',adultConfirmed:true,ownContactConfirmed:true,consentVersion:'mock-v1'}});
+  assert.equal(registered.status,200);
+  assert.equal(registered.body.data.state,'WAITING');
+  assert.equal(registered.body.data.exchangeId,undefined);
+  const waiting=await call('/api/v2/love-letter-status',{session,headers:{Cookie:privateHeaders.Cookie,'X-Mock-Time':'2030-10-01T12:00:59+09:00'}});
+  assert.equal(waiting.body.data.state,'WAITING');
+  assert.equal(waiting.body.data.exchangeId,null);
+  const revealed=await call('/api/v2/love-letter-status',{session,headers:{Cookie:privateHeaders.Cookie,'X-Mock-Time':'2030-10-01T12:01:00+09:00'}});
+  assert.equal(revealed.body.data.state,'SEALED');
+  assert.ok(revealed.body.data.exchangeId);
+});
+
+test('love letter guide closes overnight and reopens at 09:00 KST',async()=>{
+  const before=await call('/api/v2/love-letter-guide',{session:'love-hours',headers:{'X-Mock-Time':'2030-10-02T08:59:59+09:00'}});
+  assert.equal(before.body.data.enabled,false);
+  assert.equal(before.body.data.dailyOpensAt,'09:00');
+  assert.equal(before.body.data.dailyClosesAt,'24:00');
+  const open=await call('/api/v2/love-letter-guide',{session:'love-hours',headers:{'X-Mock-Time':'2030-10-02T09:00:00+09:00'}});
+  assert.equal(open.body.data.enabled,true);
+  const closed=await call('/api/v2/love-letter-guide',{session:'love-hours',headers:{'X-Mock-Time':'2030-10-04T00:00:00+09:00'}});
+  assert.equal(closed.body.data.enabled,false);
+});
+
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
 test('Meta revision distinguishes aligned content from unscoped and error responses',()=>{
   const metaSchema={$ref:'#/components/schemas/Meta'};

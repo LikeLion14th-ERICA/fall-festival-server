@@ -78,24 +78,6 @@ public class LoveLetterController {
         return response(request, service.register(cookie(request), input, key));
     }
 
-    @PostMapping("/love-letter-draws")
-    public ResponseEntity<ApiResponse<LoveLetterService.Draw>> draw(HttpServletRequest request,
-        @RequestHeader(value="Idempotency-Key", required=false) String key,
-        @RequestHeader(value="X-Love-Letter-CSRF", required=false) String csrf) {
-        protect(request, csrf);
-        limiter.check(request, "draw", cookie(request));
-        return response(request, service.draw(cookie(request), key));
-    }
-
-    @PostMapping("/love-letter-seeded-draws")
-    public ResponseEntity<ApiResponse<LoveLetterService.Draw>> seededDraw(HttpServletRequest request,
-        @RequestHeader(value="Idempotency-Key", required=false) String key,
-        @RequestHeader(value="X-Love-Letter-CSRF", required=false) String csrf) {
-        protect(request, csrf);
-        limiter.check(request, "draw", cookie(request));
-        return response(request, service.drawSeeded(cookie(request), key));
-    }
-
     @PostMapping("/love-letter-results/{id}/open")
     public ResponseEntity<ApiResponse<LoveLetterService.Opened>> open(HttpServletRequest request,
         @PathVariable UUID id, @RequestHeader(value="X-Love-Letter-CSRF", required=false) String csrf) {

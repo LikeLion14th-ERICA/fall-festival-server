@@ -26,7 +26,7 @@ public class LoveLetterStore {
     public record Letter(UUID id, UUID authorId, String gender, String name, String body,
                          String contact, String keyVersion, boolean blocked) {}
     public record Exchange(UUID id, UUID letterId, boolean opened, boolean blocked,
-                           String contact, String keyVersion) {}
+                           String contact, String keyVersion, Instant createdAt) {}
     public record DayLetter(UUID letterId, String gender, String state, Instant createdAt) {}
     public record RequestResult(UUID letterId, UUID exchangeId) {}
     public record Invitation(UUID id, UUID participantId, LocalDate date, boolean used) {}
@@ -122,6 +122,26 @@ public class LoveLetterStore {
                 rs.getObject(4, OffsetDateTime.class).toInstant())).stream().findFirst();
     }
 
+    public List<UUID> boundSeededParticipants(UUID festival, LocalDate date) {
+        return jdbc.query("""
+            SELECT d.participant_id FROM love_letter_participation_days d
+            JOIN love_letter_participants p ON p.id=d.participant_id
+            JOIN love_letters own ON own.id=d.letter_id
+            WHERE p.festival_id=:festival AND d.operating_date=:date AND d.state='SEEDED'
+              AND p.token_sha256 IS NOT NULL AND NOT p.restricted
+              AND EXISTS (
+                SELECT 1 FROM love_letters candidate
+                JOIN love_letter_participants author ON author.id=candidate.author_id
+                WHERE candidate.festival_id=:festival AND candidate.gender<>own.gender
+                  AND candidate.author_id<>d.participant_id AND candidate.created_date<=:date
+                  AND NOT candidate.blocked AND NOT author.restricted
+                  AND NOT EXISTS (SELECT 1 FROM love_letter_exchanges used WHERE used.letter_id=candidate.id)
+              )
+            ORDER BY p.created_at LIMIT 100
+            """, new MapSqlParameterSource().addValue("festival", festival).addValue("date", date),
+            (rs,n) -> rs.getObject(1, UUID.class));
+    }
+
     public Optional<Instant> letterCreatedAt(UUID id) {
         return jdbc.query("SELECT created_at FROM love_letters WHERE id=:id", new MapSqlParameterSource("id", id),
             (rs,n) -> rs.getObject(1, OffsetDateTime.class).toInstant()).stream().findFirst();
@@ -213,22 +233,24 @@ public class LoveLetterStore {
 
     public Optional<Exchange> exchange(UUID receiver, UUID exchange) {
         return jdbc.query("""
-            SELECT e.id,e.letter_id,e.opened_at IS NOT NULL,l.blocked,l.contact_cipher,l.key_version
+            SELECT e.id,e.letter_id,e.opened_at IS NOT NULL,l.blocked,l.contact_cipher,l.key_version,e.created_at
             FROM love_letter_exchanges e JOIN love_letters l ON l.id=e.letter_id
             WHERE e.id=:exchange AND e.receiver_id=:receiver
             """, new MapSqlParameterSource().addValue("exchange", exchange).addValue("receiver", receiver),
             (rs, n) -> new Exchange(rs.getObject(1, UUID.class), rs.getObject(2, UUID.class),
-                rs.getBoolean(3), rs.getBoolean(4), rs.getString(5), rs.getString(6))).stream().findFirst();
+                rs.getBoolean(3), rs.getBoolean(4), rs.getString(5), rs.getString(6),
+                rs.getObject(7, OffsetDateTime.class).toInstant())).stream().findFirst();
     }
 
     public Optional<Exchange> latestExchange(UUID receiver) {
         return jdbc.query("""
-            SELECT e.id,e.letter_id,e.opened_at IS NOT NULL,l.blocked,l.contact_cipher,l.key_version
+            SELECT e.id,e.letter_id,e.opened_at IS NOT NULL,l.blocked,l.contact_cipher,l.key_version,e.created_at
             FROM love_letter_exchanges e JOIN love_letters l ON l.id=e.letter_id
             WHERE e.receiver_id=:receiver ORDER BY e.operating_date DESC,e.created_at DESC,e.id DESC LIMIT 1
             """, new MapSqlParameterSource("receiver", receiver),
             (rs, n) -> new Exchange(rs.getObject(1, UUID.class), rs.getObject(2, UUID.class),
-                rs.getBoolean(3), rs.getBoolean(4), rs.getString(5), rs.getString(6))).stream().findFirst();
+                rs.getBoolean(3), rs.getBoolean(4), rs.getString(5), rs.getString(6),
+                rs.getObject(7, OffsetDateTime.class).toInstant())).stream().findFirst();
     }
 
     public void markOpened(UUID id, Instant now) {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 64,
+  "operationCount": 62,
   "operations": [
     {
       "operationId": "getConfig",
@@ -1043,7 +1043,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "nextDayRestoresWritingAndNewDrawReplacesPreviousResult"
+            "test": "nextDayRestoresWritingAndRegistrationReplacesPreviousResult"
           }
         ]
       },
@@ -1061,40 +1061,6 @@
           {
             "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
             "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
-          }
-        ]
-      },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
-    },
-    {
-      "operationId": "drawLoveLetter",
-      "path": "/api/v2/love-letter-draws",
-      "method": "POST",
-      "status": "live",
-      "testMapping": {
-        "kind": "provider",
-        "tests": [
-          {
-            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
-          }
-        ]
-      },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
-    },
-    {
-      "operationId": "drawSeededLoveLetter",
-      "path": "/api/v2/love-letter-seeded-draws",
-      "method": "POST",
-      "status": "live",
-      "testMapping": {
-        "kind": "provider",
-        "tests": [
-          {
-            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
-            "test": "emptyPoolKeepsRegisteredLetterAndSeededInvitationDrawsOnlyOnce"
           }
         ]
       },

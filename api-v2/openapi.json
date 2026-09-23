@@ -24667,9 +24667,11 @@
                       "data": {
                         "enabled": true,
                         "opensAt": "2030-10-01T09:00:00+09:00",
-                        "closesAt": "2030-10-03T22:00:00+09:00",
+                        "closesAt": "2030-10-04T00:00:00+09:00",
                         "consentVersion": "mock-v1",
                         "timezone": "Asia/Seoul",
+                        "dailyOpensAt": "09:00",
+                        "dailyClosesAt": "24:00",
                         "participationRule": "BROWSER_DAILY",
                         "minimumAge": 19,
                         "maxNameChars": 20,
@@ -24677,7 +24679,7 @@
                         "maxContactChars": 100,
                         "ownContactConfirmationRequired": true,
                         "disclosureConsentRequired": true,
-                        "drawDelaySeconds": 60
+                        "revealDelaySeconds": 60
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -24696,9 +24698,11 @@
                       "data": {
                         "enabled": false,
                         "opensAt": "2030-10-01T09:00:00+09:00",
-                        "closesAt": "2030-10-03T22:00:00+09:00",
+                        "closesAt": "2030-10-04T00:00:00+09:00",
                         "consentVersion": "mock-v1",
                         "timezone": "Asia/Seoul",
+                        "dailyOpensAt": "09:00",
+                        "dailyClosesAt": "24:00",
                         "participationRule": "BROWSER_DAILY",
                         "minimumAge": 19,
                         "maxNameChars": 20,
@@ -24706,7 +24710,7 @@
                         "maxContactChars": 100,
                         "ownContactConfirmationRequired": true,
                         "disclosureConsentRequired": true,
-                        "drawDelaySeconds": 60
+                        "revealDelaySeconds": 60
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25052,8 +25056,7 @@
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": "mock-only-csrf-token",
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25111,8 +25114,7 @@
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": "mock-only-csrf-token",
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25410,7 +25412,7 @@
     "/api/v2/love-letter-status": {
       "get": {
         "operationId": "getLoveLetterStatus",
-        "summary": "오늘 참여·60초 대기·최근 결과 조회",
+        "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회",
         "description": "연결 화면: LOVE-001. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -25470,7 +25472,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: normal",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: normal",
                     "value": {
                       "data": {
                         "state": "WRITABLE",
@@ -25479,8 +25481,7 @@
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25494,41 +25495,16 @@
                     }
                   },
                   "waiting": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: waiting",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: waiting",
                     "value": {
                       "data": {
                         "state": "WAITING",
                         "canParticipate": false,
-                        "nextParticipationAt": "2030-10-02T00:00:00+09:00",
+                        "nextParticipationAt": "2030-10-02T09:00:00+09:00",
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": "2030-10-01T12:01:00+09:00"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "draw-ready": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: draw-ready",
-                    "value": {
-                      "data": {
-                        "state": "DRAW_READY",
-                        "canParticipate": false,
-                        "nextParticipationAt": "2030-10-02T00:00:00+09:00",
-                        "exchangeId": null,
-                        "contact": null,
-                        "csrfToken": null,
-                        "canDraw": true,
-                        "drawAvailableAt": "2030-10-01T12:01:00+09:00"
+                        "revealAt": "2030-10-01T12:01:00+09:00"
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25542,17 +25518,16 @@
                     }
                   },
                   "sealed": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: sealed",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: sealed",
                     "value": {
                       "data": {
                         "state": "SEALED",
                         "canParticipate": false,
-                        "nextParticipationAt": "2030-10-02T00:00:00+09:00",
+                        "nextParticipationAt": "2030-10-02T09:00:00+09:00",
                         "exchangeId": "00000000-0000-4000-8000-000000000701",
                         "contact": null,
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25566,17 +25541,16 @@
                     }
                   },
                   "opened": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: opened",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: opened",
                     "value": {
                       "data": {
                         "state": "OPENED",
                         "canParticipate": false,
-                        "nextParticipationAt": "2030-10-02T00:00:00+09:00",
+                        "nextParticipationAt": "2030-10-02T09:00:00+09:00",
                         "exchangeId": "00000000-0000-4000-8000-000000000701",
                         "contact": "@mock-only-contact",
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25590,7 +25564,7 @@
                     }
                   },
                   "blocked": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: blocked",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: blocked",
                     "value": {
                       "data": {
                         "state": "RESULT_BLOCKED",
@@ -25599,8 +25573,7 @@
                         "exchangeId": "00000000-0000-4000-8000-000000000701",
                         "contact": null,
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25614,7 +25587,7 @@
                     }
                   },
                   "restricted": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: restricted",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: restricted",
                     "value": {
                       "data": {
                         "state": "RESTRICTED",
@@ -25623,8 +25596,7 @@
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25638,7 +25610,7 @@
                     }
                   },
                   "closed": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: closed",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: closed",
                     "value": {
                       "data": {
                         "state": "CLOSED",
@@ -25647,8 +25619,7 @@
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": null,
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -25682,7 +25653,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: locale-not-ready",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -25702,7 +25673,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: bad-request",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -25825,7 +25796,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: rate-limited",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -25884,7 +25855,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "오늘 참여·60초 대기·최근 결과 조회: error",
+                    "summary": "미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -25915,7 +25886,6 @@
         "x-mock-scenarios": [
           "normal",
           "waiting",
-          "draw-ready",
           "sealed",
           "opened",
           "blocked",
@@ -25931,7 +25901,7 @@
     "/api/v2/love-letters": {
       "post": {
         "operationId": "registerLoveLetter",
-        "summary": "쪽지 등록과 60초 대기 시작",
+        "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기",
         "description": "연결 화면: LOVE-001. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -26023,11 +25993,11 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "쪽지 등록과 60초 대기 시작: normal",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: normal",
                     "value": {
                       "data": {
                         "letterId": "00000000-0000-4000-8000-000000000703",
-                        "drawAvailableAt": "2030-10-01T12:01:00+09:00",
+                        "revealAt": "2030-10-01T12:01:00+09:00",
                         "state": "WAITING"
                       },
                       "meta": {
@@ -26042,11 +26012,11 @@
                     }
                   },
                   "replay": {
-                    "summary": "쪽지 등록과 60초 대기 시작: replay",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: replay",
                     "value": {
                       "data": {
                         "letterId": "00000000-0000-4000-8000-000000000703",
-                        "drawAvailableAt": "2030-10-01T12:01:00+09:00",
+                        "revealAt": "2030-10-01T12:01:00+09:00",
                         "state": "WAITING"
                       },
                       "meta": {
@@ -26081,7 +26051,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "쪽지 등록과 60초 대기 시작: locale-not-ready",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -26101,7 +26071,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "쪽지 등록과 60초 대기 시작: bad-request",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -26141,7 +26111,7 @@
                 },
                 "examples": {
                   "restricted": {
-                    "summary": "쪽지 등록과 60초 대기 시작: restricted",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: restricted",
                     "value": {
                       "error": {
                         "code": "LOVE_RESTRICTED",
@@ -26161,7 +26131,7 @@
                     }
                   },
                   "invalid-csrf": {
-                    "summary": "쪽지 등록과 60초 대기 시작: invalid-csrf",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: invalid-csrf",
                     "value": {
                       "error": {
                         "code": "LOVE_CSRF_INVALID",
@@ -26238,8 +26208,28 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "pool-empty": {
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: pool-empty",
+                    "value": {
+                      "error": {
+                        "code": "LOVE_POOL_EMPTY",
+                        "message": "받을 수 있는 쪽지가 아직 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "already-participated": {
-                    "summary": "쪽지 등록과 60초 대기 시작: already-participated",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: already-participated",
                     "value": {
                       "error": {
                         "code": "LOVE_ALREADY_PARTICIPATED",
@@ -26259,7 +26249,7 @@
                     }
                   },
                   "idempotency-conflict": {
-                    "summary": "쪽지 등록과 60초 대기 시작: idempotency-conflict",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: idempotency-conflict",
                     "value": {
                       "error": {
                         "code": "LOVE_IDEMPOTENCY_CONFLICT",
@@ -26382,7 +26372,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "쪽지 등록과 60초 대기 시작: rate-limited",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -26441,7 +26431,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "쪽지 등록과 60초 대기 시작: error",
+                    "summary": "쪽지 등록과 원자적 사전 배정, 60초 열람 대기: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -26472,6 +26462,7 @@
         "x-mock-scenarios": [
           "normal",
           "replay",
+          "pool-empty",
           "already-participated",
           "restricted",
           "idempotency-conflict",
@@ -26503,1044 +26494,10 @@
         }
       }
     },
-    "/api/v2/love-letter-draws": {
-      "post": {
-        "operationId": "drawLoveLetter",
-        "summary": "등록 60초 후 다른 성별 쪽지 추첨",
-        "description": "연결 화면: LOVE-001. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
-        "tags": [
-          "공개"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "name": "locale",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ko",
-                "en",
-                "zh-Hans",
-                "ja"
-              ],
-              "default": "ko"
-            }
-          },
-          {
-            "name": "__Host-festival-love",
-            "in": "cookie",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "난수 토큰"
-            },
-            "description": "전용 익명 HttpOnly 쿠키. 브라우저 credentials: include."
-          },
-          {
-            "name": "Origin",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "허용된 앱 origin"
-            },
-            "description": "서버 설정의 허용 origin과 정확히 일치해야 한다."
-          },
-          {
-            "name": "X-Love-Letter-CSRF",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "세션에서 받은 CSRF 토큰"
-            },
-            "description": "POST /love-letter-participants 또는 GET /love-letter-status의 csrfToken."
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
-            },
-            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Cache-Control": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                },
-                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoveLetterDrawResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: normal",
-                    "value": {
-                      "data": {
-                        "exchangeId": "00000000-0000-4000-8000-000000000701",
-                        "state": "SEALED"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "replay": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: replay",
-                    "value": {
-                      "data": {
-                        "exchangeId": "00000000-0000-4000-8000-000000000701",
-                        "state": "SEALED"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 예시입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "locale-not-ready": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: locale-not-ready",
-                    "value": {
-                      "error": {
-                        "code": "LOCALE_NOT_READY",
-                        "message": "준비 완료 언어만 요청할 수 있습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "bad-request": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: bad-request",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_QUERY",
-                        "message": "잘못된 요청 예시입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "관리자 권한이 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "restricted": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: restricted",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_RESTRICTED",
-                        "message": "참여가 제한되었습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "invalid-csrf": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: invalid-csrf",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_CSRF_INVALID",
-                        "message": "요청 보호 토큰이 유효하지 않습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "요청한 정보를 찾을 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "405": {
-            "description": "지원하지 않는 메서드입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "409": {
-            "description": "요청 상태가 충돌합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "waiting": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: waiting",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_WAITING",
-                        "message": "작성 후 1분이 지나면 추첨할 수 있습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "pool-empty": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: pool-empty",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_POOL_EMPTY",
-                        "message": "받을 수 있는 쪽지가 아직 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "not-registered": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: not-registered",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_NOT_REGISTERED",
-                        "message": "오늘 등록한 쪽지가 없습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "already-participated": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: already-participated",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_ALREADY_PARTICIPATED",
-                        "message": "오늘은 이미 참여했습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "idempotency-conflict": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: idempotency-conflict",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_IDEMPOTENCY_CONFLICT",
-                        "message": "요청 키가 다른 내용에 재사용되었습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "428": {
-            "description": "조건부 요청이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "429": {
-            "description": "잠시 후 다시 요청해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Retry-After": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "description": "재시도 전 대기 초"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate-limited": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: rate-limited",
-                    "value": {
-                      "error": {
-                        "code": "RATE_LIMITED",
-                        "message": "잠시 후 다시 요청해 주세요.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "목 서버 처리 중 오류가 발생했습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "등록 60초 후 다른 성별 쪽지 추첨: error",
-                    "value": {
-                      "error": {
-                        "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-screen-ids": [
-          "LOVE-001"
-        ],
-        "x-contract-status": "screen-specified",
-        "x-mock-scenarios": [
-          "normal",
-          "replay",
-          "waiting",
-          "pool-empty",
-          "not-registered",
-          "already-participated",
-          "restricted",
-          "idempotency-conflict",
-          "invalid-csrf",
-          "error",
-          "locale-not-ready",
-          "bad-request",
-          "rate-limited"
-        ]
-      }
-    },
-    "/api/v2/love-letter-seeded-draws": {
-      "post": {
-        "operationId": "drawSeededLoveLetter",
-        "summary": "사전 등록 쪽지 추첨(동일 60초 규칙)",
-        "description": "연결 화면: LOVE-001. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
-        "tags": [
-          "공개"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "name": "locale",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ko",
-                "en",
-                "zh-Hans",
-                "ja"
-              ],
-              "default": "ko"
-            }
-          },
-          {
-            "name": "__Host-festival-love",
-            "in": "cookie",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "난수 토큰"
-            },
-            "description": "전용 익명 HttpOnly 쿠키. 브라우저 credentials: include."
-          },
-          {
-            "name": "Origin",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "허용된 앱 origin"
-            },
-            "description": "서버 설정의 허용 origin과 정확히 일치해야 한다."
-          },
-          {
-            "name": "X-Love-Letter-CSRF",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "세션에서 받은 CSRF 토큰"
-            },
-            "description": "POST /love-letter-participants 또는 GET /love-letter-status의 csrfToken."
-          },
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 128,
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
-            },
-            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Cache-Control": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                },
-                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoveLetterDrawResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): normal",
-                    "value": {
-                      "data": {
-                        "exchangeId": "00000000-0000-4000-8000-000000000701",
-                        "state": "SEALED"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "replay": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): replay",
-                    "value": {
-                      "data": {
-                        "exchangeId": "00000000-0000-4000-8000-000000000701",
-                        "state": "SEALED"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 예시입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "locale-not-ready": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): locale-not-ready",
-                    "value": {
-                      "error": {
-                        "code": "LOCALE_NOT_READY",
-                        "message": "준비 완료 언어만 요청할 수 있습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "bad-request": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): bad-request",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_QUERY",
-                        "message": "잘못된 요청 예시입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "관리자 권한이 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "restricted": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): restricted",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_RESTRICTED",
-                        "message": "참여가 제한되었습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "요청한 정보를 찾을 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "405": {
-            "description": "지원하지 않는 메서드입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "409": {
-            "description": "요청 상태가 충돌합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "waiting": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): waiting",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_WAITING",
-                        "message": "작성 후 1분이 지나면 추첨할 수 있습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "pool-empty": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): pool-empty",
-                    "value": {
-                      "error": {
-                        "code": "LOVE_POOL_EMPTY",
-                        "message": "받을 수 있는 쪽지가 아직 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "428": {
-            "description": "조건부 요청이 필요합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "429": {
-            "description": "잠시 후 다시 요청해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Retry-After": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "description": "재시도 전 대기 초"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate-limited": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): rate-limited",
-                    "value": {
-                      "error": {
-                        "code": "RATE_LIMITED",
-                        "message": "잠시 후 다시 요청해 주세요.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "목 서버 처리 중 오류가 발생했습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "사전 등록 쪽지 추첨(동일 60초 규칙): error",
-                    "value": {
-                      "error": {
-                        "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-screen-ids": [
-          "LOVE-001"
-        ],
-        "x-contract-status": "screen-specified",
-        "x-mock-scenarios": [
-          "normal",
-          "replay",
-          "waiting",
-          "pool-empty",
-          "restricted",
-          "error",
-          "locale-not-ready",
-          "bad-request",
-          "rate-limited"
-        ]
-      }
-    },
     "/api/v2/love-letter-results/{id}/open": {
       "post": {
         "operationId": "openLoveLetter",
-        "summary": "봉투 개봉",
+        "summary": "60초 후 봉투 개봉",
         "description": "연결 화면: LOVE-001. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -27630,7 +26587,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "봉투 개봉: normal",
+                    "summary": "60초 후 봉투 개봉: normal",
                     "value": {
                       "data": {
                         "exchangeId": "00000000-0000-4000-8000-000000000701",
@@ -27670,7 +26627,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "봉투 개봉: locale-not-ready",
+                    "summary": "60초 후 봉투 개봉: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -27690,7 +26647,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "봉투 개봉: bad-request",
+                    "summary": "60초 후 봉투 개봉: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -27730,7 +26687,7 @@
                 },
                 "examples": {
                   "blocked": {
-                    "summary": "봉투 개봉: blocked",
+                    "summary": "60초 후 봉투 개봉: blocked",
                     "value": {
                       "error": {
                         "code": "LOVE_RESULT_BLOCKED",
@@ -27806,7 +26763,28 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "waiting": {
+                    "summary": "60초 후 봉투 개봉: waiting",
+                    "value": {
+                      "error": {
+                        "code": "LOVE_WAITING",
+                        "message": "배정 후 1분이 지나면 열어볼 수 있습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -27834,7 +26812,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "봉투 개봉: rate-limited",
+                    "summary": "60초 후 봉투 개봉: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -27893,7 +26871,7 @@
                 },
                 "examples": {
                   "closed": {
-                    "summary": "봉투 개봉: closed",
+                    "summary": "60초 후 봉투 개봉: closed",
                     "value": {
                       "error": {
                         "code": "LOVE_CLOSED",
@@ -27913,7 +26891,7 @@
                     }
                   },
                   "error": {
-                    "summary": "봉투 개봉: error",
+                    "summary": "60초 후 봉투 개봉: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -27943,6 +26921,7 @@
         "x-contract-status": "screen-specified",
         "x-mock-scenarios": [
           "normal",
+          "waiting",
           "blocked",
           "closed",
           "error",
@@ -28413,14 +27392,13 @@
                     "summary": "사전 연결 링크 귀속: normal",
                     "value": {
                       "data": {
-                        "state": "SEEDED",
-                        "canParticipate": true,
-                        "nextParticipationAt": null,
+                        "state": "WAITING",
+                        "canParticipate": false,
+                        "nextParticipationAt": "2030-10-02T09:00:00+09:00",
                         "exchangeId": null,
                         "contact": null,
                         "csrfToken": "mock-only-csrf-token",
-                        "canDraw": false,
-                        "drawAvailableAt": null
+                        "revealAt": "2030-10-01T12:01:00+09:00"
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -31612,7 +30590,7 @@
               },
               "example": {
                 "opensAt": "2030-10-01T09:00:00+09:00",
-                "closesAt": "2030-10-03T22:00:00+09:00",
+                "closesAt": "2030-10-04T00:00:00+09:00",
                 "consentVersion": "mock-v1"
               }
             }
@@ -35705,6 +34683,18 @@
               "Asia/Seoul"
             ]
           },
+          "dailyOpensAt": {
+            "type": "string",
+            "enum": [
+              "09:00"
+            ]
+          },
+          "dailyClosesAt": {
+            "type": "string",
+            "enum": [
+              "24:00"
+            ]
+          },
           "participationRule": {
             "type": "string",
             "enum": [
@@ -35741,7 +34731,7 @@
           "disclosureConsentRequired": {
             "type": "boolean"
           },
-          "drawDelaySeconds": {
+          "revealDelaySeconds": {
             "type": "integer",
             "enum": [
               60
@@ -35754,6 +34744,8 @@
           "closesAt",
           "consentVersion",
           "timezone",
+          "dailyOpensAt",
+          "dailyClosesAt",
           "participationRule",
           "minimumAge",
           "maxNameChars",
@@ -35761,7 +34753,7 @@
           "maxContactChars",
           "ownContactConfirmationRequired",
           "disclosureConsentRequired",
-          "drawDelaySeconds"
+          "revealDelaySeconds"
         ],
         "additionalProperties": false
       },
@@ -35775,7 +34767,6 @@
               "BEFORE_OPEN",
               "WRITABLE",
               "WAITING",
-              "DRAW_READY",
               "SEEDED",
               "SEALED",
               "OPENED",
@@ -35834,10 +34825,7 @@
               }
             ]
           },
-          "canDraw": {
-            "type": "boolean"
-          },
-          "drawAvailableAt": {
+          "revealAt": {
             "anyOf": [
               {
                 "type": "string",
@@ -35857,8 +34845,7 @@
           "exchangeId",
           "contact",
           "csrfToken",
-          "canDraw",
-          "drawAvailableAt"
+          "revealAt"
         ],
         "additionalProperties": false
       },
@@ -35923,7 +34910,7 @@
             "description": "Opaque UUID",
             "format": "uuid"
           },
-          "drawAvailableAt": {
+          "revealAt": {
             "type": "string",
             "description": "RFC 3339 instant",
             "format": "date-time"
@@ -35937,28 +34924,7 @@
         },
         "required": [
           "letterId",
-          "drawAvailableAt",
-          "state"
-        ],
-        "additionalProperties": false
-      },
-      "LoveLetterDraw": {
-        "type": "object",
-        "properties": {
-          "exchangeId": {
-            "type": "string",
-            "description": "Opaque UUID",
-            "format": "uuid"
-          },
-          "state": {
-            "type": "string",
-            "enum": [
-              "SEALED"
-            ]
-          }
-        },
-        "required": [
-          "exchangeId",
+          "revealAt",
           "state"
         ],
         "additionalProperties": false
@@ -36195,12 +35161,12 @@
         "properties": {
           "opensAt": {
             "type": "string",
-            "description": "RFC 3339 instant",
+            "description": "첫 행사일 09:00 KST",
             "format": "date-time"
           },
           "closesAt": {
             "type": "string",
-            "description": "RFC 3339 instant",
+            "description": "마지막 행사일 다음 날 00:00 KST (24:00 종료)",
             "format": "date-time"
           },
           "consentVersion": {
@@ -36933,23 +35899,6 @@
         "additionalProperties": false,
         "description": ""
       },
-      "LoveLetterDrawResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/LoveLetterDraw"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
       "LoveLetterOpenedResponse": {
         "type": "object",
         "properties": {
@@ -37110,7 +36059,7 @@
     ],
     "legacySnapshot": "source-screen-requirements.json",
     "loveLetter": {
-      "basis": "LOVE-001 implementation plan; 60-second draw delay",
+      "basis": "LOVE-001 implementation plan; assignment at registration, reveal after 60 seconds",
       "baseCommit": "f6baa581b77b50cdcd2fd6db7c70cd30d01ae57c",
       "path": "docs/wiki/product/love-letter.md"
     }

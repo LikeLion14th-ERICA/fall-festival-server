@@ -149,7 +149,7 @@ const providerTests = {
 const loveProviderMethods = {
   getLoveLetterGuide:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
   startLoveLetterParticipant:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
-  getLoveLetterStatus:'nextDayRestoresWritingAndNewDrawReplacesPreviousResult',
+  getLoveLetterStatus:'nextDayRestoresWritingAndRegistrationReplacesPreviousResult',
   registerLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
   drawLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
   drawSeededLoveLetter:'emptyPoolKeepsRegisteredLetterAndSeededInvitationDrawsOnlyOnce',

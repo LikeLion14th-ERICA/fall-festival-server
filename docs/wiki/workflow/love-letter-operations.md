@@ -7,17 +7,18 @@
 1. `FESTIVAL_ID`가 운영 축제와 맞는지 확인하고 PR #92의 `V29` 다음 `V30` 러브레터 마이그레이션을 적용한다. 기존 표를 삭제하거나 수정하는 migration은 없다.
 2. 무작위 32바이트 키를 Base64로 인코딩해 `LOVE_LETTER_KEY_BASE64`에 서버 비밀 설정으로 공급한다. `LOVE_LETTER_KEY_VERSION`은 `v1`부터 시작한다. 행사 중 암호문이 남아 있는 동안 키·버전을 교체하지 않는다. 키는 DB, 저장소, 프런트 번들, 로그에 넣지 않는다.
 3. `LOVE_LETTER_ALLOWED_ORIGIN`을 실제 사용자 앱 HTTPS origin 하나로 설정한다. CORS와 Origin 검증에 동일하게 적용된다. 리버스 프록시는 `Origin`과 전용 쿠키를 그대로 전달하고, 러브레터 응답을 공유 캐시에 저장하지 않는다.
-4. 최종 동의문 문안·버전, 개인정보 문의 경로, 실제 시작·종료 시각, 남·여 초기 참여자의 동의 확보를 확인한다. 관리자 `PUT /api/v2/admin/love-letters/configuration`으로 기간·버전을 저장하면 기능은 비활성화된다.
+4. 최종 동의문 문안·버전, 개인정보 문의 경로, 행사 시작·종료일, 남·여 초기 참여자의 동의 확보를 확인한다. 운영은 매일 09:00~24:00 KST다. 관리자 `PUT /api/v2/admin/love-letters/configuration`에는 첫날 09:00 KST와 마지막 날 **다음 날 00:00 KST**를 보내며, 저장하면 기능은 비활성화된다.
 5. 운영자가 동의받은 실제 쪽지를 `POST /api/v2/admin/love-letters/seeds`로 개별 등록한다. 이름·연락처 파일을 저장소나 요청 로그에 보관하지 않는다. 링크 토큰은 성공 응답에서 한 번만 표시하고 지정 참여자에게 별도 안전한 경로로 전달한다. URL에는 query 대신 fragment를 쓰고 서버에 토큰 원문을 보내는 시점은 연결 POST만으로 제한한다.
 6. 양쪽 성별의 미배정 쪽지, 디자인·번역, 관리자 신고 처리, 백업·정리 절차를 확인한 뒤 `PUT /api/v2/admin/love-letters/settings`에 `{"enabled":true}`를 보낸다. 서버도 양쪽 초기 풀과 암호화 키를 검사한다. 공개 프런트 화면과 실제 링크 발송은 이 백엔드 변경 밖의 작업이다.
 
 ## 사용자 앱 연동
 
 - `GET /api/v2/love-letter-guide`로 활성화·기간·동의문 버전을 확인한다. `POST /api/v2/love-letter-participants`는 `Origin`을 보내고, 발급된 `__Host-festival-love` 쿠키를 브라우저에 맡긴다. `data.csrfToken`은 이후 쓰기 요청의 `X-Love-Letter-CSRF`에 넣는다. `credentials: include`가 필요하다.
-- 입력은 `POST /api/v2/love-letters`로 등록한다. 등록 시 당일 작성 권리가 사용되며 `drawAvailableAt`을 받는다. 응답을 못 받았으면 같은 `Idempotency-Key`와 본문으로 재전송한다. `GET /api/v2/love-letter-status`의 `WAITING`은 대기 카운트다운, `DRAW_READY`는 추첨 가능 상태다. 서버 시각 기준 60초 후 `POST /api/v2/love-letter-draws`를 별도 키로 호출한다. 자동 추첨은 없다. `LOVE_WAITING`은 시각을 다시 확인하고, `LOVE_POOL_EMPTY`는 등록을 유지한 채 추첨만 재시도한다. 추첨 응답 유실도 같은 키로 재전송한다.
-- 성공 응답의 `exchangeId`로 `POST /api/v2/love-letter-results/{id}/open`을 호출한다. `GET /api/v2/love-letter-status`의 `OPENED`에는 연락처만 포함된다. 이름·내용은 최초 봉투 개봉 응답에서만 사용하고 영구 웹 저장소에 넣지 않는다. 화면은 서버의 `nextParticipationAt`을 기준으로 다음 날 CTA를 전환한다.
-- 사전 링크는 같은 브라우저 세션에서 `POST /api/v2/love-letter-invitations/claim`으로 연결한다. 연결 성공 후 새 쿠키와 CSRF 토큰으로 `POST /api/v2/love-letter-seeded-draws`를 호출한다. 지정일이 아니거나 사용·재발급된 링크는 거절된다.
+- 입력은 `POST /api/v2/love-letters`로 등록한다. 서버가 같은 트랜잭션에서 상대 쪽지를 배정하고 `revealAt`을 반환한다. 응답을 못 받았으면 같은 `Idempotency-Key`와 본문으로 재전송한다. `LOVE_POOL_EMPTY`면 등록·당일 횟수가 차감되지 않으므로 화면 메모리에 남은 입력으로 다시 시도한다. `GET /api/v2/love-letter-status`의 `WAITING`에는 결과 ID가 없으며, `revealAt`까지 카운트다운한다. 별도 추첨 요청은 없다.
+- `revealAt` 후 상태를 다시 조회하면 `SEALED`와 `exchangeId`를 받는다. 그 ID로 `POST /api/v2/love-letter-results/{id}/open`을 호출한다. 조기 개봉의 `LOVE_WAITING`은 남은 시각을 안내한다. `OPENED` 상태 조회에는 연락처만 포함된다. 이름·내용은 봉투 개봉 응답에서만 사용하고 영구 웹 저장소에 넣지 않는다. 화면은 서버의 `nextParticipationAt`을 기준으로 다음 날 CTA를 전환한다.
+- 사전 링크는 지정일에 같은 브라우저 세션에서 `POST /api/v2/love-letter-invitations/claim`으로 연결한다. 연결 시 서버가 배정을 시도한다. 상대 쪽지가 없으면 `SEEDED`를 유지하고 서버가 주기적으로 다시 시도한다. 성공 후 새 쿠키·CSRF와 상태 조회로 60초 대기 및 봉투 도착을 표시한다. 지정일이 아니거나 사용·재발급된 링크는 거절된다.
 - `RESULT_BLOCKED`면 연락처를 숨기고 재추첨 버튼을 표시하지 않는다. `RESTRICTED`와 `CLOSED`는 새 참여와 연락처 열람을 막는다. 사용자 작성 원문은 번역하지 않으며 화면 안내와 오류 코드는 앱 언어별로 번역한다.
+- 00:00~09:00에는 `BEFORE_OPEN`과 `nextParticipationAt`(당일 09:00)을 표시한다. 다음 날 참여가 가능해지는 자정에도 실제 등록·열람은 09:00부터다.
 
 ## 운영 중·종료
 

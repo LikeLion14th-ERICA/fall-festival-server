@@ -10,19 +10,18 @@ const bool = {type:'boolean'};
 const personal = (maximum,oneLine=false) => text('사용자 작성 원문. 번역·로그·분석 수집 금지.',{minLength:1,maxLength:maximum,...(oneLine?{pattern:'^[^\\r\\n]+$'}:{})});
 
 export const LOVE_LETTER_OPERATION_IDS = [
-  'getLoveLetterGuide','startLoveLetterParticipant','getLoveLetterStatus','registerLoveLetter','drawLoveLetter',
-  'drawSeededLoveLetter','openLoveLetter','reportLoveLetter','claimLoveLetterInvitation',
+  'getLoveLetterGuide','startLoveLetterParticipant','getLoveLetterStatus','registerLoveLetter',
+  'openLoveLetter','reportLoveLetter','claimLoveLetterInvitation',
   'seedLoveLetter','reissueLoveLetterInvitation','getLoveLetterReports','getLoveLetterReport',
   'blockLoveLetter','restrictLoveLetterParticipant','configureLoveLetters','enableLoveLetters',
 ];
 
 export function applyLoveLetterContract(schemas,operations) {
   Object.assign(schemas,{
-    LoveLetterGuide:obj({enabled:bool,opensAt:nullable(dateTime),closesAt:nullable(dateTime),consentVersion:nullable(text('동의문 버전')),timezone:{type:'string',enum:['Asia/Seoul']},participationRule:{type:'string',enum:['BROWSER_DAILY']},minimumAge:{type:'integer',enum:[19]},maxNameChars:{type:'integer',enum:[20]},maxMessageChars:{type:'integer',enum:[100]},maxContactChars:{type:'integer',enum:[100]},ownContactConfirmationRequired:bool,disclosureConsentRequired:bool,drawDelaySeconds:{type:'integer',enum:[60]}}),
-    LoveLetterStatus:obj({state:{type:'string',enum:['CLOSED','BEFORE_OPEN','WRITABLE','WAITING','DRAW_READY','SEEDED','SEALED','OPENED','RESULT_BLOCKED','RESTRICTED']},canParticipate:bool,nextParticipationAt:nullable(dateTime),exchangeId:nullable(uuid),contact:nullable(personal(100)),csrfToken:nullable(text('쓰기 헤더 X-Love-Letter-CSRF 값. 세션 브라우저에만 전달.')),canDraw:bool,drawAvailableAt:nullable(dateTime)}),
+    LoveLetterGuide:obj({enabled:bool,opensAt:nullable(dateTime),closesAt:nullable(dateTime),consentVersion:nullable(text('동의문 버전')),timezone:{type:'string',enum:['Asia/Seoul']},dailyOpensAt:{type:'string',enum:['09:00']},dailyClosesAt:{type:'string',enum:['24:00']},participationRule:{type:'string',enum:['BROWSER_DAILY']},minimumAge:{type:'integer',enum:[19]},maxNameChars:{type:'integer',enum:[20]},maxMessageChars:{type:'integer',enum:[100]},maxContactChars:{type:'integer',enum:[100]},ownContactConfirmationRequired:bool,disclosureConsentRequired:bool,revealDelaySeconds:{type:'integer',enum:[60]}}),
+    LoveLetterStatus:obj({state:{type:'string',enum:['CLOSED','BEFORE_OPEN','WRITABLE','WAITING','SEEDED','SEALED','OPENED','RESULT_BLOCKED','RESTRICTED']},canParticipate:bool,nextParticipationAt:nullable(dateTime),exchangeId:nullable(uuid),contact:nullable(personal(100)),csrfToken:nullable(text('쓰기 헤더 X-Love-Letter-CSRF 값. 세션 브라우저에만 전달.')),revealAt:nullable(dateTime)}),
     LoveLetterInput:obj({gender,name:personal(20),message:personal(100,true),contact:personal(100),adultConfirmed:bool,ownContactConfirmed:bool,consentVersion:text('안내와 일치하는 동의문 버전',{minLength:1,maxLength:64})}),
-    LoveLetterRegistered:obj({letterId:uuid,drawAvailableAt:dateTime,state:{type:'string',enum:['WAITING']}}),
-    LoveLetterDraw:obj({exchangeId:uuid,state:{type:'string',enum:['SEALED']}}),
+    LoveLetterRegistered:obj({letterId:uuid,revealAt:dateTime,state:{type:'string',enum:['WAITING']}}),
     LoveLetterOpened:obj({exchangeId:uuid,name:personal(20),message:personal(100,true),contact:personal(100)}),
     LoveLetterReportAck:obj({reported:bool}),
     LoveLetterClaimInput:obj({invitationToken:text('일회용 연결 토큰. 로그에 남기지 않음.',{minLength:32,maxLength:128,writeOnly:true})}),
@@ -33,7 +32,7 @@ export function applyLoveLetterContract(schemas,operations) {
     LoveLetterAdminReport:obj({id:uuid,letterId:uuid,authorId:uuid,reporterId:uuid,name:personal(20),message:personal(100,true),contact:personal(100),blocked:bool}),
     LoveLetterRestrictionInput:obj({restricted:bool}),
     LoveLetterEnabledInput:obj({enabled:bool}),
-    LoveLetterSettingsInput:obj({opensAt:dateTime,closesAt:dateTime,consentVersion:text('동의문 버전',{minLength:1,maxLength:64})}),
+    LoveLetterSettingsInput:obj({opensAt:text('첫 행사일 09:00 KST',{format:'date-time'}),closesAt:text('마지막 행사일 다음 날 00:00 KST (24:00 종료)',{format:'date-time'}),consentVersion:text('동의문 버전',{minLength:1,maxLength:64})}),
     LoveLetterFlag:obj({enabled:bool}),
     LoveLetterBlockAck:obj({blocked:bool}),
     LoveLetterRestrictionAck:obj({restricted:bool}),
@@ -54,12 +53,9 @@ export function applyLoveLetterContract(schemas,operations) {
   add('getLoveLetterGuide','GET','/love-letter-guide','LoveLetterGuide','러브레터 운영 안내',['normal','closed','error']);
   const start=add('startLoveLetterParticipant','POST','/love-letter-participants','LoveLetterStatus','익명 참여 세션 발급',['normal','already-started','closed','error']);
   start.successStatus=201;start.additionalSuccessStatuses=[200];
-  add('getLoveLetterStatus','GET','/love-letter-status','LoveLetterStatus','오늘 참여·60초 대기·최근 결과 조회',['normal','waiting','draw-ready','sealed','opened','blocked','restricted','closed','error']);
-  const register=add('registerLoveLetter','POST','/love-letters','LoveLetterRegistered','쪽지 등록과 60초 대기 시작',['normal','replay','already-participated','restricted','idempotency-conflict','invalid-csrf','error'],'LoveLetterInput');register.idempotencyKeyRequired=true;
-  const draw=add('drawLoveLetter','POST','/love-letter-draws','LoveLetterDraw','등록 60초 후 다른 성별 쪽지 추첨',['normal','replay','waiting','pool-empty','not-registered','already-participated','restricted','idempotency-conflict','invalid-csrf','error']);
-  draw.idempotencyKeyRequired=true;
-  const seeded=add('drawSeededLoveLetter','POST','/love-letter-seeded-draws','LoveLetterDraw','사전 등록 쪽지 추첨(동일 60초 규칙)',['normal','replay','waiting','pool-empty','restricted','error']);seeded.idempotencyKeyRequired=true;
-  add('openLoveLetter','POST','/love-letter-results/{id}/open','LoveLetterOpened','봉투 개봉',['normal','blocked','closed','error']);
+  add('getLoveLetterStatus','GET','/love-letter-status','LoveLetterStatus','미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회',['normal','waiting','sealed','opened','blocked','restricted','closed','error']);
+  const register=add('registerLoveLetter','POST','/love-letters','LoveLetterRegistered','쪽지 등록과 원자적 사전 배정, 60초 열람 대기',['normal','replay','pool-empty','already-participated','restricted','idempotency-conflict','invalid-csrf','error'],'LoveLetterInput');register.idempotencyKeyRequired=true;
+  add('openLoveLetter','POST','/love-letter-results/{id}/open','LoveLetterOpened','60초 후 봉투 개봉',['normal','waiting','blocked','closed','error']);
   add('reportLoveLetter','POST','/love-letter-results/{id}/reports','LoveLetterReportAck','받은 쪽지 신고',['normal','error']);
   add('claimLoveLetterInvitation','POST','/love-letter-invitations/claim','LoveLetterStatus','사전 연결 링크 귀속',['normal','invalid-link','restricted','error'],'LoveLetterClaimInput');
   add('seedLoveLetter','POST','/admin/love-letters/seeds','LoveLetterSeeded','동의 확보된 사전 쪽지 등록',['normal','error'],'LoveLetterSeedInput',true);

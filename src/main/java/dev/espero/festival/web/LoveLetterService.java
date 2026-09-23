@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** LOVE-001 registration and drawing are separate serialized transactions. */
+/** LOVE-001 assigns a letter atomically at registration and reveals it one minute later. */
 @Service
 @Profile("db")
 public class LoveLetterService {
@@ -50,20 +50,20 @@ public class LoveLetterService {
     }
 
     public record Guide(boolean enabled, Instant opensAt, Instant closesAt, String consentVersion,
-                        String timezone, String participationRule, int minimumAge,
+                        String timezone, String dailyOpensAt, String dailyClosesAt,
+                        String participationRule, int minimumAge,
                         int maxNameChars, int maxMessageChars, int maxContactChars,
                         boolean ownContactConfirmationRequired, boolean disclosureConsentRequired,
-                        int drawDelaySeconds) {}
+                        int revealDelaySeconds) {}
     public record Session(String cookie, String csrfToken, Status status) {
         @Override public String toString() { return "LoveLetterSession[REDACTED]"; }
     }
     public record Status(String state, boolean canParticipate, Instant nextParticipationAt,
                          UUID exchangeId, String contact, String csrfToken,
-                         boolean canDraw, Instant drawAvailableAt) {
+                         Instant revealAt) {
         @Override public String toString() { return "LoveLetterStatus[state=" + state + ", contact=REDACTED]"; }
     }
-    public record Draw(UUID exchangeId, String state) {}
-    public record Registered(UUID letterId, Instant drawAvailableAt, String state) {}
+    public record Registered(UUID letterId, Instant revealAt, String state) {}
     public record Opened(UUID exchangeId, String name, String message, String contact) {
         @Override public String toString() { return "LoveLetterOpened[REDACTED]"; }
     }
@@ -84,9 +84,9 @@ public class LoveLetterService {
 
     public Guide guide() {
         Settings settings = store.settings(festivalId()).orElse(null);
-        return settings == null ? new Guide(false, null, null, null, SEOUL.getId(), "BROWSER_DAILY", 19, 20, 100, 100, true, true, 60)
+        return settings == null ? new Guide(false, null, null, null, SEOUL.getId(), "09:00", "24:00", "BROWSER_DAILY", 19, 20, 100, 100, true, true, 60)
             : new Guide(settings.enabled() && crypto.configured() && !allowedOrigin.isBlank() && inPeriod(settings),
-                settings.opensAt(), settings.closesAt(), settings.consentVersion(), SEOUL.getId(), "BROWSER_DAILY",
+                settings.opensAt(), settings.closesAt(), settings.consentVersion(), SEOUL.getId(), "09:00", "24:00", "BROWSER_DAILY",
                 19, 20, 100, 100, true, true, 60);
     }
 
@@ -104,88 +104,96 @@ public class LoveLetterService {
         Settings settings = store.settings(festivalId()).orElse(null);
         if (settings == null || !settings.enabled() || !crypto.configured() || allowedOrigin.isBlank() ||
             !clock.instant().isBefore(settings.closesAt()))
-            return new Status("CLOSED", false, null, null, null, null, false, null);
-        if (clock.instant().isBefore(settings.opensAt()))
-            return new Status("BEFORE_OPEN", false, settings.opensAt(), null, null, null, false, null);
-        Participant participant = optionalParticipant(token);
-        if (participant == null) return new Status("WRITABLE", true, null, null, null, null, false, null);
-        if (participant.restricted()) return new Status("RESTRICTED", false, null, null, null, csrf(token), false, null);
-        var day = store.dayLetter(participant.id(), today()).orElse(null);
-        if (day != null && !"COMPLETED".equals(day.state())) {
-            Instant available = day.createdAt().plusSeconds(60);
-            boolean ready = !clock.instant().isBefore(available);
-            return new Status(ready ? ("SEEDED".equals(day.state()) ? "SEEDED" : "DRAW_READY") : "WAITING",
-                false, today().plusDays(1).atStartOfDay(SEOUL).toInstant(), null, null, csrf(token), ready, available);
+            return new Status("CLOSED", false, null, null, null, null, null);
+        if (!inPeriod(settings)) {
+            Instant nextOpening = clock.instant().isBefore(settings.opensAt()) ? settings.opensAt()
+                : today().atTime(9, 0).atZone(SEOUL).toInstant();
+            return new Status("BEFORE_OPEN", false, nextOpening, null, null, null, null);
         }
+        Participant participant = optionalParticipant(token);
+        if (participant == null) return new Status("WRITABLE", true, null, null, null, null, null);
+        if (participant.restricted()) return new Status("RESTRICTED", false, null, null, null, csrf(token), null);
+        var day = store.dayLetter(participant.id(), today()).orElse(null);
+        if (day != null && !"COMPLETED".equals(day.state()))
+            return new Status("SEEDED", false, today().plusDays(1).atTime(9, 0).atZone(SEOUL).toInstant(),
+                null, null, csrf(token), null);
         Exchange latest = store.latestExchange(participant.id()).orElse(null);
         boolean done = store.participated(participant.id(), today());
-        Instant next = done ? today().plusDays(1).atStartOfDay(SEOUL).toInstant() : null;
+        Instant next = done ? today().plusDays(1).atTime(9, 0).atZone(SEOUL).toInstant() : null;
+        if (latest != null && clock.instant().isBefore(latest.createdAt().plusSeconds(60)))
+            return new Status("WAITING", !done, next, null, null, csrf(token), latest.createdAt().plusSeconds(60));
         if (latest != null && latest.blocked())
-            return new Status("RESULT_BLOCKED", !done, next, latest.id(), null, csrf(token), false, null);
+            return new Status("RESULT_BLOCKED", !done, next, latest.id(), null, csrf(token), null);
         if (latest != null && latest.opened())
-            return new Status("OPENED", !done, next, latest.id(), crypto.decrypt(latest.contact(), latest.keyVersion()), csrf(token), false, null);
-        if (latest != null) return new Status("SEALED", !done, next, latest.id(), null, csrf(token), false, null);
-        return new Status("WRITABLE", true, null, null, null, csrf(token), false, null);
+            return new Status("OPENED", !done, next, latest.id(), crypto.decrypt(latest.contact(), latest.keyVersion()), csrf(token), null);
+        if (latest != null) return new Status("SEALED", !done, next, latest.id(), null, csrf(token), null);
+        return new Status("WRITABLE", true, null, null, null, csrf(token), null);
     }
 
     @Transactional
     public Registered register(String token, Input input, String idempotencyKey) {
-        Settings settings = active();
-        validate(input, settings.consentVersion());
         checkKey(idempotencyKey);
         store.lockFestival(festivalId());
+        Settings settings = store.settings(festivalId()).orElseThrow(() -> conflict("LOVE_UNCONFIGURED", "운영 설정이 없습니다."));
+        validate(input, settings.consentVersion());
         Participant participant = requiredParticipant(token);
         ensureAllowed(participant);
         String digest = crypto.hmac("register\u0000" + input.gender() + "\u0000" + input.name() + "\u0000"
             + input.message() + "\u0000" + input.contact() + "\u0000" + input.consentVersion());
         Registered replay = registrationReplay(participant.id(), idempotencyKey, digest);
         if (replay != null) return replay;
-        if (store.participated(participant.id(), today()) || store.seededLetter(participant.id(), today()).isPresent())
-            throw conflict("LOVE_ALREADY_PARTICIPATED", "오늘은 이미 참여했습니다.");
-        UUID letterId = UUID.randomUUID();
-        store.insertLetter(letterId, festivalId(), participant.id(), today(), input.gender(),
-            crypto.encrypt(input.name().strip()), crypto.encrypt(input.message().strip()),
-            crypto.encrypt(input.contact().strip()), crypto.version(), settings.consentVersion(), clock.instant());
-        store.createPendingDay(participant.id(), today(), letterId);
-        store.saveRequest(participant.id(), today(), idempotencyKey, digest, letterId, null);
-        return new Registered(letterId, clock.instant().plusSeconds(60), "WAITING");
-    }
-
-    @Transactional
-    public Draw draw(String token, String idempotencyKey) {
         active();
-        checkKey(idempotencyKey);
-        store.lockFestival(festivalId());
-        Participant participant = requiredParticipant(token);
-        ensureAllowed(participant);
-        String digest = crypto.hmac("draw");
-        Draw replay = drawReplay(participant.id(), idempotencyKey, digest);
-        if (replay != null) return replay;
-        var day = store.dayLetter(participant.id(), today())
-            .orElseThrow(() -> conflict("LOVE_NOT_REGISTERED", "오늘 등록한 쪽지가 없습니다."));
-        if ("COMPLETED".equals(day.state())) throw conflict("LOVE_ALREADY_PARTICIPATED", "오늘은 이미 추첨했습니다.");
-        if (clock.instant().isBefore(day.createdAt().plusSeconds(60)))
-            throw new ApiException(HttpStatus.CONFLICT, "LOVE_WAITING", "작성 후 1분이 지나면 추첨할 수 있습니다.", true);
-        var candidate = store.randomCandidate(festivalId(), participant.id(), opposite(day.gender()), today())
+        Instant assignedAt = clock.instant();
+        LocalDate date = LocalDate.ofInstant(assignedAt, SEOUL);
+        if (store.participated(participant.id(), date) || store.seededLetter(participant.id(), date).isPresent())
+            throw conflict("LOVE_ALREADY_PARTICIPATED", "오늘은 이미 참여했습니다.");
+        var candidate = store.randomCandidate(festivalId(), participant.id(), opposite(input.gender()), date)
             .orElseThrow(LoveLetterService::poolEmpty);
-        UUID exchange = store.insertExchange(festivalId(), participant.id(), candidate.id(), today(), clock.instant());
-        store.completeDay(participant.id(), today(), day.letterId(), clock.instant());
-        store.saveRequest(participant.id(), today(), idempotencyKey, digest, null, exchange);
-        return new Draw(exchange, "SEALED");
+        UUID letterId = UUID.randomUUID();
+        store.insertLetter(letterId, festivalId(), participant.id(), date, input.gender(),
+            crypto.encrypt(input.name().strip()), crypto.encrypt(input.message().strip()),
+            crypto.encrypt(input.contact().strip()), crypto.version(), settings.consentVersion(), assignedAt);
+        store.createPendingDay(participant.id(), date, letterId);
+        store.insertExchange(festivalId(), participant.id(), candidate.id(), date, assignedAt);
+        store.completeDay(participant.id(), date, letterId, assignedAt);
+        store.saveRequest(participant.id(), date, idempotencyKey, digest, letterId, null);
+        return new Registered(letterId, assignedAt.plusSeconds(60), "WAITING");
+    }
+
+    public List<UUID> pendingSeededParticipants() {
+        Settings settings = store.settings(festivalId()).orElse(null);
+        if (settings == null || !settings.enabled() || !crypto.configured() || allowedOrigin.isBlank() || !inPeriod(settings))
+            return List.of();
+        return store.boundSeededParticipants(festivalId(), today());
     }
 
     @Transactional
-    public Draw drawSeeded(String token, String idempotencyKey) { return draw(token, idempotencyKey); }
+    public void assignSeeded(UUID participantId) {
+        store.lockFestival(festivalId());
+        active();
+        Instant assignedAt = clock.instant();
+        LocalDate date = LocalDate.ofInstant(assignedAt, SEOUL);
+        Participant participant = store.participantById(festivalId(), participantId).orElse(null);
+        if (participant == null || !participant.bound() || participant.restricted()) return;
+        var day = store.dayLetter(participantId, date).orElse(null);
+        if (day == null || !"SEEDED".equals(day.state())) return;
+        var candidate = store.randomCandidate(festivalId(), participantId, opposite(day.gender()), date).orElse(null);
+        if (candidate == null) return;
+        store.insertExchange(festivalId(), participantId, candidate.id(), date, assignedAt);
+        store.completeDay(participantId, date, day.letterId(), assignedAt);
+    }
 
     @Transactional
     public Opened open(String token, UUID id) {
-        active();
         store.lockFestival(festivalId());
+        active();
         Participant participant = requiredParticipant(token);
         ensureAllowed(participant);
         Exchange exchange = store.exchange(participant.id(), id)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "LOVE_RESULT_NOT_FOUND", "쪽지를 찾지 못했습니다.", false));
         if (!store.latestExchange(participant.id()).map(latest -> latest.id().equals(id)).orElse(false)) throw notFound();
+        if (clock.instant().isBefore(exchange.createdAt().plusSeconds(60)))
+            throw new ApiException(HttpStatus.CONFLICT, "LOVE_WAITING", "배정 후 1분이 지나면 열어볼 수 있습니다.", true);
         if (exchange.blocked()) throw new ApiException(HttpStatus.FORBIDDEN, "LOVE_RESULT_BLOCKED", "차단된 쪽지입니다.", false);
         var letter = store.letter(exchange.letterId()).orElseThrow();
         store.markOpened(id, clock.instant());
@@ -199,6 +207,7 @@ public class LoveLetterService {
         Participant participant = requiredParticipant(token);
         ensureAllowed(participant);
         if (!store.latestExchange(participant.id()).map(latest -> latest.id().equals(id)).orElse(false)) throw notFound();
+        if (store.exchange(participant.id(), id).map(e -> clock.instant().isBefore(e.createdAt().plusSeconds(60))).orElse(true)) throw notFound();
         store.report(id, participant.id(), clock.instant());
     }
 
@@ -247,16 +256,18 @@ public class LoveLetterService {
 
     @Transactional
     public Session claim(String currentToken, String invitationToken) {
-        active();
         if (invitationToken == null || !invitationToken.matches("[A-Za-z0-9_-]{32,128}")) throw badInput();
         store.lockFestival(festivalId());
+        active();
+        Instant assignedAt = clock.instant();
+        LocalDate date = LocalDate.ofInstant(assignedAt, SEOUL);
         Participant current = requiredParticipant(currentToken);
         ensureAllowed(current);
-        if (store.participated(current.id(), today()) || store.seededLetter(current.id(), today()).isPresent())
+        if (store.participated(current.id(), date) || store.seededLetter(current.id(), date).isPresent())
             throw conflict("LOVE_ALREADY_PARTICIPATED", "오늘은 이미 참여했습니다.");
         var invitation = store.invitation(sha256(invitationToken))
             .orElseThrow(() -> conflict("LOVE_INVITATION_INVALID", "연결 링크가 유효하지 않습니다."));
-        if (invitation.used() || !invitation.date().equals(today()))
+        if (invitation.used() || !invitation.date().equals(date))
             throw conflict("LOVE_INVITATION_INVALID", "연결 링크가 유효하지 않습니다.");
         if (invitation.participantId().equals(current.id())) throw conflict("LOVE_INVITATION_INVALID", "이미 연결되었습니다.");
         Participant invited = store.participantById(festivalId(), invitation.participantId())
@@ -266,6 +277,12 @@ public class LoveLetterService {
         String newToken = token();
         if (!store.bindParticipant(invitation.participantId(), sha256(newToken)))
             throw conflict("LOVE_INVITATION_INVALID", "이미 연결되었습니다.");
+        var day = store.dayLetter(invitation.participantId(), date).orElseThrow();
+        var candidate = store.randomCandidate(festivalId(), invitation.participantId(), opposite(day.gender()), date).orElse(null);
+        if (candidate != null) {
+            store.insertExchange(festivalId(), invitation.participantId(), candidate.id(), date, assignedAt);
+            store.completeDay(invitation.participantId(), date, day.letterId(), assignedAt);
+        }
         return new Session(newToken, csrf(newToken), status(newToken));
     }
 
@@ -285,6 +302,8 @@ public class LoveLetterService {
     @Transactional
     public void configure(Instant opensAt, Instant closesAt, String consentVersion, String requestId) {
         if (opensAt == null || closesAt == null || !opensAt.isBefore(closesAt) ||
+            !opensAt.atZone(SEOUL).toLocalTime().equals(java.time.LocalTime.of(9, 0)) ||
+            !closesAt.atZone(SEOUL).toLocalTime().equals(java.time.LocalTime.MIDNIGHT) ||
             consentVersion == null || !consentVersion.matches("[A-Za-z0-9._-]{1,64}")) throw badInput();
         store.lockFestival(festivalId());
         if (store.participantCount(festivalId()) > 0) throw conflict("LOVE_CONFIGURATION_LOCKED", "참여가 시작되어 운영 설정을 변경할 수 없습니다.");
@@ -335,14 +354,6 @@ public class LoveLetterService {
         }
     }
 
-    private Draw drawReplay(UUID participant, String key, String digest) {
-        try {
-            return store.request(participant, key, digest).map(result -> new Draw(result.exchangeId(), "SEALED")).orElse(null);
-        } catch (IllegalArgumentException error) {
-            throw conflict("LOVE_IDEMPOTENCY_CONFLICT", "요청 키가 다른 내용에 재사용되었습니다.");
-        }
-    }
-
     private Settings active() {
         Settings settings = store.settings(festivalId()).orElse(null);
         if (settings == null || !settings.enabled() || !crypto.configured() || allowedOrigin.isBlank() || !inPeriod(settings))
@@ -351,7 +362,8 @@ public class LoveLetterService {
     }
     private boolean inPeriod(Settings settings) {
         Instant now = clock.instant();
-        return !now.isBefore(settings.opensAt()) && now.isBefore(settings.closesAt());
+        return !now.isBefore(settings.opensAt()) && now.isBefore(settings.closesAt()) &&
+            now.atZone(SEOUL).getHour() >= 9;
     }
     private Participant requiredParticipant(String token) {
         Participant participant = optionalParticipant(token);

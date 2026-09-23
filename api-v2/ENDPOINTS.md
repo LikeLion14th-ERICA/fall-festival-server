@@ -53,11 +53,9 @@
 | GET | `/api/v2/admin/me` | 현재 인증 관리자 확인 |  | normal, disabled, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/love-letter-guide` | 러브레터 운영 안내 | LOVE-001 | normal, closed, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/love-letter-participants` | 익명 참여 세션 발급 | LOVE-001 | normal, already-started, closed, error, locale-not-ready, bad-request, rate-limited |
-| GET | `/api/v2/love-letter-status` | 오늘 참여·60초 대기·최근 결과 조회 | LOVE-001 | normal, waiting, draw-ready, sealed, opened, blocked, restricted, closed, error, locale-not-ready, bad-request, rate-limited |
-| POST | `/api/v2/love-letters` | 쪽지 등록과 60초 대기 시작 | LOVE-001 | normal, replay, already-participated, restricted, idempotency-conflict, invalid-csrf, error, locale-not-ready, bad-request, rate-limited |
-| POST | `/api/v2/love-letter-draws` | 등록 60초 후 다른 성별 쪽지 추첨 | LOVE-001 | normal, replay, waiting, pool-empty, not-registered, already-participated, restricted, idempotency-conflict, invalid-csrf, error, locale-not-ready, bad-request, rate-limited |
-| POST | `/api/v2/love-letter-seeded-draws` | 사전 등록 쪽지 추첨(동일 60초 규칙) | LOVE-001 | normal, replay, waiting, pool-empty, restricted, error, locale-not-ready, bad-request, rate-limited |
-| POST | `/api/v2/love-letter-results/{id}/open` | 봉투 개봉 | LOVE-001 | normal, blocked, closed, error, locale-not-ready, bad-request, rate-limited |
+| GET | `/api/v2/love-letter-status` | 미리 배정한 쪽지의 60초 열람 대기·최근 결과 조회 | LOVE-001 | normal, waiting, sealed, opened, blocked, restricted, closed, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/love-letters` | 쪽지 등록과 원자적 사전 배정, 60초 열람 대기 | LOVE-001 | normal, replay, pool-empty, already-participated, restricted, idempotency-conflict, invalid-csrf, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/love-letter-results/{id}/open` | 60초 후 봉투 개봉 | LOVE-001 | normal, waiting, blocked, closed, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/love-letter-results/{id}/reports` | 받은 쪽지 신고 | LOVE-001 | normal, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/love-letter-invitations/claim` | 사전 연결 링크 귀속 | LOVE-001 | normal, invalid-link, restricted, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/admin/love-letters/seeds` | 동의 확보된 사전 쪽지 등록 | ADM-LOVE | normal, error, bad-request, rate-limited, unauthorized, forbidden |
