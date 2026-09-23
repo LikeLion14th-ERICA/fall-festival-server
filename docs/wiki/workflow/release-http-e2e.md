@@ -10,8 +10,9 @@
 ## 현재 HTTP release E2E 인벤토리
 
 모든 현재 대상은 JUnit 5, Testcontainers PostgreSQL, 랜덤 포트 Spring 서버, Java `HttpClient`를
-사용한다. 후보 catalog는 실제 CLI로 import·publish하며, 원격 DB·계정·배포 환경에는 연결하지
-않는다.
+사용한다. catalog 사용자 흐름은 후보를 실제 CLI로 import·publish하고, 러브레터는
+가상 사전 쪽지와 관리자 설정으로 독립된 개인정보 흐름을 만든다. 원격 DB·계정·배포
+환경에는 연결하지 않는다.
 
 | 테스트 | 유형 | JUnit method |
 | --- | --- | ---: |
@@ -23,8 +24,9 @@
 | `CatalogPublicationLifecycleE2eTest` | 게시·재시작·rollback의 HTTP 노출 | 1 |
 | DynamicContentReleaseHttpE2eTest | 공지·상품·판매 상태·미디어 lifecycle과 실패 복구 | 5 |
 | OperationalBoundariesHttpE2eTest | 수령 제한, GOODS account/template CLI, 관리자 mutation 경계 | 4 |
+| `LoveLetterReleaseHttpE2eTest` | LOVE-001 관리자·익명 배정/개봉·경쟁·초대·신고/차단 | 3 |
 
-따라서 현재 실제 HTTP E2E는 8개 class, 30개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-31, 즉 31개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
+따라서 현재 실제 HTTP E2E는 9개 class, 33개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-36, 즉 36개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
 
 ## 출시 준비 판단
 
@@ -33,7 +35,8 @@
 boundary를 실제 HTTP server·security filter·serialization·runtime storage 흐름으로 추가했다.
 
 HTTP-25–30은 구현됐지만 실행 증거가 없고, HTTP-31은 명시된 인증·idempotency·notice
-boundary만 부분 구현됐다. 따라서 이 suite는 31개 HTTP 위험에 대한 작성된 자동 검증
+boundary만 부분 구현됐다. HTTP-32–36은 LOVE-001의 실제 HTTP·PostgreSQL 검증을
+[상세 매트릭스](release-http-e2e-love-letter.md)에 연결한다. 따라서 이 suite는 36개 HTTP 위험에 대한 작성된 자동 검증
 근거이며, 전체 릴리스 승인은 실제 실행, 제품 공개 gate, required CI, migration/운영 승인과
 staging 증거를 함께 요구한다.
 
@@ -48,7 +51,8 @@ staging 증거를 함께 요구한다.
 | GOODS account CLI | HTTP-29 | P0 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
 | notice template CLI | HTTP-30 | P1 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
 | admin mutation boundary | HTTP-31 | P1 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
-| ingress/browser/media/load rehearsal | STAGE-01–05 | release gate | [staging·운영 리허설 상세](release-http-e2e-staging.md) |
+| LOVE-001 익명·배정·신고·운영 경계 | HTTP-32–36 | P0 | [러브레터 상세](release-http-e2e-love-letter.md) |
+| ingress/browser/media/load rehearsal | STAGE-01–06 | release gate | [staging·운영 리허설 상세](release-http-e2e-staging.md) |
 
 각 ID는 다음 상태 중 하나로 기록한다. **계획**은 수용 조건만 존재함, **구현**은 코드가
 있지만 candidate evidence 없음, **실행 대기**는 staging/승인된 운영 리허설을 기다림,
@@ -58,7 +62,7 @@ staging 증거를 함께 요구한다.
 
 ## 구현 공통 규칙
 
-- 자동 HTTP 케이스는 Testcontainers 전용 DB, published candidate, random port server,
+- 자동 HTTP 케이스는 Testcontainers 전용 DB, 필요한 경우 published candidate, random port server,
   fixed KST clock, real login을 재사용한다. staging에서는 fixed clock을 흉내 내지 않고
   실제 ingress·시간·browser를 사용한다.
 - 응답 id는 fixture 상수 대신 최초 성공 response에서 읽는다. status, stable error code,
@@ -85,6 +89,7 @@ staging/운영 리허설은 다음 목표를 모두 포함한다. 단계별 입�
 | STAGE-03 | public image delivery, media mount, dynamic state, recovery set |
 | STAGE-04 | mobile polling (notice/goods/availability/crowding), offline recovery, navigation, accessibility |
 | STAGE-05 | rate-67와 warm/cold cache·activation spike·receipt limit 부하, 관측 지표, rollback rehearsal |
+| STAGE-06 | LOVE-001 활성화 후보의 익명 브라우저·개인정보·60초/09시·차단·정리/복구 리허설 |
 
 `readyz`는 해당 festival의 published snapshot 적재를 보는 readiness probe이며 지속적인 DB
 health check가 아니다. 연결된 image fixture가 없으면 image delivery stage는 미완료다.
@@ -95,7 +100,7 @@ set을 함께 사용하고 revision·Flyway·media·public smoke를 재확인한
 
 HTTP-25–27은 DynamicContentReleaseHttpE2eTest, HTTP-28–31은
 OperationalBoundariesHttpE2eTest에 매핑했다. 중앙 OpenAPI release coverage와 focused class
-선택기는 HTTP-01–31·OPS-01–20, 총 51개 시나리오를 사용한다.
+선택기는 HTTP-01–36·OPS-01–20, 총 56개 시나리오를 사용한다.
 
-이 변경에서는 사용자 지시에 따라 Maven, Docker, CI, k6와 모든 테스트를 실행하지 않았다.
-실행 명령과 candidate별 PASS/BLOCKED 기록은 검증 명령과 CI 및 각 상세 시나리오 문서를 따른다.
+테스트 class의 존재는 해당 후보의 실행 증거가 아니다. 실행 명령과 candidate별
+PASS/BLOCKED 기록은 검증 명령과 CI 및 각 상세 시나리오 문서를 따른다.

@@ -24735,6 +24735,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24795,6 +24804,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24814,6 +24832,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24833,6 +24860,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24852,6 +24888,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24878,6 +24923,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24918,6 +24972,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -24937,6 +25000,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25139,6 +25211,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25199,6 +25280,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25218,6 +25308,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25237,6 +25336,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25256,6 +25364,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25282,6 +25399,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25322,6 +25448,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25341,6 +25476,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25644,6 +25788,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25704,6 +25857,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25723,6 +25885,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25742,6 +25913,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25761,6 +25941,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25787,6 +25976,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25827,6 +26025,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -25846,6 +26053,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26042,6 +26258,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26102,6 +26327,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26162,6 +26396,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26181,6 +26424,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26200,6 +26452,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26280,6 +26541,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26299,6 +26569,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26318,6 +26597,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26337,6 +26625,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26363,6 +26660,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26403,6 +26709,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26422,6 +26737,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26618,6 +26942,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26678,6 +27011,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26718,6 +27060,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26737,6 +27088,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26756,6 +27116,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26803,6 +27172,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26843,6 +27221,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -26862,6 +27249,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27052,6 +27448,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27112,6 +27517,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27131,6 +27545,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27150,6 +27573,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27169,6 +27601,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27195,6 +27636,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27235,6 +27685,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27254,6 +27713,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27423,6 +27891,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27483,6 +27960,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27523,6 +28009,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27542,6 +28037,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27561,6 +28065,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27601,6 +28114,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27620,6 +28142,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27639,6 +28170,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27665,6 +28205,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27705,6 +28254,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27724,6 +28282,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27856,6 +28423,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27896,6 +28472,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27936,6 +28521,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27976,6 +28570,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -27995,6 +28598,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28014,6 +28626,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28033,6 +28654,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28052,6 +28682,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28071,6 +28710,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28097,6 +28745,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28137,6 +28794,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28156,6 +28822,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28308,6 +28983,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28348,6 +29032,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28388,6 +29081,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28428,6 +29130,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28447,6 +29158,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28466,6 +29186,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28492,6 +29221,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28532,6 +29270,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28551,6 +29298,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28687,6 +29443,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28727,6 +29492,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28767,6 +29541,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28807,6 +29590,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28826,6 +29618,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28845,6 +29646,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28871,6 +29681,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28911,6 +29730,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -28930,6 +29758,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29065,6 +29902,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29105,6 +29951,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29145,6 +30000,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29185,6 +30049,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29204,6 +30077,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29223,6 +30105,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29249,6 +30140,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29289,6 +30189,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29308,6 +30217,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29435,6 +30353,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29475,6 +30402,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29515,6 +30451,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29555,6 +30500,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29574,6 +30528,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29593,6 +30556,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29619,6 +30591,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29659,6 +30640,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29678,6 +30668,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29805,6 +30804,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29845,6 +30853,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29885,6 +30902,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29925,6 +30951,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29944,6 +30979,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29963,6 +31007,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -29982,6 +31035,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30001,6 +31063,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30020,6 +31091,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30046,6 +31126,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30086,6 +31175,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30105,6 +31203,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30235,6 +31342,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30275,6 +31391,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30315,6 +31440,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30355,6 +31489,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30374,6 +31517,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30393,6 +31545,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30412,6 +31573,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30431,6 +31601,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30450,6 +31629,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30476,6 +31664,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30516,6 +31713,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30535,6 +31741,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30667,6 +31882,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30707,6 +31931,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30747,6 +31980,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30787,6 +32029,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30806,6 +32057,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30825,6 +32085,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30844,6 +32113,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30863,6 +32141,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30882,6 +32169,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30908,6 +32204,15 @@
                   "minimum": 0
                 },
                 "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30948,6 +32253,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {
@@ -30967,6 +32281,15 @@
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
               }
             },
             "content": {

@@ -10,7 +10,7 @@ import { createState,DATES } from './domain.mjs';
 import { LOVE_LETTER_OPERATION_IDS } from './love-letter-contract.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
-const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json'),clientStates=await read('./client-state-examples.json');
+const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json'),clientStates=await read('./client-state-examples.json'),releaseCoverage=await read('./release-operation-coverage.json');
 const ajv=new Ajv2020({strict:false,allErrors:true});addFormats(ajv);
 const compiled=new Map();
 function standardValidate(schema,value){const key=JSON.stringify(schema);if(!compiled.has(key))compiled.set(key,ajv.compile({...schema,components:spec.components}));const validate=compiled.get(key);assert.equal(validate(value),true,JSON.stringify(validate.errors));}
@@ -53,6 +53,104 @@ test('love letter guide closes overnight and reopens at 09:00 KST',async()=>{
   assert.equal(open.body.data.enabled,true);
   const closed=await call('/api/v2/love-letter-guide',{session:'love-hours',headers:{'X-Mock-Time':'2030-10-04T00:00:00+09:00'}});
   assert.equal(closed.body.data.enabled,false);
+});
+
+test('all LOVE-001 routes document private caching, ownership headers and the delayed result shape',()=>{
+  assert.equal(LOVE_LETTER_OPERATION_IDS.length,15);
+  assert.equal(new Set(LOVE_LETTER_OPERATION_IDS).size,15);
+  assert.equal(Object.values(spec.paths).flatMap(Object.values).filter(item=>LOVE_LETTER_OPERATION_IDS.includes(item.operationId)).length,15);
+  for(const id of LOVE_LETTER_OPERATION_IDS){
+    const route=operation(id);
+    assert.ok(route,id);
+    for(const [status,response]of Object.entries(route.responses))
+      assert.deepEqual(response.headers?.['Cache-Control']?.schema?.enum,['no-store'],`${id} ${status}`);
+    if(id==='getLoveLetterGuide'||id==='getLoveLetterStatus')continue;
+    if(route.tags.includes('관리자')){
+      assert.deepEqual(route.security,[{AdminBearer:[]}],id);
+      continue;
+    }
+    assert.equal(route.parameters.find(parameter=>parameter.name==='Origin')?.required,true,id);
+    if(id!=='startLoveLetterParticipant'){
+      assert.equal(route.parameters.find(parameter=>parameter.name==='X-Love-Letter-CSRF')?.required,true,id);
+      assert.equal(route.parameters.find(parameter=>parameter.name==='__Host-festival-love')?.required,true,id);
+    }
+  }
+  assert.equal(operation('registerLoveLetter').parameters.find(parameter=>parameter.name==='Idempotency-Key')?.required,true);
+  assert.equal(spec.components.schemas.LoveLetterGuide.properties.revealDelaySeconds.enum[0],60);
+  assert.deepEqual(Object.keys(spec.components.schemas.LoveLetterRegistered.properties),['letterId','revealAt','state']);
+  const waiting=examples.getLoveLetterStatus.scenarios.waiting.response.data;
+  const sealed=examples.getLoveLetterStatus.scenarios.sealed.response.data;
+  const opened=examples.getLoveLetterStatus.scenarios.opened.response.data;
+  assert.equal(waiting.state,'WAITING');
+  assert.equal(waiting.exchangeId,null);
+  assert.equal(waiting.contact,null);
+  assert.equal(sealed.state,'SEALED');
+  assert.ok(sealed.exchangeId);
+  assert.equal(sealed.contact,null);
+  assert.equal(opened.state,'OPENED');
+  assert.equal(opened.name,undefined);
+  assert.equal(opened.message,undefined);
+  assert.ok(opened.contact);
+  assert.deepEqual(spec.components.schemas.LoveLetterInput.properties.gender.enum,['MALE','FEMALE']);
+  assert.equal(spec.components.schemas.LoveLetterInput.properties.name.maxLength,20);
+  assert.equal(spec.components.schemas.LoveLetterInput.properties.message.maxLength,100);
+  assert.equal(spec.components.schemas.LoveLetterInput.properties.contact.maxLength,100);
+});
+
+test('every LOVE-001 operation is included in the release HTTP scenario inventory',()=>{
+  assert.equal(releaseCoverage.scenarioCount,56);
+  const loveScenarios=new Set(['HTTP-32','HTTP-33','HTTP-34','HTTP-35','HTTP-36']);
+  for(const id of LOVE_LETTER_OPERATION_IDS){
+    const row=releaseCoverage.operations.find(item=>item.operationId===id);
+    assert.ok(row,id);
+    assert.equal(row.status,'live',id);
+    assert.equal(row.unresolvedReason,null,id);
+    assert.ok(row.scenarioIds.some(scenario=>loveScenarios.has(scenario)),id);
+  }
+  for(const id of loveScenarios){
+    const scenario=releaseCoverage.scenarios.find(item=>item.id===id);
+    assert.ok(scenario,id);
+    assert.ok(scenario.testMapping.tests.some(item=>item.file.endsWith('LoveLetterReleaseHttpE2eTest.java')),id);
+    assert.ok(scenario.operationIds.length>0,id);
+  }
+});
+
+test('love letter mock keeps an empty-pool retry writable and isolates another browser',async()=>{
+  const origin='http://localhost:5173',session='love-empty-pool-retry';
+  const started=await call('/api/v2/love-letter-participants',{method:'POST',session,headers:{Origin:origin,'X-Mock-Time':'2030-10-01T12:00:00+09:00'}});
+  assert.equal(started.status,201);
+  const headers={Origin:origin,Cookie:'__Host-festival-love=MOCK-LOVE-TOKEN','X-Love-Letter-CSRF':started.body.data.csrfToken,'Idempotency-Key':'love-empty-pool-1','X-Mock-Time':'2030-10-01T12:00:00+09:00'};
+  const body={gender:'MALE',name:'가상 별명',message:'가상 편지',contact:'@mock-only-contact',adultConfirmed:true,ownContactConfirmed:true,consentVersion:'mock-v1'};
+  const empty=await call('/api/v2/love-letters',{method:'POST',session,headers:{...headers,'X-Mock-Scenario':'pool-empty'},body});
+  assert.equal(empty.status,409);
+  assert.equal(empty.body.error.code,'LOVE_POOL_EMPTY');
+  assert.equal(empty.body.error.retryable,true);
+  assert.equal(empty.headers.get('cache-control'),'no-store');
+  const afterEmpty=await call('/api/v2/love-letter-status',{session,headers:{Cookie:headers.Cookie,'X-Mock-Time':'2030-10-01T12:00:00+09:00'}});
+  assert.equal(afterEmpty.body.data.state,'WRITABLE');
+  assert.equal(afterEmpty.body.data.canParticipate,true);
+  const registered=await call('/api/v2/love-letters',{method:'POST',session,headers,body});
+  assert.equal(registered.status,200);
+  assert.equal(registered.body.data.state,'WAITING');
+  assert.equal(registered.body.data.exchangeId,undefined);
+  assert.equal(registered.body.data.contact,undefined);
+  const other=await call('/api/v2/love-letter-status',{session:'love-other-browser',headers:{'X-Mock-Time':'2030-10-01T12:01:00+09:00'}});
+  assert.equal(other.body.data.state,'WRITABLE');
+  assert.equal(other.body.data.exchangeId,null);
+  assert.equal(other.body.data.contact,null);
+});
+
+test('love letter mock permits credentialed CSRF preflight and issues a private sample cookie',async()=>{
+  const origin='http://localhost:5173';
+  const preflight=await fetch(base+'/api/v2/love-letters',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'X-Love-Letter-CSRF, Idempotency-Key'}});
+  assert.equal(preflight.status,204);
+  assert.equal(preflight.headers.get('access-control-allow-origin'),origin);
+  assert.equal(preflight.headers.get('access-control-allow-credentials'),'true');
+  assert.match(preflight.headers.get('access-control-allow-headers'),/X-Love-Letter-CSRF/);
+  const started=await call('/api/v2/love-letter-participants',{method:'POST',session:'love-credentialed-preflight',headers:{Origin:origin,'X-Mock-Time':'2030-10-01T12:00:00+09:00'}});
+  assert.equal(started.status,201);
+  assert.match(started.headers.get('set-cookie'),/^__Host-festival-love=MOCK-LOVE-TOKEN; Path=\/; Secure; HttpOnly; SameSite=Lax$/);
+  assert.equal(started.headers.get('cache-control'),'no-store');
 });
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});

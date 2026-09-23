@@ -31,3 +31,8 @@
 ## 검증 게이트
 
 `npm run generate && npm run check`를 `api-v2`에서 실행하고, 서버는 `mvnw.cmd verify`로 확인한다. PostgreSQL Testcontainers가 없는 환경에서는 통합 검사가 skip되므로 실제 릴리스 전 Docker가 있는 CI에서 재실행해야 한다. 공개 프런트와 실기기에서 쿠키·CORS·CSRF, 좁은 화면, 번역, 키보드, 스크린리더, 자정, 통신 재시도를 확인한다.
+
+릴리스 후보에는 [LOVE-001 릴리스 시나리오](release-http-e2e-love-letter.md)의 HTTP-32–36,
+PostgreSQL 17 V30 migration과 STAGE-06을 적용한다. 자동 테스트·실행 증거·staging 판정은
+별개다. 공개 UI, 실제 사전 링크 전달, 동의문 승인, 복구/백업 기한과 알림 준비가 없으면
+활성화 후보는 `BLOCKED`이며, 기본 비활성 상태의 서버 배포와 구분해 기록한다.

@@ -2,7 +2,7 @@
 
 [릴리스 HTTP E2E 개요](release-http-e2e.md) · [위키 홈](../README.md) · 읽는 때: staging 또는 승인된 운영 리허설의 실제 ingress·브라우저·media·부하·복구 gate를 준비·실행할 때
 
-이 문서는 STAGE-01–STAGE-05의 **실행 대기** 수용 조건이다. Testcontainers HTTP E2E와
+이 문서는 STAGE-01–STAGE-05 및 러브레터 활성화 후보의 STAGE-06 **실행 대기** 수용 조건이다. Testcontainers HTTP E2E와
 서로 보완하지만 대체하지 않는다. 실제 실행 전에는
 [행사 당일 운영 절차서](festival-day-runbook.md), [운영 기준](../engineering/operations.md),
 [품질 기준](../engineering/quality.md)을 함께 확인한다.
@@ -153,3 +153,25 @@ dynamic-mutation-interleaving, receipt-rate-limit-mix 프로필을 제공한다.
 **정리.** load data와 dashboards에 user data·secret을 남기지 않는다. rollout decision은 이
 stage 하나가 아니라 required CI, HTTP E2E, product acceptance, migration/operations approval과
 함께 내린다.
+
+## STAGE-06 · LOVE-001 공개·개인정보 운영 리허설
+
+러브레터 **활성화 후보**에 필수다. 서버에 비활성 코드만 배포하고 이번 릴리스에서 공개하지
+않기로 승인했다면 비활성 상태·비노출 증거와 후속 활성화 gate를 기록하고 이 단계만
+`N/A`로 분리할 수 있다. 활성화 후보에서 공개 화면·번역·동의·초기 쪽지가 없으면
+`BLOCKED`이며, 테스트 목 응답만으로 `PASS`를 주지 않는다. 상세 입력·경계 매트릭스는
+[LOVE-001 릴리스 시나리오](release-http-e2e-love-letter.md)를 따른다.
+
+| 단계 | 실행·관측 | 통과·중단 기준 |
+| --- | --- | --- |
+| 06.1 | 비활성 image를 V30이 적용된 전용 staging DB에 배포하고 키/Origin·기간·최종 동의문·양쪽 합성 사전 쪽지·관리자/문의 담당을 확인한 뒤 승인된 관리자만 활성화 | 실제 참여자 정보는 staging으로 복사하지 않는다. 운영 활성화 전에는 별도로 실제 참여자 동의 확보를 확인한다. 한쪽 후보·키·승인이 빠지면 활성화 중단. |
+| 06.2 | 390×844·좁은 화면과 지원 브라우저에서 홈→소개→작성/동의→60초 대기→봉투 개봉→재방문·익일·오류/차단/종료를 이동한다. 한국어/영어/확정된 중국어와 긴 번역, 키보드·스크린리더·초점을 확인 | 로그인 없이 서버 `revealAt`을 따르고, 원문은 번역·영구 저장하지 않으며 연락처는 수동 복사만 허용. UI가 미구현이면 BLOCKED. |
+| 06.3 | 실제 HTTPS ingress에서 `Secure/HttpOnly/SameSite` 쿠키, CORS·Origin·CSRF, 응답 `no-store`, 59/60초와 09시/자정, 응답 유실 뒤 동일 키 재전송, 다른 브라우저 ID 접근, 초대 URL fragment·referrer를 확인 | 응답·HAR·로그에 원문/토큰 없음. 등록 한 번·배정 한 번, 00시~09시와 종료 뒤 열람 차단. 브라우저 삭제를 통한 제한 우회는 남는 위험으로 기록. |
+| 06.4 | 전용 합성 데이터로 마지막 후보 경쟁, 지정일 seed 재시도, 신고→차단→제한·해제→기능 중지, 61개 이상 독립 세션의 단일 프록시 경로, 승인된 상태 조회/쓰기 부하를 연습 | 개인 정보 없이 409/429/5xx·Retry-After, DB lock wait, pool/connection, cleanup 실패와 운영 알림을 분리 관측. 성능 임계값·알림 수신/담당이 승인되지 않았으면 BLOCKED. |
+| 06.5 | 별도 빈 staging 대상으로 백업 복원과 종료+7일 cleanup dry run/실행/재실행, V30을 포함한 이전 image rollback 호환성을 검증 | 복원 직후 기능을 끄고 기한 지난 개인정보를 재삭제한다. DB 및 백업 보존·키 보존/폐기, RPO/RTO, 삭제 건수와 재처리 완료를 보호된 운영 기록에 남긴다. |
+
+각 단계는 같은 candidate commit/image digest와 승인된 합성 fixture를 쓴다. 고객 연락처,
+실제 초대 링크, 암호화 키, raw HAR는 일반 evidence에 첨부하지 않는다. 개인정보 노출,
+배정 중복, 활성화 전제 누락 시 `enabled:false`로 신규 참여와 공개 열람을 멈추고
+복구 확인 전까지 재활성화하지 않는다. V30 테이블을 즉시 삭제하는 rollback은 허용하지
+않으며 개인정보 정리·백업 재삭제 절차를 유지한다.

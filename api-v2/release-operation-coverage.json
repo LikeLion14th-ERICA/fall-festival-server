@@ -1013,8 +1013,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-32"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "startLoveLetterParticipant",
@@ -1030,8 +1032,11 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-32",
+        "HTTP-33"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getLoveLetterStatus",
@@ -1047,8 +1052,13 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-33",
+        "HTTP-34",
+        "HTTP-35",
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "registerLoveLetter",
@@ -1064,8 +1074,11 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-33",
+        "HTTP-34"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "openLoveLetter",
@@ -1081,8 +1094,11 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-33",
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "reportLoveLetter",
@@ -1098,8 +1114,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "claimLoveLetterInvitation",
@@ -1115,8 +1133,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-35"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "seedLoveLetter",
@@ -1132,8 +1152,11 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-32",
+        "HTTP-35"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "reissueLoveLetterInvitation",
@@ -1149,8 +1172,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-35"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getLoveLetterReports",
@@ -1166,8 +1191,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "getLoveLetterReport",
@@ -1183,8 +1210,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "blockLoveLetter",
@@ -1200,8 +1229,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "restrictLoveLetterParticipant",
@@ -1217,8 +1248,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "configureLoveLetters",
@@ -1234,8 +1267,10 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-32"
+      ],
+      "unresolvedReason": null
     },
     {
       "operationId": "enableLoveLetters",
@@ -1251,11 +1286,14 @@
           }
         ]
       },
-      "scenarioIds": [],
-      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+      "scenarioIds": [
+        "HTTP-32",
+        "HTTP-36"
+      ],
+      "unresolvedReason": null
     }
   ],
-  "scenarioCount": 51,
+  "scenarioCount": 56,
   "scenarios": [
     {
       "id": "HTTP-01",
@@ -1796,6 +1834,111 @@
         ]
       },
       "operationIds": []
+    },
+    {
+      "id": "HTTP-32",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds"
+          }
+        ]
+      },
+      "operationIds": [
+        "getLoveLetterGuide",
+        "startLoveLetterParticipant",
+        "seedLoveLetter",
+        "configureLoveLetters",
+        "enableLoveLetters"
+      ]
+    },
+    {
+      "id": "HTTP-33",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds"
+          }
+        ]
+      },
+      "operationIds": [
+        "startLoveLetterParticipant",
+        "getLoveLetterStatus",
+        "registerLoveLetter",
+        "openLoveLetter"
+      ]
+    },
+    {
+      "id": "HTTP-34",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "lastLetterConcurrentRegistrationsCommitOnlyOneParticipant"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds"
+          }
+        ]
+      },
+      "operationIds": [
+        "getLoveLetterStatus",
+        "registerLoveLetter"
+      ]
+    },
+    {
+      "id": "HTTP-35",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "seedInvitationReportBlockAndRestrictionFollowOwnership"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "seededClaimRetriesAssignmentAfterPoolIsReplenished"
+          }
+        ]
+      },
+      "operationIds": [
+        "getLoveLetterStatus",
+        "claimLoveLetterInvitation",
+        "seedLoveLetter",
+        "reissueLoveLetterInvitation"
+      ]
+    },
+    {
+      "id": "HTTP-36",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "seedInvitationReportBlockAndRestrictionFollowOwnership"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java",
+            "test": "anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds"
+          }
+        ]
+      },
+      "operationIds": [
+        "getLoveLetterStatus",
+        "openLoveLetter",
+        "reportLoveLetter",
+        "getLoveLetterReports",
+        "getLoveLetterReport",
+        "blockLoveLetter",
+        "restrictLoveLetterParticipant",
+        "enableLoveLetters"
+      ]
     },
     {
       "id": "OPS-01",
