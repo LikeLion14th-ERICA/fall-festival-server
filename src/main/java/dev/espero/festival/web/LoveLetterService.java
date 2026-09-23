@@ -115,11 +115,11 @@ public class LoveLetterService {
         if (participant.restricted()) return new Status("RESTRICTED", false, null, null, null, csrf(token), null);
         var day = store.dayLetter(participant.id(), today()).orElse(null);
         if (day != null && !"COMPLETED".equals(day.state()))
-            return new Status("SEEDED", false, today().plusDays(1).atTime(9, 0).atZone(SEOUL).toInstant(),
+            return new Status("SEEDED", false, nextOpening(settings),
                 null, null, csrf(token), null);
         Exchange latest = store.latestExchange(participant.id()).orElse(null);
         boolean done = store.participated(participant.id(), today());
-        Instant next = done ? today().plusDays(1).atTime(9, 0).atZone(SEOUL).toInstant() : null;
+        Instant next = done ? nextOpening(settings) : null;
         if (latest != null && clock.instant().isBefore(latest.createdAt().plusSeconds(60)))
             return new Status("WAITING", !done, next, null, null, csrf(token), latest.createdAt().plusSeconds(60));
         if (latest != null && latest.blocked())
@@ -364,6 +364,10 @@ public class LoveLetterService {
         Instant now = clock.instant();
         return !now.isBefore(settings.opensAt()) && now.isBefore(settings.closesAt()) &&
             now.atZone(SEOUL).getHour() >= 9;
+    }
+    private Instant nextOpening(Settings settings) {
+        Instant next = today().plusDays(1).atTime(9, 0).atZone(SEOUL).toInstant();
+        return next.isBefore(settings.closesAt()) ? next : null;
     }
     private Participant requiredParticipant(String token) {
         Participant participant = optionalParticipant(token);
