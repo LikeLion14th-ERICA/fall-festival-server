@@ -1,6 +1,12 @@
 # API 명세서 v2 · 화면 개발용 계약
 
+LOVE-001 러브레터의 경로·상태·가상 예시는 [제품 명세](../docs/wiki/product/love-letter.md),
+[화면 상태](SCREEN-STATES.md), [운영·연동 인계](../docs/wiki/workflow/love-letter-operations.md)를
+함께 본다. 목 서버는 `X-Mock-Session`으로 가상 사용자 상태를 구분한다. 운영 서버의
+HttpOnly 쿠키·Origin·CSRF·DB 원자성은 백엔드 통합 검사에서 검증한다.
+
 상태: **2.0.0-draft.3 — 프런트 개발에 사용할 수 있는 초안**. 백엔드 구현·운영 배포·미정 기능 승인을 의미하지 않습니다.
+LOVE-001 경로는 백엔드 구현을 포함하지만 기능은 기본 비활성이고 운영 활성화를 의미하지 않습니다.
 
 [Product Context](../docs/PRODUCT_CONTEXT.md)와 승인된 사용자 결정에 따라 관리자 규칙은
 [v5](../docs/wiki/product/admin/README.md)로 통일했습니다. 특정 과거 commit이 아니라 현재

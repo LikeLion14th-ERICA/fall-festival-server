@@ -5,5 +5,8 @@ public enum AdminAuditResourceType {
     CROWDING,
     NOTICE,
     GOODS,
-    MEDIA
+    MEDIA,
+    LOVE_LETTER,
+    LOVE_PARTICIPANT,
+    LOVE_SETTINGS
 }

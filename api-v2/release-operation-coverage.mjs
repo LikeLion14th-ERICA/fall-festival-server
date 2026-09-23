@@ -146,6 +146,16 @@ const providerTests = {
   getCurrentAdmin: provider('src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java', 'meUsesAuthenticatedPrincipalWithoutParsingJwt'),
 };
 
+for (const operationId of [
+  'getLoveLetterGuide','startLoveLetterParticipant','getLoveLetterStatus','registerLoveLetter','drawLoveLetter',
+  'drawSeededLoveLetter','openLoveLetter','reportLoveLetter','claimLoveLetterInvitation',
+  'seedLoveLetter','reissueLoveLetterInvitation','getLoveLetterReports','getLoveLetterReport','blockLoveLetter',
+  'restrictLoveLetterParticipant','configureLoveLetters','enableLoveLetters',
+]) providerTests[operationId] = provider(
+  'src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java',
+  'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate'
+);
+
 const operationScenarios = {
   getConfig: ['HTTP-01', 'HTTP-10', 'HTTP-19', 'HTTP-20'],
   getCrowding: ['HTTP-08', 'HTTP-10', 'HTTP-18', 'HTTP-21', 'HTTP-24'],

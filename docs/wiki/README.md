@@ -12,6 +12,7 @@
 | 기능 추가·활성화·제품 판단 | [범위](product/scope.md), [근거](product/sources.md), [결정 대기](product/decisions.md) | 해당 도메인·Figma node |
 | Product 기능·Figma 화면 흐름 대조 | [Design / Wireframe Reference](design/README.md), 해당 [Product 문서](product/overview.md) | Figma node `438:2` |
 | 홈·탭·공지 진입 | [내비게이션](product/navigation.md), [홈](product/home.md) | 앱 내부 공지는 [알림 메시지](product/notice.md) |
+| 러브레터·개인정보·추첨 | [러브레터](product/love-letter.md), [관리자 명세](product/admin/love-letter.md), [설계](engineering/love-letter.md), [보안](engineering/security.md), [디자인 요청](design/love-letter-request.md), [운영 인계](workflow/love-letter-operations.md) | API v2·DB·cleanup |
 | 관리자 공통 범위·제외 기능 | [관리자 Product](product/admin/README.md), [보안](engineering/security.md) | 인증·권한 계약은 별도 설계 |
 | 관리자 혼잡도·운영 시간 연동 | [관리자 혼잡도](product/admin/crowd.md), [홈](product/home.md) | 운영 일정은 개발자 등록, 구현 시 보안·API |
 | 관리자 공지·번역·템플릿 | [관리자 공지](product/admin/notice.md), [알림 메시지](product/notice.md) | 게시·번역 구현은 engineering 문서 |

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 47,
+  "operationCount": 64,
   "operations": [
     {
       "operationId": "getConfig",
@@ -998,6 +998,295 @@
         "HTTP-12"
       ],
       "unresolvedReason": null
+    },
+    {
+      "operationId": "getLoveLetterGuide",
+      "path": "/api/v2/love-letter-guide",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "startLoveLetterParticipant",
+      "path": "/api/v2/love-letter-participants",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "getLoveLetterStatus",
+      "path": "/api/v2/love-letter-status",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "registerLoveLetter",
+      "path": "/api/v2/love-letters",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "drawLoveLetter",
+      "path": "/api/v2/love-letter-draws",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "drawSeededLoveLetter",
+      "path": "/api/v2/love-letter-seeded-draws",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "openLoveLetter",
+      "path": "/api/v2/love-letter-results/{id}/open",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "reportLoveLetter",
+      "path": "/api/v2/love-letter-results/{id}/reports",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "claimLoveLetterInvitation",
+      "path": "/api/v2/love-letter-invitations/claim",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "seedLoveLetter",
+      "path": "/api/v2/admin/love-letters/seeds",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "reissueLoveLetterInvitation",
+      "path": "/api/v2/admin/love-letters/participants/{id}/invitation",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "getLoveLetterReports",
+      "path": "/api/v2/admin/love-letters/reports",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "getLoveLetterReport",
+      "path": "/api/v2/admin/love-letters/reports/{id}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "blockLoveLetter",
+      "path": "/api/v2/admin/love-letters/{id}/block",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "restrictLoveLetterParticipant",
+      "path": "/api/v2/admin/love-letters/participants/{id}/restriction",
+      "method": "PUT",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "configureLoveLetters",
+      "path": "/api/v2/admin/love-letters/configuration",
+      "method": "PUT",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
+    },
+    {
+      "operationId": "enableLoveLetters",
+      "path": "/api/v2/admin/love-letters/settings",
+      "method": "PUT",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java",
+            "test": "loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate"
+          }
+        ]
+      },
+      "scenarioIds": [],
+      "unresolvedReason": "No HTTP/OPS scenario mapping is recorded yet."
     }
   ],
   "scenarioCount": 51,

@@ -7,6 +7,7 @@ import addFormats from 'ajv-formats';
 import { createMockServer } from './server.mjs';
 import { validate as localValidate } from './validate.mjs';
 import { createState,DATES } from './domain.mjs';
+import { LOVE_LETTER_OPERATION_IDS } from './love-letter-contract.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
 const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json'),clientStates=await read('./client-state-examples.json');
@@ -33,6 +34,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   const validateNegative=ajv.compile({...metaSchema,components:spec.components});
   assert.equal(validateNegative({...baseMeta,revision:-1}),false);
   const unscopedOperations=new Set([
+    ...LOVE_LETTER_OPERATION_IDS,
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',

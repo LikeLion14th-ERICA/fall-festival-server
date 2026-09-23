@@ -1,6 +1,7 @@
 package dev.espero.festival.auth;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -83,15 +84,28 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource(AdminAuthProperties properties) {
-        return corsConfigurationSource(properties.allowedOrigin());
+    CorsConfigurationSource corsConfigurationSource(AdminAuthProperties properties,
+        @Value("${festival.love-letter.allowed-origin:}") String loveLetterOrigin) {
+        return corsConfigurationSource(properties.allowedOrigin(), loveLetterOrigin);
     }
 
-    private CorsConfigurationSource corsConfigurationSource(String allowedOrigin) {
+    CorsConfigurationSource corsConfigurationSource(AdminAuthProperties properties) {
+        return corsConfigurationSource(properties.allowedOrigin(), "");
+    }
+
+    private CorsConfigurationSource corsConfigurationSource(String allowedOrigin, String loveLetterOrigin) {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        if (allowedOrigin == null || allowedOrigin.isBlank()) {
-            return source;
+        if (loveLetterOrigin != null && !loveLetterOrigin.isBlank()) {
+            CorsConfiguration love = new CorsConfiguration();
+            love.setAllowedOrigins(List.of(loveLetterOrigin));
+            love.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+            love.setAllowedHeaders(List.of("Content-Type", "Idempotency-Key", "X-Love-Letter-CSRF", "X-Request-Id"));
+            love.setExposedHeaders(List.of("X-Request-Id", "Retry-After"));
+            love.setAllowCredentials(true);
+            for (String path : List.of("/api/v2/love-letters", "/api/v2/love-letter-**", "/api/v2/love-letter-*/**"))
+                source.registerCorsConfiguration(path, love);
         }
+        if (allowedOrigin == null || allowedOrigin.isBlank()) return source;
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(allowedOrigin));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

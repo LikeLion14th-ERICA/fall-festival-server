@@ -1,11 +1,12 @@
 import { readFile,writeFile } from 'node:fs/promises';
 import { schemas,operations,envelopeSchema } from './contract-source.mjs';
+import { LOVE_LETTER_OPERATION_IDS } from './love-letter-contract.mjs';
 import { createState,execute,MOCK_NOW,isoKst,scenarioTime,ApiFailure } from './domain.mjs';
 import { validate } from './validate.mjs';
 import { buildCoverage } from './screen-coverage.mjs';
 import { buildReleaseOperationCoverage } from './release-operation-coverage.mjs';
 
-export const sampleParams={operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',combinationId:'combo-shirt-a-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1',mediaId:'00000000-0000-4000-8000-000000000050',variant:'master'};
+export const sampleParams={id:'00000000-0000-4000-8000-000000000701',operatingDay:'2030-10-01',colorId:'color-a',goodsId:'goods-shirt',sizeId:'size-m',combinationId:'combo-shirt-a-m',artistId:'artist-a',performanceId:'show-1',spaceId:'space-booth',mapId:'map-area',placeId:'place-booth',noticeId:'notice-1',templateId:'template-1',mediaId:'00000000-0000-4000-8000-000000000050',variant:'master'};
 const noticeInput={type:'GENERAL',translations:{ko:{title:'개발용 새 공지',body:'개발용 본문'},en:{title:'New mock notice',body:'Mock body'}},links:[{url:'https://example.invalid/mock-notice-link',labels:{ko:'예시 링크',en:'Sample link','zh-Hans':null,ja:null}}],templateId:null};
 const g=createState().goods[0];
 const productColorIds=new Map(g.colors.map((color,index)=>[color.id,`00000000-0000-4000-8000-${String(101+index).padStart(12,'0')}`]));
@@ -19,13 +20,15 @@ const productInput={
   sizes:g.sizes.map(size=>({...size,id:productSizeIds.get(size.id)})),
   options:g.combinations.map(({colorId,sizeId})=>({colorId:productColorIds.get(colorId),sizeId:productSizeIds.get(sizeId)})),
 };
-const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'ON_SALE'},ProductInput:productInput,NoticeInput:noticeInput,StampReceiptVerificationInput:{code:'482913'},StampCollectionInput:{token:'mock-booth-token-0001'},AdminLoginInput:{username:'mock-admin',password:'MOCK-NOT-A-REAL-SECRET'}};
-const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'15분 유효 signed JWT access token. Authorization: Bearer로 전달.'},AdminRefreshCookie:{type:'apiKey',in:'cookie',name:'__Host-festival-admin-refresh',description:'7일 유효 opaque refresh token. Secure·HttpOnly·SameSite=Strict이며 서버에는 SHA-256 hash만 저장.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-16',commit:'1247890eaa2010d25955662aa172e5839c4da652',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json'},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
+const loveInput={gender:'MALE',name:'개발용 별명',message:'개발용 한 줄 쪽지',contact:'@mock-only-contact',adultConfirmed:true,ownContactConfirmed:true,consentVersion:'mock-v1'};
+const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'ON_SALE'},ProductInput:productInput,NoticeInput:noticeInput,StampReceiptVerificationInput:{code:'482913'},StampCollectionInput:{token:'mock-booth-token-0001'},AdminLoginInput:{username:'mock-admin',password:'MOCK-NOT-A-REAL-SECRET'},LoveLetterInput:loveInput,LoveLetterClaimInput:{invitationToken:'MOCK_ONLY_INVITATION_TOKEN_0000000000000001'},LoveLetterSeedInput:{operatingDate:'2030-10-01',letter:loveInput,consentAt:'2030-09-30T12:00:00+09:00'},LoveLetterRestrictionInput:{restricted:true},LoveLetterEnabledInput:{enabled:true},LoveLetterSettingsInput:{opensAt:'2030-10-01T09:00:00+09:00',closesAt:'2030-10-03T22:00:00+09:00',consentVersion:'mock-v1'}};
+const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'15분 유효 signed JWT access token. Authorization: Bearer로 전달.'},AdminRefreshCookie:{type:'apiKey',in:'cookie',name:'__Host-festival-admin-refresh',description:'7일 유효 opaque refresh token. Secure·HttpOnly·SameSite=Strict이며 서버에는 SHA-256 hash만 저장.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-16',commit:'1247890eaa2010d25955662aa172e5839c4da652',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json',loveLetter:{basis:'LOVE-001 implementation plan; 60-second draw delay',baseCommit:'f6baa581b77b50cdcd2fd6db7c70cd30d01ae57c',path:'docs/wiki/product/love-letter.md'}},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
 const examples={};
 const genericErrors={400:['INVALID_QUERY','잘못된 요청 예시입니다.'],401:['UNAUTHORIZED','관리자 인증이 필요합니다.'],403:['FORBIDDEN','관리자 권한이 없습니다.'],404:['NOT_FOUND','요청한 정보를 찾을 수 없습니다.'],405:['METHOD_NOT_ALLOWED','지원하지 않는 메서드입니다.'],409:['CONFLICT','요청 상태가 충돌합니다.'],413:['PAYLOAD_TOO_LARGE','요청 본문은 64KiB 이하입니다.'],415:['UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.'],422:['VALIDATION_FAILED','요청 필드를 확인해 주세요.'],429:['RATE_LIMITED','잠시 후 다시 요청해 주세요.'],500:['INTERNAL_ERROR','목 서버 처리 중 오류가 발생했습니다.'],503:['SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.']};
 const noBodyStatuses=new Set([204,304]);
 const strongEtagHeader={schema:{type:'string',pattern:'^\"[0-9a-f]{64}\"$'},description:'현재 조건부 응답 표현의 strong ETag'};
 const unscopedOperations=new Set([
+  ...LOVE_LETTER_OPERATION_IDS,
   'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
   'getCrowding','getAdminCrowding','putAdminCrowding',
   'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
@@ -54,6 +57,8 @@ for(const op of operations){
     return [status,response];
   }));
   if(op.operationId==='startStampParticipation')responses[201].headers['Set-Cookie']={schema:{type:'string'},description:'__Host-festival-stamp 익명 참여자 쿠키. Secure; HttpOnly; SameSite=Lax; Path=/; Max-Age 30일(마지막 START부터). 오늘 처음 START하면(201) 발급·갱신하고, 오늘 이미 START했으면 200과 함께 보내지 않는다.'};
+  if(op.operationId==='startLoveLetterParticipant')responses[201].headers['Set-Cookie']={schema:{type:'string'},description:'__Host-festival-love 익명 참여자 쿠키. Secure; HttpOnly; SameSite=Lax; Path=/; Max-Age 30일.'};
+  if(op.operationId==='claimLoveLetterInvitation')responses[200].headers['Set-Cookie']={schema:{type:'string'},description:'사전 참여자에게 귀속된 새 __Host-festival-love 쿠키.'};
   if(['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId))responses[200].headers['Set-Cookie']={schema:{type:'string'},description:op.operationId==='deleteCurrentAdminSession'?'refresh cookie 만료(Max-Age=0)':'Secure; HttpOnly; SameSite=Strict refresh cookie'};
   const headerParameters=[
     ...(op.conditional?[{name:'If-None-Match',in:'header',required:false,schema:op.binaryResponse?{type:'string',pattern:'^(?:\\*|(?:W/)?"[0-9a-f]{64}")$'}:strongEtagHeader.schema,description:op.binaryResponse?'현재 media ETag. weak validator와 *도 GET 비교에 허용.':'표현이 변경되지 않았으면 304를 요청하는 strong ETag'}]:[]),
@@ -91,15 +96,17 @@ for(const op of operations){
       if(special)throw new ApiFailure(...special);
       if(body){const issues=validate(spec.components.schemas[op.input],body,spec);if(issues.length)throw new ApiFailure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.',issues);}
       const result=execute(op,state,{params:sampleParams,query,body,scenario,now});now=result.now;status=result.status;const responseRevision=unscopedOperations.has(op.operationId)?0:state.revision;response=noBodyStatuses.has(status)||op.binaryResponse?null:{data:result.data,meta:usesConditionalMeta?conditionalMeta(responseRevision):meta(responseRevision)};
-    }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;const override=op.responseOverrides?.[status];response={error:{code:override?.code??e.code,message:override?.message??e.message,details:e.details,retryable:override?.retryable??[429,500,503].includes(status)},meta:meta(0)};}
+    }catch(e){if(!(e instanceof ApiFailure))throw e;status=e.status;const override=op.responseOverrides?.[status];response={error:{code:override?.code??e.code,message:override?.message??e.message,details:e.details,retryable:override?.retryable??(['LOVE_POOL_EMPTY','LOVE_WAITING'].includes(e.code)||[429,500,503].includes(status))},meta:meta(0)};}
     if(!responses[status])throw new Error(`Missing response ${op.operationId} ${status}`);
     if(responses[status].content?.['application/json'])responses[status].content['application/json'].examples[scenario]={summary:`${op.summary}: ${scenario}`,value:response};
     const actualPath=op.path.replace(/\{(\w+)\}/g,(_,key)=>sampleParams[key]);
     const qs=new URLSearchParams(query).toString();
     const cookieEndpoint=['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId);
+    const lovePublic=op.path.startsWith('/api/v2/love-letter');
+    const loveWrite=lovePublic&&op.method!=='GET';
     const mutationHeaders={...(op.ifMatchRequired?{'If-Match':'"'+'0'.repeat(64)+'"'}:{}),...(op.idempotencyKeyRequired?{'Idempotency-Key':`mock-${op.operationId}-${scenario}`}:{})};
     const session=scenario==='locale-not-ready'?`locale-not-ready-${op.operationId}`:'frontend-demo';
-    examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':session,...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(body?{'Content-Type':'application/json'}:{}),...(op.multipartInput?{'Content-Type':scenario==='unsupported-media-type'?'application/json':'multipart/form-data; boundary=<generated>'}:{}),...mutationHeaders},...(body?{body}:{}),...(op.multipartInput&&scenario!=='unsupported-media-type'?{multipart:{file:'<binary>'}}:{})},status,response};
+    examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':session,...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint||loveWrite?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(lovePublic&&op.operationId!=='getLoveLetterGuide'&&op.operationId!=='startLoveLetterParticipant'?{Cookie:'__Host-festival-love=MOCK-LOVE-TOKEN'}:{}),...(loveWrite&&op.operationId!=='startLoveLetterParticipant'?{'X-Love-Letter-CSRF':'mock-only-csrf-token'}:{}),...(body?{'Content-Type':'application/json'}:{}),...(op.multipartInput?{'Content-Type':scenario==='unsupported-media-type'?'application/json':'multipart/form-data; boundary=<generated>'}:{}),...mutationHeaders},...(body?{body}:{}),...(op.multipartInput&&scenario!=='unsupported-media-type'?{multipart:{file:'<binary>'}}:{})},status,response};
   }
 }
 const source=JSON.parse(await readFile(new URL('./source-screen-requirements.json',import.meta.url),'utf8'));
