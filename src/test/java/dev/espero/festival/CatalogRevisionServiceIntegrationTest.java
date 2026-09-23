@@ -411,7 +411,7 @@ class CatalogRevisionServiceIntegrationTest {
         assertThat(snapshot.maps()).hasSize(4);
         assertThat(snapshot.overviewId()).hasValue("map-mock-overview");
         assertThat(snapshot.ticketMapTarget()).isNotNull();
-        assertThat(snapshot.home().links()).hasSize(6);
+        assertThat(snapshot.home().links()).hasSize(5);
         assertThat(exports.export(revision).findings()).isEmpty();
     }
 
