@@ -91,4 +91,7 @@ API v2는 공개 앱과 관리자 운영 도구가 공유하는 단일 HTTP 계�
   운영자 상태는 revision과 독립된 `(festival_id, operating_date)` 키의
   `crowding_state_dynamic`에 저장하며 혼잡도 응답 meta의 revision은 항상 0이다.
   게시 snapshot이나 유효한 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`를 반환한다.
+- 아티스트 Hyped 누적 수는 `(festival_id, artist_id)`로 저장되어 catalog revision과 독립적이다.
+  공개 GET·POST의 `meta.revision`은 `0`이며, 참여 가능 여부는 현재 게시된 FestivalDay와
+  서버의 Asia/Seoul 날짜로 판정한다. 응답은 저장하지 않도록 `Cache-Control: no-store`를 사용한다.
 - 보안·인프라 오류 meta는 추가 DB 조회 없이 만들어 원래 장애를 가리지 않는다.

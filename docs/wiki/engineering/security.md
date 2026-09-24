@@ -66,6 +66,7 @@
 | admin | `/api/v2/admin/**` | 60회 즉시, 초당 1회 회복 |
 | admin-login | `POST /admin/sessions`, `/admin/sessions/refresh` | 5회 즉시, 12초마다 1회 회복 |
 | stamp-receipt | `POST /stamp-receipt-verifications` | 5회 즉시, 12초마다 1회 회복 |
+| artist-hyped | `POST /artists/{artistId}/hyped` | 120회 즉시, 초당 4회 회복. 공개 조회 bucket과 분리 |
 
 클라이언트는 `RATE_LIMIT_TRUSTED_PROXY_HOPS`로 정한다. 브라우저 요청은 Next.js proxy와 호스팅
 load balancer를 거치므로 소켓 주소는 proxy다. 0으로 두면 모든 사용자가 한 bucket을 쓰게 되므로

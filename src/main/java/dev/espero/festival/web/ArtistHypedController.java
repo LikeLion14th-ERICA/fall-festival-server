@@ -62,6 +62,7 @@ public class ArtistHypedController {
                     metaSupport.dynamicMeta(request, context.snapshot().context(), context.locale())
                 ));
         } catch (DataAccessException exception) {
+            RequestDiagnostics.failure(request, exception);
             throw unavailable();
         }
     }
@@ -94,6 +95,7 @@ public class ArtistHypedController {
                     metaSupport.dynamicMeta(request, context.snapshot().context(), context.locale())
                 ));
         } catch (DataAccessException exception) {
+            RequestDiagnostics.failure(request, exception);
             throw unavailable();
         }
     }

@@ -1,6 +1,8 @@
 package dev.espero.festival.persistence;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
@@ -62,7 +64,7 @@ public class ArtistHypedStore {
             """, new MapSqlParameterSource()
                 .addValue("festivalId", festivalId)
                 .addValue("artistId", artistId)
-                .addValue("updatedAt", now), Long.class);
+                .addValue("updatedAt", OffsetDateTime.ofInstant(now, ZoneOffset.UTC)), Long.class);
         if (count == null) {
             throw new IllegalStateException("Artist Hyped increment returned no count.");
         }
