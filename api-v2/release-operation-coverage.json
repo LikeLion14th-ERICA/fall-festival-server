@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 47,
+  "operationCount": 49,
   "operations": [
     {
       "operationId": "getConfig",
@@ -212,6 +212,50 @@
       "scenarioIds": [
         "HTTP-05",
         "HTTP-14",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getArtistHyped",
+      "path": "/api/v2/artist-hyped",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java",
+            "test": "validatesHypedReadAndIncrementAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
+        "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "postArtistHyped",
+      "path": "/api/v2/artists/{artistId}/hyped",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java",
+            "test": "validatesHypedReadAndIncrementAgainstOpenApi"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java",
+            "test": "rejectsContestAndClosedDayWithoutIncrement"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-05",
         "HTTP-18"
       ],
       "unresolvedReason": null
@@ -1084,6 +1128,8 @@
       "operationIds": [
         "getLineup",
         "getArtist",
+        "getArtistHyped",
+        "postArtistHyped",
         "getTimetable",
         "getPerformance",
         "getProhibitedItems"
@@ -1308,6 +1354,8 @@
         "getPaymentGuide",
         "getLineup",
         "getArtist",
+        "getArtistHyped",
+        "postArtistHyped",
         "getTimetable",
         "getPerformance",
         "getProhibitedItems",

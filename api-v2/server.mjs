@@ -28,7 +28,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
-    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
+    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
     'postAdminGoodsImage','getGoodsImage'
   ]);

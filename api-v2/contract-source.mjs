@@ -47,6 +47,10 @@ export const schemas = {
   BankAccount: object({ bankName: text('은행명'), accountNumber: text('계좌 문자열. 목 값은 송금할 수 없는 MOCK-NOT-PAYABLE.'), holder: text('예금주') }),
   PaymentGuide: object({ goodsId: id, name: text('요청 공개 언어의 상품명. 해당 언어 번역이 미완료이면 404.'), price: ref('Money'), account: nullable(ref('BankAccount'), '운영 계좌 CLI로 승인된 GOODS 계좌. 미승인이면 null. 관리자 웹에서는 변경 불가.'), transferLink: nullable(ref('Link'), '승인된 계좌 설정의 송금 링크. 없으면 null.'), instructions: array(text('안내 문구'), '현장 확인·송금·지급 안내. 입금/지급 완료 상태 없음.'), locationText: optionalText, hoursText: optionalText }),
   Artist: object({ id, category: enumeration(['ARTIST', 'CONTEST'], '아티스트 / 콘테스트'), name: text('출연진 이름'), image: ref('Image'), introduction: optionalText, socialLinks: array(ref('Link'), '없으면 []와 영역 숨김'), songs: array(ref('Link'), '대표곡명과 YouTube 주소', { maxItems: 3 }), performances: array(object({ id, date, startsAt: timestamp, endsAt: timestamp }), '이 출연진의 등록 공연 일정') }),
+  ArtistHypedItem: object({ artistId: id, hypedCount: integer('축제 전체에서 이 아티스트가 받은 누적 Hyped 수. 공연 날짜와 catalog revision에 독립적.', 0, { maximum: 9007199254740991 }) }),
+  ArtistHypedSummary: object({ hypedEnabled: bool('서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 그날의 운영 시간 밖에서도 true.'), items: array(ref('ArtistHypedItem'), '현재 게시된 ARTIST 전원. artistId 오름차순이며 미참여자는 0. CONTEST는 제외.') }),
+  ArtistHypedIncrement: object({ artistId: id, hypedCount: integer('이번 요청의 원자적 +1 후 누적 Hyped 수.', 1, { maximum: 9007199254740991 }) }),
+  ArtistHypedInput: object({}, [], '빈 JSON 객체만 허용한다. 로그인·참여자 식별자·멱등 키가 없다.'),
   Lineup: object({ date, category: enumeration(['ARTIST', 'CONTEST'], '선택 분류'), items: array(object({ artistId: id, performanceId: id, name: text('출연진명'), image: ref('Image'), order: integer('선택 날짜·분류 내 공연 순서', 1) }), '공연순, 동률 id순. + 버튼만 상세 이동.') }),
   Performance: object({ id, date, title: text('공연명'), artists: array(object({ id, name: text('출연진명') }), '출연진'), startsAt: timestamp, endsAt: timestamp, description: optionalText }),
   Timetable: object({ dates: array(date, '행사 날짜'), axis: object({ startTime: text('시간축 시작 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }), endTime: text('시간축 끝 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }) }), items: array(ref('Performance'), '날짜·시작시각·id 순. 공연 일정은 실시간 갱신 대상 아님.') }),
@@ -96,6 +100,8 @@ export const operations = [
   ['getPaymentGuide','GET','/goods/{goodsId}/payment-guide','PaymentGuide','굿즈 계좌 안내',['GOODS-PAYMENT'],[],['normal','missing-optional','not-found','error']],
   ['getLineup','GET','/lineup','Lineup','날짜·분류별 라인업',['SHOW-LINEUP'],[param('date',date,'생략하면 config.defaultDate. 제공되지 않는 행사 날짜는 400.'),param('category',{...schemas.Artist.properties.category,default:'ARTIST'},'기본 ARTIST')],['normal','empty','error']],
   ['getArtist','GET','/artists/{artistId}','Artist','출연진 상세',['SHOW-ARTIST'],[],['normal','missing-optional','not-found','error']],
+  ['getArtistHyped','GET','/artist-hyped','ArtistHypedSummary','아티스트별 Hyped 누적 수와 참여 가능 상태',['SHOW-LINEUP','SHOW-ARTIST'],[],['normal','closed','ended','empty','error']],
+  ['postArtistHyped','POST','/artists/{artistId}/hyped','ArtistHypedIncrement','아티스트 Hyped +1',['SHOW-ARTIST'],[],['normal','closed','ended','contest','not-found','error'],'ArtistHypedInput'],
   ['getTimetable','GET','/timetable','Timetable','3일 타임테이블',['SHOW-TIMETABLE'],[],['normal','empty','error']],
   ['getPerformance','GET','/performances/{performanceId}','Performance','공연 정보 팝업',['SHOW-POPUP'],[],['normal','missing-optional','not-found','error']],
   ['getProhibitedItems','GET','/prohibited-items','ProhibitedItems','고정 반입 금지 물품 안내',['SHOW-TIMETABLE'],[],['normal','empty','error']],
@@ -128,6 +134,15 @@ Object.assign(operations.find(operation=>operation.operationId==='verifyStampRec
   cacheControl: 'no-store',
 });
 operations.find(operation=>operation.operationId==='getPaymentGuide').cacheControl='no-store';
+for(const operationId of ['getArtistHyped','postArtistHyped']){
+  const operation=operations.find(candidate=>candidate.operationId===operationId);
+  operation.cacheControl='no-store';
+  operation.cacheControlOnErrors=true;
+}
+Object.assign(operations.find(operation=>operation.operationId==='postArtistHyped'), {
+  successStatus: 200,
+  responseOverrides: {409:{description:'축제일 밖에는 Hyped 참여 불가',code:'HYPED_CLOSED',message:'축제일에만 기대돼요에 참여할 수 있습니다.',retryable:false}},
+});
 // Booth stamps: an anonymous HttpOnly participant cookie, never cached.
 Object.assign(operations.find(operation=>operation.operationId==='startStampParticipation'), {
   successStatus: 201,

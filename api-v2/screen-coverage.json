@@ -67,7 +67,8 @@
       "id": "SHOW-LINEUP",
       "name": "라인업 목록",
       "operations": [
-        "getLineup"
+        "getLineup",
+        "getArtistHyped"
       ],
       "browserData": [],
       "legacySource": {
@@ -78,7 +79,9 @@
       "id": "SHOW-ARTIST",
       "name": "출연진 상세",
       "operations": [
-        "getArtist"
+        "getArtist",
+        "getArtistHyped",
+        "postArtistHyped"
       ],
       "browserData": [],
       "legacySource": {
@@ -3700,6 +3703,30 @@
       "requiredInScreen": "필수",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "운영 자료 대기",
+      "pendingIds": ""
+    },
+    {
+      "id": "SHOW-LINEUP-D06",
+      "screenId": "SHOW-LINEUP",
+      "label": "아티스트별 Hyped 누적 수",
+      "target": "ArtistHypedSummary.items[].hypedCount (artistId로 결합, CONTEST 제외)",
+      "owner": "API",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "requiredInScreen": "필수",
+      "sourceDecision": "사용자 결정 2026-09-25",
+      "sourceMaterial": "../docs/wiki/product/lineup.md",
+      "pendingIds": ""
+    },
+    {
+      "id": "SHOW-ARTIST-D09",
+      "screenId": "SHOW-ARTIST",
+      "label": "Hyped 누적 수와 참여 가능 상태",
+      "target": "ArtistHypedSummary.items[].hypedCount + hypedEnabled → ArtistHypedIncrement.hypedCount",
+      "owner": "API",
+      "wikiSource": "../docs/wiki/product/lineup.md",
+      "requiredInScreen": "필수",
+      "sourceDecision": "사용자 결정 2026-09-25",
+      "sourceMaterial": "../docs/wiki/product/lineup.md",
       "pendingIds": ""
     }
   ]

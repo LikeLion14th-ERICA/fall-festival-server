@@ -45,6 +45,18 @@ public class ApiMetaSupport {
         return scopedMeta(request, context.festivalId(), context.revision(), locale, context.timezone());
     }
 
+    /** Dynamic state changes independently of the published catalog revision. */
+    public ApiMeta dynamicMeta(HttpServletRequest request, CatalogSnapshot.FestivalContext context, String locale) {
+        return scopedMeta(request, context.festivalId(), 0, locale, context.timezone());
+    }
+
+    public void setDynamicContext(HttpServletRequest request, CatalogSnapshot.FestivalContext context, String locale) {
+        request.setAttribute(
+            RESPONSE_CONTEXT_ATTRIBUTE,
+            new ResponseContext(context.festivalId(), 0, locale, context.timezone())
+        );
+    }
+
     public void setContext(HttpServletRequest request, CatalogSnapshot.FestivalContext context, String locale) {
         request.setAttribute(
             RESPONSE_CONTEXT_ATTRIBUTE,

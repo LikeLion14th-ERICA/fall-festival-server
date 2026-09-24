@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.regex.Pattern;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,6 +25,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 class RateLimitFilter extends OncePerRequestFilter {
 
     static final String STAMP_RECEIPT_PATH = "/api/v2/stamp-receipt-verifications";
+    private static final String ARTIST_HYPED_PATH = "/api/v2/artist-hyped";
+    private static final Pattern ARTIST_HYPED_MUTATION = Pattern.compile("^/api/v2/artists/[^/]+/hyped$");
 
     private static final HexFormat HEX = HexFormat.of();
     private final RateLimitProperties properties;
@@ -43,6 +47,9 @@ class RateLimitFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String path = request.getRequestURI().substring(request.getContextPath().length());
         String policyName = policyName(request.getMethod(), path);
+        if (path.equals(ARTIST_HYPED_PATH) || ARTIST_HYPED_MUTATION.matcher(path).matches()) {
+            response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
+        }
         if (policyName != null) {
             long retryAfter = limiter.acquire(policyName, policy(policyName), client(request));
             if (retryAfter > 0) {
@@ -62,6 +69,9 @@ class RateLimitFilter extends OncePerRequestFilter {
         if (method.equals("POST") && path.equals(STAMP_RECEIPT_PATH)) {
             return "stamp-receipt";
         }
+        if (method.equals("POST") && ARTIST_HYPED_MUTATION.matcher(path).matches()) {
+            return "artist-hyped";
+        }
         if (method.equals("POST")
             && (path.equals("/api/v2/admin/sessions") || path.equals("/api/v2/admin/sessions/refresh"))) {
             return "admin-login";
@@ -75,6 +85,7 @@ class RateLimitFilter extends OncePerRequestFilter {
     private RateLimitProperties.Policy policy(String name) {
         return switch (name) {
             case "stamp-receipt" -> properties.stampReceipt();
+            case "artist-hyped" -> properties.artistHyped();
             case "admin-login" -> properties.adminLogin();
             case "admin" -> properties.admin();
             default -> properties.publicRead();

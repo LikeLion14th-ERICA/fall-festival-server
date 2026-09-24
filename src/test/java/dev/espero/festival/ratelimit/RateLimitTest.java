@@ -83,6 +83,8 @@ class RateLimitTest {
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/admin/sessions/refresh")).isEqualTo("admin-login");
         assertThat(RateLimitFilter.policyName("PUT", "/api/v2/admin/crowding")).isEqualTo("admin");
         assertThat(RateLimitFilter.policyName("GET", "/api/v2/crowding")).isEqualTo("public-read");
+        assertThat(RateLimitFilter.policyName("GET", "/api/v2/artist-hyped")).isEqualTo("public-read");
+        assertThat(RateLimitFilter.policyName("POST", "/api/v2/artists/artist-a/hyped")).isEqualTo("artist-hyped");
         assertThat(RateLimitFilter.policyName("OPTIONS", "/api/v2/admin/crowding")).isNull();
         assertThat(RateLimitFilter.policyName("GET", "/readyz")).isNull();
     }
@@ -129,7 +131,8 @@ class RateLimitTest {
 
     private static RateLimitFilter filter(int hops) {
         return new RateLimitFilter(
-            new RateLimitProperties(true, hops, null, null, null, null), new RequestRateLimiter(Clock.systemUTC()), null
+            new RateLimitProperties(true, hops, null, null, null, null, null),
+            new RequestRateLimiter(Clock.systemUTC()), null
         );
     }
 
@@ -138,6 +141,8 @@ class RateLimitTest {
         "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf",
         "festival.rate-limit.public-read.capacity=2",
         "festival.rate-limit.public-read.refill-per-second=0.001",
+        "festival.rate-limit.artist-hyped.capacity=2",
+        "festival.rate-limit.artist-hyped.refill-per-second=0.001",
         "festival.rate-limit.stamp-receipt.capacity=1",
         "festival.rate-limit.stamp-receipt.refill-per-second=0.001"
     })
@@ -170,6 +175,27 @@ class RateLimitTest {
                 .andExpect(status().is4xxClientError());
             mvc.perform(post("/api/v2/stamp-receipt-verifications").with(remote("198.51.100.12")))
                 .andExpect(status().isTooManyRequests());
+        }
+
+        @Test
+        void limitsAnonymousHypedWritesSeparatelyFromPublicReads() throws Exception {
+            MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+                .addFilters(context.getBean("rateLimitFilter", org.springframework.boot.web.servlet.FilterRegistrationBean.class)
+                    .getFilter())
+                .apply(springSecurity())
+                .build();
+
+            String path = "/api/v2/artists/artist-a/hyped";
+            mvc.perform(post(path).with(remote("198.51.100.29"))).andExpect(status().isNotFound());
+            mvc.perform(post(path).with(remote("198.51.100.29"))).andExpect(status().isNotFound());
+            mvc.perform(post(path).with(remote("198.51.100.29")))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"));
+            mvc.perform(get("/api/v2/artist-hyped").with(remote("198.51.100.29")))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string("Cache-Control", "no-store"));
         }
     }
 

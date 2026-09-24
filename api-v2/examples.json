@@ -3014,6 +3014,690 @@
       }
     }
   },
+  "getArtistHyped": {
+    "screens": [
+      "SHOW-LINEUP",
+      "SHOW-ARTIST"
+    ],
+    "method": "GET",
+    "path": "/api/v2/artist-hyped",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "hypedEnabled": true,
+            "items": [
+              {
+                "artistId": "artist-a",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-breeze",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-cosmos",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-drift",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-ember",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-fable",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-groove",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-halo",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-iris",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-junction",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-kite",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-lunar",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-mono",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-nova",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-orbit",
+                "hypedCount": 0
+              }
+            ]
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "closed": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "closed",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "hypedEnabled": true,
+            "items": [
+              {
+                "artistId": "artist-a",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-breeze",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-cosmos",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-drift",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-ember",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-fable",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-groove",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-halo",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-iris",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-junction",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-kite",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-lunar",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-mono",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-nova",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-orbit",
+                "hypedCount": 0
+              }
+            ]
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T23:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "ended": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "ended",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "hypedEnabled": false,
+            "items": [
+              {
+                "artistId": "artist-a",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-breeze",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-cosmos",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-drift",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-ember",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-fable",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-groove",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-halo",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-iris",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-junction",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-kite",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-lunar",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-mono",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-nova",
+                "hypedCount": 0
+              },
+              {
+                "artistId": "artist-orbit",
+                "hypedCount": 0
+              }
+            ]
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-04T00:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "empty": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "empty",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "hypedEnabled": true,
+            "items": []
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-getArtistHyped"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/artist-hyped",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "postArtistHyped": {
+    "screens": [
+      "SHOW-ARTIST"
+    ],
+    "method": "POST",
+    "path": "/api/v2/artists/{artistId}/hyped",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "artistId": "artist-a",
+            "hypedCount": 1
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "closed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "closed",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "artistId": "artist-a",
+            "hypedCount": 1
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T23:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "ended": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "ended",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "HYPED_CLOSED",
+            "message": "축제일에만 기대돼요에 참여할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-04T00:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "contest": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "contest",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "not-found": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "not-found",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-postArtistHyped",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/artists/artist-a/hyped",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {}
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
   "getTimetable": {
     "screens": [
       "SHOW-TIMETABLE"

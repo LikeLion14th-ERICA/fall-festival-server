@@ -106,6 +106,7 @@ java -jar target/fall-festival-server-0.0.1-SNAPSHOT.jar
 | `ADMIN_BOOTSTRAP_PASSWORD` | 선택 | (없음) | `db` | 최초 관리자 비밀번호; 양쪽 값이 있을 때 15개 이상의 Unicode code point 및 UTF-8 72바이트 이하 |
 | `STAMP_RECEIPT_CODE_SHA256` | 선택 | (없음) | `db` | 스탬프 수령 인증 코드(6자리 숫자)의 SHA-256 hex. 교체 중에는 쉼표로 여러 개. 없으면 인증 API가 503 |
 | `RATE_LIMIT_ENABLED` | 선택 | `true` | 전체 | `/api/v2` 클라이언트별 요청 수 제한. 초과 시 `429 RATE_LIMITED`와 `Retry-After` |
+| `RATE_LIMIT_ARTIST_HYPED_CAPACITY` / `RATE_LIMIT_ARTIST_HYPED_REFILL_PER_SECOND` | 선택 | `120` / `4.0` | 전체 | 아티스트 Hyped 쓰기 전용 클라이언트별 버킷. 조회 버킷과 분리 |
 | `RATE_LIMIT_TRUSTED_PROXY_HOPS` | 선택 | `0` | 전체 | 앞단에서 `X-Forwarded-For`를 붙이는 신뢰 proxy 수. Next.js proxy와 호스팅 load balancer 뒤면 `2` |
 | `PUBLIC_LOCALES` | 선택 | `ko` | `db` | 공개할 언어, 쉼표 구분(`ko,en,zh-Hans`). 한국어는 항상 공개. 나열한 언어도 게시 catalog의 번역이 모두 있어야 공개되고, 빠지면 시작 로그에 이유를 남기고 `LOCALE_NOT_READY` 유지 |
 | `FESTIVAL_MEDIA_STORAGE_ROOT` | 굿즈 이미지에 필수 | (없음, Docker image는 `/var/lib/espero/media`) | `db` | 굿즈 이미지 원본·변환본을 저장할 쓰기 가능한 디렉터리. 없으면 이미지 업로드·조회가 `503 MEDIA_STORAGE_UNCONFIGURED`이고 상품을 등록할 수 없음. 빈 값이나 쓸 수 없는 경로는 startup 실패 |
