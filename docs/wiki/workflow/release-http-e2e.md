@@ -23,8 +23,9 @@
 | `CatalogPublicationLifecycleE2eTest` | 게시·재시작·rollback의 HTTP 노출 | 1 |
 | DynamicContentReleaseHttpE2eTest | 공지·상품·판매 상태·미디어 lifecycle과 실패 복구 | 5 |
 | OperationalBoundariesHttpE2eTest | 수령 제한, GOODS account/template CLI, 관리자 mutation 경계 | 4 |
+| `ArtistHypedHttpE2eTest` | 익명 Hyped HTTP·게시 아티스트·축제일 경계, hot-row 읽기/쓰기 부하 | 2 (기능 1, 부하 1) |
 
-따라서 현재 실제 HTTP E2E는 8개 class, 30개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-31, 즉 31개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
+따라서 현재 실제 HTTP E2E는 9개 class, 기능 검증 31개와 부하 검증 1개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-32, 즉 32개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
 
 ## 출시 준비 판단
 
@@ -33,7 +34,7 @@
 boundary를 실제 HTTP server·security filter·serialization·runtime storage 흐름으로 추가했다.
 
 HTTP-25–30은 구현됐지만 실행 증거가 없고, HTTP-31은 명시된 인증·idempotency·notice
-boundary만 부분 구현됐다. 따라서 이 suite는 31개 HTTP 위험에 대한 작성된 자동 검증
+boundary만 부분 구현됐다. 따라서 이 suite는 32개 HTTP 위험에 대한 작성된 자동 검증
 근거이며, 전체 릴리스 승인은 실제 실행, 제품 공개 gate, required CI, migration/운영 승인과
 staging 증거를 함께 요구한다.
 
@@ -48,6 +49,7 @@ staging 증거를 함께 요구한다.
 | GOODS account CLI | HTTP-29 | P0 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
 | notice template CLI | HTTP-30 | P1 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
 | admin mutation boundary | HTTP-31 | P1 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
+| 익명 아티스트 Hyped | HTTP-32 | P0 | 실제 게시 아티스트의 반복 클릭·누적 조회·CONTEST 제외·KST 날짜 경계·no-store와 DB 일치 |
 | ingress/browser/media/load rehearsal | STAGE-01–05 | release gate | [staging·운영 리허설 상세](release-http-e2e-staging.md) |
 
 각 ID는 다음 상태 중 하나로 기록한다. **계획**은 수용 조건만 존재함, **구현**은 코드가
@@ -95,7 +97,14 @@ set을 함께 사용하고 revision·Flyway·media·public smoke를 재확인한
 
 HTTP-25–27은 DynamicContentReleaseHttpE2eTest, HTTP-28–31은
 OperationalBoundariesHttpE2eTest에 매핑했다. 중앙 OpenAPI release coverage와 focused class
-선택기는 HTTP-01–31·OPS-01–20, 총 51개 시나리오를 사용한다.
+선택기는 HTTP-01–32·OPS-01–20, 총 52개 시나리오를 사용한다.
+
+`ArtistHypedHttpE2eTest`는 같은 disposable PostgreSQL과 loopback HTTP 서버에서
+8 writers/4 readers와 24 writers/8 readers를 각각 10초간 실행한다. POST 성공 건수와
+최종 HTTP·DB 누적 수의 일치를 검증하고 p95/p99, 오류 표본을
+`target/hyped-load-results/summary.json`에 남긴다. 서버 처리량 측정 동안만 요청 수 제한을
+끄며, 공개 쓰기 제한 자체는 `RateLimitTest`가 별도로 검증한다. 이 결과는 CI runner와
+합성 fixture의 회귀 근거이고 staging·운영 용량을 뜻하지 않는다.
 
 이 변경에서는 사용자 지시에 따라 Maven, Docker, CI, k6와 모든 테스트를 실행하지 않았다.
 실행 명령과 candidate별 PASS/BLOCKED 기록은 검증 명령과 CI 및 각 상세 시나리오 문서를 따른다.

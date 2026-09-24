@@ -231,8 +231,7 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-05",
-        "HTTP-18"
+        "HTTP-32"
       ],
       "unresolvedReason": null
     },
@@ -255,8 +254,7 @@
         ]
       },
       "scenarioIds": [
-        "HTTP-05",
-        "HTTP-18"
+        "HTTP-32"
       ],
       "unresolvedReason": null
     },
@@ -1044,7 +1042,7 @@
       "unresolvedReason": null
     }
   ],
-  "scenarioCount": 51,
+  "scenarioCount": 52,
   "scenarios": [
     {
       "id": "HTTP-01",
@@ -1128,8 +1126,6 @@
       "operationIds": [
         "getLineup",
         "getArtist",
-        "getArtistHyped",
-        "postArtistHyped",
         "getTimetable",
         "getPerformance",
         "getProhibitedItems"
@@ -1354,8 +1350,6 @@
         "getPaymentGuide",
         "getLineup",
         "getArtist",
-        "getArtistHyped",
-        "postArtistHyped",
         "getTimetable",
         "getPerformance",
         "getProhibitedItems",
@@ -1589,6 +1583,22 @@
         ]
       },
       "operationIds": []
+    },
+    {
+      "id": "HTTP-32",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ArtistHypedHttpE2eTest.java",
+            "test": "anonymousClicksFollowPublishedArtistsAndFestivalCalendarThroughHttp"
+          }
+        ]
+      },
+      "operationIds": [
+        "getArtistHyped",
+        "postArtistHyped"
+      ]
     },
     {
       "id": "OPS-01",
