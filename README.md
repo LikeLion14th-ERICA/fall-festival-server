@@ -270,7 +270,7 @@ DB에는 기록이 남아 이미지 조회가 `503`이 됩니다. DB와 이 volu
 
 ```bash
 docker volume create espero-media
-docker run --env-file <server.env> -v espero-media:/var/lib/espero/media -p 8080:8080 fall-festival-server:local
+docker run --env-file <server.env> -v espero-media:/var/lib/espero/media -v espero-logs:/var/log/espero -p 8080:8080 --log-driver local --log-opt max-size=20m --log-opt max-file=5 fall-festival-server:local
 ```
 
 host 디렉터리를 bind mount하려면 먼저 `chown 10001:10001 <dir>`로 container 사용자가 쓸 수 있게 합니다.

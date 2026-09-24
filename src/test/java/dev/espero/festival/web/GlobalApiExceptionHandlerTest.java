@@ -195,7 +195,8 @@ class GlobalApiExceptionHandlerTest {
         assertThat(response.getBody().error().code()).isEqualTo("INTERNAL_ERROR");
         assertThat(response.getBody().error().message()).doesNotContain("jdbc:", "secret");
         assertThat(output)
-            .contains("Unhandled API exception: method=GET path=/api/v2/config error_type=IllegalStateException")
+            .contains("Unhandled API exception: request_id=")
+            .contains("error_type=IllegalStateException")
             .doesNotContain("jdbc:postgresql://user:secret@db.invalid/festival");
     }
 }

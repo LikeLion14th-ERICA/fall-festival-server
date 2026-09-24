@@ -27,6 +27,8 @@ $sampler = $null
 $dbSampler = $null
 $stdoutTask = $null
 $stderrTask = $null
+$stdoutFile = $null
+$stderrFile = $null
 $serverLog = $null
 $serverError = $null
 $statusPath = Join-Path $runDirectory 'run-status.json'
@@ -78,6 +80,10 @@ try {
         $serverInfo.RedirectStandardOutput = $true
         $serverInfo.RedirectStandardError = $true
         $serverInfo.Arguments = "-jar `"$($jar.FullName)`""
+        # Use the release logging defaults, not inherited DEBUG or unrelated file destinations.
+        foreach ($variable in @($serverInfo.EnvironmentVariables.Keys | Where-Object { $_ -like 'LOGGING_*' })) {
+            [void]$serverInfo.EnvironmentVariables.Remove($variable)
+        }
         foreach ($variable in @(
             'SPRING_APPLICATION_JSON', 'JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS',
             'ADMIN_JWT_SIGNING_SECRET', 'ADMIN_ALLOWED_ORIGIN',
@@ -98,14 +104,18 @@ try {
         $serverInfo.EnvironmentVariables['ADMIN_ALLOWED_ORIGIN'] = $adminAllowedOrigin
         # Every virtual user shares one loopback address; this measures server capacity, not the per-client limit.
         $serverInfo.EnvironmentVariables['RATE_LIMIT_ENABLED'] = 'false'
+        $serverInfo.EnvironmentVariables['FESTIVAL_HTTP_LOG_SUCCESS'] = 'true'
+        $serverInfo.EnvironmentVariables['LOGGING_LEVEL_ROOT'] = 'INFO'
         $serverInfo.EnvironmentVariables['FESTIVAL_ID'] = $fixtureFestivalId
         $serverInfo.EnvironmentVariables['SERVER_PORT'] = "$port"
         $serverInfo.EnvironmentVariables['SERVER_ADDRESS'] = '127.0.0.1'
         $server = [System.Diagnostics.Process]::new()
         $server.StartInfo = $serverInfo
         $server.Start() | Out-Null
-        $stdoutTask = $server.StandardOutput.ReadToEndAsync()
-        $stderrTask = $server.StandardError.ReadToEndAsync()
+        $stdoutFile = [System.IO.File]::Open($serverLog, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::Read)
+        $stderrFile = [System.IO.File]::Open($serverError, [System.IO.FileMode]::Create, [System.IO.FileAccess]::Write, [System.IO.FileShare]::Read)
+        $stdoutTask = $server.StandardOutput.BaseStream.CopyToAsync($stdoutFile)
+        $stderrTask = $server.StandardError.BaseStream.CopyToAsync($stderrFile)
 
         $samplesPath = Join-Path $runDirectory 'jstat-samples.csv'
         $smokeReadyPath = Join-Path $runDirectory 'smoke-ready'
@@ -173,10 +183,12 @@ try {
             if ($sampler -and -not $sampler.HasExited) { Stop-Process -Id $sampler.Id -Force -ErrorAction SilentlyContinue }
             if ($dbSampler -and -not $dbSampler.HasExited) { Stop-Process -Id $dbSampler.Id -Force -ErrorAction SilentlyContinue }
             if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue }
-            if ($stdoutTask) { [System.IO.File]::WriteAllText($serverLog, $stdoutTask.GetAwaiter().GetResult()) }
-            if ($stderrTask) { [System.IO.File]::WriteAllText($serverError, $stderrTask.GetAwaiter().GetResult()) }
+            if ($stdoutTask) { $stdoutTask.GetAwaiter().GetResult() }
+            if ($stderrTask) { $stderrTask.GetAwaiter().GetResult() }
         }
         finally {
+            if ($stdoutFile) { $stdoutFile.Dispose() }
+            if ($stderrFile) { $stderrFile.Dispose() }
             docker rm -f $container 2>$null | Out-Null
         }
     }

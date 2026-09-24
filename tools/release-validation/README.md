@@ -59,6 +59,10 @@ the exact source and destination identities in the protected operations record.
    candidate with `docker-run.ps1`. It accepts only a digest, loopback host port,
    existing named media volume, existing Docker network, `db` profile, disabled
    Flyway, and disabled cleanup scheduler.
+   `-LogVolume` selects the persistent log volume (default `<ContainerName>-logs`);
+   reuse it across sequential container replacements. The candidate image must include
+   the writable `/var/log/espero` directory. Logs rotate at 20MB with archive limits
+   of 14 days and 1GB; they do not replace the external alerting/evidence gates.
 4. Verify `/healthz`, `/readyz`, catalog revision, active API operation smoke,
    dynamic DB reads, media responses, CORS/cookie behavior, proxy header handling,
    direct-backend isolation, and request IDs. `/readyz` remains a snapshot-load
