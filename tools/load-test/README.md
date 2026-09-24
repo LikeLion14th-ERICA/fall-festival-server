@@ -77,6 +77,14 @@ early. Server output is saved as `server.log` and `server-error.log`; generator 
 `load-generator.log` and `load-generator-error.log`. `/readyz` is a required gate
 because a process can remain alive after snapshot loading fails.
 
+Server `http_request` JSON events record successful and failed requests with the same
+logging enabled in normal operation. Events include the safe route pattern, status,
+duration, request ID, error code and sanitized failure location. The harness forces
+`FESTIVAL_HTTP_LOG_SUCCESS=true` and INFO root logging so capacity measurements include
+logging overhead. `FESTIVAL_HTTP_SLOW_REQUEST_MS` controls the warning threshold (500 ms).
+Server output streams directly to files during the run instead of accumulating in memory.
+Reserve disk space for full run logs; this harness does not rotate or upload its evidence.
+
 ## Dynamic polling stage (`rate-67`)
 
 After the virtual-user stages the generator offers a fixed arrival rate for

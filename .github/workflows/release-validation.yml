@@ -81,6 +81,14 @@ jobs:
         run: |
           TEST_SELECTION="$(node api-v2/release-test-selection.mjs)"
           sh ./mvnw --batch-mode --no-transfer-progress -Prelease-pg17 "-Dtest=$TEST_SELECTION" test
+      - name: Preserve release test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-pg17-test-reports
+          path: target/surefire-reports/
+          retention-days: 14
+          if-no-files-found: warn
 
   candidate-image:
     name: verify-and-scan-candidate-digest

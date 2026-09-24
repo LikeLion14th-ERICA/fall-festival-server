@@ -1,4 +1,6 @@
 spring:
+  main:
+    banner-mode: off
   application:
     name: fall-festival-server
   jackson:
@@ -22,6 +24,22 @@ spring:
     exclude:
       - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
       - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+
+logging:
+  structured:
+    format:
+      console: logstash
+      file: logstash
+    json:
+      add:
+        service: fall-festival-server
+        release: ${RELEASE_COMMIT:unknown}
+  logback:
+    rollingpolicy:
+      max-file-size: 20MB
+      max-history: 14
+      total-size-cap: 1GB
+      clean-history-on-start: true
 
 server:
   address: ${SERVER_ADDRESS:127.0.0.1}
@@ -48,6 +66,9 @@ festival:
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     trusted-proxy-hops: ${RATE_LIMIT_TRUSTED_PROXY_HOPS:0}
+  http-observation:
+    slow-request-ms: ${FESTIVAL_HTTP_SLOW_REQUEST_MS:500}
+    log-success: ${FESTIVAL_HTTP_LOG_SUCCESS:true}
   # Languages to publish besides Korean, comma-separated (en, zh-Hans). A listed
   # language is served only when its catalog content is complete; otherwise it
   # stays LOCALE_NOT_READY and the reason is logged at startup.

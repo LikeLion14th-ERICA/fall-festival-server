@@ -10,6 +10,7 @@ param(
     [Parameter(Mandatory)]
     [ValidatePattern('^[a-z0-9][a-z0-9_.-]*$')]
     [string]$MediaVolume,
+    [string]$LogVolume = '',
     [Parameter(Mandatory)]
     [ValidatePattern('^[a-z0-9][a-z0-9_.-]*$')]
     [string]$Network,
@@ -31,6 +32,9 @@ function Require([bool]$condition, [string]$message) {
 Require $ConfirmStagingTarget.IsPresent 'Pass -ConfirmStagingTarget only after verifying the protected staging target identity.'
 Require ($Environment -eq 'staging') 'This template permits staging only.'
 Require ($Image -match '^.+@sha256:[0-9a-f]{64}$') 'Image must be an immutable image@sha256 reference.'
+if (-not $LogVolume) { $LogVolume = "$ContainerName-logs" }
+Require ($LogVolume -match '^[a-z0-9][a-z0-9_.-]*$') 'Log volume name is invalid.'
+Require ($LogVolume -ne $MediaVolume) 'Log and media volumes must be separate.'
 
 $envPath = (Resolve-Path -LiteralPath $RuntimeEnvFile).Path
 $settings = @{}
@@ -73,7 +77,14 @@ $arguments = @(
     '--network', $Network,
     '--publish', "127.0.0.1:${HostPort}:8080",
     '--mount', "type=volume,src=$MediaVolume,dst=/var/lib/espero/media",
+    '--mount', "type=volume,src=$LogVolume,dst=/var/log/espero",
     '--env-file', $envPath,
+    '--env', 'LOGGING_FILE_NAME=/var/log/espero/application.jsonl',
+    '--env', 'FESTIVAL_HTTP_LOG_SUCCESS=true',
+    '--env', 'LOGGING_LEVEL_ROOT=INFO',
+    '--log-driver', 'local',
+    '--log-opt', 'max-size=20m',
+    '--log-opt', 'max-file=5',
     '--label', 'espero.release-environment=staging',
     '--label', "espero.release-image=$Image",
     $Image

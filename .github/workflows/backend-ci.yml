@@ -27,6 +27,14 @@ jobs:
           cache-dependency-path: pom.xml
       - name: Verify backend
         run: sh ./mvnw --batch-mode --no-transfer-progress verify
+      - name: Preserve backend test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports-java-${{ matrix.java }}
+          path: target/surefire-reports/
+          retention-days: 14
+          if-no-files-found: warn
 
   api-v2-contract:
     name: api-v2-contract

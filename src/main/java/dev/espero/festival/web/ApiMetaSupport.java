@@ -108,7 +108,7 @@ public class ApiMetaSupport {
         String locale,
         ZoneId timezone
     ) {
-        return new ApiMeta(
+        ApiMeta meta = new ApiMeta(
             resolveRequestId(request),
             OffsetDateTime.now(clock.withZone(timezone)).truncatedTo(ChronoUnit.MILLIS),
             timezone.getId(),
@@ -117,6 +117,8 @@ public class ApiMetaSupport {
             locale,
             false
         );
+        request.setAttribute(RequestDiagnostics.META, meta);
+        return meta;
     }
 
     private record ResponseContext(String festivalId, long revision, String locale, ZoneId timezone) {}

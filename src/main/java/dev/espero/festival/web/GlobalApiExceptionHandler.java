@@ -122,7 +122,9 @@ public class GlobalApiExceptionHandler {
         MediaServiceUnavailableException exception,
         HttpServletRequest request
     ) {
-        log.error("Goods media infrastructure failure: method={} path={}", request.getMethod(), request.getRequestURI());
+        RequestDiagnostics.failure(request, exception);
+        log.error("Goods media infrastructure failure: request_id={} diagnostic={}",
+            ApiMetaSupport.resolveRequestId(request), RequestDiagnostics.describe(exception));
         return error(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "일시적으로 이미지를 처리할 수 없습니다.", true, request);
     }
 
@@ -142,11 +144,12 @@ public class GlobalApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
+        RequestDiagnostics.failure(request, exception);
         log.error(
-            "Unhandled API exception: method={} path={} error_type={}",
-            request.getMethod(),
-            request.getRequestURI(),
-            exception.getClass().getSimpleName()
+            "Unhandled API exception: request_id={} error_type={} diagnostic={}",
+            ApiMetaSupport.resolveRequestId(request),
+            exception.getClass().getSimpleName(),
+            RequestDiagnostics.describe(exception)
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody("INTERNAL_ERROR", "처리 중 오류가 발생했습니다.", List.of(), true),

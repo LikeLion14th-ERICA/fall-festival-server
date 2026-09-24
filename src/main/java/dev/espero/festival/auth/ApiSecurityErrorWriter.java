@@ -3,6 +3,7 @@ package dev.espero.festival.auth;
 import dev.espero.festival.web.ApiErrorResponse;
 import dev.espero.festival.web.ApiMeta;
 import dev.espero.festival.web.ApiMetaSupport;
+import dev.espero.festival.web.RequestDiagnostics;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class ApiSecurityErrorWriter {
         boolean retryable
     ) throws IOException {
         ApiMeta meta = metaSupport.metaForError(request);
+        RequestDiagnostics.error(request, code);
         response.setStatus(status);
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

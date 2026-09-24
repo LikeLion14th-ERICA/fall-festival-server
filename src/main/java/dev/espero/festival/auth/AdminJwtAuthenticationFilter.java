@@ -69,6 +69,7 @@ public class AdminJwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             account = store.findAccountById(claims.adminId()).orElse(null);
         } catch (DataAccessException exception) {
+            dev.espero.festival.web.RequestDiagnostics.failure(request, exception);
             serviceUnavailable(request, response);
             return;
         }

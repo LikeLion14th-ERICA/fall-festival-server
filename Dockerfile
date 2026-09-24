@@ -39,14 +39,14 @@ RUN apk add --no-cache libwebp-tools wget \
     && img2webp -version \
     && addgroup -S -g 10001 app \
     && adduser -S -D -H -u 10001 -G app app \
-    && mkdir -p /var/lib/espero/media \
-    && chown app:app /var/lib/espero/media
+    && mkdir -p /var/lib/espero/media /var/log/espero \
+    && chown app:app /var/lib/espero/media /var/log/espero
 
 WORKDIR /app
 COPY --from=build --chown=app:app \
     /workspace/target/fall-festival-server-*.jar app.jar
 
-ARG VCS_REF
+ARG VCS_REF=unknown
 LABEL org.opencontainers.image.revision=$VCS_REF
 
 # Goods images are stored here. Mount a named volume at this path so the files
@@ -54,9 +54,12 @@ LABEL org.opencontainers.image.revision=$VCS_REF
 # directory's ownership. The fixed UID/GID 10001 lets a host directory be
 # prepared for a bind mount instead.
 ENV SERVER_ADDRESS=0.0.0.0 \
+    RELEASE_COMMIT=$VCS_REF \
     SERVER_PORT=8080 \
-    FESTIVAL_MEDIA_STORAGE_ROOT=/var/lib/espero/media
+    FESTIVAL_MEDIA_STORAGE_ROOT=/var/lib/espero/media \
+    LOGGING_FILE_NAME=/var/log/espero/application.jsonl
 VOLUME ["/var/lib/espero/media"]
+VOLUME ["/var/log/espero"]
 
 USER app
 EXPOSE 8080
