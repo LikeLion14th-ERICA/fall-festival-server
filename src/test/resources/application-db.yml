@@ -1,5 +1,9 @@
 festival:
   id: ec00912b-763f-4f8f-8f57-4bdfc389ccbf
+  love-letter:
+    # Integration tests call the retry sweep explicitly; unrelated DB contexts
+    # must not keep polling a Testcontainers database after it has stopped.
+    seed-retry-enabled: false
   # Integration tests send many requests from one address; RateLimitFilterTest covers limiting.
   rate-limit:
     enabled: false

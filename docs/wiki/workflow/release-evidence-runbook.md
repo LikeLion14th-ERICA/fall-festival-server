@@ -66,7 +66,7 @@ report hash를 반드시 연결한다. registry 주소, credential, secret, host
 | Candidate identity | commit·image·catalog candidate가 같은 후보인지 | SHA, image digest, OCI revision label과 candidate commit 일치, manifest/revision ID, 생성 시각 |
 | OpenAPI contract | 후보 계약과 생성 artifact가 일치하는지 | `api-v2/openapi.json` SHA-256, source revision, contract check 결과 |
 | Migration | Flyway history와 후보 SQL checksum이 일치하는지 | migration 목록·checksum, schema 대상, `mutationAuthorized` 판정 |
-| Operation mapping | 44개 OpenAPI operation classification과 provider·scenario mapping이 후보와 일치하는지 | classification/provider·scenario mapping hash, check 결과, 누락·중복 0 판정 |
+| Operation mapping | 후보 OpenAPI 전체 operation(현재 62개)의 classification과 provider·scenario mapping이 후보와 일치하는지 | classification/provider·scenario mapping hash, check 결과, 누락·중복 0 판정 |
 | Scan | dependency/container vulnerability, secret, misconfiguration 결과와 CodeQL Java/Kotlin 분석 | Trivy image/filesystem scan evidence, `HIGH,CRITICAL` fail-closed 결과, CodeQL report·check reference, report hash, waiver 승인 ID |
 | PostgreSQL 17 | 지원 PostgreSQL 17 staging에서 preflight와 migration 확인 | server version, schema, Flyway result/checksum, read-only preflight 결과 |
 | Automated release E2E | disposable Testcontainers DB에서 후보 import/publish, 공개 흐름, admin 경계, rollback/restart 관계 | 실행 ID, exit code, scenario summary, `/healthz`, `/readyz`, `meta.revision` |
@@ -75,10 +75,12 @@ report hash를 반드시 연결한다. registry 주소, credential, secret, host
 | Recovery | DB와 media를 같은 recovery set으로 복원하고 검증 | recovery set ID, dump/media checksum, restore 시각, revision/media smoke |
 | Browser handoff | 지원 브라우저·viewport에서 운영자와 사용자 흐름 인수인계 | browser/version/viewport, run ID, navigation/back·cookie·CORS 결과, owner sign-off |
 
-자동 release E2E의 HTTP-01~31와 OPS-01~20은 disposable Testcontainers PostgreSQL DB 전용이다.
+자동 release E2E의 HTTP-01~36와 OPS-01~20은 disposable Testcontainers PostgreSQL DB 전용이다.
 이 자동 검사는 실제 staging datasource·운영 DB·원격 개발 DB를 사용하지 않으며, Docker가 없으면
 성공으로 취급하지 않는다. 실제 staging은 별도 후보 image를 배포해 smoke, load, browser handoff,
-recovery를 실행하고 그 결과를 별도 gate evidence로 연결한다. 각 절차와 기존 시나리오·load 기준은
+recovery를 실행하고 그 결과를 별도 gate evidence로 연결한다. 러브레터 활성화 후보는
+[LOVE-001 릴리스 시나리오](release-http-e2e-love-letter.md)의 STAGE-06 증거도 연결한다.
+각 절차와 기존 시나리오·load 기준은
 [검증 명령과 CI](validation.md), [운영·카탈로그 구현 인수인계](ops-catalog-handoff.md),
 [운영](../engineering/operations.md)을 따른다. 이 문서는 그 결과를 다시 구현하거나 숫자를
 복제하지 않고 후보별 증거를 연결한다.

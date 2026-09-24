@@ -1,6 +1,12 @@
 # API 명세서 v2 · 화면 개발용 계약
 
+LOVE-001 러브레터의 경로·상태·가상 예시는 [제품 명세](../docs/wiki/product/love-letter.md),
+[화면 상태](SCREEN-STATES.md), [운영·연동 인계](../docs/wiki/workflow/love-letter-operations.md)를
+함께 본다. 목 서버는 `X-Mock-Session`으로 가상 사용자 상태를 구분한다. 운영 서버의
+HttpOnly 쿠키·Origin·CSRF·DB 원자성은 백엔드 통합 검사에서 검증한다.
+
 상태: **2.0.0-draft.3 — 프런트 개발에 사용할 수 있는 초안**. 백엔드 구현·운영 배포·미정 기능 승인을 의미하지 않습니다.
+LOVE-001 경로는 백엔드 구현을 포함하지만 기능은 기본 비활성이고 운영 활성화를 의미하지 않습니다.
 
 [Product Context](../docs/PRODUCT_CONTEXT.md)와 승인된 사용자 결정에 따라 관리자 규칙은
 [v5](../docs/wiki/product/admin/README.md)로 통일했습니다. 특정 과거 commit이 아니라 현재
@@ -11,9 +17,9 @@ branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 �
 | 결과물 | 용도 |
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
-| [ENDPOINTS.md](ENDPOINTS.md) | 44개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 263개 응답 원문 |
-| [SCREEN-DATA.md](SCREEN-DATA.md) | 26개 화면의 유효 176개·제외 11개 필드 → API 또는 프런트 상태 추적표 |
+| [ENDPOINTS.md](ENDPOINTS.md) | 62개 요청과 지원 시나리오 빠른 조회 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 468개 응답 원문 |
+| [SCREEN-DATA.md](SCREEN-DATA.md) | 26개 화면의 유효 177개·제외 10개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |
 | [client-state-examples.json](client-state-examples.json) | 스탬프 등 HTTP 응답으로 만들지 않는 로컬 상태 |
@@ -27,16 +33,16 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 예제는 source module에서 생성되므로 생성 JSON만 직접 수정하지 않습니다.
 
 릴리스 coverage metadata도 `openapi.json`에서 자동 inventory합니다. 원천 매핑은
-`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 44개 operation이
+`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 62개 operation이
 정확히 한 번 분류되는지, 각 live operation의 provider test와
-HTTP-01~31·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
-live provider와 51개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
+HTTP-01~36·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
+live provider와 56개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
 정렬된 Maven `-Dtest` CSV로 출력합니다. 이 검사는 제품 route를 활성화하지 않습니다.
 
-현재 Spring Boot 서버에는 공개 공연 조회인 `GET /api/v2/lineup`,
-`/artists/{artistId}`, `/timetable`, `/performances/{performanceId}`,
-`/prohibited-items`와 홈 공통 설정 `GET /api/v2/config`가 구현되어 있습니다. 다른 계약 경로는 각 구현 상태를 별도로 확인해야 하며,
-계약에 있다는 사실만으로 실제 서버 구현이나 공개 승인을 의미하지 않습니다.
+Spring Boot 서버에는 공개 공연 조회·홈 설정을 포함한 API v2 구현과 LOVE-001 백엔드가
+있습니다. 러브레터는 기본 비활성이며 공개 화면·운영 자료가 준비되기 전에는 활성화하지
+않습니다. 다른 계약 경로도 각 구현 상태를 별도로 확인해야 하며, 계약에 있다는 사실만으로
+실제 서버 구현이나 공개 승인을 의미하지 않습니다.
 
 ## 공통 계약
 

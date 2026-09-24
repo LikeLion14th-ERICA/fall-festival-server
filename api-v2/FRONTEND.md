@@ -1,5 +1,10 @@
 # 프런트 연동 안내
 
+LOVE-001 러브레터는 [화면 상태](SCREEN-STATES.md)와 [운영·연동 인계](../docs/wiki/workflow/love-letter-operations.md)의
+전용 쿠키·CSRF·동일 요청 키 재전송 흐름을 따른다. 이름·내용·연락처는 브라우저 영구
+저장소나 분석 이벤트에 남기지 않는다. 60초·09시 경계, 오류·차단·재방문과 모바일
+인수 기준은 [LOVE-001 릴리스 시나리오](../docs/wiki/workflow/release-http-e2e-love-letter.md)를 사용한다.
+
 ## 실제 서버와 목 서버
 
 | 대상 | API base URL | 용도 |

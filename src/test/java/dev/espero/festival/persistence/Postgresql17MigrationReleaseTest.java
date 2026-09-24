@@ -30,6 +30,17 @@ class Postgresql17MigrationReleaseTest {
     private static final String GOODS_ID = "01234567-89ab-4cde-8fab-012345678901";
     private static final String NOTICE_ID = "01234567-89ab-4cde-8fab-012345678902";
     private static final String MEDIA_ID = "01234567-89ab-4cde-8fab-012345678903";
+    private static final String STAMP_PARTICIPANT_ONE = "01234567-89ab-4cde-8fab-012345678920";
+    private static final String STAMP_PARTICIPANT_TWO = "01234567-89ab-4cde-8fab-012345678921";
+    private static final String STAMP_PARTICIPANT_THREE = "01234567-89ab-4cde-8fab-012345678922";
+    private static final String LOVE_AUTHOR_ID = "01234567-89ab-4cde-8fab-012345678930";
+    private static final String LOVE_RECEIVER_ID = "01234567-89ab-4cde-8fab-012345678931";
+    private static final String LOVE_INVITED_ID = "01234567-89ab-4cde-8fab-012345678932";
+    private static final String LOVE_LETTER_ID = "01234567-89ab-4cde-8fab-012345678933";
+    private static final String LOVE_OTHER_LETTER_ID = "01234567-89ab-4cde-8fab-012345678934";
+    private static final String LOVE_EXCHANGE_ID = "01234567-89ab-4cde-8fab-012345678935";
+    private static final String LOVE_REPORT_ID = "01234567-89ab-4cde-8fab-012345678936";
+    private static final String LOVE_INVITATION_ID = "01234567-89ab-4cde-8fab-012345678937";
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
@@ -50,33 +61,46 @@ class Postgresql17MigrationReleaseTest {
     }
 
     @Test
-    void freshV1ThroughV26ValidatesChecksumsAndRestartsWithoutMigrations() throws SQLException {
-        assertThat(flyway(26).migrate().migrationsExecuted).isEqualTo(26);
-        assertHistory(26);
+    void freshV1ThroughV30ValidatesChecksumsAndRestartsWithoutMigrations() throws SQLException {
+        assertThat(flyway(30).migrate().migrationsExecuted).isEqualTo(30);
+        assertHistory(30);
         assertThat(text("SELECT count(*) FROM media_assets")).isEqualTo("0");
         assertThat(text("SELECT count(*) FROM goods_images")).isEqualTo("0");
         assertThat(text("SELECT count(*) FROM goods_image_translations")).isEqualTo("0");
         assertThat(text("SELECT count(*) FROM festival_title_translations")).isEqualTo("0");
+        assertLoveLetterTablesAreEmpty();
         assertTemplatePlaceholder();
         assertRestartIsUnchanged();
     }
 
     @Test
-    void v23DataAndConstraintsSurviveV24V25V26AndRestart() throws SQLException {
+    void v23DataAndConstraintsSurviveSequentialMigrationsThroughV30AndRestart() throws SQLException {
         assertThat(flyway(23).migrate().migrationsExecuted).isEqualTo(23);
         assertHistory(23);
         seedV23State();
+        assertThat(text("SELECT count(*) FROM festival_links WHERE kind='WELCOME_DAY'")).isEqualTo("1");
         Map<String, String> preserved = snapshot(tables(), true);
-        for (int version = 24; version <= 26; version++) {
+        for (int version = 24; version <= 30; version++) {
             List<String> previousHistory = history();
             assertThat(flyway(version).migrate().migrationsExecuted).isOne();
             assertHistory(version);
             assertThat(history().subList(0, version - 1)).isEqualTo(previousHistory);
-            assertThat(snapshot(preserved.keySet().stream().toList(), true)).isEqualTo(preserved);
+            if (version == 29) {
+                Map<String, String> unaffected = new LinkedHashMap<>(preserved);
+                unaffected.remove("festival_links");
+                unaffected.remove("festival_link_translations");
+                assertThat(snapshot(unaffected.keySet().stream().toList(), true)).isEqualTo(unaffected);
+            } else {
+                assertThat(snapshot(preserved.keySet().stream().toList(), true)).isEqualTo(preserved);
+            }
             switch (version) {
                 case 24 -> verifyTranslations();
                 case 25 -> verifyGoodsMedia();
                 case 26 -> verifyNoticeTemplates();
+                case 27 -> verifyBoothStampSchema();
+                case 28 -> verifyStampDailyBackfill();
+                case 29 -> verifyWelcomeDayRemoval();
+                case 30 -> verifyLoveLetterSchemaAndCascades();
                 default -> throw new AssertionError("Unexpected migration target");
             }
             preserved = snapshot(tables(), true);
@@ -124,6 +148,10 @@ class Postgresql17MigrationReleaseTest {
             VALUES ('%4$s', 'ko', '기존 공지', '보존할 본문');
             INSERT INTO operational_account_settings (festival_id, purpose, state, version)
             VALUES ('%2$s', 'TICKET', 'UNCONFIGURED', 1);
+            INSERT INTO festival_links (festival_revision_id, id, kind, url, sort_order)
+            VALUES ('%1$s', 'release-welcome', 'WELCOME_DAY', 'https://example.test/welcome', 1);
+            INSERT INTO festival_link_translations (festival_revision_id, link_id, locale, label)
+            VALUES ('%1$s', 'release-welcome', 'ko', 'Welcome fixture');
             INSERT INTO catalog_revision_audit
                 (festival_id, revision_id, action, actor, created_at)
             VALUES ('%2$s', '%1$s', 'IMPORT', 'migration-test', CURRENT_TIMESTAMP);
@@ -196,6 +224,162 @@ class Postgresql17MigrationReleaseTest {
             .isEqualTo("0");
     }
 
+    private void verifyBoothStampSchema() throws SQLException {
+        execute("""
+            INSERT INTO stamp_booths (festival_revision_id, id, name, sort_order)
+            VALUES ('%1$s', 'release-booth', 'Migration fixture booth', 1);
+            INSERT INTO stamp_booth_tokens (festival_revision_id, booth_id, valid_date, token_sha256)
+            VALUES ('%1$s', 'release-booth', NULL, repeat('b', 64));
+            INSERT INTO stamp_participants (id, festival_id, token_sha256, created_at)
+            VALUES
+                ('%2$s', '%3$s', repeat('c', 64), '2030-10-01T11:00:00+09:00'),
+                ('%4$s', '%3$s', repeat('d', 64), '2030-10-01T11:00:00+09:00'),
+                ('%5$s', '%3$s', repeat('e', 64), '2030-10-01T11:00:00+09:00');
+            INSERT INTO stamp_collections (participant_id, operating_date, booth_id, collected_at)
+            VALUES
+                ('%2$s', '2030-10-02', 'release-booth', '2030-10-02T10:00:00+09:00'),
+                ('%4$s', '2030-10-01', 'release-booth', '2030-10-01T12:00:00+09:00');
+            """.formatted(REVISION_ID, STAMP_PARTICIPANT_ONE, FESTIVAL_ID,
+                STAMP_PARTICIPANT_TWO, STAMP_PARTICIPANT_THREE));
+        rejects("""
+            INSERT INTO stamp_booth_tokens (festival_revision_id, booth_id, valid_date, token_sha256)
+            VALUES ('%1$s', 'release-booth', '2030-10-01', 'bad-hash')
+            """.formatted(REVISION_ID), "23514");
+        assertThat(text("""
+            SELECT count(*) FROM pg_catalog.pg_tables
+            WHERE schemaname = current_schema() AND tablename = 'stamp_participant_days'
+            """)).isEqualTo("0");
+    }
+
+    private void verifyStampDailyBackfill() throws SQLException {
+        assertThat(text("SELECT count(*) FROM stamp_participant_days")).isEqualTo("4");
+        assertThat(text("""
+            SELECT to_char(started_at AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
+            FROM stamp_participant_days WHERE participant_id='%1$s' AND operating_date='2030-10-02'
+            """.formatted(STAMP_PARTICIPANT_ONE))).isEqualTo("2030-10-02 01:00:00");
+        assertThat(text("""
+            SELECT to_char(started_at AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
+            FROM stamp_participant_days WHERE participant_id='%1$s' AND operating_date='2030-10-01'
+            """.formatted(STAMP_PARTICIPANT_TWO))).isEqualTo("2030-10-01 03:00:00");
+        assertThat(text("""
+            SELECT to_char(started_at AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')
+            FROM stamp_participant_days WHERE participant_id='%1$s' AND operating_date='2030-10-01'
+            """.formatted(STAMP_PARTICIPANT_THREE))).isEqualTo("2030-10-01 02:00:00");
+        rejects("""
+            INSERT INTO stamp_participant_days (participant_id, operating_date, started_at)
+            VALUES ('%1$s', '2030-10-01', CURRENT_TIMESTAMP)
+            """.formatted(STAMP_PARTICIPANT_THREE), "23505");
+    }
+
+    private void verifyWelcomeDayRemoval() throws SQLException {
+        assertThat(text("SELECT count(*) FROM festival_links WHERE id='release-welcome'")).isEqualTo("0");
+        assertThat(text("SELECT count(*) FROM festival_link_translations WHERE link_id='release-welcome'")).isEqualTo("0");
+        rejects("""
+            INSERT INTO festival_links (festival_revision_id, id, kind, url, sort_order)
+            VALUES ('%1$s', 'removed-welcome', 'WELCOME_DAY', 'https://example.test/welcome', 1)
+            """.formatted(REVISION_ID), "23514");
+    }
+
+    private void verifyLoveLetterSchemaAndCascades() throws SQLException {
+        assertLoveLetterTablesAreEmpty();
+        execute("""
+            INSERT INTO love_letter_settings (festival_id, opens_at, closes_at, consent_version)
+            VALUES ('%1$s', '2030-10-01T00:00:00Z', '2030-10-03T15:00:00Z', 'v1');
+            INSERT INTO love_letter_participants (id, festival_id, token_sha256, created_at)
+            VALUES
+                ('%2$s', '%1$s', repeat('a', 64), '2030-10-01T03:00:00Z'),
+                ('%3$s', '%1$s', repeat('b', 64), '2030-10-01T03:00:00Z'),
+                ('%4$s', '%1$s', NULL, '2030-10-01T03:00:00Z');
+            INSERT INTO love_letters
+                (id, festival_id, author_id, created_date, gender, name_cipher, body_cipher, contact_cipher,
+                 key_version, consent_version, consent_at, created_at)
+            VALUES
+                ('%5$s', '%1$s', '%2$s', '2030-10-01', 'FEMALE', 'encrypted-name', 'encrypted-body',
+                 'encrypted-contact', 'v1', 'v1', '2030-10-01T03:00:00Z', '2030-10-01T03:00:00Z');
+            INSERT INTO love_letter_participation_days
+                (participant_id, operating_date, letter_id, state, completed_at)
+            VALUES ('%2$s', '2030-10-01', '%5$s', 'COMPLETED', '2030-10-01T03:00:00Z');
+            INSERT INTO love_letter_exchanges (id, festival_id, receiver_id, letter_id, operating_date, created_at)
+            VALUES ('%6$s', '%1$s', '%3$s', '%5$s', '2030-10-01', '2030-10-01T03:00:00Z');
+            INSERT INTO love_letter_requests
+                (participant_id, operating_date, idempotency_key, request_hmac, letter_id)
+            VALUES ('%2$s', '2030-10-01', 'release-register', repeat('f', 64), '%5$s');
+            INSERT INTO love_letter_invitations (id, participant_id, token_sha256, operating_date, created_at)
+            VALUES ('%7$s', '%2$s', repeat('e', 64), '2030-10-01', '2030-10-01T03:00:00Z');
+            INSERT INTO love_letter_reports (id, exchange_id, reporter_id, created_at)
+            VALUES ('%8$s', '%6$s', '%3$s', '2030-10-01T03:01:00Z');
+            INSERT INTO love_letters
+                (id, festival_id, author_id, created_date, gender, name_cipher, body_cipher, contact_cipher,
+                 key_version, consent_version, consent_at, created_at)
+            VALUES
+                ('%9$s', '%1$s', '%4$s', '2030-10-01', 'MALE', 'encrypted-name-2', 'encrypted-body-2',
+                 'encrypted-contact-2', 'v1', 'v1', '2030-10-01T03:00:00Z', '2030-10-01T03:00:00Z');
+            """.formatted(FESTIVAL_ID, LOVE_AUTHOR_ID, LOVE_RECEIVER_ID, LOVE_INVITED_ID,
+                LOVE_LETTER_ID, LOVE_EXCHANGE_ID, LOVE_INVITATION_ID, LOVE_REPORT_ID, LOVE_OTHER_LETTER_ID));
+
+        assertThat(text("SELECT count(*) FROM love_letter_settings")).isEqualTo("1");
+        assertThat(text("SELECT count(*) FROM love_letter_participants")).isEqualTo("3");
+        assertThat(text("SELECT count(*) FROM love_letters")).isEqualTo("2");
+        assertThat(text("SELECT count(*) FROM love_letter_exchanges")).isEqualTo("1");
+        assertThat(text("SELECT count(*) FROM love_letter_reports")).isEqualTo("1");
+        assertThat(text("SELECT count(*) FROM love_letter_requests")).isEqualTo("1");
+        assertThat(text("SELECT count(*) FROM love_letter_invitations")).isEqualTo("1");
+
+        rejects("""
+            UPDATE love_letter_settings SET opens_at=closes_at WHERE festival_id='%1$s'
+            """.formatted(FESTIVAL_ID), "23514");
+        rejects("""
+            INSERT INTO love_letter_participants (id, festival_id, token_sha256, created_at)
+            VALUES ('01234567-89ab-4cde-8fab-012345678938', '%1$s', 'bad-hash', CURRENT_TIMESTAMP)
+            """.formatted(FESTIVAL_ID), "23514");
+        rejects("""
+            INSERT INTO love_letters
+                (id, festival_id, author_id, created_date, gender, name_cipher, body_cipher, contact_cipher,
+                 key_version, consent_version, consent_at, created_at)
+            VALUES ('01234567-89ab-4cde-8fab-012345678939', '%1$s', '%2$s', '2030-10-02', 'OTHER',
+                'name', 'body', 'contact', 'v1', 'v1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """.formatted(FESTIVAL_ID, LOVE_INVITED_ID), "23514");
+        rejects("""
+            INSERT INTO love_letter_requests
+                (participant_id, operating_date, idempotency_key, request_hmac)
+            VALUES ('%1$s', '2030-10-01', 'bad-result', repeat('f', 64))
+            """.formatted(LOVE_RECEIVER_ID), "23514");
+        rejects("""
+            INSERT INTO love_letter_requests
+                (participant_id, operating_date, idempotency_key, request_hmac, letter_id)
+            VALUES ('%1$s', '2030-10-01', 'release-register', repeat('f', 64), '%2$s')
+            """.formatted(LOVE_AUTHOR_ID, LOVE_LETTER_ID), "23505");
+        rejects("""
+            INSERT INTO love_letter_reports (id, exchange_id, reporter_id, created_at)
+            VALUES ('01234567-89ab-4cde-8fab-012345678942', '%1$s', '%2$s', CURRENT_TIMESTAMP)
+            """.formatted(LOVE_EXCHANGE_ID, LOVE_RECEIVER_ID), "23505");
+        rejects("""
+            INSERT INTO love_letter_exchanges (id, festival_id, receiver_id, letter_id, operating_date, created_at)
+            VALUES ('01234567-89ab-4cde-8fab-012345678940', '%1$s', '%2$s', '%3$s', '2030-10-02', CURRENT_TIMESTAMP)
+            """.formatted(FESTIVAL_ID, LOVE_INVITED_ID, LOVE_LETTER_ID), "23505");
+        rejects("""
+            INSERT INTO love_letter_exchanges (id, festival_id, receiver_id, letter_id, operating_date, created_at)
+            VALUES ('01234567-89ab-4cde-8fab-012345678941', '%1$s', '%2$s', '%3$s', '2030-10-01', CURRENT_TIMESTAMP)
+            """.formatted(FESTIVAL_ID, LOVE_RECEIVER_ID, LOVE_OTHER_LETTER_ID), "23505");
+
+        execute("DELETE FROM love_letter_participants WHERE id='%s'".formatted(LOVE_AUTHOR_ID));
+        assertThat(text("SELECT count(*) FROM love_letter_participants")).isEqualTo("2");
+        assertThat(text("SELECT count(*) FROM love_letters")).isEqualTo("1");
+        assertThat(text("SELECT count(*) FROM love_letter_participation_days")).isEqualTo("0");
+        assertThat(text("SELECT count(*) FROM love_letter_exchanges")).isEqualTo("0");
+        assertThat(text("SELECT count(*) FROM love_letter_reports")).isEqualTo("0");
+        assertThat(text("SELECT count(*) FROM love_letter_requests")).isEqualTo("0");
+        assertThat(text("SELECT count(*) FROM love_letter_invitations")).isEqualTo("0");
+    }
+
+    private void assertLoveLetterTablesAreEmpty() throws SQLException {
+        for (String table : List.of("love_letter_settings", "love_letter_participants", "love_letters",
+            "love_letter_participation_days", "love_letter_exchanges", "love_letter_requests",
+            "love_letter_invitations", "love_letter_reports")) {
+            assertThat(text("SELECT count(*) FROM \"" + table + "\"")).as(table).isEqualTo("0");
+        }
+    }
+
     private void assertTemplatePlaceholder() throws SQLException {
         assertThat(text("SELECT count(*) FROM notice_templates")).isEqualTo("1");
         assertThat(text("""
@@ -219,7 +403,7 @@ class Postgresql17MigrationReleaseTest {
     private void assertRestartIsUnchanged() throws SQLException {
         List<String> beforeHistory = history();
         Map<String, String> beforeData = snapshot(tables(), false);
-        Flyway restarted = flyway(26);
+        Flyway restarted = flyway(30);
         assertThat(restarted.migrate().migrationsExecuted).isZero();
         assertThat(restarted.validateWithResult().validationSuccessful).isTrue();
         assertThat(restarted.info().pending()).isEmpty();

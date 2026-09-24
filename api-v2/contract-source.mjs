@@ -1,5 +1,6 @@
 // OpenAPI authoring source. Run npm run generate; server consumes openapi.json.
 import { applyAdminContract } from './admin-contract.mjs';
+import { applyLoveLetterContract } from './love-letter-contract.mjs';
 const text = (description, extra = {}) => ({ type: 'string', minLength: 1, description, ...extra });
 const integer = (description, minimum = 0, extra = {}) => ({ type: 'integer', minimum, description, ...extra });
 const bool = description => ({ type: 'boolean', description });
@@ -147,4 +148,5 @@ Object.assign(operations.find(operation=>operation.operationId==='getTicketGuide
 });
 
 applyAdminContract(schemas,operations);
+applyLoveLetterContract(schemas,operations);
 export const envelopeSchema = (name, metaName = 'Meta') => object({ data: ref(name), meta: ref(metaName) });

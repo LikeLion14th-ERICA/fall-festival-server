@@ -57,7 +57,8 @@ strict 후보에서는 최소 하나의 공간·대표 지도 경로·PLACE 핀�
 navigation/back 상태, Secure·SameSite cookie, 관리자 proxy, 모바일 네트워크 복귀와 polling은
 web 저장소와 실기기 acceptance gate에서 확인한다.
 
-현재 release E2E 시나리오는 HTTP-01~24와 OPS-01~20, 총 **44개**다. 이 수는 관련 요청을
+2026-09-22 인수인계 당시 release E2E 시나리오는 HTTP-01~24와 OPS-01~20, 총 **44개**였다.
+현재 목록·개수는 [릴리스 HTTP E2E](release-http-e2e.md)를 확인한다. 이 수는 관련 요청을
 한 lifecycle 안에 묶는 JUnit method 수와 다르며, 각 시나리오의 상세 매핑은
 [검증 명령](validation.md#릴리스-후보-backend-e2e)에 둔다.
 
@@ -117,8 +118,10 @@ package 뒤 운영 runbook대로 별도로 실행한다. 단, 이 검증도 원�
   다시 실행한다.
 - 재개 전 `git fetch origin`으로 최신 `main`을 확인한다. `origin/main`을 포함하지 않은 branch는
   먼저 병합하고, 충돌을 해결한 뒤 HTTP·운영자 focused 명령과 전체 `clean verify`를 다시 실행한다.
-- 현재 matrix는 HTTP-01~24와 OPS-01~20, 총 44개다. focused 명령의 JUnit invocation은 HTTP
-  20개, 운영자·개발자 도구 48개다. scenario 수와 invocation 수를 같은 수치로 보고하지 않는다.
+- 이 인수인계 시점의 matrix는 HTTP-01~24와 OPS-01~20, 총 44개였다. focused 명령의 당시
+  JUnit invocation은 HTTP 20개, 운영자·개발자 도구 48개였다. 최신 범위는
+  [릴리스 HTTP E2E](release-http-e2e.md)를 사용하고, scenario 수와 invocation 수를 같은
+  수치로 보고하지 않는다.
 - 유지해야 할 경계: 비축제일 관리자 혼잡도 PUT은 `409 NOT_FESTIVAL_DAY`, 실제 FestivalDay의
   운영 전·후 저장은 허용한다. pre-open 티켓은 계좌를 노출하지 않는다. legacy ticket 일정은
   import·validate·publish 모두 `LEGACY_TICKET_SCHEDULE_UNCONFIGURED`으로 차단한다. `null`

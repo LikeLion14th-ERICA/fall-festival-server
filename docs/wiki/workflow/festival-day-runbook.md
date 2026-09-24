@@ -102,11 +102,12 @@ Cloudflare TLS/proxy 설정은 아직 확인되지 않았으므로 아래 절차
    위치는 C·D가 작업 기록에 남기고, 아래의 보존 정책을 적용한다.
 3. 새 이미지로 교체할 때는 기존에 확인한 `espero-media` volume을 반드시 다시 mount하고,
    DB 접속 환경변수와 `FESTIVAL_ID`를 유지한다. volume 없이 컨테이너를 재생성하지 않는다.
-4. Flyway는 애플리케이션 시작 시 자동 실행될 수 있다. 현재 사전 점검 결과는 PostgreSQL
-   17.11, `public` schema, V1~V26 전부 `success`이며 현재 SQL과 checksum이 일치한다.
-   새 artifact가 추가 migration을 포함하거나 이력·checksum이 다르면 재시작하지 말고 DB
-   담당자와 먼저 검토한다. Flyway migration을 수동으로 되돌리거나 장애 복구 중 임의로
-   migrate/import/publish하지 않는다.
+4. Flyway는 애플리케이션 시작 시 자동 실행될 수 있다. 이전 운영 사전 점검 결과는 PostgreSQL
+   17.11, `public` schema, V1~V26 전부 `success`였다. LOVE-001 후보는 V30까지 포함하므로
+   [PG17 migration 및 LOVE 릴리스 검증](release-http-e2e-love-letter.md)과 현재 운영 DB의
+   실제 history/checksum을 대조한 뒤 적용 여부를 판단한다. 새 artifact가 추가 migration을
+   포함하거나 이력·checksum이 다르면 재시작하지 말고 DB 담당자와 먼저 검토한다.
+   Flyway migration을 수동으로 되돌리거나 장애 복구 중 임의로 migrate/import/publish하지 않는다.
 5. 재기동 후 `/healthz`가 200이고 `/readyz`가 200인지, 공개 API의 `meta.revision`이 의도한
    published snapshot인지 확인한다. 실제로 연결된 굿즈 이미지가 있으면 공개 굿즈 응답이 돌려준
    `images[].masterUrl`을 확인된 공개 URL에서 `GET`해 `200`인지 확인한다. 이 검증은 volume
@@ -158,7 +159,7 @@ revision, media 파일 조회를 확인한 뒤에만 트래픽을 재개한다. 
 | A1 접속과 현재 상태 | C / D | 승인된 접속 경로, 현재 container ID·image digest·생성 시각, 실행 중인 health 응답 | 접속 권한 또는 현재 상태를 확인할 수 없음 |
 | 컨테이너 교체 | C / D | 실제 `docker run` 명령의 안전한 참조, 환경변수 주입 방식·secret 저장 위치 참조, host port/network, `espero-media` mount와 DB/FESTIVAL_ID 유지 여부 | 실제 실행 옵션·volume 연결을 확인하지 못함 |
 | Caddy·TLS·Cloudflare | C / D | `Caddyfile` 위치, 설정 검증·적용·되돌림 명령, backend upstream, TLS 발급 방식, Cloudflare proxy/DNS 상태 | Caddyfile 또는 공개 HTTPS 경로를 검증하지 못함 |
-| Flyway 사전 점검·적용 | D / C | V1~V26 history/checksum, 기존 data 범위, provider mutation 승인, 적용 여부와 중단 판단 | `STOP_AND_REVIEW`, `mutationAuthorized=false`, history/checksum 불일치 또는 승인 부재 |
+| Flyway 사전 점검·적용 | D / C | 현재 운영 history/checksum, 후보 V1~V30 순차 적용·기존 data 보존, provider mutation 승인, 적용 여부와 중단 판단 | `STOP_AND_REVIEW`, `mutationAuthorized=false`, history/checksum 불일치 또는 승인 부재 |
 | 이전 이미지·DB·media 복구 | C / D | 이전 image digest, 같은 recovery set ID의 DB·media artifact, 복원 대상과 검증 결과 | 이전 이미지 또는 짝지어진 recovery set이 없음 |
 | 배포·복구 smoke | C / D | `/healthz`, `/readyz`, 공개 API `meta.revision`, 연결된 굿즈 이미지 `masterUrl` 200 결과 | 어느 required probe가 실패하거나 연결 이미지 전달을 확인하지 못함 |
 
@@ -239,7 +240,7 @@ ETag와 상태가 바뀌었는지 다음 polling 또는 즉시 조회로 확인�
 - [ ] `/healthz`·`/readyz`로 재시작 뒤 정상 기동을 확인했다.
 - [ ] 재기동·이미지 교체 전 DB와 `espero-media` volume을 같은 백업 artifact ID로 함께 보관했다.
 - [ ] backup recovery set의 보존 기간과 삭제 예정 시점이 정책에 맞고, DB·media가 함께 관리된다.
-- [ ] 복구 시 Flyway V1~V26 history/checksum, published revision, media 이미지 조회를 확인했다.
+- [ ] 복구 시 적용된 Flyway 버전의 history/checksum(LOVE-001 후보는 V30까지), published revision, media 이미지 조회를 확인했다.
 - [ ] 재기동 뒤 실제로 연결된 굿즈 이미지의 확인된 공개 URL이 `200`을 반환했다(이미지가 없으면 이 항목은 미완료다).
 - [ ] 혼잡도 저장 전 Asia/Seoul의 오늘이 실제 `FestivalDay`이고 GET의 `data.operatingDay`도 오늘인지 확인했다. 관리자 JWT, 최신 `If-Match`, `Idempotency-Key`를 사용해 204 및 공개 조회 반영을 확인했으며, `NOT_FESTIVAL_DAY`이면 중단했다.
 - [ ] A1 접속·container/image·실행 옵션·Caddy·Flyway·복구 세트의 실제 증거와 중단 판단을 작업 기록에 남겼다.

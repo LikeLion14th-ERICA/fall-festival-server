@@ -1,5 +1,6 @@
 // Fictional fixtures only. No DB, actual festival dates, account, or user records.
 import { initializeAdmin,hoursFor,inventoryFor,adminExecute,validateNotice } from './admin-domain.mjs';
+import { executeLoveLetter } from './love-letter-domain.mjs';
 export const MOCK_NOW = '2030-10-01T18:00:00+09:00';
 export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
@@ -355,6 +356,8 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   const getAvailability=goodsId=>inventoryFor(state,goodsId,{failure,sold,locale});
   const extra=adminExecute(op,state,{params,body,scenario,mutate,failure,DATES});
   if(extra)return {status:extra.status||200,data:extra.data,now,locale};
+  const love=executeLoveLetter(op,state,{params,body,scenario,now,locale,failure});
+  if(love)return love;
   switch(op.operationId){
     case 'getConfig':data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:DATES,defaultDate:empty?null:defaultDate(date)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}]}};break;
     case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale,op.operationId==='getAdminCrowding');break;

@@ -20,7 +20,10 @@ final class DatabasePreflight {
         "flyway_schema_history", "admin_accounts", "admin_refresh_sessions", "admin_audit_events",
         "admin_idempotency_records", "catalog_revision_audit", "crowding_state",
         "crowding_state_dynamic", "festivals", "festival_revisions",
-        "operational_account_settings", "operational_account_setting_history");
+        "operational_account_settings", "operational_account_setting_history",
+        "love_letter_settings", "love_letter_participants", "love_letters",
+        "love_letter_participation_days", "love_letter_exchanges", "love_letter_requests",
+        "love_letter_invitations", "love_letter_reports");
     private final MigrationInventory inventory;
 
     DatabasePreflight(MigrationInventory inventory) {

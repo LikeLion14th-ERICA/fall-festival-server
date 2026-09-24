@@ -61,6 +61,13 @@ festival:
   # Never put the code itself here; without a value the check answers 503.
   stamp-receipt:
     code-sha256: ${STAMP_RECEIPT_CODE_SHA256:}
+  # LOVE-001 remains disabled until an operator configures the period, consent,
+  # both seed pools and the server-only encryption key. Never commit real values.
+  love-letter:
+    key-base64: ${LOVE_LETTER_KEY_BASE64:}
+    key-version: ${LOVE_LETTER_KEY_VERSION:v1}
+    allowed-origin: ${LOVE_LETTER_ALLOWED_ORIGIN:}
+    seed-retry-enabled: ${LOVE_LETTER_SEED_RETRY_ENABLED:true}
   # Per-client limits on /api/v2. trusted-proxy-hops is the number of proxies in
   # front of the server that append X-Forwarded-For (0 = the socket address).
   rate-limit:

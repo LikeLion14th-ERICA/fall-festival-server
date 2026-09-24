@@ -33,7 +33,9 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 테스트 위치는 `src/test/java`다. DB 및 운영 배포는 아직 구성하지 않았다.
 
 `.github/workflows/backend-ci.yml`의 릴리스 관련 검사 이름은 `backend-verify (Java 21)`,
-`backend-verify (Java 25)`, `api-v2-contract`, `docker-build`, `security-filesystem`이다.
+`backend-verify (Java 25)`, `pg17-love-letter-regression`, `api-v2-contract`, `docker-build`,
+`security-filesystem`이다. PR의 PG17 검사는 V30 migration과 LOVE-001 MockMvc·실제 HTTP를
+집중 실행하고, 전체 release 선택 목록의 후보별 검증은 별도의 release workflow가 실행한다.
 `security-filesystem`은 루트 backend의 의존성·비밀값·설정을 검사하고, 별도 실기기 검증
 프로젝트인 최상위 `test/`만 제외한다. `docker-build`는 root `Dockerfile`로 만든 런타임
 이미지를 별도로 검사한다. 두 Trivy 검사는 수정 여부와 관계없이 high/critical finding에서
@@ -54,9 +56,10 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 동일한 고정 이미지를 사용한다. `test/` 실기기 검증 환경의 PostgreSQL 설정은 별개다.
 
 `Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의
-새 임시 database에 V1~V26을 적용하는 경우와, V23에서 지도·안내·굿즈·공지·계좌 이력의
-fixture를 만든 뒤 V24 → V25 → V26을 차례로 적용하는 경우를 검사한다. 각 단계는
-Flyway history·checksum, 기존 데이터의 전체 행 보존, 번역·미디어·템플릿 제약을
+새 임시 database에 V1~V30을 적용하는 경우와, V23에서 지도·안내·굿즈·공지·계좌 이력의
+fixture를 만든 뒤 V24 → V25 → V26 → V27 → V28 → V29 → V30을 차례로 적용하는 경우를
+검사한다. 각 단계는 Flyway history·checksum, 기존 데이터의 행 보존(단 V29에서 의도한
+웰컴데이 링크 정리), 번역·미디어·템플릿·스탬프·러브레터 제약을
 검증하고 새 Flyway 인스턴스의 재기동에서 migration 0건·history/데이터 무변경을 확인한다.
 기존 migration SQL을 그대로 사용하며 원격 DB나 staging·prod 설정을 읽지 않는다.
 
@@ -79,7 +82,7 @@ class의 결과를 검사한다. 필수 class 누락, 0건, migration 시나리�
 
 ### 릴리스 후보 backend E2E
 
-현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-31`의 범위, 아직 구현하지 않은
+현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-36`의 범위, 아직 구현하지 않은
 보강 후보와 staging gate는 [릴리스 HTTP E2E 시나리오](release-http-e2e.md)에 정리한다.
 
 `ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는
@@ -127,8 +130,15 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-29 | GOODS account CLI | 실제 child JVM dry-run/set/stale/clear/restart가 payment-guide에 반영되고 TICKET state를 바꾸지 않음을 확인 |
 | HTTP-30 | notice template CLI | preview·전체 교체·관리자 목록/상세·template 삭제 뒤 notice 보존·malformed/duplicate 무변경을 확인 |
 | HTTP-31 | 관리자 mutation boundary | 8개 mutation route의 auth/key/precondition 거절과 notice replay/stale/key reuse side effect를 부분 범위로 확인 |
+| HTTP-32 | 러브레터 활성화·익명 경계 | 기간·동의문·남/여 seed 후 활성화, 실제 관리자 인증, 공개 안내·전용 쿠키·Origin/CSRF와 기능 중지 전제를 확인 |
+| HTTP-33 | 사전 배정·60초 개봉 | 등록과 이성 쪽지 배정의 원자성, 59/60초 상태/결과 ID·연락처 비노출, 본인 개봉·타 브라우저 거절, DB 암호문을 확인 |
+| HTTP-34 | 마지막 쪽지·요청 재전송 | 두 브라우저 동시 등록의 단일 배정, 실패자의 등록/당일 기록 무변경, 동일 키 replay와 다른 본문 키 충돌을 확인 |
+| HTTP-35 | 사전 초대·자동 재시도 | 링크 재발급/무효화·지정일 claim, 쪽지 부족의 권리 보존·자동 재시도와 60초 제한을 확인 |
+| HTTP-36 | 신고·차단·제한·중지 | 수신자 전용 신고, 관리자 목록/상세·차단, 기존 연락처 열람 중지와 당일 재추첨 금지, 참여 제한·해제를 확인 |
 
-위 HTTP-01~31은 서로 다른 출시 위험을 나타내는 **31개 시나리오**다. JUnit test
+위 HTTP-01~36은 서로 다른 출시 위험을 나타내는 **36개 시나리오**다. LOVE-001의
+입력·동시성·보안·정리와 staging 상세 판정은 [러브레터 릴리스 시나리오](release-http-e2e-love-letter.md)를
+따른다. JUnit test
 method는 관계된 요청을 한 transaction·server lifecycle 안에서 묶으므로 시나리오 수와
 method 수가 같지 않다.
 
@@ -142,7 +152,7 @@ cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessH
 E2E는 다음 명령으로 실행한다.
 
 ```powershell
-cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,DynamicContentReleaseHttpE2eTest,OperationalBoundariesHttpE2eTest test"
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,DynamicContentReleaseHttpE2eTest,OperationalBoundariesHttpE2eTest,LoveLetterReleaseHttpE2eTest test"
 ```
 
 다른 후보 manifest는 경로를 시스템 프로퍼티로 준다. 이 기본 모드에서는 빈 공간·지도와
@@ -202,8 +212,8 @@ main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource�
 | OPS-20 | legacy 티켓 일정 복구 | 날짜·송금·수령의 필수 일정 6개 각각 누락 시 export finding과 import/validate/publish 차단·무변경을 확인하고, 값을 복구한 retry만 게시 가능 |
 
 `null` PLACE filter는 현재 계약상 정상이며 OPS-19에서 lossless로 보존한다. 위
-OPS-01~20은 **20개 시나리오**다. HTTP 31개와 합쳐 현재 backend release E2E 시나리오는
-**51개**다.
+OPS-01~20은 **20개 시나리오**다. HTTP 36개와 합쳐 현재 backend release E2E 시나리오는
+**56개**다.
 
 운영 도구 focused 검증은 다음 명령으로 실행한다.
 

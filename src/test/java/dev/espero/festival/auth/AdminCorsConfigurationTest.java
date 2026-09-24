@@ -26,6 +26,24 @@ class AdminCorsConfigurationTest {
         assertThat(cors.getAllowCredentials()).isTrue();
     }
 
+    @Test
+    void loveLetterOriginAllowsCredentialedNestedRoutesAndCsrfHeader() {
+        SecurityConfiguration configuration = new SecurityConfiguration();
+        var source = configuration.corsConfigurationSource(properties(), "http://localhost:5173");
+        MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/api/v2/love-letter-results/123/open");
+        request.addHeader("Origin", "http://localhost:5173");
+        request.addHeader("Access-Control-Request-Method", "POST");
+        CorsConfiguration cors = source.getCorsConfiguration(request);
+        assertThat(cors).isNotNull();
+        assertThat(cors.getAllowedOrigins()).containsExactly("http://localhost:5173");
+        assertThat(cors.getAllowedHeaders()).contains("X-Love-Letter-CSRF", "Idempotency-Key");
+        assertThat(cors.getAllowCredentials()).isTrue();
+        MockHttpServletRequest registration = new MockHttpServletRequest("OPTIONS", "/api/v2/love-letters");
+        registration.addHeader("Origin", "http://localhost:5173");
+        registration.addHeader("Access-Control-Request-Method", "POST");
+        assertThat(source.getCorsConfiguration(registration)).isNotNull();
+    }
+
     private AdminAuthProperties properties() {
         return new AdminAuthProperties(
             Duration.ofMinutes(15),

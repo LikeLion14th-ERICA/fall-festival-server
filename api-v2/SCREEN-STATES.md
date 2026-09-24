@@ -39,3 +39,26 @@
 새로고침 없는 반영의 통신 방식·최대 지연, 실제 이미지 업로드·번역 서비스는 별도 합의 대상입니다.
 비HTTP 예제는 [client-state-examples.json](client-state-examples.json)을 사용합니다.
 실기기 QR·모바일 렌더링·실제 송금 연결은 목 HTTP 검증으로 대체하지 않습니다.
+
+## LOVE-001 러브레터 상태
+
+| 상태 | API 판단 | 화면과 버튼 |
+|---|---|---|
+| 작성 가능 | `status.state=WRITABLE`, `canParticipate=true` | 입력·동의 후 등록. 등록 버튼을 누른 동안 중복 입력 금지 |
+| 60초 대기 | `WAITING`, `revealAt`, 결과 ID 없음 | 등록과 동시에 배정은 확정. 서버 시각 기준 남은 시간 표시. 재방문에도 등록값을 다시 받지 않음 |
+| 사전 등록 대기 | `SEEDED` | 링크 연결 직후 새 쿠키·CSRF 사용. 상대 쪽지가 없으면 서버가 지정일 안에 배정을 다시 시도 |
+| 봉투 도착 | `SEALED`, `exchangeId` | 연락처 없이 봉투와 열기 버튼. 개봉 POST 전에는 원문 표시 금지 |
+| 열람 완료 | `OPENED` | 최초 개봉 응답에 이름·내용·연락처. 새로 방문한 상태 조회에는 연락처만 표시 |
+| 결과 차단 | `RESULT_BLOCKED` | 연락처 숨김, 차단 안내. 당일 재추첨 없음 |
+| 참여 제한 | `RESTRICTED` | 추첨·열람 버튼 비활성. 운영 문의 경로 안내 |
+| 운영 전·야간·종료 | `BEFORE_OPEN` 또는 `CLOSED` | 행사일 09:00~24:00 운영. 00:00~09:00에는 당일 09:00 개장 안내, 최종 종료 후에는 열람 없음 |
+
+등록은 `POST /love-letters`로 쪽지 저장과 추첨을 함께 확정하고 그날의 작성 권리를 사용한다.
+`WAITING` 동안 결과 ID와 연락처는 응답에 없으며 `revealAt` 이후 상태 조회에서 봉투 ID가 나온다.
+`LOVE_WAITING`은 60초 전에 봉투를 열려고 한 경우다. `LOVE_POOL_EMPTY`는 등록·당일 제한을
+적용하지 않으므로 작성 화면에서 등록을 재시도한다.
+`LOVE_ALREADY_PARTICIPATED`는 상태를 다시 조회한다. 통신 응답 유실에는 동일한
+`Idempotency-Key`와 동일 본문으로 각 요청을 재전송한다. `LOVE_IDEMPOTENCY_CONFLICT`는 다른
+본문에 키를 재사용한 경우다. `LOVE_INVITATION_INVALID`는 만료·사용·재발급된 링크를
+같은 안전한 문구로 안내한다. `LOVE_CSRF_INVALID`, `LOVE_ORIGIN_INVALID`, `LOVE_RATE_LIMITED`
+등 보안 오류는 개인정보를 포함하지 않는다.

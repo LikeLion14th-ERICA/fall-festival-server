@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { createState,execute,ApiFailure,crowdingDayFor,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
+import { LOVE_LETTER_OPERATION_IDS } from './love-letter-contract.mjs';
 import { validate } from './validate.mjs';
 
 const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
@@ -25,6 +26,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const routes=Object.entries(spec.paths).flatMap(([path,methods])=>Object.entries(methods).map(([method,o])=>{const schemes=(o.security||[]).flatMap(requirement=>Object.keys(requirement));const jsonBody=o.requestBody?.content?.['application/json'];return {path,method:method.toUpperCase(),definition:o,operationId:o.operationId,input:jsonBody?.schema?.$ref?.split('/').at(-1),multipart:Boolean(o.requestBody?.content?.['multipart/form-data']),requiresBearer:schemes.includes('AdminBearer'),requiresRefreshCookie:schemes.includes('AdminRefreshCookie'),cookieCsrf:['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(o.operationId),scenarios:o['x-mock-scenarios'],regex:new RegExp('^'+path.replace(/\{\w+\}/g,'([a-z0-9][a-z0-9-]{0,63})')+'$'),keys:[...path.matchAll(/\{(\w+)\}/g)].map(m=>m[1])};}));
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin, X-Mock-Session, X-Mock-Scenario, X-Mock-Time'};
   const unscopedOperations=new Set([
+    ...LOVE_LETTER_OPERATION_IDS,
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
@@ -44,8 +46,8 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
         if(csrfRoute)failure(403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.');
         failure(403,'ORIGIN_NOT_ALLOWED','이 개발 서버에 허용되지 않은 origin입니다.');
       }
-      if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location, ETag, X-Server-Time');}
-      if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, If-Match, Idempotency-Key, If-None-Match, X-Mock-Session, X-Mock-Scenario, X-Mock-Time, X-Mock-Delay','Access-Control-Max-Age':'600'});return res.end();}
+      if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Allow-Credentials','true');res.setHeader('Access-Control-Expose-Headers','X-Request-Id, Retry-After, Location, ETag, X-Server-Time');}
+      if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, If-Match, Idempotency-Key, If-None-Match, X-Love-Letter-CSRF, X-Mock-Session, X-Mock-Scenario, X-Mock-Time, X-Mock-Delay','Access-Control-Max-Age':'600'});return res.end();}
       const session=req.headers['x-mock-session']||'default';
       if(!/^[a-zA-Z0-9_-]{1,64}$/.test(session))failure(400,'INVALID_MOCK_SESSION','목 세션은 영숫자·밑줄·하이픈 1~64자입니다.');
       const wall=Date.now();for(const [key,item]of sessions)if(wall-item.used>3600000)sessions.delete(key);
@@ -73,7 +75,9 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const query={};
       for(const [key,v]of url.searchParams){if(Object.hasOwn(query,key))failure(400,'INVALID_QUERY','중복 쿼리 파라미터입니다.');if(key!=='__scenario'&&!route.definition.parameters.some(p=>p.in==='query'&&p.name===key))failure(400,'INVALID_QUERY','정의되지 않은 쿼리 파라미터입니다.');query[key]=v;}
       for(const p of route.definition.parameters){
-        const value=p.in==='path'?params[p.name]:p.in==='query'?query[p.name]:req.headers[p.name.toLowerCase()];
+        const value=p.in==='path'?params[p.name]:p.in==='query'?query[p.name]:p.in==='cookie'?
+          req.headers.cookie?.split(';').map(part=>part.trim()).find(part=>part.startsWith(`${p.name}=`))?.slice(p.name.length+1):
+          req.headers[p.name.toLowerCase()];
         if(value===undefined){
           if(p.required){
             if(p.name==='If-Match')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
@@ -172,13 +176,14 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       }
       if(['createAdminSession','refreshAdminSession'].includes(route.operationId))extra['Set-Cookie']='__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN; Path=/; Secure; HttpOnly; SameSite=Strict';
       if(route.operationId==='deleteCurrentAdminSession')extra['Set-Cookie']='__Host-festival-admin-refresh=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict';
+      if(['startLoveLetterParticipant','claimLoveLetterInvitation'].includes(route.operationId))extra['Set-Cookie']='__Host-festival-love=MOCK-LOVE-TOKEN; Path=/; Secure; HttpOnly; SameSite=Lax';
       return send(responseStatus,responseStatus===304?null:response,extra);
     }catch(error){
       const known=error instanceof ApiFailure;
       const status=known?error.status:500;
       // Never log requests, tokens, bodies, or personal data.
       if(!known)process.stderr.write('mock internal response/handler failure\n');
-      return send(status,{error:{code:known?error.code:'INTERNAL_ERROR',message:known?error.message:'목 서버 처리 중 오류가 발생했습니다.',details:known?error.details:[],retryable:[429,500,503].includes(status)},meta:meta(0)},status===429?{'Retry-After':'1'}:{});
+      return send(status,{error:{code:known?error.code:'INTERNAL_ERROR',message:known?error.message:'목 서버 처리 중 오류가 발생했습니다.',details:known?error.details:[],retryable:['LOVE_POOL_EMPTY','LOVE_WAITING'].includes(error.code)||[429,500,503].includes(status)},meta:meta(0)},status===429?{'Retry-After':'1'}:{});
     }
   });
   server.requestTimeout=10000;server.headersTimeout=5000;

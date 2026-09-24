@@ -18002,5 +18002,3561 @@
         }
       }
     }
+  },
+  "getLoveLetterGuide": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "GET",
+    "path": "/api/v2/love-letter-guide",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-guide",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "enabled": true,
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1",
+            "timezone": "Asia/Seoul",
+            "dailyOpensAt": "09:00",
+            "dailyClosesAt": "24:00",
+            "participationRule": "BROWSER_DAILY",
+            "minimumAge": 19,
+            "maxNameChars": 20,
+            "maxMessageChars": 100,
+            "maxContactChars": 100,
+            "ownContactConfirmationRequired": true,
+            "disclosureConsentRequired": true,
+            "revealDelaySeconds": 60
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "closed": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-guide",
+          "headers": {
+            "X-Mock-Scenario": "closed",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "enabled": false,
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1",
+            "timezone": "Asia/Seoul",
+            "dailyOpensAt": "09:00",
+            "dailyClosesAt": "24:00",
+            "participationRule": "BROWSER_DAILY",
+            "minimumAge": 19,
+            "maxNameChars": 20,
+            "maxMessageChars": 100,
+            "maxContactChars": 100,
+            "ownContactConfirmationRequired": true,
+            "disclosureConsentRequired": true,
+            "revealDelaySeconds": 60
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T23:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-guide",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-guide?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-getLoveLetterGuide"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-guide",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-guide",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "startLoveLetterParticipant": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "POST",
+    "path": "/api/v2/love-letter-participants",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 201,
+        "response": {
+          "data": {
+            "state": "WRITABLE",
+            "canParticipate": true,
+            "nextParticipationAt": null,
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": "mock-only-csrf-token",
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "already-started": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants",
+          "headers": {
+            "X-Mock-Scenario": "already-started",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "WRITABLE",
+            "canParticipate": true,
+            "nextParticipationAt": null,
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": "mock-only-csrf-token",
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "closed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants",
+          "headers": {
+            "X-Mock-Scenario": "closed",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "LOVE_CLOSED",
+            "message": "러브레터 운영 시간이 아닙니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T23:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-startLoveLetterParticipant",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-participants",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getLoveLetterStatus": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "GET",
+    "path": "/api/v2/love-letter-status",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "WRITABLE",
+            "canParticipate": true,
+            "nextParticipationAt": null,
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": null,
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "waiting": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "waiting",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "WAITING",
+            "canParticipate": false,
+            "nextParticipationAt": "2030-10-02T09:00:00+09:00",
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": null,
+            "revealAt": "2030-10-01T12:01:00+09:00"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "sealed": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "sealed",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "SEALED",
+            "canParticipate": false,
+            "nextParticipationAt": "2030-10-02T09:00:00+09:00",
+            "exchangeId": "00000000-0000-4000-8000-000000000701",
+            "contact": null,
+            "csrfToken": null,
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "opened": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "opened",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "OPENED",
+            "canParticipate": false,
+            "nextParticipationAt": "2030-10-02T09:00:00+09:00",
+            "exchangeId": "00000000-0000-4000-8000-000000000701",
+            "contact": "@mock-only-contact",
+            "csrfToken": null,
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "blocked": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "blocked",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "RESULT_BLOCKED",
+            "canParticipate": false,
+            "nextParticipationAt": null,
+            "exchangeId": "00000000-0000-4000-8000-000000000701",
+            "contact": null,
+            "csrfToken": null,
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "restricted": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "restricted",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "RESTRICTED",
+            "canParticipate": false,
+            "nextParticipationAt": null,
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": null,
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "closed": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "closed",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "CLOSED",
+            "canParticipate": false,
+            "nextParticipationAt": null,
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": null,
+            "revealAt": null
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T23:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-getLoveLetterStatus",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/love-letter-status",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "registerLoveLetter": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "POST",
+    "path": "/api/v2/love-letters",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-normal"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "letterId": "00000000-0000-4000-8000-000000000703",
+            "revealAt": "2030-10-01T12:01:00+09:00",
+            "state": "WAITING"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "replay": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "replay",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-replay"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "letterId": "00000000-0000-4000-8000-000000000703",
+            "revealAt": "2030-10-01T12:01:00+09:00",
+            "state": "WAITING"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "pool-empty": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "pool-empty",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-pool-empty"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "LOVE_POOL_EMPTY",
+            "message": "받을 수 있는 쪽지가 아직 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "already-participated": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "already-participated",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-already-participated"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "LOVE_ALREADY_PARTICIPATED",
+            "message": "오늘은 이미 참여했습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "restricted": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "restricted",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-restricted"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "LOVE_RESTRICTED",
+            "message": "참여가 제한되었습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-conflict": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-conflict",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-idempotency-conflict"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "LOVE_IDEMPOTENCY_CONFLICT",
+            "message": "요청 키가 다른 내용에 재사용되었습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "invalid-csrf": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "invalid-csrf",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-invalid-csrf"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "LOVE_CSRF_INVALID",
+            "message": "요청 보호 토큰이 유효하지 않습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-error"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-registerLoveLetter",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-locale-not-ready"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-bad-request"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letters",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json",
+            "Idempotency-Key": "mock-registerLoveLetter-rate-limited"
+          },
+          "body": {
+            "gender": "MALE",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "adultConfirmed": true,
+            "ownContactConfirmed": true,
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "openLoveLetter": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "POST",
+    "path": "/api/v2/love-letter-results/{id}/open",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "exchangeId": "00000000-0000-4000-8000-000000000701",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "waiting": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "waiting",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "LOVE_WAITING",
+            "message": "배정 후 1분이 지나면 열어볼 수 있습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "blocked": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "blocked",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "LOVE_RESULT_BLOCKED",
+            "message": "차단된 쪽지입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "closed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "closed",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "LOVE_CLOSED",
+            "message": "러브레터 운영 시간이 아닙니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T23:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-openLoveLetter",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/open",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "reportLoveLetter": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "POST",
+    "path": "/api/v2/love-letter-results/{id}/reports",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/reports",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "reported": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/reports",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/reports?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-reportLoveLetter",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/reports",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-results/00000000-0000-4000-8000-000000000701/reports",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "claimLoveLetterInvitation": {
+    "screens": [
+      "LOVE-001"
+    ],
+    "method": "POST",
+    "path": "/api/v2/love-letter-invitations/claim",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "state": "WAITING",
+            "canParticipate": false,
+            "nextParticipationAt": "2030-10-02T09:00:00+09:00",
+            "exchangeId": null,
+            "contact": null,
+            "csrfToken": "mock-only-csrf-token",
+            "revealAt": "2030-10-01T12:01:00+09:00"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "invalid-link": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim",
+          "headers": {
+            "X-Mock-Scenario": "invalid-link",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "LOVE_INVITATION_INVALID",
+            "message": "연결 링크가 유효하지 않습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "restricted": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim",
+          "headers": {
+            "X-Mock-Scenario": "restricted",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "LOVE_RESTRICTED",
+            "message": "참여가 제한되었습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "locale-not-ready": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim?locale=en",
+          "headers": {
+            "X-Mock-Scenario": "locale-not-ready",
+            "X-Mock-Session": "locale-not-ready-claimLoveLetterInvitation",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "LOCALE_NOT_READY",
+            "message": "준비 완료 언어만 요청할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/love-letter-invitations/claim",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Origin": "http://localhost:5173",
+            "Cookie": "__Host-festival-love=MOCK-LOVE-TOKEN",
+            "X-Love-Letter-CSRF": "mock-only-csrf-token",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "seedLoveLetter": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "POST",
+    "path": "/api/v2/admin/love-letters/seeds",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/seeds",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "operatingDate": "2030-10-01",
+            "letter": {
+              "gender": "MALE",
+              "name": "개발용 별명",
+              "message": "개발용 한 줄 쪽지",
+              "contact": "@mock-only-contact",
+              "adultConfirmed": true,
+              "ownContactConfirmed": true,
+              "consentVersion": "mock-v1"
+            },
+            "consentAt": "2030-09-30T12:00:00+09:00"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "participantId": "00000000-0000-4000-8000-000000000702",
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/seeds",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "operatingDate": "2030-10-01",
+            "letter": {
+              "gender": "MALE",
+              "name": "개발용 별명",
+              "message": "개발용 한 줄 쪽지",
+              "contact": "@mock-only-contact",
+              "adultConfirmed": true,
+              "ownContactConfirmed": true,
+              "consentVersion": "mock-v1"
+            },
+            "consentAt": "2030-09-30T12:00:00+09:00"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/seeds",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "operatingDate": "2030-10-01",
+            "letter": {
+              "gender": "MALE",
+              "name": "개발용 별명",
+              "message": "개발용 한 줄 쪽지",
+              "contact": "@mock-only-contact",
+              "adultConfirmed": true,
+              "ownContactConfirmed": true,
+              "consentVersion": "mock-v1"
+            },
+            "consentAt": "2030-09-30T12:00:00+09:00"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/seeds",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "operatingDate": "2030-10-01",
+            "letter": {
+              "gender": "MALE",
+              "name": "개발용 별명",
+              "message": "개발용 한 줄 쪽지",
+              "contact": "@mock-only-contact",
+              "adultConfirmed": true,
+              "ownContactConfirmed": true,
+              "consentVersion": "mock-v1"
+            },
+            "consentAt": "2030-09-30T12:00:00+09:00"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/seeds",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "operatingDate": "2030-10-01",
+            "letter": {
+              "gender": "MALE",
+              "name": "개발용 별명",
+              "message": "개발용 한 줄 쪽지",
+              "contact": "@mock-only-contact",
+              "adultConfirmed": true,
+              "ownContactConfirmed": true,
+              "consentVersion": "mock-v1"
+            },
+            "consentAt": "2030-09-30T12:00:00+09:00"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/seeds",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "operatingDate": "2030-10-01",
+            "letter": {
+              "gender": "MALE",
+              "name": "개발용 별명",
+              "message": "개발용 한 줄 쪽지",
+              "contact": "@mock-only-contact",
+              "adultConfirmed": true,
+              "ownContactConfirmed": true,
+              "consentVersion": "mock-v1"
+            },
+            "consentAt": "2030-09-30T12:00:00+09:00"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "reissueLoveLetterInvitation": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "POST",
+    "path": "/api/v2/admin/love-letters/participants/{id}/invitation",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/invitation",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "participantId": "00000000-0000-4000-8000-000000000702",
+            "invitationToken": "MOCK_ONLY_INVITATION_TOKEN_0000000000000001"
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/invitation",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/invitation",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/invitation",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/invitation",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/invitation",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getLoveLetterReports": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "GET",
+    "path": "/api/v2/admin/love-letters/reports",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": [
+            {
+              "id": "00000000-0000-4000-8000-000000000704",
+              "letterId": "00000000-0000-4000-8000-000000000703",
+              "reporterId": "00000000-0000-4000-8000-000000000702",
+              "createdAt": "2030-10-01T18:00:00+09:00"
+            }
+          ],
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "empty": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "empty",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": [],
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getLoveLetterReport": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "GET",
+    "path": "/api/v2/admin/love-letters/reports/{id}",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports/00000000-0000-4000-8000-000000000701",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "id": "00000000-0000-4000-8000-000000000704",
+            "letterId": "00000000-0000-4000-8000-000000000703",
+            "authorId": "00000000-0000-4000-8000-000000000702",
+            "reporterId": "00000000-0000-4000-8000-000000000702",
+            "name": "개발용 별명",
+            "message": "개발용 한 줄 쪽지",
+            "contact": "@mock-only-contact",
+            "blocked": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports/00000000-0000-4000-8000-000000000701",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports/00000000-0000-4000-8000-000000000701",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports/00000000-0000-4000-8000-000000000701",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports/00000000-0000-4000-8000-000000000701",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/love-letters/reports/00000000-0000-4000-8000-000000000701",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "blockLoveLetter": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "POST",
+    "path": "/api/v2/admin/love-letters/{id}/block",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/00000000-0000-4000-8000-000000000701/block",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "blocked": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/00000000-0000-4000-8000-000000000701/block",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/00000000-0000-4000-8000-000000000701/block",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/00000000-0000-4000-8000-000000000701/block",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/00000000-0000-4000-8000-000000000701/block",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/admin/love-letters/00000000-0000-4000-8000-000000000701/block",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "restrictLoveLetterParticipant": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "PUT",
+    "path": "/api/v2/admin/love-letters/participants/{id}/restriction",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/restriction",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "restricted": true
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "restricted": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/restriction",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "restricted": true
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/restriction",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "restricted": true
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/restriction",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "restricted": true
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/restriction",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "restricted": true
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/participants/00000000-0000-4000-8000-000000000701/restriction",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "restricted": true
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "configureLoveLetters": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "PUT",
+    "path": "/api/v2/admin/love-letters/configuration",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/configuration",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "enabled": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/configuration",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/configuration",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/configuration",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/configuration",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/configuration",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "opensAt": "2030-10-01T09:00:00+09:00",
+            "closesAt": "2030-10-04T00:00:00+09:00",
+            "consentVersion": "mock-v1"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "enableLoveLetters": {
+    "screens": [
+      "ADM-LOVE"
+    ],
+    "method": "PUT",
+    "path": "/api/v2/admin/love-letters/settings",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/settings",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "enabled": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/settings",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/settings",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/settings",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/settings",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/love-letters/settings",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "enabled": true
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
   }
 }

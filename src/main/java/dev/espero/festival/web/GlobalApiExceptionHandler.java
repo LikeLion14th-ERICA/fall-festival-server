@@ -62,7 +62,9 @@ public class GlobalApiExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ApiErrorResponse> handleApiException(ApiException exception, HttpServletRequest request) {
-        return ResponseEntity.status(exception.status()).body(new ApiErrorResponse(
+        ResponseEntity.BodyBuilder response = ResponseEntity.status(exception.status());
+        if ("LOVE_RATE_LIMITED".equals(exception.code())) response.header(HttpHeaders.RETRY_AFTER, "60");
+        return response.body(new ApiErrorResponse(
             new ApiErrorResponse.ErrorBody(exception.code(), exception.getMessage(), List.of(), exception.retryable()),
             metaSupport.metaForError(request)
         ));

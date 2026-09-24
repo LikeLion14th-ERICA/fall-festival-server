@@ -12,6 +12,7 @@
 | 기능 추가·활성화·제품 판단 | [범위](product/scope.md), [근거](product/sources.md), [결정 대기](product/decisions.md) | 해당 도메인·Figma node |
 | Product 기능·Figma 화면 흐름 대조 | [Design / Wireframe Reference](design/README.md), 해당 [Product 문서](product/overview.md) | Figma node `438:2` |
 | 홈·탭·공지 진입 | [내비게이션](product/navigation.md), [홈](product/home.md) | 앱 내부 공지는 [알림 메시지](product/notice.md) |
+| 러브레터·개인정보·추첨 | [러브레터](product/love-letter.md), [관리자 명세](product/admin/love-letter.md), [설계](engineering/love-letter.md), [보안](engineering/security.md), [디자인 요청](design/love-letter-request.md), [운영 인계](workflow/love-letter-operations.md) | API v2·DB·cleanup |
 | 관리자 공통 범위·제외 기능 | [관리자 Product](product/admin/README.md), [보안](engineering/security.md) | 인증·권한 계약은 별도 설계 |
 | 관리자 혼잡도·운영 시간 연동 | [관리자 혼잡도](product/admin/crowd.md), [홈](product/home.md) | 운영 일정은 개발자 등록, 구현 시 보안·API |
 | 관리자 공지·번역·템플릿 | [관리자 공지](product/admin/notice.md), [알림 메시지](product/notice.md) | 게시·번역 구현은 engineering 문서 |
@@ -42,7 +43,7 @@
 | 운영·카탈로그 장기 구현 이어받기 | [운영·카탈로그 구현 인수인계](workflow/ops-catalog-handoff.md) | 현재 미완료 단계와 검증 기록 |
 | 행사 당일 콘텐츠 수정·계좌/스탬프 코드 교체·장애 롤백 | [행사 당일 운영 절차서](workflow/festival-day-runbook.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md) | 계좌는 [계좌 운영 설정](engineering/operational-account-settings.md), catalog rollback은 [게시](engineering/publishing.md) |
 | commit·squash 메시지 | [커밋](workflow/commits.md) | breaking change 계약 |
-| 검증·완료 보고 | [검증](workflow/validation.md), [릴리스 HTTP E2E](workflow/release-http-e2e.md), [완료 조건](workflow/done.md) | 해당 항목만 적용 |
+| 검증·완료 보고 | [검증](workflow/validation.md), [릴리스 HTTP E2E](workflow/release-http-e2e.md), [LOVE-001 릴리스 시나리오](workflow/release-http-e2e-love-letter.md), [완료 조건](workflow/done.md) | 해당 항목만 적용 |
 | PR·리뷰·병합 | [PR](workflow/pull-requests.md), [완료 조건](workflow/done.md) | PR 템플릿 |
 | hotfix·release·tag | [릴리스](workflow/releases.md), [릴리스 HTTP E2E](workflow/release-http-e2e.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md), [PR](workflow/pull-requests.md), [운영](engineering/operations.md) | 배포 runbook |
 | 위키·컨텍스트 문서 | [위키 관리](MAINTENANCE.md) | 변경하는 주제 페이지 |

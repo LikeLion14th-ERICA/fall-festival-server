@@ -81,7 +81,9 @@ openRisks/owner/dueAt: <none-or-explicit entries>
 2. staging의 image digest, DB target reference, `FESTIVAL_ID`, media mount identity,
    ingress/upstream reference와 catalog revision을 기록한다.
 3. [STAGE-01](release-http-e2e-staging.md#stage-01--artifactmigrationpublished-snapshotpublic-probe)과
-   STAGE-02~05 중 후보에 적용되는 모든 결과가 PASS인지 확인한다.
+   STAGE-02~05 중 후보에 적용되는 모든 결과가 PASS인지 확인한다. 러브레터 활성화 후보에는
+   [STAGE-06](release-http-e2e-staging.md)의
+   브라우저·개인정보·운영/복구 증거도 필수다.
 4. 운영 배포 전 현재 image/config, 이전 known-good image/config, paired recovery set과 rollback
    담당자를 기록한다. 실제 값은 보호된 기록에서만 참조한다.
 5. 독립 확인자가 staging 후보 digest와 승격 대상 digest가 같은지 확인하고 운영 배포를 승인한다.
@@ -115,6 +117,7 @@ smoke를 다시 통과하기 전에는 운영 재개로 판정하지 않는다.
 | 굿즈 | 상품·가격·실제 옵션 조합·이미지·판매 상태 | 수량 모델을 만들지 않고 실제 제공 조합과 상태가 일치 |
 | 티켓 | 단가·송금 시간·계좌·티켓존·수령 안내 | 미확정값을 노출하지 않고 승인된 값과 상태만 제공 |
 | 스탬프 | 운영일·공통 QR·일일 한도·수령 안내·담당자 | 공통 QR 흐름과 현장 안내가 승인 운영안과 일치 |
+| 러브레터 활성화 후보 | 09:00~24:00 KST 기간, 최종 동의문·문의 경로, 남·여 사전 동의/초기 후보, 암호화 키·Origin의 설정 참조 | 기본 비활성 배포 뒤 승인 조건을 모두 확인한 경우에만 활성화하며 60초 대기·차단·종료와 개인정보 정리 절차가 [LOVE-001 시나리오](release-http-e2e-love-letter.md)와 일치 |
 | 외부 링크 | URL, 공개 접근, 모바일 가독성 | 로그인 없이 HTTPS로 열리고 승인 대상과 일치 |
 | 언어 | 공개 locale, 공식 명칭, 번역 완료 상태 | 준비된 언어만 보이고 미완성 언어 fallback이 없음 |
 

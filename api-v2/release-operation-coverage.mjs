@@ -37,6 +37,7 @@ const releaseGate = 'src/test/java/dev/espero/festival/e2e/OperationalReleaseGat
 const emptyPreflight = 'src/test/java/dev/espero/festival/e2e/DatabasePreflightEmptyDatabaseE2eTest.java';
 const dynamicContent = 'src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java';
 const operationalBoundaries = 'src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java';
+const loveLetterE2e = 'src/test/java/dev/espero/festival/e2e/LoveLetterReleaseHttpE2eTest.java';
 
 const scenarioTests = {
   'HTTP-01': [{ file: web, test: 'candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys' }],
@@ -74,6 +75,20 @@ const scenarioTests = {
   'HTTP-29': [{ file: operationalBoundaries, test: 'goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects' }],
   'HTTP-30': [{ file: operationalBoundaries, test: 'templateCliReplacementIsAtomicAndPreservesNoticesFromRemovedTemplates' }],
   'HTTP-31': [{ file: operationalBoundaries, test: 'administratorMutationMatrixRejectsBeforeSideEffectsAndNoticeReplayIsExactlyOnce' }],
+  'HTTP-32': [{ file: loveLetterE2e, test: 'anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds' }],
+  'HTTP-33': [{ file: loveLetterE2e, test: 'anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds' }],
+  'HTTP-34': [
+    { file: loveLetterE2e, test: 'lastLetterConcurrentRegistrationsCommitOnlyOneParticipant' },
+    { file: loveLetterE2e, test: 'anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds' },
+  ],
+  'HTTP-35': [
+    { file: loveLetterE2e, test: 'seedInvitationReportBlockAndRestrictionFollowOwnership' },
+    { file: 'src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java', test: 'seededClaimRetriesAssignmentAfterPoolIsReplenished' },
+  ],
+  'HTTP-36': [
+    { file: loveLetterE2e, test: 'seedInvitationReportBlockAndRestrictionFollowOwnership' },
+    { file: loveLetterE2e, test: 'anonymousRegistrationPreassignsAndRevealsOnlyAfterSixtySeconds' },
+  ],
   'OPS-01': [{ file: operator, test: 'catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain' }],
   'OPS-02': [{ file: operator, test: 'catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain' }],
   'OPS-03': [{ file: operator, test: 'catalogCliRejectsCorruptDraftAndRecoversWithAValidReplacementThroughSeparateProcesses' }],
@@ -146,6 +161,26 @@ const providerTests = {
   getCurrentAdmin: provider('src/test/java/dev/espero/festival/web/AdminSessionControllerTest.java', 'meUsesAuthenticatedPrincipalWithoutParsingJwt'),
 };
 
+const loveProviderMethods = {
+  getLoveLetterGuide:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  startLoveLetterParticipant:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  getLoveLetterStatus:'nextDayRestoresWritingAndRegistrationReplacesPreviousResult',
+  registerLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  openLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  reportLoveLetter:'anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse',
+  claimLoveLetterInvitation:'reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration',
+  seedLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  reissueLoveLetterInvitation:'reissuedInvitationInvalidatesOldLinkAndRejectsExistingDailyRegistration',
+  getLoveLetterReports:'anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse',
+  getLoveLetterReport:'anotherBrowserCannotOpenOrReportAndRegistrationRejectsKeyReuse',
+  blockLoveLetter:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  restrictLoveLetterParticipant:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  configureLoveLetters:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+  enableLoveLetters:'loveLetterFlowWaitsOneMinuteAndKeepsResultsPrivate',
+};
+for (const [operationId, method] of Object.entries(loveProviderMethods))
+  providerTests[operationId] = provider('src/test/java/dev/espero/festival/web/LoveLetterFlowIntegrationTest.java', method);
+
 const operationScenarios = {
   getConfig: ['HTTP-01', 'HTTP-10', 'HTTP-19', 'HTTP-20'],
   getCrowding: ['HTTP-08', 'HTTP-10', 'HTTP-18', 'HTTP-21', 'HTTP-24'],
@@ -194,12 +229,27 @@ const operationScenarios = {
   refreshAdminSession: ['HTTP-07', 'HTTP-12'],
   deleteCurrentAdminSession: ['HTTP-07', 'HTTP-12'],
   getCurrentAdmin: ['HTTP-07', 'HTTP-12'],
+  getLoveLetterGuide: ['HTTP-32'],
+  startLoveLetterParticipant: ['HTTP-32', 'HTTP-33'],
+  getLoveLetterStatus: ['HTTP-33', 'HTTP-34', 'HTTP-35', 'HTTP-36'],
+  registerLoveLetter: ['HTTP-33', 'HTTP-34'],
+  openLoveLetter: ['HTTP-33', 'HTTP-36'],
+  reportLoveLetter: ['HTTP-36'],
+  claimLoveLetterInvitation: ['HTTP-35'],
+  seedLoveLetter: ['HTTP-32', 'HTTP-35'],
+  reissueLoveLetterInvitation: ['HTTP-35'],
+  getLoveLetterReports: ['HTTP-36'],
+  getLoveLetterReport: ['HTTP-36'],
+  blockLoveLetter: ['HTTP-36'],
+  restrictLoveLetterParticipant: ['HTTP-36'],
+  configureLoveLetters: ['HTTP-32'],
+  enableLoveLetters: ['HTTP-32', 'HTTP-36'],
 };
 
 const operationUnresolvedReasons = {};
 
 const expectedScenarioIds = [
-  ...Array.from({ length: 31 }, (_, index) => `HTTP-${String(index + 1).padStart(2, '0')}`),
+  ...Array.from({ length: 36 }, (_, index) => `HTTP-${String(index + 1).padStart(2, '0')}`),
   ...Array.from({ length: 20 }, (_, index) => `OPS-${String(index + 1).padStart(2, '0')}`),
 ];
 
@@ -288,6 +338,12 @@ export const validateReleaseOperationCoverage = (spec, metadata, { repositoryRoo
       specOperations.push({ operationId: operation.operationId, path, method: method.toUpperCase() });
     }
   }
+  for (const operationId of Object.keys(providerTests))
+    if (!specOperationIds.has(operationId)) issue(issues, `stale provider mapping is not in OpenAPI: ${operationId}`);
+  for (const operationId of Object.keys(operationScenarios))
+    if (!specOperationIds.has(operationId)) issue(issues, `stale scenario mapping is not in OpenAPI: ${operationId}`);
+  for (const id of Object.keys(scenarioTests))
+    if (!expectedScenarioIds.includes(id)) issue(issues, `stale release scenario test mapping: ${id}`);
   const rows = Array.isArray(metadata?.operations) ? metadata.operations : [];
   if (metadata?.operationCount !== specOperations.length) issue(issues, `operationCount ${metadata?.operationCount} does not match OpenAPI ${specOperations.length}`);
   const rowKeys = new Set();
@@ -311,7 +367,7 @@ export const validateReleaseOperationCoverage = (spec, metadata, { repositoryRoo
   for (const row of rows) if (!specKeys.has(expectedOperationKey(row))) issue(issues, `coverage row is not in OpenAPI: ${expectedOperationKey(row)}`);
   if (rows.length !== specOperations.length) issue(issues, `coverage has ${rows.length} rows for ${specOperations.length} OpenAPI operations`);
   const scenarios = Array.isArray(metadata?.scenarios) ? metadata.scenarios : [];
-  if (metadata?.scenarioCount !== expectedScenarioIds.length || scenarios.length !== expectedScenarioIds.length) issue(issues, 'scenario inventory must contain HTTP-01..31 and OPS-01..20 exactly once');
+  if (metadata?.scenarioCount !== expectedScenarioIds.length || scenarios.length !== expectedScenarioIds.length) issue(issues, 'scenario inventory must contain HTTP-01..36 and OPS-01..20 exactly once');
   const scenarioIds = new Set();
   for (const scenario of scenarios) {
     if (scenarioIds.has(scenario.id)) issue(issues, `duplicate scenario ${scenario.id}`);
