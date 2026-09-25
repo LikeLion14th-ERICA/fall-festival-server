@@ -4894,6 +4894,1247 @@
         ]
       }
     },
+    "/api/v2/artist-hyped": {
+      "get": {
+        "operationId": "getArtistHyped",
+        "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태",
+        "description": "연결 화면: SHOW-LINEUP, SHOW-ARTIST. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ko",
+                "en",
+                "zh-Hans",
+                "ja"
+              ],
+              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
+              "default": "ko"
+            },
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistHypedSummaryResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: normal",
+                    "value": {
+                      "data": {
+                        "hypedEnabled": true,
+                        "items": [
+                          {
+                            "artistId": "artist-a",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-breeze",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-cosmos",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-drift",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-ember",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-fable",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-groove",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-halo",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-iris",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-junction",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-kite",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-lunar",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-mono",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-nova",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-orbit",
+                            "hypedCount": 0
+                          }
+                        ]
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "closed": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: closed",
+                    "value": {
+                      "data": {
+                        "hypedEnabled": true,
+                        "items": [
+                          {
+                            "artistId": "artist-a",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-breeze",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-cosmos",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-drift",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-ember",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-fable",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-groove",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-halo",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-iris",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-junction",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-kite",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-lunar",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-mono",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-nova",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-orbit",
+                            "hypedCount": 0
+                          }
+                        ]
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T23:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "ended": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: ended",
+                    "value": {
+                      "data": {
+                        "hypedEnabled": false,
+                        "items": [
+                          {
+                            "artistId": "artist-a",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-breeze",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-cosmos",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-drift",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-ember",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-fable",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-groove",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-halo",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-iris",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-junction",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-kite",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-lunar",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-mono",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-nova",
+                            "hypedCount": 0
+                          },
+                          {
+                            "artistId": "artist-orbit",
+                            "hypedCount": 0
+                          }
+                        ]
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-04T00:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "empty": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: empty",
+                    "value": {
+                      "data": {
+                        "hypedEnabled": true,
+                        "items": []
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "locale-not-ready": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "bad-request": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "아티스트별 Hyped 누적 수와 참여 가능 상태: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "SHOW-LINEUP",
+          "SHOW-ARTIST"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "closed",
+          "ended",
+          "empty",
+          "error",
+          "locale-not-ready",
+          "bad-request",
+          "rate-limited"
+        ]
+      }
+    },
+    "/api/v2/artists/{artistId}/hyped": {
+      "post": {
+        "operationId": "postArtistHyped",
+        "summary": "아티스트 Hyped +1",
+        "description": "연결 화면: SHOW-ARTIST. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "공개"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ko",
+                "en",
+                "zh-Hans",
+                "ja"
+              ],
+              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
+              "default": "ko"
+            },
+            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
+          },
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+            },
+            "description": "목의 실제 ID는 /__mock/catalog 또는 examples.json 참고."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtistHypedIncrementResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "아티스트 Hyped +1: normal",
+                    "value": {
+                      "data": {
+                        "artistId": "artist-a",
+                        "hypedCount": 1
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "closed": {
+                    "summary": "아티스트 Hyped +1: closed",
+                    "value": {
+                      "data": {
+                        "artistId": "artist-a",
+                        "hypedCount": 1
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T23:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "locale-not-ready": {
+                    "summary": "아티스트 Hyped +1: locale-not-ready",
+                    "value": {
+                      "error": {
+                        "code": "LOCALE_NOT_READY",
+                        "message": "준비 완료 언어만 요청할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "bad-request": {
+                    "summary": "아티스트 Hyped +1: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "contest": {
+                    "summary": "아티스트 Hyped +1: contest",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "요청한 정보를 찾을 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "not-found": {
+                    "summary": "아티스트 Hyped +1: not-found",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "요청한 정보를 찾을 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "축제일 밖에는 Hyped 참여 불가",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "ended": {
+                    "summary": "아티스트 Hyped +1: ended",
+                    "value": {
+                      "error": {
+                        "code": "HYPED_CLOSED",
+                        "message": "축제일에만 기대돼요에 참여할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-04T00:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "요청 본문은 64KiB 이하입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "415": {
+            "description": "application/json 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "422": {
+            "description": "요청 필드를 확인해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "아티스트 Hyped +1: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "아티스트 Hyped +1: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "SHOW-ARTIST"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "closed",
+          "ended",
+          "contest",
+          "not-found",
+          "error",
+          "locale-not-ready",
+          "bad-request",
+          "rate-limited"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "저장할 변경값",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtistHypedInput"
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
     "/api/v2/timetable": {
       "get": {
         "operationId": "getTimetable",
@@ -25939,6 +27180,81 @@
         "additionalProperties": false,
         "description": ""
       },
+      "ArtistHypedItem": {
+        "type": "object",
+        "properties": {
+          "artistId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "hypedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "축제 전체에서 이 아티스트가 받은 누적 Hyped 수. 공연 날짜와 catalog revision에 독립적.",
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "artistId",
+          "hypedCount"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "ArtistHypedSummary": {
+        "type": "object",
+        "properties": {
+          "hypedEnabled": {
+            "type": "boolean",
+            "description": "서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 그날의 운영 시간 밖에서도 true."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArtistHypedItem"
+            },
+            "description": "현재 게시된 ARTIST 전원. artistId 오름차순이며 미참여자는 0. CONTEST는 제외."
+          }
+        },
+        "required": [
+          "hypedEnabled",
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "ArtistHypedIncrement": {
+        "type": "object",
+        "properties": {
+          "artistId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+          },
+          "hypedCount": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "이번 요청의 원자적 +1 후 누적 Hyped 수.",
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "artistId",
+          "hypedCount"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "ArtistHypedInput": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false,
+        "description": "빈 JSON 객체만 허용한다. 로그인·참여자 식별자·멱등 키가 없다."
+      },
       "Lineup": {
         "type": "object",
         "properties": {
@@ -28375,6 +29691,40 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Artist"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "ArtistHypedSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ArtistHypedSummary"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "ArtistHypedIncrementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ArtistHypedIncrement"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

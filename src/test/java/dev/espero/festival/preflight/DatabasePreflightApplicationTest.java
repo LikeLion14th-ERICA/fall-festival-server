@@ -94,6 +94,7 @@ class DatabasePreflightApplicationTest {
         assertThat(inventory.tablesThrough(17)).contains(
             "crowding_state_dynamic", "notices", "notice_translations", "notice_links", "notice_link_translations"
         );
+        assertThat(inventory.tablesThrough(30)).contains("artist_hyped_counts");
     }
 
     @Test

@@ -19,7 +19,7 @@ const productInput={
   sizes:g.sizes.map(size=>({...size,id:productSizeIds.get(size.id)})),
   options:g.combinations.map(({colorId,sizeId})=>({colorId:productColorIds.get(colorId),sizeId:productSizeIds.get(sizeId)})),
 };
-const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'ON_SALE'},ProductInput:productInput,NoticeInput:noticeInput,StampReceiptVerificationInput:{code:'482913'},StampCollectionInput:{token:'mock-booth-token-0001'},AdminLoginInput:{username:'mock-admin',password:'MOCK-NOT-A-REAL-SECRET'}};
+const inputExamples={CrowdingInput:{level:'CROWDED'},AvailabilityInput:{status:'ON_SALE'},ProductInput:productInput,NoticeInput:noticeInput,StampReceiptVerificationInput:{code:'482913'},StampCollectionInput:{token:'mock-booth-token-0001'},ArtistHypedInput:{},AdminLoginInput:{username:'mock-admin',password:'MOCK-NOT-A-REAL-SECRET'}};
 const spec={openapi:'3.1.0',info:{title:'Espero 화면 기반 API 명세서 v2',version:'2.0.0-draft.3',description:'프런트 연동용 계약 초안. 기존 v1에서 독립. x-contract-status를 확인하고 운영 미정 값을 확정하지 않는다. 모든 examples는 가상 개발 데이터이며 실제 송금을 지원하지 않는다.'},servers:[{url:'http://127.0.0.1:4010',description:'로컬 목 전용. 실제 운영 서버 미정.'}],security:[],paths:{},components:{schemas:{...schemas},securitySchemes:{AdminBearer:{type:'http',scheme:'bearer',description:'15분 유효 signed JWT access token. Authorization: Bearer로 전달.'},AdminRefreshCookie:{type:'apiKey',in:'cookie',name:'__Host-festival-admin-refresh',description:'7일 유효 opaque refresh token. Secure·HttpOnly·SameSite=Strict이며 서버에는 SHA-256 hash만 저장.'}}},'x-source':{basis:'Product Context wiki v5; user decision 2026-09-16',commit:'1247890eaa2010d25955662aa172e5839c4da652',paths:['docs/wiki/product/','docs/wiki/product/admin/'],legacySnapshot:'source-screen-requirements.json'},'x-mock-controls':{scenario:'X-Mock-Scenario 또는 __scenario 쿼리(목 전용)',session:'X-Mock-Session',time:'X-Mock-Time',delay:'X-Mock-Delay (0~3000ms)'}};
 const examples={};
 const genericErrors={400:['INVALID_QUERY','잘못된 요청 예시입니다.'],401:['UNAUTHORIZED','관리자 인증이 필요합니다.'],403:['FORBIDDEN','관리자 권한이 없습니다.'],404:['NOT_FOUND','요청한 정보를 찾을 수 없습니다.'],405:['METHOD_NOT_ALLOWED','지원하지 않는 메서드입니다.'],409:['CONFLICT','요청 상태가 충돌합니다.'],413:['PAYLOAD_TOO_LARGE','요청 본문은 64KiB 이하입니다.'],415:['UNSUPPORTED_MEDIA_TYPE','application/json 요청이 필요합니다.'],422:['VALIDATION_FAILED','요청 필드를 확인해 주세요.'],429:['RATE_LIMITED','잠시 후 다시 요청해 주세요.'],500:['INTERNAL_ERROR','목 서버 처리 중 오류가 발생했습니다.'],503:['SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.']};
@@ -29,7 +29,7 @@ const unscopedOperations=new Set([
   'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
   'getCrowding','getAdminCrowding','putAdminCrowding',
   'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
-  'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
+  'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
   'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
   'postAdminGoodsImage','getGoodsImage'
 ]);
@@ -43,7 +43,7 @@ for(const op of operations){
   const statuses=[...(successStatus===200||op.additionalSuccessStatuses?.includes(200)?[200]:[]),400,403,404,405,409,429,500,503,...(op.input||op.multipartInput?[413,415,422]:[]),...(op.admin?[401]:[]),...(op.ifMatchRequired||op.idempotencyKeyRequired?[428]:[]),...(op.conditional?[304]:[]),successStatus].filter((status,index,array)=>array.indexOf(status)===index);
   const responses=Object.fromEntries(statuses.map(status=>{
     const conditionalHeaders=op.conditional&&(status<300||status===304)?{ETag:strongEtagHeader,...(op.binaryResponse?{}:{'X-Server-Time':{schema:{type:'string',format:'date-time'},description:'조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다.'}})}:{};
-    const cacheControlHeaders=op.cacheControl&&(status<300||(op.conditional&&status===304))?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:op.cacheControl==='no-store'?'브라우저와 중간 캐시가 응답을 저장하지 못하게 한다.':op.binaryResponse?'응답에 적용되는 캐시 지시문.':'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{};
+    const cacheControlHeaders=op.cacheControl&&(status<300||(op.conditional&&status===304)||op.cacheControlOnErrors)?{'Cache-Control':{schema:{type:'string',enum:[op.cacheControl]},description:op.cacheControl==='no-store'?'브라우저와 중간 캐시가 응답을 저장하지 못하게 한다.':op.binaryResponse?'응답에 적용되는 캐시 지시문.':'공유 캐시 금지와 매 요청 재검증. proxy는 이 값과 ETag를 그대로 전달한다.'}}:{};
     const binaryHeaders=op.binaryResponse&&(status===200||status===304)?{'Content-Disposition':{schema:{type:'string',enum:['inline']},description:'브라우저 inline 표시'},'X-Content-Type-Options':{schema:{type:'string',enum:['nosniff']},description:'MIME sniffing 차단'}}:{};
     const locationHeaders=op.locationHeader&&status===successStatus?{Location:{schema:{type:'string',format:'uri-reference',pattern:`^${op.path}/[^/]+$`},description:`생성된 리소스의 상세 경로(${op.path}/{id})`}}:{};
     const requestIdHeader={'X-Request-Id':{schema:{type:'string'},description:op.binaryResponse||usesConditionalMeta?'요청 추적 ID':'응답 meta.requestId와 동일'}};

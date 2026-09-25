@@ -245,7 +245,7 @@ export function createState() {
     places.push({id:landmark.id,kind:landmark.kind,name:landmark.name,locationText:landmark.locationText,hoursText:landmark.hoursText,description:landmark.description,usage:landmark.usage,spaceId:null});
   }
   return initializeAdmin({
-    revision:1,nextId:1,festivalDays:[
+    revision:1,nextId:1,hypedCounts:{},festivalDays:[
       {operatingDay:'2030-10-01',opensAt:'13:00',closesAt:'22:00'},
       {operatingDay:'2030-10-02',opensAt:'12:00',closesAt:'21:00'},
       {operatingDay:'2030-10-03',opensAt:'14:00',closesAt:'20:00'},
@@ -410,6 +410,22 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const performer=find(state.artists,params.artistId);
       data={...performer,performances:state.performances.filter(p=>p.artists.some(a=>a.id===params.artistId)).map(({id,date,startsAt,endsAt})=>({id,date,startsAt,endsAt}))};
       if(missing)Object.assign(data,{introduction:null,socialLinks:[],songs:[]});break;
+    }
+    case 'getArtistHyped':{
+      data={hypedEnabled:DATES.includes(date),items:(empty?[]:state.artists.filter(artist=>artist.category==='ARTIST'))
+        .map(artist=>({artistId:artist.id,hypedCount:state.hypedCounts[artist.id]||0}))
+        .sort((a,b)=>a.artistId.localeCompare(b.artistId))};
+      break;
+    }
+    case 'postArtistHyped':{
+      const artist=state.artists.find(candidate=>candidate.id===params.artistId);
+      if(!artist||artist.category!=='ARTIST'||scenario==='contest')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+      if(!DATES.includes(date))failure(409,'HYPED_CLOSED','축제일에만 기대돼요에 참여할 수 있습니다.');
+      if(!body||Object.keys(body).length)failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.');
+      const hypedCount=(state.hypedCounts[artist.id]||0)+1;
+      state.hypedCounts[artist.id]=hypedCount;
+      data={artistId:artist.id,hypedCount};
+      break;
     }
     case 'getTimetable':data={dates:DATES,axis:{startTime:'17:00',endTime:'22:00'},items:empty?[]:structuredClone(state.performances).sort((a,b)=>a.startsAt.localeCompare(b.startsAt)||a.id.localeCompare(b.id))};break;
     case 'getPerformance':data=find(state.performances,params.performanceId);if(missing)data.description=null;break;

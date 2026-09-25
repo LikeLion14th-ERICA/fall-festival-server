@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jdk-alpine-3.24 AS build
 
-RUN apk add --no-cache libwebp-tools \
+RUN apk add --no-cache libwebp-tools 'libexpat>=2.8.5-r0' \
     && command -v cwebp \
     && command -v dwebp \
     && command -v webpinfo \
@@ -28,7 +28,7 @@ RUN ./mvnw --batch-mode --no-transfer-progress -DskipTests package
 
 FROM eclipse-temurin:21-jre-alpine-3.24 AS runtime
 
-RUN apk add --no-cache libwebp-tools wget \
+RUN apk add --no-cache libwebp-tools wget 'libexpat>=2.8.5-r0' \
     && command -v cwebp \
     && command -v dwebp \
     && command -v webpinfo \

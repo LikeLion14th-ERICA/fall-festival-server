@@ -1,5 +1,29 @@
 # Catalog load verification
 
+## Artist Hyped HTTP load
+
+`ArtistHypedHttpE2eTest` is the isolated Hyped load path. It migrates a disposable
+Testcontainers PostgreSQL database, publishes the synthetic catalog through the real CLI,
+starts the Spring server on a random loopback port, and runs two 10-second stages against
+one ARTIST: 8 writers with 4 readers, then 24 writers with 8 readers. It verifies that
+every successful POST is reflected in the final HTTP and PostgreSQL count. The JSON
+report in `target/hyped-load-results/summary.json` records per-stage request counts,
+failures, and POST/GET p95 and p99 latency. The `Artist Hyped Load` GitHub Actions
+workflow preserves the report as an artifact.
+
+Run the focused test with Docker and Java 21+:
+
+```powershell
+.\mvnw.cmd --batch-mode --no-transfer-progress "-Dtest=ArtistHypedHttpE2eTest" test
+```
+
+The test disables rate limiting only for server capacity measurement; `RateLimitTest`
+checks the dedicated `artist-hyped` bucket separately. Its synthetic loopback result is a
+regression measurement, not a staging or production capacity claim. No shared database
+or remotely deployed server is targeted.
+
+## Catalog routes
+
 This is an opt-in, local-only harness for the public catalog. It creates a disposable
 PostgreSQL 16 Docker container, starts the packaged Spring JAR with the `db` profile,
 loads a synthetic repeatable Flyway fixture, verifies `/readyz` and the seven public

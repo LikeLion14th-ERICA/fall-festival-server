@@ -14,6 +14,8 @@
 | GET | `/api/v2/goods/{goodsId}/payment-guide` | 굿즈 계좌 안내 | GOODS-PAYMENT | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/lineup` | 날짜·분류별 라인업 | SHOW-LINEUP | normal, empty, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/artists/{artistId}` | 출연진 상세 | SHOW-ARTIST | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
+| GET | `/api/v2/artist-hyped` | 아티스트별 Hyped 누적 수와 참여 가능 상태 | SHOW-LINEUP, SHOW-ARTIST | normal, closed, ended, empty, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/artists/{artistId}/hyped` | 아티스트 Hyped +1 | SHOW-ARTIST | normal, closed, ended, contest, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/timetable` | 3일 타임테이블 | SHOW-TIMETABLE | normal, empty, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/performances/{performanceId}` | 공연 정보 팝업 | SHOW-POPUP | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/prohibited-items` | 고정 반입 금지 물품 안내 | SHOW-TIMETABLE | normal, empty, error, locale-not-ready, bad-request, rate-limited |

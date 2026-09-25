@@ -37,6 +37,7 @@ const releaseGate = 'src/test/java/dev/espero/festival/e2e/OperationalReleaseGat
 const emptyPreflight = 'src/test/java/dev/espero/festival/e2e/DatabasePreflightEmptyDatabaseE2eTest.java';
 const dynamicContent = 'src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java';
 const operationalBoundaries = 'src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java';
+const artistHypedE2e = 'src/test/java/dev/espero/festival/e2e/ArtistHypedHttpE2eTest.java';
 
 const scenarioTests = {
   'HTTP-01': [{ file: web, test: 'candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys' }],
@@ -74,6 +75,7 @@ const scenarioTests = {
   'HTTP-29': [{ file: operationalBoundaries, test: 'goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects' }],
   'HTTP-30': [{ file: operationalBoundaries, test: 'templateCliReplacementIsAtomicAndPreservesNoticesFromRemovedTemplates' }],
   'HTTP-31': [{ file: operationalBoundaries, test: 'administratorMutationMatrixRejectsBeforeSideEffectsAndNoticeReplayIsExactlyOnce' }],
+  'HTTP-32': [{ file: artistHypedE2e, test: 'anonymousClicksFollowPublishedArtistsAndFestivalCalendarThroughHttp' }],
   'OPS-01': [{ file: operator, test: 'catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain' }],
   'OPS-02': [{ file: operator, test: 'catalogCliUsesBaselineGuardsAndRollsBackThroughItsRealMain' }],
   'OPS-03': [{ file: operator, test: 'catalogCliRejectsCorruptDraftAndRecoversWithAValidReplacementThroughSeparateProcesses' }],
@@ -107,6 +109,8 @@ const providerTests = {
   getPaymentGuide: provider('src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java', 'returnsPaymentGuideAccountOnlyWhenConfigured'),
   getLineup: provider('src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java', 'validatesLineupSuccessAndEmptyResponses'),
   getArtist: provider('src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java', 'validatesArtistSuccessAndMissingOptionalResponses'),
+  getArtistHyped: provider('src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java', 'validatesHypedReadAndIncrementAgainstOpenApi'),
+  postArtistHyped: provider('src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java', 'validatesHypedReadAndIncrementAgainstOpenApi', 'rejectsContestAndClosedDayWithoutIncrement'),
   getTimetable: provider('src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java', 'validatesTimetableNormalAndEmptyResponses'),
   getPerformance: provider('src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java', 'validatesPerformanceNormalNullableEmptyAndErrorResponses'),
   getProhibitedItems: provider('src/test/java/dev/espero/festival/web/PerformanceControllerOpenApiTest.java', 'validatesProhibitedNormalEmptyAndBadRequestResponses'),
@@ -157,6 +161,8 @@ const operationScenarios = {
   getPaymentGuide: ['HTTP-18', 'HTTP-29'],
   getLineup: ['HTTP-05', 'HTTP-14', 'HTTP-18', 'HTTP-19'],
   getArtist: ['HTTP-05', 'HTTP-14', 'HTTP-18'],
+  getArtistHyped: ['HTTP-32'],
+  postArtistHyped: ['HTTP-32'],
   getTimetable: ['HTTP-05', 'HTTP-14', 'HTTP-18', 'HTTP-19'],
   getPerformance: ['HTTP-05', 'HTTP-14', 'HTTP-18'],
   getProhibitedItems: ['HTTP-05', 'HTTP-18'],
@@ -199,7 +205,7 @@ const operationScenarios = {
 const operationUnresolvedReasons = {};
 
 const expectedScenarioIds = [
-  ...Array.from({ length: 31 }, (_, index) => `HTTP-${String(index + 1).padStart(2, '0')}`),
+  ...Array.from({ length: 32 }, (_, index) => `HTTP-${String(index + 1).padStart(2, '0')}`),
   ...Array.from({ length: 20 }, (_, index) => `OPS-${String(index + 1).padStart(2, '0')}`),
 ];
 

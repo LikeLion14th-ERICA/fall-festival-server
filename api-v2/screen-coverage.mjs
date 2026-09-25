@@ -43,8 +43,9 @@ export function buildCoverage(source,operations){
   const rewardInstruction=data.find(d=>d.id==='STAMP-REWARD-D01');
   if(rewardInstruction)Object.assign(rewardInstruction,{label:'담당자 제시·수령 인증 코드 입력 안내',target:groups['STAMP-REWARD'][0],owner:'프런트'});
   for(const [screenId,id,label,target] of [['GOODS-DETAIL','GOODS-DETAIL-D08','실제 제공 조합','Availability.combinations'],['ADM-GOODS-PRODUCT-EDIT','ADM-GOODS-PRODUCT-EDIT-D08','실제 제공 조합','ProductInput.options'],['SHOW-TIMETABLE','SHOW-TIMETABLE-D07','반입 금지 물품 목록','ProhibitedItems.items'],['STAMP-REWARD','STAMP-REWARD-D02','수령 인증 결과','StampReceiptVerificationInput.code → StampReceiptVerification.verified']])data.push({id,screenId,label,target,owner:'API',wikiSource:wikiSource(screenId),requiredInScreen:'필수',sourceDecision:'위키 v5',sourceMaterial:'운영 자료 대기',pendingIds:''});
+  for(const [screenId,id,label,target] of [['SHOW-LINEUP','SHOW-LINEUP-D06','아티스트별 Hyped 누적 수','ArtistHypedSummary.items[].hypedCount (artistId로 결합, CONTEST 제외)'],['SHOW-ARTIST','SHOW-ARTIST-D09','Hyped 누적 수와 참여 가능 상태','ArtistHypedSummary.items[].hypedCount + hypedEnabled → ArtistHypedIncrement.hypedCount']])data.push({id,screenId,label,target,owner:'API',wikiSource:wikiSource(screenId),requiredInScreen:'필수',sourceDecision:'사용자 결정 2026-09-25',sourceMaterial:wikiSource(screenId),pendingIds:''});
   const screenRows=source.tabs.find(t=>t.title==='01 화면 현황').rows.filter(r=>groups[r[0]]&&r[0]!=='ADM-CROWD-HOURS');
   const screens=screenRows.map(r=>({id:r[0],name:r[1],operations:operations.filter(o=>o.screens.includes(r[0])).map(o=>o.operationId),browserData:data.filter(d=>d.screenId===r[0]&&d.owner!=='API').map(d=>d.id),legacySource:{pendingIds:currentPendingIds(r[9])}}));
-  if(data.length!==187||screens.length!==26)throw new Error('Screen source changed; review coverage counts.');
+  if(data.length!==189||screens.length!==26)throw new Error('Screen source changed; review coverage counts.');
   return {basis:'Product Context v5 (user confirmed 2026-09-14)',baseCommit:'21eb76dacd78b3ad79ed4d9589dd341fbc25b883',legacySourceUrl:source.url,screens,data};
 }

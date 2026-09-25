@@ -16,6 +16,7 @@ REVOKE ALL ON FUNCTION :"schema".record_operational_account_setting_history() FR
 
 GRANT USAGE ON SCHEMA :"schema" TO :"runtime_role";
 GRANT SELECT ON TABLE :"schema".operational_account_settings TO :"runtime_role";
+GRANT SELECT, INSERT, UPDATE ON TABLE :"schema".artist_hyped_counts TO :"runtime_role";
 
 GRANT USAGE ON SCHEMA :"schema" TO :"account_operator_role";
 GRANT SELECT, INSERT, UPDATE ON TABLE :"schema".operational_account_settings TO :"account_operator_role";
@@ -68,6 +69,9 @@ REVOKE ALL ON TABLE :"schema".crowding_state FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".crowding_state FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".crowding_state_dynamic FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".crowding_state_dynamic FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".artist_hyped_counts FROM PUBLIC;
+REVOKE ALL ON TABLE :"schema".artist_hyped_counts FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".artist_hyped_counts FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notices FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notices FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_translations FROM :"catalog_export_role";

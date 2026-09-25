@@ -36,7 +36,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
-    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide',
+    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
     'postAdminGoodsImage','getGoodsImage'
   ]);
@@ -48,8 +48,43 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.ok(examples.getTicketGuide.scenarios.normal.response.meta.revision>=1);
   assert.equal(examples.getCrowding.scenarios.normal.response.meta.revision,0);
 });
-test('26 screens and 177 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,187);assert.equal(new Set(coverage.data.map(x=>x.id)).size,187);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');});
+test('26 screens and 179 active data items plus 10 retired items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,189);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
+test('Hyped mock keeps repeatable artist counts across festival days with KST closure',async()=>{
+  const session='hyped-contract';
+  const getPath='/api/v2/artist-hyped';
+  const postPath='/api/v2/artists/artist-a/hyped';
+  const initial=await call(getPath,{session});
+  assert.equal(initial.status,200);
+  assert.equal(initial.headers.get('cache-control'),'no-store');
+  assert.equal(initial.body.meta.revision,0);
+  assert.equal(initial.body.data.hypedEnabled,true);
+  assert.equal(initial.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,0);
+  assert.equal(initial.body.data.items.some(item=>item.artistId==='artist-b'),false);
+
+  for(let count=1;count<=2;count++){
+    const clicked=await call(postPath,{method:'POST',body:{},session});
+    assert.equal(clicked.status,200);
+    assert.equal(clicked.headers.get('cache-control'),'no-store');
+    assert.equal(clicked.body.meta.revision,0);
+    assert.deepEqual(clicked.body.data,{artistId:'artist-a',hypedCount:count});
+  }
+  const refreshed=await call(getPath,{session});
+  assert.equal(refreshed.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,2);
+  const contest=await call('/api/v2/artists/artist-b/hyped',{method:'POST',body:{},session});
+  assert.equal(contest.status,404);
+  const late=await call(postPath,{method:'POST',body:{},session,headers:{'X-Mock-Time':'2030-10-03T23:59:59+09:00'}});
+  assert.equal(late.status,200);
+  assert.equal(late.body.data.hypedCount,3);
+  const ended=await call(postPath,{method:'POST',body:{},session,headers:{'X-Mock-Time':'2030-10-04T00:00:00+09:00'}});
+  assert.equal(ended.status,409);
+  assert.equal(ended.body.error.code,'HYPED_CLOSED');
+  const readonly=await call(getPath,{session,headers:{'X-Mock-Time':'2030-10-04T00:00:00+09:00'}});
+  assert.equal(readonly.body.data.hypedEnabled,false);
+  assert.equal(readonly.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,3);
+  const invalid=await call(postPath,{method:'POST',body:{extra:true},session});
+  assert.equal(invalid.status,422);
+});
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
 test('Goods image upload error contract matches its Spring runtime behavior',()=>{
   const upload=operation('postAdminGoodsImage');
@@ -499,7 +534,7 @@ test('Runtime validator rejects representative schema violations independently o
 });
 
 test('v5 removes operating-hour and quantity writes and map crowd consumers',async()=>{
-  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,176);
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,178);
   for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
   assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
   for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);

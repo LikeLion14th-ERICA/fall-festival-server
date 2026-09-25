@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 47,
+  "operationCount": 49,
   "operations": [
     {
       "operationId": "getConfig",
@@ -213,6 +213,48 @@
         "HTTP-05",
         "HTTP-14",
         "HTTP-18"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getArtistHyped",
+      "path": "/api/v2/artist-hyped",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java",
+            "test": "validatesHypedReadAndIncrementAgainstOpenApi"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-32"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "postArtistHyped",
+      "path": "/api/v2/artists/{artistId}/hyped",
+      "method": "POST",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java",
+            "test": "validatesHypedReadAndIncrementAgainstOpenApi"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/ArtistHypedControllerOpenApiTest.java",
+            "test": "rejectsContestAndClosedDayWithoutIncrement"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-32"
       ],
       "unresolvedReason": null
     },
@@ -1000,7 +1042,7 @@
       "unresolvedReason": null
     }
   ],
-  "scenarioCount": 51,
+  "scenarioCount": 52,
   "scenarios": [
     {
       "id": "HTTP-01",
@@ -1541,6 +1583,22 @@
         ]
       },
       "operationIds": []
+    },
+    {
+      "id": "HTTP-32",
+      "testMapping": {
+        "kind": "release-scenario",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/ArtistHypedHttpE2eTest.java",
+            "test": "anonymousClicksFollowPublishedArtistsAndFestivalCalendarThroughHttp"
+          }
+        ]
+      },
+      "operationIds": [
+        "getArtistHyped",
+        "postArtistHyped"
+      ]
     },
     {
       "id": "OPS-01",

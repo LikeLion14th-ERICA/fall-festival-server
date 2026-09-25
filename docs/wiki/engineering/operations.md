@@ -101,6 +101,20 @@ revision·locale을 남긴다. `RELEASE_COMMIT`에 배포 commit을 넣으면 �
   5xx·429 수, heap·GC, PostgreSQL 연결·active·lock 대기를 함께 남긴다. Render 512MB 같은
   단일 환경 결과만으로 운영 용량을 확정하지 않는다.
 
+### 아티스트 Hyped
+
+`GET /api/v2/artist-hyped`는 공유 누적 수와 `hypedEnabled`를 읽고,
+`POST /api/v2/artists/{artistId}/hyped`는 공개 참여를 기록한다. 두 응답에
+`Cache-Control: no-store`를 적용하고 Next.js same-origin proxy가 이 값을 보존하며 자체
+캐시를 사용하지 않는지 확인한다. GET은 화면이 보이고 온라인일 때 15초마다 조회하며, 화면이
+숨겨지거나 오프라인이면 멈춘다. 화면에 돌아오거나 온라인이 되면 즉시 다시 조회한다.
+
+공개 쓰기의 보호 속도 제한은 `RATE_LIMIT_ARTIST_HYPED_CAPACITY`(기본 `120`)와
+`RATE_LIMIT_ARTIST_HYPED_REFILL_PER_SECOND`(기본 `4.0`)로 조정한다. 이는 개인별 참여 횟수
+한도가 아니라 서버 요청 보호 설정이다. 집계는 축제 회차·아티스트별 누적값이며 카탈로그
+재게시로 초기화하지 않는다. 게시 전후에도 같은 아티스트 ID를 유지하고 다른 출연자에게
+재사용하지 않는다.
+
 ## 구현 규칙
 
 - 운영 콘텐츠는 최소 `draft / scheduled / published / archived` 생명주기와 게시자,

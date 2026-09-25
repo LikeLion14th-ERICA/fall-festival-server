@@ -39,6 +39,8 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 이미지를 별도로 검사한다. 두 Trivy 검사는 수정 여부와 관계없이 high/critical finding에서
 실패하고 SARIF artifact를 남긴다. GitHub에서 실행된 후 저장소 관리자가 이 릴리스 관련
 검사를 보호 규칙의 필수 검사로 지정해야 한다. 로컬 실행이 GitHub CI 성공을 뜻하지 않는다.
+`.github/workflows/artist-hyped-load.yml`은 관련 backend·workflow 변경 PR에서
+`artist-hyped-load`를 별도 실행하고 JSON 측정 결과와 Surefire 진단을 보존한다.
 실행과 환경변수는 [루트 README](../../../README.md)를 따른다.
 초기 구성의 실제 결과와 미실행 항목은 [개발 준비 기록](../../backend-setup-verification.md)에 있다.
 
@@ -79,7 +81,7 @@ class의 결과를 검사한다. 필수 class 누락, 0건, migration 시나리�
 
 ### 릴리스 후보 backend E2E
 
-현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-31`의 범위, 아직 구현하지 않은
+현재 HTTP E2E의 실제 class·method 수, `HTTP-01`~`HTTP-32`의 범위, 아직 구현하지 않은
 보강 후보와 staging gate는 [릴리스 HTTP E2E 시나리오](release-http-e2e.md)에 정리한다.
 
 `ReleaseReadinessHttpE2eTest`는 Docker의 임시 PostgreSQL에만 연결한다. 테스트는
@@ -127,8 +129,9 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-29 | GOODS account CLI | 실제 child JVM dry-run/set/stale/clear/restart가 payment-guide에 반영되고 TICKET state를 바꾸지 않음을 확인 |
 | HTTP-30 | notice template CLI | preview·전체 교체·관리자 목록/상세·template 삭제 뒤 notice 보존·malformed/duplicate 무변경을 확인 |
 | HTTP-31 | 관리자 mutation boundary | 8개 mutation route의 auth/key/precondition 거절과 notice replay/stale/key reuse side effect를 부분 범위로 확인 |
+| HTTP-32 | 아티스트 Hyped | 게시된 ARTIST의 익명 반복 POST·GET 누적값, CONTEST/없는 ID 거절, 축제일 KST 자정 전후, no-store, DB 일치를 실제 HTTP로 확인 |
 
-위 HTTP-01~31은 서로 다른 출시 위험을 나타내는 **31개 시나리오**다. JUnit test
+위 HTTP-01~32는 서로 다른 출시 위험을 나타내는 **32개 시나리오**다. JUnit test
 method는 관계된 요청을 한 transaction·server lifecycle 안에서 묶으므로 시나리오 수와
 method 수가 같지 않다.
 
@@ -142,7 +145,15 @@ cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessH
 E2E는 다음 명령으로 실행한다.
 
 ```powershell
-cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,DynamicContentReleaseHttpE2eTest,OperationalBoundariesHttpE2eTest test"
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ReleaseReadinessHttpE2eTest,OperationalAccountPropagationE2eTest,CrowdingConcurrencyE2eTest,CatalogPublicationLifecycleE2eTest,AdminSessionReleaseE2eTest,ReleaseFailureModesHttpE2eTest,DynamicContentReleaseHttpE2eTest,OperationalBoundariesHttpE2eTest,ArtistHypedHttpE2eTest test"
+```
+
+Hyped HTTP 기능과 동시 읽기·쓰기 부하만 실행할 때는 다음을 사용한다. Docker의 임시
+PostgreSQL과 loopback 서버만 사용하며, 결과는
+`target/hyped-load-results/summary.json`에 기록된다.
+
+```powershell
+cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=ArtistHypedHttpE2eTest test"
 ```
 
 다른 후보 manifest는 경로를 시스템 프로퍼티로 준다. 이 기본 모드에서는 빈 공간·지도와
@@ -202,8 +213,8 @@ main entry point를 실행하는 E2E이며, 원격 DB·현재 셸의 datasource�
 | OPS-20 | legacy 티켓 일정 복구 | 날짜·송금·수령의 필수 일정 6개 각각 누락 시 export finding과 import/validate/publish 차단·무변경을 확인하고, 값을 복구한 retry만 게시 가능 |
 
 `null` PLACE filter는 현재 계약상 정상이며 OPS-19에서 lossless로 보존한다. 위
-OPS-01~20은 **20개 시나리오**다. HTTP 31개와 합쳐 현재 backend release E2E 시나리오는
-**51개**다.
+OPS-01~20은 **20개 시나리오**다. HTTP 32개와 합쳐 현재 backend release E2E 시나리오는
+**52개**다.
 
 운영 도구 focused 검증은 다음 명령으로 실행한다.
 
