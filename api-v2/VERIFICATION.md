@@ -1,6 +1,8 @@
 # API v2 검증 기록
 
-검증일: 2026-09-15. 환경: Windows, Node.js 24.
+## 2026-09-15 · API 계약 검증
+
+환경: Windows, Node.js 24.
 기준: main 63ccdf383839718faf4172cac578f672dd928658 및 사용자 FAQ 외부 링크·START 전 QR 진입·현장 수령 인증 코드 결정.
 
 | 검사 | 실제 결과 |
@@ -34,3 +36,20 @@
 기존 값의 누락이 없고 의도한 25개 셀 변경만 남음을 확인했다. 시각 렌더링은 미검증이다.
 저장소 SCREEN-DATA.md와 SCREEN-STATES.md도 같은 기준으로 갱신했으며 이전 원문
 스냅샷은 비교용으로 보존했다.
+
+## 2026-09-25 · 아티스트 Hyped 변경 검증
+
+이 절은 위 2026-09-15 기록과 다른 후보인 [PR #97](https://github.com/LikeLion14th-ERICA/fall-festival-server/pull/97)의
+병합 커밋 `43ef081`의 코드 기준이다. `npm run check`에서 OpenAPI 49개 operation, 화면 26개,
+데이터 매핑 189개(현행 추적 178개·제외 11개), 응답 예제 381개와 계약 테스트 425개가
+통과했다. Hyped GET/POST는 같은 OpenAPI, 목 서버, 화면 데이터 연결에 포함된다.
+
+PR CI에서는 Java 21/25 `verify`, `api-v2-contract`, `artist-hyped-load`, CodeQL,
+Docker image·filesystem 보안 검사가 통과했다. Java 21 로그의
+`ArtistHypedHttpE2eTest` 2개는 실패·건너뜀 0개였고, 전용 부하 단계는
+실제 HTTP와 임시 PostgreSQL에서 성공 POST 총수와 최종 HTTP·DB 누적 수의 일치를
+검사한다. [부하 실행 방법](../tools/load-test/README.md)과
+[릴리스 HTTP E2E](../docs/wiki/workflow/release-http-e2e.md)에 범위가 있다.
+
+이 검증은 분리된 합성 환경과 백엔드 계약을 대상으로 했다. 실제 프런트 화면, 배포 ingress,
+운영 proxy·공유 NAT에서의 제한 동작과 staging 용량은 별도 검증 대상이다.
