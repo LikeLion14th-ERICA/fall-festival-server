@@ -9,6 +9,7 @@ Product Context 위키 v5와 화면 데이터 문서를 동기화한 프런트 �
 - [화면별 데이터 연결](api-v2/SCREEN-DATA.md)
 - [예제 요청·응답](api-v2/examples.json)
 - [목 서버 실행·프런트 연동](api-v2/FRONTEND.md)
+- [아티스트 Hyped 화면·API 연동](api-v2/FRONTEND.md#아티스트-hyped)
 - [결정 대기·총학생회 통합 질문](api-v2/DECISIONS.md)
 - [검증 결과](api-v2/VERIFICATION.md)
 

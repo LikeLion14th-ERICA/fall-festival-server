@@ -33,10 +33,10 @@
 조건부 읽기와 제한을 검증한다. 여기에 공지·굿즈·굿즈 이미지·스탬프 수령 확인과 운영
 boundary를 실제 HTTP server·security filter·serialization·runtime storage 흐름으로 추가했다.
 
-HTTP-25–30은 구현됐지만 실행 증거가 없고, HTTP-31은 명시된 인증·idempotency·notice
-boundary만 부분 구현됐다. 따라서 이 suite는 32개 HTTP 위험에 대한 작성된 자동 검증
-근거이며, 전체 릴리스 승인은 실제 실행, 제품 공개 gate, required CI, migration/운영 승인과
-staging 증거를 함께 요구한다.
+HTTP-25–30은 구현됐고, HTTP-31은 명시된 인증·idempotency·notice boundary만 부분
+구현됐다. 2026-09-25 기준 PR #97의 Java 21 CI에서 HTTP-25–30 및 HTTP-32 class가
+건너뜀 없이 통과했다. 이는 이 후보의 자동 검증 근거이며, 전체 릴리스 승인은 제품 공개 gate,
+required CI, migration/운영 승인과 staging 증거를 함께 요구한다.
 
 ## 상세 케이스와 상태
 
@@ -85,8 +85,8 @@ staging/운영 리허설은 다음 목표를 모두 포함한다. 단계별 입�
 | STAGE-01 | artifact·migration·published snapshot·public HTTPS probe |
 | STAGE-02 | 관리자 browser cookie/CORS와 익명 공개 접근 |
 | STAGE-03 | public image delivery, media mount, dynamic state, recovery set |
-| STAGE-04 | mobile polling (notice/goods/availability/crowding), offline recovery, navigation, accessibility |
-| STAGE-05 | rate-67와 warm/cold cache·activation spike·receipt limit 부하, 관측 지표, rollback rehearsal |
+| STAGE-04 | mobile polling (notice/goods/availability/crowding/Hyped), offline recovery, navigation, accessibility |
+| STAGE-05 | rate-67와 warm/cold cache·activation spike·receipt/Hyped limit 부하, 관측 지표, rollback rehearsal |
 
 `readyz`는 해당 festival의 published snapshot 적재를 보는 readiness probe이며 지속적인 DB
 health check가 아니다. 연결된 image fixture가 없으면 image delivery stage는 미완료다.
@@ -106,5 +106,11 @@ OperationalBoundariesHttpE2eTest에 매핑했다. 중앙 OpenAPI release coverag
 끄며, 공개 쓰기 제한 자체는 `RateLimitTest`가 별도로 검증한다. 이 결과는 CI runner와
 합성 fixture의 회귀 근거이고 staging·운영 용량을 뜻하지 않는다.
 
-이 변경에서는 사용자 지시에 따라 Maven, Docker, CI, k6와 모든 테스트를 실행하지 않았다.
-실행 명령과 candidate별 PASS/BLOCKED 기록은 검증 명령과 CI 및 각 상세 시나리오 문서를 따른다.
+2026-09-25 PR #97의 `5f98cfc` 코드 기준 `api-v2-contract`, Java 21/25 verify,
+`artist-hyped-load`, CodeQL, Docker image·filesystem 보안 검사 CI가 통과했다.
+Java 21 verify에서 `ArtistHypedHttpE2eTest` 2개,
+`DynamicContentReleaseHttpE2eTest` 5개,
+`OperationalBoundariesHttpE2eTest` 4개가 모두 건너뜀 없이 통과했다.
+Hyped load의 JSON 결과는 해당 CI artifact에 보관하며, 실제 staging·운영 용량과
+browser/UI 구현은 아직 검증되지 않았다. candidate별 PASS/BLOCKED 기록과 배포 판정은
+[검증 명령과 CI](validation.md) 및 각 상세 시나리오 문서를 따른다.
