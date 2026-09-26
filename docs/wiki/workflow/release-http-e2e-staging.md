@@ -72,7 +72,8 @@ STAGE-03 media smoke를 다시 확인한다.
 | 02.2 | allowed origin의 CORS preflight 및 credentialed request | allow-origin/credentials/header/method가 application policy와 일치 | browser가 expected origin을 보내지 못하면 CORS setting을 추측해 우회하지 않는다. |
 | 02.3 | foreign Origin은 browser에서 login·refresh·logout으로, missing Origin은 non-browser HTTP client에서 같은 cookie route로, malformed bearer는 보호된 admin endpoint로 각각 요청 | 각 request가 해당 contract error로 거절 | session cookie, business row, audit, idempotency, media file이 추가되지 않는다. public GET에 malformed bearer가 붙었다고 거절을 기대하지 않는다. |
 | 02.4 | notice/product/availability/media의 representative valid mutation과 rejected mutation | bearer authentication과 precondition 결과가 API contract와 일치 | invalid request가 public GET, DB, media lifecycle을 바꾸지 않는다. |
-| 02.5 | private profile에서 notices/goods/availability/media를 익명으로 읽는다 | public path가 login/administrator cookie 없이 성공 | session 로그아웃 뒤 public user path가 인증 뒤로 이동하지 않는다. |
+| 02.5 | private profile에서 notices/goods/availability/media와 `GET /api/v2/artist-hyped`를 익명으로 읽는다 | public path가 login/administrator cookie 없이 성공 | session 로그아웃 뒤 public user path가 인증 뒤로 이동하지 않는다. |
+| 02.6 | 오늘이 등록된 FestivalDay인 격리 fixture에서 private profile로 실제 ARTIST의 Hyped 버튼을 반복 누른다 | 관리자 cookie 없이 각 명시적 클릭이 1회 POST되고 반환된 누적 수가 증가한다. CONTEST에는 버튼이 없다 | 429 또는 모호한 네트워크 결과를 성공으로 표시하거나 자동 재전송하지 않는다. 축제일 fixture가 없으면 BLOCKED로 기록한다. |
 
 **증거.** DevTools network record에서 request Origin, cookie attributes, response CORS headers와
 status만 보관한다. cookie/token value와 uploaded binary는 redact한다. 필요하면 keyboard focus,
@@ -86,8 +87,8 @@ label, error display는 STAGE-04 evidence에 연결한다.
 | 단계 | 실행·관측 | 통과 기준 | 중단 또는 복구 판단 |
 | --- | --- | --- | --- |
 | 03.1 | 실제 연결 image를 가진 public goods response의 `images[].masterUrl`을 기록하고 public ingress GET | `200 image/webp`와 expected cache/security headers | 연결 image가 없으면 image delivery는 **미완료**이며 PASS로 바꾸지 않는다. |
-| 03.2 | restart 전 KST 시각, notice visibility state와 ticket window를 포함한 notice/product/combination status/GOODS·TICKET account 의미값, current media mount identity 기록 | baseline이 revision 외 동적 data와 time boundary를 분리해 기록 | catalog revision만 보고 dynamic state가 보존됐다고 결론 내리지 않는다. |
-| 03.3 | STAGE-01 controlled restart 뒤 같은 public URL·동적 reader를 재조회 | 저장된 의미값과 media mount는 유지되고, restart 동안 ticket window/notice date boundary를 넘었으면 public 표현은 문서화된 시간 전이에 맞는다 | missing mount/404/503, data loss 또는 time boundary와 맞지 않는 public 전이면 traffic 재개 전에 원인을 분류한다. |
+| 03.2 | restart 전 KST 시각, notice visibility state와 ticket window를 포함한 notice/product/combination status/GOODS·TICKET account 의미값, 아티스트별 Hyped 누적 수, current media mount identity 기록 | baseline이 revision 외 동적 data와 time boundary를 분리해 기록 | catalog revision만 보고 dynamic state가 보존됐다고 결론 내리지 않는다. |
+| 03.3 | STAGE-01 controlled restart 뒤 같은 public URL·동적 reader를 재조회 | 저장된 의미값·Hyped 누적 수와 media mount는 유지되고, restart 동안 ticket window/notice date boundary를 넘었으면 public 표현은 문서화된 시간 전이에 맞는다 | missing mount/404/503, data loss 또는 time boundary와 맞지 않는 public 전이면 traffic 재개 전에 원인을 분류한다. |
 | 03.4 | DB/media backup recovery set reference와 before/after smoke를 대조 | DB와 media가 같은 recovery set ID·time으로 관리됨 | DB 또는 media 한쪽만 복원하는 계획은 실행하지 않는다. |
 
 **원인별 대응.** ingress/TLS 단독 문제는 확인된 config rollback을, incompatible artifact는 DB
@@ -99,19 +100,20 @@ media GET와 public smoke를 확인한다. 모든 HTTP failure의 기본 대응�
 
 ## STAGE-04 · mobile polling·offline recovery·navigation·accessibility
 
-**목적.** mobile real browser가 dynamic notices/goods/availability/crowding을 15초 polling
+**목적.** mobile real browser가 dynamic notices/goods/availability/crowding/Hyped를 15초 polling
 규칙과 stale UX로 안전하게 보여 주는지 확인한다.
 
 | 단계 | 실제 사용자 흐름 | 통과 기준 |
 | --- | --- | --- |
-| 04.1 | 390×844와 지원 viewport에서 notice/goods/availability/crowding first entry | initial request가 즉시 시작되고 로그인 없이 usable content/empty/error state가 보인다. |
-| 04.2 | page visible 상태에서 notice/goods/availability/crowding의 15초, hidden 상태, foreground 복귀 | visible에서만 15초 polling, hidden에서 중단, foreground/route 재진입에서 즉시 revalidate한다. 동일 resource request가 겹치지 않는다. |
-| 04.3 | notice/goods/availability/crowding에서 offline → online, server failure를 재현 | offline/hidden 중 polling 중단, online에서 즉시 재요청, 실패는 30초→60초 backoff, 마지막 정상값과 stale/error 상태를 구분한다. |
+| 04.1 | 390×844와 지원 viewport에서 notice/goods/availability/crowding 및 아티스트 라인업·상세 first entry | initial request가 즉시 시작되고 로그인 없이 usable content/empty/error state가 보인다. Hyped 조회 실패를 0회로 바꾸지 않는다. |
+| 04.2 | page visible 상태에서 notice/goods/availability/crowding/Hyped의 15초, hidden 상태, foreground 복귀 | visible에서만 15초 polling, hidden에서 중단, foreground/route 재진입에서 즉시 revalidate한다. 동일 resource request가 겹치지 않는다. |
+| 04.3 | notice/goods/availability/crowding/Hyped에서 offline → online, server failure를 재현 | offline/hidden 중 polling 중단, online에서 즉시 재요청한다. Hyped는 마지막 정상 수를 보존하고, 결과가 모호한 POST는 재전송하지 않고 GET으로 동기화한다. 다른 화면의 실패 backoff는 각 화면 계약을 따른다. |
 | 04.4 | 같은 catalog revision 아래 administrator가 notice/goods/availability를 바꾸고, [행사 당일 운영 절차서](festival-day-runbook.md) 기준으로 실제 FestivalDay·operatingDay를 확인한 뒤 crowding을 바꾼다 | next polling 또는 immediate revalidation에서 dynamic change가 보인다. catalog meta.revision만으로 dynamic update를 버리지 않는다. FestivalDay/operatingDay가 아니면 crowding mutation은 BLOCKED로 기록한다. |
 | 04.5 | list → detail → back, deep link, keyboard/zoom/긴 번역 | product navigation 규칙, scroll/focus restoration, label·keyboard focus, text reflow/overflow가 각 화면 계약에 맞는다. |
+| 04.6 | 아티스트 라인업 → 상세에서 Hyped 수, 버튼, 닫힘·429 상태를 확인 | 라인업은 수만 표시하고 상세에서만 클릭할 수 있다. 닫힌 기간에는 수를 읽되 참여를 막고, 실패한 클릭으로 수를 올리지 않는다. 긴 수 표기와 버튼 focus·label을 확인한다. |
 
-Network timing은 browser trace로 기록한다. 적용 대상 screen은 15초 polling과 30/60초 backoff
-수용 조건을 충족해야 한다. 구현이 없으면 FAIL 또는 BLOCKED로 기록하고, 승인되지 않았거나
+Network timing은 browser trace로 기록한다. 적용 대상 screen은 15초 polling과 각 화면 계약의
+실패 후 재조회 규칙을 충족해야 한다. 구현이 없으면 FAIL 또는 BLOCKED로 기록하고, 승인되지 않았거나
 화면 계약에 매핑되지 않은 screen만 근거와 함께 `N/A`로 남긴다.
 
 ## STAGE-05 · staging k6 부하 프로필·관측·rollback rehearsal
@@ -142,11 +144,12 @@ dynamic-mutation-interleaving, receipt-rate-limit-mix 프로필을 제공한다.
 | activation spike/public polling/sustained | public polling은 crowding/notices/goods/goods availability를 17/17/17/16 RPS로 분리하고, activation은 같은 비율로 67/134/335 RPS를 만든다. route별 success/429/5xx/timeout/transport, dropped iteration과 heap·GC·DB 관측을 분리한다. |
 | dynamic mutation | opt-in bearer/origin·FestivalDay·writable fixture, initial admin savedLevel 확인, 원래 savedLevel의 read-back 복원과 cleanup audit를 요구한다. |
 | receipt rate-limit mix | valid/invalid 결과, RATE_LIMITED envelope·Retry-After·request ID, public/other client 분리와 refill 회복을 기록한다. |
+| artist Hyped burst | 별도 승인된 격리 fixture에서 실제 ingress로 GET/POST를 함께 실행한다. 승인한 목표 요청량·지연 기준과 client identity 분포를 실행 전에 기록하고, 보호 limiter를 켠 결과에서 성공 POST 총수와 최종 API·DB count 일치, 429·5xx·timeout·lock wait·connection pressure를 분리한다. 합성 loopback CI 결과로 대체하지 않는다. |
 
 | 단계 | 실행·관측 | 통과·중단 기준 |
 | --- | --- | --- |
 | 05.1 | candidate artifact와 STAGE-01 probe가 통과한 동일 환경에서 rate-67 실행 | 모든 rate-67 기준과 관측 evidence가 충족해야 한다. 429/5xx를 합쳐 숨기지 않는다. |
-| 05.2 | rate-67과 warm/cold cache, 1×/2×/5× activation, public polling, sustained, receipt limit 중 후보에 적용되는 승인 profile을 비교 | saturation point, DB lock/connection pressure, cache/limiter/client identity condition을 기록한다. 결과 하나로 production capacity를 확정하지 않는다. |
+| 05.2 | rate-67과 warm/cold cache, 1×/2×/5× activation, public polling, sustained, receipt limit 및 Hyped burst 중 후보에 적용되는 승인 profile을 비교 | saturation point, DB lock/connection pressure, cache/limiter/client identity condition을 기록한다. 결과 하나로 production capacity를 확정하지 않는다. |
 | 05.3 | 승인된 별도 recovery 대상에서 documented rollback/recovery를 rehearsal | agreed RPO/RTO 판단, Flyway/revision/media/public smoke를 모두 재확인한다. |
 | 05.4 | rehearsal failure 또는 health/core smoke failure | release를 진행하지 않고 known-good artifact/config 또는 대상별 recovery로 전환한다. |
 
