@@ -60,20 +60,6 @@
       "imageHeight": null
     },
     {
-      "id": "food-truck-zone-11",
-      "category": "FOOD_TRUCK",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
-    },
-    {
-      "id": "food-truck-zone-12",
-      "category": "FOOD_TRUCK",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
-    },
-    {
       "id": "booth-pleeting",
       "category": "BOOTH",
       "imageUrl": null,
@@ -212,6 +198,300 @@
       "imageUrl": null,
       "imageWidth": null,
       "imageHeight": null
+    },
+    {
+      "id": "promo-ic-pbl",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-shinhan-bank",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-counseling-center",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-human-rights-center",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-health-center",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-global-innovation",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-likelion",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-turucar",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-calivak",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "promo-sponuva",
+      "category": "PROMOTION_BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-grimul",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-ggomul",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-dust-on",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-malgo-deco",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-bratitude",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-elor",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-kkonggeurami",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-chalna",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-seosan-nonghyup",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-everland",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-nolzang",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "flea-hq",
+      "category": "FLEA_MARKET",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-onekitchen",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-hwanggeummacha",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-aimkitchen",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-oppagopchang",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-kingking",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-bibifoodz",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-monster",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-paradise",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-fantasticboom",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-hwalhwal",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-yogerfood",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "truck-chagoonsikdang",
+      "category": "FOOD_TRUCK",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "lawn-picnic-zone",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "lawn-hanyang-workshop",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "lawn-hanyang-arcade",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "lawn-hanyang-stationery",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "campus-erica-wall",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "campus-erica-way",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "campus-erica-wish",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
+    },
+    {
+      "id": "campus-dongchim-3manli",
+      "category": "BOOTH",
+      "imageUrl": null,
+      "imageWidth": null,
+      "imageHeight": null
     }
   ],
   "spaceTranslations": [
@@ -294,32 +574,6 @@
       "contactUrl": null
     },
     {
-      "spaceId": "food-truck-zone-11",
-      "locale": "ko",
-      "name": "푸드트럭존 11번 구역",
-      "imageAlt": "푸드트럭존 11번 구역 대표 이미지",
-      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 11번 (7·8번 노상존 아래)",
-      "operatorText": null,
-      "hoursText": null,
-      "descriptionText": null,
-      "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
-    },
-    {
-      "spaceId": "food-truck-zone-12",
-      "locale": "ko",
-      "name": "푸드트럭존 12번 구역",
-      "imageAlt": "푸드트럭존 12번 구역 대표 이미지",
-      "locationText": "체육관 앞 · 학술정보관 주차장 주점존 12번 (9·10번 노상존 아래)",
-      "operatorText": null,
-      "hoursText": null,
-      "descriptionText": null,
-      "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
-    },
-    {
       "spaceId": "booth-pleeting",
       "locale": "ko",
       "name": "플리팅",
@@ -339,11 +593,11 @@
       "imageAlt": "학술정보팀 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 1번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/hyuerica/"
     },
     {
       "spaceId": "promo-rotc",
@@ -352,11 +606,11 @@
       "imageAlt": "학군단 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 2번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/hyu_1151rotc/"
     },
     {
       "spaceId": "promo-career",
@@ -365,7 +619,7 @@
       "imageAlt": "커리어개발팀 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 3번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -378,7 +632,7 @@
       "imageAlt": "데이터보안/활용사업 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 4번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -391,7 +645,7 @@
       "imageAlt": "교목실 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 5번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -404,7 +658,7 @@
       "imageAlt": "국제팀 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 6번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -417,11 +671,11 @@
       "imageAlt": "안경원 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 7번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/er.s_optician/"
     },
     {
       "spaceId": "promo-told",
@@ -430,7 +684,7 @@
       "imageAlt": "TOLD 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 8번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -443,7 +697,7 @@
       "imageAlt": "YBM 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 9번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -456,7 +710,7 @@
       "imageAlt": "카운셀러 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 10번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -465,12 +719,12 @@
     {
       "spaceId": "promo-operations",
       "locale": "ko",
-      "name": "프로모션 운영부스",
-      "imageAlt": "프로모션 운영부스 대표 이미지",
+      "name": "프로모션 운영본부(쿠팡이츠)",
+      "imageAlt": "프로모션 운영본부(쿠팡이츠) 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 11번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
-      "descriptionText": null,
+      "hoursText": "10:00 ~ 18:00",
+      "descriptionText": "한양대 ERICA 이츠 축제 타임! 지금 QR 스캔하고 최대 1만원 랜덤 쿠폰 100% 당첨!",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -482,7 +736,7 @@
       "imageAlt": "산업 인재양성 부스 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 1번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -495,7 +749,7 @@
       "imageAlt": "지능형로봇사업팀 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 2번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -508,7 +762,7 @@
       "imageAlt": "창업교육센터 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 3번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -521,7 +775,7 @@
       "imageAlt": "발전협력팀 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 4~6번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -534,11 +788,11 @@
       "imageAlt": "스타벅스 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 7번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/starbuckskorea/"
     },
     {
       "spaceId": "promo-nongshim",
@@ -547,11 +801,11 @@
       "imageAlt": "농심 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 8번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
-      "contactLabel": null,
-      "contactUrl": null
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/nongshim/"
     },
     {
       "spaceId": "promo-gahee",
@@ -560,7 +814,7 @@
       "imageAlt": "가히 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 9번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
       "contactLabel": null,
@@ -573,11 +827,557 @@
       "imageAlt": "삼성미라클안과 대표 이미지",
       "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 10번째",
       "operatorText": null,
-      "hoursText": "11:00 ~ 17:00",
+      "hoursText": "10:00 ~ 18:00",
       "descriptionText": null,
       "experienceText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/samsungmiracle/"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "IC-PBL교수학습센터",
+      "descriptionText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/icpbl.erica/",
+      "spaceId": "promo-ic-pbl",
+      "locale": "ko",
+      "name": "ic-pbl",
+      "imageAlt": "ic-pbl 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 3번째",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/shinhanbank_official/",
+      "spaceId": "promo-shinhan-bank",
+      "locale": "ko",
+      "name": "신한은행",
+      "imageAlt": "신한은행 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 9번째",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
       "contactLabel": null,
-      "contactUrl": null
+      "contactUrl": null,
+      "spaceId": "promo-counseling-center",
+      "locale": "ko",
+      "name": "상담센터",
+      "imageAlt": "상담센터 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 학술정보관 쪽 줄 10번째(안경원과 같은 칸, 9/30)",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "promo-human-rights-center",
+      "locale": "ko",
+      "name": "인권센터",
+      "imageAlt": "인권센터 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 1번째(9/30)",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/healthcenter_hanyang/",
+      "spaceId": "promo-health-center",
+      "locale": "ko",
+      "name": "학생지원팀(한양보건센터)",
+      "imageAlt": "학생지원팀(한양보건센터) 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 2번째(9/30)",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "promo-global-innovation",
+      "locale": "ko",
+      "name": "글로벌 사회혁신팀",
+      "imageAlt": "글로벌 사회혁신팀 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 제4공학관 쪽 줄 3번째(9/30~10/1)",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "멋쟁이사자처럼 한양대학교 ERICA",
+      "descriptionText": "축제 웹앱 소개 및 스탬프투어 경품 제공 부스",
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/likelion_erica/",
+      "spaceId": "promo-likelion",
+      "locale": "ko",
+      "name": "멋쟁이사자처럼",
+      "imageAlt": "멋쟁이사자처럼 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/turucar_official/",
+      "spaceId": "promo-turucar",
+      "locale": "ko",
+      "name": "투루카",
+      "imageAlt": "투루카 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 상단 11번째 칸(10/1)",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "promo-calivak",
+      "locale": "ko",
+      "name": "CALIVAK",
+      "imageAlt": "CALIVAK 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 하단 9번째 칸(9/30~10/1)",
+      "hoursText": "10:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "\"MOVE. SWEAT. CARE.\" 움직이는 순간에도, 피부는 스포뉴바. 스포츠를 즐기는 한양대학교 ERICA 학우들을 위해 스포뉴바가 캠퍼스에 찾아옵니다.",
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/sponuva_official/",
+      "spaceId": "promo-sponuva",
+      "locale": "ko",
+      "name": "스포뉴바",
+      "imageAlt": "스포뉴바 대표 이미지",
+      "locationText": "제4공학관 · 학술정보관 사이 프로모션 스트리트, 하단 12번째 칸",
+      "hoursText": "11:00 ~ 18:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "중앙동아리 그림얼",
+      "descriptionText": "판매 품목: 캐리커쳐",
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/grimul_erica/",
+      "spaceId": "flea-grimul",
+      "locale": "ko",
+      "name": "그림얼 출장부",
+      "imageAlt": "그림얼 출장부 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 1번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 키링, 악세서리류(팔찌, 목걸이 등), 오마모리 부적, 워리스톤",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-ggomul",
+      "locale": "ko",
+      "name": "꼬물꾸물대면품절",
+      "imageAlt": "꼬물꾸물대면품절 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 2번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 악세서리류(비즈 팔찌, 비즈 목걸이)",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-dust-on",
+      "locale": "ko",
+      "name": "Dust.On",
+      "imageAlt": "Dust.On 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 3번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 데스크 피규어, 스마트폰 거치대, 클리커 키링, 테이블 조명, 연필꽂이, 코스터",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-malgo-deco",
+      "locale": "ko",
+      "name": "말고 데크크",
+      "imageAlt": "말고 데크크 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 4번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 라이터 스티커, 카드 스티커, 슬리브리스, 원숄더 반팔, 리유저블백",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-bratitude",
+      "locale": "ko",
+      "name": "Bratitude",
+      "imageAlt": "Bratitude 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 5번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 악세서리류(목걸이 3종, 팔찌 2종, 뱅글, 반지 2종)",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-elor",
+      "locale": "ko",
+      "name": "ELOR(장신구 보급소)",
+      "imageAlt": "ELOR(장신구 보급소) 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 6번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 악세서리류(반지, 팔찌, 목걸이, 키링), 생활용품류(파우치, 스크런치, 지갑)",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-kkonggeurami",
+      "locale": "ko",
+      "name": "꽁그라미",
+      "imageAlt": "꽁그라미 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 7번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 포토 굿즈(커스텀 키링)",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-chalna",
+      "locale": "ko",
+      "name": "찰나공방(Keep Your Moment)",
+      "imageAlt": "찰나공방(Keep Your Moment) 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 8번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "서산농협",
+      "descriptionText": "판매 품목: 농작물",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-seosan-nonghyup",
+      "locale": "ko",
+      "name": "서산농협",
+      "imageAlt": "서산농협 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 9번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "에버랜드",
+      "descriptionText": "판매 품목: 티켓. 10/1 하루만 운영한다.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-everland",
+      "locale": "ko",
+      "name": "에버랜드",
+      "imageAlt": "에버랜드 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존 10번",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": "판매 품목: 굿즈. MD스토어.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "flea-nolzang",
+      "locale": "ko",
+      "name": "놀장_NOL:ZANG",
+      "imageAlt": "놀장_NOL:ZANG 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존, 배치도 왼쪽 상단(운영본부 위)",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/hanyang_erica_stu/",
+      "spaceId": "flea-hq",
+      "locale": "ko",
+      "name": "플리마켓 운영본부",
+      "imageAlt": "플리마켓 운영본부 대표 이미지",
+      "locationText": "학생복지관 앞 민주광장 플리마켓존, 배치도 왼쪽(MD스토어 아래)",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-onekitchen",
+      "locale": "ko",
+      "name": "원키친",
+      "imageAlt": "원키친 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-hwanggeummacha",
+      "locale": "ko",
+      "name": "황금마차",
+      "imageAlt": "황금마차 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-aimkitchen",
+      "locale": "ko",
+      "name": "에임키친",
+      "imageAlt": "에임키친 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-oppagopchang",
+      "locale": "ko",
+      "name": "오빠곱창",
+      "imageAlt": "오빠곱창 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-kingking",
+      "locale": "ko",
+      "name": "킹킹",
+      "imageAlt": "킹킹 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-bibifoodz",
+      "locale": "ko",
+      "name": "비비푸드Z",
+      "imageAlt": "비비푸드Z 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-monster",
+      "locale": "ko",
+      "name": "몬스터",
+      "imageAlt": "몬스터 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-paradise",
+      "locale": "ko",
+      "name": "파라다이스",
+      "imageAlt": "파라다이스 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-fantasticboom",
+      "locale": "ko",
+      "name": "판타스틱붐",
+      "imageAlt": "판타스틱붐 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-hwalhwal",
+      "locale": "ko",
+      "name": "활활",
+      "imageAlt": "활활 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "truck-yogerfood",
+      "locale": "ko",
+      "name": "요거푸드",
+      "imageAlt": "요거푸드 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": null,
+      "descriptionText": null,
+      "contactLabel": "Instagram",
+      "contactUrl": "https://www.instagram.com/cha_goontr/",
+      "spaceId": "truck-chagoonsikdang",
+      "locale": "ko",
+      "name": "차군식당",
+      "imageAlt": "차군식당 대표 이미지",
+      "locationText": "예체능대학 사거리 일대 푸드트럭존",
+      "hoursText": "11:00 ~ 23:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 콘텐츠팀",
+      "descriptionText": "피크닉존에서 선선한 바람이 불어오는 가을을 즐겨보세요!",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "lawn-picnic-zone",
+      "locale": "ko",
+      "name": "피크닉존",
+      "imageAlt": "피크닉존 대표 이미지",
+      "locationText": "잔디공터",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 콘텐츠팀",
+      "descriptionText": "정답 없이 손 가는 대로 만들어가는 그 감각을, 하냥 공방에서 다시 느껴보세요.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "lawn-hanyang-workshop",
+      "locale": "ko",
+      "name": "하냥공방",
+      "imageAlt": "하냥공방 대표 이미지",
+      "locationText": "잔디공터",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 콘텐츠팀",
+      "descriptionText": "어렸을 때 해가 질 때까지 친구들과 즐겼던 그 시절 놀이들을 다시 만나보세요!",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "lawn-hanyang-arcade",
+      "locale": "ko",
+      "name": "하냥오락실",
+      "imageAlt": "하냥오락실 대표 이미지",
+      "locationText": "잔디공터",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 콘텐츠팀",
+      "descriptionText": "게임 부스에서 모은 간식 교환권을 하냥 문방구에서 달콤하게 터뜨릴 시간!",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "lawn-hanyang-stationery",
+      "locale": "ko",
+      "name": "하냥문방구",
+      "imageAlt": "하냥문방구 대표 이미지",
+      "locationText": "잔디공터",
+      "hoursText": "11:00 ~ 17:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 기획운영팀",
+      "descriptionText": "작은 타일 위에 나만의 이야기를 자유롭게 그려, 모두의 조각이 하나의 벽이 됩니다.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "campus-erica-wall",
+      "locale": "ko",
+      "name": "ERICA WALL",
+      "imageAlt": "ERICA WALL 대표 이미지",
+      "locationText": "호수공원 신전",
+      "hoursText": "11:00 ~ 19:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 기획운영팀",
+      "descriptionText": "낮에는 바닥에 그림을 그리고, 밤에는 등불로 소원을 밝히는 낭만과 동심의 거리.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "campus-erica-way",
+      "locale": "ko",
+      "name": "ERICA WAY",
+      "imageAlt": "ERICA WAY 대표 이미지",
+      "locationText": "학술정보관 사거리~예체능대학 사거리 일대(소원등불 부스: 호수공원 신전)",
+      "hoursText": "11:00 ~ 19:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 기획운영팀",
+      "descriptionText": "호수공원에서 소원을 빌면 이루어진다는 소문 — 나만의 소원을 적어 호수에 띄워보세요.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "campus-erica-wish",
+      "locale": "ko",
+      "name": "ERICA WISH",
+      "imageAlt": "ERICA WISH 대표 이미지",
+      "locationText": "호수공원 신전",
+      "hoursText": "11:00 ~ 19:00"
+    },
+    {
+      "experienceText": null,
+      "operatorText": "2026 한양문화제기획단 콘텐츠팀",
+      "descriptionText": "9/30 하루만 운영. 캠퍼스 곳곳의 STAFF를 찾아 공기놀이·딱지치기·참참참에 도전하고 상품을 받아가세요.",
+      "contactLabel": null,
+      "contactUrl": null,
+      "spaceId": "campus-dongchim-3manli",
+      "locale": "ko",
+      "name": "동심 찾아 3만리!",
+      "imageAlt": "동심 찾아 3만리! 대표 이미지",
+      "locationText": "호수공원, 학술정보관, 공학관 일대 (상품 교환: 하냥 문방구)",
+      "hoursText": "13:00 ~ 15:00"
     }
   ],
   "spaceSortOrders": [
@@ -610,16 +1410,6 @@
       "locale": "ko",
       "spaceId": "pubzone-tarot-booth",
       "sortRank": 6
-    },
-    {
-      "locale": "ko",
-      "spaceId": "food-truck-zone-11",
-      "sortRank": 7
-    },
-    {
-      "locale": "ko",
-      "spaceId": "food-truck-zone-12",
-      "sortRank": 8
     },
     {
       "locale": "ko",
@@ -720,6 +1510,216 @@
       "locale": "ko",
       "spaceId": "promo-samsung-miracle-eye",
       "sortRank": 28
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-ic-pbl",
+      "sortRank": 29
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-shinhan-bank",
+      "sortRank": 30
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-counseling-center",
+      "sortRank": 31
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-human-rights-center",
+      "sortRank": 32
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-health-center",
+      "sortRank": 33
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-global-innovation",
+      "sortRank": 34
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-likelion",
+      "sortRank": 35
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-turucar",
+      "sortRank": 36
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-calivak",
+      "sortRank": 37
+    },
+    {
+      "locale": "ko",
+      "spaceId": "promo-sponuva",
+      "sortRank": 38
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-grimul",
+      "sortRank": 39
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-ggomul",
+      "sortRank": 40
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-dust-on",
+      "sortRank": 41
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-malgo-deco",
+      "sortRank": 42
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-bratitude",
+      "sortRank": 43
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-elor",
+      "sortRank": 44
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-kkonggeurami",
+      "sortRank": 45
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-chalna",
+      "sortRank": 46
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-seosan-nonghyup",
+      "sortRank": 47
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-everland",
+      "sortRank": 48
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-nolzang",
+      "sortRank": 49
+    },
+    {
+      "locale": "ko",
+      "spaceId": "flea-hq",
+      "sortRank": 50
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-onekitchen",
+      "sortRank": 51
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-hwanggeummacha",
+      "sortRank": 52
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-aimkitchen",
+      "sortRank": 53
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-oppagopchang",
+      "sortRank": 54
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-kingking",
+      "sortRank": 55
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-bibifoodz",
+      "sortRank": 56
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-monster",
+      "sortRank": 57
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-paradise",
+      "sortRank": 58
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-fantasticboom",
+      "sortRank": 59
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-hwalhwal",
+      "sortRank": 60
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-yogerfood",
+      "sortRank": 61
+    },
+    {
+      "locale": "ko",
+      "spaceId": "truck-chagoonsikdang",
+      "sortRank": 62
+    },
+    {
+      "locale": "ko",
+      "spaceId": "lawn-picnic-zone",
+      "sortRank": 63
+    },
+    {
+      "locale": "ko",
+      "spaceId": "lawn-hanyang-workshop",
+      "sortRank": 64
+    },
+    {
+      "locale": "ko",
+      "spaceId": "lawn-hanyang-arcade",
+      "sortRank": 65
+    },
+    {
+      "locale": "ko",
+      "spaceId": "lawn-hanyang-stationery",
+      "sortRank": 66
+    },
+    {
+      "locale": "ko",
+      "spaceId": "campus-erica-wall",
+      "sortRank": 67
+    },
+    {
+      "locale": "ko",
+      "spaceId": "campus-erica-way",
+      "sortRank": 68
+    },
+    {
+      "locale": "ko",
+      "spaceId": "campus-erica-wish",
+      "sortRank": 69
+    },
+    {
+      "locale": "ko",
+      "spaceId": "campus-dongchim-3manli",
+      "sortRank": 70
     }
   ],
   "spaceEvents": [
@@ -734,6 +1734,132 @@
       "locale": "ko",
       "sortOrder": 1,
       "content": "하루 6회 진행"
+    },
+    {
+      "spaceId": "promo-operations",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "coupang eats COUPON EVENT: QR코드 스캔 후 [쿠폰받기] 버튼 클릭"
+    },
+    {
+      "spaceId": "promo-operations",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "등록 및 사용 기간: 2026년 10월 4일까지 (ID당 1매 등록 가능)"
+    },
+    {
+      "spaceId": "promo-likelion",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "축제 웹앱 소개: 축제 웹앱 이용 안내"
+    },
+    {
+      "spaceId": "promo-likelion",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "스탬프투어 경품 제공 이벤트: 몬스터 협찬 상품 제공"
+    },
+    {
+      "spaceId": "promo-sponuva",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "스포츠 미션에 도전하세요! 부스에서 준비된 간단한 스포츠 미션에 참여(10~20초)하면 스포뉴바 제품을 만나볼 수 있어요."
+    },
+    {
+      "spaceId": "promo-sponuva",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "스포뉴바 공식 인스타그램(@sponuva_official) 팔로우 인증"
+    },
+    {
+      "spaceId": "promo-sponuva",
+      "locale": "ko",
+      "sortOrder": 3,
+      "content": "부스에서 인증샷 촬영 후 @sponuva_official 태그, #스포뉴바 #SPONUVA #스포츠스킨케어"
+    },
+    {
+      "spaceId": "lawn-picnic-zone",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "대여 가능 물품: 돗자리 / 밀크박스 / 인디언텐트"
+    },
+    {
+      "spaceId": "lawn-picnic-zone",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "이용 방법: 본부에서 학생증·신분증 제시 후 명부 작성, 대여물품 최대 90분 이용 후 반납하면 신분증 수령"
+    },
+    {
+      "spaceId": "lawn-hanyang-workshop",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "책갈피 공방: 스팽클과 드라이플라워로 나만의 책갈피 만들기"
+    },
+    {
+      "spaceId": "lawn-hanyang-workshop",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "슈링클스 공방: 캐릭터 도안에 색칠 후 오븐에 구워 키링 완성"
+    },
+    {
+      "spaceId": "lawn-hanyang-workshop",
+      "locale": "ko",
+      "sortOrder": 3,
+      "content": "아크릴 무드등 공방: 아크릴판에 그림을 그려 무드등 완성"
+    },
+    {
+      "spaceId": "lawn-hanyang-arcade",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "플링코 / 랜덤 비석치기 / 탁구공 튀기기 / 인간 파칭코 게임 참여"
+    },
+    {
+      "spaceId": "lawn-hanyang-arcade",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "게임 성공 시 간식 교환권 지급, 하냥문방구에서 간식으로 교환"
+    },
+    {
+      "spaceId": "lawn-hanyang-stationery",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "간식 교환: 하냥오락실에서 모은 교환권만큼 추억의 간식 교환(솜사탕 1일 150개 한정)"
+    },
+    {
+      "spaceId": "campus-erica-wall",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "타일 꾸미기: 타일에 개성을 자유롭게 그려 넣고 신전 벽에 이어붙이기"
+    },
+    {
+      "spaceId": "campus-erica-way",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "소원등불: 매일 선착순 200명, 준비 수량 소진 시 조기 마감"
+    },
+    {
+      "spaceId": "campus-erica-way",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "바닥 낙서 거리: 트롤리에서 분필을 챙겨 자유롭게 바닥에 그림 그리기"
+    },
+    {
+      "spaceId": "campus-erica-wish",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "소원 적기: 종이에 소원을 적고 빛나는 모래를 넣어 호수에 띄우기 (매일 선착순 1,000명)"
+    },
+    {
+      "spaceId": "campus-erica-wish",
+      "locale": "ko",
+      "sortOrder": 2,
+      "content": "하냥이와 사진 촬영"
+    },
+    {
+      "spaceId": "campus-dongchim-3manli",
+      "locale": "ko",
+      "sortOrder": 1,
+      "content": "게임 3종(공기놀이, 딱지치기, 참참참)에서 승리하면 티켓 획득, 3장 모으면 상품 수령 (선착순 5명)"
     }
   ],
   "spaceMenuItems": [
@@ -827,6 +1953,174 @@
       "sortOrder": 3,
       "name": "스페이스X 스테이크",
       "priceAmount": null
+    },
+    {
+      "spaceId": "truck-onekitchen",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "부채살불초밥(10p)",
+      "priceAmount": 12000
+    },
+    {
+      "spaceId": "truck-onekitchen",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "생연어초밥",
+      "priceAmount": 13000
+    },
+    {
+      "spaceId": "truck-hwanggeummacha",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "야끼소바",
+      "priceAmount": 10000
+    },
+    {
+      "spaceId": "truck-hwanggeummacha",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "오꼬노미야끼",
+      "priceAmount": 10000
+    },
+    {
+      "spaceId": "truck-aimkitchen",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "양념닭강정",
+      "priceAmount": 10000
+    },
+    {
+      "spaceId": "truck-aimkitchen",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "뿌링닭강정",
+      "priceAmount": 14000
+    },
+    {
+      "spaceId": "truck-aimkitchen",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "콜팝닭강정",
+      "priceAmount": 18000
+    },
+    {
+      "spaceId": "truck-oppagopchang",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "야채곱창",
+      "priceAmount": 13000
+    },
+    {
+      "spaceId": "truck-oppagopchang",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "순대볶음",
+      "priceAmount": 13000
+    },
+    {
+      "spaceId": "truck-oppagopchang",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "무뼈닭발",
+      "priceAmount": 13000
+    },
+    {
+      "spaceId": "truck-kingking",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "닭꼬치",
+      "priceAmount": 3000
+    },
+    {
+      "spaceId": "truck-bibifoodz",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "츄러스",
+      "priceAmount": 4000
+    },
+    {
+      "spaceId": "truck-bibifoodz",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "아츄",
+      "priceAmount": 7000
+    },
+    {
+      "spaceId": "truck-monster",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "닭강정",
+      "priceAmount": 10000
+    },
+    {
+      "spaceId": "truck-paradise",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "커피",
+      "priceAmount": 3500
+    },
+    {
+      "spaceId": "truck-paradise",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "음료",
+      "priceAmount": 7000
+    },
+    {
+      "spaceId": "truck-fantasticboom",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "타코야끼",
+      "priceAmount": 6000
+    },
+    {
+      "spaceId": "truck-hwalhwal",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "통 바베큐 반덩이",
+      "priceAmount": 13000
+    },
+    {
+      "spaceId": "truck-hwalhwal",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "통 바베큐 한덩이",
+      "priceAmount": 20000
+    },
+    {
+      "spaceId": "truck-yogerfood",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "칠리새우",
+      "priceAmount": 10000
+    },
+    {
+      "spaceId": "truck-yogerfood",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "크림새우",
+      "priceAmount": 10000
+    },
+    {
+      "spaceId": "truck-yogerfood",
+      "locale": "ko",
+      "sortOrder": 3,
+      "name": "반반",
+      "priceAmount": 15000
+    },
+    {
+      "spaceId": "truck-chagoonsikdang",
+      "locale": "ko",
+      "sortOrder": 1,
+      "name": "스테이크 덮밥 1인",
+      "priceAmount": 15000
+    },
+    {
+      "spaceId": "truck-chagoonsikdang",
+      "locale": "ko",
+      "sortOrder": 2,
+      "name": "스테이크 덮밥 2인",
+      "priceAmount": 25000
     }
   ],
   "places": [
@@ -1079,6 +2373,62 @@
       "imageUrl": null,
       "imageWidth": null,
       "imageHeight": null
+    },
+    {
+      "id": "contest-boston-city-boy",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/boston-city-boy.png",
+      "imageWidth": 758,
+      "imageHeight": 569
+    },
+    {
+      "id": "contest-feelsogood",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/feelsogood.png",
+      "imageWidth": 754,
+      "imageHeight": 566
+    },
+    {
+      "id": "contest-doh",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/doh.png",
+      "imageWidth": 1198,
+      "imageHeight": 686
+    },
+    {
+      "id": "contest-mareun-five",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/mareun-five.png",
+      "imageWidth": 1201,
+      "imageHeight": 696
+    },
+    {
+      "id": "contest-mungge-cloud",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/mungge-cloud.png",
+      "imageWidth": 1228,
+      "imageHeight": 699
+    },
+    {
+      "id": "contest-tal",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/tal.png",
+      "imageWidth": 1223,
+      "imageHeight": 686
+    },
+    {
+      "id": "contest-hema",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/hema.png",
+      "imageWidth": 1263,
+      "imageHeight": 696
+    },
+    {
+      "id": "contest-manchui",
+      "category": "CONTEST",
+      "imageUrl": "https://raw.githubusercontent.com/LikeLion14th-ERICA/fall-festival-server/main/ops/catalog/hanyang-2026/assets/contest-artists/manchui.png",
+      "imageWidth": 1199,
+      "imageHeight": 686
     }
   ],
   "artistTranslations": [
@@ -1137,10 +2487,145 @@
       "name": "프로미스나인",
       "imageAlt": "프로미스나인 프로필 사진",
       "introduction": "🍊프로미스나인🍊\n✨ 상큼한 에너지로 한양문화제의 무대를 환하게 물들이는 순간,\n한양을 더 설레게 할 프로미스나인(fromis_9)이 찾아옵니다! 🍀\n* 지원 불참"
+    },
+    {
+      "artistId": "contest-boston-city-boy",
+      "locale": "ko",
+      "name": "보스턴시티보이",
+      "imageAlt": "보스턴시티보이 대표 이미지",
+      "introduction": "RAP\n\n청춘의 감정과 서사를 노래하는 감성래퍼 보스턴시티보이 입니다."
+    },
+    {
+      "artistId": "contest-feelsogood",
+      "locale": "ko",
+      "name": "필소굿",
+      "imageAlt": "필소굿 대표 이미지",
+      "introduction": "RAP\n\n교내 유일무이 흑인음악동아리 필소굿입니다."
+    },
+    {
+      "artistId": "contest-doh",
+      "locale": "ko",
+      "name": "DOH",
+      "imageAlt": "DOH 대표 이미지",
+      "introduction": "DANCE\n\n도호야호~ ✌️ Dance of Hanyang! 중앙댄스동아리 DOH입니다!"
+    },
+    {
+      "artistId": "contest-mareun-five",
+      "locale": "ko",
+      "name": "마른파이브",
+      "imageAlt": "마른파이브 대표 이미지",
+      "introduction": "BAND\n\n마른 놈들 다섯이 모인 마른파이브입니다. 록이 뭔지 보여드리겠습니다."
+    },
+    {
+      "artistId": "contest-mungge-cloud",
+      "locale": "ko",
+      "name": "뭉게구름",
+      "imageAlt": "뭉게구름 대표 이미지",
+      "introduction": "BAND\n\n어쿠스틱 밴드동아리 뭉게구름입니다. 뭉게랑 같이 꿈나라로 떠나볼까?"
+    },
+    {
+      "artistId": "contest-tal",
+      "locale": "ko",
+      "name": "탈",
+      "imageAlt": "탈 대표 이미지",
+      "introduction": "사물놀이\n\n중앙 풍물 동아리 [탈]이 천둥과 바람, 비와 대지가 품었던 태초의 울림을 사물에 담아 오늘의 무대를 깨웁니다."
+    },
+    {
+      "artistId": "contest-hema",
+      "locale": "ko",
+      "name": "HEMA",
+      "imageAlt": "HEMA 대표 이미지",
+      "introduction": "BAND\n\n전자음악밴드동아리 HEMA입니다! 폭포같은 사운드로 무대 엎어보겠습니다!!"
+    },
+    {
+      "artistId": "contest-manchui",
+      "locale": "ko",
+      "name": "만취(MANCHUI)",
+      "imageAlt": "만취(MANCHUI) 대표 이미지",
+      "introduction": "DANCE\n\n만가지를 취하다 만취. 저희의 퍼포먼스에 취해보시죠."
     }
   ],
-  "artistLinks": [],
-  "artistLinkTranslations": [],
+  "artistLinks": [
+    {
+      "artistId": "contest-boston-city-boy",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/heedoe_flows/"
+    },
+    {
+      "artistId": "contest-feelsogood",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/feelsooooooooooogood/"
+    },
+    {
+      "artistId": "contest-doh",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/doh.official/"
+    },
+    {
+      "artistId": "contest-mungge-cloud",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/moonge_cloud/"
+    },
+    {
+      "artistId": "contest-tal",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/tal_pungmul/"
+    },
+    {
+      "artistId": "contest-hema",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/hema_1991_/"
+    },
+    {
+      "artistId": "contest-manchui",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/maaaaaaanchui/"
+    }
+  ],
+  "artistLinkTranslations": [
+    {
+      "artistId": "contest-boston-city-boy",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "contest-feelsogood",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "contest-doh",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "contest-mungge-cloud",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "contest-tal",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "contest-hema",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "contest-manchui",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    }
+  ],
   "artistSongs": [
     {
       "artistId": "nct-wish",
@@ -1463,6 +2948,18 @@
       "festivalDate": "2026-09-29",
       "startsAt": "2026-09-29T17:30:00+09:00",
       "endsAt": null
+    },
+    {
+      "id": "contest-day2-special",
+      "festivalDate": "2026-09-30",
+      "startsAt": "2026-09-30T19:00:00+09:00",
+      "endsAt": "2026-09-30T20:00:00+09:00"
+    },
+    {
+      "id": "contest-day3-together",
+      "festivalDate": "2026-10-01",
+      "startsAt": "2026-10-01T17:10:00+09:00",
+      "endsAt": "2026-10-01T19:10:00+09:00"
     }
   ],
   "performanceTranslations": [
@@ -1519,6 +3016,18 @@
       "locale": "ko",
       "title": "스개팅",
       "description": "대운동장 공연무대. 정확한 시각은 추후 공지."
+    },
+    {
+      "performanceId": "contest-day2-special",
+      "locale": "ko",
+      "title": "학생 스페셜공연",
+      "description": "잔디공터 뒤 주차장(주점존, 제3주차장)"
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "locale": "ko",
+      "title": "TO:GETHER 본선",
+      "description": "대운동장 내 공연무대"
     }
   ],
   "performanceArtists": [
@@ -1561,6 +3070,46 @@
       "performanceId": "performance-fromis-9",
       "artistId": "fromis-9",
       "displayOrder": 1
+    },
+    {
+      "performanceId": "contest-day2-special",
+      "artistId": "contest-boston-city-boy",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "contest-day2-special",
+      "artistId": "contest-feelsogood",
+      "displayOrder": 2
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "artistId": "contest-doh",
+      "displayOrder": 1
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "artistId": "contest-mareun-five",
+      "displayOrder": 2
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "artistId": "contest-mungge-cloud",
+      "displayOrder": 3
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "artistId": "contest-tal",
+      "displayOrder": 4
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "artistId": "contest-hema",
+      "displayOrder": 5
+    },
+    {
+      "performanceId": "contest-day3-together",
+      "artistId": "contest-manchui",
+      "displayOrder": 6
     }
   ],
   "timetableConfig": null,
@@ -1588,7 +3137,11 @@
   },
   "stampGuide": {
     "title": "스탬프 투어",
-    "dates": ["2026-09-29", "2026-09-30", "2026-10-01"],
+    "dates": [
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01"
+    ],
     "instructions": [
       "멋사 부스에서 QR을 스캔해 시작 스탬프 1개 적립",
       "다른 부스 체험 후 운영자가 보여주는 QR 스캔",
