@@ -56,7 +56,7 @@ public class CrowdingViewService {
         PublishedFestivalContext context = publishedContext();
         List<CrowdingSchedule> schedules = schedules(context);
         Instant now = clock.instant();
-        LocalDate today = LocalDate.now(clock.withZone(context.timezone()));
+        LocalDate today = now.atZone(context.timezone()).toLocalDate();
         CrowdingSchedule selected = select(schedules, today);
         Optional<CrowdingRecord> saved;
         try {
@@ -106,7 +106,8 @@ public class CrowdingViewService {
             saved,
             response,
             meta,
-            etag
+            etag,
+            now
         );
     }
 
@@ -144,9 +145,9 @@ public class CrowdingViewService {
                 return false;
             }
             LocalDate openDate = schedule.opensAt().atZoneSameInstant(timezone).toLocalDate();
-            LocalDate closeDate = schedule.closesAt().atZoneSameInstant(timezone).toLocalDate();
             if (!schedule.operatingDate().equals(openDate)
-                || !schedule.operatingDate().equals(closeDate)) {
+                || schedule.closesAt().toInstant().isAfter(
+                    schedule.operatingDate().plusDays(1).atStartOfDay(timezone).toInstant())) {
                 return false;
             }
             if (previous != null && !previous.isBefore(schedule.operatingDate())) {
@@ -247,7 +248,8 @@ public class CrowdingViewService {
         Optional<CrowdingRecord> saved,
         CrowdingResponse response,
         ApiMeta meta,
-        String etag
+        String etag,
+        Instant observedAt
     ) {
         public LocalDate operatingDay() {
             return selected.operatingDate();

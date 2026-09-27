@@ -93,6 +93,37 @@ class Postgresql17MigrationReleaseTest {
         assertRestartIsUnchanged();
     }
 
+    @Test
+    void v31PreservesExistingDataWithoutBackfillAndConstrainsAdministratorHours() throws SQLException {
+        flyway(30).migrate();
+        execute("""
+            INSERT INTO festival_days (id, festival_revision_id, festival_date, opens_at, closes_at, created_at, updated_at)
+            VALUES ('01234567-89ab-4cde-8fab-012345678907', '%1$s', '2026-09-29',
+                '2026-09-29T11:00:00+09:00', '2026-09-29T23:00:00+09:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+            INSERT INTO crowding_state_dynamic (festival_id, operating_date, level, updated_at)
+            VALUES ('%2$s', '2026-09-29', 'CROWDED', '2026-09-29T12:00:00+09:00');
+            """.formatted(REVISION_ID, FESTIVAL_ID));
+        Map<String, String> before = snapshot(tables(), false);
+        assertThat(flyway(31).migrate().migrationsExecuted).isOne();
+        assertHistory(31);
+        assertThat(snapshot(before.keySet().stream().toList(), false)).isEqualTo(before);
+        assertThat(text("SELECT count(*) FROM crowding_operating_hours")).isEqualTo("0");
+        execute("""
+            INSERT INTO crowding_operating_hours (festival_id, operating_date, opens_at, closes_at, updated_at)
+            VALUES ('%s', '2026-09-29', '2026-09-29T11:00:00+09:00',
+                '2026-09-30T00:00:00+09:00', CURRENT_TIMESTAMP)
+            """.formatted(FESTIVAL_ID));
+        rejects("UPDATE crowding_operating_hours SET closes_at = '2026-09-30T00:01:00+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET opens_at = '2026-09-28T23:00:00+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET opens_at = '2026-09-29T11:00:01+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET opens_at = '2026-09-29T11:00:00.001+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET closes_at = opens_at", "23514");
+        rejects("UPDATE crowding_operating_hours SET festival_id = '01234567-89ab-4cde-8fab-012345678999'", "23503");
+        Map<String, String> confirmed = snapshot(tables(), false);
+        assertThat(flyway(31).migrate().migrationsExecuted).isZero();
+        assertThat(snapshot(tables(), false)).isEqualTo(confirmed);
+    }
+
     private void seedV23State() throws SQLException {
         // Local fixtures only. No credentials, external configuration or operational content are imported.
         execute("""

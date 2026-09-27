@@ -1,6 +1,7 @@
 package dev.espero.festival.persistence;
 
 import dev.espero.festival.domain.CrowdingRecord;
+import dev.espero.festival.domain.CrowdingOperatingHours;
 import dev.espero.festival.domain.CrowdingSchedule;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,31 +42,17 @@ public class CrowdingStore {
         ).stream().findFirst();
     }
 
-    /** Locks a state row before an administrator checks its ETag and writes it. */
-    public Optional<CrowdingRecord> findForUpdate(UUID festivalId, LocalDate operatingDate) {
-        Optional<CrowdingRecord> current = jdbc.query("""
-            SELECT level, updated_at
-            FROM crowding_state_dynamic
-            WHERE festival_id = :festivalId
-              AND operating_date = :operatingDate
-            FOR UPDATE
-            """,
-            stateParameters(festivalId, operatingDate),
-            (resultSet, rowNumber) -> mapRecord(resultSet)
-        ).stream().findFirst();
-        if (current.isPresent()) {
-            return current;
-        }
-        // A missing state row has nothing to lock. Serialize the first insert
-        // on the festival row so two concurrent saves cannot race into the
-        // composite primary key.
+    /** All dynamic writes and catalog publication acquire the festival first. */
+    public void lockFestival(UUID festivalId) {
         jdbc.query("""
-            SELECT id
-            FROM festivals
-            WHERE id = :festivalId
-            FOR UPDATE
+            SELECT id FROM festivals WHERE id = :festivalId FOR UPDATE
             """, new MapSqlParameterSource("festivalId", festivalId),
             (resultSet, rowNumber) -> resultSet.getObject("id", UUID.class));
+    }
+
+    /** Locks the festival before the state row, including for existing rows. */
+    public Optional<CrowdingRecord> findForUpdate(UUID festivalId, LocalDate operatingDate) {
+        lockFestival(festivalId);
         return jdbc.query("""
             SELECT level, updated_at
             FROM crowding_state_dynamic
@@ -80,15 +67,60 @@ public class CrowdingStore {
 
     /** Reads all dates from the published FestivalRevision in date order. */
     public List<CrowdingSchedule> findSchedules(UUID festivalRevisionId) {
+        return findOperatingHours(festivalRevisionId).stream()
+            .map(hours -> new CrowdingSchedule(hours.operatingDate(), hours.opensAt(), hours.closesAt()))
+            .toList();
+    }
+
+    /** Overlay by row presence, so even invalid/null catalog times remain editable. */
+    public List<CrowdingOperatingHours> findOperatingHours(UUID festivalRevisionId) {
         return jdbc.query("""
-            SELECT festival_date, opens_at, closes_at
-            FROM festival_days
-            WHERE festival_revision_id = :festivalRevisionId
-            ORDER BY festival_date
+            SELECT day.festival_date,
+                   CASE WHEN hours.festival_id IS NULL THEN day.opens_at ELSE hours.opens_at END AS opens_at,
+                   CASE WHEN hours.festival_id IS NULL THEN day.closes_at ELSE hours.closes_at END AS closes_at,
+                   hours.updated_at
+            FROM festival_days day
+            JOIN festival_revisions revision ON revision.id = day.festival_revision_id
+            LEFT JOIN crowding_operating_hours hours
+              ON hours.festival_id = revision.festival_id AND hours.operating_date = day.festival_date
+            WHERE day.festival_revision_id = :festivalRevisionId
+            ORDER BY day.festival_date
             """,
             new MapSqlParameterSource("festivalRevisionId", festivalRevisionId),
-            (resultSet, rowNumber) -> mapSchedule(resultSet)
+            (resultSet, rowNumber) -> new CrowdingOperatingHours(
+                resultSet.getObject("festival_date", LocalDate.class),
+                resultSet.getObject("opens_at", OffsetDateTime.class),
+                resultSet.getObject("closes_at", OffsetDateTime.class),
+                resultSet.getObject("updated_at", OffsetDateTime.class) == null ? null
+                    : resultSet.getObject("updated_at", OffsetDateTime.class).toInstant()
+            )
         );
+    }
+
+    /** First confirmation persists even if the catalog fallback has the same times. */
+    @Transactional
+    public boolean saveOperatingHours(UUID festivalId, LocalDate date, OffsetDateTime opensAt,
+        OffsetDateTime closesAt, Instant updatedAt) {
+        lockFestival(festivalId);
+        List<CrowdingOperatingHours> saved = jdbc.query("""
+            SELECT operating_date, opens_at, closes_at, updated_at FROM crowding_operating_hours
+            WHERE festival_id = :festivalId AND operating_date = :operatingDate FOR UPDATE
+            """, stateParameters(festivalId, date), (row, number) -> new CrowdingOperatingHours(
+                row.getObject("operating_date", LocalDate.class), row.getObject("opens_at", OffsetDateTime.class),
+                row.getObject("closes_at", OffsetDateTime.class), row.getObject("updated_at", OffsetDateTime.class).toInstant()
+            ));
+        if (!saved.isEmpty() && saved.getFirst().opensAt().isEqual(opensAt)
+            && saved.getFirst().closesAt().isEqual(closesAt)) {
+            return false;
+        }
+        jdbc.update("""
+            INSERT INTO crowding_operating_hours (festival_id, operating_date, opens_at, closes_at, updated_at)
+            VALUES (:festivalId, :operatingDate, :opensAt, :closesAt, :updatedAt)
+            ON CONFLICT (festival_id, operating_date) DO UPDATE
+            SET opens_at = EXCLUDED.opens_at, closes_at = EXCLUDED.closes_at, updated_at = EXCLUDED.updated_at
+            """, stateParameters(festivalId, date).addValue("opensAt", opensAt)
+                .addValue("closesAt", closesAt).addValue("updatedAt", atUtc(updatedAt)));
+        return true;
     }
 
     /** Inserts or updates the authoritative state. Same-level saves are no-ops. */
@@ -125,14 +157,6 @@ public class CrowdingStore {
         return new CrowdingRecord(
             resultSet.getString("level"),
             resultSet.getObject("updated_at", OffsetDateTime.class).toInstant()
-        );
-    }
-
-    private CrowdingSchedule mapSchedule(ResultSet resultSet) throws SQLException {
-        return new CrowdingSchedule(
-            resultSet.getObject("festival_date", LocalDate.class),
-            resultSet.getObject("opens_at", OffsetDateTime.class),
-            resultSet.getObject("closes_at", OffsetDateTime.class)
         );
     }
 

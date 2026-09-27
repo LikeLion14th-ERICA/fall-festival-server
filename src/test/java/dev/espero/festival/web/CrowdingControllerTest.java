@@ -160,13 +160,33 @@ class CrowdingControllerTest {
     }
 
     @Test
-    void rejectsAScheduleWhoseCloseFallsOnTheNextLocalDate() {
+    void preservesLegacySecondsAndAllowsClosingExactlyAtNextMidnight() {
+        LocalDate day = LocalDate.parse("2030-10-01");
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(day, OffsetDateTime.parse("2030-10-01T13:00:31.125+09:00"),
+                OffsetDateTime.parse("2030-10-02T00:00:00+09:00"))
+        ));
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, day)).thenReturn(Optional.empty());
+
+        CrowdingResponse before = serviceAt("2030-10-01T04:00:31.124Z").current(request).response();
+        assertThat(before.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.BEFORE_OPEN);
+        CrowdingResponse opened = serviceAt("2030-10-01T04:00:31.125Z").current(request).response();
+        assertThat(opened.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
+        assertThat(opened.opensAt().getNano()).isEqualTo(125_000_000);
+        assertThat(serviceAt("2030-10-01T14:59:59.999Z").current(request).response().operatingStatus())
+            .isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
+        assertThat(serviceAt("2030-10-01T15:00:00Z").current(request).response().operatingStatus())
+            .isEqualTo(CrowdingResponse.OperatingStatus.CLOSED);
+    }
+
+    @Test
+    void rejectsAScheduleWhoseCloseFallsAfterNextMidnight() {
         when(contextService.currentPublished()).thenReturn(ApiMetaTestFixtures.PUBLISHED_CONTEXT);
         when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
             new CrowdingSchedule(
                 java.time.LocalDate.parse("2030-10-01"),
                 OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
-                OffsetDateTime.parse("2030-10-02T00:00:00+09:00")
+                OffsetDateTime.parse("2030-10-02T00:01:00+09:00")
             )
         ));
 
