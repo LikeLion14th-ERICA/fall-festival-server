@@ -27,8 +27,9 @@
   중단한다. 그래서 준비 도중 끼어든 게시를 조용히 덮어쓰지 않는다.
 - export는 저장된 revision 하나를 repeatable-read transaction에서 manifest로 되돌린다. 공개
   `CatalogSnapshot`을 재사용하지 않고 revision-scoped 행을 직접 읽어 다른 locale, 현재가 아닌
-  map asset version과 공개 API가 내보내지 않는 내용까지 보존한다. 계좌·혼잡도는 catalog 밖이므로
-  포함하지 않는다.
+  map asset version과 공개 API가 내보내지 않는 내용까지 보존한다. 계좌·혼잡도 상태·재학생존
+  운영 시간은 catalog 밖이므로 포함하지 않는다. catalog publish와 rollback은 이 동적 설정을
+  변경하지 않는다.
 - export는 무손실이다. 부분 설정된 티켓 일정은 추측해 채우지 않고
   `LEGACY_TICKET_SCHEDULE_UNCONFIGURED` finding으로 보고하며, 그 manifest의 import·publish는
   승인된 값을 넣기 전까지 같은 코드로 실패한다. filter group이 없는 `PLACE` 핀은 디자인 필터

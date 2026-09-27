@@ -34,11 +34,12 @@
 | 입력·미디어 | API 계약의 `additionalProperties: false`와 invalid input, 상품 이미지 magic bytes·decode·크기·pixel·animated WebP·경로 | `AdminAuthApiIntegrationTest`, `AdminGoodsProductCreationFlowIntegrationTest`, `GoodsInputValidatorTest`, `GoodsImageInspectorTest`, media storage tests |
 | SQL 입력 경계 | SQL 형태의 관리자 공지 제목이 parameter binding을 거쳐 원문 그대로 저장·재조회되고 기존 공지를 바꾸지 않음 | `AdminSessionReleaseE2eTest` |
 | 요청 제한 | public/admin/login/stamp/artist-hyped token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After`; Hyped 쓰기는 공개 조회와 별도 bucket | `RateLimitTest`(Hyped 포함), release E2E HTTP-21·22 |
-| idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match` | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest` |
+| idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match`; 혼잡도 시간·단계 쓰기의 축제 행 → 시간·상태 행 잠금 순서와 자정 경계 | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest` 및 운영 시간 provider/E2E 검증 |
 | JSON 본문 경계 | `/api/v2`의 JSON `POST`·`PUT`·`PATCH`·`DELETE` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
 | 수령 인증·동적 결제 안내 | 수령 코드는 공백을 제거하지 않은 정확한 6자리 숫자만 허용하고, 성공 수령 인증과 `GET /api/v2/goods/{goodsId}/payment-guide`는 `Cache-Control: no-store` | `StampReceiptVerifierTest`, `CatalogControllerOpenApiTest`, `GoodsFlowIntegrationTest` |
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |
-| 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; Spring Security와 선행 rate/JSON 거부 오류도 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest`, `RateLimitTest` |
+| 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; operating-hours GET의 조건부 응답에도 적용하고, Spring Security와 선행 rate/JSON 거부 오류도 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest`, `RateLimitTest`, 운영 시간 HTTP 검증 |
+| 운영 시간 권한·감사 | runtime만 `crowding_operating_hours`의 SELECT·INSERT·UPDATE를 사용하고 catalog export/publish role은 접근하지 못함. 저장·감사·idempotency는 한 transaction이며 실패한 감사는 시간을 rollback | migration·role provisioning·운영 시간 통합 검증 |
 | 오류·로그 | 오류 envelope와 startup/cleanup/API 오류 로그에 connection string·비밀값·stack trace를 넣지 않음 | `GlobalApiExceptionHandlerTest`, `CatalogSnapshotProviderTest`, `CleanupJobSafetyTest` |
 | 의존성·비밀값·이미지 | 루트 backend filesystem(최상위 `test/` 제외)과 root runtime image의 high/critical 취약점, 루트 backend 비밀값 | `security-filesystem`과 `docker-build`의 Trivy SARIF scan |
 

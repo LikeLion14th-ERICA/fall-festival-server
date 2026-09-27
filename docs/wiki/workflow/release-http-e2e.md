@@ -29,7 +29,7 @@
 
 ## 출시 준비 판단
 
-기존 gate는 catalog 탐색, 지도·공연 관계, 티켓, 관리자 세션, 혼잡도, 게시·rollback,
+기존 gate는 catalog 탐색, 지도·공연 관계, 티켓, 관리자 세션, 혼잡도와 날짜별 운영 시간, 게시·rollback,
 조건부 읽기와 제한을 검증한다. 여기에 공지·굿즈·굿즈 이미지·스탬프 수령 확인과 운영
 boundary를 실제 HTTP server·security filter·serialization·runtime storage 흐름으로 추가했다.
 

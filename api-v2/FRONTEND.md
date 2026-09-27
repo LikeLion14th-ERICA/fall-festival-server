@@ -84,7 +84,7 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 | 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, all-languages를 적용한 목 세션의 locale=en 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
-| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도는 `If-Match`·`Idempotency-Key`를 사용하며 동일 상태 재선택은 204로 성공하고 저장 시각을 유지 |
+| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도는 `If-Match`·`Idempotency-Key`를 사용하며 동일 상태 재선택은 204로 성공하고 저장 시각을 유지. 운영 시간은 날짜별 조회·저장, ETag 충돌·검증 실패·게시 해제 상태를 확인 |
 | 스탬프 | guide missing-optional, 수령 인증 normal / invalid-code / error, 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·코드 오류·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
@@ -186,7 +186,50 @@ same-origin proxy도 이 헤더를 보존하며 응답을 저장하지 않습니
 
 ## 새 관리자 계약 연동
 
-[관리자 변경 내역](ADMIN-CHANGES.md)의 draft.3 경로와 필드를 사용합니다. 수량 및 운영 시간 편집 요청은 제거했습니다.
+[관리자 변경 내역](ADMIN-CHANGES.md)의 draft.3 경로와 필드를 사용합니다. 실제 관리자 화면은
+이 문서의 요청 흐름을 따라 별도 구현합니다.
+
+### 재학생존 운영 시간 관리
+
+날짜 목록은 클라이언트 달력이나 공개 `/crowding` 응답에서 만들지 말고 새 관리자 API로 읽습니다.
+관리자 경로는 모두 `ADMIN` 인증이 필요하고, 성공·오류 응답은 `Cache-Control: no-store`이며
+관리자 요청 제한을 적용합니다.
+
+| 동작 | 요청 | 결과 |
+|---|---|---|
+| 날짜 목록 | `GET /admin/crowding/operating-hours` | `data.items`를 `operatingDay` 오름차순으로 표시. 각 항목에 `operatingDay`, `opensAt`, `closesAt`, `updatedAt`이 있음. 게시 날짜가 없으면 `200`과 빈 `items`를 표시 |
+| 날짜 상세 | `GET /admin/crowding/operating-hours/{operatingDay}` | 편집 기준 시간과 strong `ETag`를 읽음. `updatedAt: null`이면 현재 published FestivalDay의 카탈로그 초기값 |
+| 날짜 저장 | `PUT /admin/crowding/operating-hours/{operatingDay}` | 본문 `{ "opensAt": "...", "closesAt": "..." }`, 상세 응답의 `ETag`를 `If-Match`로 보내고 `Idempotency-Key`를 함께 보내며 성공은 `204` |
+
+입·종료 값은 offset이 포함된 RFC3339 시각으로 보내고 서버가 KST로 정규화합니다. 분 단위만
+허용하므로 초가 0이 아닌 시각과 소수초는 `422 VALIDATION_FAILED`입니다. 시작은 해당 날짜 안,
+종료는 시작보다 뒤이면서 다음 날 KST `00:00` 이하이어야 합니다. 명시적 익일 자정을 저장할 때는
+다음 날짜의 `00:00:00+09:00`을 보냅니다. 시작 시각은 포함하고 종료 시각은 제외합니다.
+
+카탈로그 초기값이 새 입력 규칙에 맞지 않아도 목록·상세는 원래 값을 그대로 반환하므로 화면에서
+반올림하거나 값의 의미를 바꾸지 않습니다. 관리자는 상세에서 받은 ETag로 유효한 값으로 고칠 수
+있습니다. 날짜 목록은 published FestivalDay에서만 나오고 비어 있을 수 있습니다.
+
+- 목록은 화면 진입 시 조회하고, 날짜 상세는 편집 진입 때 최신 `ETag`와 함께 조회합니다.
+- 상세 `ETag`를 저장 중 유지하고, `If-Match` 누락은 `428`, 저장 전 다른 편집이 반영된 경우는
+  `409 EDIT_CONFLICT`입니다. 저장 충돌 뒤 자동으로 입력값을 최신 서버 값으로 바꾸지 않습니다.
+  사용자가 입력을 검토할 수 있게 보존하고 최신 상세를 별도로 다시 읽습니다.
+- `Idempotency-Key`가 없으면 `428`입니다. 동일 key와 본문으로 완료된 요청을 재시도하면 같은
+  `204`를 반환합니다. 완료된 요청은 날짜가 게시에서 제거된 뒤 재시도해도 저장된 성공 응답을
+  반환합니다. 같은 key를 다른 본문에 재사용하면 `409 IDEMPOTENCY_KEY_REUSED`입니다.
+- 잘못된 날짜 문자열은 `400 INVALID_DATE`, 목록에 없는 날짜의 상세 GET은 `404 NOT_FOUND`,
+  게시되지 않은 날짜의 새 저장은 `409 NOT_FESTIVAL_DAY`입니다. 입력 형식·시간 구간 오류는
+  `422 VALIDATION_FAILED`입니다.
+- `GET`은 ETag를 저장해 조건부 재조회에 사용합니다. 상세 GET에서 받은 strong `ETag`만 PUT의
+  `If-Match` 값으로 사용합니다. `meta.revision`은 이 동적 관리자 설정에서 `0`입니다.
+- 운영 시간 목록의 날짜만 화면에 노출합니다. 목록이 비어 있으면 빈 상태를 보여 주고 공개
+  혼잡도 API의 기존 일정 미설정 오류를 관리자 화면에 대신 표시하지 않습니다.
+
+날짜마다 독립된 저장 버튼을 둡니다. 종료 선택지에는 `익일 00:00`을 분명히 표시합니다.
+성공한 저장 뒤 목록, 해당 날짜 상세, 현재 혼잡도(`GET /crowding`)를 다시 읽습니다. 홈은 기존
+15초 polling에서 변경된 운영 상태를 반영합니다. 목록 갱신과 편집 중 입력 상태를 분리해, 작성
+중인 값이 주기적 조회로 덮이지 않게 합니다. 입력 검증 실패·요청 충돌·일시 오류에는 입력값을
+유지하고 저장 상태와 재시도 동작을 표시합니다.
 
 - 굿즈 상태는 실제 제공 조합에 `PUT /admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability`, 본문 `{ "status": "SOLD_OUT" }`로 저장합니다. quantity는 422입니다.
 - 신규 상품·옵션 조합은 ON_SALE로 생성합니다. 색상·사이즈·조합 삭제도 허용하며, 삭제한 조합의 판매 상태는 제거하고 유지 조합의 상태는 그대로 둡니다.

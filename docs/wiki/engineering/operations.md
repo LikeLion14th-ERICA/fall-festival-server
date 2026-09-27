@@ -82,6 +82,27 @@ revision·locale을 남긴다. `RELEASE_COMMIT`에 배포 commit을 넣으면 �
 같은 volume으로 컨테이너를 교체한 뒤 이전 기록이 남는지도 확인한다. 로그 수집·대시보드·경보
 수신과 DB/JVM 병목 지표는 별도 운영 gate이며 이 파일 설정만으로 완료되었다고 판정하지 않는다.
 
+## 재학생존 운영 시간 설정
+
+운영 시간 목록·상세 GET과 날짜별 PUT은 관리자 전용이며 모든 응답에 `Cache-Control: no-store`를
+적용한다. 목록·상세 조회는 조건부 요청을 지원하고 상세 응답의 strong ETag로 PUT의
+`If-Match`를 처리한다. Next.js same-origin proxy는 응답·조건부 상태를 전달하고 캐시하지
+않는다.
+
+V31 `crowding_operating_hours`는 catalog revision 밖에 저장된다. 관리자 저장이 완료되면 다음
+공개 혼잡도 GET부터 새 운영 시간을 적용하므로 설정을 읽기 위해 서버를 다시 시작하지 않는다.
+홈은 기존 15초 polling으로 상태를 갱신한다. 카탈로그 게시와 rollback은 이 행을 수정하지
+않으며 DB recovery set에도 포함한다.
+
+배포 시 최신 main의 migration과 role 권한을 사전 점검하고, runtime에만 새 테이블의
+SELECT·INSERT·UPDATE를 준다. catalog export/publish role은 새 테이블을 읽거나 쓸 수 없어야
+한다. 배포 후 관리자가 목록과 상세를 읽어 `updatedAt: null` 및 게시본 초기값을 확인하고,
+승인된 실제 시작·종료 시각을 날짜별로 저장한 뒤 재조회로 유지 여부를 확인한다.
+
+이전 애플리케이션으로 rollback할 때는 해당 버전이 관리자 저장값을 읽지 않아 공개 혼잡도가
+카탈로그 초기값으로 돌아갈 수 있음을 확인한다. 적용 시각의 호환성을 운영자와 함께 점검하고
+`crowding_operating_hours`와 그 행은 유지한다. migration을 내려서 테이블이나 설정을 지우지 않는다.
+
 ## 초기 갱신·부하 기준
 
 - 혼잡도, 공지, 굿즈 판매 상태는 화면이 보이는 동안 15초 HTTP polling으로 갱신한다.

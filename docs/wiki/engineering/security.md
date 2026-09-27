@@ -85,6 +85,10 @@ client key로 쓰며, client bucket table이 가득 차도 active bucket을 지�
 - 관리자 감사 이력은 append-only이고 해당 운영 데이터 변경과 같은 DB transaction에서
   기록한다. 감사 저장이 실패하면 운영 데이터 변경도 rollback하고, 운영 변경이
   rollback되면 감사 이력도 남기지 않는다.
+- 재학생존 운영 시간의 첫 저장도 관리자 변경으로 감사한다. 카탈로그 기본값과 같은 값으로
+  저장한 경우에도 설정 행과 감사 event를 만들며, 이후 현재 값과 같은 저장은 수정 시각과
+  감사 이력을 추가하지 않는다. 운영 시간 행·감사 event·idempotency 완료 상태는 한
+  transaction으로 처리한다.
 - `AdminAuditEvent`는 1년간 보관한다. cleanup framework의 audit target은 기본 dry-run·
   scheduler 비활성 상태이며, 전용 cleanup datasource와 역할을 별도로 지정한 경우에만
   파괴적 scheduler를 활성화한다. 운영 설정과 결과 형식은 [데이터 정리](cleanup.md)를 따른다.
