@@ -203,10 +203,10 @@ class CrowdingOperatingHoursE2eTest {
 
     @Test
     void levelWaitingAcrossMidnightKeepsExtendedOperatingDay() throws Exception {
+        CLOCK.now = Instant.parse("2026-09-29T14:59:59Z");
         String token = login();
         assertThat(send(hoursRequestForDay(token, DAY, tag(adminGet(ITEM, token)),
             DAY + "T11:00:00+09:00", "2026-09-30T01:00:00+09:00")).statusCode()).isEqualTo(204);
-        CLOCK.now = Instant.parse("2026-09-29T14:59:59Z");
         String etag = tag(adminGet("/api/v2/admin/crowding", token));
         try (var pool = Executors.newVirtualThreadPerTaskExecutor()) {
             Future<HttpResponse<String>> pending = new org.springframework.transaction.support.TransactionTemplate(transactionManager)
@@ -229,6 +229,7 @@ class CrowdingOperatingHoursE2eTest {
     @Test
     void finalDayRemainsEditableAfterMidnightAndRejectsWaitingWriteAtOne() throws Exception {
         String finalDay = "2026-10-01";
+        CLOCK.now = Instant.parse("2026-10-01T15:30:00Z");
         String token = login();
         String initialHours = tag(adminGet(BASE + "/" + finalDay, token));
         HttpResponse<String> beyondLimit = send(hoursRequestForDay(token, finalDay, initialHours,
@@ -237,7 +238,6 @@ class CrowdingOperatingHoursE2eTest {
         assertError(beyondLimit, "VALIDATION_FAILED");
         assertThat(send(hoursRequestForDay(token, finalDay, initialHours,
             finalDay + "T11:00:00+09:00", "2026-10-02T01:00:00+09:00")).statusCode()).isEqualTo(204);
-        CLOCK.now = Instant.parse("2026-10-01T15:30:00Z");
         assertThat(send(levelRequest(token, tag(adminGet("/api/v2/admin/crowding", token))))
             .statusCode()).isEqualTo(204);
         var saved = jdbc.queryForMap("SELECT operating_date, level, updated_at FROM crowding_state_dynamic WHERE festival_id = ?", FESTIVAL);
@@ -246,12 +246,13 @@ class CrowdingOperatingHoursE2eTest {
         assertThat(JsonPath.<String>read(publicView.body(), "$.data.operatingDay")).isEqualTo(finalDay);
         assertThat(JsonPath.<String>read(publicView.body(), "$.data.status")).isEqualTo("CROWDED");
         CLOCK.now = Instant.parse("2026-10-01T15:59:59Z");
-        String etag = tag(adminGet("/api/v2/admin/crowding", token));
+        String boundaryToken = login();
+        String etag = tag(adminGet("/api/v2/admin/crowding", boundaryToken));
         try (var pool = Executors.newVirtualThreadPerTaskExecutor()) {
             Future<HttpResponse<String>> pending = new org.springframework.transaction.support.TransactionTemplate(transactionManager)
                 .execute(status -> {
                     crowding.lockFestival(FESTIVAL);
-                    Future<HttpResponse<String>> result = pool.submit(() -> send(levelRequest(token, etag)));
+                    Future<HttpResponse<String>> result = pool.submit(() -> send(levelRequest(boundaryToken, etag)));
                     awaitFestivalWait();
                     CLOCK.now = Instant.parse("2026-10-01T16:00:00Z");
                     return result;
@@ -262,7 +263,7 @@ class CrowdingOperatingHoursE2eTest {
         }
         HttpResponse<String> ended = get("/api/v2/crowding");
         assertThat(JsonPath.<String>read(ended.body(), "$.data.status")).isEqualTo("CLOSED");
-        HttpResponse<String> newWrite = send(levelRequest(token, tag(adminGet("/api/v2/admin/crowding", token))));
+        HttpResponse<String> newWrite = send(levelRequest(boundaryToken, tag(adminGet("/api/v2/admin/crowding", boundaryToken))));
         assertThat(newWrite.statusCode()).isEqualTo(409);
         assertError(newWrite, "NOT_FESTIVAL_DAY");
         assertThat(jdbc.queryForMap("SELECT operating_date, level, updated_at FROM crowding_state_dynamic WHERE festival_id = ?", FESTIVAL))
