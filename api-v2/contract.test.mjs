@@ -481,7 +481,7 @@ test('Crowding hours enforce minute boundaries, date membership, and completed r
     {opensAt:`${day}T12:00:00+18:01`,closesAt:'2030-10-03T00:00:00+09:00'},
     {opensAt:`${day}T12:00:00+19:00`,closesAt:'2030-10-03T00:00:00+09:00'},
   ]){const invalid=await put(body,saved.headers.get('etag'));assert.equal(invalid.status,422);assert.equal(invalid.body.error.code,'VALIDATION_FAILED');}
-  assert.deepEqual(normalizeCrowdingOperatingHoursInput(day,{opensAt:`${day}T21:00:00+18:00`,closesAt:'2030-10-02T07:00:00+18:00'},failure),{opensAt:`${day}T12:00:00+09:00`,closesAt:`${day}T22:00:00+09:00`});
+  assert.deepEqual(normalizeCrowdingOperatingHoursInput(day,{opensAt:`${day}T21:00:00+18:00`,closesAt:'2030-10-03T07:00:00+18:00'},failure),{opensAt:`${day}T12:00:00+09:00`,closesAt:`${day}T22:00:00+09:00`});
   const notFestival=await call(`${basePath}/2030-10-04`,{session,method:'PUT',headers:{...admin,'If-Match':saved.headers.get('etag'),'Idempotency-Key':'hours-not-festival'},body:{opensAt:'2030-10-04T12:00:00+09:00',closesAt:'2030-10-04T21:00:00+09:00'}});
   assert.equal(notFestival.status,409);assert.equal(notFestival.body.error.code,'NOT_FESTIVAL_DAY');
   const replayAfterRemoval=await call(path,{session,method:'PUT',headers:{...admin,'If-Match':etag,'Idempotency-Key':'hours-next-midnight','X-Mock-Scenario':'removed-day'},body:{opensAt:`${day}T12:00:00+09:00`,closesAt:'2030-10-03T00:00:00+09:00'}});
@@ -522,6 +522,11 @@ test('Public crowding accepts bounded catalog seconds and fractions while PUT re
   const data=execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}).data;
   assert.equal(data.opensAt,'2030-10-01T13:00:45.123456+09:00');
   assert.equal(data.closesAt,'2030-10-01T22:00:12.345678+09:00');
+  const boundary=time=>execute(operation('getCrowding'),state,{now:time}).data.status;
+  assert.equal(boundary('2030-10-01T13:00:45.123455+09:00'),'BEFORE_OPEN');
+  assert.equal(boundary('2030-10-01T13:00:45.123456+09:00'),'MODERATE');
+  assert.equal(boundary('2030-10-01T22:00:12.345677+09:00'),'MODERATE');
+  assert.equal(boundary('2030-10-01T22:00:12.345678+09:00'),'CLOSED');
   state.festivalDays[0]={...state.festivalDays[0],closesAt:'2030-10-02T00:00:00.000000001+09:00'};
   assert.throws(()=>execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}),error=>error.status===503&&error.code==='CROWDING_SCHEDULE_UNCONFIGURED');
 });

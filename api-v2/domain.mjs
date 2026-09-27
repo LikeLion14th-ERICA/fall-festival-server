@@ -355,7 +355,8 @@ function validPublicCrowdingSchedule(state,operatingDay){
   const dayStartNanos=BigInt(dayStart)*1000000n,nextDayStartNanos=BigInt(nextDayStart)*1000000n;
   if(opensAt.kstValue.slice(0,10)!==operatingDay||opensAt.nanoseconds<dayStartNanos||opensAt.nanoseconds>=nextDayStartNanos)return null;
   if(closesAt.nanoseconds<=opensAt.nanoseconds||closesAt.nanoseconds>nextDayStartNanos)return null;
-  return {operatingDay,opensAt:opensAt.kstValue,closesAt:closesAt.kstValue};
+  return {operatingDay,opensAt:opensAt.kstValue,closesAt:closesAt.kstValue,
+    opensAtNanos:opensAt.nanoseconds,closesAtNanos:closesAt.nanoseconds};
 }
 function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=false) {
   const today=dayKst(now);
@@ -370,7 +371,9 @@ function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=f
   const closesAt=schedule.closesAt;
   const openingText=opensAt.slice(11,16);
   const stored=scenario==='unmodified'||(!includeSelectedDaySavedState&&today!==operatingDay)?null:state.crowding[operatingDay];
-  const status=+new Date(now)<+new Date(opensAt)?'BEFORE_OPEN':+new Date(now)>=+new Date(closesAt)?'CLOSED':stored?.level||'RELAXED';
+  const fraction=String(now).match(/\.(\d{1,9})(?:Z|[+-]\d{2}:\d{2})$/)?.[1]||'';
+  const nowNanos=BigInt(Date.parse(now))*1000000n+BigInt(fraction.padEnd(9,'0')||'0')%1000000n;
+  const status=nowNanos<schedule.opensAtNanos?'BEFORE_OPEN':nowNanos>=schedule.closesAtNanos?'CLOSED':stored?.level||'RELAXED';
   const colors={RELAXED:'green',MODERATE:'orange',CROWDED:'red',FULL:'black'};
   const messages=CROWD_MESSAGES[locale]||CROWD_MESSAGES.ko;
   const active=!!colors[status];

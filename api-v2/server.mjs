@@ -116,6 +116,8 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(route.operationId==='getGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
+      if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.');
+      if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
       if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='removed-day')state.festivalDays=state.festivalDays.filter(day=>day.operatingDay!==params.operatingDay);
       let result;
       if(route.operationId==='putAdminCrowdingOperatingHoursDay'){
