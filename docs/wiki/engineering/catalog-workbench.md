@@ -28,7 +28,7 @@
 - **축제 경계:** export·diff·publish에 준 revision UUID는 configured `FESTIVAL_ID` 소속이어야 한다.
   다른 축제의 revision은 catalog를 읽거나 바꾸기 전에 `422 REVISION_FESTIVAL_MISMATCH`로 거절한다.
 - **catalog 밖 테이블:** [role provisioning script](../../../tools/database/provision-operational-account-roles.sql)가
-  catalog export·publish role에서 계좌·티켓 계좌 열·혼잡도·공지 테이블 권한을 회수한다.
+  catalog export·publish role에서 계좌·티켓 계좌 열·혼잡도 상태·혼잡도 운영 시간·공지 테이블 권한을 회수한다.
   provider가 schema 전체를 먼저 grant했어도 적용된다. catalog 밖 테이블을 추가하는
   migration 뒤에는 script를 다시 실행하고 새 테이블을 script에 추가한다(굿즈 포함).
 

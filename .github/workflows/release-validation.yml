@@ -86,7 +86,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-pg17-test-reports
-          path: target/surefire-reports/
+          path: |
+            target/surefire-reports/
+            target/crowding-hours-load-report.json
           retention-days: 14
           if-no-files-found: warn
 

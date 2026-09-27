@@ -14803,7 +14803,7 @@
       },
       "put": {
         "operationId": "putAdminCrowding",
-        "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지",
+        "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지",
         "description": "연결 화면: ADM-CROWD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -14875,7 +14875,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: bad-request",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -14915,7 +14915,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: unauthorized",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -14955,7 +14955,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: forbidden",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -15032,8 +15032,28 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "not-festival-day": {
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: not-festival-day",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FESTIVAL_DAY",
+                        "message": "현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "edit-conflict": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: edit-conflict",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: edit-conflict",
                     "value": {
                       "error": {
                         "code": "EDIT_CONFLICT",
@@ -15130,7 +15150,7 @@
                 },
                 "examples": {
                   "precondition-required": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: precondition-required",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: precondition-required",
                     "value": {
                       "error": {
                         "code": "PRECONDITION_REQUIRED",
@@ -15177,7 +15197,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: rate-limited",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -15236,7 +15256,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: error",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -19281,6 +19301,1518 @@
           "unauthorized",
           "forbidden"
         ]
+      }
+    },
+    "/api/v2/admin/crowding/operating-hours": {
+      "get": {
+        "operationId": "getAdminCrowdingOperatingHours",
+        "summary": "게시된 재학생존 운영 시간 목록",
+        "description": "연결 화면: ADM-CROWD-HOURS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrowdingOperatingHoursListConditionalResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "게시된 재학생존 운영 시간 목록: normal",
+                    "value": {
+                      "data": {
+                        "items": [
+                          {
+                            "operatingDay": "2030-10-01",
+                            "opensAt": "2030-10-01T13:00:00+09:00",
+                            "closesAt": "2030-10-01T22:00:00+09:00",
+                            "updatedAt": null
+                          },
+                          {
+                            "operatingDay": "2030-10-02",
+                            "opensAt": "2030-10-02T12:00:00+09:00",
+                            "closesAt": "2030-10-02T21:00:00+09:00",
+                            "updatedAt": null
+                          },
+                          {
+                            "operatingDay": "2030-10-03",
+                            "opensAt": "2030-10-03T14:00:00+09:00",
+                            "closesAt": "2030-10-03T20:00:00+09:00",
+                            "updatedAt": null
+                          }
+                        ]
+                      },
+                      "meta": {
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "empty": {
+                    "summary": "게시된 재학생존 운영 시간 목록: empty",
+                    "value": {
+                      "data": {
+                        "items": []
+                      },
+                      "meta": {
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "게시된 재학생존 운영 시간 목록: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "게시된 재학생존 운영 시간 목록: unauthorized",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "게시된 재학생존 운영 시간 목록: forbidden",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "관리자 권한이 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "게시된 재학생존 운영 시간 목록: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "게시된 재학생존 운영 시간 목록: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "ADM-CROWD-HOURS"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "empty",
+          "error",
+          "bad-request",
+          "rate-limited",
+          "unauthorized",
+          "forbidden"
+        ],
+        "x-conditional": true
+      }
+    },
+    "/api/v2/admin/crowding/operating-hours/{operatingDay}": {
+      "get": {
+        "operationId": "getAdminCrowdingOperatingHoursDay",
+        "summary": "재학생존 날짜별 운영 시간 및 편집 ETag",
+        "description": "연결 화면: ADM-CROWD-HOURS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "operatingDay",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Date"
+            },
+            "description": "운영일 또는 등록된 안정 ID"
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "표현이 변경되지 않았으면 304를 요청하는 strong ETag"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrowdingOperatingHoursConditionalResponse"
+                },
+                "examples": {
+                  "normal": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: normal",
+                    "value": {
+                      "data": {
+                        "operatingDay": "2030-10-01",
+                        "opensAt": "2030-10-01T13:00:00+09:00",
+                        "closesAt": "2030-10-01T22:00:00+09:00",
+                        "updatedAt": null
+                      },
+                      "meta": {
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^\"[0-9a-f]{64}\"$"
+                },
+                "description": "현재 조건부 응답 표현의 strong ETag"
+              },
+              "X-Server-Time": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "description": "조건부 응답의 서버 시각. 본문 meta에 넣지 않아 ETag를 바꾸지 않는다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: unauthorized",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: forbidden",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "관리자 권한이 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not-found": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: not-found",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "요청한 정보를 찾을 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "요청 추적 ID"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "재학생존 날짜별 운영 시간 및 편집 ETag: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "ADM-CROWD-HOURS"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "not-found",
+          "error",
+          "bad-request",
+          "rate-limited",
+          "unauthorized",
+          "forbidden"
+        ],
+        "x-conditional": true
+      },
+      "put": {
+        "operationId": "putAdminCrowdingOperatingHoursDay",
+        "summary": "재학생존 날짜별 운영 시간 저장",
+        "description": "연결 화면: ADM-CROWD-HOURS. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
+        "tags": [
+          "관리자"
+        ],
+        "security": [
+          {
+            "AdminBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "operatingDay",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Date"
+            },
+            "description": "운영일 또는 등록된 안정 ID"
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\"[0-9a-f]{64}\"$"
+            },
+            "description": "현재 표현의 strong ETag. 누락 시 428, 불일치 시 409."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            "description": "같은 날짜 운영 시간 저장 재시도에 사용하는 1~128자 키. 누락 시 428."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "성공",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 예시입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "bad-request": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: bad-request",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_QUERY",
+                        "message": "잘못된 요청 예시입니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "관리자 인증이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: unauthorized",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "관리자 인증이 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "관리자 권한이 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: forbidden",
+                    "value": {
+                      "error": {
+                        "code": "FORBIDDEN",
+                        "message": "관리자 권한이 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "요청한 정보를 찾을 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "405": {
+            "description": "지원하지 않는 메서드입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "409": {
+            "description": "요청 상태가 충돌합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not-festival-day": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: not-festival-day",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FESTIVAL_DAY",
+                        "message": "현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "removed-day": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: removed-day",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FESTIVAL_DAY",
+                        "message": "현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "idempotency-key-reused": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: idempotency-key-reused",
+                    "value": {
+                      "error": {
+                        "code": "IDEMPOTENCY_KEY_REUSED",
+                        "message": "같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "edit-conflict": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: edit-conflict",
+                    "value": {
+                      "error": {
+                        "code": "EDIT_CONFLICT",
+                        "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "요청 본문은 64KiB 이하입니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "415": {
+            "description": "application/json 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "422": {
+            "description": "요청 필드를 확인해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "validation-failed": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: validation-failed",
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "요청 필드를 확인해 주세요.",
+                        "details": [
+                          {
+                            "field": "$.opensAt",
+                            "reason": "문자열 형식이 다릅니다."
+                          }
+                        ],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "조건부 요청이 필요합니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "precondition-required": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: precondition-required",
+                    "value": {
+                      "error": {
+                        "code": "PRECONDITION_REQUIRED",
+                        "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "idempotency-key-required": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: idempotency-key-required",
+                    "value": {
+                      "error": {
+                        "code": "IDEMPOTENCY_KEY_REQUIRED",
+                        "message": "Idempotency-Key 헤더가 필요합니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "잠시 후 다시 요청해 주세요.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "재시도 전 대기 초"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate-limited": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: rate-limited",
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "잠시 후 다시 요청해 주세요.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "목 서버 처리 중 오류가 발생했습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {}
+              }
+            }
+          },
+          "503": {
+            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "응답 meta.requestId와 동일"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "재학생존 날짜별 운영 시간 저장: error",
+                    "value": {
+                      "error": {
+                        "code": "SERVICE_UNAVAILABLE",
+                        "message": "일시적으로 정보를 불러올 수 없습니다.",
+                        "details": [],
+                        "retryable": true
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen-ids": [
+          "ADM-CROWD-HOURS"
+        ],
+        "x-contract-status": "screen-specified",
+        "x-mock-scenarios": [
+          "normal",
+          "not-festival-day",
+          "removed-day",
+          "validation-failed",
+          "precondition-required",
+          "idempotency-key-required",
+          "idempotency-key-reused",
+          "edit-conflict",
+          "error",
+          "bad-request",
+          "rate-limited",
+          "unauthorized",
+          "forbidden"
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "저장할 변경값",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrowdingOperatingHoursInput"
+              },
+              "example": {
+                "opensAt": "2030-10-01T13:00:00+09:00",
+                "closesAt": "2030-10-01T22:00:00+09:00"
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability": {
@@ -26362,20 +27894,20 @@
           "operatingDay": {
             "type": "string",
             "minLength": 1,
-            "description": "Asia/Seoul 기준 YYYY-MM-DD.",
+            "description": "이 혼잡도와 운영 일정이 귀속되는 축제 운영일. 전날 구간이 열려 있고 당일 일정이 아직 시작되지 않았으면 전날 날짜를 유지한다.",
             "format": "date"
           },
           "opensAt": {
             "type": "string",
             "minLength": 1,
-            "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
+            "description": "선택 operatingDay의 KST 시작 시각. 운영 구간은 시작 시각을 포함한다.",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
           },
           "closesAt": {
             "type": "string",
             "minLength": 1,
-            "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
+            "description": "선택 operatingDay 다음 날 01:00까지 가능한 KST 종료 시각. 종료 순간은 운영 구간에서 제외한다.",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
           },
@@ -26386,7 +27918,7 @@
               "OPEN",
               "CLOSED"
             ],
-            "description": "게시된 FestivalDay 운영 일정으로 계산한 실제 운영 상태"
+            "description": "선택 operatingDay 일정으로 계산한 상태. 오늘 일정이 시작된 뒤에는 종료되어도 오늘 날짜 선택을 유지한다."
           },
           "status": {
             "type": "string",
@@ -26398,7 +27930,7 @@
               "FULL",
               "CLOSED"
             ],
-            "description": "운영 시간과 마지막 저장 상태를 결합한 최종 표시 상태"
+            "description": "선택 운영일 일정과 마지막 저장 상태를 결합한 최종 표시 상태. 자정 뒤 전날 구간이 계속 열려 있으면 전날 상태를 유지한다."
           },
           "savedLevel": {
             "anyOf": [
@@ -26416,7 +27948,7 @@
                 "type": "null"
               }
             ],
-            "description": "해당 운영일에 아직 저장하지 않았으면 null"
+            "description": "선택 operatingDay에 아직 저장하지 않았으면 null. 운영 중인 야간 구간은 전날 저장값을 사용한다."
           },
           "colorToken": {
             "anyOf": [
@@ -26454,7 +27986,7 @@
                 "type": "null"
               }
             ],
-            "description": "운영 전·종료면 null. 같은 상태 재선택은 저장·시각을 갱신하지 않는다."
+            "description": "운영 전·종료면 null. 야간 구간은 자정 뒤에도 같은 operatingDay의 마지막 저장 시각을 유지한다. 같은 상태 재선택은 저장·시각을 갱신하지 않는다."
           },
           "timeBasis": {
             "type": "string",
@@ -29494,6 +31026,95 @@
         "additionalProperties": false,
         "description": ""
       },
+      "CrowdingOperatingHours": {
+        "type": "object",
+        "properties": {
+          "operatingDay": {
+            "$ref": "#/components/schemas/Date"
+          },
+          "opensAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "운영일에 적용되는 KST RFC 3339 시각. 종료는 익일 01:00까지이며 종료 순간은 운영 구간에서 제외한다. 잘못된 게시 일정은 관리자 조회에서 원문(초 포함)이나 null 그대로 반환해 수정할 수 있다."
+          },
+          "closesAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "운영일에 적용되는 KST RFC 3339 시각. 종료는 익일 01:00까지이며 종료 순간은 운영 구간에서 제외한다. 잘못된 게시 일정은 관리자 조회에서 원문(초 포함)이나 null 그대로 반환해 수정할 수 있다."
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Timestamp"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "관리자 저장 전에는 null이며 게시 일정의 초기값을 뜻한다."
+          }
+        },
+        "required": [
+          "operatingDay",
+          "opensAt",
+          "closesAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false,
+        "description": "현재 published FestivalDay 일정에 적용되는 재학생존 운영 시간. 관리자 저장값은 catalog revision과 독립적이다."
+      },
+      "CrowdingOperatingHoursList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrowdingOperatingHours"
+            },
+            "description": "게시된 축제일 순. 게시된 축제일이 없으면 빈 배열."
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "CrowdingOperatingHoursInput": {
+        "type": "object",
+        "properties": {
+          "opensAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$",
+            "description": "운영일 경로의 KST 날짜 안에 있는 시작 시각. 분 단위이며 초는 00, 소수초는 허용하지 않는다."
+          },
+          "closesAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$",
+            "description": "시작보다 뒤인 종료 시각. 같은 날짜 또는 익일 01:00까지 허용하며 익일 01:01은 422로 거절한다. 종료 순간은 운영 구간에 포함하지 않는다."
+          }
+        },
+        "required": [
+          "opensAt",
+          "closesAt"
+        ],
+        "additionalProperties": false,
+        "description": "요청 본문은 opensAt과 closesAt 두 필드만 포함한다. 운영일은 경로 /{operatingDay}로 지정하며 본문에 넣지 않는다. 시작은 운영일 안, 종료는 시작 뒤부터 익일 01:00까지 허용한다. 둘 다 offset 포함 RFC 3339 분 단위 시각이며 Asia/Seoul로 정규화한다."
+      },
       "AdminLoginInput": {
         "type": "object",
         "properties": {
@@ -30065,6 +31686,57 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/AvailabilityList"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "CrowdingOperatingHoursListConditionalResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CrowdingOperatingHoursList"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ConditionalMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "CrowdingOperatingHoursConditionalResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CrowdingOperatingHours"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ConditionalMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false,
+        "description": ""
+      },
+      "CrowdingOperatingHoursResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CrowdingOperatingHours"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

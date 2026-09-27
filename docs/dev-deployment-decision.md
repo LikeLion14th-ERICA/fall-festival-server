@@ -4,7 +4,7 @@
 
 - 상태: backend는 A1 인스턴스에 Docker로 이미 배포돼 있다. 이 문서는 확인된 A1 사실과
   아직 확인하지 못한 운영 값을 구분한다.
-- 기준: 2026-09-20 읽기 전용 사전 점검 결과와 현재 `main`의 Flyway V1~V26 SQL
+- 기록 기준: 2026-09-20 읽기 전용 사전 점검 결과와 당시 `main`의 Flyway V1~V26 SQL
 - Provider 정책 확인일: 2026-09-17 (Render 기본안 검토 당시. A1로 바뀐 뒤에는 해당 없음)
 - 범위: remote development only; production hosting 결정이 아님
 - 검증 게이트: `READ_ONLY_DATABASE_PREFLIGHT`, `DEPLOYMENT_VALIDATION_REQUIRED`
@@ -197,7 +197,7 @@ migrate, catalog import와 catalog publish를 실행하지 않는다. Flyway가 
 process도 이 database를 대상으로 먼저 기동하지 않는다. 이 점검은 저장소의 standalone
 `DatabasePreflightApplication`으로 수행한다(SELECT만 실행, 불명확하면 `STOP_AND_REVIEW`,
 [DB 읽기 전용 사전 점검](wiki/engineering/database-preflight.md)). Network access, database/schema 상태,
-migration history와 V1~V26 호환성을 확인한 뒤에만 mutation 단계로 진행한다. 공유 schema라면
+migration history와 최신 main의 V1~V32 호환성을 확인한 뒤에만 mutation 단계로 진행한다. 공유 schema라면
 별도 database 또는 schema가 필요한지 다시 결정한다.
 
 팀에서 제공한 connection 정보는 다음 Spring 변수로 분리해 A1의 secret/environment settings에만
@@ -216,7 +216,7 @@ direct/pooled connection option은 read-only preflight와 제공 조건을 확�
 
 `FESTIVAL_ID`에는 read-only preflight와 이후 승인된 migration 결과로 이 development DB에 실제
 존재함을 확인한 `festivals.id`를 사용한다. 기존 festival이 있으면 그 사용 가능성을 먼저 검토하고,
-빈 호환 schema에 V1~V26을 적용한 경우에만 Flyway가 만든 development festival을 확인한다. V6 seed
+빈 호환 schema에 최신 main의 V1~V32를 적용한 경우에만 Flyway가 만든 development festival을 확인한다. V6 seed
 UUID를 무조건 가정하거나 production/shared 환경의 UUID를 추측해 사용하지 않는다. UUID literal은
 이 decision에 복제하지 않는다.
 
@@ -391,11 +391,23 @@ ADMIN_BOOTSTRAP_PASSWORD=<bootstrap-password>
 ## Flyway
 
 기존 database가 비어 있다고 가정하지 않는다. 먼저 `READ_ONLY_DATABASE_PREFLIGHT`에서
-`flyway_schema_history`, schema와 기존 data를 확인하고 V1~V26 호환성을 판정한다. 안전하다고
-승인된 경우에만 빈 호환 schema에는 V1~V26을 적용하고, 기존 Flyway history가 있으면 확인된 현재
+`flyway_schema_history`, schema와 기존 data를 확인하고 최신 main의 V1~V32 호환성을 판정한다. 안전하다고
+승인된 경우에만 빈 호환 schema에는 V1~V32를 적용하고, 기존 Flyway history가 있으면 확인된 현재
 migration 상태에서 이어간다. 상태가 불명확하거나 공유 schema이면 migrate하지 않고
 `STOP_AND_REVIEW`한다. Production 또는 multi-instance 배포에서는 별도 migration gate를 다시
 결정한다.
+
+2026-09-28 승인된 재학생존 운영 시간 기능은 V31 `crowding_operating_hours`를 추가한다.
+이 테이블에는 시작·종료·수정 시각만 저장하고 초기 backfill은 하지 않는다. 2026-09-20의
+원격 preflight 결과(V1~V26)는 그 시점의 기록으로 유지한다. 그 결과는 V31 적용 승인이나 현재
+원격 schema 상태의 증거가 아니므로 배포 때 최신 main artifact로 preflight를 다시 실행한다.
+runtime role에만 새 테이블의 SELECT·INSERT·UPDATE를 부여하고 catalog export/publish role은
+접근하지 못하게 한다.
+
+2026-09-28 추가 변경은 V32에서 운영 시간 CHECK 제약을 익일 `01:00`까지 넓힌다. V31 SQL과
+checksum은 보존하고 V32는 설정 행을 backfill하지 않는다. 배포 전에는 V31→V32 upgrade와
+기존 데이터 보존을 최신 artifact로 검증하고, 이전 애플리케이션이 익일 `00:00` 이후 종료값을
+읽고 판정할 수 있는지 확인하지 못하면 해당 설정이 있는 DB를 구버전으로 rollback하지 않는다.
 
 현재 확인 결과는 PostgreSQL 17.11, public schema, V1~V26 success 및 현재 SQL과 checksum
 일치다. 그러나 기존 festival·revision과 다른 client session이 있으므로 이 결과만으로
@@ -435,11 +447,12 @@ backend는 이미 A1에 떠 있으므로 아래는 최초 provision이 아니라
   2026-09-20 preflight에서 V1~V26 success/checksum 일치, festival 1개, revision 1~4 확인
 - [ ] 현재 data와 동일 database/schema를 사용하는 다른 서비스·팀 여부 확인
 - [ ] A1의 DB network access와 session 소유자 확인
-- [ ] V1~V26 migration compatibility와 mutation 승인 기록 — checksum은 확인했으나
+- [ ] 최신 main의 V1~V32 migration compatibility와 mutation 승인 기록 — 2026-09-20에는
+  V1~V26 checksum만 확인했으며,
   `STOP_AND_REVIEW`/`mutationAuthorized=false`이므로 승인 전 변경 금지
 - [ ] role 생성과 권한 부여는 [DB 역할 설계](wiki/engineering/db-role-design.md)의 권한표를
   따른다. 그 문서의 `CREATE ROLE`은 아직 실행하지 않은 초안이다.
-- [ ] 역할 provisioning script 적용과 catalog 역할의 계좌·혼잡도·공지·굿즈 접근 거부 확인
+- [ ] 역할 provisioning script 적용과 catalog 역할의 계좌·혼잡도·혼잡도 운영 시간·공지·굿즈 접근 거부 확인
 - [ ] 안전한 경우에만 Flyway 적용 또는 확인된 현재 migration 상태에서 continue
 - [ ] 실제 festival/revision과 `FESTIVAL_ID` 확인
 - [ ] 기존 catalog data가 있으면 자동 변경 없이 `STOP_AND_REVIEW`
@@ -447,7 +460,7 @@ backend는 이미 A1에 떠 있으므로 아래는 최초 provision이 아니라
 - [ ] 컨테이너 listen 주소와 host port/Caddy upstream 확인 (`Caddyfile` 및 A1 실행 정보 필요)
 - [ ] C/D 인수인계 기록에 A1 접속, 현재 container/image, 실제 실행 옵션·환경변수 주입 방식,
   Caddy 검증·적용·되돌림 방법과 TLS/Cloudflare 상태를 남김
-- [ ] D가 Flyway 사전 점검·적용 또는 중단 판단, provider mutation 승인, V1~V26 history/checksum을
+- [ ] D가 Flyway 사전 점검·적용 또는 중단 판단, provider mutation 승인, 현재 history/checksum을
   기록함
 - [ ] DB·media recovery set이 함께 생성됐고 보존 정책·저장 위치·복원 검증 결과가 작업 기록에 있음
 - [ ] Web backend 최초 시작 또는 controlled restart 뒤 `/healthz` 200 확인

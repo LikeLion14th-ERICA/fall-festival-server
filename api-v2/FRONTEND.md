@@ -84,7 +84,7 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 | 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, all-languages를 적용한 목 세션의 locale=en 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
 | 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
-| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도는 `If-Match`·`Idempotency-Key`를 사용하며 동일 상태 재선택은 204로 성공하고 저장 시각을 유지 |
+| 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도는 `If-Match`·`Idempotency-Key`를 사용하며 동일 상태 재선택은 204로 성공하고 저장 시각을 유지. 운영 시간은 날짜별 조회·저장, ETag 충돌·검증 실패·게시 해제 상태를 확인 |
 | 스탬프 | guide missing-optional, 수령 인증 normal / invalid-code / error, 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·코드 오류·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
@@ -186,7 +186,16 @@ same-origin proxy도 이 헤더를 보존하며 응답을 저장하지 않습니
 
 ## 새 관리자 계약 연동
 
-[관리자 변경 내역](ADMIN-CHANGES.md)의 draft.3 경로와 필드를 사용합니다. 수량 및 운영 시간 편집 요청은 제거했습니다.
+[관리자 변경 내역](ADMIN-CHANGES.md)의 draft.3 경로와 필드를 사용합니다. 실제 관리자 화면은
+이 문서의 요청 흐름을 따라 별도 구현합니다.
+
+### 재학생존 운영 시간 관리
+
+[운영시간 설정 전용 프런트 전달 문서](CROWDING-OPERATING-HOURS-FRONTEND.md)를 사용합니다.
+날짜별 API, 두 필드의 요청 본문, 상세 ETag·멱등성 헤더, 저장·재시도·충돌 처리와
+익일 `01:00`까지의 운영 규칙을 한 문서에 정리했습니다.
+
+### 기타 관리자 연동
 
 - 굿즈 상태는 실제 제공 조합에 `PUT /admin/goods/{goodsId}/colors/{colorId}/sizes/{sizeId}/availability`, 본문 `{ "status": "SOLD_OUT" }`로 저장합니다. quantity는 422입니다.
 - 신규 상품·옵션 조합은 ON_SALE로 생성합니다. 색상·사이즈·조합 삭제도 허용하며, 삭제한 조합의 판매 상태는 제거하고 유지 조합의 상태는 그대로 둡니다.

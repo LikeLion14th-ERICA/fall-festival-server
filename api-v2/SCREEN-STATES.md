@@ -25,7 +25,8 @@
 | STAMP-START | stamp-guide + 당일 로컬 상태 | 선택 수령 안내·QR 누락은 자료 대기. START만으로 적립하지 않음. START 전 기본 카메라 QR 직접 진입은 이 화면으로 이동하며 자동 시작·적립 없음 |
 | STAMP-COLLECT | guide + 로컬 count/date/started/claimed | 처음0칸. 공통 QR1회당1개·하루4개. 자정 초기화. START 후 기본 카메라 QR 진입만 적립 처리하며 카메라 오류는 HTTP 오류와 분리 |
 | STAMP-REWARD | 로컬4칸·수령 상태 + `POST /stamp-receipt-verifications` | 4칸 전 수령 불가. 안내 창에는 상품 수령 버튼 없이 담당자용 코드 입력칸과 확인 버튼을 둔다. `verified: true`일 때만 `claimed=true`로 저장·창 닫기. 코드 오류·통신 실패는 미수령 상태·창을 유지하고 코드값은 저장하지 않는다. 서버 지급 기록·재고·엄격한 중복 차단 없음 |
-| ADM-CROWD | admin/crowding | 저장 전 savedLevel/updatedAt=null. FULL 확인 취소는 요청 없음. 실제 `FestivalDay`인 날짜는 운영 전·운영 종료 뒤에도 저장할 수 있다. 실제 FestivalDay가 아닌 날짜의 PUT은 `409 NOT_FESTIVAL_DAY`이며 기존 상태를 유지한다. 저장 실패 기존값 유지. 자정 초기화. 시간 읽기 전용 |
+| ADM-CROWD | admin/crowding | 저장 전 savedLevel/updatedAt=null. FULL 확인 취소는 요청 없음. 현재 선택 운영일이 오늘이거나 OPEN 구간이면 단계 PUT을 허용한다. 전날 구간이 열려 있고 당일 일정이 아직 시작되지 않았으면 자정 뒤에도 전날 operatingDay·상태·수정 시각을 유지한다. 당일 일정 시작부터 오늘을 우선하며, 실제 FestivalDay가 아닌 새 운영일의 PUT은 `409 NOT_FESTIVAL_DAY`다. 저장 실패 기존값을 유지하고, idempotency key 범위는 operatingDay별이다. |
+| ADM-CROWD-HOURS | admin/crowding/operating-hours | published FestivalDay만 날짜순 표시하며 빈 일정은 `items: []`. 날짜마다 편집·저장한다. 상세 GET ETag와 If-Match, Idempotency-Key를 사용한다. 저장 성공 뒤 목록·상세·현재 혼잡도를 다시 읽는다. 조회·저장 실패와 `409 EDIT_CONFLICT`에서는 입력값을 보존하고 최신 시간을 다시 불러온다. 저장하지 않은 날짜는 게시 일정 초기값(updatedAt=null)을 표시한다. 익일 `01:00`까지 종료값을 저장할 수 있고 실제 구간은 종료 시각을 제외한다. 자정에 현재 혼잡도 날짜와 상태를 다시 조회한다. |
 | ADM-NOTICE-LIST | admin/notices, 최종 수정순 | 등록 공지 없음. 조회 실패 재시도. 지난 일반 공지도 관리자에는 유지 |
 | ADM-NOTICE-EDIT | 수정 초기값 + 선택적 번역 미리보기 | 영어 PENDING/FAILED도 한국어 저장 성공. 한국어 공백·잘못된 링크422. 실패 시 입력 유지. 이미지 직접 첨부 없음 |
 | ADM-NOTICE-DELETE | 확인 후 DELETE | 취소는 요청 없음. 실패 기존 공지 유지. 성공 모든 언어·홈에서 제거. 이미 삭제409/404는 목록 재동기화 |

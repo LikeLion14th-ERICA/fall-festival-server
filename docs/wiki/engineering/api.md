@@ -68,6 +68,10 @@ API v2는 공개 앱과 관리자 운영 도구가 공유하는 단일 HTTP 계�
   귀속하며, 표시 이름과 안정적 ID를 분리한다.
 - 날짜·시각은 timezone을 잃지 않는 형식으로 교환하고, 정렬과 pagination은 동일 요청의
   반복에서도 안정적이어야 한다.
+- 재학생존 운영 시간은 관리자 전용의 날짜별 동적 설정이다. 게시된 `FestivalDay`를 날짜
+  순으로 제공하고 관리자 저장값을 우선 적용하며, 미저장 날짜는 catalog 시간을 사용한다.
+  저장 요청은 날짜 상세의 strong ETag와 idempotency key를 요구하고, 공개 혼잡도 응답 형식은
+  바꾸지 않는다. 세부 route와 `If-Match`·오류 규칙은 [API v2 프런트 연동 안내](../../../api-v2/FRONTEND.md#재학생존-운영-시간-관리)를 따른다.
 - 학교 약칭이나 번역 문구에서 식별자를 만들지 않는다.
 
 ## 화면 데이터 기반 API v2
@@ -85,12 +89,15 @@ API v2는 공개 앱과 관리자 운영 도구가 공유하는 단일 HTTP 계�
   FestivalRevision을 한 번 확정하고, 같은 revision ID로 데이터를 조회해 실제 Festival UUID,
   revision number와 timezone을 meta에 사용한다. 이때 revision은 1 이상이다.
 - 특정 published FestivalRevision에 안전하게 귀속되지 않는 응답은 `revision: 0`을 사용한다.
-  관리자 인증·시스템·오류 응답뿐 아니라 아직 FestivalDay 연결이 완료되지 않은 혼잡도 응답도
-  여기에 포함한다. 0은 published content revision의 대체값이 아니다.
-- 혼잡도 일정은 현재 `published FestivalRevision`의 `FestivalDay` snapshot에서 읽는다.
+  관리자 인증·시스템·오류 응답, 혼잡도처럼 현재 게시 콘텐츠 revision에 종속되지 않는 응답도
+  revision `0`을 쓴다. `0`은 published content revision의 대체값이 아니다.
+- 혼잡도 일정의 날짜와 기본 시간은 현재 `published FestivalRevision`의 `FestivalDay`에서 읽고,
+  날짜별 관리자 저장값이 있으면 해당 값으로 덮어쓴다. 미저장 날짜는 카탈로그 초기값을 쓴다.
   운영자 상태는 revision과 독립된 `(festival_id, operating_date)` 키의
   `crowding_state_dynamic`에 저장하며 혼잡도 응답 meta의 revision은 항상 0이다.
-  게시 snapshot이나 유효한 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`를 반환한다.
+  게시 일정이 없거나 게시된 축제일 중 관리자 저장값·카탈로그 초기값을 적용한 유효 시간이 없는
+  날짜가 있으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`를 반환한다. 관리자 조회는 잘못된 카탈로그
+  시간을 원본대로 반환하므로 수정할 수 있다.
 - 아티스트 Hyped 누적 수는 `(festival_id, artist_id)`로 저장되어 catalog revision과 독립적이다.
   공개 GET·POST의 `meta.revision`은 `0`이며, 참여 가능 여부는 현재 게시된 FestivalDay와
   서버의 Asia/Seoul 날짜로 판정한다. 응답은 저장하지 않도록 `Cache-Control: no-store`를 사용한다.

@@ -13,11 +13,9 @@ import dev.espero.festival.idempotency.IdempotencyResponse;
 import dev.espero.festival.persistence.CrowdingStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,7 +90,7 @@ public class CrowdingController {
         validateHeaders(request);
         CrowdingLevel level = validateInput(input);
         CrowdingViewService.CrowdingSnapshot snapshot = views.currentForAdmin(request);
-        if (!snapshot.today().equals(snapshot.operatingDay())) {
+        if (!snapshot.canUpdateLevel()) {
             throw new ApiException(
                 HttpStatus.CONFLICT,
                 "NOT_FESTIVAL_DAY",
@@ -117,30 +115,28 @@ public class CrowdingController {
         );
 
         idempotency.execute(idempotencyRequest, () -> {
-            Optional<dev.espero.festival.domain.CrowdingRecord> current = store.findForUpdate(
-                snapshot.context().festivalId(),
-                snapshot.operatingDay()
-            );
-            Instant now = clock.instant();
-            CrowdingViewService.CrowdingSnapshot currentSnapshot = views.withSaved(
-                request,
-                snapshot.context(),
-                snapshot.schedules(),
-                snapshot.today(),
-                snapshot.schedule(),
-                current,
-                now
-            );
+            store.lockFestival(snapshot.context().festivalId());
+            // Publication, hours, state and time are re-read after obtaining the
+            // shared festival lock. The pre-reservation snapshot only scopes the key.
+            CrowdingViewService.CrowdingSnapshot currentSnapshot = views.currentForAdmin(request);
+            if (!snapshot.operatingDay().equals(currentSnapshot.operatingDay())) {
+                throw new ApiException(HttpStatus.CONFLICT, "EDIT_CONFLICT",
+                    "운영일이 변경되었습니다. 최신 상태를 확인해 주세요.", false);
+            }
             mutationPreconditions.requireCurrentRepresentation(
                 request,
                 AdminMutationConcurrency.IF_MATCH_REQUIRED,
                 currentSnapshot.etag()
             );
+            if (!currentSnapshot.canUpdateLevel()) {
+                throw new ApiException(HttpStatus.CONFLICT, "EDIT_CONFLICT",
+                    "운영 구간이 변경되었습니다. 최신 상태를 확인해 주세요.", false);
+            }
             CrowdingStore.CrowdingMutation mutation = store.save(
                 snapshot.context().festivalId(),
                 snapshot.operatingDay(),
                 level.name(),
-                now
+                currentSnapshot.observedAt()
             );
             if (mutation.changed()) {
                 audit.record(

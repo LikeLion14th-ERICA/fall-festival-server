@@ -38,6 +38,7 @@ const emptyPreflight = 'src/test/java/dev/espero/festival/e2e/DatabasePreflightE
 const dynamicContent = 'src/test/java/dev/espero/festival/e2e/DynamicContentReleaseHttpE2eTest.java';
 const operationalBoundaries = 'src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java';
 const artistHypedE2e = 'src/test/java/dev/espero/festival/e2e/ArtistHypedHttpE2eTest.java';
+const crowdingHoursE2e = 'src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java';
 
 const scenarioTests = {
   'HTTP-01': [{ file: web, test: 'candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys' }],
@@ -47,23 +48,40 @@ const scenarioTests = {
   'HTTP-05': [{ file: web, test: 'candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys' }],
   'HTTP-06': [{ file: web, test: 'candidatePublishesBeforeStartupAndPassesVisitorAndOperatorJourneys' }],
   'HTTP-07': [{ file: sessionE2e, test: 'userSessionLifecycleRotatesAndRevokesRefreshCredentials' }],
-  'HTTP-08': [{ file: crowdingE2e, test: 'concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse' }],
-  'HTTP-09': [{ file: crowdingE2e, test: 'loopbackAdminRequiresIfMatchAndRejectsStaleRepresentation' }],
+  'HTTP-08': [
+    { file: crowdingE2e, test: 'concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse' },
+    { file: crowdingHoursE2e, test: 'firstHoursSavesConflictOnce' },
+    { file: crowdingHoursE2e, test: 'concurrentHoursAndLevelWritesUseCurrentSchedule' },
+  ],
+  'HTTP-09': [
+    { file: crowdingE2e, test: 'loopbackAdminRequiresIfMatchAndRejectsStaleRepresentation' },
+    { file: crowdingHoursE2e, test: 'firstHoursSavesConflictOnce' },
+  ],
   'HTTP-10': [{ file: web, test: 'publicQueriesRejectUnpublishedLocalesAndDuplicateParametersWithReleaseMetadata' }],
   'HTTP-11': [{ file: web, test: 'publicConditionalReadsAcceptWeakAndMultiValueValidators' }],
   'HTTP-12': [{ file: sessionE2e, test: 'sessionBoundaryRejectsBadOriginCredentialsTokensAndMalformedBodies' }],
   'HTTP-13': [{ file: web, test: 'releaseCliChildCannotBeRedirectedByAHostileDatasourceOverride' }],
   'HTTP-14': [{ file: web, test: 'traversesEveryDeclaredDateCategoryAndExposedSpaceFilter' }],
   'HTTP-15': [{ file: account, test: 'cliSetAndClearPropagateToHttpWithConditionalEtagSemantics' }],
-  'HTTP-16': [{ file: crowdingE2e, test: 'concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse' }],
-  'HTTP-17': [{ file: publication, test: 'publicationAndRollbackBecomeVisibleAfterRestartWithoutChangingDynamicState' }],
+  'HTTP-16': [
+    { file: crowdingE2e, test: 'concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse' },
+    { file: crowdingHoursE2e, test: 'levelWaitingAcrossMidnightRequiresRefetch' },
+  ],
+  'HTTP-17': [
+    { file: publication, test: 'publicationAndRollbackBecomeVisibleAfterRestartWithoutChangingDynamicState' },
+    { file: crowdingHoursE2e, test: 'freshApplicationReadsPersistedHoursWithoutCatalogRewrite' },
+  ],
   'HTTP-18': [{ file: web, test: 'publicInputFailuresStaySafeAndDoNotBlockAnonymousCatalogNavigation' }],
   'HTTP-19': [{ file: web, test: 'defaultDateAndLineupStayAlignedBeforeAndAfterTheFestivalCalendar' }],
   'HTTP-20': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
   'HTTP-21': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
   'HTTP-22': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
   'HTTP-23': [{ file: account, test: 'transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds' }],
-  'HTTP-24': [{ file: crowdingE2e, test: 'loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours' }],
+  'HTTP-24': [
+    { file: crowdingE2e, test: 'loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours' },
+    { file: crowdingHoursE2e, test: 'hoursWaitingForPublicationChecksNewMembership' },
+    { file: crowdingHoursE2e, test: 'pollingLoadSeesHoursUpdatesAndKeepsSavedState' },
+  ],
   'HTTP-25': [{ file: dynamicContent, test: 'noticeLifecycleReplaysOnceRejectsStaleWritesAndRemovesPublicVisibility' }],
   'HTTP-26': [{ file: dynamicContent, test: 'goodsAvailabilityAndOptionEditsPreserveRetainedStateThenDetachOnHardDelete' }],
   'HTTP-27': [
@@ -128,6 +146,9 @@ const providerTests = {
   verifyStampReceipt: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesStampReceiptSuccessAndRefusalAgainstOpenApi'),
   getAdminCrowding: provider('src/test/java/dev/espero/festival/web/CrowdingFlowIntegrationTest.java', 'savesWithTheCurrentEtagThenServesTheNewRepresentationAndRejectsStaleWrites'),
   putAdminCrowding: provider('src/test/java/dev/espero/festival/web/CrowdingControllerOpenApiTest.java', 'validatesMissingConcurrencyPreconditionAgainstThe428Contract'),
+  getAdminCrowdingOperatingHours: provider('src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java', 'listsPublishedHoursAndAllowsEmptySchedule', 'repairsInvalidFallbackWithoutBlockingAdministratorReads'),
+  getAdminCrowdingOperatingHoursDay: provider('src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java', 'listsPublishedHoursAndAllowsEmptySchedule', 'repairsInvalidFallbackWithoutBlockingAdministratorReads'),
+  putAdminCrowdingOperatingHoursDay: provider('src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java', 'confirmsFallbackAndKeepsIdenticalSavesUnchanged', 'validatesInputsHeadersAndConflicts', 'repairsInvalidFallbackWithoutBlockingAdministratorReads'),
   getAdminNotices: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
   postAdminNotice: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi', 'requiresIdempotencyKeyOnCreateAndIfMatchOnUpdate', 'rejectsInvalidNoticeInputShapes'),
   getAdminNotice: provider('src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java', 'createsReadsUpdatesAndSoftDeletesANoticeThroughTheAdminApi'),
@@ -180,6 +201,9 @@ const operationScenarios = {
   verifyStampReceipt: ['HTTP-06', 'HTTP-28'],
   getAdminCrowding: ['HTTP-08', 'HTTP-09', 'HTTP-12', 'HTTP-16', 'HTTP-24'],
   putAdminCrowding: ['HTTP-08', 'HTTP-09', 'HTTP-12', 'HTTP-16', 'HTTP-24'],
+  getAdminCrowdingOperatingHours: ['HTTP-08', 'HTTP-09', 'HTTP-17', 'HTTP-24'],
+  getAdminCrowdingOperatingHoursDay: ['HTTP-08', 'HTTP-09', 'HTTP-17', 'HTTP-24'],
+  putAdminCrowdingOperatingHoursDay: ['HTTP-08', 'HTTP-09', 'HTTP-17', 'HTTP-24'],
   getAdminNotices: ['HTTP-25'],
   postAdminNotice: ['HTTP-25'],
   getAdminNotice: ['HTTP-25'],

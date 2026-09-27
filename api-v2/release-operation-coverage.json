@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 49,
+  "operationCount": 52,
   "operations": [
     {
       "operationId": "getConfig",
@@ -797,6 +797,88 @@
       "unresolvedReason": null
     },
     {
+      "operationId": "getAdminCrowdingOperatingHours",
+      "path": "/api/v2/admin/crowding/operating-hours",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "listsPublishedHoursAndAllowsEmptySchedule"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "repairsInvalidFallbackWithoutBlockingAdministratorReads"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-08",
+        "HTTP-09",
+        "HTTP-17",
+        "HTTP-24"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "getAdminCrowdingOperatingHoursDay",
+      "path": "/api/v2/admin/crowding/operating-hours/{operatingDay}",
+      "method": "GET",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "listsPublishedHoursAndAllowsEmptySchedule"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "repairsInvalidFallbackWithoutBlockingAdministratorReads"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-08",
+        "HTTP-09",
+        "HTTP-17",
+        "HTTP-24"
+      ],
+      "unresolvedReason": null
+    },
+    {
+      "operationId": "putAdminCrowdingOperatingHoursDay",
+      "path": "/api/v2/admin/crowding/operating-hours/{operatingDay}",
+      "method": "PUT",
+      "status": "live",
+      "testMapping": {
+        "kind": "provider",
+        "tests": [
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "confirmsFallbackAndKeepsIdenticalSavesUnchanged"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "validatesInputsHeadersAndConflicts"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/CrowdingOperatingHoursFlowIntegrationTest.java",
+            "test": "repairsInvalidFallbackWithoutBlockingAdministratorReads"
+          }
+        ]
+      },
+      "scenarioIds": [
+        "HTTP-08",
+        "HTTP-09",
+        "HTTP-17",
+        "HTTP-24"
+      ],
+      "unresolvedReason": null
+    },
+    {
       "operationId": "putAdminAvailability",
       "path": "/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability",
       "method": "PUT",
@@ -1177,13 +1259,24 @@
           {
             "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
             "test": "concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "firstHoursSavesConflictOnce"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "concurrentHoursAndLevelWritesUseCurrentSchedule"
           }
         ]
       },
       "operationIds": [
         "getCrowding",
         "getAdminCrowding",
-        "putAdminCrowding"
+        "putAdminCrowding",
+        "getAdminCrowdingOperatingHours",
+        "getAdminCrowdingOperatingHoursDay",
+        "putAdminCrowdingOperatingHoursDay"
       ]
     },
     {
@@ -1194,12 +1287,19 @@
           {
             "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
             "test": "loopbackAdminRequiresIfMatchAndRejectsStaleRepresentation"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "firstHoursSavesConflictOnce"
           }
         ]
       },
       "operationIds": [
         "getAdminCrowding",
-        "putAdminCrowding"
+        "putAdminCrowding",
+        "getAdminCrowdingOperatingHours",
+        "getAdminCrowdingOperatingHoursDay",
+        "putAdminCrowdingOperatingHoursDay"
       ]
     },
     {
@@ -1308,6 +1408,10 @@
           {
             "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
             "test": "concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "levelWaitingAcrossMidnightRequiresRefetch"
           }
         ]
       },
@@ -1324,10 +1428,18 @@
           {
             "file": "src/test/java/dev/espero/festival/e2e/CatalogPublicationLifecycleE2eTest.java",
             "test": "publicationAndRollbackBecomeVisibleAfterRestartWithoutChangingDynamicState"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "freshApplicationReadsPersistedHoursWithoutCatalogRewrite"
           }
         ]
       },
-      "operationIds": []
+      "operationIds": [
+        "getAdminCrowdingOperatingHours",
+        "getAdminCrowdingOperatingHoursDay",
+        "putAdminCrowdingOperatingHoursDay"
+      ]
     },
     {
       "id": "HTTP-18",
@@ -1447,13 +1559,24 @@
           {
             "file": "src/test/java/dev/espero/festival/e2e/CrowdingConcurrencyE2eTest.java",
             "test": "loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "hoursWaitingForPublicationChecksNewMembership"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/e2e/CrowdingOperatingHoursE2eTest.java",
+            "test": "pollingLoadSeesHoursUpdatesAndKeepsSavedState"
           }
         ]
       },
       "operationIds": [
         "getCrowding",
         "getAdminCrowding",
-        "putAdminCrowding"
+        "putAdminCrowding",
+        "getAdminCrowdingOperatingHours",
+        "getAdminCrowdingOperatingHoursDay",
+        "putAdminCrowdingOperatingHoursDay"
       ]
     },
     {

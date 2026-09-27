@@ -48,6 +48,10 @@ macOS/Linux에서도 같은 `java` 명령을 사용하고 패키징만 `sh ./mvn
   일반/partition table·view·foreign table 이름과 SELECT 권한을 조사한다.
 - 대상 schema의 Flyway version/type/script/checksum/success를 현재 artifact에 포함된 SQL과
   비교한다. SQL 파일은 텍스트로만 읽으며 Flyway를 호출하거나 migration을 실행하지 않는다.
+- 운영 시간 기능은 V31 `crowding_operating_hours`와 V32 시간 구간 constraint 갱신을 포함한 최신
+  artifact를 사용해 사전 점검한다. V31은 빈 테이블로 시작하며 카탈로그 시간이나 기존 혼잡도
+  상태를 backfill하지 않는다. V32는 V31 SQL/checksum을 변경하지 않는다.
+  검사 결과만으로 원격 DB에 migration을 적용하거나 runtime/catalog role 권한을 바꾸지 않는다.
 - 축제 ID·timezone, revision ID·회차·번호·state와 published 상태를 출력한다. 카탈로그
   table은 `EXISTS`로 데이터 유무만 조사한다. 제목·본문·계좌·인증 정보·감사 본문은 조회하지 않는다.
 - 같은 DB의 다른 client session 수와 상태 접근 가능 여부를 조사한다. session의 SQL,

@@ -1,6 +1,6 @@
 # 화면 데이터 → API 필드
 
-Product Context v5 기준 26개 화면의 데이터 178개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
+Product Context v5 기준 27개 화면의 데이터 183개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
 
 | 데이터 ID | 항목 | 처리 | 계약/프런트 책임 | 위키 근거 |
 |---|---|---|---|---|
@@ -49,8 +49,8 @@ Product Context v5 기준 26개 화면의 데이터 178개를 추적합니다. �
 | HOME-D01 | 혼잡도 단계 | API | Crowding.savedLevel | [위키](../docs/wiki/product/home.md) |
 | HOME-D02 | 운영 상태 | API | Crowding.status | [위키](../docs/wiki/product/home.md) |
 | HOME-D03 | 마지막 수정 시각 | API | Crowding.updatedAt + Crowding.timeBasis | [위키](../docs/wiki/product/home.md) |
-| HOME-D04 | 당일 입장 시작 시각 | API | Crowding.opensAt | [위키](../docs/wiki/product/home.md) |
-| HOME-D05 | 당일 운영 종료 시각 | API | Crowding.closesAt | [위키](../docs/wiki/product/home.md) |
+| HOME-D04 | 선택 운영일 입장 시작 시각 | API | Crowding.opensAt | [위키](../docs/wiki/product/home.md) |
+| HOME-D05 | 선택 운영일 종료 시각 | API | Crowding.closesAt | [위키](../docs/wiki/product/home.md) |
 | HOME-D06 | 혼잡도 색상 | 프런트 | 프런트 고정 UI: Crowding.colorToken → 디자인 색상 | [위키](../docs/wiki/product/home.md) |
 | HOME-D07 | 혼잡도 안내 문구 | 프런트 | 프런트 번역: Crowding.status; Crowding.message는 참고 | [위키](../docs/wiki/product/home.md) |
 | HOME-D08 | 제공 언어 목록 | API | Config.languages | [위키](../docs/wiki/product/home.md) |
@@ -169,11 +169,11 @@ Product Context v5 기준 26개 화면의 데이터 178개를 추적합니다. �
 | ADM-GOODS-D05 | 남은 재고 수량 | 제외 | 제외: 실제 재고 수량 미관리 | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-D06 | 상품 전체 품절 여부 | API | Availability.allSoldOut | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-CROWD-D09 | 혼잡도 판단 기준 | 프런트 | 프런트 고정 UI: 운영자 판단 기준·85% 자동 만석 아님 | [위키](../docs/wiki/product/admin/crowd.md) |
-| ADM-CROWD-HOURS-D01 | 운영일 | 제외 | 제외: 운영 시간은 개발자 등록, 관리자 편집 없음 | [위키](../docs/wiki/product/admin/crowd.md) |
-| ADM-CROWD-HOURS-D02 | 입장 시작 시각 | 제외 | 제외: 운영 시간은 개발자 등록, 관리자 편집 없음 | [위키](../docs/wiki/product/admin/crowd.md) |
-| ADM-CROWD-HOURS-D03 | 운영 종료 시각 | 제외 | 제외: 운영 시간은 개발자 등록, 관리자 편집 없음 | [위키](../docs/wiki/product/admin/crowd.md) |
-| ADM-CROWD-HOURS-D04 | 기본값 적용 여부 | 제외 | 제외: 운영 시간은 개발자 등록, 관리자 편집 없음 | [위키](../docs/wiki/product/admin/crowd.md) |
-| ADM-CROWD-HOURS-D05 | 입력 중 시간 | 제외 | 제외: 운영 시간은 개발자 등록, 관리자 편집 없음 | [위키](../docs/wiki/product/admin/crowd.md) |
+| ADM-CROWD-HOURS-D01 | 운영일 | API | CrowdingOperatingHours.operatingDay | [위키](../docs/wiki/product/admin/crowd.md) |
+| ADM-CROWD-HOURS-D02 | 입장 시작 시각 | API | CrowdingOperatingHours.opensAt | [위키](../docs/wiki/product/admin/crowd.md) |
+| ADM-CROWD-HOURS-D03 | 운영 종료 시각 | API | CrowdingOperatingHours.closesAt | [위키](../docs/wiki/product/admin/crowd.md) |
+| ADM-CROWD-HOURS-D04 | 기본값 적용 여부 | API | CrowdingOperatingHours.updatedAt (null이면 게시 일정 초기값) | [위키](../docs/wiki/product/admin/crowd.md) |
+| ADM-CROWD-HOURS-D05 | 입력 중 시간 | 브라우저 | 브라우저: 저장 전 입력값 보존 | [위키](../docs/wiki/product/admin/crowd.md) |
 | ADM-GOODS-PRODUCT-LIST-D01 | 상품 ID | API | Goods.id | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-LIST-D02 | 상품명 | API | Goods.name | [위키](../docs/wiki/product/admin/goods.md) |
 | ADM-GOODS-PRODUCT-LIST-D03 | 가격 | API | Goods.price | [위키](../docs/wiki/product/admin/goods.md) |

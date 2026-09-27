@@ -9433,7 +9433,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-normal"
           },
           "body": {
@@ -9452,7 +9452,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-full"
           },
           "body": {
@@ -9472,15 +9472,31 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-not-festival-day"
           },
           "body": {
             "level": "CROWDED"
           }
         },
-        "status": 204,
-        "response": null
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "NOT_FESTIVAL_DAY",
+            "message": "현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
       },
       "error": {
         "request": {
@@ -9491,7 +9507,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-error"
           },
           "body": {
@@ -9526,7 +9542,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-precondition-required"
           },
           "body": {
@@ -9561,7 +9577,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-edit-conflict"
           },
           "body": {
@@ -9596,7 +9612,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-bad-request"
           },
           "body": {
@@ -9631,7 +9647,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-rate-limited"
           },
           "body": {
@@ -9666,7 +9682,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-unauthorized"
           },
           "body": {
@@ -9701,7 +9717,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-forbidden"
           },
           "body": {
@@ -12448,6 +12464,903 @@
             "X-Mock-Scenario": "forbidden",
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getAdminCrowdingOperatingHours": {
+    "screens": [
+      "ADM-CROWD-HOURS"
+    ],
+    "method": "GET",
+    "path": "/api/v2/admin/crowding/operating-hours",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "items": [
+              {
+                "operatingDay": "2030-10-01",
+                "opensAt": "2030-10-01T13:00:00+09:00",
+                "closesAt": "2030-10-01T22:00:00+09:00",
+                "updatedAt": null
+              },
+              {
+                "operatingDay": "2030-10-02",
+                "opensAt": "2030-10-02T12:00:00+09:00",
+                "closesAt": "2030-10-02T21:00:00+09:00",
+                "updatedAt": null
+              },
+              {
+                "operatingDay": "2030-10-03",
+                "opensAt": "2030-10-03T14:00:00+09:00",
+                "closesAt": "2030-10-03T20:00:00+09:00",
+                "updatedAt": null
+              }
+            ]
+          },
+          "meta": {
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "empty": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "empty",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "items": []
+          },
+          "meta": {
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "getAdminCrowdingOperatingHoursDay": {
+    "screens": [
+      "ADM-CROWD-HOURS"
+    ],
+    "method": "GET",
+    "path": "/api/v2/admin/crowding/operating-hours/{operatingDay}",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 200,
+        "response": {
+          "data": {
+            "operatingDay": "2030-10-01",
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00",
+            "updatedAt": null
+          },
+          "meta": {
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "not-found": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "not-found",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 404,
+        "response": {
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "요청한 정보를 찾을 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "GET",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin"
+          }
+        },
+        "status": 403,
+        "response": {
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "관리자 권한이 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      }
+    }
+  },
+  "putAdminCrowdingOperatingHoursDay": {
+    "screens": [
+      "ADM-CROWD-HOURS"
+    ],
+    "method": "PUT",
+    "path": "/api/v2/admin/crowding/operating-hours/{operatingDay}",
+    "scenarios": {
+      "normal": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "normal",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-normal"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 204,
+        "response": null
+      },
+      "not-festival-day": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "not-festival-day",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-not-festival-day"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "NOT_FESTIVAL_DAY",
+            "message": "현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "removed-day": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "removed-day",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-removed-day"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "NOT_FESTIVAL_DAY",
+            "message": "현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "validation-failed": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "validation-failed",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-validation-failed"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:01+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 422,
+        "response": {
+          "error": {
+            "code": "VALIDATION_FAILED",
+            "message": "요청 필드를 확인해 주세요.",
+            "details": [
+              {
+                "field": "$.opensAt",
+                "reason": "문자열 형식이 다릅니다."
+              }
+            ],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "precondition-required": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "precondition-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-precondition-required"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "PRECONDITION_REQUIRED",
+            "message": "최신 상태를 확인한 뒤 다시 저장해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-required": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-required",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-idempotency-key-required"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 428,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REQUIRED",
+            "message": "Idempotency-Key 헤더가 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "idempotency-key-reused": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "idempotency-key-reused",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-idempotency-key-reused"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "IDEMPOTENCY_KEY_REUSED",
+            "message": "같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "edit-conflict": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "edit-conflict",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-edit-conflict"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "EDIT_CONFLICT",
+            "message": "다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "error": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "error",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-error"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 503,
+        "response": {
+          "error": {
+            "code": "SERVICE_UNAVAILABLE",
+            "message": "일시적으로 정보를 불러올 수 없습니다.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "bad-request": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "bad-request",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-bad-request"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 400,
+        "response": {
+          "error": {
+            "code": "INVALID_QUERY",
+            "message": "잘못된 요청 예시입니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "rate-limited": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "rate-limited",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-rate-limited"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 429,
+        "response": {
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "잠시 후 다시 요청해 주세요.",
+            "details": [],
+            "retryable": true
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "unauthorized": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "unauthorized",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-unauthorized"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
+          }
+        },
+        "status": 401,
+        "response": {
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "관리자 인증이 필요합니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "forbidden": {
+        "request": {
+          "method": "PUT",
+          "path": "/api/v2/admin/crowding/operating-hours/2030-10-01",
+          "headers": {
+            "X-Mock-Scenario": "forbidden",
+            "X-Mock-Session": "frontend-demo",
+            "Authorization": "Bearer mock-admin",
+            "Content-Type": "application/json",
+            "If-Match": "\"d627076ecc9a5eba51b8c1f69ce110a8951eff25a2efcb07232cccb87fc3a6ab\"",
+            "Idempotency-Key": "mock-putAdminCrowdingOperatingHoursDay-forbidden"
+          },
+          "body": {
+            "opensAt": "2030-10-01T13:00:00+09:00",
+            "closesAt": "2030-10-01T22:00:00+09:00"
           }
         },
         "status": 403,

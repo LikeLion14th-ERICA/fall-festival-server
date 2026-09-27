@@ -20,6 +20,7 @@
 - 공간·지도: `GET /api/v2/spaces`, `/spaces/{spaceId}`, `/maps`, `/maps/{mapId}`,
   `/maps/{mapId}/pins`, `/places/{placeId}`
 - 안내·운영 상태: `GET /api/v2/ticket-guide`, `/stamp-guide`, `/crowding`
+- 관리자 재학생존 혼잡도 운영 시간: 날짜별 `GET /api/v2/admin/crowding/operating-hours`와 상세 조회·저장
 
 카탈로그 API는 시작 시 검증한 published snapshot만 읽습니다. 실제 행사 운영 자료는 승인
 전이므로 migration에 임의로 seed하지 않습니다. 공개 GET은 인증 없이 접근할 수 있습니다.
@@ -161,7 +162,7 @@ sh ./mvnw spring-boot:run
 
 이 저장소는 PostgreSQL에 연결할 수 있지만 루트 Docker Compose 등으로 PostgreSQL 인스턴스를
 생성하거나 기동하지는 않습니다. 기존 PostgreSQL, 팀 공유 DB 또는 직접 준비한 로컬 PostgreSQL
-중 하나가 필요합니다. 새 DB에서는 기본값인 `SPRING_FLYWAY_ENABLED=true`로 V1~V13 migration을
+중 하나가 필요합니다. 새 DB에서는 기본값인 `SPRING_FLYWAY_ENABLED=true`로 V1~V31 migration을
 적용합니다. Flyway clean은 비활성화되어 있습니다. `false`는 migration이 이미 별도로 관리되는
 schema를 의도적으로 사용할 때만 선택하며 일반 개발 기본값으로 사용하지 않습니다.
 

@@ -94,7 +94,7 @@ class CrowdingControllerOpenApiTest {
             ZoneId.of("Asia/Seoul")
         );
         CrowdingViewService.CrowdingSnapshot snapshot = new CrowdingViewService.CrowdingSnapshot(
-            context, List.of(schedule), schedule.operatingDate(), schedule, Optional.empty(), response, meta, ""
+            context, List.of(schedule), schedule.operatingDate(), schedule, Optional.empty(), response, meta, "", clock.instant()
         );
         ConditionalResponseSupport conditional = new ConditionalResponseSupport(new tools.jackson.databind.ObjectMapper());
         etag = conditional.strongEtag(new ConditionalApiResponse<>(response, ConditionalApiMeta.from(meta)));

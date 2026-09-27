@@ -320,6 +320,10 @@ class OperationalAccountSettingsIntegrationTest {
         provisionRoles();
         try (Connection connection = connection()) {
             executeAs(connection, RUNTIME_ROLE, "SELECT count(*) FROM operational_account_settings");
+            executeAs(connection, RUNTIME_ROLE, "SELECT count(*) FROM crowding_operating_hours");
+            executeAs(connection, RUNTIME_ROLE, "UPDATE crowding_operating_hours SET updated_at = CURRENT_TIMESTAMP WHERE false");
+            executeAs(connection, RUNTIME_ROLE, "INSERT INTO crowding_operating_hours SELECT * FROM crowding_operating_hours WHERE false");
+            assertPermissionDenied(connection, RUNTIME_ROLE, "DELETE FROM crowding_operating_hours WHERE false");
             assertPermissionDenied(connection, RUNTIME_ROLE, "UPDATE operational_account_settings SET version = 2");
             assertPermissionDenied(connection, EXPORT_ROLE, "SELECT count(*) FROM operational_account_settings");
             assertPermissionDenied(connection, EXPORT_ROLE, "SELECT count(*) FROM operational_account_setting_history");
@@ -374,7 +378,7 @@ class OperationalAccountSettingsIntegrationTest {
             // Crowding, notices and goods stay outside every catalog role.
             for (String role : List.of(EXPORT_ROLE, PUBLISH_ROLE)) {
                 for (String table : List.of(
-                    "crowding_state", "crowding_state_dynamic", "notices", "notice_translations",
+                    "crowding_state", "crowding_state_dynamic", "crowding_operating_hours", "notices", "notice_translations",
                     "notice_links", "notice_link_translations", "notice_templates", "notice_template_translations", "stamp_participants", "stamp_collections",
                     "stamp_rewards", "stamp_participant_days",
                     "goods", "goods_translations", "goods_colors",
