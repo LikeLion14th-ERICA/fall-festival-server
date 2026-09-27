@@ -61,3 +61,19 @@ Docker image·filesystem 보안 검사가 통과했다. Java 21 로그의
 통합 checkout에서 백엔드·테스트 컴파일과 로컬 단위·OpenAPI provider 테스트 33개가 실패·건너뜀 없이 통과했다. API v2 `npm run check`도 통과했다. 생성 일치·release operation coverage·OpenAPI 표준 파싱·JSON Schema·목 HTTP 동작을 포함한 계약 테스트 458개가 실패·건너뜀 없이 통과했다. 격리 worktree의 의존성 부족으로 중단됐던 검사는 통합 checkout의 설치된 의존성으로 실행했다. 검증 중 발견한 PUT 예제 ETag·시간대 예제와 목 소수초 경계 판정을 수정했다.
 
 이 PC에는 Docker가 없어 PostgreSQL migration·role·preflight 통합 검증, 실제 Spring HTTP E2E와 공개 조회 67 RPS 부하 회귀는 로컬에서 실행하지 못했다. 해당 테스트는 공통 PR CI에 연결됐고 V30→V31 업그레이드·무 backfill·제약 검사는 별도 `pg17-migration` 작업에서 PostgreSQL 17로 실행한다. 원격 CI 결과는 아직 대기 상태이며 이 기록은 전체 CI 통과를 뜻하지 않는다. 실제 관리자 UI 구현, 브라우저 polling 확인, staging 배포 뒤 승인 운영 시간 저장과 배포 환경의 재시작·재게시·rollback 보존 확인도 남아 있다.
+
+## 2026-09-28 · 야간 운영 경계 추가 통합 검증
+
+기준: 익일 `01:00` 종료 상한, KST 자정 운영일 선택, 운영일별 혼잡도 idempotency 및 stale ETag 처리.
+
+| 검사 | 실제 결과 |
+|---|---|
+| API v2 `npm run check` | 통과. 52 operations, 27 screens, 189 data mappings, 408 example responses, release operation coverage 52/52, 계약 테스트 460개. 실패·건너뜀 0 |
+| 생성·표준 파싱·JSON Schema | 생성 산출물 일치, OpenAPI parser, JSON Schema 검증 통과 |
+| 로컬 Java 검증 | main/test 컴파일과 focused Java 26개 통과. 실패·건너뜀 0 |
+| Docker 기반 검증 | 이 PC에 Docker가 없어 V31→V32 PostgreSQL migration, role/preflight 통합 검증과 Spring HTTP E2E를 실행하지 못했다. 최신 push의 PR CI 결과를 기다리는 중이며 아직 통과로 기록하지 않는다 |
+
+계약 테스트에서 같은 밤 운영일을 유지한 자정 뒤 저장·완료 재시도, 종료 경계의 stale ETag 충돌,
+다음 날짜에서 같은 key를 새 범위로 사용하는 경우를 확인한다. 겹치는 전날·당일 일정의 선택 우선순위와
+당일 CLOSED 유지도 unit/consumer에서 확인한다. 실제 UI와 운영 DB·배포 환경의 호환성은 이 검사에
+포함되지 않는다.

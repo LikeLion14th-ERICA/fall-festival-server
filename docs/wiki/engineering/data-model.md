@@ -27,6 +27,9 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 - V31 `crowding_operating_hours`는 `(festival_id, operating_date)`별 운영 시작·종료와
   수정 시각을 catalog revision 밖에 저장한다. 기존 행 backfill은 없으며, 행이 없는 축제일은
   현재 published `FestivalDay`의 시간을 초기값으로 사용한다.
+- V32는 별도 migration에서 V31 시간 구간 CHECK 제약을 확장해 종료 상한을 운영일 다음 날
+  `01:00`까지 허용한다. V31 SQL은 수정하지 않아 기존 Flyway checksum을 보존하고, V32도 행을
+  backfill하지 않는다. 운영 시작은 운영일 KST 날짜 안이고 종료 순간은 실제 운영 구간에서 제외한다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
   함께 준비한 뒤에만 운영 DB를 연결한다.
 - `test/`의 Next.js·Spring Boot·PostgreSQL 코드는 PWA·스탬프·Push 실기기 검증 환경이다.
@@ -57,7 +60,9 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 날짜와 시각은 `Asia/Seoul` 및 offset을 보존한다.
 
 `crowding_operating_hours`의 기본키는 `(festival_id, operating_date)`이며 `opens_at`,
-`closes_at`, `updated_at`을 저장한다. 첫 관리자 저장은 카탈로그 초기값과 같아도 설정 행과
+`closes_at`, `updated_at`을 저장한다. 종료는 시작 뒤부터 운영일 다음 날 KST `01:00`까지 허용하고
+시작 포함·종료 제외로 판정한다. 야간 구간은 전날 운영일에 귀속하며 자정에 상태 행을 새 날짜로
+이월하거나 지우지 않는다. 첫 관리자 저장은 카탈로그 초기값과 같아도 설정 행과
 감사 기록을 만든다. 그 뒤 같은 값 저장은 수정 시각·감사 기록을 바꾸지 않는다. 카탈로그
 재게시·rollback·서버 재시작은 이 행을 변경하지 않는다. 게시에서 날짜가 빠져도 설정을 보존하고,
 같은 날짜가 다시 게시되면 적용한다.

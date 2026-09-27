@@ -34,7 +34,7 @@
 | 입력·미디어 | API 계약의 `additionalProperties: false`와 invalid input, 상품 이미지 magic bytes·decode·크기·pixel·animated WebP·경로 | `AdminAuthApiIntegrationTest`, `AdminGoodsProductCreationFlowIntegrationTest`, `GoodsInputValidatorTest`, `GoodsImageInspectorTest`, media storage tests |
 | SQL 입력 경계 | SQL 형태의 관리자 공지 제목이 parameter binding을 거쳐 원문 그대로 저장·재조회되고 기존 공지를 바꾸지 않음 | `AdminSessionReleaseE2eTest` |
 | 요청 제한 | public/admin/login/stamp/artist-hyped token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After`; Hyped 쓰기는 공개 조회와 별도 bucket | `RateLimitTest`(Hyped 포함), release E2E HTTP-21·22 |
-| idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match`; 혼잡도 시간·단계 쓰기의 축제 행 → 시간·상태 행 잠금 순서와 자정 경계 | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest` 및 운영 시간 provider/E2E 검증 |
+| idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match`; 혼잡도 시간·단계 쓰기의 축제 행 → 시간·상태 행 잠금 순서, 날짜별 key 범위와 자정 선택 변경 충돌 | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest`, 야간 운영 E2E 및 운영 시간 provider 검증 |
 | JSON 본문 경계 | `/api/v2`의 JSON `POST`·`PUT`·`PATCH`·`DELETE` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
 | 수령 인증·동적 결제 안내 | 수령 코드는 공백을 제거하지 않은 정확한 6자리 숫자만 허용하고, 성공 수령 인증과 `GET /api/v2/goods/{goodsId}/payment-guide`는 `Cache-Control: no-store` | `StampReceiptVerifierTest`, `CatalogControllerOpenApiTest`, `GoodsFlowIntegrationTest` |
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |

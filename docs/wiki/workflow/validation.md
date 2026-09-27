@@ -55,12 +55,11 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 `PostgresTestImages`가 승인된 `postgres:17.11`을 선택한다. 기존 PG17 preflight 테스트도
 동일한 고정 이미지를 사용한다. `test/` 실기기 검증 환경의 PostgreSQL 설정은 별개다.
 
-`Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의
-새 임시 database에 최신 main의 V1~V31을 적용하는 경우와, V23에서 지도·안내·굿즈·공지·계좌 이력의
-fixture를 만든 뒤 V24~V31을 차례로 적용하는 경우를 검사한다. 각 단계는 Flyway history·checksum,
-기존 데이터의 전체 행 보존, 번역·미디어·템플릿 제약과 V31 `crowding_operating_hours`의
-backfill 없는 생성을 검증하고, 새 Flyway 인스턴스 재기동에서 migration 0건·history/데이터
-무변경을 확인한다.
+`Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의 migration suite는
+네 개 독립 경로를 확인한다: 빈 DB V1→V26, V23 fixture에서 V24~V26 적용과 기존 행 보존,
+V30→V31의 `crowding_operating_hours` 무 backfill 생성, V31→V32 시간 구간 CHECK 확장이다.
+V31 checksum 보존을 확인하고 각 경로에서 Flyway history·기존 데이터를 검증한다. 새 Flyway 인스턴스
+재기동은 migration 0건·history/데이터 무변경을 확인한다.
 기존 migration SQL을 그대로 사용하며 원격 DB나 staging·prod 설정을 읽지 않는다.
 
 migration 게이트만 실행하는 focused 명령은 다음과 같다.
@@ -122,7 +121,7 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-21 | 공개 읽기 rate limit | trusted proxy client 단위 429·`Retry-After`·안전 envelope, 다른 client의 독립 bucket, clock 회복 뒤 재조회와 서버 생성 request ID를 실제 HTTP로 확인 |
 | HTTP-22 | 관리자 로그인 rate limit | 잘못된 비밀번호 추측이 trusted proxy client 단위로 제한되고 다른 client·refill 뒤에는 다시 인증 오류로 처리되며 cookie를 발급하지 않음 |
 | HTTP-23 | 티켓 송금 초 경계 | `09:59:59`·`10:00:00`·`17:59:59`·`18:00:00` KST에서 `DAILY_CLOSED`/`TRANSFER_OPEN`, 계좌 노출, settings version, 이전·현재 ETag의 200/304가 정확히 전환됨 |
-| HTTP-24 | 혼잡도·운영 시간 경계 | 첫 축제일 전·중간 공백일·마지막 날 뒤와 시작 포함·종료 제외, 익일 `00:00` 허용·`00:01` 거절, 비축제일 저장 409, 잘못된 날짜 400, 목록 빈 배열, 누락·stale `If-Match` 428/409을 실제 HTTP로 확인 |
+| HTTP-24 | 혼잡도·운영 시간 경계 | 실제 Spring HTTP E2E는 익일 `01:00` 허용·`01:01` 거절, 야간 운영일을 유지한 자정 통과 대기 쓰기 성공, 종료 경계 대기 쓰기 stale 충돌, 마지막 축제일 익일 저장을 확인한다. 전날 OPEN과 당일 일정 겹침에서 당일 우선·당일 CLOSED 유지, 날짜별 idempotency key 범위는 unit/consumer/provider 검증에서 확인한다. 기존 경계 검증은 첫 축제일 전·중간 공백일·마지막 날 뒤, 비축제일 저장 409, 잘못된 날짜 400, 목록 빈 배열, 누락·stale `If-Match` 428/409를 다룬다. |
 | HTTP-25 | 공지 lifecycle | 실제 관리자 생성 Location·replay·key reuse·If-Match stale·수정·삭제와 공개 목록 반영·conditional read를 확인 |
 | HTTP-26 | 상품·판매 상태 lifecycle | 상품 생성 Location·replay·목록/상세/관리자 목록·조합 ON_SALE/SOLD_OUT·옵션 변경·hard delete와 media detach를 확인 |
 | HTTP-27 | 이미지 upload/delivery | multipart 인증·상한·유형·replay·media 공개 200/304 header·replacement/detach·processor/storage 실패 rollback을 확인 |
