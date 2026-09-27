@@ -14803,7 +14803,7 @@
       },
       "put": {
         "operationId": "putAdminCrowding",
-        "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지",
+        "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지",
         "description": "연결 화면: ADM-CROWD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "관리자"
@@ -14875,7 +14875,7 @@
                 },
                 "examples": {
                   "bad-request": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: bad-request",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -14915,7 +14915,7 @@
                 },
                 "examples": {
                   "unauthorized": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: unauthorized",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: unauthorized",
                     "value": {
                       "error": {
                         "code": "UNAUTHORIZED",
@@ -14955,7 +14955,7 @@
                 },
                 "examples": {
                   "forbidden": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: forbidden",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: forbidden",
                     "value": {
                       "error": {
                         "code": "FORBIDDEN",
@@ -15032,8 +15032,28 @@
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "not-festival-day": {
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: not-festival-day",
+                    "value": {
+                      "error": {
+                        "code": "NOT_FESTIVAL_DAY",
+                        "message": "현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
                   "edit-conflict": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: edit-conflict",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: edit-conflict",
                     "value": {
                       "error": {
                         "code": "EDIT_CONFLICT",
@@ -15130,7 +15150,7 @@
                 },
                 "examples": {
                   "precondition-required": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: precondition-required",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: precondition-required",
                     "value": {
                       "error": {
                         "code": "PRECONDITION_REQUIRED",
@@ -15177,7 +15197,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: rate-limited",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -15236,7 +15256,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지: error",
+                    "summary": "선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -20227,7 +20247,7 @@
               "maxLength": 128,
               "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
             },
-            "description": "같은 저장 요청 재시도에 사용하는 1~128자 키. 누락 시 428."
+            "description": "같은 날짜 운영 시간 저장 재시도에 사용하는 1~128자 키. 누락 시 428."
           }
         ],
         "responses": {
@@ -27874,20 +27894,20 @@
           "operatingDay": {
             "type": "string",
             "minLength": 1,
-            "description": "Asia/Seoul 기준 YYYY-MM-DD.",
+            "description": "이 혼잡도와 운영 일정이 귀속되는 축제 운영일. 전날 구간이 열려 있고 당일 일정이 아직 시작되지 않았으면 전날 날짜를 유지한다.",
             "format": "date"
           },
           "opensAt": {
             "type": "string",
             "minLength": 1,
-            "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
+            "description": "선택 operatingDay의 KST 시작 시각. 운영 구간은 시작 시각을 포함한다.",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
           },
           "closesAt": {
             "type": "string",
             "minLength": 1,
-            "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
+            "description": "선택 operatingDay 다음 날 01:00까지 가능한 KST 종료 시각. 종료 순간은 운영 구간에서 제외한다.",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
           },
@@ -27898,7 +27918,7 @@
               "OPEN",
               "CLOSED"
             ],
-            "description": "게시된 FestivalDay 운영 일정으로 계산한 실제 운영 상태"
+            "description": "선택 operatingDay 일정으로 계산한 상태. 오늘 일정이 시작된 뒤에는 종료되어도 오늘 날짜 선택을 유지한다."
           },
           "status": {
             "type": "string",
@@ -27910,7 +27930,7 @@
               "FULL",
               "CLOSED"
             ],
-            "description": "운영 시간과 마지막 저장 상태를 결합한 최종 표시 상태"
+            "description": "선택 운영일 일정과 마지막 저장 상태를 결합한 최종 표시 상태. 자정 뒤 전날 구간이 계속 열려 있으면 전날 상태를 유지한다."
           },
           "savedLevel": {
             "anyOf": [
@@ -27928,7 +27948,7 @@
                 "type": "null"
               }
             ],
-            "description": "해당 운영일에 아직 저장하지 않았으면 null"
+            "description": "선택 operatingDay에 아직 저장하지 않았으면 null. 운영 중인 야간 구간은 전날 저장값을 사용한다."
           },
           "colorToken": {
             "anyOf": [
@@ -27966,7 +27986,7 @@
                 "type": "null"
               }
             ],
-            "description": "운영 전·종료면 null. 같은 상태 재선택은 저장·시각을 갱신하지 않는다."
+            "description": "운영 전·종료면 null. 야간 구간은 자정 뒤에도 같은 operatingDay의 마지막 저장 시각을 유지한다. 같은 상태 재선택은 저장·시각을 갱신하지 않는다."
           },
           "timeBasis": {
             "type": "string",
@@ -31021,7 +31041,7 @@
                 "type": "null"
               }
             ],
-            "description": "KST RFC 3339 시각. 관리자는 잘못된 게시 일정의 원문(초 포함)이나 null도 조회해 수정할 수 있다."
+            "description": "운영일에 적용되는 KST RFC 3339 시각. 종료는 익일 01:00까지이며 종료 순간은 운영 구간에서 제외한다. 잘못된 게시 일정은 관리자 조회에서 원문(초 포함)이나 null 그대로 반환해 수정할 수 있다."
           },
           "closesAt": {
             "anyOf": [
@@ -31032,7 +31052,7 @@
                 "type": "null"
               }
             ],
-            "description": "KST RFC 3339 시각. 관리자는 잘못된 게시 일정의 원문(초 포함)이나 null도 조회해 수정할 수 있다."
+            "description": "운영일에 적용되는 KST RFC 3339 시각. 종료는 익일 01:00까지이며 종료 순간은 운영 구간에서 제외한다. 잘못된 게시 일정은 관리자 조회에서 원문(초 포함)이나 null 그대로 반환해 수정할 수 있다."
           },
           "updatedAt": {
             "anyOf": [
@@ -31079,13 +31099,13 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$",
-            "description": "RFC 3339 시각. 초는 00이어야 하고 소수초는 허용하지 않으며, offset은 ±18:00 이내이고 서버가 Asia/Seoul로 정규화한다."
+            "description": "운영일 경로의 KST 날짜 안에 있는 시작 시각. 분 단위이며 초는 00, 소수초는 허용하지 않는다."
           },
           "closesAt": {
             "type": "string",
             "format": "date-time",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$",
-            "description": "RFC 3339 시각. 초는 00이어야 하고 소수초는 허용하지 않으며, offset은 ±18:00 이내이고 서버가 Asia/Seoul로 정규화한다."
+            "description": "시작보다 뒤인 종료 시각. 같은 날짜 또는 익일 01:00까지 허용하며 익일 01:01은 422로 거절한다. 종료 순간은 운영 구간에 포함하지 않는다."
           }
         },
         "required": [
@@ -31093,7 +31113,7 @@
           "closesAt"
         ],
         "additionalProperties": false,
-        "description": "KST 기준 분 단위 시작·종료 시각. 시작은 운영일 안, 종료는 시작 뒤부터 익일 00:00까지 허용."
+        "description": "요청 본문은 opensAt과 closesAt 두 필드만 포함한다. 운영일은 경로 /{operatingDay}로 지정하며 본문에 넣지 않는다. 시작은 운영일 안, 종료는 시작 뒤부터 익일 01:00까지 허용한다. 둘 다 offset 포함 RFC 3339 분 단위 시각이며 Asia/Seoul로 정규화한다."
       },
       "AdminLoginInput": {
         "type": "object",

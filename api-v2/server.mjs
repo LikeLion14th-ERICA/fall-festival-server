@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { createState,execute,ApiFailure,crowdingDayFor,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
+import { createState,execute,ApiFailure,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
 import { crowdingOperatingHoursFor,normalizeCrowdingOperatingHoursInput } from './admin-domain.mjs';
 import { validate } from './validate.mjs';
 
@@ -116,6 +116,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(route.operationId==='getGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
+      if(route.operationId==='putAdminCrowding'&&scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.');
       if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.');
       if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
       if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='removed-day')state.festivalDays=state.festivalDays.filter(day=>day.operatingDay!==params.operatingDay);
@@ -139,18 +140,23 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
           if(result.status>=200&&result.status<300)state.idempotency[scopedKey]={fingerprint,status:result.status};
         }
       }else if(route.operationId==='putAdminCrowding'){
+        if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');
         const key=req.headers['idempotency-key'];
-        const fingerprint=stableJson({
-          operatingDay:crowdingDayFor(now,state.festivalDays),
-          payload:{level:body.level,confirmFull:body.confirmFull===true},
-        });
-        const prior=state.idempotency[key];
+        const current=execute({operationId:'getAdminCrowding'},state,{now,scenario:'normal',locale});
+        const operatingDay=current.data.operatingDay;
+        const today=isoKst(Date.parse(now)).slice(0,10);
+        if(today!==operatingDay&&current.data.operatingStatus!=='OPEN')failure(409,'NOT_FESTIVAL_DAY','현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.');
+        const scopedKey=`crowding:${operatingDay}:${key}`;
+        const fingerprint=stableJson({level:body.level,confirmFull:body.confirmFull===true});
+        const prior=state.idempotency[scopedKey];
         if(prior){
           if(prior.fingerprint!==fingerprint)failure(409,'IDEMPOTENCY_KEY_REUSED','같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.');
           result={status:prior.status,data:null,now,locale};
         }else{
+          const currentEtag=strongEtag({data:current.data,meta:{timezone:'Asia/Seoul',festivalId:'festival-mock',revision:0,locale,mock:true}});
+          if(req.headers['if-match']!==currentEtag)failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
           result=execute(route,state,{params,query,body,scenario,now});
-          if(result.status>=200&&result.status<300)state.idempotency[key]={fingerprint,status:result.status};
+          if(result.status>=200&&result.status<300)state.idempotency[scopedKey]={fingerprint,status:result.status};
         }
       }else{
         result=execute(route,state,{params,query,body,scenario,now});

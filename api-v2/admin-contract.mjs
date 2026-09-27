@@ -7,8 +7,8 @@ export function applyAdminContract(s,ops){
   const nullable=(schema,d)=>({anyOf:[schema,{type:'null'}],description:d});
   const en=(values,d)=>({type:'string',enum:values,description:d});
   const id=ref('Id');
-  const operatingHourValue=nullable({type:'string'},'KST RFC 3339 시각. 관리자는 잘못된 게시 일정의 원문(초 포함)이나 null도 조회해 수정할 수 있다.');
-    const operatingHourInput={type:'string',format:'date-time',pattern:'^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$',description:'RFC 3339 시각. 초는 00이어야 하고 소수초는 허용하지 않으며, offset은 ±18:00 이내이고 서버가 Asia/Seoul로 정규화한다.'};
+  const operatingHourValue=nullable({type:'string'},'운영일에 적용되는 KST RFC 3339 시각. 종료는 익일 01:00까지이며 종료 순간은 운영 구간에서 제외한다. 잘못된 게시 일정은 관리자 조회에서 원문(초 포함)이나 null 그대로 반환해 수정할 수 있다.');
+    const operatingHourInput={type:'string',format:'date-time',pattern:'^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$',description:'offset을 포함하는 RFC 3339 시각. 초는 00이어야 하고 소수초는 허용하지 않는다. offset은 ±18:00 이내이며 서버가 Asia/Seoul로 정규화한다.'};
   const productInputId={type:'string',format:'uuid',pattern:'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',description:'ProductInput 전용 안정 UUID.'};
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
   s.GoodsColorTranslation=obj({name:str('색상명')});
@@ -60,18 +60,18 @@ export function applyAdminContract(s,ops){
   s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
   s.CrowdingOperatingHours=obj({operatingDay:ref('Date'),opensAt:operatingHourValue,closesAt:operatingHourValue,updatedAt:nullable(ref('Timestamp'),'관리자 저장 전에는 null이며 게시 일정의 초기값을 뜻한다.')},'현재 published FestivalDay 일정에 적용되는 재학생존 운영 시간. 관리자 저장값은 catalog revision과 독립적이다.');
   s.CrowdingOperatingHoursList=obj({items:arr(ref('CrowdingOperatingHours'),'게시된 축제일 순. 게시된 축제일이 없으면 빈 배열.')});
-  s.CrowdingOperatingHoursInput=obj({opensAt:operatingHourInput,closesAt:operatingHourInput},'KST 기준 분 단위 시작·종료 시각. 시작은 운영일 안, 종료는 시작 뒤부터 익일 00:00까지 허용.');
+  s.CrowdingOperatingHoursInput=obj({opensAt:{...operatingHourInput,description:'운영일 경로의 KST 날짜 안에 있는 시작 시각. 분 단위이며 초는 00, 소수초는 허용하지 않는다.'},closesAt:{...operatingHourInput,description:'시작보다 뒤인 종료 시각. 같은 날짜 또는 익일 01:00까지 허용하며 익일 01:01은 422로 거절한다. 종료 순간은 운영 구간에 포함하지 않는다.'}},'요청 본문은 opensAt과 closesAt 두 필드만 포함한다. 운영일은 경로 /{operatingDay}로 지정하며 본문에 넣지 않는다. 시작은 운영일 안, 종료는 시작 뒤부터 익일 01:00까지 허용한다. 둘 다 offset 포함 RFC 3339 분 단위 시각이며 Asia/Seoul로 정규화한다.');
   s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
   s.AdminLogout=obj({loggedOut:{type:'boolean',enum:[true],description:'현재 refresh session revoke 및 cookie 만료 완료'}});
   s.NoticeInput.description='한국어·영어 제목·본문 필수 수동 입력. 자동 번역 없음. 중국어 간체·일본어는 준비된 경우만 포함. 링크는 본문이 있는 언어마다 label 필수, 없는 언어는 null.';
   const find=id=>ops.find(o=>o.operationId===id);
-  find('getCrowding').scenarios=find('getCrowding').scenarios.filter(x=>x!=='overnight');
   find('getCrowding').screens=['HOME'];find('getCrowding').summary='홈 재학생존 혼잡도';
   for(const operationId of ['getCrowding','getAdminCrowding'])find(operationId).conditional=true;
   const crowdingPut=find('putAdminCrowding');
   crowdingPut.successStatus=204;
   crowdingPut.ifMatchRequired=true;
   crowdingPut.idempotencyKeyRequired=true;
+  crowdingPut.summary='선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지';
   crowdingPut.scenarios.push('precondition-required','edit-conflict');
   find('getConfig').scenarios.push('all-languages');
   find('getNotices').conditional=true;
@@ -102,6 +102,7 @@ export function applyAdminContract(s,ops){
   crowdingHoursPut.successStatus=204;
   crowdingHoursPut.ifMatchRequired=true;
   crowdingHoursPut.idempotencyKeyRequired=true;
+  crowdingHoursPut.idempotencyKeyDescription='같은 날짜 운영 시간 저장 재시도에 사용하는 1~128자 키. 누락 시 428.';
   const old=ops.findIndex(o=>o.operationId==='putAdminAvailability');ops.splice(old,1);
   for(const id of ['postAdminNotice','putAdminNotice']){find(id).provisional=false;find(id).summary=find(id).summary.replace('(검토 필요)','');find(id).scenarios.push('validation-failed');}
   function add(operationId,method,path,schema,summary,screens,input,scenarios=['normal','error'],provisional=false){

@@ -318,7 +318,11 @@ function publicKstTimestamp(millis,fraction=''){
   const local=new Date(millis+9*3600000).toISOString().slice(0,19);
   return `${local}${fraction?`.${fraction}`:''}+09:00`;
 }
-function parsePublicScheduleTime(operatingDay,value,field){
+function timestampNanos(value){
+  const fraction=String(value).match(/\.(\d{1,9})(?:Z|[+-]\d{2}:\d{2})$/)?.[1]||'';
+  return BigInt(Date.parse(value))*1000000n+BigInt(fraction.padEnd(9,'0')||'0')%1000000n;
+}
+function parsePublicScheduleTime(operatingDay,value,field,opensAt){
   if(typeof value!=='string')return null;
   const operatingDate=operatingDay.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if(!operatingDate||!validCalendarDate(Number(operatingDate[1]),Number(operatingDate[2]),Number(operatingDate[3])))return null;
@@ -329,7 +333,12 @@ function parsePublicScheduleTime(operatingDay,value,field){
     if(hour>23)return null;
     fraction=local[4]||'';
     const isZero=hour===0&&minute===0&&second===0&&(!fraction||/^0+$/.test(fraction));
-    const date=field==='closesAt'&&isZero?dayKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000):operatingDay;
+    let date=operatingDay;
+    if(field==='closesAt'&&isZero)date=dayKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000);
+    else if(field==='closesAt'&&opensAt){
+      const sameDayMillis=Date.parse(`${operatingDay}T${local[1]}:${local[2]}:${String(second).padStart(2,'0')}${fraction?`.${fraction}`:''}+09:00`);
+      if(sameDayMillis<=opensAt.millis)date=dayKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000);
+    }
     const clock=`${local[1]}:${local[2]}:${String(second).padStart(2,'0')}${fraction?`.${fraction}`:''}`;
     millis=Date.parse(`${date}T${clock}+09:00`);
     kstValue=`${date}T${clock}+09:00`;
@@ -349,14 +358,35 @@ function validPublicCrowdingSchedule(state,operatingDay){
   const raw=crowdingOperatingHoursFor(state,operatingDay);
   if(!raw)return null;
   const opensAt=parsePublicScheduleTime(operatingDay,raw.opensAt,'opensAt');
-  const closesAt=parsePublicScheduleTime(operatingDay,raw.closesAt,'closesAt');
+  const closesAt=parsePublicScheduleTime(operatingDay,raw.closesAt,'closesAt',opensAt);
   if(!opensAt||!closesAt)return null;
-  const dayStart=Date.parse(`${operatingDay}T00:00:00+09:00`),nextDayStart=dayStart+86400000;
-  const dayStartNanos=BigInt(dayStart)*1000000n,nextDayStartNanos=BigInt(nextDayStart)*1000000n;
+  const dayStart=Date.parse(`${operatingDay}T00:00:00+09:00`),nextDayStart=dayStart+86400000,maxClose=dayStart+25*60*60*1000;
+  const dayStartNanos=BigInt(dayStart)*1000000n,nextDayStartNanos=BigInt(nextDayStart)*1000000n,maxCloseNanos=BigInt(maxClose)*1000000n;
   if(opensAt.kstValue.slice(0,10)!==operatingDay||opensAt.nanoseconds<dayStartNanos||opensAt.nanoseconds>=nextDayStartNanos)return null;
-  if(closesAt.nanoseconds<=opensAt.nanoseconds||closesAt.nanoseconds>nextDayStartNanos)return null;
+  if(closesAt.nanoseconds<=opensAt.nanoseconds||closesAt.nanoseconds>maxCloseNanos)return null;
   return {operatingDay,opensAt:opensAt.kstValue,closesAt:closesAt.kstValue,
     opensAtNanos:opensAt.nanoseconds,closesAtNanos:closesAt.nanoseconds};
+}
+function shiftKstDate(date,days){
+  return dayKst(Date.parse(`${date}T00:00:00+09:00`)+days*86400000);
+}
+export function crowdingOperatingDayFor(now,state){
+  const days=state?.festivalDays||[];
+  if(!days.length)return null;
+  const today=dayKst(now);
+  const todayDay=days.find(day=>day.operatingDay===today);
+  if(todayDay){
+    const schedule=validPublicCrowdingSchedule(state,today);
+    if(schedule&&timestampNanos(now)>=schedule.opensAtNanos)return today;
+  }
+  const yesterday=shiftKstDate(today,-1);
+  const yesterdayDay=days.find(day=>day.operatingDay===yesterday);
+  if(yesterdayDay){
+    const schedule=validPublicCrowdingSchedule(state,yesterday);
+    const nowNanos=timestampNanos(now);
+    if(schedule&&nowNanos>=schedule.opensAtNanos&&nowNanos<schedule.closesAtNanos)return yesterday;
+  }
+  return crowdingDayFor(now,days);
 }
 function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=false) {
   const today=dayKst(now);
@@ -364,15 +394,15 @@ function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=f
     return validPublicCrowdingSchedule(state,day.operatingDay);
   });
   if(!schedules.length||schedules.some(schedule=>!schedule))failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
-  const operatingDay=crowdingDayFor(now,state.festivalDays);
+  const operatingDay=crowdingOperatingDayFor(now,state);
   const schedule=schedules.find(item=>item.operatingDay===operatingDay);
   if(!schedule)failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
   const opensAt=schedule.opensAt;
   const closesAt=schedule.closesAt;
   const openingText=opensAt.slice(11,16);
-  const stored=scenario==='unmodified'||(!includeSelectedDaySavedState&&today!==operatingDay)?null:state.crowding[operatingDay];
-  const fraction=String(now).match(/\.(\d{1,9})(?:Z|[+-]\d{2}:\d{2})$/)?.[1]||'';
-  const nowNanos=BigInt(Date.parse(now))*1000000n+BigInt(fraction.padEnd(9,'0')||'0')%1000000n;
+  const nowNanos=timestampNanos(now);
+  const publicStateInScope=today===operatingDay||nowNanos>=schedule.opensAtNanos&&nowNanos<schedule.closesAtNanos;
+  const stored=scenario==='unmodified'||(!includeSelectedDaySavedState&&!publicStateInScope)?null:state.crowding[operatingDay];
   const status=nowNanos<schedule.opensAtNanos?'BEFORE_OPEN':nowNanos>=schedule.closesAtNanos?'CLOSED':stored?.level||'RELAXED';
   const colors={RELAXED:'green',MODERATE:'orange',CROWDED:'red',FULL:'black'};
   const messages=CROWD_MESSAGES[locale]||CROWD_MESSAGES.ko;
@@ -380,7 +410,7 @@ function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=f
   return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:CROWD_MESSAGES[locale]?(status==='BEFORE_OPEN'?messages.BEFORE_OPEN(openingText):messages[status]):`Mock crowd status: ${status}`,updatedAt:active?stored?.updatedAt||null:null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
 }
 export function scenarioTime(scenario,now) {
-  return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00',overnight:'2030-10-02T01:00:00+09:00'})[scenario]||now;
+  return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00'})[scenario]||now;
 }
 // Korean is the only ready default. Controlled mock scenarios can enable complete fictional translations.
 function localize(value,locale) {
@@ -425,10 +455,10 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale,op.operationId==='getAdminCrowding');break;
     case 'putAdminCrowding':{
       if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');
-      const today=dayKst(now),publishedDays=(state.festivalDays||[]).map(day=>day.operatingDay).sort();
-      if(!publishedDays.length||today>=publishedDays[0]&&today<=publishedDays.at(-1)&&!publishedDays.includes(today))failure(409,'EDIT_CONFLICT','게시된 운영일이 변경됐습니다. 혼잡도 정보를 다시 조회해 주세요.');
-      const savedDay=crowdingDayFor(now,state.festivalDays);
-      if(!savedDay)failure(409,'NOT_FESTIVAL_DAY','현재 게시된 축제일에만 혼잡도를 저장할 수 있습니다.');
+      if(scenario==='not-festival-day')failure(409,'NOT_FESTIVAL_DAY','현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.');
+      const current=crowdInfo(state,now,'normal',locale,true);
+      const savedDay=current.operatingDay;
+      if(dayKst(now)!==savedDay&&current.operatingStatus!=='OPEN')failure(409,'NOT_FESTIVAL_DAY','현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.');
       const stored=state.crowding[savedDay];
       if(stored?.level!==body.level)state.crowding[savedDay]={level:body.level,updatedAt:mutate()};
       return {status:204,data:null,now,locale};

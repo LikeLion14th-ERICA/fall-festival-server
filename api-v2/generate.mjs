@@ -91,9 +91,11 @@ for(const op of operations){
     let now=scenarioTime(scenario,MOCK_NOW);
     const meta=revision=>({requestId:'mock-example-request',serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});
     const conditionalMeta=revision=>({timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});
-    const initialHoursEtag=op.operationId==='putAdminCrowdingOperatingHoursDay'
+    const initialEtag=op.operationId==='putAdminCrowdingOperatingHoursDay'
       ? `"${createHash('sha256').update(stableJson({data:crowdingOperatingHoursFor(state,sampleParams.operatingDay),meta:conditionalMeta(0)})).digest('hex')}"`
-      : '"'+'0'.repeat(64)+'"';
+      : op.operationId==='putAdminCrowding'
+        ? `"${createHash('sha256').update(stableJson({data:execute({operationId:'getAdminCrowding'},state,{now,scenario:'normal',locale:'ko'}).data,meta:conditionalMeta(0)})).digest('hex')}"`
+        : '"'+'0'.repeat(64)+'"';
     try{
       const disabledFailure=op.operationId==='createAdminSession'?[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.']:op.operationId==='refreshAdminSession'?[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.']:[401,...genericErrors[401]];
       const special={ 'bad-request':[400,...genericErrors[400]],'rate-limited':[429,...genericErrors[429]],unauthorized:[401,...genericErrors[401]],forbidden:[403,...genericErrors[403]],'invalid-credentials':[401,'ADMIN_AUTHENTICATION_FAILED','관리자 인증에 실패했습니다.'],'invalid-origin':[403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.'],expired:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],revoked:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],unknown:[401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.'],disabled:disabledFailure,'precondition-required':[428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.'],'idempotency-key-required':[428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.'],'idempotency-key-reused':[409,'IDEMPOTENCY_KEY_REUSED','같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.'],'removed-day':[409,'NOT_FESTIVAL_DAY','현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.'],'invalid-media-reference':[422,'INVALID_MEDIA_REFERENCE','사용할 수 없는 상품 이미지가 포함되어 있습니다.'],...(op.multipartInput?{'validation-failed':[422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.'],'payload-too-large':[413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.'],'unsupported-media-type':[415,'UNSUPPORTED_MEDIA_TYPE','multipart/form-data 요청이 필요합니다.']}:{}),'edit-conflict':[409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.']}[scenario];
@@ -106,7 +108,7 @@ for(const op of operations){
     const actualPath=op.path.replace(/\{(\w+)\}/g,(_,key)=>sampleParams[key]);
     const qs=new URLSearchParams(query).toString();
     const cookieEndpoint=['createAdminSession','refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId);
-    const mutationHeaders={...(op.ifMatchRequired?{'If-Match':initialHoursEtag}:{}),...(op.idempotencyKeyRequired?{'Idempotency-Key':`mock-${op.operationId}-${scenario}`}:{})};
+    const mutationHeaders={...(op.ifMatchRequired?{'If-Match':initialEtag}:{}),...(op.idempotencyKeyRequired?{'Idempotency-Key':`mock-${op.operationId}-${scenario}`}:{})};
     const session=scenario==='locale-not-ready'?`locale-not-ready-${op.operationId}`:'frontend-demo';
     examples[op.operationId].scenarios[scenario]={request:{method:op.method,path:actualPath+(qs?'?'+qs:''),headers:{'X-Mock-Scenario':scenario,'X-Mock-Session':session,...(op.admin&&op.authRequired!==false?{Authorization:'Bearer mock-admin'}:{}),...(cookieEndpoint?{Origin:scenario==='invalid-origin'?'https://attacker.invalid':'http://localhost:5173'}:{}),...(['refreshAdminSession','deleteCurrentAdminSession'].includes(op.operationId)?{Cookie:'__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'}:{}),...(body?{'Content-Type':'application/json'}:{}),...(op.multipartInput?{'Content-Type':scenario==='unsupported-media-type'?'application/json':'multipart/form-data; boundary=<generated>'}:{}),...mutationHeaders},...(body?{body}:{}),...(op.multipartInput&&scenario!=='unsupported-media-type'?{multipart:{file:'<binary>'}}:{})},status,response};
   }

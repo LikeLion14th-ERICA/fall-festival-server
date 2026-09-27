@@ -32,7 +32,7 @@
 | POST | `/api/v2/stamp-collections` | 부스 QR 스탬프 적립(부스당 하루 1회) | STAMP-COLLECT | normal, not-started, invalid-token, already-collected, card-full, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, card-incomplete, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, unconfigured, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/crowding` | 실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지 | ADM-CROWD | normal, full, not-festival-day, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/crowding` | 선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지 | ADM-CROWD | normal, full, not-festival-day, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, validation-failed, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices/{noticeId}` | 공지 수정 초기값 | ADM-NOTICE-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |

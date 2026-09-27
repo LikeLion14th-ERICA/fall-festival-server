@@ -9433,7 +9433,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-normal"
           },
           "body": {
@@ -9452,7 +9452,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-full"
           },
           "body": {
@@ -9472,15 +9472,31 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-not-festival-day"
           },
           "body": {
             "level": "CROWDED"
           }
         },
-        "status": 204,
-        "response": null
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "NOT_FESTIVAL_DAY",
+            "message": "현재 운영 중인 축제일에만 혼잡도를 저장할 수 있습니다.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
       },
       "error": {
         "request": {
@@ -9491,7 +9507,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-error"
           },
           "body": {
@@ -9526,7 +9542,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-precondition-required"
           },
           "body": {
@@ -9561,7 +9577,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-edit-conflict"
           },
           "body": {
@@ -9596,7 +9612,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-bad-request"
           },
           "body": {
@@ -9631,7 +9647,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-rate-limited"
           },
           "body": {
@@ -9666,7 +9682,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-unauthorized"
           },
           "body": {
@@ -9701,7 +9717,7 @@
             "X-Mock-Session": "frontend-demo",
             "Authorization": "Bearer mock-admin",
             "Content-Type": "application/json",
-            "If-Match": "\"0000000000000000000000000000000000000000000000000000000000000000\"",
+            "If-Match": "\"3711a9228261ad10fa165ce7685ae0716657dd6c77904577ac4c9e9e621706b3\"",
             "Idempotency-Key": "mock-putAdminCrowding-forbidden"
           },
           "body": {

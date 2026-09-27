@@ -19,13 +19,14 @@ export function hoursFor(state,operatingDay){
   return day;
 }
 const isoKst=time=>new Date(time+9*3600000).toISOString().replace(/\.000Z$/,'Z').replace(/Z$/,'+09:00');
-function catalogTime(operatingDay,value,field){
+function catalogTime(operatingDay,value,field,opensAt){
   if(value==null)return null;
   if(typeof value!=='string')return String(value);
   if(/^\d{2}:\d{2}$/.test(value)){
     const [hour,minute]=value.split(':').map(Number);
     if(hour>23||minute>59)return value;
-    const date=value==='00:00'&&field==='closesAt'?isoKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000).slice(0,10):operatingDay;
+    const nextDayClose=field==='closesAt'&&(value==='00:00'||(/^\d{2}:\d{2}$/.test(opensAt||'')&&value<opensAt));
+    const date=nextDayClose?isoKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000).slice(0,10):operatingDay;
     return `${date}T${value}:00+09:00`;
   }
   return value;
@@ -37,7 +38,7 @@ export function crowdingOperatingHoursFor(state,operatingDay){
   return {
     operatingDay,
     opensAt:saved?.opensAt??catalogTime(operatingDay,day.opensAt,'opensAt'),
-    closesAt:saved?.closesAt??catalogTime(operatingDay,day.closesAt,'closesAt'),
+    closesAt:saved?.closesAt??catalogTime(operatingDay,day.closesAt,'closesAt',day.opensAt),
     updatedAt:saved?.updatedAt??null,
   };
 }
@@ -55,12 +56,12 @@ export function normalizeCrowdingOperatingHoursInput(operatingDay,body,failure){
   const opensAt=normalize(body.opensAt,'opensAt');
   const closesAt=normalize(body.closesAt,'closesAt');
   const start=Date.parse(`${operatingDay}T00:00:00+09:00`);
-  const end=start+86400000;
+  const end=start+25*60*60*1000;
   if(opensAt.millis<start||opensAt.millis>=end){
     failure(422,'VALIDATION_FAILED','시작 시각은 운영일 안이어야 합니다.',[{field:'opensAt',reason:'운영일 시작 이상, 다음 날 00:00 미만이어야 합니다.'}]);
   }
   if(closesAt.millis<=opensAt.millis||closesAt.millis>end){
-    failure(422,'VALIDATION_FAILED','종료 시각은 시작 뒤부터 익일 00:00까지 입력해 주세요.',[{field:'closesAt',reason:'시작 시각 초과, 익일 00:00 이하여야 합니다.'}]);
+    failure(422,'VALIDATION_FAILED','종료 시각은 시작 뒤부터 익일 01:00까지 입력해 주세요.',[{field:'closesAt',reason:'시작 시각 초과, 익일 01:00 이하여야 합니다.'}]);
   }
   return {opensAt:opensAt.value,closesAt:closesAt.value};
 }
