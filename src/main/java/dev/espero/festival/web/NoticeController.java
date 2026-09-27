@@ -18,6 +18,7 @@ import dev.espero.festival.idempotency.IdempotencyRequest;
 import dev.espero.festival.idempotency.IdempotencyResponse;
 import dev.espero.festival.persistence.NoticeStore;
 import dev.espero.festival.persistence.NoticeTemplateStore;
+import dev.espero.festival.push.PushNotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class NoticeController {
     private final AdminNoticeViewService adminViews;
     private final NoticeStore store;
     private final NoticeTemplateStore templates;
+    private final PushNotificationService push;
     private final FestivalProperties properties;
     private final ApiMetaSupport metaSupport;
     private final ConditionalResponseSupport conditionalResponses;
@@ -69,6 +71,7 @@ public class NoticeController {
         AdminNoticeViewService adminViews,
         NoticeStore store,
         NoticeTemplateStore templates,
+        PushNotificationService push,
         FestivalProperties properties,
         ApiMetaSupport metaSupport,
         ConditionalResponseSupport conditionalResponses,
@@ -83,6 +86,7 @@ public class NoticeController {
         this.adminViews = adminViews;
         this.store = store;
         this.templates = templates;
+        this.push = push;
         this.properties = properties;
         this.metaSupport = metaSupport;
         this.conditionalResponses = conditionalResponses;
@@ -142,6 +146,8 @@ public class NoticeController {
                 noticeId.toString(),
                 ApiMetaSupport.resolveRequestId(request)
             );
+            NoticeTranslation koTranslation = translations.get("ko");
+            push.notifyNoticeCreated(koTranslation.title(), koTranslation.body());
             String json = writeJson(new ConditionalApiResponse<>(snapshot.response(), ConditionalApiMeta.from(snapshot.meta())));
             return new IdempotencyResponse(201, MediaType.APPLICATION_JSON_VALUE, json);
         });

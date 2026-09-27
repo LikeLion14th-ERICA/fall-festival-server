@@ -68,6 +68,13 @@
             <version>2.21.0</version>
         </dependency>
         <dependency>
+            <!-- Sends notice-created web push via FCM. Version pinned; check Maven
+                 Central for a newer patch before relying on this long-term. -->
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.4.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
