@@ -49,14 +49,16 @@ class OperationalCatalogDraftTest {
         fillImages(draft.path("spaces"), gaps);
         fillImages(draft.path("artists"), gaps);
         for (JsonNode item : draft.path("spaceMenuItems")) {
-            gaps.add(fill((ObjectNode) item, "priceAmount", 1));
+            addIfGap(gaps, fill((ObjectNode) item, "priceAmount", 1));
         }
         for (JsonNode performance : draft.path("performances")) {
             String date = performance.path("festivalDate").asString();
             if (performance.path("startsAt").isNull()) {
                 gaps.add(fill((ObjectNode) performance, "startsAt", date + "T19:00:00+09:00"));
             }
-            gaps.add(fill((ObjectNode) performance, "endsAt", date + "T19:30:00+09:00"));
+            if (performance.path("endsAt").isNull()) {
+                gaps.add(fill((ObjectNode) performance, "endsAt", date + "T19:30:00+09:00"));
+            }
         }
 
         assertThat(gaps).as("every filled field was a null gap in the draft").doesNotContainNull();
@@ -65,16 +67,22 @@ class OperationalCatalogDraftTest {
         CatalogManifest manifest = new CatalogManifestReader(new CatalogManifestValidator())
             .read(filled, UUID.randomUUID()).manifest();
 
-        assertThat(manifest.spaces()).hasSize(28);
-        assertThat(manifest.artists()).hasSize(8);
+        assertThat(manifest.spaces()).hasSize(68);
+        assertThat(manifest.artists()).hasSize(16);
         assertThat(manifest.stampGuideTranslations()).hasSize(2);
     }
 
     private static void fillImages(JsonNode rows, List<String> gaps) {
         for (JsonNode row : rows) {
-            gaps.add(fill((ObjectNode) row, "imageUrl", "https://example.invalid/image.png"));
-            gaps.add(fill((ObjectNode) row, "imageWidth", 1000));
-            gaps.add(fill((ObjectNode) row, "imageHeight", 1000));
+            addIfGap(gaps, fill((ObjectNode) row, "imageUrl", "https://example.invalid/image.png"));
+            addIfGap(gaps, fill((ObjectNode) row, "imageWidth", 1000));
+            addIfGap(gaps, fill((ObjectNode) row, "imageHeight", 1000));
+        }
+    }
+
+    private static void addIfGap(List<String> gaps, String field) {
+        if (field != null) {
+            gaps.add(field);
         }
     }
 
