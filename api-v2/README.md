@@ -15,6 +15,7 @@ branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 �
 | [examples.json](examples.json) | 요청 헤더·본문·경로와 408개 응답 원문 |
 | [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 183개·제외 6개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
+| [CROWDING-OPERATING-HOURS-FRONTEND.md](CROWDING-OPERATING-HOURS-FRONTEND.md) | 관리자 재학생존 운영시간 설정만 모은 프런트 전달 문서 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |
 | [client-state-examples.json](client-state-examples.json) | 스탬프 등 HTTP 응답으로 만들지 않는 로컬 상태 |
 | [source-screen-requirements.json](source-screen-requirements.json) | 출처 8개 탭의 원문 스냅샷 |
