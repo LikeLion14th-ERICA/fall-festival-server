@@ -19,14 +19,14 @@
 | `ReleaseFailureModesHttpE2eTest` | 미게시 후보, readiness, rate limit·request ID 복구 | 1 |
 | `AdminSessionReleaseE2eTest` | 로그인·refresh rotation·logout·인증 경계 | 3 |
 | `CrowdingConcurrencyE2eTest` | 혼잡도 동시 저장·멱등·시간 경계 | 5 |
-| `CrowdingOperatingHoursE2eTest` | 날짜별 시간·단계·게시 동시 변경, 자정 충돌, 재시작 보존과 공개 polling 부하 | 6 (기능 5, 부하 1) |
+| `CrowdingOperatingHoursE2eTest` | 날짜별 시간·단계·게시 동시 변경, 야간 자정 통과·종료 경계 충돌, 재시작 보존과 공개 polling 부하 | 8 (기능 7, 부하 1) |
 | `OperationalAccountPropagationE2eTest` | TICKET 계좌 CLI → HTTP 반영·송금 시간 경계 | 2 |
 | `CatalogPublicationLifecycleE2eTest` | 게시·재시작·rollback의 HTTP 노출 | 1 |
 | DynamicContentReleaseHttpE2eTest | 공지·상품·판매 상태·미디어 lifecycle과 실패 복구 | 5 |
 | OperationalBoundariesHttpE2eTest | 수령 제한, GOODS account/template CLI, 관리자 mutation 경계 | 4 |
 | `ArtistHypedHttpE2eTest` | 익명 Hyped HTTP·게시 아티스트·축제일 경계, hot-row 읽기/쓰기 부하 | 2 (기능 1, 부하 1) |
 
-따라서 현재 실제 HTTP E2E는 10개 class, 기능 검증 36개와 부하 검증 2개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-32, 즉 32개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
+따라서 현재 실제 HTTP E2E는 10개 class, 기능 검증 38개와 부하 검증 2개 JUnit method다. 하나의 method가 관계된 요청을 함께 묶으므로 위험 시나리오 기준 수는 HTTP-01–HTTP-32, 즉 32개다. 운영자·개발자 도구 시나리오 OPS-01–OPS-20은 별도 process E2E이며 HTTP 수에 포함하지 않는다.
 
 ## 출시 준비 판단
 

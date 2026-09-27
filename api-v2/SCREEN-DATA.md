@@ -49,8 +49,8 @@ Product Context v5 기준 27개 화면의 데이터 183개를 추적합니다. �
 | HOME-D01 | 혼잡도 단계 | API | Crowding.savedLevel | [위키](../docs/wiki/product/home.md) |
 | HOME-D02 | 운영 상태 | API | Crowding.status | [위키](../docs/wiki/product/home.md) |
 | HOME-D03 | 마지막 수정 시각 | API | Crowding.updatedAt + Crowding.timeBasis | [위키](../docs/wiki/product/home.md) |
-| HOME-D04 | 당일 입장 시작 시각 | API | Crowding.opensAt | [위키](../docs/wiki/product/home.md) |
-| HOME-D05 | 당일 운영 종료 시각 | API | Crowding.closesAt | [위키](../docs/wiki/product/home.md) |
+| HOME-D04 | 선택 운영일 입장 시작 시각 | API | Crowding.opensAt | [위키](../docs/wiki/product/home.md) |
+| HOME-D05 | 선택 운영일 종료 시각 | API | Crowding.closesAt | [위키](../docs/wiki/product/home.md) |
 | HOME-D06 | 혼잡도 색상 | 프런트 | 프런트 고정 UI: Crowding.colorToken → 디자인 색상 | [위키](../docs/wiki/product/home.md) |
 | HOME-D07 | 혼잡도 안내 문구 | 프런트 | 프런트 번역: Crowding.status; Crowding.message는 참고 | [위키](../docs/wiki/product/home.md) |
 | HOME-D08 | 제공 언어 목록 | API | Config.languages | [위키](../docs/wiki/product/home.md) |

@@ -1191,7 +1191,7 @@
     {
       "id": "HOME-D04",
       "screenId": "HOME",
-      "label": "당일 입장 시작 시각",
+      "label": "선택 운영일 입장 시작 시각",
       "wikiSource": "../docs/wiki/product/home.md",
       "legacySource": {
         "owner": "서버 제공",
@@ -1209,7 +1209,7 @@
     {
       "id": "HOME-D05",
       "screenId": "HOME",
-      "label": "당일 운영 종료 시각",
+      "label": "선택 운영일 종료 시각",
       "wikiSource": "../docs/wiki/product/home.md",
       "legacySource": {
         "owner": "서버 제공",
