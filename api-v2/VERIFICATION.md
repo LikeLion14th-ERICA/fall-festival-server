@@ -58,6 +58,6 @@ Docker image·filesystem 보안 검사가 통과했다. Java 21 로그의
 
 이번 기능의 API 계약 생성 결과는 52 operations, 27 screens, 189 data mappings(추적 183개·제외 6개), 예제 408개다. 계약 생성은 통과했다. 기존 제외 이력은 위 2026-09-15 기록과 API 관리자 변경 기록에 남기고, 현재 운영 시간 화면 매핑은 다시 활성화했다.
 
-백엔드 컴파일과 로컬 단위 테스트 31개는 통과했다. API v2 `npm test`는 이 작업 환경에 `@apidevtools/swagger-parser`가 없어 실행하지 못했고, 오프라인 `npm ci`도 사용자 npm 캐시 접근의 `EPERM`으로 완료되지 않았다. 계약 생성 검사와 의존성 없는 HTTP smoke 결과는 통합 게이트 결과와 함께 확인해야 한다.
+백엔드 컴파일과 로컬 단위 테스트 31개는 통과했다. API v2 `npm test`는 이 작업 환경에 `@apidevtools/swagger-parser`가 없어 실행하지 못했고, 오프라인 `npm ci`도 사용자 npm 캐시 접근의 `EPERM`으로 완료되지 않았다. 이 환경에서 계약 테스트는 실행하지 못했다. 의존성 없는 HTTP smoke 결과도 아직 확인 기록에 없다; 통합 게이트에서 계약 테스트와 실제 HTTP 흐름을 확인한다.
 
 PostgreSQL 17 migration·role·preflight, provider 검증, 실제 HTTP E2E, 공개 조회 부하 회귀를 포함한 통합 검증은 CI 대기 상태다. 이 기록은 전체 CI 통과를 뜻하지 않는다. 실제 관리자 UI 구현, 브라우저 polling 확인, staging 배포 뒤 승인 운영 시간 저장, 재시작·재게시·rollback 보존 확인도 남아 있다.
