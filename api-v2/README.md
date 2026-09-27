@@ -11,9 +11,9 @@ branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 �
 | 결과물 | 용도 |
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
-| [ENDPOINTS.md](ENDPOINTS.md) | 49개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 381개 응답 원문 |
-| [SCREEN-DATA.md](SCREEN-DATA.md) | 26개 화면의 현행 추적 178개·제외 11개 필드 → API 또는 프런트 상태 추적표 |
+| [ENDPOINTS.md](ENDPOINTS.md) | 52개 요청과 지원 시나리오 빠른 조회 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 408개 응답 원문 |
+| [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 183개·제외 6개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |
 | [client-state-examples.json](client-state-examples.json) | 스탬프 등 HTTP 응답으로 만들지 않는 로컬 상태 |
@@ -27,13 +27,13 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 예제는 source module에서 생성되므로 생성 JSON만 직접 수정하지 않습니다.
 
 릴리스 coverage metadata도 `openapi.json`에서 자동 inventory합니다. 원천 매핑은
-`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 49개 operation이
+`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 52개 operation이
 정확히 한 번 분류되는지, 각 live operation의 provider test와
 HTTP-01~32·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
 live provider와 52개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
 정렬된 Maven `-Dtest` CSV로 출력합니다. 이 검사는 제품 route를 활성화하지 않습니다.
 
-현재 branch는 OpenAPI의 49개 operation을 live provider 검증 대상으로 분류합니다.
+현재 branch는 OpenAPI의 52개 operation을 live provider 검증 대상으로 분류합니다.
 공개 공연 조회와 홈 공통 설정뿐 아니라 아티스트 Hyped 조회·참여도 Spring Boot에
 구현되어 있습니다. 경로별 구현·검증 근거는
 [릴리스 operation coverage](release-operation-coverage.json)와 해당 provider test를
@@ -63,7 +63,7 @@ live provider와 52개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17Mi
 
 | 항목 | 규칙 |
 |---|---|
-| 날짜·시각 | 날짜 `YYYY-MM-DD`, 시각 RFC 3339의 `+09:00` 포함. 시간대 `Asia/Seoul`. 날짜 경계는 사용자 기기 시간대와 무관 |
+| 날짜·시각 | 날짜 `YYYY-MM-DD`, 응답 시각 RFC 3339의 `+09:00` 포함. 시간대 `Asia/Seoul`. 재학생존 운영 시간 저장은 RFC 3339 offset 입력을 KST로 정규화한다. 날짜 경계는 사용자 기기 시간대와 무관 |
 | 금액 | `{ "amount": 1000, "currency": "KRW" }`. 원 단위 0 이상의 정수. 문자열·소수점·센트 변환 없음 |
 | 필수·선택 | OpenAPI의 `required`가 키 존재 여부를 결정. `null` 허용과 키 생략 가능은 별개. 선택 표시 정보도 키는 유지하고 값이 없으면 `null`인 필드가 대부분 |
 | 빈 값 | 목록·연관 항목은 `[]`, 없는 선택 정보는 `null`. 빈 문자열·`"미정"`을 결측값으로 사용하지 않음. 필수 운영 데이터 누락을 가짜 값으로 채우지 않음 |
@@ -87,7 +87,7 @@ live provider와 52개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17Mi
 
 ## 화면 계약의 주요 결정
 
-- 혼잡도는 사용자 홈과 관리자가 공유합니다. 지도에는 표시하지 않습니다. 운영 시간은 published FestivalDay에서 읽고 관리자 편집 경로는 없습니다. 관리자는 실제 `FestivalDay`인 날짜에만 저장할 수 있으며 운영 전·운영 종료 뒤에도 저장할 수 있습니다. 실제 FestivalDay가 아닌 날짜의 PUT은 `409 NOT_FESTIVAL_DAY`입니다. 공개 홈은 실제 운영 시간 상태를 우선하고 운영 전·종료에는 저장 시각을 숨깁니다. 관리자 저장은 `If-Match`와 `Idempotency-Key`가 필요하며 성공·재시도는 204입니다. 같은 단계를 다시 저장하면 성공으로 응답하되 수정 시각과 감사 이력을 바꾸지 않습니다. 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`입니다.
+- 혼잡도는 사용자 홈과 관리자가 공유합니다. 지도에는 표시하지 않습니다. 운영 시간은 published FestivalDay에서 초기값을 가져오고, 관리자 저장값은 축제일별로 revision과 독립해 유지합니다. `/admin/crowding/operating-hours` 목록·날짜별 상세·저장은 ADMIN 전용입니다. 상세 ETag를 `If-Match`로 보내며 저장에는 `Idempotency-Key`가 필요하고 성공·완료 재시도는 204입니다. 관리자 저장 전에는 현재 게시 일정의 시간을 사용합니다. 관리자는 실제 published FestivalDay에 운영 전·종료 뒤에도 저장할 수 있고 다른 날짜의 PUT은 `409 NOT_FESTIVAL_DAY`입니다. 시작은 해당 날짜 안, 종료는 시작 이후 익일 00:00까지 분 단위로 입력합니다. 시각은 `Asia/Seoul`로 정규화하고 초·소수초 입력은 거절합니다. 시간 편집은 혼잡도 단계와 수정 시각을 변경하지 않습니다. 공개 홈은 실제 운영 시간 상태를 우선하고 운영 전·종료에는 혼잡도 수정 시각을 숨깁니다. 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`입니다.
 - 굿즈는 Goods.options에 등록된 실제 색상×사이즈 조합만 표시합니다. 관리자가 ON_SALE(구매 가능)/SOLD_OUT(품절)을 선택하며 수량 입력·저장은 없습니다. 상품 정보와 판매 상태를 독립 조회하고 전체 품절이어도 상품과 계좌 안내 진입을 유지합니다. 신규 상품·조합은 ON_SALE로 시작하고 색상·사이즈·조합 삭제는 허용합니다. 삭제한 조합의 판매 상태를 제거하고 유지 조합 상태는 보존합니다.
 - 한국어 공지는 먼저 저장·게시하며 영어가 PENDING/FAILED여도 막지 않습니다. 선택 언어의 READY 번역만 노출합니다. 직접 이미지 첨부와 공개 공지 상세 API는 없습니다.
 - 타임테이블은 고정 반입 금지 물품 목록·안내를 /prohibited-items로 조회합니다. 공연 진행 여부에 따라 숨기지 않으며 현재 시각선은 축제 당일 17:00~22:00에만 표시합니다.

@@ -1,5 +1,5 @@
 // Fictional fixtures only. No DB, actual festival dates, account, or user records.
-import { initializeAdmin,hoursFor,inventoryFor,adminExecute,validateNotice } from './admin-domain.mjs';
+import { initializeAdmin,inventoryFor,adminExecute,validateNotice,crowdingOperatingHoursFor } from './admin-domain.mjs';
 export const MOCK_NOW = '2030-10-01T18:00:00+09:00';
 export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
@@ -297,25 +297,84 @@ function findPublicGoods(state,goodsId,locale) {
   return goods;
 }
 const defaultDate = date => date < DATES[0] ? DATES[0] : date > DATES.at(-1) ? DATES.at(-1) : date;
-export const crowdingDayFor = now => defaultDate(dayKst(now));
+export function crowdingDayFor(now,publishedDays=DATES) {
+  const days=publishedDays.map(day=>typeof day==='string'?day:day.operatingDay).sort();
+  if(!days.length)return null;
+  const today=dayKst(now);
+  if(today>days.at(-1))return days.at(-1);
+  return days.find(day=>day>=today)||null;
+}
 // Approved crowd messages (docs/wiki/product/translations.md). Japanese has no approved copy yet.
 const CROWD_MESSAGES={
   ko:{BEFORE_OPEN:t=>`오늘 재학생존 입장은 ${t}에 시작해요`,RELAXED:'재학생존의 공간이 많이 남았어요.',MODERATE:'재학생존의 공간이 절반 이상 찼어요.',CROWDED:'재학생존이 많이 혼잡해요.',FULL:'재학생존이 꽉 차서 외부인존에서만 즐길 수 있어요.',CLOSED:'오늘 재학생존 운영이 종료됐어요'},
   en:{BEFORE_OPEN:t=>`Student Zone entry starts at ${t} today`,RELAXED:'Plenty of space available',MODERATE:'At least half full',CROWDED:'Very crowded',FULL:'The Student Zone is full. Please use the Visitor Zone.',CLOSED:'The Student Zone is closed for today'},
   'zh-Hans':{BEFORE_OPEN:t=>`今日学生区${t}开放入场`,RELAXED:'空间充足',MODERATE:'已占用一半以上',CROWDED:'非常拥挤',FULL:'本校学生区已满，请前往访客区。',CLOSED:'今日学生区已关闭'},
 };
+function validCalendarDate(year,month,day){
+  const date=new Date(0);date.setUTCFullYear(year,month-1,day);
+  return date.getUTCFullYear()===year&&date.getUTCMonth()===month-1&&date.getUTCDate()===day;
+}
+function publicKstTimestamp(millis,fraction=''){
+  const local=new Date(millis+9*3600000).toISOString().slice(0,19);
+  return `${local}${fraction?`.${fraction}`:''}+09:00`;
+}
+function parsePublicScheduleTime(operatingDay,value,field){
+  if(typeof value!=='string')return null;
+  const operatingDate=operatingDay.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!operatingDate||!validCalendarDate(Number(operatingDate[1]),Number(operatingDate[2]),Number(operatingDate[3])))return null;
+  const local=value.match(/^([0-2][0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.(\d{1,9}))?)?$/);
+  let millis,fraction=null,kstValue;
+  if(local){
+    const hour=Number(local[1]),minute=Number(local[2]),second=Number(local[3]||0);
+    if(hour>23)return null;
+    fraction=local[4]||'';
+    const isZero=hour===0&&minute===0&&second===0&&(!fraction||/^0+$/.test(fraction));
+    const date=field==='closesAt'&&isZero?dayKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000):operatingDay;
+    const clock=`${local[1]}:${local[2]}:${String(second).padStart(2,'0')}${fraction?`.${fraction}`:''}`;
+    millis=Date.parse(`${date}T${clock}+09:00`);
+    kstValue=`${date}T${clock}+09:00`;
+  }else{
+    const match=value.match(/^(\d{4})-(\d{2})-(\d{2})T((?:[01]\d|2[0-3])):([0-5]\d):([0-5]\d)(?:\.(\d{1,9}))?(Z|[+-](?:(?:0\d|1[0-7]):[0-5]\d|18:00))$/);
+    if(!match||!validCalendarDate(Number(match[1]),Number(match[2]),Number(match[3])))return null;
+    fraction=match[7]||'';
+    millis=Date.parse(value);
+    if(!Number.isFinite(millis))return null;
+    kstValue=publicKstTimestamp(millis,fraction);
+  }
+  if(!Number.isFinite(millis))return null;
+  const nanoseconds=BigInt(millis)*1000000n+BigInt((fraction.padEnd(9,'0').slice(0,9)||'0'))%1000000n;
+  return {millis,nanoseconds,kstValue};
+}
+function validPublicCrowdingSchedule(state,operatingDay){
+  const raw=crowdingOperatingHoursFor(state,operatingDay);
+  if(!raw)return null;
+  const opensAt=parsePublicScheduleTime(operatingDay,raw.opensAt,'opensAt');
+  const closesAt=parsePublicScheduleTime(operatingDay,raw.closesAt,'closesAt');
+  if(!opensAt||!closesAt)return null;
+  const dayStart=Date.parse(`${operatingDay}T00:00:00+09:00`),nextDayStart=dayStart+86400000;
+  const dayStartNanos=BigInt(dayStart)*1000000n,nextDayStartNanos=BigInt(nextDayStart)*1000000n;
+  if(opensAt.kstValue.slice(0,10)!==operatingDay||opensAt.nanoseconds<dayStartNanos||opensAt.nanoseconds>=nextDayStartNanos)return null;
+  if(closesAt.nanoseconds<=opensAt.nanoseconds||closesAt.nanoseconds>nextDayStartNanos)return null;
+  return {operatingDay,opensAt:opensAt.kstValue,closesAt:closesAt.kstValue};
+}
 function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=false) {
   const today=dayKst(now);
-  let operatingDay=defaultDate(today);
-  const hours=hoursFor(state,operatingDay);
-  const opensAt=`${operatingDay}T${hours.opensAt}:00+09:00`;
-  const closesAt=`${operatingDay}T${hours.closesAt}:00+09:00`;
+  const schedules=(state.festivalDays||[]).map(day=>{
+    return validPublicCrowdingSchedule(state,day.operatingDay);
+  });
+  if(!schedules.length||schedules.some(schedule=>!schedule))failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
+  const operatingDay=crowdingDayFor(now,state.festivalDays);
+  const schedule=schedules.find(item=>item.operatingDay===operatingDay);
+  if(!schedule)failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
+  const opensAt=schedule.opensAt;
+  const closesAt=schedule.closesAt;
+  const openingText=opensAt.slice(11,16);
   const stored=scenario==='unmodified'||(!includeSelectedDaySavedState&&today!==operatingDay)?null:state.crowding[operatingDay];
   const status=+new Date(now)<+new Date(opensAt)?'BEFORE_OPEN':+new Date(now)>=+new Date(closesAt)?'CLOSED':stored?.level||'RELAXED';
   const colors={RELAXED:'green',MODERATE:'orange',CROWDED:'red',FULL:'black'};
   const messages=CROWD_MESSAGES[locale]||CROWD_MESSAGES.ko;
   const active=!!colors[status];
-  return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:CROWD_MESSAGES[locale]?(status==='BEFORE_OPEN'?messages.BEFORE_OPEN(hours.opensAt):messages[status]):`Mock crowd status: ${status}`,updatedAt:active?stored?.updatedAt||null:null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
+  return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:CROWD_MESSAGES[locale]?(status==='BEFORE_OPEN'?messages.BEFORE_OPEN(openingText):messages[status]):`Mock crowd status: ${status}`,updatedAt:active?stored?.updatedAt||null:null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
 }
 export function scenarioTime(scenario,now) {
   return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00',overnight:'2030-10-02T01:00:00+09:00'})[scenario]||now;
@@ -344,7 +403,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     failure(400,KNOWN_LOCALES.has(locale)?'LOCALE_NOT_READY':'INVALID_QUERY',KNOWN_LOCALES.has(locale)?'준비 완료 언어만 요청할 수 있습니다.':'요청 파라미터를 확인해 주세요.');
   }
   if(scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 정보를 불러올 수 없습니다.');
-  if(scenario==='unconfigured'&&['getCrowding','getAdminCrowding'].includes(op.operationId))failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
+  if((scenario==='unconfigured'||!state.festivalDays?.length)&&['getCrowding','getAdminCrowding'].includes(op.operationId))failure(503,'CROWDING_SCHEDULE_UNCONFIGURED','재학생존 운영 일정이 아직 등록되지 않았습니다.');
   if(scenario==='not-found')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
   if(scenario==='already-deleted')failure(409,'ALREADY_DELETED','이미 삭제된 공지입니다.');
   if(scenario==='version-conflict')failure(409,'MAP_VERSION_MISMATCH','지도 이미지를 다시 조회해 주세요.');
@@ -356,11 +415,17 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   const extra=adminExecute(op,state,{params,body,scenario,mutate,failure,DATES});
   if(extra)return {status:extra.status||200,data:extra.data,now,locale};
   switch(op.operationId){
-    case 'getConfig':data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:DATES,defaultDate:empty?null:defaultDate(date)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}]}};break;
+    case 'getConfig':{
+      const publishedDates=(state.festivalDays||[]).map(day=>day.operatingDay).sort();
+      data={festival:{id:'festival-mock',title:'개발용 가상 축제',dates:empty?[]:publishedDates,defaultDate:empty?null:crowdingDayFor(now,publishedDates)},languages:[{code:'ko',label:'한국어'},{code:'en',label:'English'}],links:{universityNotices:missing?null:link('예시 학교 공지'),faq:scenario==='faq-ready'?link('예시 축제 FAQ','mock-faq'):null,officialChannels:empty||missing?[]:[{id:'channel-mock',...link('예시 공식 채널'),iconKey:'website'}]}};break;
+    }
     case 'getCrowding':case 'getAdminCrowding':data=crowdInfo(state,now,scenario,locale,op.operationId==='getAdminCrowding');break;
     case 'putAdminCrowding':{
       if(body.level==='FULL'&&body.confirmFull!==true)failure(422,'CONFIRMATION_REQUIRED','만석 변경 확인이 필요합니다.');
-      const savedDay=crowdingDayFor(now);
+      const today=dayKst(now),publishedDays=(state.festivalDays||[]).map(day=>day.operatingDay).sort();
+      if(!publishedDays.length||today>=publishedDays[0]&&today<=publishedDays.at(-1)&&!publishedDays.includes(today))failure(409,'EDIT_CONFLICT','게시된 운영일이 변경됐습니다. 혼잡도 정보를 다시 조회해 주세요.');
+      const savedDay=crowdingDayFor(now,state.festivalDays);
+      if(!savedDay)failure(409,'NOT_FESTIVAL_DAY','현재 게시된 축제일에만 혼잡도를 저장할 수 있습니다.');
       const stored=state.crowding[savedDay];
       if(stored?.level!==body.level)state.crowding[savedDay]={level:body.level,updatedAt:mutate()};
       return {status:204,data:null,now,locale};

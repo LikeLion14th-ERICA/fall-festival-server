@@ -1,6 +1,8 @@
 export function initializeAdmin(state){
   state.languages=['ko'];state.inventory={};
   state.idempotency??={};
+  state.crowdingOperatingHours??={};
+  state.crowdingOperatingHoursAudit??=[];
   for(const g of state.goods){
     state.inventory[g.id]={
       updatedAt:null,
@@ -12,7 +14,55 @@ export function initializeAdmin(state){
 export function hoursFor(state,operatingDay){
   const day=state.festivalDays?.find(item=>item.operatingDay===operatingDay);
   if(!day)throw new Error(`Missing mock FestivalDay for ${operatingDay}`);
+  const saved=state.crowdingOperatingHours?.[operatingDay];
+  if(saved)return {...day,opensAt:saved.opensAt.slice(11,16),closesAt:saved.closesAt.slice(11,16)};
   return day;
+}
+const isoKst=time=>new Date(time+9*3600000).toISOString().replace(/\.000Z$/,'Z').replace(/Z$/,'+09:00');
+function catalogTime(operatingDay,value,field){
+  if(value==null)return null;
+  if(typeof value!=='string')return String(value);
+  if(/^\d{2}:\d{2}$/.test(value)){
+    const [hour,minute]=value.split(':').map(Number);
+    if(hour>23||minute>59)return value;
+    const date=value==='00:00'&&field==='closesAt'?isoKst(Date.parse(`${operatingDay}T00:00:00+09:00`)+86400000).slice(0,10):operatingDay;
+    return `${date}T${value}:00+09:00`;
+  }
+  return value;
+}
+export function crowdingOperatingHoursFor(state,operatingDay){
+  const day=state.festivalDays?.find(item=>item.operatingDay===operatingDay);
+  if(!day)return null;
+  const saved=state.crowdingOperatingHours?.[operatingDay];
+  return {
+    operatingDay,
+    opensAt:saved?.opensAt??catalogTime(operatingDay,day.opensAt,'opensAt'),
+    closesAt:saved?.closesAt??catalogTime(operatingDay,day.closesAt,'closesAt'),
+    updatedAt:saved?.updatedAt??null,
+  };
+}
+export function normalizeCrowdingOperatingHoursInput(operatingDay,body,failure){
+  const normalize=(value,field)=>{
+    const match=typeof value==='string'&&value.match(/^(\d{4})-(\d{2})-(\d{2})T((?:[01]\d|2[0-3])):([0-5]\d):00(Z|[+-](?:(?:0\d|1[0-7]):[0-5]\d|18:00))$/);
+    const millis=match?Date.parse(value):NaN;
+    const calendarDate=match?new Date(0):null;
+    if(calendarDate)calendarDate.setUTCFullYear(Number(match[1]),Number(match[2])-1,Number(match[3]));
+    if(!Number.isFinite(millis)||!calendarDate||calendarDate.getUTCFullYear()!==Number(match[1])||calendarDate.getUTCMonth()!==Number(match[2])-1||calendarDate.getUTCDate()!==Number(match[3])){
+      failure(422,'VALIDATION_FAILED','시각은 초·소수초 없이 분 단위로 입력해 주세요.',[{field,reason:'분 단위 RFC 3339 시각이어야 합니다.'}]);
+    }
+    return {millis,value:isoKst(millis)};
+  };
+  const opensAt=normalize(body.opensAt,'opensAt');
+  const closesAt=normalize(body.closesAt,'closesAt');
+  const start=Date.parse(`${operatingDay}T00:00:00+09:00`);
+  const end=start+86400000;
+  if(opensAt.millis<start||opensAt.millis>=end){
+    failure(422,'VALIDATION_FAILED','시작 시각은 운영일 안이어야 합니다.',[{field:'opensAt',reason:'운영일 시작 이상, 다음 날 00:00 미만이어야 합니다.'}]);
+  }
+  if(closesAt.millis<=opensAt.millis||closesAt.millis>end){
+    failure(422,'VALIDATION_FAILED','종료 시각은 시작 뒤부터 익일 00:00까지 입력해 주세요.',[{field:'closesAt',reason:'시작 시각 초과, 익일 00:00 이하여야 합니다.'}]);
+  }
+  return {opensAt:opensAt.value,closesAt:closesAt.value};
 }
 export function inventoryFor(state,goodsId,{admin=false,sold=false,locale='ko',failure}={}){
   const g=state.goods.find(g=>g.id===goodsId);if(!g)failure(404,'NOT_FOUND','상품이 없습니다.');
@@ -50,6 +100,27 @@ export function adminExecute(op,state,ctx){
     case 'createAdminSession':case 'refreshAdminSession':return {data:{accessToken:'MOCK-SIGNED-ACCESS-TOKEN',expiresAt:'2030-10-01T18:15:00+09:00',admin:{id:'00000000-0000-4000-8000-000000000001',username:'mock-admin',authority:'ADMIN',enabled:true}}};
     case 'deleteCurrentAdminSession':return {data:{loggedOut:true}};
     case 'getCurrentAdmin':return {data:{id:'00000000-0000-4000-8000-000000000001',username:'mock-admin',authority:'ADMIN',enabled:true}};
+    case 'getAdminCrowdingOperatingHours':{
+      const days=scenario==='empty'?[]:[...(state.festivalDays||[])].sort((a,b)=>a.operatingDay.localeCompare(b.operatingDay));
+      return {data:{items:days.map(day=>crowdingOperatingHoursFor(state,day.operatingDay))}};
+    }
+    case 'getAdminCrowdingOperatingHoursDay':{
+      const data=crowdingOperatingHoursFor(state,params.operatingDay);
+      if(!data)failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
+      return {data};
+    }
+    case 'putAdminCrowdingOperatingHoursDay':{
+      const day=state.festivalDays?.find(item=>item.operatingDay===params.operatingDay);
+      if(scenario==='not-festival-day'||!day)failure(409,'NOT_FESTIVAL_DAY','현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.');
+      const value=normalizeCrowdingOperatingHoursInput(params.operatingDay,body,failure);
+      const current=state.crowdingOperatingHours[params.operatingDay];
+      if(!current||current.opensAt!==value.opensAt||current.closesAt!==value.closesAt){
+        const updatedAt=mutate();
+        state.crowdingOperatingHours[params.operatingDay]={...value,updatedAt};
+        state.crowdingOperatingHoursAudit.push({operatingDay:params.operatingDay,...value,updatedAt});
+      }
+      return {status:204,data:null};
+    }
     case 'postAdminGoodsImage':return {data:{mediaId:'00000000-0000-4000-8000-000000000050'},status:201};
     case 'putAdminAvailability':{
       const g=state.goods.find(g=>g.id===params.goodsId);if(!g)failure(404,'NOT_FOUND','상품이 없습니다.');

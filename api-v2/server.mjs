@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { createState,execute,ApiFailure,crowdingDayFor,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
+import { crowdingOperatingHoursFor,normalizeCrowdingOperatingHoursInput } from './admin-domain.mjs';
 import { validate } from './validate.mjs';
 
 const KNOWN_LOCALES=new Set(['ko','en','zh-Hans','ja']);
@@ -26,7 +27,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
   const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin, X-Mock-Session, X-Mock-Scenario, X-Mock-Time'};
   const unscopedOperations=new Set([
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-    'getCrowding','getAdminCrowding','putAdminCrowding',
+    'getCrowding','getAdminCrowding','putAdminCrowding','getAdminCrowdingOperatingHours','getAdminCrowdingOperatingHoursDay','putAdminCrowdingOperatingHoursDay',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
@@ -78,12 +79,12 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
           if(p.required){
             if(p.name==='If-Match')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
             if(p.name==='Idempotency-Key')failure(428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.');
-            failure(400,p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','필수 요청 값이 없습니다.',[{field:p.name,reason:'필수 값입니다.'}]);
+            failure(400,p.name==='operatingDay'?'INVALID_DATE':p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','필수 요청 값이 없습니다.',[{field:p.name,reason:'필수 값입니다.'}]);
           }
         }else{
           const issues=validate(p.schema,value,spec,p.name);
           if(issues.length&&route.operationId==='getGoodsImage'&&p.name==='variant')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
-          if(issues.length)failure(400,p.name==='If-Match'?'INVALID_IF_MATCH':p.name==='Idempotency-Key'?'INVALID_IDEMPOTENCY_KEY':p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','요청 값 형식이 잘못되었습니다.',issues);
+          if(issues.length)failure(400,p.name==='operatingDay'?'INVALID_DATE':p.name==='If-Match'?'INVALID_IF_MATCH':p.name==='Idempotency-Key'?'INVALID_IDEMPOTENCY_KEY':p.in==='header'?'INVALID_HEADER':'INVALID_QUERY','요청 값 형식이 잘못되었습니다.',issues);
         }
       }
       scenario=req.headers['x-mock-scenario']||query.__scenario||'normal';delete query.__scenario;
@@ -107,6 +108,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(scenario==='rate-limited')failure(429,'RATE_LIMITED','잠시 후 다시 요청해 주세요.');
       if(scenario==='precondition-required')failure(428,'PRECONDITION_REQUIRED','최신 상태를 확인한 뒤 다시 저장해 주세요.');
       if(scenario==='idempotency-key-required')failure(428,'IDEMPOTENCY_KEY_REQUIRED','Idempotency-Key 헤더가 필요합니다.');
+      if(scenario==='idempotency-key-reused')failure(409,'IDEMPOTENCY_KEY_REUSED','같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.');
       if(scenario==='invalid-media-reference')failure(422,'INVALID_MEDIA_REFERENCE','사용할 수 없는 상품 이미지가 포함되어 있습니다.');
       if(scenario==='validation-failed')failure(422,'VALIDATION_FAILED','요청 파일을 확인해 주세요.');
       if(scenario==='payload-too-large')failure(413,'PAYLOAD_TOO_LARGE','업로드 파일은 10 MiB 이하여야 합니다.');
@@ -114,11 +116,30 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       if(route.operationId==='postAdminGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(route.operationId==='getGoodsImage'&&scenario==='error')failure(503,'SERVICE_UNAVAILABLE','일시적으로 이미지를 처리할 수 없습니다.');
       if(scenario==='edit-conflict')failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
+      if(route.operationId==='putAdminCrowdingOperatingHoursDay'&&scenario==='removed-day')state.festivalDays=state.festivalDays.filter(day=>day.operatingDay!==params.operatingDay);
       let result;
-      if(route.operationId==='putAdminCrowding'){
+      if(route.operationId==='putAdminCrowdingOperatingHoursDay'){
+        const key=req.headers['idempotency-key'];
+        const operatingDay=params.operatingDay;
+        const normalized=normalizeCrowdingOperatingHoursInput(operatingDay,body,failure);
+        const scopedKey=`crowding-operating-hours:${operatingDay}:${key}`;
+        const fingerprint=stableJson({operatingDay,payload:normalized});
+        const prior=state.idempotency[scopedKey];
+        if(prior){
+          if(prior.fingerprint!==fingerprint)failure(409,'IDEMPOTENCY_KEY_REUSED','같은 Idempotency-Key를 다른 요청에 사용할 수 없습니다.');
+          result={status:prior.status,data:null,now,locale};
+        }else{
+          const current=crowdingOperatingHoursFor(state,operatingDay);
+          if(!current)failure(409,'NOT_FESTIVAL_DAY','현재 게시된 축제일의 운영 시간만 저장할 수 있습니다.');
+          const currentEtag=strongEtag({data:current,meta:{timezone:'Asia/Seoul',festivalId:'festival-mock',revision:0,locale,mock:true}});
+          if(req.headers['if-match']!==currentEtag)failure(409,'EDIT_CONFLICT','다른 관리자가 먼저 변경했습니다. 최신 상태를 확인해 주세요.');
+          result=execute(route,state,{params,query,body,scenario,now});
+          if(result.status>=200&&result.status<300)state.idempotency[scopedKey]={fingerprint,status:result.status};
+        }
+      }else if(route.operationId==='putAdminCrowding'){
         const key=req.headers['idempotency-key'];
         const fingerprint=stableJson({
-          operatingDay:crowdingDayFor(now),
+          operatingDay:crowdingDayFor(now,state.festivalDays),
           payload:{level:body.level,confirmFull:body.confirmFull===true},
         });
         const prior=state.idempotency[key];

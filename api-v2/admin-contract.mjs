@@ -7,6 +7,8 @@ export function applyAdminContract(s,ops){
   const nullable=(schema,d)=>({anyOf:[schema,{type:'null'}],description:d});
   const en=(values,d)=>({type:'string',enum:values,description:d});
   const id=ref('Id');
+  const operatingHourValue=nullable({type:'string'},'KST RFC 3339 시각. 관리자는 잘못된 게시 일정의 원문(초 포함)이나 null도 조회해 수정할 수 있다.');
+    const operatingHourInput={type:'string',format:'date-time',pattern:'^\\d{4}-\\d{2}-\\d{2}T(?:[01]\\d|2[0-3]):[0-5]\\d:00(?:Z|[+-](?:(?:0\\d|1[0-7]):[0-5]\\d|18:00))$',description:'RFC 3339 시각. 초는 00이어야 하고 소수초는 허용하지 않으며, offset은 ±18:00 이내이고 서버가 Asia/Seoul로 정규화한다.'};
   const productInputId={type:'string',format:'uuid',pattern:'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',description:'ProductInput 전용 안정 UUID.'};
   s.AvailabilityInput=obj({status:en(['ON_SALE','SOLD_OUT'],'구매 가능 / 품절 직접 저장')});
   s.GoodsColorTranslation=obj({name:str('색상명')});
@@ -56,6 +58,9 @@ export function applyAdminContract(s,ops){
   s.AdminGoodsImageUpload=obj({mediaId:{type:'string',format:'uuid',description:'저장경로를 노출하지 않는 opaque media UUID.'}},'상품과 아직 연결되지 않은 관리자 이미지 업로드 결과.');
   s.AdminIdentity=obj({id,username:{type:'string',minLength:1,maxLength:100,description:'관리자 로그인 식별자'},authority:en(['ADMIN'],'현재 Product 범위의 단일 관리자 권한'),enabled:{type:'boolean',description:'false이면 로그인·refresh·관리자 API 인증 거부'}});
   s.AdminSession=obj({accessToken:{type:'string',minLength:1,description:'15분 유효한 signed JWT. Authorization Bearer로 전달'},expiresAt:ref('Timestamp'),admin:ref('AdminIdentity')});
+  s.CrowdingOperatingHours=obj({operatingDay:ref('Date'),opensAt:operatingHourValue,closesAt:operatingHourValue,updatedAt:nullable(ref('Timestamp'),'관리자 저장 전에는 null이며 게시 일정의 초기값을 뜻한다.')},'현재 published FestivalDay 일정에 적용되는 재학생존 운영 시간. 관리자 저장값은 catalog revision과 독립적이다.');
+  s.CrowdingOperatingHoursList=obj({items:arr(ref('CrowdingOperatingHours'),'게시된 축제일 순. 게시된 축제일이 없으면 빈 배열.')});
+  s.CrowdingOperatingHoursInput=obj({opensAt:operatingHourInput,closesAt:operatingHourInput},'KST 기준 분 단위 시작·종료 시각. 시작은 운영일 안, 종료는 시작 뒤부터 익일 00:00까지 허용.');
   s.AdminLoginInput=obj({username:{type:'string',minLength:1,maxLength:100},password:{type:'string',minLength:1,maxLength:200,writeOnly:true}},'공개 회원가입 없이 환경 bootstrap으로 만든 관리자 계정으로 로그인');
   s.AdminLogout=obj({loggedOut:{type:'boolean',enum:[true],description:'현재 refresh session revoke 및 cookie 만료 완료'}});
   s.NoticeInput.description='한국어·영어 제목·본문 필수 수동 입력. 자동 번역 없음. 중국어 간체·일본어는 준비된 경우만 포함. 링크는 본문이 있는 언어마다 label 필수, 없는 언어는 null.';
@@ -88,6 +93,15 @@ export function applyAdminContract(s,ops){
   noticeDelete.idempotencyKeyRequired=true;
   noticeDelete.scenarios.push('precondition-required','edit-conflict');
   find('getAdminGoods').summary='관리자 실제 제공 조합별 판매 상태';
+  add('getAdminCrowdingOperatingHours','GET','/admin/crowding/operating-hours','CrowdingOperatingHoursList','게시된 재학생존 운영 시간 목록',['ADM-CROWD-HOURS'],undefined,['normal','empty','error']);
+  add('getAdminCrowdingOperatingHoursDay','GET','/admin/crowding/operating-hours/{operatingDay}','CrowdingOperatingHours','재학생존 날짜별 운영 시간 및 편집 ETag',['ADM-CROWD-HOURS'],undefined,['normal','not-found','error']);
+  add('putAdminCrowdingOperatingHoursDay','PUT','/admin/crowding/operating-hours/{operatingDay}','CrowdingOperatingHours','재학생존 날짜별 운영 시간 저장',['ADM-CROWD-HOURS'],'CrowdingOperatingHoursInput',['normal','not-festival-day','removed-day','validation-failed','precondition-required','idempotency-key-required','idempotency-key-reused','edit-conflict','error']);
+  find('getAdminCrowdingOperatingHours').conditional=true;
+  find('getAdminCrowdingOperatingHoursDay').conditional=true;
+  const crowdingHoursPut=find('putAdminCrowdingOperatingHoursDay');
+  crowdingHoursPut.successStatus=204;
+  crowdingHoursPut.ifMatchRequired=true;
+  crowdingHoursPut.idempotencyKeyRequired=true;
   const old=ops.findIndex(o=>o.operationId==='putAdminAvailability');ops.splice(old,1);
   for(const id of ['postAdminNotice','putAdminNotice']){find(id).provisional=false;find(id).summary=find(id).summary.replace('(검토 필요)','');find(id).scenarios.push('validation-failed');}
   function add(operationId,method,path,schema,summary,screens,input,scenarios=['normal','error'],provisional=false){

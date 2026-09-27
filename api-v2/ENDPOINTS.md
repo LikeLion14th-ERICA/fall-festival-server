@@ -41,6 +41,9 @@
 | GET | `/api/v2/admin/notice-templates` | 공지 템플릿 목록 | ADM-NOTICE-TEMPLATE | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates/{templateId}` | 템플릿 초기값 | ADM-NOTICE-TEMPLATE | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/goods` | 관리자 실제 제공 조합별 판매 상태 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/crowding/operating-hours` | 게시된 재학생존 운영 시간 목록 | ADM-CROWD-HOURS | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/crowding/operating-hours/{operatingDay}` | 재학생존 날짜별 운영 시간 및 편집 ETag | ADM-CROWD-HOURS | normal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/crowding/operating-hours/{operatingDay}` | 재학생존 날짜별 운영 시간 저장 | ADM-CROWD-HOURS | normal, not-festival-day, removed-day, validation-failed, precondition-required, idempotency-key-required, idempotency-key-reused, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability` | 조합 판매 상태 저장. last-write-wins 예외로 If-Match 불필요. | ADM-GOODS | normal, sold-out, not-found, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products` | 관리자 상품 목록 | ADM-GOODS-PRODUCT-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
