@@ -590,6 +590,9 @@ test('Public crowding accepts bounded catalog seconds and fractions while PUT re
   assert.equal(boundary('2030-10-01T22:00:12.345677+09:00'),'MODERATE');
   assert.equal(boundary('2030-10-01T22:00:12.345678+09:00'),'CLOSED');
   state.festivalDays[0]={...state.festivalDays[0],closesAt:'2030-10-02T00:00:00.000000001+09:00'};
+  assert.equal(execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}).data.closesAt,
+    '2030-10-02T00:00:00.000000001+09:00');
+  state.festivalDays[0]={...state.festivalDays[0],closesAt:'2030-10-02T01:00:00.000000001+09:00'};
   assert.throws(()=>execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}),error=>error.status===503&&error.code==='CROWDING_SCHEDULE_UNCONFIGURED');
 });
 test('Goods save changes only one combination and derives sold-out; failed writes do not mutate',async()=>{
