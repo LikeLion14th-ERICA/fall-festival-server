@@ -57,10 +57,10 @@ public class CrowdingViewService {
         List<CrowdingSchedule> schedules = schedules(context);
         Instant now = clock.instant();
         LocalDate today = now.atZone(context.timezone()).toLocalDate();
-        CrowdingSchedule selected = select(schedules, today);
+        CrowdingSchedule selected = select(schedules, today, now);
         Optional<CrowdingRecord> saved;
         try {
-            saved = includeSelectedDaySavedState || today.equals(selected.operatingDate())
+            saved = includeSelectedDaySavedState || today.equals(selected.operatingDate()) || isOpen(selected, now)
                 ? store.findFor(context.festivalId(), selected.operatingDate())
                 : Optional.empty();
         } catch (DataAccessException exception) {
@@ -147,7 +147,7 @@ public class CrowdingViewService {
             LocalDate openDate = schedule.opensAt().atZoneSameInstant(timezone).toLocalDate();
             if (!schedule.operatingDate().equals(openDate)
                 || schedule.closesAt().toInstant().isAfter(
-                    schedule.operatingDate().plusDays(1).atStartOfDay(timezone).toInstant())) {
+                    schedule.operatingDate().plusDays(1).atTime(1, 0).atZone(timezone).toInstant())) {
                 return false;
             }
             if (previous != null && !previous.isBefore(schedule.operatingDate())) {
@@ -158,13 +158,29 @@ public class CrowdingViewService {
         return true;
     }
 
-    private CrowdingSchedule select(List<CrowdingSchedule> schedules, LocalDate today) {
+    private CrowdingSchedule select(List<CrowdingSchedule> schedules, LocalDate today, Instant now) {
+        // Once today's opening has occurred, its state never falls back to yesterday,
+        // even if today's shorter window closes before yesterday's extended window.
+        for (CrowdingSchedule schedule : schedules) {
+            if (schedule.operatingDate().equals(today) && !now.isBefore(schedule.opensAt().toInstant())) {
+                return schedule;
+            }
+        }
+        for (CrowdingSchedule schedule : schedules) {
+            if (schedule.operatingDate().equals(today.minusDays(1)) && isOpen(schedule, now)) {
+                return schedule;
+            }
+        }
         for (CrowdingSchedule schedule : schedules) {
             if (!schedule.operatingDate().isBefore(today)) {
                 return schedule;
             }
         }
         return schedules.getLast();
+    }
+
+    private boolean isOpen(CrowdingSchedule schedule, Instant now) {
+        return !now.isBefore(schedule.opensAt().toInstant()) && now.isBefore(schedule.closesAt().toInstant());
     }
 
     private CrowdingResponse response(
@@ -177,12 +193,10 @@ public class CrowdingViewService {
     ) {
         OffsetDateTime opensAt = selected.opensAt().atZoneSameInstant(timezone).toOffsetDateTime();
         OffsetDateTime closesAt = selected.closesAt().atZoneSameInstant(timezone).toOffsetDateTime();
-        boolean beforeSelectedDay = today.isBefore(selected.operatingDate());
-        boolean afterSelectedDay = today.isAfter(selected.operatingDate());
         CrowdingResponse.OperatingStatus operatingStatus;
-        if (beforeSelectedDay || now.isBefore(opensAt.toInstant())) {
+        if (now.isBefore(opensAt.toInstant())) {
             operatingStatus = CrowdingResponse.OperatingStatus.BEFORE_OPEN;
-        } else if (afterSelectedDay || !now.isBefore(closesAt.toInstant())) {
+        } else if (!now.isBefore(closesAt.toInstant())) {
             operatingStatus = CrowdingResponse.OperatingStatus.CLOSED;
         } else {
             operatingStatus = CrowdingResponse.OperatingStatus.OPEN;
@@ -257,6 +271,10 @@ public class CrowdingViewService {
 
         public CrowdingSchedule schedule() {
             return selected;
+        }
+
+        public boolean canUpdateLevel() {
+            return today.equals(operatingDay()) || response.operatingStatus() == CrowdingResponse.OperatingStatus.OPEN;
         }
     }
 }

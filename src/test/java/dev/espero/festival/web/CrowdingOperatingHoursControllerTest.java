@@ -98,6 +98,23 @@ class CrowdingOperatingHoursControllerTest {
     }
 
     @Test
+    void acceptsNextDayOneAndRejectsEveryLaterMinute() throws Exception {
+        String tag = etag();
+        String prefix = "{\"opensAt\":\"2026-09-29T11:00:00+09:00\",\"closesAt\":\"";
+        mvc.perform(put(ITEM).header("If-Match", tag).header("Idempotency-Key", "overnight-max")
+            .contentType("application/json").content(prefix + "2026-09-30T01:00:00+09:00\"}"))
+            .andExpect(status().isNoContent());
+        verify(store).saveOperatingHours(eq(ApiMetaTestFixtures.FESTIVAL_ID), eq(DATE), any(),
+            eq(OffsetDateTime.parse("2026-09-30T01:00:00+09:00")), any());
+        for (String close : List.of("2026-09-30T01:01:00+09:00", "2026-09-30T01:00:01+09:00",
+            "2026-09-30T01:00:00.000+09:00")) {
+            mvc.perform(put(ITEM).header("If-Match", tag).header("Idempotency-Key", "late-close")
+                .contentType("application/json").content(prefix + close + "\"}"))
+                .andExpect(status().isUnprocessableEntity());
+        }
+    }
+
+    @Test
     void normalizesEquivalentOffsetsAndChecksCurrentEtagAfterLock() throws Exception {
         String tag = etag();
         when(store.saveOperatingHours(any(), any(), any(), any(), any())).thenReturn(true);

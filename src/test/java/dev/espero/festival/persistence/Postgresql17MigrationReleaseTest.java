@@ -94,6 +94,31 @@ class Postgresql17MigrationReleaseTest {
     }
 
     @Test
+    void v32PreservesV31RowsAndExtendsClosingThroughNextDayOne() throws SQLException {
+        flyway(31).migrate();
+        execute("""
+            INSERT INTO crowding_operating_hours (festival_id, operating_date, opens_at, closes_at, updated_at)
+            VALUES ('%s', '2026-09-29', '2026-09-29T11:00:00+09:00',
+                '2026-09-30T00:00:00+09:00', '2026-09-29T12:00:00+09:00')
+            """.formatted(FESTIVAL_ID));
+        Map<String, String> before = snapshot(tables(), false);
+        List<String> previousHistory = history();
+        assertThat(flyway(32).migrate().migrationsExecuted).isOne();
+        assertHistory(32);
+        assertThat(history().subList(0, 31)).isEqualTo(previousHistory);
+        assertThat(snapshot(before.keySet().stream().toList(), false)).isEqualTo(before);
+        execute("UPDATE crowding_operating_hours SET closes_at = '2026-09-30T00:01:00+09:00'");
+        execute("UPDATE crowding_operating_hours SET closes_at = '2026-09-30T01:00:00+09:00'");
+        rejects("UPDATE crowding_operating_hours SET closes_at = '2026-09-30T01:01:00+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET opens_at = '2026-09-30T00:00:00+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET closes_at = '2026-09-30T01:00:00.000001+09:00'", "23514");
+        rejects("UPDATE crowding_operating_hours SET opens_at = '2026-09-29T11:00:01+09:00'", "23514");
+        Map<String, String> confirmed = snapshot(tables(), false);
+        assertThat(flyway(32).migrate().migrationsExecuted).isZero();
+        assertThat(snapshot(tables(), false)).isEqualTo(confirmed);
+    }
+
+    @Test
     void v31PreservesExistingDataWithoutBackfillAndConstrainsAdministratorHours() throws SQLException {
         flyway(30).migrate();
         execute("""

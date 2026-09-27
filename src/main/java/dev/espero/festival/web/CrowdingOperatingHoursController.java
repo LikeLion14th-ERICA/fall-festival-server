@@ -152,7 +152,7 @@ public class CrowdingOperatingHoursController {
         OffsetDateTime opensAt = parseTime(input.get("opensAt"));
         OffsetDateTime closesAt = parseTime(input.get("closesAt"));
         if (!opensAt.toLocalDate().equals(date) || !opensAt.isBefore(closesAt)
-            || closesAt.isAfter(date.plusDays(1).atStartOfDay(KST).toOffsetDateTime())) throw validation();
+            || closesAt.isAfter(date.plusDays(1).atTime(1, 0).atZone(KST).toOffsetDateTime())) throw validation();
         return new Times(opensAt, closesAt);
     }
 
@@ -188,7 +188,7 @@ public class CrowdingOperatingHoursController {
 
     private ApiException validation() {
         return new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_FAILED",
-            "해당 운영일의 분 단위 시작·종료 시간을 확인해 주세요. 종료는 익일 00:00까지 가능합니다.", false);
+            "해당 운영일의 분 단위 시작·종료 시간을 확인해 주세요. 종료는 익일 01:00까지 가능합니다.", false);
     }
 
     public record Hours(LocalDate operatingDay, OffsetDateTime opensAt, OffsetDateTime closesAt,

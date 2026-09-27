@@ -168,7 +168,7 @@ class CrowdingOperatingHoursFlowIntegrationTest {
             body("2026-09-29T11:00:01+09:00", "2026-09-29T23:00:00+09:00"),
             body("2026-09-29T11:00:00.000+09:00", "2026-09-29T23:00:00+09:00"),
             body("2026-09-28T23:00:00+09:00", "2026-09-29T23:00:00+09:00"),
-            body("2026-09-29T11:00:00+09:00", "2026-09-30T00:01:00+09:00"),
+            body("2026-09-29T11:00:00+09:00", "2026-09-30T01:01:00+09:00"),
             body("2026-09-29T11:00:00+09:00", "2026-09-29T11:00:00+09:00"),
             "{\"opensAt\":null,\"closesAt\":null}",
             valid.substring(0, valid.length()-1) + ",\"unexpected\":true}")) {
@@ -249,7 +249,7 @@ class CrowdingOperatingHoursFlowIntegrationTest {
     void repairsInvalidFallbackWithoutBlockingAdministratorReads() throws Exception {
         UUID revision = publish(DEVELOPMENT_CATALOG);
         jdbc.update("UPDATE festival_days SET opens_at = opens_at + INTERVAL '31 seconds', "
-            + "closes_at = ((festival_date + 1)::timestamp AT TIME ZONE 'Asia/Seoul') + INTERVAL '1 minute' "
+            + "closes_at = ((festival_date + 1)::timestamp AT TIME ZONE 'Asia/Seoul') + INTERVAL '61 minutes' "
             + "WHERE festival_revision_id = :id",
             Map.of("id", revision));
         mvc.perform(asAdmin(get(HOURS))).andExpect(status().isOk())
@@ -262,6 +262,38 @@ class CrowdingOperatingHoursFlowIntegrationTest {
                 .andExpect(status().isNoContent());
         }
         publicCrowding().andExpect(status().isOk());
+    }
+
+    @Test
+    void preservesAndEditsPreviousOperatingDayDuringExtendedNight() throws Exception {
+        publish(DEVELOPMENT_CATALOG);
+        saveHours(DATE, etag(DATE), nextKey(), body("2026-09-29T11:00:00+09:00", "2026-09-30T01:00:00+09:00"))
+            .andExpect(status().isNoContent());
+        save(adminCrowding().andReturn().getResponse().getHeader("ETag"), nextKey(), "CROWDED")
+            .andExpect(status().isNoContent());
+        var original = crowdingStateRows();
+        clock.set(OffsetDateTime.parse("2026-09-30T00:30:00+09:00"));
+        publicCrowding().andExpect(jsonPath("$.data.operatingDay").value(DATE))
+            .andExpect(jsonPath("$.data.status").value("CROWDED"));
+        assertThat(crowdingStateRows()).isEqualTo(original);
+        save(adminCrowding().andReturn().getResponse().getHeader("ETag"), nextKey(), "MODERATE")
+            .andExpect(status().isNoContent());
+        var nightState = crowdingStateRows();
+        assertThat(nightState).hasSize(1);
+        assertThat(nightState.getFirst().get("operating_date").toString()).isEqualTo(DATE);
+        saveHours(DATE, etag(DATE), nextKey(), body("2026-09-29T11:00:00+09:00", "2026-09-30T00:20:00+09:00"))
+            .andExpect(status().isNoContent());
+        publicCrowding().andExpect(jsonPath("$.data.operatingDay").value("2026-09-30"))
+            .andExpect(jsonPath("$.data.status").value("BEFORE_OPEN"));
+        saveHours(DATE, etag(DATE), nextKey(), body("2026-09-29T11:00:00+09:00", "2026-09-30T01:00:00+09:00"))
+            .andExpect(status().isNoContent());
+        publicCrowding().andExpect(jsonPath("$.data.operatingDay").value(DATE))
+            .andExpect(jsonPath("$.data.status").value("MODERATE"));
+        assertThat(crowdingStateRows()).isEqualTo(nightState);
+        clock.set(OffsetDateTime.parse("2026-09-30T01:00:00+09:00"));
+        publicCrowding().andExpect(jsonPath("$.data.operatingDay").value("2026-09-30"))
+            .andExpect(jsonPath("$.data.status").value("BEFORE_OPEN"))
+            .andExpect(jsonPath("$.data.savedLevel").isEmpty());
     }
 
     @Test

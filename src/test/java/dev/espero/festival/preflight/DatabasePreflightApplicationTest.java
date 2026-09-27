@@ -96,6 +96,7 @@ class DatabasePreflightApplicationTest {
         );
         assertThat(inventory.tablesThrough(30)).contains("artist_hyped_counts");
         assertThat(inventory.tablesThrough(31)).contains("crowding_operating_hours");
+        assertThat(inventory.tablesThrough(32)).contains("crowding_operating_hours");
     }
 
     @Test
