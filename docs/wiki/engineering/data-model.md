@@ -24,6 +24,12 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
   [부스·지도 공개 카탈로그](spaces-map-backend.md)를 따른다.
 - V30 `artist_hyped_counts`는 `(festival_id, artist_id)`별 익명 Hyped 누적 수를
   catalog revision 밖에 저장한다. 게시 중인 `ARTIST`만 공개 참여를 받으며 `CONTEST`는 제외한다.
+- V31 `crowding_operating_hours`는 `(festival_id, operating_date)`별 운영 시작·종료와
+  수정 시각을 catalog revision 밖에 저장한다. 기존 행 backfill은 없으며, 행이 없는 축제일은
+  현재 published `FestivalDay`의 시간을 초기값으로 사용한다.
+- V32는 별도 migration에서 V31 시간 구간 CHECK 제약을 확장해 종료 상한을 운영일 다음 날
+  `01:00`까지 허용한다. V31 SQL은 수정하지 않아 기존 Flyway checksum을 보존하고, V32도 행을
+  backfill하지 않는다. 운영 시작은 운영일 KST 날짜 안이고 종료 순간은 실제 운영 구간에서 제외한다.
 - 기본 profile은 DataSource와 Flyway 자동 구성을 끈다. `db` profile과 환경변수, 실제 migration을
   함께 준비한 뒤에만 운영 DB를 연결한다.
 - `test/`의 Next.js·Spring Boot·PostgreSQL 코드는 PWA·스탬프·Push 실기기 검증 환경이다.
@@ -53,9 +59,17 @@ Entity·Flyway migration이 아니며, 미정 운영값을 seed 데이터나 DDL
 귀속하고, Hyped 같은 실시간 운영값은 축제 회차에 귀속한다. 표시명은 안정 ID와 분리한다.
 날짜와 시각은 `Asia/Seoul` 및 offset을 보존한다.
 
+`crowding_operating_hours`의 기본키는 `(festival_id, operating_date)`이며 `opens_at`,
+`closes_at`, `updated_at`을 저장한다. 종료는 시작 뒤부터 운영일 다음 날 KST `01:00`까지 허용하고
+시작 포함·종료 제외로 판정한다. 야간 구간은 전날 운영일에 귀속하며 자정에 상태 행을 새 날짜로
+이월하거나 지우지 않는다. 첫 관리자 저장은 카탈로그 초기값과 같아도 설정 행과
+감사 기록을 만든다. 그 뒤 같은 값 저장은 수정 시각·감사 기록을 바꾸지 않는다. 카탈로그
+재게시·rollback·서버 재시작은 이 행을 변경하지 않는다. 게시에서 날짜가 빠져도 설정을 보존하고,
+같은 날짜가 다시 게시되면 적용한다.
+
 | 영역 | 후보 모델 | 핵심 관계와 불변식 |
 |---|---|---|
-| 회차·게시·운영일 | `Festival`, `FestivalRevision`, `FestivalDay`, `CatalogRevisionAudit`, `CrowdingState` | Festival 1:N Revision, Revision 1:N 운영 콘텐츠. 공개 혼잡도 일정은 정확히 하나의 `published` revision의 FestivalDay에서 읽고, 운영자 상태는 revision과 독립된 `(festival_id, operating_date)` `crowding_state_dynamic`에 둔다. V5 `crowding_state`는 호환 이력으로 보존한다. 관리자는 실제 `FestivalDay`인 날짜에만 저장할 수 있고 운영 전·운영 종료 뒤 저장은 허용한다. FestivalDay가 아닌 날짜의 저장은 `NOT_FESTIVAL_DAY` 충돌로 거절한다. 같은 상태 저장은 수정 시각을 바꾸지 않는다. |
+| 회차·게시·운영일 | `Festival`, `FestivalRevision`, `FestivalDay`, `CatalogRevisionAudit`, `CrowdingState`, `CrowdingOperatingHours` | Festival 1:N Revision, Revision 1:N 운영 콘텐츠. 공개 혼잡도 일정은 하나의 현재 `published` revision의 FestivalDay를 기준으로 하고, 날짜별 `crowding_operating_hours` 설정이 있으면 우선 적용하며 미설정 날짜는 카탈로그 시간을 쓴다. 운영자 상태는 revision과 독립된 `(festival_id, operating_date)` `crowding_state_dynamic`에 둔다. V5 `crowding_state`는 호환 이력으로 보존한다. 운영 시간은 실제 게시 `FestivalDay`인 날짜에만 저장한다. 혼잡도 상태는 실제 `FestivalDay` 날짜에 대해 운영 전·운영 종료 뒤에도 저장할 수 있다. 게시 날짜가 아닌 운영 시간 저장은 `NOT_FESTIVAL_DAY` 충돌로 거절한다. 같은 상태 저장은 수정 시각을 바꾸지 않는다. |
 | 공지 | `Notice`, `NoticeTranslation`, `NoticeLink`, `NoticeTemplate`, `NoticeTemplateTranslation` | Notice 1:N Translation/Link. `(notice_id, locale)`은 고유하며 한국어는 READY·본문 필수다. 외국어 READY/PENDING/FAILED와 사용자 노출은 분리한다. 공지의 물리 삭제·soft delete·보존 기간은 아직 결정하지 않았다. |
 | 굿즈 | `Goods`, `GoodsImage`, `GoodsColor`, `GoodsSize`, `GoodsOption`, `PaymentGuide`, `OperationalAccountSetting` | 실제 제공 조합만 `GoodsOption`으로 만든다. `(goods_id, color_id, size_id)`는 고유하고 `availability`는 `ON_SALE` 또는 `SOLD_OUT`이며 `updated_at`을 남긴다. 신규 상품·조합은 `ON_SALE`로 시작한다. 색상·사이즈·조합 삭제 시 그 상태를 제거하고 남은 조합 상태를 보존한다. `allSoldOut`은 실제 조합이 하나 이상이고 모두 품절일 때의 파생값이다. 수량, 자동 품절, 입금 확인, 지급 완료는 저장하지 않는다. `GOODS` 계좌 현재값은 catalog revision과 분리한다. |
 | 공연 | `Artist`, `ArtistTranslation`, `ArtistLink`, `ArtistLinkTranslation`, `ArtistSong`, `ArtistSongTranslation`, `Performance`, `PerformanceTranslation`, `PerformanceArtist`, `TimetableConfig`, `ProhibitedItem`, `ProhibitedItemTranslation`, `ProhibitedMessage` | V13 물리 schema다. Artist와 Performance는 revision-scoped 복합 키를 사용하고 `PerformanceArtist` N:M 관계로 여러 출연진과 공연별 표시 순서를 표현한다. Performance는 `(festival_revision_id, festival_date)` 복합 FK로 같은 revision의 FestivalDay에 속한다. 번역·링크·대표곡과 반입 금지 항목/문구는 별도 테이블이며 locale fallback을 저장 구조에서 만들지 않는다. 타임테이블 축은 revision별 설정이고 FestivalDay 운영 시간과 분리한다. 단일 무대만 사용하므로 `Stage` aggregate와 stage field는 없으며 운영 seed도 없다. |

@@ -67,6 +67,7 @@ role이 앱을 실제로 돌리는 데 필요한 나머지 테이블 권한(카�
 | 테이블 | 권한 |
 |---|---|
 | `crowding_state_dynamic` | SELECT, INSERT, UPDATE |
+| `crowding_operating_hours` | SELECT, INSERT, UPDATE (날짜별 관리자 운영 시간. 테이블 V31, 시간 상한 constraint V32) |
 | `artist_hyped_counts` | SELECT, INSERT, UPDATE (익명 아티스트 Hyped 누적 수; 카탈로그 revision 밖) |
 | `stamp_participants`, `stamp_participant_days`, `stamp_collections`, `stamp_rewards` | SELECT, INSERT (부스 스탬프 V27·일일 START V28, `StampStore` 기준) |
 | `notices`, `notice_translations`, `notice_links`, `notice_link_translations` | SELECT, INSERT, UPDATE, DELETE |
@@ -103,14 +104,15 @@ role이 앱을 실제로 돌리는 데 필요한 나머지 테이블 권한(카�
 
 ### `catalog_export` — export만
 
-`runtime`의 "카탈로그(SELECT만)" 목록과 거의 같지만, **계좌·혼잡도·공지·굿즈·스탬프 참여 기록은
+`runtime`의 "카탈로그(SELECT만)" 목록과 거의 같지만, **계좌·혼잡도 상태·혼잡도 운영 시간·공지·굿즈·스탬프 참여 기록은
 절대 포함하지 않는다** — provisioning script가 명시적으로 이걸 막는다. `ticket_guide_revisions`는 계좌 컬럼이
 애초에 없으므로 전체 컬럼 SELECT 가능(레거시 `ticket_guide`/`ticket_guide_revisions`의 옛 계좌
 컬럼이 남아있다면 그 컬럼만 제외 — provisioning script의 컬럼 목록 참고).
 
 ### `catalog_publish` — import/publish/rollback (✅ `CatalogRevisionService`/`CatalogManifestReader`에서 확인)
 
-`catalog_export`와 같은 테이블 목록 + 아래 쓰기 권한.
+`catalog_export`와 같은 테이블 목록 + 아래 쓰기 권한. `crowding_operating_hours`는
+catalog 입력·게시 범위가 아니므로 읽기·쓰기 권한을 주지 않는다.
 
 - 모든 카탈로그 자식 테이블(spaces, artists, performances, maps, ... 위 목록 전체): INSERT
 - `festival_revisions`: SELECT, INSERT, UPDATE (draft 생성, published/archived 상태 전환)

@@ -160,13 +160,33 @@ class CrowdingControllerTest {
     }
 
     @Test
-    void rejectsAScheduleWhoseCloseFallsOnTheNextLocalDate() {
+    void preservesLegacySecondsAndAllowsClosingExactlyAtNextMidnight() {
+        LocalDate day = LocalDate.parse("2030-10-01");
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(day, OffsetDateTime.parse("2030-10-01T13:00:31.125+09:00"),
+                OffsetDateTime.parse("2030-10-02T00:00:00+09:00"))
+        ));
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, day)).thenReturn(Optional.empty());
+
+        CrowdingResponse before = serviceAt("2030-10-01T04:00:31.124Z").current(request).response();
+        assertThat(before.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.BEFORE_OPEN);
+        CrowdingResponse opened = serviceAt("2030-10-01T04:00:31.125Z").current(request).response();
+        assertThat(opened.operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
+        assertThat(opened.opensAt().getNano()).isEqualTo(125_000_000);
+        assertThat(serviceAt("2030-10-01T14:59:59.999Z").current(request).response().operatingStatus())
+            .isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
+        assertThat(serviceAt("2030-10-01T15:00:00Z").current(request).response().operatingStatus())
+            .isEqualTo(CrowdingResponse.OperatingStatus.CLOSED);
+    }
+
+    @Test
+    void rejectsAScheduleWhoseCloseFallsAfterNextDayOne() {
         when(contextService.currentPublished()).thenReturn(ApiMetaTestFixtures.PUBLISHED_CONTEXT);
         when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
             new CrowdingSchedule(
                 java.time.LocalDate.parse("2030-10-01"),
                 OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
-                OffsetDateTime.parse("2030-10-02T00:00:00+09:00")
+                OffsetDateTime.parse("2030-10-02T01:01:00+09:00")
             )
         ));
 
@@ -177,6 +197,65 @@ class CrowdingControllerTest {
                 assertThat(api.status().value()).isEqualTo(503);
                 assertThat(api.code()).isEqualTo("CROWDING_SCHEDULE_UNCONFIGURED");
             });
+    }
+
+    @Test
+    void continuesYesterdayUntilOneAndDoesNotCarryStateToNextOperatingDay() {
+        LocalDate yesterday = LocalDate.parse("2030-10-01");
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(yesterday, OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
+                OffsetDateTime.parse("2030-10-02T01:00:00+09:00")), sameDaySchedule("2030-10-02")
+        ));
+        Instant savedAt = Instant.parse("2030-10-01T06:00:00Z");
+        when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, yesterday))
+            .thenReturn(Optional.of(new CrowdingRecord("CROWDED", savedAt)));
+        for (String instant : List.of("2030-10-01T15:00:00Z", "2030-10-01T15:30:00Z", "2030-10-01T15:59:59Z")) {
+            var snapshot = serviceAt(instant).current(request);
+            assertThat(snapshot.operatingDay()).isEqualTo(yesterday);
+            assertThat(snapshot.response().status()).isEqualTo(CrowdingResponse.Status.CROWDED);
+            assertThat(snapshot.response().updatedAt().toInstant()).isEqualTo(savedAt);
+            assertThat(snapshot.canUpdateLevel()).isTrue();
+        }
+        var nextDay = serviceAt("2030-10-01T16:00:00Z").current(request);
+        assertThat(nextDay.operatingDay()).isEqualTo(yesterday.plusDays(1));
+        assertThat(nextDay.response().status()).isEqualTo(CrowdingResponse.Status.BEFORE_OPEN);
+        assertThat(nextDay.response().savedLevel()).isNull();
+    }
+
+    @Test
+    void prefersTodayFromOpeningAndDoesNotReturnToOverlappingYesterday() {
+        LocalDate yesterday = LocalDate.parse("2030-10-01");
+        LocalDate today = yesterday.plusDays(1);
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(yesterday, OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
+                OffsetDateTime.parse("2030-10-02T01:00:00+09:00")),
+            new CrowdingSchedule(today, OffsetDateTime.parse("2030-10-02T00:20:00+09:00"),
+                OffsetDateTime.parse("2030-10-02T00:40:00+09:00"))
+        ));
+        assertThat(serviceAt("2030-10-01T15:19:59Z").current(request).operatingDay()).isEqualTo(yesterday);
+        var opened = serviceAt("2030-10-01T15:20:00Z").current(request);
+        assertThat(opened.operatingDay()).isEqualTo(today);
+        assertThat(opened.response().status()).isEqualTo(CrowdingResponse.Status.RELAXED);
+        var ended = serviceAt("2030-10-01T15:50:00Z").current(request);
+        assertThat(ended.operatingDay()).isEqualTo(today);
+        assertThat(ended.response().status()).isEqualTo(CrowdingResponse.Status.CLOSED);
+    }
+
+    @Test
+    void permitsFinalDayExtensionOnUnpublishedNextDateButStopsAtClosing() {
+        LocalDate lastDay = LocalDate.parse("2030-10-01");
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(lastDay, OffsetDateTime.parse("2030-10-01T13:00:00+09:00"),
+                OffsetDateTime.parse("2030-10-02T01:00:00+09:00"))
+        ));
+        var active = serviceAt("2030-10-01T15:30:00Z").current(request);
+        assertThat(active.operatingDay()).isEqualTo(lastDay);
+        assertThat(active.response().operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
+        assertThat(active.canUpdateLevel()).isTrue();
+        var ended = serviceAt("2030-10-01T16:00:00Z").current(request);
+        assertThat(ended.operatingDay()).isEqualTo(lastDay);
+        assertThat(ended.response().operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.CLOSED);
+        assertThat(ended.canUpdateLevel()).isFalse();
     }
 
     @Test

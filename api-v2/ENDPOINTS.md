@@ -32,7 +32,7 @@
 | POST | `/api/v2/stamp-collections` | 부스 QR 스탬프 적립(부스당 하루 1회) | STAMP-COLLECT | normal, not-started, invalid-token, already-collected, card-full, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, card-incomplete, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, unconfigured, error, bad-request, rate-limited, unauthorized, forbidden |
-| PUT | `/api/v2/admin/crowding` | 실제 FestivalDay 혼잡도 저장·운영 전후 허용·비운영일 409·동일 상태 시각 유지 | ADM-CROWD | normal, full, not-festival-day, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/crowding` | 선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지 | ADM-CROWD | normal, full, not-festival-day, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | POST | `/api/v2/admin/notices` | 공지 등록 | ADM-NOTICE-EDIT | normal, error, validation-failed, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices/{noticeId}` | 공지 수정 초기값 | ADM-NOTICE-EDIT | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
@@ -41,6 +41,9 @@
 | GET | `/api/v2/admin/notice-templates` | 공지 템플릿 목록 | ADM-NOTICE-TEMPLATE | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notice-templates/{templateId}` | 템플릿 초기값 | ADM-NOTICE-TEMPLATE | normal, missing-optional, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/goods` | 관리자 실제 제공 조합별 판매 상태 | ADM-GOODS | normal, empty, sold-out, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/crowding/operating-hours` | 게시된 재학생존 운영 시간 목록 | ADM-CROWD-HOURS | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
+| GET | `/api/v2/admin/crowding/operating-hours/{operatingDay}` | 재학생존 날짜별 운영 시간 및 편집 ETag | ADM-CROWD-HOURS | normal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |
+| PUT | `/api/v2/admin/crowding/operating-hours/{operatingDay}` | 재학생존 날짜별 운영 시간 저장 | ADM-CROWD-HOURS | normal, not-festival-day, removed-day, validation-failed, precondition-required, idempotency-key-required, idempotency-key-reused, edit-conflict, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/goods/{goodsId}/combinations/{combinationId}/availability` | 조합 판매 상태 저장. last-write-wins 예외로 If-Match 불필요. | ADM-GOODS | normal, sold-out, not-found, precondition-required, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products` | 관리자 상품 목록 | ADM-GOODS-PRODUCT-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/products/{goodsId}` | 상품 수정 초기값 | ADM-GOODS-PRODUCT-EDIT | normal, not-found, error, bad-request, rate-limited, unauthorized, forbidden |

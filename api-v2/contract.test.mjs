@@ -6,7 +6,8 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { createMockServer } from './server.mjs';
 import { validate as localValidate } from './validate.mjs';
-import { createState,DATES } from './domain.mjs';
+import { createState,DATES,failure,execute } from './domain.mjs';
+import { adminExecute,crowdingOperatingHoursFor,normalizeCrowdingOperatingHoursInput } from './admin-domain.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
 const spec=await read('./openapi.json'),examples=await read('./examples.json'),coverage=await read('./screen-coverage.json'),clientStates=await read('./client-state-examples.json');
@@ -34,7 +35,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.equal(validateNegative({...baseMeta,revision:-1}),false);
   const unscopedOperations=new Set([
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
-    'getCrowding','getAdminCrowding','putAdminCrowding',
+    'getCrowding','getAdminCrowding','putAdminCrowding','getAdminCrowdingOperatingHours','getAdminCrowdingOperatingHoursDay','putAdminCrowdingOperatingHoursDay',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
     'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
@@ -48,7 +49,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.ok(examples.getTicketGuide.scenarios.normal.response.meta.revision>=1);
   assert.equal(examples.getCrowding.scenarios.normal.response.meta.revision,0);
 });
-test('26 screens and 178 non-excluded data items plus 11 excluded items are covered without duplicate IDs',()=>{assert.equal(coverage.screens.length,26);assert.equal(coverage.data.length,189);assert.equal(coverage.data.filter(x=>x.owner!=='제외').length,178);assert.equal(coverage.data.filter(x=>x.owner==='제외').length,11);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));});
+test('27 screens include restored crowding-hours mappings without duplicate IDs',()=>{assert.equal(coverage.screens.length,27);assert.equal(coverage.data.length,189);assert.equal(coverage.data.filter(x=>x.owner!=='제외').length,183);assert.equal(coverage.data.filter(x=>x.owner==='제외').length,6);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));for(const id of ['ADM-CROWD-HOURS-D01','ADM-CROWD-HOURS-D02','ADM-CROWD-HOURS-D03','ADM-CROWD-HOURS-D04'])assert.equal(coverage.data.find(d=>d.id===id).owner,'API');assert.equal(coverage.data.find(d=>d.id==='ADM-CROWD-HOURS-D05').owner,'브라우저');});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('Hyped mock keeps repeatable artist counts across festival days with KST closure',async()=>{
   const session='hyped-contract';
@@ -382,17 +383,217 @@ test('Crowding no-op, FULL confirmation, day boundary, restoration, shared read 
   const outsideSession='crowding-outside-festival-day';
   const outsideAdmin=await call('/api/v2/admin/crowding',{session:outsideSession,headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'}});
   const outsideSave=await call('/api/v2/admin/crowding',{session:outsideSession,method:'PUT',headers:{...admin,'If-Match':outsideAdmin.headers.get('etag'),'Idempotency-Key':'crowding-outside','X-Mock-Time':'2030-09-30T10:00:00+09:00'},body:{level:'CROWDED'}});
-  assert.equal(outsideSave.status,204);
+  assert.equal(outsideSave.status,409);assert.equal(outsideSave.body.error.code,'NOT_FESTIVAL_DAY');
   const outsideSaved=await call('/api/v2/admin/crowding',{session:outsideSession,headers:{...admin,'X-Mock-Time':'2030-09-30T10:00:00+09:00'}});
-  assert.equal(outsideSaved.body.data.operatingDay,'2030-10-01');assert.equal(outsideSaved.body.data.savedLevel,'CROWDED');
+  assert.equal(outsideSaved.body.data.operatingDay,'2030-10-01');assert.equal(outsideSaved.body.data.savedLevel,'MODERATE');
   const festivalOpening=await call('/api/v2/crowding',{session:outsideSession,headers:{'X-Mock-Time':'2030-10-01T14:00:00+09:00'}});
-  assert.equal(festivalOpening.body.data.status,'CROWDED');
+  assert.equal(festivalOpening.body.data.status,'MODERATE');
+});
+test('Crowding carries the selected operating day and saved timestamp through an overnight window',async()=>{
+  const session='crowding-overnight',hoursPath='/api/v2/admin/crowding/operating-hours/2030-10-01';
+  const hours=await call(hoursPath,{session,headers:admin});
+  const extended=await call(hoursPath,{session,method:'PUT',headers:{...admin,'If-Match':hours.headers.get('etag'),'Idempotency-Key':'overnight-hours'},body:{opensAt:'2030-10-01T13:00:00+09:00',closesAt:'2030-10-02T01:00:00+09:00'}});
+  assert.equal(extended.status,204);
+  const beforeMidnight=await call('/api/v2/admin/crowding',{session,headers:{...admin,'X-Mock-Time':'2030-10-01T23:59:00+09:00'}});
+  const afterMidnight=await call('/api/v2/admin/crowding',{session,headers:{...admin,'X-Mock-Time':'2030-10-02T00:30:00+09:00'}});
+  assert.equal(beforeMidnight.body.data.operatingDay,'2030-10-01');
+  assert.equal(afterMidnight.body.data.operatingDay,'2030-10-01');
+  assert.equal(afterMidnight.headers.get('etag'),beforeMidnight.headers.get('etag'));
+  const publicAt0030=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T00:30:00+09:00'}});
+  assert.equal(publicAt0030.body.data.operatingDay,'2030-10-01');
+  assert.equal(publicAt0030.body.data.status,'MODERATE');
+  assert.equal(publicAt0030.body.data.savedLevel,'MODERATE');
+  assert.equal(publicAt0030.body.data.updatedAt,'2030-10-01T17:00:00+09:00');
+  const changed=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':beforeMidnight.headers.get('etag'),'Idempotency-Key':'overnight-level','X-Mock-Time':'2030-10-02T00:30:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(changed.status,204);
+  const replay=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':beforeMidnight.headers.get('etag'),'Idempotency-Key':'overnight-level','X-Mock-Time':'2030-10-02T00:59:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(replay.status,204);
+  const activeAt0059=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T00:59:00+09:00'}});
+  assert.equal(activeAt0059.body.data.operatingDay,'2030-10-01');
+  assert.equal(activeAt0059.body.data.status,'CROWDED');
+  assert.ok(activeAt0059.body.data.updatedAt);
+  const atClose=await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-02T01:00:00+09:00'}});
+  assert.equal(atClose.body.data.operatingDay,'2030-10-02');
+  assert.equal(atClose.body.data.status,'BEFORE_OPEN');
+  assert.equal(atClose.body.data.savedLevel,null);
+  assert.equal(atClose.body.data.updatedAt,null);
+  const waiting=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':activeAt0059.headers.get('etag'),'Idempotency-Key':'overnight-waiting-write','X-Mock-Time':'2030-10-02T01:00:00+09:00'},body:{level:'FULL',confirmFull:true}});
+  assert.equal(waiting.status,409);assert.equal(waiting.body.error.code,'EDIT_CONFLICT');
+  const oldScope=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':beforeMidnight.headers.get('etag'),'Idempotency-Key':'overnight-level','X-Mock-Time':'2030-10-02T01:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(oldScope.status,409);assert.equal(oldScope.body.error.code,'EDIT_CONFLICT');
+  const nextDay=await call('/api/v2/admin/crowding',{session,headers:{...admin,'X-Mock-Time':'2030-10-02T01:00:00+09:00'}});
+  const nextDaySave=await call('/api/v2/admin/crowding',{session,method:'PUT',headers:{...admin,'If-Match':nextDay.headers.get('etag'),'Idempotency-Key':'overnight-level','X-Mock-Time':'2030-10-02T01:00:00+09:00'},body:{level:'CROWDED'}});
+  assert.equal(nextDaySave.status,204);
+  const today=await call('/api/v2/admin/crowding',{session,headers:{...admin,'X-Mock-Time':'2030-10-02T13:00:00+09:00'}});
+  assert.equal(today.body.data.operatingDay,'2030-10-02');
+  assert.equal(today.body.data.status,'CROWDED');assert.equal(today.body.data.savedLevel,'CROWDED');
 });
 test('Crowding conditional reads return an ETag and 304 without a body',async()=>{
   const first=await call('/api/v2/crowding',{session:'crowding-conditional'});
   assert.match(first.headers.get('etag'),/^"[0-9a-f]{64}"$/);
   const second=await call('/api/v2/crowding',{session:'crowding-conditional',headers:{'If-None-Match':first.headers.get('etag')}});
   assert.equal(second.status,304);assert.equal(second.body,null);assert.equal(second.headers.get('etag'),first.headers.get('etag'));
+});
+test('Crowding hours list and detail are admin-only conditional no-store reads',async()=>{
+  const session='crowding-hours-read',listPath='/api/v2/admin/crowding/operating-hours';
+  const listOperation=operation('getAdminCrowdingOperatingHours'),detailOperation=operation('getAdminCrowdingOperatingHoursDay');
+  assert.deepEqual(listOperation.security,[{AdminBearer:[]}]);assert.deepEqual(detailOperation.security,[{AdminBearer:[]}]);
+  assert.equal(listOperation['x-conditional'],true);assert.equal(detailOperation['x-conditional'],true);
+  assert.equal(listOperation.responses['200'].headers['Cache-Control'].schema.enum[0],'no-store');
+  const putOperation=operation('putAdminCrowdingOperatingHoursDay');
+  assert.deepEqual(putOperation.requestBody.content['application/json'].schema,{$ref:'#/components/schemas/CrowdingOperatingHoursInput'});
+  assert.deepEqual(spec.components.schemas.CrowdingOperatingHoursInput.required,['opensAt','closesAt']);
+  assert.equal(Object.keys(spec.components.schemas.CrowdingOperatingHoursInput.properties).length,2);
+  assert.equal(putOperation.parameters.find(parameter=>parameter.name==='If-Match').required,true);
+  assert.equal(putOperation.parameters.find(parameter=>parameter.name==='Idempotency-Key').required,true);
+  assert.equal(putOperation.responses['204'].content,undefined);
+  const unauthenticated=await call(listPath,{session});assert.equal(unauthenticated.status,401);
+  const list=await call(listPath,{session,headers:admin});
+  assert.equal(list.status,200);assert.equal(list.headers.get('cache-control'),'no-store');assert.equal(list.body.meta.revision,0);
+  assert.deepEqual(list.body.data.items.map(day=>day.operatingDay),DATES);
+  assert.equal(list.body.data.items[0].updatedAt,null);
+  const empty=await call(listPath,{session,headers:{...admin,'X-Mock-Scenario':'empty'}});
+  assert.deepEqual(empty.body.data.items,[]);
+  const path=`${listPath}/2030-10-01`,detail=await call(path,{session,headers:admin});
+  assert.equal(detail.status,200);assert.equal(detail.headers.get('cache-control'),'no-store');
+  assert.match(detail.headers.get('etag'),/^"[0-9a-f]{64}"$/);assert.equal(detail.body.data.opensAt,'2030-10-01T13:00:00+09:00');
+  const conditional=await call(path,{session,headers:{...admin,'If-None-Match':detail.headers.get('etag')}});
+  assert.equal(conditional.status,304);assert.equal(conditional.body,null);assert.equal(conditional.headers.get('etag'),detail.headers.get('etag'));
+  const invalidDate=await call(`${listPath}/2030-02-30`,{session,headers:admin});
+  assert.equal(invalidDate.status,400);assert.equal(invalidDate.body.error.code,'INVALID_DATE');
+  const missing=await call(`${listPath}/2030-10-04`,{session,headers:admin});
+  assert.equal(missing.status,404);assert.equal(missing.body.error.code,'NOT_FOUND');
+});
+test('Crowding hours saves normalize KST, preserve crowding state, and replay by day and canonical body',async()=>{
+  const session='crowding-hours-write',basePath='/api/v2/admin/crowding/operating-hours',dayPath=`${basePath}/2030-10-01`;
+  const crowdBefore=(await call('/api/v2/crowding',{session})).body.data;
+  const initial=await call(dayPath,{session,headers:admin}),etag=initial.headers.get('etag');
+  const input={opensAt:'2030-10-01T04:00:00Z',closesAt:'2030-10-01T08:59:00Z'};
+  const put=(body,match,key,extra={})=>call(dayPath,{session,method:'PUT',headers:{...admin,'If-Match':match,'Idempotency-Key':key,...extra},body});
+  const noMatch=await call(dayPath,{session,method:'PUT',headers:{...admin,'Idempotency-Key':'hours-missing-match'},body:input});
+  assert.equal(noMatch.status,428);assert.equal(noMatch.body.error.code,'PRECONDITION_REQUIRED');
+  const noKey=await call(dayPath,{session,method:'PUT',headers:{...admin,'If-Match':etag},body:input});
+  assert.equal(noKey.status,428);assert.equal(noKey.body.error.code,'IDEMPOTENCY_KEY_REQUIRED');
+  const saved=await put(input,etag,'hours-day-one');assert.equal(saved.status,204);assert.equal(saved.body,null);
+  const savedDetail=await call(dayPath,{session,headers:admin});
+  assert.equal(savedDetail.body.data.opensAt,'2030-10-01T13:00:00+09:00');
+  assert.equal(savedDetail.body.data.closesAt,'2030-10-01T17:59:00+09:00');
+  assert.ok(savedDetail.body.data.updatedAt);
+  const closed=(await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T18:00:00+09:00'}})).body.data;
+  assert.equal(closed.status,'CLOSED');assert.equal(closed.updatedAt,null);assert.equal(closed.savedLevel,crowdBefore.savedLevel);
+  assert.equal(closed.opensAt,'2030-10-01T13:00:00+09:00');assert.equal(closed.closesAt,'2030-10-01T17:59:00+09:00');
+  const equivalent={opensAt:'2030-10-01T13:00:00+09:00',closesAt:'2030-10-01T17:59:00+09:00'};
+  const replay=await put(equivalent,etag,'hours-day-one');assert.equal(replay.status,204);
+  assert.equal((await call(dayPath,{session,headers:admin})).body.data.updatedAt,savedDetail.body.data.updatedAt);
+  const sameValue=await put(equivalent,savedDetail.headers.get('etag'),'hours-day-one-noop');
+  assert.equal(sameValue.status,204);assert.equal((await call(dayPath,{session,headers:admin})).body.data.updatedAt,savedDetail.body.data.updatedAt);
+  const reused=await put({...equivalent,closesAt:'2030-10-01T18:00:00+09:00'},etag,'hours-day-one');
+  assert.equal(reused.status,409);assert.equal(reused.body.error.code,'IDEMPOTENCY_KEY_REUSED');
+  const extension=await put({opensAt:'2030-10-01T13:00:00+09:00',closesAt:'2030-10-01T22:00:00+09:00'},savedDetail.headers.get('etag'),'hours-day-one-extension');
+  assert.equal(extension.status,204);
+  const reopened=(await call('/api/v2/crowding',{session,headers:{'X-Mock-Time':'2030-10-01T18:00:00+09:00'}})).body.data;
+  assert.equal(reopened.status,crowdBefore.status);assert.equal(reopened.savedLevel,crowdBefore.savedLevel);assert.equal(reopened.updatedAt,crowdBefore.updatedAt);
+  assert.equal((await call('/api/v2/crowding',{session})).body.data.updatedAt,crowdBefore.updatedAt);
+  const stale=await put({opensAt:'2030-10-01T13:00:00+09:00',closesAt:'2030-10-01T23:00:00+09:00'},etag,'hours-stale-write');
+  assert.equal(stale.status,409);assert.equal(stale.body.error.code,'EDIT_CONFLICT');
+});
+test('Crowding hours enforce minute boundaries, date membership, and completed replay after removal',async()=>{
+  const session='crowding-hours-boundaries',basePath='/api/v2/admin/crowding/operating-hours',day='2030-10-02',path=`${basePath}/${day}`;
+  const initial=await call(path,{session,headers:admin}),etag=initial.headers.get('etag');
+  const put=(body,match=etag,key=`hours-boundary-${Math.random()}`)=>call(path,{session,method:'PUT',headers:{...admin,'If-Match':match,'Idempotency-Key':key},body});
+  const firstFallback=await put({opensAt:`${day}T03:00:00Z`,closesAt:`${day}T12:00:00Z`},etag,'hours-first-fallback');
+  assert.equal(firstFallback.status,204);
+  const firstSaved=await call(path,{session,headers:admin});assert.ok(firstSaved.body.data.updatedAt);
+  const sameFallback=await put({opensAt:`${day}T12:00:00+09:00`,closesAt:`${day}T21:00:00+09:00`},firstSaved.headers.get('etag'),'hours-same-fallback');
+  assert.equal(sameFallback.status,204);assert.equal((await call(path,{session,headers:admin})).body.data.updatedAt,firstSaved.body.data.updatedAt);
+  const beforeMidnightSave=await call(path,{session,headers:admin});
+  const nextMidnight=await put({opensAt:`${day}T12:00:00+09:00`,closesAt:'2030-10-03T00:00:00+09:00'},beforeMidnightSave.headers.get('etag'),'hours-next-midnight');
+  assert.equal(nextMidnight.status,204);
+  const saved=await call(path,{session,headers:admin});
+  const halfPastMidnight=await put({opensAt:`${day}T12:00:00+09:00`,closesAt:'2030-10-03T00:30:00+09:00'},saved.headers.get('etag'),'hours-next-half-hour');
+  assert.equal(halfPastMidnight.status,204);
+  const afterHalfPast=await call(path,{session,headers:admin});
+  assert.equal(afterHalfPast.body.data.closesAt,'2030-10-03T00:30:00+09:00');
+  const oneAm=await put({opensAt:`${day}T12:00:00+09:00`,closesAt:'2030-10-03T01:00:00+09:00'},afterHalfPast.headers.get('etag'),'hours-next-one-am');
+  assert.equal(oneAm.status,204);
+  const boundarySaved=await call(path,{session,headers:admin});
+  assert.equal(boundarySaved.body.data.closesAt,'2030-10-03T01:00:00+09:00');
+  for(const body of [
+    {opensAt:`${day}T12:00:00+09:00`,closesAt:'2030-10-03T01:01:00+09:00'},
+    {opensAt:'2030-10-03T00:00:00+09:00',closesAt:'2030-10-03T00:00:00+09:00'},
+    {opensAt:`${day}T12:00:01+09:00`,closesAt:'2030-10-03T00:00:00+09:00'},
+    {opensAt:`${day}T12:00:00.000+09:00`,closesAt:'2030-10-03T00:00:00+09:00'},
+    {opensAt:`${day}T12:00:00+09:00`,closesAt:`${day}T12:00:00+09:00`},
+    {opensAt:'2030-02-30T12:00:00+09:00',closesAt:'2030-10-03T00:00:00+09:00'},
+    {opensAt:`${day}T12:00:00+18:01`,closesAt:'2030-10-03T00:00:00+09:00'},
+    {opensAt:`${day}T12:00:00+19:00`,closesAt:'2030-10-03T00:00:00+09:00'},
+  ]){const invalid=await put(body,boundarySaved.headers.get('etag'));assert.equal(invalid.status,422);assert.equal(invalid.body.error.code,'VALIDATION_FAILED');}
+  assert.deepEqual(normalizeCrowdingOperatingHoursInput(day,{opensAt:`${day}T21:00:00+18:00`,closesAt:'2030-10-03T07:00:00+18:00'},failure),{opensAt:`${day}T12:00:00+09:00`,closesAt:`${day}T22:00:00+09:00`});
+  const notFestival=await call(`${basePath}/2030-10-04`,{session,method:'PUT',headers:{...admin,'If-Match':saved.headers.get('etag'),'Idempotency-Key':'hours-not-festival'},body:{opensAt:'2030-10-04T12:00:00+09:00',closesAt:'2030-10-04T21:00:00+09:00'}});
+  assert.equal(notFestival.status,409);assert.equal(notFestival.body.error.code,'NOT_FESTIVAL_DAY');
+  const replayAfterRemoval=await call(path,{session,method:'PUT',headers:{...admin,'If-Match':etag,'Idempotency-Key':'hours-next-midnight','X-Mock-Scenario':'removed-day'},body:{opensAt:`${day}T12:00:00+09:00`,closesAt:'2030-10-03T00:00:00+09:00'}});
+  assert.equal(replayAfterRemoval.status,204);
+  const removed=await call(path,{session,headers:admin});assert.equal(removed.status,404);assert.equal(removed.body.error.code,'NOT_FOUND');
+});
+test('Crowding hours fallback preserves malformed catalog values and saved overrides across catalog changes',()=>{
+  const state=createState(),day={...state.festivalDays[0]};
+  day.opensAt='13:00:45';day.closesAt=null;state.festivalDays[0]=day;
+  assert.deepEqual(crowdingOperatingHoursFor(state,day.operatingDay),{operatingDay:day.operatingDay,opensAt:'13:00:45',closesAt:null,updatedAt:null});
+  assert.throws(()=>execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}),error=>error.status===503&&error.code==='CROWDING_SCHEDULE_UNCONFIGURED');
+  let now='2030-10-01T18:00:00+09:00';
+  const mutate=()=>{state.revision++;return now;};
+  const saved=adminExecute(operation('putAdminCrowdingOperatingHoursDay'),state,{params:{operatingDay:day.operatingDay},body:{opensAt:'2030-10-01T04:00:00Z',closesAt:'2030-10-01T13:00:00Z'},scenario:'normal',mutate,failure,DATES});
+  assert.equal(saved.status,204);const value=crowdingOperatingHoursFor(state,day.operatingDay);assert.equal(value.opensAt,'2030-10-01T13:00:00+09:00');
+  const updatedAt=value.updatedAt;state.revision++;state.festivalDays=state.festivalDays.filter(item=>item.operatingDay!==day.operatingDay);
+  assert.equal(crowdingOperatingHoursFor(state,day.operatingDay),null);
+  state.festivalDays.push({...day,opensAt:'14:00',closesAt:'21:00'});
+  assert.deepEqual(crowdingOperatingHoursFor(state,day.operatingDay),{operatingDay:day.operatingDay,opensAt:'2030-10-01T13:00:00+09:00',closesAt:'2030-10-01T22:00:00+09:00',updatedAt});
+  assert.equal(state.crowdingOperatingHoursAudit.length,1);
+  assert.equal(execute(operation('getCrowding'),state,{now}).data.closesAt,'2030-10-01T22:00:00+09:00');
+});
+test('Crowding hours follow current published days and normalize midnight in KST',()=>{
+  const state=createState();
+  state.festivalDays=state.festivalDays.filter(day=>day.operatingDay!=='2030-10-02');
+  const nextPublished=execute(operation('getCrowding'),state,{now:'2030-10-02T18:00:00+09:00'}).data;
+  assert.equal(nextPublished.operatingDay,'2030-10-03');assert.equal(nextPublished.status,'BEFORE_OPEN');
+  assert.throws(()=>execute(operation('putAdminCrowding'),state,{now:'2030-10-02T18:00:00+09:00',body:{level:'CROWDED'}}),error=>error.status===409&&error.code==='NOT_FESTIVAL_DAY');
+  state.festivalDays[0]={...state.festivalDays[0],closesAt:'01:00'};
+  assert.equal(crowdingOperatingHoursFor(state,'2030-10-01').closesAt,'2030-10-02T01:00:00+09:00');
+  const overnight=execute(operation('getCrowding'),state,{now:'2030-10-02T00:30:00+09:00'}).data;
+  assert.equal(overnight.operatingDay,'2030-10-01');assert.equal(overnight.status,'MODERATE');assert.equal(overnight.updatedAt,'2030-10-01T17:00:00+09:00');
+  const lastMinute=execute(operation('getCrowding'),state,{now:'2030-10-02T00:59:59+09:00'}).data;
+  assert.equal(lastMinute.operatingDay,'2030-10-01');assert.equal(lastMinute.status,'MODERATE');
+  const atClose=execute(operation('getCrowding'),state,{now:'2030-10-02T01:00:00+09:00'}).data;
+  assert.equal(atClose.operatingDay,'2030-10-03');assert.equal(atClose.status,'BEFORE_OPEN');
+  state.festivalDays.push({operatingDay:'2030-10-02',opensAt:'12:00',closesAt:'21:00'});
+  assert.equal(execute(operation('getCrowding'),state,{now:'2030-10-02T18:00:00+09:00'}).data.operatingDay,'2030-10-02');
+});
+test('Crowding selects a started today schedule over an overlapping overnight schedule',()=>{
+  const state=createState();
+  state.festivalDays.find(day=>day.operatingDay==='2030-10-01').closesAt='01:00';
+  state.festivalDays.find(day=>day.operatingDay==='2030-10-02').opensAt='00:20';
+  state.festivalDays.find(day=>day.operatingDay==='2030-10-02').closesAt='00:40';
+  const atOpen=execute(operation('getCrowding'),state,{now:'2030-10-02T00:20:00+09:00'}).data;
+  assert.equal(atOpen.operatingDay,'2030-10-02');assert.equal(atOpen.operatingStatus,'OPEN');
+  const afterClose=execute(operation('getCrowding'),state,{now:'2030-10-02T00:50:00+09:00'}).data;
+  assert.equal(afterClose.operatingDay,'2030-10-02');assert.equal(afterClose.operatingStatus,'CLOSED');assert.equal(afterClose.status,'CLOSED');
+});
+test('Public crowding accepts bounded catalog seconds and fractions while PUT remains minute-only',()=>{
+  const state=createState();
+  state.festivalDays[0]={...state.festivalDays[0],opensAt:'13:00:45.123456',closesAt:'22:00:12.345678'};
+  const data=execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}).data;
+  assert.equal(data.opensAt,'2030-10-01T13:00:45.123456+09:00');
+  assert.equal(data.closesAt,'2030-10-01T22:00:12.345678+09:00');
+  const boundary=time=>execute(operation('getCrowding'),state,{now:time}).data.status;
+  assert.equal(boundary('2030-10-01T13:00:45.123455+09:00'),'BEFORE_OPEN');
+  assert.equal(boundary('2030-10-01T13:00:45.123456+09:00'),'MODERATE');
+  assert.equal(boundary('2030-10-01T22:00:12.345677+09:00'),'MODERATE');
+  assert.equal(boundary('2030-10-01T22:00:12.345678+09:00'),'CLOSED');
+  state.festivalDays[0]={...state.festivalDays[0],closesAt:'2030-10-02T00:00:00.000000001+09:00'};
+  assert.equal(execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}).data.closesAt,
+    '2030-10-02T00:00:00.000000001+09:00');
+  state.festivalDays[0]={...state.festivalDays[0],closesAt:'2030-10-02T01:00:00.000000001+09:00'};
+  assert.throws(()=>execute(operation('getCrowding'),state,{now:'2030-10-01T18:00:00+09:00'}),error=>error.status===503&&error.code==='CROWDING_SCHEDULE_UNCONFIGURED');
 });
 test('Goods save changes only one combination and derives sold-out; failed writes do not mutate',async()=>{
   const session='goods-flow',path='/api/v2/admin/goods/goods-shirt/combinations/combo-shirt-a-m/availability';
@@ -533,11 +734,12 @@ test('Runtime validator rejects representative schema violations independently o
   assert.ok(localValidate(spec.components.schemas.Pin,{id:'p',label:'p',category:'p',x:1.1,y:0,target:{kind:'PLACE',placeId:'a',mapId:'b'}},spec).length);
 });
 
-test('v5 removes operating-hour and quantity writes and map crowd consumers',async()=>{
-  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,178);
+test('crowding hours use their approved route while legacy routes and out-of-scope fields stay removed',async()=>{
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,183);
   for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
   assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
   for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);
+  assert.equal((await call('/api/v2/admin/crowding/operating-hours',{headers:admin})).status,200);
   assert.doesNotMatch(JSON.stringify(createState()),/"quantit(?:y|ies)"/);
   for(const path of ['/api/v2/admin/goods','/api/v2/goods-availability']){
     const d=(await call(path,{headers:admin})).body.data;

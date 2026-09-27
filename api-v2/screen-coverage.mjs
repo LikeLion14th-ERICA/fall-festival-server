@@ -19,6 +19,7 @@ const groups={
   'STAMP-COLLECT':['StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여)','StampCard.stamps (부스당 하루 1개, 최대 StampCard.dailyLimit)','StampCard.rewardClaimed','StampCard.date (축제 시간대 자정 초기화)','StampCollectionInput.token ← 부스 QR 링크의 b 값'],
   'STAMP-REWARD':['프런트 고정 UI: 담당자에게 제시·수령 인증 코드 입력·확인 버튼; 상품 수령 버튼 없음'],
   'ADM-CROWD':['Crowding.savedLevel','Crowding.status','Crowding.colorToken','Crowding.message','Crowding.updatedAt','Crowding.operatingDay','Crowding.opensAt','Crowding.closesAt'],
+  'ADM-CROWD-HOURS':['CrowdingOperatingHours.operatingDay','CrowdingOperatingHours.opensAt','CrowdingOperatingHours.closesAt','CrowdingOperatingHours.updatedAt (null이면 게시 일정 초기값)','브라우저: 저장 전 입력값 보존'],
   'ADM-NOTICE-LIST':['AdminNotice.id','AdminNotice.type','AdminNotice.translations.ko.title','AdminNotice.updatedAt'],
   'ADM-NOTICE-EDIT':['AdminNotice.type','AdminNotice.translations.ko.title','AdminNotice.translations.ko.body','AdminNotice.image (입력·노출 정책 미정)','AdminNotice.templateId','AdminNotice.translations'],
   'ADM-NOTICE-DELETE':['AdminNotice.id','AdminNotice.translations.ko.title'],
@@ -34,18 +35,21 @@ export function buildCoverage(source,operations){
   groups['ADM-NOTICE-EDIT'][3]='보류: 이미지 필드 폐기';
   groups['ADM-NOTICE-EDIT'][6]='AdminNotice.links';groups['ADM-NOTICE-EDIT'][7]='AdminNotice.translations (수동 ko·en 필수 입력, 자동 번역 없음)';
   groups['ADM-GOODS']=['Availability.goodsId','Availability.name','AdminGoodsCombination.colorId + AdminGoodsCombination.sizeId','AdminGoodsCombination.status','제외: 실제 재고 수량 미관리','Availability.allSoldOut'];
-  groups['ADM-CROWD-HOURS']=Array(5).fill('제외: 운영 시간은 개발자 등록, 관리자 편집 없음');
   groups['ADM-GOODS-PRODUCT-LIST']=['Goods.id','Goods.name','Goods.price','보류: 이미지 필드는 별도 마이그레이션','Goods.colors','Goods.sizes'];
   groups['ADM-GOODS-PRODUCT-EDIT']=[...groups['ADM-GOODS-PRODUCT-LIST'],'브라우저: 상품 작성 중 입력값'];
   const wikiSource=screen=>'../docs/wiki/product/'+(screen.startsWith('ADM-CROWD')?'admin/crowd.md':screen.startsWith('ADM-NOTICE')?'admin/notice.md':screen.startsWith('ADM-GOODS')?'admin/goods.md':screen.startsWith('MAP')?'map.md':screen.startsWith('GOODS')?'goods.md':screen.startsWith('BOOTH')?'spaces.md':screen.startsWith('STAMP')?'stamp.md':screen==='TICKET'?'ticket.md':screen==='HOME'?'home.md':screen==='NOTICE-LIST'?'notice.md':screen==='SHOW-TIMETABLE'||screen==='SHOW-POPUP'?'timetable.md':'lineup.md');
   const rows=source.tabs.find(t=>t.title==='02 데이터와 책임').rows.filter(r=>r[0]==='작성');
   const data=rows.map(r=>{const index=Number(r[2].match(/-D(\d+)$/)?.[1])-1;const target=groups[r[1]]?.[index];if(!target)throw new Error(`Missing screen data mapping: ${r[2]}`);return {id:r[2],screenId:r[1],label:r[2]==='SHOW-TIMETABLE-D05'?'고정 반입 금지 물품 안내':r[2]==='ADM-GOODS-D04'?'판매 상태':r[4],wikiSource:wikiSource(r[1]),legacySource:{owner:r[9],decision:r[10],material:r[11],pendingIds:currentPendingIds(r[13]),requiredInScreen:r[6]},owner:target.startsWith('제외')?'제외':target.startsWith('브라우저')?'브라우저':target.startsWith('프런트')?'프런트':target.startsWith('보류')?'보류':'API',target,requiredInScreen:'OpenAPI required 및 SCREEN-STATES.md 참조',sourceDecision:'위키 v5',sourceMaterial:wikiSource(r[1])};});
   const rewardInstruction=data.find(d=>d.id==='STAMP-REWARD-D01');
+  for(const [id,label] of [['HOME-D04','선택 운영일 입장 시작 시각'],['HOME-D05','선택 운영일 종료 시각']]){
+    const row=data.find(d=>d.id===id);
+    if(row)row.label=label;
+  }
   if(rewardInstruction)Object.assign(rewardInstruction,{label:'담당자 제시·수령 인증 코드 입력 안내',target:groups['STAMP-REWARD'][0],owner:'프런트'});
   for(const [screenId,id,label,target] of [['GOODS-DETAIL','GOODS-DETAIL-D08','실제 제공 조합','Availability.combinations'],['ADM-GOODS-PRODUCT-EDIT','ADM-GOODS-PRODUCT-EDIT-D08','실제 제공 조합','ProductInput.options'],['SHOW-TIMETABLE','SHOW-TIMETABLE-D07','반입 금지 물품 목록','ProhibitedItems.items'],['STAMP-REWARD','STAMP-REWARD-D02','수령 인증 결과','StampReceiptVerificationInput.code → StampReceiptVerification.verified']])data.push({id,screenId,label,target,owner:'API',wikiSource:wikiSource(screenId),requiredInScreen:'필수',sourceDecision:'위키 v5',sourceMaterial:'운영 자료 대기',pendingIds:''});
   for(const [screenId,id,label,target] of [['SHOW-LINEUP','SHOW-LINEUP-D06','아티스트별 Hyped 누적 수','ArtistHypedSummary.items[].hypedCount (artistId로 결합, CONTEST 제외)'],['SHOW-ARTIST','SHOW-ARTIST-D09','Hyped 누적 수와 참여 가능 상태','ArtistHypedSummary.items[].hypedCount + hypedEnabled → ArtistHypedIncrement.hypedCount']])data.push({id,screenId,label,target,owner:'API',wikiSource:wikiSource(screenId),requiredInScreen:'필수',sourceDecision:'사용자 결정 2026-09-25',sourceMaterial:wikiSource(screenId),pendingIds:''});
-  const screenRows=source.tabs.find(t=>t.title==='01 화면 현황').rows.filter(r=>groups[r[0]]&&r[0]!=='ADM-CROWD-HOURS');
+  const screenRows=source.tabs.find(t=>t.title==='01 화면 현황').rows.filter(r=>groups[r[0]]);
   const screens=screenRows.map(r=>({id:r[0],name:r[1],operations:operations.filter(o=>o.screens.includes(r[0])).map(o=>o.operationId),browserData:data.filter(d=>d.screenId===r[0]&&d.owner!=='API').map(d=>d.id),legacySource:{pendingIds:currentPendingIds(r[9])}}));
-  if(data.length!==189||screens.length!==26)throw new Error('Screen source changed; review coverage counts.');
+  if(data.length!==189||screens.length!==27)throw new Error('Screen source changed; review coverage counts.');
   return {basis:'Product Context v5 (user confirmed 2026-09-14)',baseCommit:'21eb76dacd78b3ad79ed4d9589dd341fbc25b883',legacySourceUrl:source.url,screens,data};
 }

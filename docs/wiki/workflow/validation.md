@@ -55,11 +55,11 @@ macOS/Linux에서는 `sh ./mvnw --batch-mode --no-transfer-progress verify`를 �
 `PostgresTestImages`가 승인된 `postgres:17.11`을 선택한다. 기존 PG17 preflight 테스트도
 동일한 고정 이미지를 사용한다. `test/` 실기기 검증 환경의 PostgreSQL 설정은 별개다.
 
-`Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의
-새 임시 database에 V1~V26을 적용하는 경우와, V23에서 지도·안내·굿즈·공지·계좌 이력의
-fixture를 만든 뒤 V24 → V25 → V26을 차례로 적용하는 경우를 검사한다. 각 단계는
-Flyway history·checksum, 기존 데이터의 전체 행 보존, 번역·미디어·템플릿 제약을
-검증하고 새 Flyway 인스턴스의 재기동에서 migration 0건·history/데이터 무변경을 확인한다.
+`Postgresql17MigrationReleaseTest`는 release profile에서만 기본 선택된다. Docker의 migration suite는
+네 개 독립 경로를 확인한다: 빈 DB V1→V26, V23 fixture에서 V24~V26 적용과 기존 행 보존,
+V30→V31의 `crowding_operating_hours` 무 backfill 생성, V31→V32 시간 구간 CHECK 확장이다.
+V31 checksum 보존을 확인하고 각 경로에서 Flyway history·기존 데이터를 검증한다. 새 Flyway 인스턴스
+재기동은 migration 0건·history/데이터 무변경을 확인한다.
 기존 migration SQL을 그대로 사용하며 원격 DB나 staging·prod 설정을 읽지 않는다.
 
 migration 게이트만 실행하는 focused 명령은 다음과 같다.
@@ -105,15 +105,15 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-05 | 공연 탐색 | config 기본 날짜 → lineup → artist → performance → timetable, 출연진·공연 ID와 순서 관계 |
 | HTTP-06 | 티켓·스탬프 확인 | ticket guide의 `UNCONFIGURED`·strong ETag/304·map target, stamp 제목·보상·기간·일일 한도, 부스 QR 적립(참여 쿠키·부스당 하루 1회·4개 제한)과 가득 찬 판의 수령 1회 |
 | HTTP-07 | 관리자 세션 | 로그인 → `/admin/me` → refresh rotation → 이전 refresh 거부 → logout 뒤 refresh 거부 |
-| HTTP-08 | 혼잡도 운영 | 공개 조회 → 관리자 변경 → 같은 idempotency key replay → 공개 반영 → 같은 단계 재선택의 no-op |
-| HTTP-09 | 충돌·확인 처리 | stale `If-Match`의 409, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |
+| HTTP-08 | 혼잡도·운영 시간 운영 | 공개 조회 → 운영 시간 목록·상세 조회 → catalog 초기값과 같은 첫 저장 및 감사 기록 → 동일 key replay 204 → 운영 시간 재조회·공개 혼잡도 반영 → 같은 시간/혼잡도 재저장의 no-op |
+| HTTP-09 | 충돌·확인 처리 | 운영 시간 stale `If-Match`의 409와 필수 헤더 428, 잘못된 시간의 422, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |
 | HTTP-10 | locale·query 오류 | 미게시 locale의 `LOCALE_NOT_READY`, 미지원·중복 query의 `INVALID_QUERY`, 후보 meta와 안전한 오류 envelope |
 | HTTP-11 | 조건부 읽기 호환성 | ticket guide의 strong ETag에 weak validator와 다중 `If-None-Match` 값을 보내도 304·새 request ID·cache 지시자가 일관됨 |
 | HTTP-12 | 관리자 입력 경계 | 허용하지 않거나 누락된 Origin의 credential 발급 거절, 잘못된 비밀번호·손상 access token·malformed JSON·access token 없는 logout의 안전한 오류 |
 | HTTP-13 | release E2E datasource 격리 | Hikari·JNDI override가 있어도 후보 import helper와 HTTP context가 Testcontainers datasource만 사용 |
 | HTTP-14 | 전체 후보 탐색 | 모든 선언 날짜·ARTIST/CONTEST 목록의 반복 응답·순서·상세 관계와 노출된 모든 공간 category filter·중복 없음 |
 | HTTP-15 | 계좌 CLI의 즉시 반영 | 별도 Account CLI의 TICKET set·clear가 실행 중 server의 ticket guide·version·ETag/304에 즉시 반영되고 마감 시 계좌를 숨김 |
-| HTTP-16 | 혼잡도 동시 변경 | 실제 admin HTTP 요청 두 개의 같은 key/ETag 경쟁에서 한 번만 저장·감사되고 replay·key 재사용 거절이 보존됨 |
+| HTTP-16 | 혼잡도·운영 시간 동시 변경 | 실제 관리자 HTTP 요청의 동일 key/ETag 경쟁에서 한 번만 저장·감사되고 stale 수정은 409. 같은 key의 다른 본문 거절과 날짜 제거 뒤 완료 요청 replay 204도 확인 |
 | HTTP-17 | 게시·재시작·rollback lifecycle | A 게시 → 실행 server의 A snapshot 유지 → 재시작의 B 노출 → expected-current rollback → 재시작의 새 revision A 복원과 동적 상태 보존 |
 | HTTP-18 | 공개 입력 오류 후 복구 | 잘못된 날짜·분류·지도 query와 존재하지 않는 공간·지도·장소·출연진·공연이 안정 오류·후보 meta를 내고, 잘못된 admin bearer가 공개 탐색을 막지 않으며 다음 config 조회가 복구됨 |
 | HTTP-19 | 축제 날짜 경계 | 첫 FestivalDay 전과 마지막 FestivalDay 후에 config 기본 날짜와 기본 lineup 날짜가 각각 첫째·마지막 날로 함께 고정됨 |
@@ -121,7 +121,7 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-21 | 공개 읽기 rate limit | trusted proxy client 단위 429·`Retry-After`·안전 envelope, 다른 client의 독립 bucket, clock 회복 뒤 재조회와 서버 생성 request ID를 실제 HTTP로 확인 |
 | HTTP-22 | 관리자 로그인 rate limit | 잘못된 비밀번호 추측이 trusted proxy client 단위로 제한되고 다른 client·refill 뒤에는 다시 인증 오류로 처리되며 cookie를 발급하지 않음 |
 | HTTP-23 | 티켓 송금 초 경계 | `09:59:59`·`10:00:00`·`17:59:59`·`18:00:00` KST에서 `DAILY_CLOSED`/`TRANSFER_OPEN`, 계좌 노출, settings version, 이전·현재 ETag의 200/304가 정확히 전환됨 |
-| HTTP-24 | 혼잡도 일정 경계 | 첫 축제일 전·중간 공백일·마지막 날 뒤와 개장·마감 시각의 `operatingStatus`, 비축제일 PUT 409, 운영 시간 밖 축제일 저장, 누락·stale `If-Match`의 428/409을 실제 HTTP로 확인 |
+| HTTP-24 | 혼잡도·운영 시간 경계 | 실제 Spring HTTP E2E는 익일 `01:00` 허용·`01:01` 거절, 야간 운영일을 유지한 자정 통과 대기 쓰기 성공, 종료 경계 대기 쓰기 stale 충돌, 마지막 축제일 익일 저장을 확인한다. 전날 OPEN과 당일 일정 겹침에서 당일 우선·당일 CLOSED 유지, 날짜별 idempotency key 범위는 unit/consumer/provider 검증에서 확인한다. 기존 경계 검증은 첫 축제일 전·중간 공백일·마지막 날 뒤, 비축제일 저장 409, 잘못된 날짜 400, 목록 빈 배열, 누락·stale `If-Match` 428/409를 다룬다. |
 | HTTP-25 | 공지 lifecycle | 실제 관리자 생성 Location·replay·key reuse·If-Match stale·수정·삭제와 공개 목록 반영·conditional read를 확인 |
 | HTTP-26 | 상품·판매 상태 lifecycle | 상품 생성 Location·replay·목록/상세/관리자 목록·조합 ON_SALE/SOLD_OUT·옵션 변경·hard delete와 media detach를 확인 |
 | HTTP-27 | 이미지 upload/delivery | multipart 인증·상한·유형·replay·media 공개 200/304 header·replacement/detach·processor/storage 실패 rollback을 확인 |
