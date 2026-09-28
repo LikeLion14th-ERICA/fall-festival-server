@@ -9,13 +9,12 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-/** Builds the public notice list from the current KST day's visibility window. */
+/** Builds the public notice list from non-deleted notices ready in the requested locale. */
 @Service
 @Profile("db")
 public class NoticeViewService {
@@ -46,9 +45,7 @@ public class NoticeViewService {
         String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
         UUID festivalId = properties.configuredFestivalId();
         LocalDate today = LocalDate.now(clock.withZone(TIMEZONE));
-        ZonedDateTime windowStart = today.atStartOfDay(TIMEZONE);
-        ZonedDateTime windowEnd = windowStart.plusDays(1);
-        List<Notice> notices = store.findVisible(festivalId, windowStart.toInstant(), windowEnd.toInstant());
+        List<Notice> notices = store.findVisible(festivalId);
         List<NoticeResponse> items = notices.stream()
             .filter(notice -> isReadyForLocale(notice, requestedLocale))
             .map(notice -> toResponse(notice, requestedLocale))

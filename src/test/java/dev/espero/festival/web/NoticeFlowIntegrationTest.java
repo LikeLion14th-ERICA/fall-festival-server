@@ -46,7 +46,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/** Drives the public and administrator notice endpoints against the real KST-scoped notice table. */
+/** Drives the public and administrator notice endpoints against the real festival-scoped notice table. */
 @SpringBootTest(properties = "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf")
 @ActiveProfiles("db")
 @Testcontainers(disabledWithoutDocker = true)
@@ -123,7 +123,7 @@ class NoticeFlowIntegrationTest {
     }
 
     @Test
-    void listsTodaysGeneralNoticeAndAnyDayLostFoundOrderedNewestFirst() throws Exception {
+    void listsAllNoticeTypesRegardlessOfDateOrderedNewestFirst() throws Exception {
         UUID older = insertNotice("GENERAL", "2030-10-01T09:00:00+09:00");
         UUID newer = insertNotice("GENERAL", "2030-10-01T10:00:00+09:00");
         UUID yesterdayGeneral = insertNotice("GENERAL", "2030-09-30T23:00:00+09:00");
@@ -131,13 +131,41 @@ class NoticeFlowIntegrationTest {
 
         mvc.perform(get("/api/v2/notices"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(3)))
+            .andExpect(jsonPath("$.data.items", org.hamcrest.Matchers.hasSize(4)))
             .andExpect(jsonPath("$.data.items[0].id").value(newer.toString()))
             .andExpect(jsonPath("$.data.items[1].id").value(older.toString()))
-            .andExpect(jsonPath("$.data.items[2].id").value(oldLostFound.toString()))
-            .andExpect(jsonPath("$.data.visibleIds", org.hamcrest.Matchers.not(
-                org.hamcrest.Matchers.hasItem(yesterdayGeneral.toString())
+            .andExpect(jsonPath("$.data.items[2].id").value(yesterdayGeneral.toString()))
+            .andExpect(jsonPath("$.data.items[3].id").value(oldLostFound.toString()))
+            .andExpect(jsonPath("$.data.visibleIds", org.hamcrest.Matchers.contains(
+                newer.toString(), older.toString(), yesterdayGeneral.toString(), oldLostFound.toString()
             )));
+    }
+
+    @Test
+    void keepsNoticesVisibleAcrossKstMidnight() throws Exception {
+        UUID general = insertNotice("GENERAL", "2030-10-01T18:53:00+09:00");
+        UUID lostFound = insertNotice("LOST_FOUND", "2030-09-30T09:00:00+09:00");
+        clock.set(OffsetDateTime.parse("2030-10-01T23:59:59+09:00"));
+        var before = mvc.perform(get("/api/v2/notices"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.asOfDate").value("2030-10-01"))
+            .andExpect(jsonPath("$.data.visibleIds", org.hamcrest.Matchers.contains(
+                general.toString(), lostFound.toString()
+            )))
+            .andReturn().getResponse();
+
+        clock.set(OffsetDateTime.parse("2030-10-02T00:00:00+09:00"));
+        var after = mvc.perform(get("/api/v2/notices").header("If-None-Match", before.getHeader("ETag")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.asOfDate").value("2030-10-02"))
+            .andReturn().getResponse();
+        var beforeData = objectMapper.readTree(before.getContentAsString()).path("data");
+        var afterData = objectMapper.readTree(after.getContentAsString()).path("data");
+        assertThat(afterData.path("items")).isEqualTo(beforeData.path("items"));
+        assertThat(afterData.path("visibleIds")).isEqualTo(beforeData.path("visibleIds"));
+
+        mvc.perform(get("/api/v2/notices").header("If-None-Match", after.getHeader("ETag")))
+            .andExpect(status().isNotModified());
     }
 
     @Test

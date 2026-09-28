@@ -189,7 +189,7 @@ export function createState() {
   const notices = [
     {id:'notice-1',type:'GENERAL',translations:{ko:translation('예시 공지','개발용 공지 본문입니다.'),en:translation('Sample notice','Mock content only.')},links:[noticeLink({ko:'예시 안내',en:'Sample link'})],templateId:null,createdAt:'2030-10-01T16:00:00+09:00',updatedAt:'2030-10-01T16:00:00+09:00'},
     {id:'notice-lost',type:'LOST_FOUND',translations:{ko:translation('예시 분실물','실제 분실물이 아닙니다.'),en:translation('Sample lost item','Mock item, not a real report.')},links:[],templateId:null,createdAt:'2030-09-30T16:00:00+09:00',updatedAt:'2030-09-30T16:00:00+09:00'},
-    {id:'notice-old',type:'GENERAL',translations:{ko:translation('지난 예시 공지','사용자 목록에서는 제외합니다.'),en:translation('Past sample notice','Excluded from the user list.')},links:[],templateId:null,createdAt:'2030-09-30T18:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
+    {id:'notice-old',type:'GENERAL',translations:{ko:translation('지난 예시 공지','등록 날짜와 관계없이 삭제 전까지 표시합니다.'),en:translation('Past sample notice','Visible until deleted, regardless of its creation date.')},links:[],templateId:null,createdAt:'2030-09-30T18:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
     {id:'notice-ko-only',type:'GENERAL',translations:{ko:translation('영어 미번역 예시','과거 이관 데이터처럼 영어 번역이 없는 예시입니다. en 공개 목록에서는 제외됩니다.')},links:[],templateId:null,createdAt:'2030-10-01T17:00:00+09:00',updatedAt:'2030-10-01T17:00:00+09:00'},
     {id:'notice-route',type:'GENERAL',translations:{ko:translation('목 구역 이동 안내','가상 구역 이동 동선을 확인하는 개발용 공지입니다.'),en:translation('Mock route notice','A fictional route notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:10:00+09:00',updatedAt:'2030-10-01T17:10:00+09:00'},
     {id:'notice-stage',type:'GENERAL',translations:{ko:translation('목 공연 대기 안내','가상 공연 목록과 대기 상태를 검증하는 개발용 공지입니다.'),en:translation('Mock stage notice','A fictional stage notice for frontend work.')},links:[],templateId:null,createdAt:'2030-10-01T17:20:00+09:00',updatedAt:'2030-10-01T17:20:00+09:00'},
@@ -463,7 +463,6 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     }
     case 'getNotices':{
       let items=state.notices.filter(n=>!state.deleted.has(n.id)
-        &&(n.type==='LOST_FOUND'||dayKst(n.createdAt)===date)
         &&hasContentLocale(n.translations,locale)
         &&n.links.every(link=>hasContentLocale(link.labels,locale))).map(n=>{
         const t=n.translations[locale];

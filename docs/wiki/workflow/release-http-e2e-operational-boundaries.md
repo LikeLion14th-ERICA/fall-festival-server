@@ -109,7 +109,7 @@ state를 각각 폐기한다.
 - template set A와 B를 별도 temporary JSON file로 준비한다. A에는 test template id, ko와
   선택 locale의 번역이 있고 B에는 그 id가 없다. JSON 원문에는 실제 운영 제목·URL을 넣지 않는다.
 - 실제 `NoticeTemplateCliApplication` child process와 관리자 bearer session을 준비한다.
-  public notice visibility를 보려면 공지 payload도 ko·en을 모두 가지며 KST 당일에 생성한다.
+  public notice visibility를 보려면 공지 payload도 ko·en을 모두 갖춘다. 등록 날짜와 관계없이 노출된다.
 
 | 단계 | CLI 또는 HTTP 흐름 | 수용 조건 | 상태 불변식 |
 | --- | --- | --- | --- |
