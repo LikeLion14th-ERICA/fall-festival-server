@@ -128,11 +128,6 @@ const performanceFixtures = DATES.flatMap((date,dayIndex) => {
   ];
 });
 
-// Fictional receiving accounts; only the detail response carries them.
-const MOCK_BANK_TRANSFERS = {
-  'space-pub':{bankId:'mock-bank',bankDisplayName:'개발용 은행',accountNumber:'000000000000',accountHolderName:'개발용 예금주',tossLinkEnabled:false},
-  'space-food-truck':{bankId:'mock-bank',bankDisplayName:'개발용 은행',accountNumber:'012345678901',accountHolderName:'개발용 푸드트럭',tossLinkEnabled:false},
-};
 const mapForCategory = {BOOTH:'map-area',PUB:'map-pub',FLEA_MARKET:'map-market',FOOD_TRUCK:'map-food',STUDENT_COUNCIL_BOOTH:'map-area',PROMOTION_BOOTH:'map-area'};
 const EVENT_CATEGORIES = new Set(['BOOTH','STUDENT_COUNCIL_BOOTH','PROMOTION_BOOTH']);
 const MENU_CATEGORIES = new Set(['PUB','FOOD_TRUCK']);
@@ -145,7 +140,6 @@ const space = ({id,category,name,locationText,operator,hoursText,description,con
     events:EVENT_CATEGORIES.has(category)?events:[],
     menu:MENU_CATEGORIES.has(category)?menu:[],
     mapTarget:{mapId,placeId:`place-${key}`,pinId:`pin-${key}`,mapVersion:MAP_VERSION},
-    bankTransfer:null,
   };
 };
 const pubMenu = (theme,index) => [
@@ -410,7 +404,7 @@ function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=f
   return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:CROWD_MESSAGES[locale]?(status==='BEFORE_OPEN'?messages.BEFORE_OPEN(openingText):messages[status]):`Mock crowd status: ${status}`,updatedAt:active?stored?.updatedAt||null:null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
 }
 export function scenarioTime(scenario,now) {
-  return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00'})[scenario]||now;
+  return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00','reward-closed':'2030-10-01T17:00:00+09:00'})[scenario]||now;
 }
 // Korean is the only ready default. Controlled mock scenarios can enable complete fictional translations.
 function localize(value,locale) {
@@ -489,12 +483,6 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       break;
     }
     case 'getGoodAvailability':data=getAvailability(findPublicGoods(state,params.goodsId,locale).id);break;
-    case 'getPaymentGuide':{
-      const g=findPublicGoods(state,params.goodsId,locale);
-      const resolved=resolveGoodsResponse(g,locale);
-      data={goodsId:g.id,name:resolved.name,price:g.price,account:missing?null:{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'},transferLink:null,instructions:['현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.','목 응답은 실제 송금을 지원하지 않습니다.'],locationText:missing?null:'예시 판매 장소',hoursText:missing?null:'예시 운영 시간'};
-      break;
-    }
     case 'getLineup':{
       const selected=query.date||defaultDate(date),category=query.category||'ARTIST';
       if(!DATES.includes(selected))failure(400,'INVALID_DATE','행사 날짜 중에서 선택해 주세요.');
@@ -529,7 +517,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getPerformance':data=find(state.performances,params.performanceId);if(missing)data.description=null;break;
     case 'getProhibitedItems':data={items:empty?[]:['개발용 반입 금지 물품 예시'],message:empty?null:'총학생회 확정 자료를 사전 번역해 고정 표시합니다. 이 내용은 예시입니다.'};break;
     case 'getSpaces':data={items:empty?[]:structuredClone(state.spaces).filter(s=>!query.category||query.category==='ALL'||s.category===query.category).sort((a,b)=>a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id))};break;
-    case 'getSpace':data=find(state.spaces,params.spaceId);data.bankTransfer=MOCK_BANK_TRANSFERS[data.id]||null;if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null,bankTransfer:null});break;
+    case 'getSpace':data=find(state.spaces,params.spaceId);if(missing)Object.assign(data,{operator:null,hoursText:null,description:null,contact:null,experience:null,events:[],menu:[],mapTarget:null});break;
     case 'getMaps':data={items:empty?[]:structuredClone(state.maps),overviewId:empty?null:'map-overview'};break;
     case 'getMap':data=find(state.maps,params.mapId);break;
     case 'getPins':{
@@ -546,7 +534,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       const unconfigured=scenario==='unconfigured';
       data={unitPrice:unconfigured?null:money(25000)};break;
     }
-    case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['축제일마다 START를 누르면 그날 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
+    case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['축제일마다 START를 누르면 그날 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'매일 11:00~17:00',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
     case 'startStampParticipation':
       // START is once per festival day: a card from an earlier day means not started today.
       if(scenario==='already-started'&&state.stampCard?.date!==date)mockStampCard(state,date,0);
@@ -571,10 +559,12 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     }
     case 'verifyStampReceipt':{
       if(scenario==='invalid-code'||typeof body.code!=='string'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');
-      if(!state.stampCard&&scenario==='normal')mockStampCard(state,date,4);
+      if(!state.stampCard&&['normal','reward-closed'].includes(scenario))mockStampCard(state,date,4);
       const card=state.stampCard?stampCardData(state,date):null;
       if(scenario==='reward-claimed'||card?.rewardClaimed)failure(409,'STAMP_REWARD_CLAIMED','오늘은 이미 상품을 받았어요.');
       if(scenario==='card-incomplete'||!card||card.stamps.length<4)failure(409,'STAMP_CARD_INCOMPLETE','스탬프 4개를 모두 모아야 상품을 받을 수 있어요.');
+      const pickupTime=isoKst(now).slice(11,19);
+      if(pickupTime<'11:00:00'||pickupTime>='17:00:00')failure(409,'STAMP_REWARD_CLOSED','상품 수령은 11:00부터 17:00 전까지 가능해요.');
       state.stampCard.rewardClaimed=true;
       data={verified:true};break;
     }

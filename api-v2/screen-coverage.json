@@ -55,10 +55,15 @@
     {
       "id": "GOODS-PAYMENT",
       "name": "굿즈 계좌 안내",
-      "operations": [
-        "getPaymentGuide"
+      "operations": [],
+      "browserData": [
+        "GOODS-PAYMENT-D01",
+        "GOODS-PAYMENT-D02",
+        "GOODS-PAYMENT-D03",
+        "GOODS-PAYMENT-D04",
+        "GOODS-PAYMENT-D05",
+        "GOODS-PAYMENT-D06"
       ],
-      "browserData": [],
       "legacySource": {
         "pendingIds": "GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03"
       }
@@ -1785,10 +1790,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "프런트",
-      "target": "프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 송금 안내 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1803,10 +1808,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "PaymentGuide.name",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1821,10 +1826,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "PaymentGuide.price",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1839,10 +1844,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.bankName",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1857,10 +1862,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.accountNumber",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1875,10 +1880,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.holder",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1893,10 +1898,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "PaymentGuide.instructions",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {

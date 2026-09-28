@@ -111,13 +111,11 @@ class GoodsFlowIntegrationTest {
     }
 
     @Test
-    void returnsPaymentGuideAccountOnlyWhenConfigured() throws Exception {
+    void doesNotExposePaymentGuideEvenWhenGoodsAccountIsConfigured() throws Exception {
         UUID goodsId = insertOptionsGoods();
 
         mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide"))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Cache-Control", "no-store"))
-            .andExpect(jsonPath("$.data.account").doesNotExist());
+            .andExpect(status().isNotFound());
 
         jdbc.update("""
             INSERT INTO operational_account_settings (
@@ -128,9 +126,12 @@ class GoodsFlowIntegrationTest {
             """, new MapSqlParameterSource("festivalId", FESTIVAL_ID));
 
         mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide"))
-            .andExpect(header().string("Cache-Control", "no-store"))
-            .andExpect(jsonPath("$.data.account.bankName").value("목 은행"))
-            .andExpect(jsonPath("$.data.transferLink").doesNotExist());
+            .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v2/goods/" + goodsId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.price.amount").isNumber())
+            .andExpect(jsonPath("$.data.account").doesNotExist());
     }
 
     @Test
@@ -154,9 +155,6 @@ class GoodsFlowIntegrationTest {
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
         mvc.perform(get("/api/v2/goods/" + goodsId + "/availability").param("locale", "zh-Hans"))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
-        mvc.perform(get("/api/v2/goods/" + goodsId + "/payment-guide").param("locale", "zh-Hans"))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
     }

@@ -3615,419 +3615,6 @@
         ]
       }
     },
-    "/api/v2/goods/{goodsId}/payment-guide": {
-      "get": {
-        "operationId": "getPaymentGuide",
-        "summary": "굿즈 계좌 안내",
-        "description": "연결 화면: GOODS-PAYMENT. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
-        "tags": [
-          "공개"
-        ],
-        "security": [],
-        "parameters": [
-          {
-            "name": "locale",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ko",
-                "en",
-                "zh-Hans",
-                "ja"
-              ],
-              "description": "준비 완료 언어만 config에서 제공. 생략 시 ko. 이미지 속 글자는 번역하지 않음.",
-              "default": "ko"
-            },
-            "description": "config.languages의 준비 완료 언어만 요청. 알려졌지만 준비되지 않은 언어는 LOCALE_NOT_READY, 알 수 없는 값은 INVALID_QUERY. Accept-Language는 사용하지 않음."
-          },
-          {
-            "name": "goodsId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
-              "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
-            },
-            "description": "목의 실제 ID는 /__mock/catalog 또는 examples.json 참고."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Cache-Control": {
-                "schema": {
-                  "type": "string",
-                  "enum": [
-                    "no-store"
-                  ]
-                },
-                "description": "브라우저와 중간 캐시가 응답을 저장하지 못하게 한다."
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaymentGuideResponse"
-                },
-                "examples": {
-                  "normal": {
-                    "summary": "굿즈 계좌 안내: normal",
-                    "value": {
-                      "data": {
-                        "goodsId": "goods-shirt",
-                        "name": "예시 의류",
-                        "price": {
-                          "amount": 1000,
-                          "currency": "KRW"
-                        },
-                        "account": {
-                          "bankName": "개발용 은행",
-                          "accountNumber": "MOCK-NOT-PAYABLE",
-                          "holder": "개발용 예금주"
-                        },
-                        "transferLink": null,
-                        "instructions": [
-                          "현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.",
-                          "목 응답은 실제 송금을 지원하지 않습니다."
-                        ],
-                        "locationText": "예시 판매 장소",
-                        "hoursText": "예시 운영 시간"
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "missing-optional": {
-                    "summary": "굿즈 계좌 안내: missing-optional",
-                    "value": {
-                      "data": {
-                        "goodsId": "goods-shirt",
-                        "name": "예시 의류",
-                        "price": {
-                          "amount": 1000,
-                          "currency": "KRW"
-                        },
-                        "account": null,
-                        "transferLink": null,
-                        "instructions": [
-                          "현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.",
-                          "목 응답은 실제 송금을 지원하지 않습니다."
-                        ],
-                        "locationText": null,
-                        "hoursText": null
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 예시입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "locale-not-ready": {
-                    "summary": "굿즈 계좌 안내: locale-not-ready",
-                    "value": {
-                      "error": {
-                        "code": "LOCALE_NOT_READY",
-                        "message": "준비 완료 언어만 요청할 수 있습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "bad-request": {
-                    "summary": "굿즈 계좌 안내: bad-request",
-                    "value": {
-                      "error": {
-                        "code": "INVALID_QUERY",
-                        "message": "잘못된 요청 예시입니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "관리자 권한이 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "404": {
-            "description": "요청한 정보를 찾을 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "not-found": {
-                    "summary": "굿즈 계좌 안내: not-found",
-                    "value": {
-                      "error": {
-                        "code": "NOT_FOUND",
-                        "message": "요청한 정보를 찾을 수 없습니다.",
-                        "details": [],
-                        "retryable": false
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "405": {
-            "description": "지원하지 않는 메서드입니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "409": {
-            "description": "요청 상태가 충돌합니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "429": {
-            "description": "잠시 후 다시 요청해 주세요.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              },
-              "Retry-After": {
-                "schema": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "description": "재시도 전 대기 초"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate-limited": {
-                    "summary": "굿즈 계좌 안내: rate-limited",
-                    "value": {
-                      "error": {
-                        "code": "RATE_LIMITED",
-                        "message": "잠시 후 다시 요청해 주세요.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "목 서버 처리 중 오류가 발생했습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {}
-              }
-            }
-          },
-          "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
-            "headers": {
-              "X-Request-Id": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "응답 meta.requestId와 동일"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "굿즈 계좌 안내: error",
-                    "value": {
-                      "error": {
-                        "code": "SERVICE_UNAVAILABLE",
-                        "message": "일시적으로 정보를 불러올 수 없습니다.",
-                        "details": [],
-                        "retryable": true
-                      },
-                      "meta": {
-                        "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 0,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-screen-ids": [
-          "GOODS-PAYMENT"
-        ],
-        "x-contract-status": "screen-specified",
-        "x-mock-scenarios": [
-          "normal",
-          "missing-optional",
-          "not-found",
-          "error",
-          "locale-not-ready",
-          "bad-request",
-          "rate-limited"
-        ]
-      }
-    },
     "/api/v2/lineup": {
       "get": {
         "operationId": "getLineup",
@@ -7702,8 +7289,7 @@
                               "placeId": "place-pub-07",
                               "pinId": "pin-pub-07",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-03",
@@ -7732,8 +7318,7 @@
                               "placeId": "place-market-03",
                               "pinId": "pin-market-03",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-02",
@@ -7798,8 +7383,7 @@
                               "placeId": "place-pub-02",
                               "pinId": "pin-pub-02",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub",
@@ -7864,8 +7448,7 @@
                               "placeId": "place-pub",
                               "pinId": "pin-pub",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-food-truck-02",
@@ -7912,8 +7495,7 @@
                               "placeId": "place-food-truck-02",
                               "pinId": "pin-food-truck-02",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-12",
@@ -7944,8 +7526,7 @@
                               "placeId": "place-booth-12",
                               "pinId": "pin-booth-12",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-02",
@@ -7970,8 +7551,7 @@
                               "placeId": "place-market-02",
                               "pinId": "pin-market-02",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-02",
@@ -8002,8 +7582,7 @@
                               "placeId": "place-booth-02",
                               "pinId": "pin-booth-02",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-07",
@@ -8028,8 +7607,7 @@
                               "placeId": "place-market-07",
                               "pinId": "pin-market-07",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-05",
@@ -8056,8 +7634,7 @@
                               "placeId": "place-booth-05",
                               "pinId": "pin-booth-05",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-08",
@@ -8122,8 +7699,7 @@
                               "placeId": "place-pub-08",
                               "pinId": "pin-pub-08",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-04",
@@ -8184,8 +7760,7 @@
                               "placeId": "place-pub-04",
                               "pinId": "pin-pub-04",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth",
@@ -8217,8 +7792,7 @@
                               "placeId": "place-booth",
                               "pinId": "pin-booth",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-food-truck",
@@ -8265,8 +7839,7 @@
                               "placeId": "place-food-truck",
                               "pinId": "pin-food-truck",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-04",
@@ -8295,8 +7868,7 @@
                               "placeId": "place-market-04",
                               "pinId": "pin-market-04",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-04",
@@ -8327,8 +7899,7 @@
                               "placeId": "place-booth-04",
                               "pinId": "pin-booth-04",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-06",
@@ -8357,8 +7928,7 @@
                               "placeId": "place-market-06",
                               "pinId": "pin-market-06",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-08",
@@ -8387,8 +7957,7 @@
                               "placeId": "place-booth-08",
                               "pinId": "pin-booth-08",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-10",
@@ -8453,8 +8022,7 @@
                               "placeId": "place-pub-10",
                               "pinId": "pin-pub-10",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-06",
@@ -8519,8 +8087,7 @@
                               "placeId": "place-pub-06",
                               "pinId": "pin-pub-06",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-05",
@@ -8549,8 +8116,7 @@
                               "placeId": "place-market-05",
                               "pinId": "pin-market-05",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market-08",
@@ -8579,8 +8145,7 @@
                               "placeId": "place-market-08",
                               "pinId": "pin-market-08",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-05",
@@ -8645,8 +8210,7 @@
                               "placeId": "place-pub-05",
                               "pinId": "pin-pub-05",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-03",
@@ -8675,8 +8239,7 @@
                               "placeId": "place-booth-03",
                               "pinId": "pin-booth-03",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-student-council",
@@ -8707,8 +8270,7 @@
                               "placeId": "place-student-council",
                               "pinId": "pin-student-council",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-10",
@@ -8735,8 +8297,7 @@
                               "placeId": "place-booth-10",
                               "pinId": "pin-booth-10",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-07",
@@ -8767,8 +8328,7 @@
                               "placeId": "place-booth-07",
                               "pinId": "pin-booth-07",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-03",
@@ -8833,8 +8393,7 @@
                               "placeId": "place-pub-03",
                               "pinId": "pin-pub-03",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-06",
@@ -8863,8 +8422,7 @@
                               "placeId": "place-booth-06",
                               "pinId": "pin-booth-06",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-promotion",
@@ -8891,8 +8449,7 @@
                               "placeId": "place-promotion",
                               "pinId": "pin-promotion",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-11",
@@ -8921,8 +8478,7 @@
                               "placeId": "place-booth-11",
                               "pinId": "pin-booth-11",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-market",
@@ -8951,8 +8507,7 @@
                               "placeId": "place-market",
                               "pinId": "pin-market",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-pub-09",
@@ -9017,8 +8572,7 @@
                               "placeId": "place-pub-09",
                               "pinId": "pin-pub-09",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           },
                           {
                             "id": "space-booth-09",
@@ -9049,8 +8603,7 @@
                               "placeId": "place-booth-09",
                               "pinId": "pin-booth-09",
                               "mapVersion": "mock-map-1"
-                            },
-                            "bankTransfer": null
+                            }
                           }
                         ]
                       },
@@ -9433,8 +8986,7 @@
                           "placeId": "place-booth",
                           "pinId": "pin-booth",
                           "mapVersion": "mock-map-1"
-                        },
-                        "bankTransfer": null
+                        }
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -9468,8 +9020,7 @@
                         "experience": null,
                         "events": [],
                         "menu": [],
-                        "mapTarget": null,
-                        "bankTransfer": null
+                        "mapTarget": null
                       },
                       "meta": {
                         "requestId": "mock-example-request",
@@ -12048,7 +11599,7 @@
                         "reward": {
                           "name": "몬스터",
                           "locationText": "예시 수령 장소",
-                          "hoursText": "예시 수령 시간",
+                          "hoursText": "매일 11:00~17:00",
                           "notice": "하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다."
                         },
                         "dailyLimit": 4,
@@ -13665,7 +13216,7 @@
     "/api/v2/stamp-receipt-verifications": {
       "post": {
         "operationId": "verifyStampReceipt",
-        "summary": "스탬프 상품 수령 인증",
+        "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만)",
         "description": "연결 화면: STAMP-REWARD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -13717,14 +13268,14 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "스탬프 상품 수령 인증: normal",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): normal",
                     "value": {
                       "data": {
                         "verified": true
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 1,
@@ -13754,7 +13305,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "스탬프 상품 수령 인증: locale-not-ready",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -13764,7 +13315,7 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -13774,7 +13325,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "스탬프 상품 수령 인증: bad-request",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -13784,7 +13335,7 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -13871,7 +13422,7 @@
                 },
                 "examples": {
                   "card-incomplete": {
-                    "summary": "스탬프 상품 수령 인증: card-incomplete",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): card-incomplete",
                     "value": {
                       "error": {
                         "code": "STAMP_CARD_INCOMPLETE",
@@ -13881,7 +13432,7 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -13891,7 +13442,7 @@
                     }
                   },
                   "reward-claimed": {
-                    "summary": "스탬프 상품 수령 인증: reward-claimed",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): reward-claimed",
                     "value": {
                       "error": {
                         "code": "STAMP_REWARD_CLAIMED",
@@ -13901,7 +13452,27 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "reward-closed": {
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): reward-closed",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_REWARD_CLOSED",
+                        "message": "상품 수령은 11:00부터 17:00 전까지 가능해요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T17:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -13969,7 +13540,7 @@
                 },
                 "examples": {
                   "invalid-code": {
-                    "summary": "스탬프 상품 수령 인증: invalid-code",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): invalid-code",
                     "value": {
                       "error": {
                         "code": "INVALID_RECEIPT_CODE",
@@ -13979,7 +13550,7 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -14016,7 +13587,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "스탬프 상품 수령 인증: rate-limited",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -14026,7 +13597,7 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -14075,7 +13646,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "스탬프 상품 수령 인증: error",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -14085,7 +13656,7 @@
                       },
                       "meta": {
                         "requestId": "mock-example-request",
-                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "serverTime": "2030-10-01T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -14108,6 +13679,7 @@
           "invalid-code",
           "card-incomplete",
           "reward-claimed",
+          "reward-closed",
           "error",
           "locale-not-ready",
           "bad-request",
@@ -27504,7 +27076,7 @@
           "url": {
             "type": "string",
             "minLength": 1,
-            "description": "외부 HTTPS 주소. 목에서는 송금 불가 예시 주소.",
+            "description": "외부 HTTPS 주소.",
             "format": "uri",
             "pattern": "^https://"
           },
@@ -28363,94 +27935,6 @@
         "additionalProperties": false,
         "description": ""
       },
-      "PaymentGuide": {
-        "type": "object",
-        "properties": {
-          "goodsId": {
-            "type": "string",
-            "minLength": 1,
-            "description": "표시명에서 유추하지 않는 불투명 ID. 회차 내 안정적으로 유지.",
-            "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "description": "요청 공개 언어의 상품명. 해당 언어 번역이 미완료이면 404."
-          },
-          "price": {
-            "$ref": "#/components/schemas/Money"
-          },
-          "account": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/BankAccount"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "운영 계좌 CLI로 승인된 GOODS 계좌. 미승인이면 null. 관리자 웹에서는 변경 불가."
-          },
-          "transferLink": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Link"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "승인된 계좌 설정의 송금 링크. 없으면 null."
-          },
-          "instructions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "description": "안내 문구"
-            },
-            "description": "현장 확인·송금·지급 안내. 입금/지급 완료 상태 없음."
-          },
-          "locationText": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "등록된 표시 텍스트"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "null이면 제목과 영역을 함께 숨김. 빈 문자열로 대체하지 않음."
-          },
-          "hoursText": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "등록된 표시 텍스트"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "null이면 제목과 영역을 함께 숨김. 빈 문자열로 대체하지 않음."
-          }
-        },
-        "required": [
-          "goodsId",
-          "name",
-          "price",
-          "account",
-          "transferLink",
-          "instructions",
-          "locationText",
-          "hoursText"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
       "Artist": {
         "type": "object",
         "properties": {
@@ -29039,17 +28523,6 @@
               }
             ],
             "description": "같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태."
-          },
-          "bankTransfer": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/BankTransfer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "부스 수취 계좌. 상세 조회에서만 제공하고 목록에서는 항상 null. 공개할 계좌가 없으면 null이며 이때 계좌 안내와 송금 버튼을 표시하지 않음. 상세 응답은 Cache-Control: no-store로 매번 최신 계좌를 받음."
           }
         },
         "required": [
@@ -29065,49 +28538,10 @@
           "experience",
           "events",
           "menu",
-          "mapTarget",
-          "bankTransfer"
+          "mapTarget"
         ],
         "additionalProperties": false,
         "description": ""
-      },
-      "BankTransfer": {
-        "type": "object",
-        "properties": {
-          "bankId": {
-            "type": "string",
-            "minLength": 1,
-            "description": "서비스 내부 은행 식별자. 토스 송금 링크의 은행 파라미터와 같은 값이라고 가정하지 않음."
-          },
-          "bankDisplayName": {
-            "type": "string",
-            "minLength": 1,
-            "description": "화면에 표시할 은행명"
-          },
-          "accountNumber": {
-            "type": "string",
-            "minLength": 1,
-            "description": "앞자리 0을 보존하는 문자열 계좌번호"
-          },
-          "accountHolderName": {
-            "type": "string",
-            "minLength": 1,
-            "description": "부스 담당자가 확인한 공개용 예금주명. 금융기관 실명 검증 결과가 아님."
-          },
-          "tossLinkEnabled": {
-            "type": "boolean",
-            "description": "토스 송금 연결 노출 여부. 실기기 검증 전에는 false이며 계좌 복사는 항상 별도로 제공."
-          }
-        },
-        "required": [
-          "bankId",
-          "bankDisplayName",
-          "accountNumber",
-          "accountHolderName",
-          "tossLinkEnabled"
-        ],
-        "additionalProperties": false,
-        "description": "송금 안내 전용. 금액은 저장하지 않으며 메뉴 가격과 분리한다. 입금 확인은 웹앱 밖에서 현장 근무자가 한다."
       },
       "Spaces": {
         "type": "object",
@@ -30991,23 +30425,6 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Availability"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "required": [
-          "data",
-          "meta"
-        ],
-        "additionalProperties": false,
-        "description": ""
-      },
-      "PaymentGuideResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/PaymentGuide"
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"

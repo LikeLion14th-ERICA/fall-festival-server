@@ -62,27 +62,18 @@ class CatalogControllerTest {
 
         assertThat(controller.getSpaces(request(Map.of())).data().items()).singleElement()
             .satisfies(item -> assertThat(item.image()).isNull());
-        assertThat(controller.getSpace("space-test", request(Map.of())).getBody().data().image()).isNull();
+        assertThat(controller.getSpace("space-test", request(Map.of())).data().image()).isNull();
     }
 
     @Test
-    void addsTheBoothAccountOnlyToTheUncachedDetailResponse() {
+    void servesSpaceDetailsAndListWithoutPaymentFields() {
         when(snapshots.required()).thenReturn(snapshotWithMap());
-        CatalogResponses.BankTransfer account =
-            new CatalogResponses.BankTransfer("example-bank", "예시 은행", "000123456789", "예시 예금주", true);
-        CatalogController withAccounts = new CatalogController(
-            snapshots,
-            ApiMetaTestFixtures.contentMetaSupport(Clock.fixed(Instant.parse("2030-10-01T09:00:00Z"), ZoneOffset.UTC)),
-            spaceId -> spaceId.equals("space-test") ? java.util.Optional.of(account) : java.util.Optional.empty()
-        );
+        var detail = controller.getSpace("space-test", request(Map.of()));
+        ApiResponse<CatalogResponses.Spaces> list = controller.getSpaces(request(Map.of()));
 
-        var detail = withAccounts.getSpace("space-test", request(Map.of()));
-        ApiResponse<CatalogResponses.Spaces> list = withAccounts.getSpaces(request(Map.of()));
-
-        assertThat(detail.getHeaders().getCacheControl()).isEqualTo("no-store");
-        assertThat(detail.getBody().data().bankTransfer()).isEqualTo(account);
-        assertThat(detail.getBody().data().bankTransfer().accountNumber()).startsWith("000");
-        assertThat(list.data().items()).allSatisfy(space -> assertThat(space.bankTransfer()).isNull());
+        assertThat(detail.data().id()).isEqualTo("space-test");
+        assertThat(list.data().items()).singleElement()
+            .satisfies(space -> assertThat(space.id()).isEqualTo("space-test"));
     }
 
     @Test

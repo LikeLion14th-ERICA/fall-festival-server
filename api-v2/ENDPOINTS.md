@@ -11,7 +11,6 @@
 | GET | `/api/v2/goods-availability` | 상품 목록의 판매 상태 | GOODS-LIST | normal, empty, sold-out, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/goods/{goodsId}` | 상품 상세 | GOODS-DETAIL | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/goods/{goodsId}/availability` | 상품 상세의 판매 상태 | GOODS-DETAIL | normal, sold-out, not-found, error, locale-not-ready, bad-request, rate-limited |
-| GET | `/api/v2/goods/{goodsId}/payment-guide` | 굿즈 계좌 안내 | GOODS-PAYMENT | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/lineup` | 날짜·분류별 라인업 | SHOW-LINEUP | normal, empty, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/artists/{artistId}` | 출연진 상세 | SHOW-ARTIST | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/artist-hyped` | 아티스트별 Hyped 누적 수와 참여 가능 상태 | SHOW-LINEUP, SHOW-ARTIST | normal, closed, ended, empty, error, locale-not-ready, bad-request, rate-limited |
@@ -30,7 +29,7 @@
 | POST | `/api/v2/stamp-participants` | 스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 | STAMP-START | normal, already-started, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/stamp-card` | 오늘의 스탬프판 | STAMP-COLLECT, STAMP-REWARD | normal, empty, not-started, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/stamp-collections` | 부스 QR 스탬프 적립(부스당 하루 1회) | STAMP-COLLECT | normal, not-started, invalid-token, already-collected, card-full, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
-| POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증 | STAMP-REWARD | normal, invalid-code, card-incomplete, reward-claimed, error, locale-not-ready, bad-request, rate-limited |
+| POST | `/api/v2/stamp-receipt-verifications` | 스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) | STAMP-REWARD | normal, invalid-code, card-incomplete, reward-claimed, reward-closed, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/admin/crowding` | 관리자 혼잡도 | ADM-CROWD | normal, before-open, closed, unmodified, unconfigured, error, bad-request, rate-limited, unauthorized, forbidden |
 | PUT | `/api/v2/admin/crowding` | 선택된 운영일 혼잡도 저장. 자정 뒤 야간 운영 중이면 전날 operatingDay를 유지 | ADM-CROWD | normal, full, not-festival-day, error, precondition-required, edit-conflict, bad-request, rate-limited, unauthorized, forbidden |
 | GET | `/api/v2/admin/notices` | 관리자 공지 목록 | ADM-NOTICE-LIST | normal, empty, error, bad-request, rate-limited, unauthorized, forbidden |

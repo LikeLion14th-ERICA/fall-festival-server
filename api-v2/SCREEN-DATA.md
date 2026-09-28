@@ -1,6 +1,6 @@
 # 화면 데이터 → API 필드
 
-Product Context v5 기준 27개 화면의 데이터 172개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
+Product Context v5 기준 27개 화면의 데이터 165개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
 
 | 데이터 ID | 항목 | 처리 | 계약/프런트 책임 | 위키 근거 |
 |---|---|---|---|---|
@@ -81,13 +81,13 @@ Product Context v5 기준 27개 화면의 데이터 172개를 추적합니다. �
 | GOODS-DETAIL-D04 | 색상 | API | Goods.colors | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D05 | 사이즈 | API | Goods.sizes | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D06 | 색상×사이즈별 구매 가능 여부 | API | Availability.combinations | [위키](../docs/wiki/product/goods.md) |
-| GOODS-DETAIL-D07 | 현장 확인·수령 안내 | 프런트 | 프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내 | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D01 | 상품명 | API | PaymentGuide.name | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D02 | 상품 가격 | API | PaymentGuide.price | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D03 | 은행명 | API | BankAccount.bankName | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D04 | 계좌번호 | API | BankAccount.accountNumber | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D05 | 예금주 | API | BankAccount.holder | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D06 | 현장 송금·수령 안내 | API | PaymentGuide.instructions | [위키](../docs/wiki/product/goods.md) |
+| GOODS-DETAIL-D07 | 현장 확인·수령 안내 | 제외 | 제외: 사용자 결정에 따라 송금 안내 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D01 | 상품명 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D02 | 상품 가격 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D03 | 은행명 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D04 | 계좌번호 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D05 | 예금주 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D06 | 현장 송금·수령 안내 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
 | SHOW-LINEUP-D01 | 대표 사진 | API | Lineup.items[].image | [위키](../docs/wiki/product/lineup.md) |
 | SHOW-LINEUP-D02 | 이름 | API | Lineup.items[].name | [위키](../docs/wiki/product/lineup.md) |
 | SHOW-LINEUP-D03 | 공연 날짜 | API | Lineup.date | [위키](../docs/wiki/product/lineup.md) |

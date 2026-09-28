@@ -64,9 +64,7 @@ class CatalogControllerOpenApiTest {
         Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC);
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
         mvc = MockMvcBuilders.standaloneSetup(
-            new CatalogController(snapshots, metaSupport, spaceId -> spaceId.equals("space-booth")
-                ? Optional.of(new CatalogResponses.BankTransfer("example-bank", "예시 은행", "000123456789", "예시 예금주", false))
-                : Optional.empty()),
+            new CatalogController(snapshots, metaSupport),
             new ConfigController(snapshots, metaSupport, clock),
             new StampReceiptController(snapshots, metaSupport, new StampReceiptVerifier(
                 java.util.HexFormat.of().formatHex(StampReceiptVerifier.sha256("048213"))

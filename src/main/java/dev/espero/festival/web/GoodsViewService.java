@@ -1,8 +1,5 @@
 package dev.espero.festival.web;
 
-import dev.espero.festival.account.OperationalAccountPurpose;
-import dev.espero.festival.account.OperationalAccountSetting;
-import dev.espero.festival.account.OperationalAccountSettingsService;
 import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.Goods;
 import dev.espero.festival.domain.GoodsCombination;
@@ -16,7 +13,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -32,7 +28,6 @@ public class GoodsViewService {
     private final GoodsStore store;
     private final FestivalProperties properties;
     private final CatalogSnapshotProvider snapshots;
-    private final OperationalAccountSettingsService accountSettings;
     private final ApiMetaSupport metaSupport;
     private final GoodsMediaUrlSupport mediaUrls;
 
@@ -40,14 +35,12 @@ public class GoodsViewService {
         GoodsStore store,
         FestivalProperties properties,
         CatalogSnapshotProvider snapshots,
-        OperationalAccountSettingsService accountSettings,
         ApiMetaSupport metaSupport,
         GoodsMediaUrlSupport mediaUrls
     ) {
         this.store = store;
         this.properties = properties;
         this.snapshots = snapshots;
-        this.accountSettings = accountSettings;
         this.metaSupport = metaSupport;
         this.mediaUrls = mediaUrls;
     }
@@ -96,32 +89,6 @@ public class GoodsViewService {
         );
         ApiMeta meta = metaSupport.unscopedMeta(request, requestedLocale);
         return new GoodsAvailabilitySnapshot(toAvailabilityResponse(goods, requestedLocale), meta);
-    }
-
-    public GoodsPaymentGuideSnapshot paymentGuide(HttpServletRequest request, UUID goodsId) {
-        String requestedLocale = ContentLocale.requestedLocale(request, snapshots);
-        Goods goods = requireReadyForLocale(
-            store.findById(properties.configuredFestivalId(), goodsId).orElseThrow(GoodsViewService::notFound),
-            requestedLocale
-        );
-        GoodsTranslation translation = goods.translations().get(requestedLocale);
-        Optional<OperationalAccountSetting> setting = accountSettings.findCurrent(
-            properties.configuredFestivalId(), OperationalAccountPurpose.GOODS
-        );
-        // transferLink stays null until the display-name source for the link
-        // is decided, matching TicketGuideController's TICKET account guide.
-        GoodsPaymentGuideResponse response = new GoodsPaymentGuideResponse(
-            goods.id().toString(),
-            translation.name(),
-            new GoodsPaymentGuideResponse.Money(goods.priceAmount(), CURRENCY),
-            account(setting),
-            null,
-            List.of(),
-            null,
-            null
-        );
-        ApiMeta meta = metaSupport.unscopedMeta(request, requestedLocale);
-        return new GoodsPaymentGuideSnapshot(response, meta);
     }
 
     private GoodsResponse toResponse(Goods goods, String requestedLocale) {
@@ -186,14 +153,6 @@ public class GoodsViewService {
         );
     }
 
-    private GoodsPaymentGuideResponse.BankAccount account(Optional<OperationalAccountSetting> setting) {
-        return setting.filter(OperationalAccountSetting::isConfigured)
-            .map(current -> new GoodsPaymentGuideResponse.BankAccount(
-                current.bankName(), current.accountNumber(), current.accountHolder()
-            ))
-            .orElse(null);
-    }
-
     private static Goods requireReadyForLocale(Goods goods, String locale) {
         if (!isReadyForLocale(goods, locale)) {
             throw notFound();
@@ -219,6 +178,4 @@ public class GoodsViewService {
     public record GoodsAvailabilityListSnapshot(GoodsAvailabilityListResponse response, ApiMeta meta) {}
 
     public record GoodsAvailabilitySnapshot(GoodsAvailabilityResponse response, ApiMeta meta) {}
-
-    public record GoodsPaymentGuideSnapshot(GoodsPaymentGuideResponse response, ApiMeta meta) {}
 }

@@ -2290,235 +2290,6 @@
       }
     }
   },
-  "getPaymentGuide": {
-    "screens": [
-      "GOODS-PAYMENT"
-    ],
-    "method": "GET",
-    "path": "/api/v2/goods/{goodsId}/payment-guide",
-    "scenarios": {
-      "normal": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide",
-          "headers": {
-            "X-Mock-Scenario": "normal",
-            "X-Mock-Session": "frontend-demo"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "goodsId": "goods-shirt",
-            "name": "예시 의류",
-            "price": {
-              "amount": 1000,
-              "currency": "KRW"
-            },
-            "account": {
-              "bankName": "개발용 은행",
-              "accountNumber": "MOCK-NOT-PAYABLE",
-              "holder": "개발용 예금주"
-            },
-            "transferLink": null,
-            "instructions": [
-              "현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.",
-              "목 응답은 실제 송금을 지원하지 않습니다."
-            ],
-            "locationText": "예시 판매 장소",
-            "hoursText": "예시 운영 시간"
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "missing-optional": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide",
-          "headers": {
-            "X-Mock-Scenario": "missing-optional",
-            "X-Mock-Session": "frontend-demo"
-          }
-        },
-        "status": 200,
-        "response": {
-          "data": {
-            "goodsId": "goods-shirt",
-            "name": "예시 의류",
-            "price": {
-              "amount": 1000,
-              "currency": "KRW"
-            },
-            "account": null,
-            "transferLink": null,
-            "instructions": [
-              "현장에서 상품과 색상, 사이즈를 확인한 후 송금해 주세요.",
-              "목 응답은 실제 송금을 지원하지 않습니다."
-            ],
-            "locationText": null,
-            "hoursText": null
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "not-found": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide",
-          "headers": {
-            "X-Mock-Scenario": "not-found",
-            "X-Mock-Session": "frontend-demo"
-          }
-        },
-        "status": 404,
-        "response": {
-          "error": {
-            "code": "NOT_FOUND",
-            "message": "요청한 정보를 찾을 수 없습니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "error": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide",
-          "headers": {
-            "X-Mock-Scenario": "error",
-            "X-Mock-Session": "frontend-demo"
-          }
-        },
-        "status": 503,
-        "response": {
-          "error": {
-            "code": "SERVICE_UNAVAILABLE",
-            "message": "일시적으로 정보를 불러올 수 없습니다.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "locale-not-ready": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide?locale=en",
-          "headers": {
-            "X-Mock-Scenario": "locale-not-ready",
-            "X-Mock-Session": "locale-not-ready-getPaymentGuide"
-          }
-        },
-        "status": 400,
-        "response": {
-          "error": {
-            "code": "LOCALE_NOT_READY",
-            "message": "준비 완료 언어만 요청할 수 있습니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "bad-request": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide",
-          "headers": {
-            "X-Mock-Scenario": "bad-request",
-            "X-Mock-Session": "frontend-demo"
-          }
-        },
-        "status": 400,
-        "response": {
-          "error": {
-            "code": "INVALID_QUERY",
-            "message": "잘못된 요청 예시입니다.",
-            "details": [],
-            "retryable": false
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      },
-      "rate-limited": {
-        "request": {
-          "method": "GET",
-          "path": "/api/v2/goods/goods-shirt/payment-guide",
-          "headers": {
-            "X-Mock-Scenario": "rate-limited",
-            "X-Mock-Session": "frontend-demo"
-          }
-        },
-        "status": 429,
-        "response": {
-          "error": {
-            "code": "RATE_LIMITED",
-            "message": "잠시 후 다시 요청해 주세요.",
-            "details": [],
-            "retryable": true
-          },
-          "meta": {
-            "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
-            "timezone": "Asia/Seoul",
-            "festivalId": "festival-mock",
-            "revision": 0,
-            "locale": "ko",
-            "mock": true
-          }
-        }
-      }
-    }
-  },
   "getLineup": {
     "screens": [
       "SHOW-LINEUP"
@@ -4703,8 +4474,7 @@
                   "placeId": "place-pub-07",
                   "pinId": "pin-pub-07",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-03",
@@ -4733,8 +4503,7 @@
                   "placeId": "place-market-03",
                   "pinId": "pin-market-03",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-02",
@@ -4799,8 +4568,7 @@
                   "placeId": "place-pub-02",
                   "pinId": "pin-pub-02",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub",
@@ -4865,8 +4633,7 @@
                   "placeId": "place-pub",
                   "pinId": "pin-pub",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-food-truck-02",
@@ -4913,8 +4680,7 @@
                   "placeId": "place-food-truck-02",
                   "pinId": "pin-food-truck-02",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-12",
@@ -4945,8 +4711,7 @@
                   "placeId": "place-booth-12",
                   "pinId": "pin-booth-12",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-02",
@@ -4971,8 +4736,7 @@
                   "placeId": "place-market-02",
                   "pinId": "pin-market-02",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-02",
@@ -5003,8 +4767,7 @@
                   "placeId": "place-booth-02",
                   "pinId": "pin-booth-02",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-07",
@@ -5029,8 +4792,7 @@
                   "placeId": "place-market-07",
                   "pinId": "pin-market-07",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-05",
@@ -5057,8 +4819,7 @@
                   "placeId": "place-booth-05",
                   "pinId": "pin-booth-05",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-08",
@@ -5123,8 +4884,7 @@
                   "placeId": "place-pub-08",
                   "pinId": "pin-pub-08",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-04",
@@ -5185,8 +4945,7 @@
                   "placeId": "place-pub-04",
                   "pinId": "pin-pub-04",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth",
@@ -5218,8 +4977,7 @@
                   "placeId": "place-booth",
                   "pinId": "pin-booth",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-food-truck",
@@ -5266,8 +5024,7 @@
                   "placeId": "place-food-truck",
                   "pinId": "pin-food-truck",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-04",
@@ -5296,8 +5053,7 @@
                   "placeId": "place-market-04",
                   "pinId": "pin-market-04",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-04",
@@ -5328,8 +5084,7 @@
                   "placeId": "place-booth-04",
                   "pinId": "pin-booth-04",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-06",
@@ -5358,8 +5113,7 @@
                   "placeId": "place-market-06",
                   "pinId": "pin-market-06",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-08",
@@ -5388,8 +5142,7 @@
                   "placeId": "place-booth-08",
                   "pinId": "pin-booth-08",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-10",
@@ -5454,8 +5207,7 @@
                   "placeId": "place-pub-10",
                   "pinId": "pin-pub-10",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-06",
@@ -5520,8 +5272,7 @@
                   "placeId": "place-pub-06",
                   "pinId": "pin-pub-06",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-05",
@@ -5550,8 +5301,7 @@
                   "placeId": "place-market-05",
                   "pinId": "pin-market-05",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market-08",
@@ -5580,8 +5330,7 @@
                   "placeId": "place-market-08",
                   "pinId": "pin-market-08",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-05",
@@ -5646,8 +5395,7 @@
                   "placeId": "place-pub-05",
                   "pinId": "pin-pub-05",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-03",
@@ -5676,8 +5424,7 @@
                   "placeId": "place-booth-03",
                   "pinId": "pin-booth-03",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-student-council",
@@ -5708,8 +5455,7 @@
                   "placeId": "place-student-council",
                   "pinId": "pin-student-council",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-10",
@@ -5736,8 +5482,7 @@
                   "placeId": "place-booth-10",
                   "pinId": "pin-booth-10",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-07",
@@ -5768,8 +5513,7 @@
                   "placeId": "place-booth-07",
                   "pinId": "pin-booth-07",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-03",
@@ -5834,8 +5578,7 @@
                   "placeId": "place-pub-03",
                   "pinId": "pin-pub-03",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-06",
@@ -5864,8 +5607,7 @@
                   "placeId": "place-booth-06",
                   "pinId": "pin-booth-06",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-promotion",
@@ -5892,8 +5634,7 @@
                   "placeId": "place-promotion",
                   "pinId": "pin-promotion",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-11",
@@ -5922,8 +5663,7 @@
                   "placeId": "place-booth-11",
                   "pinId": "pin-booth-11",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-market",
@@ -5952,8 +5692,7 @@
                   "placeId": "place-market",
                   "pinId": "pin-market",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-pub-09",
@@ -6018,8 +5757,7 @@
                   "placeId": "place-pub-09",
                   "pinId": "pin-pub-09",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               },
               {
                 "id": "space-booth-09",
@@ -6050,8 +5788,7 @@
                   "placeId": "place-booth-09",
                   "pinId": "pin-booth-09",
                   "mapVersion": "mock-map-1"
-                },
-                "bankTransfer": null
+                }
               }
             ]
           },
@@ -6253,8 +5990,7 @@
               "placeId": "place-booth",
               "pinId": "pin-booth",
               "mapVersion": "mock-map-1"
-            },
-            "bankTransfer": null
+            }
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -6296,8 +6032,7 @@
             "experience": null,
             "events": [],
             "menu": [],
-            "mapTarget": null,
-            "bankTransfer": null
+            "mapTarget": null
           },
           "meta": {
             "requestId": "mock-example-request",
@@ -7764,7 +7499,7 @@
             "reward": {
               "name": "몬스터",
               "locationText": "예시 수령 장소",
-              "hoursText": "예시 수령 시간",
+              "hoursText": "매일 11:00~17:00",
               "notice": "하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다."
             },
             "dailyLimit": 4,
@@ -8695,7 +8430,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 1,
@@ -8727,7 +8462,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -8759,7 +8494,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -8791,7 +8526,39 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
+            "timezone": "Asia/Seoul",
+            "festivalId": "festival-mock",
+            "revision": 0,
+            "locale": "ko",
+            "mock": true
+          }
+        }
+      },
+      "reward-closed": {
+        "request": {
+          "method": "POST",
+          "path": "/api/v2/stamp-receipt-verifications",
+          "headers": {
+            "X-Mock-Scenario": "reward-closed",
+            "X-Mock-Session": "frontend-demo",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "code": "482913"
+          }
+        },
+        "status": 409,
+        "response": {
+          "error": {
+            "code": "STAMP_REWARD_CLOSED",
+            "message": "상품 수령은 11:00부터 17:00 전까지 가능해요.",
+            "details": [],
+            "retryable": false
+          },
+          "meta": {
+            "requestId": "mock-example-request",
+            "serverTime": "2030-10-01T17:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -8823,7 +8590,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -8855,7 +8622,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -8887,7 +8654,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
@@ -8919,7 +8686,7 @@
           },
           "meta": {
             "requestId": "mock-example-request",
-            "serverTime": "2030-10-01T18:00:00.000+09:00",
+            "serverTime": "2030-10-01T12:00:00.000+09:00",
             "timezone": "Asia/Seoul",
             "festivalId": "festival-mock",
             "revision": 0,
