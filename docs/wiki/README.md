@@ -18,8 +18,8 @@
 | 관리자 굿즈·판매 상태 | [관리자 굿즈](product/admin/goods.md), [굿즈샵](product/goods.md) | 실제 수량 관리는 범위 밖 |
 | 에리카 웰컴 데이 (제거됨, 2026-09-22) | [웰컴 데이](product/welcome.md), [범위](product/scope.md) | 참여 저조로 기능 중단, 제거 전 명세는 기록으로만 유지 |
 | FAQ 외부 링크·URL | [홈](product/home.md), [범위](product/scope.md), [결정 대기](product/decisions.md) | [FAQ 검토용 초안](product/faq-draft.md)은 외부 콘텐츠 참고 기록 |
-| 굿즈·재고·현장 송금 | [굿즈샵](product/goods.md) | 계좌·운영값은 결정 대기 |
-| 외부인 티켓·현장 수령 | [외부인 티켓](product/ticket.md), [지도](product/map.md) | 계좌·운영값은 결정 대기 |
+| 굿즈·재고·가격 안내 | [굿즈샵](product/goods.md) | 계좌·송금은 공개 범위 밖 |
+| 외부인 티켓 금액 안내 | [외부인 티켓](product/ticket.md) | 계좌·송금·수령 절차는 공개 범위 밖 |
 | 공연·라인업 | [라인업](product/lineup.md) | 타임테이블은 해당 행도 적용 |
 | 타임테이블·현재 시각선·반입 금지 물품 안내 | [타임테이블](product/timetable.md), [라인업](product/lineup.md) | 구현 시 API v2 `getTimetable`, `getProhibitedItems` 계약 동기화 |
 | 부스·주점·플리마켓·메뉴 | [부스&마켓](product/spaces.md) | 위치 연결은 지도 |
@@ -30,7 +30,7 @@
 | 사용자 화면·문자열·번역 | [다국어](engineering/i18n.md), [승인 번역표](product/translations.md), [품질](engineering/quality.md) | 해당 화면 도메인 |
 | API·DB·schema·데이터 계약 | [API 규칙](engineering/api.md), [데이터 모델·ERD](engineering/data-model.md), [API 절 찾기](engineering/api-navigation.md) | 부스·지도 구현은 [부스·지도 공개 카탈로그](engineering/spaces-map-backend.md), 해당 도메인·계약 테스트 |
 | 원격 DB 최초 연결·migration·catalog import/publish 전 | [DB 읽기 전용 사전 점검](engineering/database-preflight.md), [운영](engineering/operations.md) | [원격 개발 환경 결정](../dev-deployment-decision.md) |
-| TICKET·GOODS 계좌 설정 CLI·역할 provisioning·retention | [계좌 운영 설정](engineering/operational-account-settings.md), [DB 읽기 전용 사전 점검](engineering/database-preflight.md), [보안](engineering/security.md) | 티켓 read 전환은 [외부인 티켓](product/ticket.md) |
+| 보존된 TICKET·GOODS 계좌 설정 CLI·역할 provisioning·retention | [계좌 운영 설정](engineering/operational-account-settings.md), [DB 읽기 전용 사전 점검](engineering/database-preflight.md), [보안](engineering/security.md) | 공개 API는 금액·판매 상태만 제공 |
 | 실제 DB에 role 생성·권한 분리 실행 전 | [DB 역할 설계](engineering/db-role-design.md), [계좌 운영 설정](engineering/operational-account-settings.md), [DB 읽기 전용 사전 점검](engineering/database-preflight.md) | 역할 provisioning script는 [tools/database](../../tools/database/provision-operational-account-roles.sql) |
 | 관리자·인증·공개 쓰기·저장·로그·업로드 | [보안](engineering/security.md) | 관리자·미디어 API |
 | backend 보안 출시 점검 | [보안 출시 체크리스트](engineering/security-release-checklist.md), [보안](engineering/security.md), [검증](workflow/validation.md) | 배포 영향은 [운영](engineering/operations.md)·실제 운영 증거 |
@@ -40,7 +40,7 @@
 | 캐시·배포·복구·인프라 | [운영](engineering/operations.md), [품질](engineering/quality.md), [검증](workflow/validation.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md), [운영 수용 검증 가이드](workflow/release-operational-acceptance-guide.md) | 변경 대상 runbook |
 | branch·worktree·동기화·push | [작업 절차](workflow/task.md), [브랜치](workflow/branches.md) | PR 규칙 |
 | 운영·카탈로그 장기 구현 이어받기 | [운영·카탈로그 구현 인수인계](workflow/ops-catalog-handoff.md) | 현재 미완료 단계와 검증 기록 |
-| 행사 당일 콘텐츠 수정·계좌/스탬프 코드 교체·장애 롤백 | [행사 당일 운영 절차서](workflow/festival-day-runbook.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md) | 계좌는 [계좌 운영 설정](engineering/operational-account-settings.md), catalog rollback은 [게시](engineering/publishing.md) |
+| 행사 당일 콘텐츠 수정·스탬프 코드 교체·장애 롤백 | [행사 당일 운영 절차서](workflow/festival-day-runbook.md), [릴리스 증거 runbook](workflow/release-evidence-runbook.md) | 계좌 이력·구버전 rollback은 [계좌 운영 설정](engineering/operational-account-settings.md), catalog rollback은 [게시](engineering/publishing.md) |
 | commit·squash 메시지 | [커밋](workflow/commits.md) | breaking change 계약 |
 | 검증·완료 보고 | [검증](workflow/validation.md), [릴리스 HTTP E2E](workflow/release-http-e2e.md), [완료 조건](workflow/done.md) | 해당 항목만 적용 |
 | PR·리뷰·병합 | [PR](workflow/pull-requests.md), [완료 조건](workflow/done.md) | PR 템플릿 |
