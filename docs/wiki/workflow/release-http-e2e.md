@@ -120,3 +120,13 @@ Java 21 verify에서 `ArtistHypedHttpE2eTest` 2개,
 Hyped load의 JSON 결과는 해당 CI artifact에 보관하며, 실제 staging·운영 용량과
 browser/UI 구현은 아직 검증되지 않았다. candidate별 PASS/BLOCKED 기록과 배포 판정은
 [검증 명령과 CI](validation.md) 및 각 상세 시나리오 문서를 따른다.
+
+
+### 인코딩 경로 보안 회귀
+
+`AdminSessionReleaseE2eTest`의 실제 로그인·JWT 조회·refresh 회전·logout 흐름은 인코딩된
+관리자 경로를 사용한다. `OperationalBoundariesHttpE2eTest`의 실제 수령 컨트롤러·DB 흐름도
+인코딩된 수령 경로로 성공·코드 오류·전용 요청 제한·회복을 검증한다.
+`EncodedPathSecurityHttpTest`는 별도 저장소 없는 probe handler와 실제 Tomcat·보안 필터로
+정상/인코딩 경로의 동일 bucket, context path, Origin·인증·no-store·JSON 본문 제한을 검증한다.
+이 테스트들은 운영 ingress와 실제 브라우저의 SameSite·CORS 실측을 대체하지 않는다.

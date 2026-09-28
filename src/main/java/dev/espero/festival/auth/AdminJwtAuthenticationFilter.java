@@ -42,7 +42,7 @@ public class AdminJwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
+        String path = ApiRequestPath.of(request);
         return !path.startsWith(ADMIN_PREFIX)
             || ("POST".equals(request.getMethod()) && (LOGIN_PATH.equals(path) || REFRESH_PATH.equals(path)));
     }

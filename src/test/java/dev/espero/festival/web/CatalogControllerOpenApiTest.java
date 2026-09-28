@@ -147,6 +147,23 @@ class CatalogControllerOpenApiTest {
     }
 
     @Test
+    void validatesEventClosedErrorsAgainstOpenApi() throws Exception {
+        when(snapshots.required()).thenReturn(snapshot());
+        ApiException closed = new ApiException(org.springframework.http.HttpStatus.CONFLICT,
+            "STAMP_EVENT_CLOSED", "스탬프투어 행사 기간이 아니에요.", false);
+        org.mockito.Mockito.doThrow(closed).when(stampCards).start(org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.doThrow(closed).when(stampCards).collect(
+            org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.doThrow(closed).when(stampCards).claimReward(org.mockito.ArgumentMatchers.any());
+        assertMatchesErrorSchema("/api/v2/stamp-participants", "409", "STAMP_EVENT_CLOSED", 3,
+            post("/api/v2/stamp-participants"));
+        assertMatchesErrorSchema("/api/v2/stamp-collections", "409", "STAMP_EVENT_CLOSED", 3,
+            post("/api/v2/stamp-collections").contentType("application/json").content("{\"token\":\"mock-booth-token-0001\"}"));
+        assertMatchesErrorSchema("/api/v2/stamp-receipt-verifications", "409", "STAMP_EVENT_CLOSED", 3,
+            post("/api/v2/stamp-receipt-verifications").contentType("application/json").content("{\"code\":\"048213\"}"));
+    }
+
+    @Test
     void validatesTheConfigPayloadAgainstOpenApi() throws Exception {
         CatalogSnapshot base = snapshot();
         when(snapshots.required()).thenReturn(new CatalogSnapshot(

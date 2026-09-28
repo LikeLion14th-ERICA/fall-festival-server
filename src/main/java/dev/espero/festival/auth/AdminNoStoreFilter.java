@@ -15,7 +15,7 @@ final class AdminNoStoreFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith(ADMIN_PATH_PREFIX);
+        return !ApiRequestPath.of(request).startsWith(ADMIN_PATH_PREFIX);
     }
 
     @Override

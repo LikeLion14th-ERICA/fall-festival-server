@@ -17,6 +17,7 @@ public class NoOpPushNotificationService implements PushNotificationService {
     @Override
     public void subscribe(String deviceToken) {
         warnOnce();
+        throw new PushSubscriptionFailedException(null);
     }
 
     @Override
@@ -27,8 +28,8 @@ public class NoOpPushNotificationService implements PushNotificationService {
     private void warnOnce() {
         if (!warned) {
             warned = true;
-            log.warn("FESTIVAL_PUSH_FIREBASE_CREDENTIALS_PATH is not set: push subscribe and "
-                + "notice-created push both no-op.");
+            log.warn("FESTIVAL_PUSH_FIREBASE_CREDENTIALS_PATH is not set: push subscriptions unavailable; "
+                + "notice-created push skipped.");
         }
     }
 }

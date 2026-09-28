@@ -56,6 +56,16 @@
 
 ## 요청 수 제한
 
+경로별 정책은 원문 URI 문자열 대신 Spring MVC와 같은 `RequestPath`의 세그먼트 디코딩·
+matrix parameter 처리 결과로 선택한다. 요청 제한, 관리자 Origin 검사, JWT 처리, no-store와 JSON 본문 제한이
+같은 `ApiRequestPath`를 사용하며 context path도 제외한다. 인코딩된 철자가 별도 bucket이나
+Origin 검사 제외 경로가 되면 안 된다.
+
+Firebase 구독은 토큰별 성공 수 1·실패 수 0을 확인한 경우에만 성공으로 반환한다.
+토큰별 실패·외부 예외·Firebase 미설정은 구독 API의 `503 SERVICE_UNAVAILABLE`로 처리한다.
+공지 저장 뒤 푸시 발송 실패는 공지 저장을 되돌리지 않는다. Firebase 예외 객체·메시지 대신
+SDK의 오류 코드만 로그에 남긴다.
+
 `/api/v2`는 인증보다 먼저 클라이언트별 token bucket으로 제한한다. 단일 인스턴스 메모리에서 동작하며
 초과하면 `429 RATE_LIMITED`(retryable)와 `Retry-After`를 반환한다. `/healthz`, `/readyz`,
 `/docs`는 제한하지 않는다.

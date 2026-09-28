@@ -31,9 +31,12 @@ class FirebasePushNotificationService implements PushNotificationService {
     @Override
     public void subscribe(String deviceToken) {
         try {
-            messaging.subscribeToTopic(List.of(deviceToken), topic);
+            var result = messaging.subscribeToTopic(List.of(deviceToken), topic);
+            if (result.getSuccessCount() != 1 || result.getFailureCount() != 0) {
+                throw new PushSubscriptionFailedException(null);
+            }
         } catch (FirebaseMessagingException exception) {
-            log.warn("Push subscribe failed: errorCode={}", exception.getMessagingErrorCode(), exception);
+            log.warn("Push subscribe failed: errorCode={}", exception.getMessagingErrorCode());
             throw new PushSubscriptionFailedException(exception);
         }
     }
@@ -54,7 +57,7 @@ class FirebasePushNotificationService implements PushNotificationService {
         try {
             messaging.send(message.build());
         } catch (FirebaseMessagingException exception) {
-            log.warn("Notice-created push failed to send", exception);
+            log.warn("Notice-created push failed: errorCode={}", exception.getMessagingErrorCode());
         }
     }
 }

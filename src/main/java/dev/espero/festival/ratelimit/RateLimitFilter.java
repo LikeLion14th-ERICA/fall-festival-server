@@ -1,6 +1,7 @@
 package dev.espero.festival.ratelimit;
 
 import dev.espero.festival.auth.ApiSecurityErrorWriter;
+import dev.espero.festival.auth.ApiRequestPath;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +46,14 @@ class RateLimitFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain chain
     ) throws ServletException, IOException {
-        String path = request.getRequestURI().substring(request.getContextPath().length());
+        String path;
+        try {
+            path = ApiRequestPath.of(request);
+        } catch (IllegalArgumentException exception) {
+            errors.write(request, response, HttpStatus.BAD_REQUEST.value(),
+                "INVALID_REQUEST", "요청 경로를 확인해 주세요.", false);
+            return;
+        }
         String policyName = policyName(request.getMethod(), path);
         if (path.equals(ARTIST_HYPED_PATH) || ARTIST_HYPED_MUTATION.matcher(path).matches()) {
             response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
