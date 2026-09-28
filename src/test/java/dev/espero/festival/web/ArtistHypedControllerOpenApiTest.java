@@ -65,12 +65,12 @@ class ArtistHypedControllerOpenApiTest {
 
     @Test
     void validatesHypedReadAndIncrementAgainstOpenApi() throws Exception {
-        when(store.currentArtists(FESTIVAL_ID, REVISION_ID)).thenReturn(List.of(
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, "")).thenReturn(List.of(
             new ArtistHypedStore.Count("artist-a", 0),
             new ArtistHypedStore.Count("artist-b", 12_000)
         ));
         when(store.isCurrentArtist(REVISION_ID, "artist-a")).thenReturn(true);
-        when(store.increment(FESTIVAL_ID, "artist-a", Instant.parse("2030-10-01T00:00:00Z")))
+        when(store.increment(FESTIVAL_ID, "artist-a", "", Instant.parse("2030-10-01T00:00:00Z")))
             .thenReturn(1L, 2L);
 
         MvcResult read = assertMatches("/api/v2/artist-hyped", "get", 200, get(LIST_PATH));
@@ -102,7 +102,7 @@ class ArtistHypedControllerOpenApiTest {
 
         when(store.isCurrentArtist(REVISION_ID, "artist-a")).thenReturn(true);
         useTime("2030-10-01T14:59:59Z"); // 23:59:59 KST remains a festival day.
-        when(store.increment(FESTIVAL_ID, "artist-a", Instant.parse("2030-10-01T14:59:59Z")))
+        when(store.increment(FESTIVAL_ID, "artist-a", "", Instant.parse("2030-10-01T14:59:59Z")))
             .thenReturn(1L);
         assertMatches("/api/v2/artists/{artistId}/hyped", "post", 200,
             post(POST_PATH).contentType(MediaType.APPLICATION_JSON).content("{}"));
@@ -123,11 +123,57 @@ class ArtistHypedControllerOpenApiTest {
             post(POST_PATH).contentType(MediaType.APPLICATION_JSON).content("{\"extra\":true}"));
         assertMatches("/api/v2/artists/{artistId}/hyped", "post", 415,
             post(POST_PATH).contentType(MediaType.TEXT_PLAIN).content("{}"));
-        when(store.currentArtists(FESTIVAL_ID, REVISION_ID))
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, ""))
             .thenThrow(new TransientDataAccessResourceException("database unavailable"));
         MvcResult failure = assertMatches("/api/v2/artist-hyped", "get", 503, get(LIST_PATH));
         assertThat(json.readTree(failure.getResponse().getContentAsString()).at("/error/code").asText())
             .isEqualTo("SERVICE_UNAVAILABLE");
+    }
+
+    @Test
+    void enablesHypedOnlyDuringTheRehearsalWindowOnSeptemberTwentyEighth() throws Exception {
+        useTime("2026-09-28T01:59:59Z");
+        mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hypedEnabled").value(false));
+        useTime("2026-09-28T02:00:00Z");
+        mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hypedEnabled").value(true));
+        useTime("2026-09-28T05:59:59Z");
+        mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hypedEnabled").value(true));
+        useTime("2026-09-28T06:00:00Z");
+        mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hypedEnabled").value(false));
+    }
+
+    @Test
+    void isolatesRehearsalCountsAndRestoresFestivalCountsAtThreePm() throws Exception {
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, "rehearsal-2026-09-28:"))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 8)));
+        when(store.isCurrentArtist(REVISION_ID, "artist-a")).thenReturn(true);
+        when(store.increment(FESTIVAL_ID, "artist-a", "rehearsal-2026-09-28:",
+            Instant.parse("2026-09-28T02:00:00Z"))).thenReturn(9L);
+        useTime("2026-09-28T02:00:00Z");
+        MvcResult rehearsalRead = mvc.perform(get(LIST_PATH)).andExpect(status().isOk()).andReturn();
+        assertThat(json.readTree(rehearsalRead.getResponse().getContentAsString())
+            .at("/data/items/0/artistId").asText()).isEqualTo("artist-a");
+        assertThat(json.readTree(rehearsalRead.getResponse().getContentAsString())
+            .at("/data/items/0/hypedCount").asLong()).isEqualTo(8);
+        MvcResult rehearsalPost = mvc.perform(post(POST_PATH).contentType(MediaType.APPLICATION_JSON).content("{}"))
+            .andExpect(status().isOk()).andReturn();
+        assertThat(json.readTree(rehearsalPost.getResponse().getContentAsString())
+            .at("/data/artistId").asText()).isEqualTo("artist-a");
+        assertThat(json.readTree(rehearsalPost.getResponse().getContentAsString())
+            .at("/data/hypedCount").asLong()).isEqualTo(9);
+
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, ""))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 3)));
+        useTime("2026-09-28T06:00:00Z");
+        MvcResult festivalRead = mvc.perform(get(LIST_PATH)).andExpect(status().isOk()).andReturn();
+        assertThat(json.readTree(festivalRead.getResponse().getContentAsString())
+            .at("/data/items/0/hypedCount").asLong()).isEqualTo(3);
+        verify(store).increment(FESTIVAL_ID, "artist-a", "rehearsal-2026-09-28:",
+            Instant.parse("2026-09-28T02:00:00Z"));
     }
 
     private MvcResult assertMatches(String path, String method, int expectedStatus,

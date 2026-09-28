@@ -130,6 +130,41 @@ class CrowdingControllerTest {
     }
 
     @Test
+    void usesRehearsalScheduleAcrossSeptemberTwentyEighthAndOnlyAllowsWritesDuringWindow() {
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            sameDaySchedule("2026-09-29"), sameDaySchedule("2026-09-30"), sameDaySchedule("2026-10-01")
+        ));
+        var before = serviceAt("2026-09-28T01:59:59Z").current(request);
+        assertThat(before.operatingDay()).isEqualTo(LocalDate.parse("2026-09-28"));
+        assertThat(before.response().operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.BEFORE_OPEN);
+        assertThat(before.canUpdateLevel()).isFalse();
+
+        var start = serviceAt("2026-09-28T02:00:00Z").current(request);
+        assertThat(start.operatingDay()).isEqualTo(LocalDate.parse("2026-09-28"));
+        assertThat(start.response().operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.OPEN);
+        assertThat(start.canUpdateLevel()).isTrue();
+
+        var finalSecond = serviceAt("2026-09-28T05:59:59Z").current(request);
+        assertThat(finalSecond.operatingDay()).isEqualTo(LocalDate.parse("2026-09-28"));
+        assertThat(finalSecond.canUpdateLevel()).isTrue();
+
+        var end = serviceAt("2026-09-28T06:00:00Z").current(request);
+        assertThat(end.operatingDay()).isEqualTo(LocalDate.parse("2026-09-28"));
+        assertThat(end.response().operatingStatus()).isEqualTo(CrowdingResponse.OperatingStatus.CLOSED);
+        assertThat(end.canUpdateLevel()).isFalse();
+    }
+
+    @Test
+    void rehearsalScheduleDoesNotDependOnConfiguredFestivalHours() {
+        when(store.findSchedules(ApiMetaTestFixtures.REVISION_ID)).thenReturn(List.of(
+            new CrowdingSchedule(LocalDate.parse("2026-09-29"), null, null)
+        ));
+        var rehearsal = serviceAt("2026-09-28T02:00:00Z").current(request);
+        assertThat(rehearsal.operatingDay()).isEqualTo(LocalDate.parse("2026-09-28"));
+        assertThat(rehearsal.canUpdateLevel()).isTrue();
+    }
+
+    @Test
     void adminReadsTheSelectedOperatingDaysSavedLevelOutsideTheFestivalDay() {
         schedule();
         when(store.findFor(ApiMetaTestFixtures.FESTIVAL_ID, java.time.LocalDate.parse("2030-10-01")))

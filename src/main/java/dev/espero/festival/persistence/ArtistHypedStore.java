@@ -22,16 +22,21 @@ public class ArtistHypedStore {
     }
 
     public List<Count> currentArtists(UUID festivalId, UUID revisionId) {
+        return currentArtists(festivalId, revisionId, "");
+    }
+
+    public List<Count> currentArtists(UUID festivalId, UUID revisionId, String keyPrefix) {
         return jdbc.query("""
             SELECT artist.id AS artist_id, COALESCE(hyped.hyped_count, 0) AS hyped_count
             FROM artists artist
             LEFT JOIN artist_hyped_counts hyped
-              ON hyped.festival_id = :festivalId AND hyped.artist_id = artist.id
+              ON hyped.festival_id = :festivalId AND hyped.artist_id = :keyPrefix || artist.id
             WHERE artist.festival_revision_id = :revisionId AND artist.category = 'ARTIST'
             ORDER BY artist.id
             """, new MapSqlParameterSource()
                 .addValue("festivalId", festivalId)
-                .addValue("revisionId", revisionId),
+                .addValue("revisionId", revisionId)
+                .addValue("keyPrefix", keyPrefix),
             (resultSet, rowNumber) -> new Count(
                 resultSet.getString("artist_id"), resultSet.getLong("hyped_count")
             )
@@ -69,6 +74,10 @@ public class ArtistHypedStore {
             throw new IllegalStateException("Artist Hyped increment returned no count.");
         }
         return count;
+    }
+
+    public long increment(UUID festivalId, String artistId, String keyPrefix, Instant now) {
+        return increment(festivalId, keyPrefix + artistId, now);
     }
 
     public record Count(String artistId, long hypedCount) {}
