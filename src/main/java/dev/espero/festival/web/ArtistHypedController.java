@@ -40,7 +40,7 @@ public class ArtistHypedController {
     private final ArtistHypedBatchService batches;
     private final ApiMetaSupport metaSupport;
     private final Clock clock;
-    private CachedCounts cachedCounts;
+    private volatile CachedCounts cachedCounts;
 
     public ArtistHypedController(
         CatalogSnapshotProvider snapshots,
@@ -121,17 +121,28 @@ public class ArtistHypedController {
                 metaSupport.dynamicMeta(request, context.snapshot().context(), context.locale())));
     }
 
-    // ponytail: one bounded entry for the single-instance deployment; serialize cache misses only here.
-    private synchronized List<ArtistHypedResponse.Item> currentCounts(CountKey key) {
-        Instant now = clock.instant();
-        if (cachedCounts == null || !cachedCounts.key().equals(key)
-            || now.isBefore(cachedCounts.loadedAt()) || !now.isBefore(cachedCounts.loadedAt().plusSeconds(1))) {
-            var items = store.currentArtists(key.festivalId(), key.revisionId(), key.prefix()).stream()
-                .map(count -> new ArtistHypedResponse.Item(count.artistId(), count.hypedCount()))
-                .toList();
-            cachedCounts = new CachedCounts(key, now, items);
+    // ponytail: one bounded entry for the single-instance deployment. Fresh hits skip the lock so
+    // polling never waits behind a refresh query; only misses are serialized and share one query.
+    private List<ArtistHypedResponse.Item> currentCounts(CountKey key) {
+        CachedCounts cached = cachedCounts;
+        if (fresh(cached, key, clock.instant())) {
+            return cached.items();
         }
-        return cachedCounts.items();
+        synchronized (this) {
+            Instant now = clock.instant();
+            if (!fresh(cachedCounts, key, now)) {
+                var items = store.currentArtists(key.festivalId(), key.revisionId(), key.prefix()).stream()
+                    .map(count -> new ArtistHypedResponse.Item(count.artistId(), count.hypedCount()))
+                    .toList();
+                cachedCounts = new CachedCounts(key, now, items);
+            }
+            return cachedCounts.items();
+        }
+    }
+
+    private static boolean fresh(CachedCounts cached, CountKey key, Instant now) {
+        return cached != null && cached.key().equals(key)
+            && !now.isBefore(cached.loadedAt()) && now.isBefore(cached.loadedAt().plusSeconds(1));
     }
 
     private synchronized void updateCachedCount(CountKey key, String artistId, long count) {

@@ -233,6 +233,24 @@ HYPED_CLOSED, 회차 전환 후에는 FESTIVAL_MISMATCH로 거절한다. 리허�
 Spring Security 기본 `Pragma: no-cache`·`Expires: 0`을 쓰지 않는다. URL에 확장자가 없으므로
 CDN(Cloudflare 등)은 이 경로를 캐시 대상으로 지정하는 규칙이 있어야 edge에서 응답한다.
 
+공개 여부는 요청마다 DB로 확인해 분리된 이미지는 즉시 404가 된다. `If-None-Match` 재검증과
+메모리 응답도 파일 존재만 확인(stat)하므로 저장 파일이 사라진 경우를 숨기지 않는다. 저장된
+variant는 변경되지 않으므로 4 MiB 이하 본문을 `FESTIVAL_MEDIA_SERVING_CACHE_MAX_BYTES`(기본
+32 MiB, `0`은 사용 안 함) 안에서 최근 사용 순으로 메모리에 보관해 반복 요청의 디스크 읽기를
+생략한다.
+
+### 과부하 보호
+
+관리자 경로를 제외한 `/api/v2` 요청은 동시에 `FESTIVAL_OVERLOAD_PUBLIC_MAX_CONCURRENT`(기본
+`150`)개까지 처리하고, Hyped POST는 별도로 `FESTIVAL_OVERLOAD_HYPED_WRITE_MAX_CONCURRENT`(기본
+`8`)개까지 처리한다. 자리가 없으면 `FESTIVAL_OVERLOAD_MAX_WAIT_MS`(기본 `200`)만 기다린 뒤
+`503 SERVICE_UNAVAILABLE`(`retryable: true`, `Retry-After: 1`)로 답한다. Hyped 한도는 DB 연결
+수(`SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE`, 기본 45)보다 작게 유지해 Hyped 묶음이 모든 연결을
+차지하지 못하게 한다. 기본값에서는 스탬프(20)와 Hyped 쓰기(8)가 모두 차도 다른 기능에 17개가
+남는다. 사용자별 Hyped 쓰기 속도(`RATE_LIMIT_ARTIST_HYPED_REFILL_PER_SECOND`)를 올리면 이 상한이
+DB 사용을 묶는 역할을 한다. 용량 측정처럼 의도적으로 끌 때만 `FESTIVAL_OVERLOAD_ENABLED=false`를
+사용한다.
+
 ## 구현 규칙
 
 - 운영 콘텐츠는 최소 `draft / scheduled / published / archived` 생명주기와 게시자,

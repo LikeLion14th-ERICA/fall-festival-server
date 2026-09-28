@@ -82,6 +82,13 @@ festival:
     artist-hyped-read:
       capacity: ${RATE_LIMIT_ARTIST_HYPED_READ_CAPACITY:120}
       refill-per-second: ${RATE_LIMIT_ARTIST_HYPED_READ_REFILL_PER_SECOND:4.0}
+  # In-flight bounds on public API requests. Excess requests get a retryable 503
+  # after max-wait-ms instead of queueing for a database connection.
+  overload:
+    enabled: ${FESTIVAL_OVERLOAD_ENABLED:true}
+    public-max-concurrent: ${FESTIVAL_OVERLOAD_PUBLIC_MAX_CONCURRENT:150}
+    hyped-write-max-concurrent: ${FESTIVAL_OVERLOAD_HYPED_WRITE_MAX_CONCURRENT:8}
+    max-wait-ms: ${FESTIVAL_OVERLOAD_MAX_WAIT_MS:200}
   http-observation:
     slow-request-ms: ${FESTIVAL_HTTP_SLOW_REQUEST_MS:500}
     log-success: ${FESTIVAL_HTTP_LOG_SUCCESS:true}

@@ -65,7 +65,7 @@ import tools.jackson.databind.json.JsonMapper;
     "festival.admin-auth.allowed-origin=https://admin.hyped.test",
     "festival.admin-auth.bootstrap-username=hyped-e2e-admin",
     "festival.admin-auth.bootstrap-password=hyped-e2e-test-password",
-    "festival.rate-limit.enabled=false", "festival.public-locales=ko,en",
+    "festival.rate-limit.enabled=false", "festival.overload.enabled=false", "festival.public-locales=ko,en",
     "festival.cleanup.schedule-enabled=false", "festival.cleanup.dry-run=true",
     "festival.cleanup.datasource.url=", "festival.cleanup.datasource.username=",
     "festival.cleanup.datasource.password=", "festival.cleanup.datasource.role=",
