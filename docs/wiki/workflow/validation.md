@@ -2,6 +2,29 @@
 
 [위키 홈](../README.md) · 읽는 때: 코드·의존성·배포 변경 검증
 
+## 2026-09-29 스탬프 부하 보호 로컬 검증
+
+- macOS/OpenJDK 26.0.2.1, Docker의 임시 PostgreSQL 16에서 실행했다. 운영 API·DB에는
+  연결하지 않았다. 아래 명령은 저장소 루트에서 실행했다.
+  `TMPDIR=/private/tmp sh ./mvnw --batch-mode --no-transfer-progress -Djava.io.tmpdir=/private/tmp -DargLine=-Djava.io.tmpdir=/private/tmp verify`
+- 전체 779개, 실패·오류 0, skip 7, 실행 가능한
+  `target/fall-festival-server-0.0.1-SNAPSHOT.jar` 패키징 성공. skip은
+  `media.codec.external-tools.required` 미지정으로 외부 WebP 2개·Alpine 5개다.
+- 스탬프 DB 통합 13개에는 동시 같은 부스·마지막 칸·중복 수령, 잠금 timeout 후 rollback과
+  복구, 읽기 query timeout, 같은 connection의 transaction-local timeout 원복, 실제 prepared
+  statement 수(조회 4·적립 8), nanosecond 시계에서 POST/GET 적립 시각 일치를 포함한다.
+  admission 포화·예외 뒤 permit 반환, 안내·다른 기능의 HTTP 응답, invalid 수령 코드와 기존
+  429 추측 방어, stamp/public bucket 분리를 별도 단위·provider 회귀로 확인했다.
+- `npm --prefix api-v2 run check`: 463개 통과, 51 operations·403 examples.
+  새 503 오류의 schema·Retry-After·no-store 계약과 생성 OpenAPI 일치를 확인했다.
+- 전체 suite 종료 중 이전 임시 DB가 정리된 pool의 연결 경고와 Surefire의
+  `System.exit(0)` 이후 30초 fork JVM 종료 진단이 있었다. Maven 종료 코드는 0이고
+  모든 테스트·패키징은 성공했지만 전체 suite의 자원 종료 지연은 이번 변경에서 고치지 않았다.
+  원본 branch의 전체 suite를 별도로 재실행하지 않았으므로 기존 문제인지는 확정하지 않았다.
+- `git diff --check` 통과. 운영 배포·실제 동시 사용자 p95·Hikari 대기 개선·수령 NAT 용량은
+  이 결과에 포함하지 않는다. 동시 처리 4·transaction 3초·잠금 1초의 적용 범위와
+  connection 획득 시간의 별도 한계는 [운영 문서](../engineering/operations.md#스탬프-동시-처리-보호)를 따른다.
+
 ## 2026-09-29 Hyped 묶음 전송 로컬 검증
 
 - macOS, OpenJDK 26.0.2.1, Maven Wrapper, Docker의 임시 PostgreSQL에서 실행했다.

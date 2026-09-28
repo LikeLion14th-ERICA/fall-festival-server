@@ -4,11 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,14 +24,22 @@ import org.springframework.stereotype.Repository;
 public class StampStore {
 
     private final NamedParameterJdbcTemplate jdbc;
+    private final String lockTimeout;
 
-    public StampStore(NamedParameterJdbcTemplate jdbc) {
+    public StampStore(NamedParameterJdbcTemplate jdbc,
+        @Value("${festival.stamp.lock-timeout-ms:1000}") int lockTimeoutMillis) {
         this.jdbc = jdbc;
+        if (lockTimeoutMillis < 1) {
+            throw new IllegalArgumentException("festival.stamp.lock-timeout-ms must be positive");
+        }
+        this.lockTimeout = lockTimeoutMillis + "ms";
     }
 
     public record BoothToken(String boothId, String boothName, LocalDate validDate) {}
 
     public record Collected(String boothId, Instant collectedAt) {}
+
+    public record NamedCollected(String boothId, String boothName, Instant collectedAt) {}
 
     public Optional<BoothToken> findBoothToken(UUID revisionId, String tokenSha256) {
         return jdbc.query("""
@@ -46,18 +53,6 @@ public class StampStore {
                 resultSet.getString("name"),
                 resultSet.getObject("valid_date", LocalDate.class)
             )).stream().findFirst();
-    }
-
-    /** Booth display names of a revision; a collected booth missing here keeps only its id. */
-    public Map<String, String> boothNames(UUID revisionId) {
-        Map<String, String> names = new LinkedHashMap<>();
-        jdbc.query("""
-            SELECT id, name FROM stamp_booths WHERE festival_revision_id = :revisionId ORDER BY sort_order
-            """, new MapSqlParameterSource("revisionId", revisionId),
-            resultSet -> {
-                names.put(resultSet.getString("id"), resultSet.getString("name"));
-            });
-        return names;
     }
 
     public UUID createParticipant(UUID festivalId, String tokenSha256, Instant now) {
@@ -82,6 +77,7 @@ public class StampStore {
 
     /** Records today's START (V28); returns false when the participant already started today. */
     public boolean startDay(UUID participantId, LocalDate date, Instant now) {
+        boundLockWait();
         return jdbc.update("""
             INSERT INTO stamp_participant_days (participant_id, operating_date, started_at)
             VALUES (:participantId, :date, :startedAt)
@@ -103,8 +99,31 @@ public class StampStore {
 
     /** Must run inside the caller's transaction. */
     public void lockParticipant(UUID participantId) {
+        boundLockWait();
         jdbc.query("SELECT id FROM stamp_participants WHERE id = :id FOR UPDATE",
             new MapSqlParameterSource("id", participantId), resultSet -> {});
+    }
+
+    /** Transaction-local only: pooled connections never retain the stamp lock policy. */
+    private void boundLockWait() {
+        jdbc.queryForObject("SELECT set_config('lock_timeout', :timeout, true)",
+            new MapSqlParameterSource("timeout", lockTimeout), String.class);
+    }
+
+    /** Join names only for this card's at most four rows; removed booths retain a null name. */
+    public List<NamedCollected> namedCollections(UUID participantId, LocalDate date, UUID revisionId) {
+        return jdbc.query("""
+            SELECT c.booth_id, b.name, c.collected_at
+            FROM stamp_collections c
+            LEFT JOIN stamp_booths b ON b.festival_revision_id = :revisionId AND b.id = c.booth_id
+            WHERE c.participant_id = :participantId AND c.operating_date = :date
+            ORDER BY c.collected_at, c.booth_id
+            """, new MapSqlParameterSource().addValue("participantId", participantId)
+                .addValue("date", date).addValue("revisionId", revisionId),
+            (resultSet, rowNumber) -> new NamedCollected(
+                resultSet.getString("booth_id"), resultSet.getString("name"),
+                resultSet.getObject("collected_at", OffsetDateTime.class).toInstant()
+            ));
     }
 
     public List<Collected> collections(UUID participantId, LocalDate date) {

@@ -166,6 +166,15 @@ Object.assign(operations.find(operation=>operation.operationId==='collectStamp')
   successStatus: 200,
   cacheControl: 'no-store',
 });
+for (const operationId of ['startStampParticipation','getStampCard','collectStamp','verifyStampReceipt']) {
+  operations.find(operation=>operation.operationId===operationId).responseOverrides={503:{
+    description:'스탬프 DB 동시 처리 한도 또는 DB/transaction 실패는 SERVICE_UNAVAILABLE(retryable=true), Retry-After: 1, Cache-Control: no-store. 안내·수령 코드 미설정 오류는 기존 오류 코드를 유지한다.',
+    headers:{
+      'Retry-After':{schema:{type:'integer',enum:[1]},description:'SERVICE_UNAVAILABLE일 때 재시도 전 최소 대기 초. 응답 유실 가능성이 있는 쓰기는 현재 스탬프판을 먼저 확인한다.'},
+      'Cache-Control':{schema:{type:'string',enum:['no-store']},description:'SERVICE_UNAVAILABLE 응답은 저장하지 않는다.'},
+    },
+  }};
+}
 // The ticket amount belongs to the published catalog revision.
 Object.assign(operations.find(operation=>operation.operationId==='getTicketGuide'), {
   conditional: true,

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,6 +56,7 @@ class CatalogControllerOpenApiTest {
     private final ObjectMapper json = new ObjectMapper();
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final StampCardService stampCards = mock(StampCardService.class);
+    private final StampRequestAdmission stampAdmission = new StampRequestAdmission(1);
     private JsonNode openApi;
     private MockMvc mvc;
 
@@ -68,14 +70,49 @@ class CatalogControllerOpenApiTest {
             new ConfigController(snapshots, metaSupport, clock),
             new StampReceiptController(snapshots, metaSupport, new StampReceiptVerifier(
                 java.util.HexFormat.of().formatHex(StampReceiptVerifier.sha256("048213"))
-            ), stampCards),
-            new StampCardController(snapshots, metaSupport, stampCards),
+            ), stampCards, stampAdmission),
+            new StampCardController(snapshots, metaSupport, stampCards, stampAdmission),
+            new StampGuideController(snapshots, metaSupport),
             new TicketGuideController(
                 snapshots,
                 new ConditionalResponseSupport(new tools.jackson.databind.ObjectMapper()),
                 metaSupport
             )
         ).setControllerAdvice(new GlobalApiExceptionHandler(metaSupport)).build();
+    }
+
+    @Test
+    void overloadRejectsAllStampDbRoutesBeforeServiceWhileGuideAndCatalogRemainAvailable() {
+        CatalogSnapshot base = snapshot();
+        when(snapshots.required()).thenReturn(new CatalogSnapshot(base.context(), base.spaces(), base.maps(),
+            base.places(), base.pinsByMapVersion(), base.ticketGuideConfig(),
+            new dev.espero.festival.domain.StampGuide("test", List.of(java.time.LocalDate.parse("2030-10-01")),
+                List.of(), "test", null, null, null, null, Instant.EPOCH), base.ticketMapTarget()));
+        stampAdmission.execute(() -> {
+            try {
+                for (var request : List.of(post("/api/v2/stamp-participants"), get("/api/v2/stamp-card"),
+                    post("/api/v2/stamp-collections").contentType("application/json").content("{\"token\":\"mock-booth-token-0001\"}"),
+                    post("/api/v2/stamp-receipt-verifications").contentType("application/json").content("{\"code\":\"048213\"}"))) {
+                    MvcResult result = mvc.perform(request).andExpect(status().isServiceUnavailable())
+                        .andExpect(header().string("Retry-After", "1"))
+                        .andExpect(header().string("Cache-Control", "no-store"))
+                        .andExpect(jsonPath("$.error.code").value("SERVICE_UNAVAILABLE"))
+                        .andExpect(jsonPath("$.error.retryable").value(true)).andReturn();
+                    assertThat(result.getResponse().getContentAsString()).doesNotContain("SQLException", "token_sha256");
+                    assertThat(validate(errorSchema(request.buildRequest(new org.springframework.mock.web.MockServletContext())
+                        .getRequestURI(), "503"), json.readTree(result.getResponse().getContentAsString()))).isEmpty();
+                }
+                // Invalid staff codes still undergo strict verification without consuming a DB permit.
+                mvc.perform(post("/api/v2/stamp-receipt-verifications").contentType("application/json")
+                    .content("{\"code\":\"000000\"}")).andExpect(status().isUnprocessableEntity());
+                mvc.perform(get("/api/v2/stamp-guide")).andExpect(status().isOk());
+                mvc.perform(get("/api/v2/spaces")).andExpect(status().isOk());
+            } catch (Exception exception) {
+                throw new AssertionError(exception);
+            }
+            return null;
+        });
+        org.mockito.Mockito.verifyNoInteractions(stampCards);
     }
 
     @Test

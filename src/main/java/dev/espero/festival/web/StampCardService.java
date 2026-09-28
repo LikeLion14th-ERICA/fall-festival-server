@@ -13,9 +13,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Base64;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -68,7 +69,7 @@ public class StampCardService {
     public record Started(StampCardResponse card, boolean startedNow, String cookieToken) {}
 
     /** Records today's START, creating the participant for a browser without a valid cookie. */
-    @Transactional
+    @Transactional(timeoutString = "${festival.stamp.transaction-timeout-seconds:3}")
     public Started start(String participantToken) {
         CatalogSnapshot snapshot = snapshots.required();
         Instant instant = clock.instant();
@@ -84,7 +85,7 @@ public class StampCardService {
     }
 
     /** Today's card; {@code STAMP_NOT_STARTED} until today's START, which shows the start screen. */
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, timeoutString = "${festival.stamp.transaction-timeout-seconds:3}")
     public StampCardResponse current(String participantToken) {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::notStarted);
         CatalogSnapshot snapshot = snapshots.required();
@@ -93,12 +94,13 @@ public class StampCardService {
         return card(participant, snapshot, today);
     }
 
-    @Transactional
+    @Transactional(timeoutString = "${festival.stamp.transaction-timeout-seconds:3}")
     public StampCardResponse collect(String participantToken, String boothToken) {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::notStarted);
         store.lockParticipant(participant);
         CatalogSnapshot snapshot = snapshots.required();
-        Instant instant = clock.instant();
+        // PostgreSQL timestamps have microsecond precision; reuse exactly the persisted value in the response.
+        Instant instant = clock.instant().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
         LocalDate today = instant.atZone(snapshot.context().timezone()).toLocalDate();
         requireEventDay(snapshot, today);
         requireStartedToday(participant, today);
@@ -113,7 +115,7 @@ public class StampCardService {
         if (store.rewardClaimed(participant, today)) {
             throw conflict("STAMP_REWARD_CLAIMED", "오늘은 이미 상품을 받았어요.");
         }
-        List<StampStore.Collected> collected = store.collections(participant, today);
+        List<StampStore.NamedCollected> collected = store.namedCollections(participant, today, snapshot.context().revisionId());
         if (collected.stream().anyMatch(stamp -> stamp.boothId().equals(booth.boothId()))) {
             throw conflict("STAMP_ALREADY_COLLECTED", "이 부스의 스탬프는 오늘 이미 받았어요.");
         }
@@ -121,14 +123,17 @@ public class StampCardService {
             throw conflict("STAMP_CARD_FULL", "오늘 받을 수 있는 스탬프를 모두 모았어요.");
         }
         store.insertCollection(participant, today, booth.boothId(), instant);
-        return card(participant, snapshot, today);
+        List<StampStore.NamedCollected> updated = new ArrayList<>(collected);
+        updated.add(new StampStore.NamedCollected(booth.boothId(), booth.boothName(), instant));
+        // The participant lock protects this snapshot through commit; no second DB read is needed.
+        return card(snapshot, today, updated, false);
     }
 
     /**
      * Records today's reward for a participant who holds a full card. The
      * caller has already checked the staff reward code.
      */
-    @Transactional
+    @Transactional(timeoutString = "${festival.stamp.transaction-timeout-seconds:3}")
     public void claimReward(String participantToken) {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::incomplete);
         store.lockParticipant(participant);
@@ -150,15 +155,22 @@ public class StampCardService {
     }
 
     private StampCardResponse card(UUID participant, CatalogSnapshot snapshot, LocalDate today) {
-        Map<String, String> names = store.boothNames(snapshot.context().revisionId());
-        List<StampCardResponse.Stamp> stamps = store.collections(participant, today).stream()
+        return card(snapshot, today, store.namedCollections(participant, today, snapshot.context().revisionId()),
+            store.rewardClaimed(participant, today));
+    }
+
+    private StampCardResponse card(CatalogSnapshot snapshot, LocalDate today,
+        List<StampStore.NamedCollected> collected, boolean rewardClaimed) {
+        List<StampCardResponse.Stamp> stamps = collected.stream()
+            .sorted(Comparator.comparing(StampStore.NamedCollected::collectedAt)
+                .thenComparing(StampStore.NamedCollected::boothId))
             .map(stamp -> new StampCardResponse.Stamp(
                 stamp.boothId(),
-                names.get(stamp.boothId()),
+                stamp.boothName(),
                 OffsetDateTime.ofInstant(stamp.collectedAt(), snapshot.context().timezone())
             ))
             .toList();
-        return new StampCardResponse(today, DAILY_LIMIT, stamps, store.rewardClaimed(participant, today));
+        return new StampCardResponse(today, DAILY_LIMIT, stamps, rewardClaimed);
     }
 
     private void requireStartedToday(UUID participant, LocalDate today) {

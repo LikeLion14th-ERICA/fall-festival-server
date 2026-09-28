@@ -61,11 +61,21 @@ festival:
   # Never put the code itself here; without a value the check answers 503.
   stamp-receipt:
     code-sha256: ${STAMP_RECEIPT_CODE_SHA256:}
+  stamp:
+    max-concurrent-requests: ${FESTIVAL_STAMP_MAX_CONCURRENT_REQUESTS:20}
+    transaction-timeout-seconds: ${FESTIVAL_STAMP_TRANSACTION_TIMEOUT_SECONDS:3}
+    lock-timeout-ms: ${FESTIVAL_STAMP_LOCK_TIMEOUT_MS:1000}
   # Per-client limits on /api/v2. trusted-proxy-hops is the number of proxies in
   # front of the server that append X-Forwarded-For (0 = the socket address).
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     trusted-proxy-hops: ${RATE_LIMIT_TRUSTED_PROXY_HOPS:0}
+    stamp-read:
+      capacity: ${RATE_LIMIT_STAMP_READ_CAPACITY:120}
+      refill-per-second: ${RATE_LIMIT_STAMP_READ_REFILL_PER_SECOND:4.0}
+    stamp-write:
+      capacity: ${RATE_LIMIT_STAMP_WRITE_CAPACITY:120}
+      refill-per-second: ${RATE_LIMIT_STAMP_WRITE_REFILL_PER_SECOND:4.0}
     artist-hyped:
       capacity: ${RATE_LIMIT_ARTIST_HYPED_CAPACITY:120}
       refill-per-second: ${RATE_LIMIT_ARTIST_HYPED_REFILL_PER_SECOND:4.0}
@@ -112,6 +122,12 @@ spring:
       # Negative timeout skips the eager connection check so the app still
       # starts if the shared DB is temporarily unreachable.
       initialization-fail-timeout: -1
+      # 20 concurrent stamp requests leave 25 connections for every other feature. The
+      # dedicated database allows 100; Coolify rolling deploys briefly run two pools, so
+      # 2 x 45 plus admin reserve and tools stays within it (2026-09-29).
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:45}
+      # Fail fast instead of holding a request thread for Hikari's 30 s default.
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:3000}
   flyway:
     enabled: ${SPRING_FLYWAY_ENABLED:true}
     clean-disabled: true

@@ -81,6 +81,14 @@ class RateLimitFilter extends OncePerRequestFilter {
         if (method.equals("POST") && path.equals(STAMP_RECEIPT_PATH)) {
             return "stamp-receipt";
         }
+        if ((method.equals("GET") || method.equals("HEAD"))
+            && (path.equals("/api/v2/stamp-card") || path.equals("/api/v2/stamp-guide"))) {
+            return "stamp-read";
+        }
+        if (method.equals("POST")
+            && (path.equals("/api/v2/stamp-participants") || path.equals("/api/v2/stamp-collections"))) {
+            return "stamp-write";
+        }
         if (method.equals("POST") && ARTIST_HYPED_MUTATION.matcher(path).matches()) {
             return "artist-hyped";
         }
@@ -100,6 +108,8 @@ class RateLimitFilter extends OncePerRequestFilter {
     private RateLimitProperties.Policy policy(String name) {
         return switch (name) {
             case "stamp-receipt" -> properties.stampReceipt();
+            case "stamp-read" -> properties.stampRead();
+            case "stamp-write" -> properties.stampWrite();
             case "artist-hyped" -> properties.artistHyped();
             case "artist-hyped-read" -> properties.artistHypedRead();
             case "admin-login" -> properties.adminLogin();

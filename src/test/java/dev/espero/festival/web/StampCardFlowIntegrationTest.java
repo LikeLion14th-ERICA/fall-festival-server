@@ -19,6 +19,11 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +81,9 @@ class StampCardFlowIntegrationTest {
 
     @Autowired
     private MutableClock clock;
+
+    @Autowired
+    private DataSource dataSource;
 
     @MockitoBean
     private CatalogSnapshotProvider snapshots;
@@ -253,6 +261,182 @@ class StampCardFlowIntegrationTest {
             mvc.perform(collect(participant, token(booth))).andExpect(status().isOk());
         }
         return participant;
+    }
+
+    @Test
+    void concurrentDuplicateScansAndLastSlotKeepExactlyOneCommittedCollection() throws Exception {
+        Cookie participant = start();
+        List<MvcResult> duplicate = race(
+            () -> mvc.perform(collect(participant, token("likelion"))).andReturn(),
+            () -> mvc.perform(collect(participant, token("likelion"))).andReturn());
+        assertThat(duplicate).extracting(result -> result.getResponse().getStatus()).containsExactlyInAnyOrder(200, 409);
+        assertThat(duplicate.stream().filter(result -> result.getResponse().getStatus() == 409).findFirst().orElseThrow()
+            .getResponse().getContentAsString()).contains("STAMP_ALREADY_COLLECTED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_collections", Map.of(), Long.class)).isEqualTo(1);
+        mvc.perform(collect(participant, token("photo"))).andExpect(status().isOk());
+        mvc.perform(collect(participant, token("tarot"))).andExpect(status().isOk());
+        List<MvcResult> lastSlot = race(
+            () -> mvc.perform(collect(participant, token("career"))).andReturn(),
+            () -> mvc.perform(collect(participant, token("starbucks"))).andReturn());
+        assertThat(lastSlot).extracting(result -> result.getResponse().getStatus()).containsExactlyInAnyOrder(200, 409);
+        assertThat(lastSlot.stream().filter(result -> result.getResponse().getStatus() == 409).findFirst().orElseThrow()
+            .getResponse().getContentAsString()).contains("STAMP_CARD_FULL");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_collections", Map.of(), Long.class)).isEqualTo(4);
+    }
+
+    @Test
+    void concurrentRewardClaimsCommitOnlyOnce() throws Exception {
+        Cookie participant = fullCard();
+        List<MvcResult> results = race(
+            () -> mvc.perform(receipt(participant, RECEIPT_CODE)).andReturn(),
+            () -> mvc.perform(receipt(participant, RECEIPT_CODE)).andReturn());
+        assertThat(results).extracting(result -> result.getResponse().getStatus()).containsExactlyInAnyOrder(200, 409);
+        assertThat(results.stream().filter(result -> result.getResponse().getStatus() == 409).findFirst().orElseThrow()
+            .getResponse().getContentAsString()).contains("STAMP_REWARD_CLAIMED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_rewards", Map.of(), Long.class)).isEqualTo(1);
+    }
+
+    @Test
+    void collectionResponseUsesTheSameTimestampPrecisionAsSubsequentReads() throws Exception {
+        Cookie participant = start();
+        clock.set(OffsetDateTime.parse("2030-10-01T12:00:00.123456789+09:00"));
+        mvc.perform(collect(participant, token("likelion"))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.stamps[0].collectedAt").value("2030-10-01T12:00:00.123456+09:00"));
+        mvc.perform(get("/api/v2/stamp-card").cookie(participant)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.stamps[0].collectedAt").value("2030-10-01T12:00:00.123456+09:00"));
+    }
+
+    @Test
+    void participantLockTimesOutRollsBackAndNextRequestRecovers() throws Exception {
+        Cookie participant = start();
+        UUID id = jdbc.queryForObject("SELECT id FROM stamp_participants WHERE token_sha256=:hash",
+            Map.of("hash", StampCardService.sha256(participant.getValue())), UUID.class);
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (var statement = connection.prepareStatement("SELECT id FROM stamp_participants WHERE id=? FOR UPDATE")) {
+                    statement.setObject(1, id);
+                    statement.executeQuery().close();
+                }
+                long begin = System.nanoTime();
+                mvc.perform(collect(participant, token("likelion"))).andExpect(status().isServiceUnavailable())
+                    .andExpect(header().string("Retry-After", "1"))
+                    .andExpect(jsonPath("$.error.code").value("SERVICE_UNAVAILABLE"));
+                assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin)).isBetween(500L, 5000L);
+                assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_collections", Map.of(), Long.class)).isZero();
+            } finally {
+                connection.rollback();
+            }
+        }
+        mvc.perform(collect(participant, token("likelion"))).andExpect(status().isOk());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_collections", Map.of(), Long.class)).isEqualTo(1);
+    }
+
+    @Test
+    void cardReadUsesFourSqlStatementsAndCollectionUsesEightIncludingLockTimeout() throws Exception {
+        Cookie participant = start();
+        CountingDataSource counting = new CountingDataSource(dataSource);
+        var template = new NamedParameterJdbcTemplate(counting);
+        var service = new StampCardService(new dev.espero.festival.persistence.StampStore(template, 1000), snapshots,
+            new dev.espero.festival.context.FestivalProperties("ec00912b-763f-4f8f-8f57-4bdfc389ccbf"), clock);
+        var transaction = new org.springframework.transaction.support.TransactionTemplate(
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(counting));
+        transaction.execute(status -> service.current(participant.getValue()));
+        assertThat(counting.sql).hasSize(4);
+        assertThat(counting.sql.stream().filter(sql -> sql.contains("LEFT JOIN stamp_booths"))).hasSize(1);
+        counting.sql.clear();
+        StampCardResponse result = transaction.execute(status -> service.collect(participant.getValue(), token("likelion")));
+        assertThat(counting.sql).hasSize(8);
+        assertThat(counting.sql.stream().filter(sql -> sql.contains("stamp_collections") && sql.stripLeading().startsWith("SELECT")))
+            .hasSize(1);
+        assertThat(counting.sql.stream().filter(sql -> sql.contains("stamp_rewards"))).hasSize(1);
+        assertThat(result.stamps()).hasSize(1);
+        assertThat(result.stamps().getFirst().boothName()).isEqualTo("likelion 부스");
+    }
+
+    @Test
+    void readQueryTimeoutReturnsRetryableFailureAndRecoversAfterDatabaseLockRelease() throws Exception {
+        Cookie participant = start();
+        try (var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (var statement = connection.createStatement()) {
+                    statement.execute("LOCK TABLE stamp_participants IN ACCESS EXCLUSIVE MODE");
+                }
+                long begin = System.nanoTime();
+                mvc.perform(get("/api/v2/stamp-card").cookie(participant))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(header().string("Retry-After", "1"))
+                    .andExpect(jsonPath("$.error.code").value("SERVICE_UNAVAILABLE"));
+                assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin)).isBetween(1500L, 6000L);
+            } finally {
+                connection.rollback();
+            }
+        }
+        mvc.perform(get("/api/v2/stamp-card").cookie(participant)).andExpect(status().isOk());
+    }
+
+    @Test
+    void lockTimeoutResetsOnTheSameConnectionAfterCommitAndRollback() throws Exception {
+        Cookie participant = start();
+        UUID id = jdbc.queryForObject("SELECT id FROM stamp_participants WHERE token_sha256=:hash",
+            Map.of("hash", StampCardService.sha256(participant.getValue())), UUID.class);
+        try (var connection = dataSource.getConnection()) {
+            var single = new org.springframework.jdbc.datasource.SingleConnectionDataSource(connection, true);
+            var template = new NamedParameterJdbcTemplate(single);
+            var store = new dev.espero.festival.persistence.StampStore(template, 1000);
+            var transaction = new org.springframework.transaction.support.TransactionTemplate(
+                new org.springframework.jdbc.datasource.DataSourceTransactionManager(single));
+            String original = template.queryForObject("SHOW lock_timeout", Map.of(), String.class);
+            for (boolean rollback : List.of(false, true)) {
+                transaction.execute(status -> {
+                    store.lockParticipant(id);
+                    assertThat(template.queryForObject("SHOW lock_timeout", Map.of(), String.class)).isEqualTo("1s");
+                    if (rollback) status.setRollbackOnly();
+                    return null;
+                });
+                assertThat(template.queryForObject("SHOW lock_timeout", Map.of(), String.class)).isEqualTo(original);
+            }
+        }
+    }
+
+    private List<MvcResult> race(Callable<MvcResult> first, Callable<MvcResult> second) throws Exception {
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch start = new CountDownLatch(1);
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var tasks = List.of(first, second).stream().map(operation -> executor.submit(() -> {
+                ready.countDown();
+                if (!start.await(5, TimeUnit.SECONDS)) throw new AssertionError("start timed out");
+                return operation.call();
+            })).toList();
+            try {
+                assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+            } finally {
+                start.countDown();
+            }
+            return List.of(tasks.get(0).get(10, TimeUnit.SECONDS), tasks.get(1).get(10, TimeUnit.SECONDS));
+        }
+    }
+
+    /** Counts statements prepared on an actual PostgreSQL connection, including SET LOCAL configuration. */
+    private static final class CountingDataSource extends org.springframework.jdbc.datasource.DelegatingDataSource {
+        final java.util.ArrayList<String> sql = new java.util.ArrayList<>();
+
+        CountingDataSource(DataSource target) { super(target); }
+
+        @Override
+        public java.sql.Connection getConnection() throws java.sql.SQLException {
+            var connection = super.getConnection();
+            return (java.sql.Connection) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class<?>[] {java.sql.Connection.class}, (proxy, method, args) -> {
+                    if (method.getName().equals("prepareStatement")) sql.add((String) args[0]);
+                    try {
+                        return method.invoke(connection, args);
+                    } catch (java.lang.reflect.InvocationTargetException exception) {
+                        throw exception.getCause();
+                    }
+                });
+        }
     }
 
     private Cookie start() throws Exception {

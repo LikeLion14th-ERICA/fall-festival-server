@@ -80,10 +80,29 @@ class StampCardServiceTest {
             assertThat(result.date()).isEqualTo(DAY);
             verify(clock, times(1)).instant();
             verify(snapshots, times(1)).required();
-            verify(store, atLeastOnce()).collections(ID, DAY);
+            verify(store).namedCollections(ID, DAY, ID);
             if (operation.equals("start")) verify(store).startDay(ID, DAY, before);
             if (operation.equals("collect")) verify(store).insertCollection(ID, DAY, "booth", before);
         }
+    }
+
+    @Test
+    void collectionReusesLockedSnapshotAndKeepsTimestampThenBoothOrdering() {
+        Instant now = Instant.parse("2026-09-29T03:00:00Z");
+        when(store.namedCollections(ID, DAY, ID)).thenReturn(List.of(
+            new StampStore.NamedCollected("removed", null, now.minusSeconds(1)),
+            new StampStore.NamedCollected("z-last", "마지막", now)));
+
+        StampCardResponse result = service.collect(TOKEN, BOOTH);
+
+        assertThat(result.stamps()).extracting(StampCardResponse.Stamp::boothId)
+            .containsExactly("removed", "booth", "z-last");
+        assertThat(result.stamps().getFirst().boothName()).isNull();
+        assertThat(result.stamps().get(1).boothName()).isEqualTo("부스");
+        assertThat(result.rewardClaimed()).isFalse();
+        verify(store).namedCollections(ID, DAY, ID);
+        verify(store).rewardClaimed(ID, DAY);
+        verify(store, never()).collections(any(), any());
     }
 
     @Test
