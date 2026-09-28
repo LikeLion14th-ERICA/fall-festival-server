@@ -91,7 +91,7 @@ revision·locale을 남긴다. `RELEASE_COMMIT`에 배포 commit을 넣으면 �
 bucket을 공유한다. 수령 코드 검증은 기존 5회 burst·12초당 1회 정책을 유지한다.
 
 DB를 사용하는 스탬프 카드 GET·START·적립·수령은 백엔드 인스턴스당
-`FESTIVAL_STAMP_MAX_CONCURRENT_REQUESTS`(기본 4)개까지 처리한다. controller에서 service의
+`FESTIVAL_STAMP_MAX_CONCURRENT_REQUESTS`(기본 20)개까지 처리한다. controller에서 service의
 transaction 시작 전에 permit을 얻고 commit/rollback 이후 반환한다. 초과 요청은 대기열이나
 DB transaction을 만들지 않고 `503 SERVICE_UNAVAILABLE`, `retryable: true`, `Retry-After: 1`,
 `Cache-Control: no-store`를 반환한다. 잘못된 수령 코드는 DB permit 없이 기존대로 거절하며,
@@ -105,10 +105,18 @@ commit/rollback 이후 pooled connection에 설정을 남기지 않는다. parti
 변환하고 내부 진단은 요청 ID·예외 종류·코드 위치만 남긴다.
 
 transaction timeout은 **Hikari connection 획득 대기, HTTP 전송, commit의 모든 네트워크 대기**를
-3초 이내로 보장하지 않는다. Hikari 기본 connection-timeout은 별도 override가 없으면 30초다.
+3초 이내로 보장하지 않는다. connection 획득 대기는 `SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT`
+(기본 3000ms)으로 따로 제한한다.
 공유 pool의 실제 maximum-pool-size보다 stamp 동시 수를 작게 유지하고 active/pending/획득 시간,
-PostgreSQL lock wait, 요청 p95를 함께 확인한다. 기본 4개는 다른 기능용 headroom을 남기려는
-보호값이며 처리량 보증이나 물리적인 전용 connection 예약은 아니다. 다른 기능이 pool을
+PostgreSQL lock wait, 요청 p95를 함께 확인한다. 기본 20개는 축제 당일 스탬프 동시 처리량을
+늘리기 위한 값(2026-09-29 사용자 요청, 기존 4)이며 처리량 보증이나 전용 connection 예약은
+아니다. 이를 위해 `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE` 기본값을 45로 두어 스탬프가
+20개를 모두 써도 다른 기능에 25개가 남게 한다. 운영 DB는 축제 웹 전용이며 `max_connections`는
+100이다(2026-09-29 확인). Coolify 무중단 배포 중에는 새·기존 백엔드가 잠시 함께 떠 pool이 두 개
+생기므로 2×45에 관리자 예약분·관리 도구·cleanup 전용 연결을 더해도 100 안에 들게 했다. 백엔드
+인스턴스를 늘리거나 다른 앱이 같은 DB를 쓰면 pool 합계를 다시 계산한다. DB·백엔드·프런트가
+같은 서버에서 CPU를 공유하므로 pool을 더 키우기 전에 피크 시간 서버 CPU를 확인한다. pool을
+줄이면 스탬프 한도도 pool보다 작게 함께 낮춘다. 다른 기능이 pool을
 모두 점유하면 허용된 stamp 요청도 연결을 기다릴 수 있다. 다중 backend에서는 permit과
 rate bucket이 각각 별도이므로 인스턴스 수만큼 총 동시 요청이 늘어나는 점을 재평가한다.
 

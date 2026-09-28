@@ -15,7 +15,7 @@ public class StampRequestAdmission {
 
     private final Semaphore permits;
 
-    public StampRequestAdmission(@Value("${festival.stamp.max-concurrent-requests:4}") int maximum) {
+    public StampRequestAdmission(@Value("${festival.stamp.max-concurrent-requests:20}") int maximum) {
         if (maximum < 1) {
             throw new IllegalArgumentException("festival.stamp.max-concurrent-requests must be positive");
         }
