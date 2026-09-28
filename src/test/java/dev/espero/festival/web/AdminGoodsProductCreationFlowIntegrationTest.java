@@ -3,7 +3,6 @@ package dev.espero.festival.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -894,8 +893,8 @@ class AdminGoodsProductCreationFlowIntegrationTest {
     }
 
     private org.springframework.test.web.servlet.ResultActions performStreaming(String path) throws Exception {
-        MvcResult initial = mvc.perform(get(path)).andExpect(request().asyncStarted()).andReturn();
-        return mvc.perform(asyncDispatch(initial));
+        // Goods images are written synchronously; see GoodsMediaController.
+        return mvc.perform(get(path)).andExpect(request().asyncNotStarted());
     }
 
     private JsonNode openApiProductExample() throws IOException {

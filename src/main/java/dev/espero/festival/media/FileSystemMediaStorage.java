@@ -106,14 +106,25 @@ public final class FileSystemMediaStorage implements MediaStorage {
 
     @Override
     public InputStream open(UUID festivalId, UUID mediaId, MediaVariant variant) throws IOException {
+        Path input = storedVariant(festivalId, mediaId, variant);
+        Set<OpenOption> options = Set.of(StandardOpenOption.READ, LinkOption.NOFOLLOW_LINKS);
+        return Channels.newInputStream(Files.newByteChannel(input, options));
+    }
+
+    @Override
+    public long size(UUID festivalId, UUID mediaId, MediaVariant variant) throws IOException {
+        return Files.readAttributes(storedVariant(festivalId, mediaId, variant), BasicFileAttributes.class,
+            LinkOption.NOFOLLOW_LINKS).size();
+    }
+
+    private Path storedVariant(UUID festivalId, UUID mediaId, MediaVariant variant) throws IOException {
         Objects.requireNonNull(variant, "Media variant is required");
         Path input = checked(finalDirectory(festivalId, mediaId).resolve(variant.filename()));
         rejectExistingSymlinkComponents(input);
         if (!Files.isRegularFile(input, LinkOption.NOFOLLOW_LINKS)) {
             throw new NoSuchFileException(input.toString());
         }
-        Set<OpenOption> options = Set.of(StandardOpenOption.READ, LinkOption.NOFOLLOW_LINKS);
-        return Channels.newInputStream(Files.newByteChannel(input, options));
+        return input;
     }
 
     @Override
