@@ -69,4 +69,16 @@ class NotificationSubscriptionControllerTest {
         mvc.perform(post(PATH).contentType(MediaType.APPLICATION_JSON).content("{\"token\":\"device-token-1\"}"))
             .andExpect(status().isServiceUnavailable());
     }
+
+    @Test
+    void unconfiguredFirebaseDoesNotReportSubscribed() throws Exception {
+        ApiMetaSupport metaSupport = ApiMetaTestFixtures.systemMetaSupport(Clock.systemUTC());
+        MockMvc unconfigured = MockMvcBuilders.standaloneSetup(new NotificationSubscriptionController(
+            new dev.espero.festival.push.NoOpPushNotificationService(), metaSupport))
+            .setControllerAdvice(new GlobalApiExceptionHandler(metaSupport)).build();
+        var response = unconfigured.perform(post(PATH).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"token\":\"device-token-1\"}"))
+            .andExpect(status().isServiceUnavailable()).andReturn().getResponse().getContentAsString();
+        assertThat(response).contains("SERVICE_UNAVAILABLE").doesNotContain("subscribed", "device-token-1");
+    }
 }

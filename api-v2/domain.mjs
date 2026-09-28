@@ -404,7 +404,7 @@ function crowdInfo(state,now,scenario,locale='ko',includeSelectedDaySavedState=f
   return {operatingDay,opensAt,closesAt,operatingStatus:active?'OPEN':status,status,savedLevel:stored?.level||null,colorToken:colors[status]||null,message:CROWD_MESSAGES[locale]?(status==='BEFORE_OPEN'?messages.BEFORE_OPEN(openingText):messages[status]):`Mock crowd status: ${status}`,updatedAt:active?stored?.updatedAt||null:null,timeBasis:active?(stored?'OPERATOR':'OPENING'):'NONE'};
 }
 export function scenarioTime(scenario,now) {
-  return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00','reward-closed':'2030-10-01T17:00:00+09:00'})[scenario]||now;
+  return ({'before-open':'2030-09-30T10:00:00+09:00',closed:'2030-10-01T23:00:00+09:00',ended:'2030-10-04T00:00:00+09:00','reward-closed':'2030-10-01T17:00:00+09:00','event-closed':'2030-09-30T12:00:00+09:00'})[scenario]||now;
 }
 // Korean is the only ready default. Controlled mock scenarios can enable complete fictional translations.
 function localize(value,locale) {
@@ -540,6 +540,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     }
     case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['축제일마다 START를 누르면 그날 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'매일 11:00~17:00',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
     case 'startStampParticipation':
+      if(!DATES.includes(date))failure(409,'STAMP_EVENT_CLOSED','스탬프투어 행사 기간이 아니에요.');
       // START is once per festival day: a card from an earlier day means not started today.
       if(scenario==='already-started'&&state.stampCard?.date!==date)mockStampCard(state,date,0);
       status=state.stampCard?.date===date?200:201;
@@ -550,6 +551,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       if(scenario==='not-started'||state.stampCard?.date!==date)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
       data=stampCardData(state,date);break;
     case 'collectStamp':{
+      if(!DATES.includes(date))failure(409,'STAMP_EVENT_CLOSED','스탬프투어 행사 기간이 아니에요.');
       if(!state.stampCard&&scenario!=='not-started')mockStampCard(state,date,0);
       if(scenario==='not-started'||state.stampCard?.date!==date)failure(404,'STAMP_NOT_STARTED','스탬프투어를 먼저 시작해 주세요.');
       const booth=MOCK_STAMP_BOOTHS.find(candidate=>candidate.token===body.token);
@@ -563,6 +565,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     }
     case 'verifyStampReceipt':{
       if(scenario==='invalid-code'||typeof body.code!=='string'||body.code!==MOCK_STAMP_RECEIPT_CODE)failure(422,'INVALID_RECEIPT_CODE','수령 인증 코드를 확인해 주세요.');
+      if(!DATES.includes(date))failure(409,'STAMP_EVENT_CLOSED','스탬프투어 행사 기간이 아니에요.');
       if(!state.stampCard&&['normal','reward-closed'].includes(scenario))mockStampCard(state,date,4);
       const card=state.stampCard?stampCardData(state,date):null;
       if(scenario==='reward-claimed'||card?.rewardClaimed)failure(409,'STAMP_REWARD_CLAIMED','오늘은 이미 상품을 받았어요.');

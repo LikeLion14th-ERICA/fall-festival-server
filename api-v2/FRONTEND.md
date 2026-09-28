@@ -210,3 +210,12 @@ npm run check
 ```
 
 `check`는 생성 파일 일치 여부, OpenAPI 표준 파싱, JSON Schema 검증, 실제 HTTP 요청·응답 및 상태 변경을 검사합니다. 수정 후에는 `npm run generate`를 먼저 실행하세요. 모든 경로를 고정 예제로 호출하는 검증 외에 자정·운영일·인증 경계·저장 실패·지도 연결 등 별도 동작 검증을 포함합니다.
+
+### 스탬프 보안 수정 (2026-09-28)
+
+START·적립·수령은 게시된 `stampGuide.dates`에 서버의 오늘(Asia/Seoul)이 포함될 때만 허용한다.
+기간 밖에는 `409 STAMP_EVENT_CLOSED`를 반환한다. 참여·적립·수령 성공으로 표시하지 않고
+기존 상태를 유지하며 행사 기간 안내를 표시한다. 안내 미설정은 `503 STAMP_GUIDE_NOT_CONFIGURED`다.
+카드 조회의 `404 STAMP_NOT_STARTED` 처리는 유지한다. 수령 시간은 행사일의 11:00 이상 17:00 미만이다.
+푸시 구독은 토큰별 Firebase 구독 성공을 확인한 경우만 성공이다. 토큰별 실패 또는 Firebase
+미설정은 기존 `503 SERVICE_UNAVAILABLE`이며 구독 완료로 표시하지 않는다.

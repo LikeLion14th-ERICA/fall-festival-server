@@ -84,14 +84,14 @@ class AdminSessionReleaseE2eTest {
     @Test
     @Timeout(value = 60, unit = TimeUnit.SECONDS)
     void userSessionLifecycleRotatesAndRevokesRefreshCredentials() throws Exception {
-        HttpResponse<String> anonymous = send(get("/api/v2/admin/me").build());
+        HttpResponse<String> anonymous = send(get("/api/v2/%61dmin/me").build());
         assertError(anonymous, 401, "UNAUTHORIZED");
 
-        HttpResponse<String> missingRefresh = send(post("/api/v2/admin/sessions/refresh")
+        HttpResponse<String> missingRefresh = send(post("/api/v2/admin/s%65ssions/refresh")
             .header("Origin", ORIGIN).build());
         assertError(missingRefresh, 401, "ADMIN_REFRESH_TOKEN_INVALID");
 
-        HttpResponse<String> login = send(post("/api/v2/admin/sessions")
+        HttpResponse<String> login = send(post("/api/v2/admin/s%65ssions")
             .header("Origin", ORIGIN)
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(
@@ -103,23 +103,23 @@ class AdminSessionReleaseE2eTest {
         String firstCookie = cookie(login);
         assertThat(access).isNotBlank();
 
-        HttpResponse<String> me = send(get("/api/v2/admin/me")
+        HttpResponse<String> me = send(get("/api/v2/%61dmin/me")
             .header("Authorization", "Bearer " + access).build());
         assertThat(me.statusCode()).isEqualTo(200);
         assertThat(json(me, "$.data.username")).isEqualTo("auth-e2e-admin");
 
-        HttpResponse<String> rotated = send(post("/api/v2/admin/sessions/refresh")
+        HttpResponse<String> rotated = send(post("/api/v2/admin/s%65ssions/refresh")
             .header("Origin", ORIGIN).header("Cookie", firstCookie).build());
         assertThat(rotated.statusCode()).isEqualTo(200);
         String rotatedAccess = json(rotated, "$.data.accessToken");
         String secondCookie = cookie(rotated);
         assertThat(secondCookie).isNotEqualTo(firstCookie);
 
-        HttpResponse<String> replay = send(post("/api/v2/admin/sessions/refresh")
+        HttpResponse<String> replay = send(post("/api/v2/admin/s%65ssions/refresh")
             .header("Origin", ORIGIN).header("Cookie", firstCookie).build());
         assertError(replay, 401, "ADMIN_REFRESH_TOKEN_INVALID");
 
-        HttpResponse<String> logout = send(delete("/api/v2/admin/sessions/current")
+        HttpResponse<String> logout = send(delete("/api/v2/admin/s%65ssions/current")
             .header("Origin", ORIGIN)
             .header("Authorization", "Bearer " + rotatedAccess)
             .header("Cookie", secondCookie)
@@ -128,7 +128,7 @@ class AdminSessionReleaseE2eTest {
         assertThat(json(logout, "$.data.loggedOut")).isEqualTo("true");
         assertThat(requiredHeader(logout, "Set-Cookie")).contains(COOKIE + "=", "Max-Age=0");
 
-        HttpResponse<String> revoked = send(post("/api/v2/admin/sessions/refresh")
+        HttpResponse<String> revoked = send(post("/api/v2/admin/s%65ssions/refresh")
             .header("Origin", ORIGIN).header("Cookie", secondCookie).build());
         assertError(revoked, 401, "ADMIN_REFRESH_TOKEN_INVALID");
     }

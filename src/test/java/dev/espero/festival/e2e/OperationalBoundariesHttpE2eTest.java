@@ -515,7 +515,7 @@ class OperationalBoundariesHttpE2eTest {
 
     private HttpResponse<String> receiptChain(HttpClient http, ConfigurableApplicationContext server, String code, String chain,
         String participant) throws Exception {
-        HttpRequest.Builder request = request(server, "/api/v2/stamp-receipt-verifications").header("X-Forwarded-For", chain)
+        HttpRequest.Builder request = request(server, "/api/v2/stamp%2dreceipt-verifications").header("X-Forwarded-For", chain)
             .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(
                 JSON.writeValueAsString(Map.of("code", code))));
         if (participant != null) {

@@ -11918,7 +11918,7 @@
     "/api/v2/stamp-participants": {
       "post": {
         "operationId": "startStampParticipation",
-        "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급",
+        "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용",
         "description": "연결 화면: STAMP-START. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -11970,7 +11970,7 @@
                 },
                 "examples": {
                   "already-started": {
-                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: already-started",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: already-started",
                     "value": {
                       "data": {
                         "date": "2030-10-01",
@@ -12025,7 +12025,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: normal",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: normal",
                     "value": {
                       "data": {
                         "date": "2030-10-01",
@@ -12065,7 +12065,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: locale-not-ready",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -12085,7 +12085,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: bad-request",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -12180,7 +12180,28 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
-                "examples": {}
+                "examples": {
+                  "event-closed": {
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: event-closed",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_EVENT_CLOSED",
+                        "message": "스탬프투어 행사 기간이 아니에요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-09-30T12:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -12208,7 +12229,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: rate-limited",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -12267,7 +12288,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급: error",
+                    "summary": "스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 · 게시된 스탬프 행사일에만 허용: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -12298,6 +12319,7 @@
         "x-mock-scenarios": [
           "normal",
           "already-started",
+          "event-closed",
           "error",
           "locale-not-ready",
           "bad-request",
@@ -12697,7 +12719,7 @@
     "/api/v2/stamp-collections": {
       "post": {
         "operationId": "collectStamp",
-        "summary": "부스 QR 스탬프 적립(부스당 하루 1회)",
+        "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용",
         "description": "연결 화면: STAMP-COLLECT. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -12749,7 +12771,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): normal",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: normal",
                     "value": {
                       "data": {
                         "date": "2030-10-01",
@@ -12795,7 +12817,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): locale-not-ready",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -12815,7 +12837,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): bad-request",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -12874,7 +12896,7 @@
                 },
                 "examples": {
                   "not-started": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): not-started",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: not-started",
                     "value": {
                       "error": {
                         "code": "STAMP_NOT_STARTED",
@@ -12933,7 +12955,7 @@
                 },
                 "examples": {
                   "already-collected": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): already-collected",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: already-collected",
                     "value": {
                       "error": {
                         "code": "STAMP_ALREADY_COLLECTED",
@@ -12953,7 +12975,7 @@
                     }
                   },
                   "card-full": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): card-full",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: card-full",
                     "value": {
                       "error": {
                         "code": "STAMP_CARD_FULL",
@@ -12973,7 +12995,7 @@
                     }
                   },
                   "reward-claimed": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): reward-claimed",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: reward-claimed",
                     "value": {
                       "error": {
                         "code": "STAMP_REWARD_CLAIMED",
@@ -12984,6 +13006,26 @@
                       "meta": {
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "event-closed": {
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: event-closed",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_EVENT_CLOSED",
+                        "message": "스탬프투어 행사 기간이 아니에요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-09-30T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -13051,7 +13093,7 @@
                 },
                 "examples": {
                   "invalid-token": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): invalid-token",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: invalid-token",
                     "value": {
                       "error": {
                         "code": "INVALID_STAMP_TOKEN",
@@ -13098,7 +13140,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): rate-limited",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -13157,7 +13199,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회): error",
+                    "summary": "부스 QR 스탬프 적립(부스당 하루 1회) · 게시된 스탬프 행사일에만 허용: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -13192,6 +13234,7 @@
           "already-collected",
           "card-full",
           "reward-claimed",
+          "event-closed",
           "error",
           "locale-not-ready",
           "bad-request",
@@ -13216,7 +13259,7 @@
     "/api/v2/stamp-receipt-verifications": {
       "post": {
         "operationId": "verifyStampReceipt",
-        "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만)",
+        "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용",
         "description": "연결 화면: STAMP-REWARD. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -13268,7 +13311,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): normal",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: normal",
                     "value": {
                       "data": {
                         "verified": true
@@ -13305,7 +13348,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): locale-not-ready",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -13325,7 +13368,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): bad-request",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -13422,7 +13465,7 @@
                 },
                 "examples": {
                   "card-incomplete": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): card-incomplete",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: card-incomplete",
                     "value": {
                       "error": {
                         "code": "STAMP_CARD_INCOMPLETE",
@@ -13442,7 +13485,7 @@
                     }
                   },
                   "reward-claimed": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): reward-claimed",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: reward-claimed",
                     "value": {
                       "error": {
                         "code": "STAMP_REWARD_CLAIMED",
@@ -13462,7 +13505,7 @@
                     }
                   },
                   "reward-closed": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): reward-closed",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: reward-closed",
                     "value": {
                       "error": {
                         "code": "STAMP_REWARD_CLOSED",
@@ -13473,6 +13516,26 @@
                       "meta": {
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T17:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "festival-mock",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "event-closed": {
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: event-closed",
+                    "value": {
+                      "error": {
+                        "code": "STAMP_EVENT_CLOSED",
+                        "message": "스탬프투어 행사 기간이 아니에요.",
+                        "details": [],
+                        "retryable": false
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-09-30T12:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
                         "festivalId": "festival-mock",
                         "revision": 0,
@@ -13540,7 +13603,7 @@
                 },
                 "examples": {
                   "invalid-code": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): invalid-code",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: invalid-code",
                     "value": {
                       "error": {
                         "code": "INVALID_RECEIPT_CODE",
@@ -13587,7 +13650,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): rate-limited",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -13646,7 +13709,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만): error",
+                    "summary": "스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만) · 게시된 스탬프 행사일에만 허용: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -13680,6 +13743,7 @@
           "card-incomplete",
           "reward-claimed",
           "reward-closed",
+          "event-closed",
           "error",
           "locale-not-ready",
           "bad-request",

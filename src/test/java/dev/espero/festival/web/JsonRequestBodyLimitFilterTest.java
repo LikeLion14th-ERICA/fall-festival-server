@@ -21,6 +21,18 @@ import tools.jackson.databind.ObjectMapper;
 class JsonRequestBodyLimitFilterTest {
 
     @Test
+    void encodedApiPrefixAndContextPathCannotBypassTheBodyLimit() throws Exception {
+        MockHttpServletRequest request = jsonRequest(JsonRequestBodyLimitFilter.MAX_BODY_BYTES + 1);
+        request.setContextPath("/festival");
+        request.setRequestURI("/festival/%61pi/v2/admin/security-probe");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        AtomicBoolean called = new AtomicBoolean();
+        filter().doFilter(request, response, (nextRequest, nextResponse) -> called.set(true));
+        assertThat(called).isFalse();
+        assertThat(response.getStatus()).isEqualTo(413);
+    }
+
+    @Test
     void rejectsADeclaredJsonBodyOverTheLimit() throws Exception {
         MockHttpServletRequest request = jsonRequest(JsonRequestBodyLimitFilter.MAX_BODY_BYTES + 1);
         MockHttpServletResponse response = new MockHttpServletResponse();

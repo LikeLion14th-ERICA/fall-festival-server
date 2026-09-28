@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -69,22 +70,27 @@ public class StampCardService {
     /** Records today's START, creating the participant for a browser without a valid cookie. */
     @Transactional
     public Started start(String participantToken) {
-        LocalDate today = today(snapshots.required());
+        CatalogSnapshot snapshot = snapshots.required();
+        Instant instant = clock.instant();
+        LocalDate today = instant.atZone(snapshot.context().timezone()).toLocalDate();
+        requireEventDay(snapshot, today);
         Optional<UUID> existing = participant(participantToken);
         String token = existing.isPresent() ? participantToken : newParticipantToken();
         UUID participant = existing.orElseGet(
-            () -> store.createParticipant(festival.configuredFestivalId(), sha256(token), clock.instant())
+            () -> store.createParticipant(festival.configuredFestivalId(), sha256(token), instant)
         );
-        boolean startedNow = store.startDay(participant, today, clock.instant());
-        return new Started(card(participant), startedNow, startedNow ? token : null);
+        boolean startedNow = store.startDay(participant, today, instant);
+        return new Started(card(participant, snapshot, today), startedNow, startedNow ? token : null);
     }
 
     /** Today's card; {@code STAMP_NOT_STARTED} until today's START, which shows the start screen. */
     @Transactional(readOnly = true)
     public StampCardResponse current(String participantToken) {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::notStarted);
-        requireStartedToday(participant, today(snapshots.required()));
-        return card(participant);
+        CatalogSnapshot snapshot = snapshots.required();
+        LocalDate today = clock.instant().atZone(snapshot.context().timezone()).toLocalDate();
+        requireStartedToday(participant, today);
+        return card(participant, snapshot, today);
     }
 
     @Transactional
@@ -92,7 +98,9 @@ public class StampCardService {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::notStarted);
         store.lockParticipant(participant);
         CatalogSnapshot snapshot = snapshots.required();
-        LocalDate today = today(snapshot);
+        Instant instant = clock.instant();
+        LocalDate today = instant.atZone(snapshot.context().timezone()).toLocalDate();
+        requireEventDay(snapshot, today);
         requireStartedToday(participant, today);
         StampStore.BoothToken booth = boothToken == null || !BOOTH_TOKEN.matcher(boothToken).matches()
             ? null
@@ -112,8 +120,8 @@ public class StampCardService {
         if (collected.size() >= DAILY_LIMIT) {
             throw conflict("STAMP_CARD_FULL", "오늘 받을 수 있는 스탬프를 모두 모았어요.");
         }
-        store.insertCollection(participant, today, booth.boothId(), clock.instant());
-        return card(participant);
+        store.insertCollection(participant, today, booth.boothId(), instant);
+        return card(participant, snapshot, today);
     }
 
     /**
@@ -125,23 +133,23 @@ public class StampCardService {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::incomplete);
         store.lockParticipant(participant);
         CatalogSnapshot snapshot = snapshots.required();
-        LocalDate today = today(snapshot);
+        Instant instant = clock.instant();
+        LocalDate today = instant.atZone(snapshot.context().timezone()).toLocalDate();
+        requireEventDay(snapshot, today);
         if (store.rewardClaimed(participant, today)) {
             throw conflict("STAMP_REWARD_CLAIMED", "오늘은 이미 상품을 받았어요.");
         }
         if (store.collections(participant, today).size() < DAILY_LIMIT) {
             throw incomplete();
         }
-        LocalTime now = LocalTime.now(clock.withZone(snapshot.context().timezone()));
+        LocalTime now = instant.atZone(snapshot.context().timezone()).toLocalTime();
         if (now.isBefore(REWARD_OPENS) || !now.isBefore(REWARD_CLOSES)) {
             throw conflict("STAMP_REWARD_CLOSED", "상품 수령은 11:00부터 17:00 전까지 가능해요.");
         }
-        store.insertReward(participant, today, clock.instant());
+        store.insertReward(participant, today, instant);
     }
 
-    private StampCardResponse card(UUID participant) {
-        CatalogSnapshot snapshot = snapshots.required();
-        LocalDate today = today(snapshot);
+    private StampCardResponse card(UUID participant, CatalogSnapshot snapshot, LocalDate today) {
         Map<String, String> names = store.boothNames(snapshot.context().revisionId());
         List<StampCardResponse.Stamp> stamps = store.collections(participant, today).stream()
             .map(stamp -> new StampCardResponse.Stamp(
@@ -166,8 +174,14 @@ public class StampCardService {
         return store.findParticipant(festival.configuredFestivalId(), sha256(participantToken));
     }
 
-    private LocalDate today(CatalogSnapshot snapshot) {
-        return LocalDate.now(clock.withZone(snapshot.context().timezone()));
+    private void requireEventDay(CatalogSnapshot snapshot, LocalDate today) {
+        if (snapshot.stampGuide() == null || snapshot.stampGuide().dates().isEmpty()) {
+            throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "STAMP_GUIDE_NOT_CONFIGURED",
+                "스탬프 안내가 아직 설정되지 않았습니다.", true);
+        }
+        if (!snapshot.stampGuide().dates().contains(today)) {
+            throw conflict("STAMP_EVENT_CLOSED", "스탬프투어 행사 기간이 아니에요.");
+        }
     }
 
     private String newParticipantToken() {

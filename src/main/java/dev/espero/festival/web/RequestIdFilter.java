@@ -1,5 +1,6 @@
 package dev.espero.festival.web;
 
+import dev.espero.festival.auth.ApiRequestPath;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +15,7 @@ class RequestIdFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v2/");
+        return !ApiRequestPath.of(request).startsWith("/api/v2/");
     }
 
     @Override

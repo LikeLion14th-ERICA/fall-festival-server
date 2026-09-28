@@ -1,6 +1,7 @@
 package dev.espero.festival.web;
 
 import dev.espero.festival.auth.ApiSecurityErrorWriter;
+import dev.espero.festival.auth.ApiRequestPath;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
@@ -32,7 +33,7 @@ final class JsonRequestBodyLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v2/")
+        return !ApiRequestPath.of(request).startsWith("/api/v2/")
             || !hasRequestBody(request.getMethod())
             || !isJson(request.getContentType());
     }

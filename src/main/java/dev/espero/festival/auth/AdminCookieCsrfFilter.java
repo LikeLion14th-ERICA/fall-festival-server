@@ -27,7 +27,7 @@ public class AdminCookieCsrfFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String method = request.getMethod();
-        String path = request.getRequestURI();
+        String path = ApiRequestPath.of(request);
         return !("POST".equals(method) && (LOGIN_PATH.equals(path) || REFRESH_PATH.equals(path)))
             && !("DELETE".equals(method) && LOGOUT_PATH.equals(path));
     }

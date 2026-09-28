@@ -12,7 +12,7 @@ branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 �
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
 | [ENDPOINTS.md](ENDPOINTS.md) | 51개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 399개 응답 원문 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 402개 응답 원문 |
 | [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 165개·제외 24개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [CROWDING-OPERATING-HOURS-FRONTEND.md](CROWDING-OPERATING-HOURS-FRONTEND.md) | 관리자 재학생존 운영시간 설정만 모은 프런트 전달 문서 |

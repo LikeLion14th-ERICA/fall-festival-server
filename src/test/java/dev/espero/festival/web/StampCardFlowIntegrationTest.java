@@ -88,7 +88,10 @@ class StampCardFlowIntegrationTest {
         clock.set(OffsetDateTime.parse("2030-10-01T12:00:00+09:00"));
         when(snapshots.required()).thenReturn(new CatalogSnapshot(
             new CatalogSnapshot.FestivalContext("festival-stamps", REVISION_ID, 1),
-            List.of(), List.of(), List.of(), Map.of(), null
+            List.of(), List.of(), List.of(), Map.of(), null,
+            new dev.espero.festival.domain.StampGuide("test", List.of(
+                java.time.LocalDate.parse("2030-10-01"), java.time.LocalDate.parse("2030-10-02"),
+                java.time.LocalDate.parse("2030-10-03")), List.of(), "test", null, null, null, null, Instant.EPOCH), null
         ));
         when(snapshots.publishedLocales()).thenReturn(List.of("ko"));
         for (String table : List.of("stamp_rewards", "stamp_collections", "stamp_participant_days", "stamp_participants",
@@ -287,6 +290,28 @@ class StampCardFlowIntegrationTest {
     /** A fixed 22-character token per booth, as the generator produces. */
     private static String token(String booth) {
         return (booth + "-token-0123456789abcdefgh").substring(0, 22).replace('_', '-');
+    }
+
+    @Test
+    void outsideEventDatesRejectsStartCollectionAndReceiptWithoutPersistingWrites() throws Exception {
+        Cookie participant = start();
+        for (String date : List.of("2030-09-30", "2030-10-04")) {
+            clock.set(OffsetDateTime.parse(date + "T12:00:00+09:00"));
+            mvc.perform(post("/api/v2/stamp-participants"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("STAMP_EVENT_CLOSED"))
+                .andExpect(header().doesNotExist("Set-Cookie"));
+            mvc.perform(post("/api/v2/stamp-collections").cookie(participant).contentType("application/json")
+                    .content("{\"token\":\"" + token("likelion") + "\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("STAMP_EVENT_CLOSED"));
+            mvc.perform(post("/api/v2/stamp-receipt-verifications").cookie(participant).contentType("application/json")
+                    .content("{\"code\":\"" + RECEIPT_CODE + "\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.error.code").value("STAMP_EVENT_CLOSED"));
+        }
+        for (String table : List.of("stamp_collections", "stamp_rewards")) {
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table, Map.of(), Long.class)).isZero();
+        }
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_participants", Map.of(), Long.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_participant_days", Map.of(), Long.class)).isEqualTo(1);
     }
 
     private void insertToken(String booth, java.time.LocalDate validDate, String token) {

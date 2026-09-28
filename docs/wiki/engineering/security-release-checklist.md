@@ -34,6 +34,9 @@
 | 입력·미디어 | API 계약의 `additionalProperties: false`와 invalid input, 상품 이미지 magic bytes·decode·크기·pixel·animated WebP·경로 | `AdminAuthApiIntegrationTest`, `AdminGoodsProductCreationFlowIntegrationTest`, `GoodsInputValidatorTest`, `GoodsImageInspectorTest`, media storage tests |
 | SQL 입력 경계 | SQL 형태의 관리자 공지 제목이 parameter binding을 거쳐 원문 그대로 저장·재조회되고 기존 공지를 바꾸지 않음 | `AdminSessionReleaseE2eTest` |
 | 요청 제한 | public/admin/login/stamp/artist-hyped token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After`; Hyped 쓰기는 공개 조회와 별도 bucket | `RateLimitTest`(Hyped 포함), release E2E HTTP-21·22 |
+| 인코딩 경로 | MVC 세그먼트 해석과 요청 제한·Origin·JWT·no-store·JSON 크기 제한의 일치, context path 지원 | `EncodedPathSecurityHttpTest`, 인코딩 경로의 실제 세션 lifecycle을 포함한 `AdminSessionReleaseE2eTest` |
+| 스탬프 행사일·시각 | 게시된 `stampGuide.dates` 밖 START·적립·수령 거절, 한 작업의 날짜·저장 시각·응답 일치 | `StampCardServiceTest`, `StampCardFlowIntegrationTest`, `CatalogControllerOpenApiTest` |
+| 푸시 구독 실패 | Firebase 토큰별 실패와 미설정은 성공 응답을 만들지 않음, 외부 예외 원문 로깅 금지 | `PushNotificationServiceTest`, `NotificationSubscriptionControllerTest` |
 | idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match`; 혼잡도 시간·단계 쓰기의 축제 행 → 시간·상태 행 잠금 순서, 날짜별 key 범위와 자정 선택 변경 충돌 | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest`, 야간 운영 E2E 및 운영 시간 provider 검증 |
 | JSON 본문 경계 | `/api/v2`의 JSON `POST`·`PUT`·`PATCH`·`DELETE` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
 | 수령 인증·결제 비노출 | 수령 코드는 정확한 6자리 숫자만 허용하고 KST 11:00 이상 17:00 미만에만 성공한다. 티켓·굿즈·부스 공개 응답에는 계좌·송금 필드가 없으며 옛 goods payment-guide 경로는 404다. 성공 수령 인증은 `Cache-Control: no-store`다. | `StampCardFlowIntegrationTest`, `CatalogControllerOpenApiTest`, `GoodsFlowIntegrationTest` |

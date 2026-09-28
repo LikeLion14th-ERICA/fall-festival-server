@@ -271,3 +271,12 @@ docker compose build
   맞는 검사를 추가한다. 현재 `security-filesystem`과 `docker-build`는 각각 filesystem·image
   Trivy SARIF artifact를 업로드하며 `contents: read` 외의 GitHub 권한을 요구하지 않는다.
   검사 이름이나 명령이 바뀌면 이 문서도 같은 PR에서 갱신한다.
+
+### 2026-09-28 백엔드 보안 수정 로컬 검증
+
+- Windows, Java 25.0.2, Maven Wrapper, Docker의 임시 PostgreSQL 16에서 실행했다.
+- `b52c825` 기반 수정본의 `mvnw.cmd --batch-mode --no-transfer-progress verify`: 743개, 실패·오류 0, skip 9, JAR 패키징 성공. skip은 외부 이미지 도구 profile 7개와 Windows 심볼릭 링크 2개다.
+- 최신 main `535579c` 통합 및 JSON 경로·provider 검증 보강 후 `mvnw.cmd --batch-mode --no-transfer-progress "-Dtest=EncodedPathSecurityHttpTest,AdminCookieCsrfFilterTest,SecurityConfigurationTest,AdminSessionReleaseE2eTest,OperationalBoundariesHttpE2eTest,RateLimitTest,JsonRequestBodyLimitFilterTest,StampCardServiceTest,StampCardFlowIntegrationTest,CatalogControllerOpenApiTest,PushNotificationServiceTest,NotificationSubscriptionControllerTest,ArtistHypedControllerOpenApiTest,ArtistHypedHttpE2eTest" verify`: 68개, 실패·오류·skip 0, 패키징 성공.
+- 최종 `npm --prefix api-v2 run generate` 및 `npm --prefix api-v2 run check`: 458개 통과, 51 operations·402 examples.
+- `git diff --check`와 변경 문서의 상대 링크 검사 통과.
+- 실제 운영 ingress·브라우저 cookie/CORS·Firebase 전송·DB 역할/복구·PG17 release profile·CI scan은 이번 로컬 결과에 포함하지 않는다. 공개 프런트는 별도 저장소이며 오류 처리 인계는 `api-v2/FRONTEND.md`에 기록했다.

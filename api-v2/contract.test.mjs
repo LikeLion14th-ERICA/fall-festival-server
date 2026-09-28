@@ -974,3 +974,23 @@ test('Goods and spaces expose prices without transfer details',async()=>{
   const list=(await call('/api/v2/spaces')).body.data.items;
   assert.ok(list.every(space=>!Object.hasOwn(space,'bankTransfer')));
 });
+
+
+test('Stamp writes reject dates outside the published guide without changing the card',async()=>{
+  for(const date of ['2030-09-30','2030-10-04']){
+    for(const [operationId,path,body] of [
+      ['startStampParticipation','stamp-participants',undefined],
+      ['collectStamp','stamp-collections',{token:'mock-booth-token-0001'}],
+      ['verifyStampReceipt','stamp-receipt-verifications',{code:'482913'}],
+    ]){
+      const state=createState(),before=structuredClone(state.stampCard),now=`${date}T12:00:00+09:00`;
+      assert.throws(()=>execute(operation(operationId),state,{body,now}),e=>e.status===409&&e.code==='STAMP_EVENT_CLOSED');
+      assert.deepEqual(state.stampCard,before);
+      const response=await call(`/api/v2/${path}`,{method:'POST',body,session:`closed-${date}-${path}`,headers:{'X-Mock-Time':now}});
+      assert.equal(response.status,409);
+      assert.equal(response.body.error.code,'STAMP_EVENT_CLOSED');
+      assert.equal(response.body.error.retryable,false);
+      assert.equal(examples[operationId].scenarios['event-closed'].response.error.code,'STAMP_EVENT_CLOSED');
+    }
+  }
+});
