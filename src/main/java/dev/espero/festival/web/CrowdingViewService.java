@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("db")
 public class CrowdingViewService {
+
+    private static final LocalDate REHEARSAL_DAY = LocalDate.of(2026, 9, 28);
+    private static final LocalTime REHEARSAL_START = LocalTime.of(11, 0);
+    private static final LocalTime REHEARSAL_END = LocalTime.of(15, 0);
 
     private final CrowdingStore store;
     private final FestivalContextService contextService;
@@ -54,8 +59,8 @@ public class CrowdingViewService {
 
     private CrowdingSnapshot current(HttpServletRequest request, boolean includeSelectedDaySavedState) {
         PublishedFestivalContext context = publishedContext();
-        List<CrowdingSchedule> schedules = schedules(context);
         Instant now = clock.instant();
+        List<CrowdingSchedule> schedules = schedules(context, now);
         LocalDate today = now.atZone(context.timezone()).toLocalDate();
         CrowdingSchedule selected = select(schedules, today, now);
         Optional<CrowdingRecord> saved;
@@ -121,17 +126,29 @@ public class CrowdingViewService {
         }
     }
 
-    private List<CrowdingSchedule> schedules(PublishedFestivalContext context) {
+    private List<CrowdingSchedule> schedules(PublishedFestivalContext context, Instant now) {
         final List<CrowdingSchedule> schedules;
         try {
             schedules = store.findSchedules(context.festivalRevisionId());
         } catch (DataAccessException exception) {
             throw scheduleUnconfigured();
         }
+        if (now.atZone(context.timezone()).toLocalDate().equals(REHEARSAL_DAY)) {
+            return List.of(new CrowdingSchedule(REHEARSAL_DAY,
+                REHEARSAL_DAY.atTime(REHEARSAL_START).atZone(context.timezone()).toOffsetDateTime(),
+                REHEARSAL_DAY.atTime(REHEARSAL_END).atZone(context.timezone()).toOffsetDateTime()));
+        }
         if (schedules.isEmpty() || !validSchedules(schedules, context.timezone())) {
             throw scheduleUnconfigured();
         }
         return schedules;
+    }
+
+    private static boolean isRehearsalWindow(Instant now, ZoneId timezone) {
+        var local = now.atZone(timezone);
+        LocalTime time = local.toLocalTime();
+        return local.toLocalDate().equals(REHEARSAL_DAY)
+            && !time.isBefore(REHEARSAL_START) && time.isBefore(REHEARSAL_END);
     }
 
     private boolean validSchedules(List<CrowdingSchedule> schedules, ZoneId timezone) {
@@ -274,6 +291,9 @@ public class CrowdingViewService {
         }
 
         public boolean canUpdateLevel() {
+            if (operatingDay().equals(REHEARSAL_DAY)) {
+                return isRehearsalWindow(observedAt, context.timezone());
+            }
             return today.equals(operatingDay()) || response.operatingStatus() == CrowdingResponse.OperatingStatus.OPEN;
         }
     }

@@ -97,6 +97,22 @@ class ArtistHypedStoreIntegrationTest {
         assertThat(count(festivalId, secondRevision, "hyped-test-artist")).isEqualTo(161);
     }
 
+    @Test
+    void rehearsalPrefixKeepsCountsSeparateAndReturnsThePublicArtistId() {
+        UUID festivalId = ApiMetaTestFixtures.FESTIVAL_ID;
+        UUID revisionId = ApiMetaTestFixtures.REVISION_ID;
+        String artistId = "hyped-rehearsal-isolation";
+        insertArtist(revisionId, artistId, "ARTIST");
+        assertThat(store.increment(festivalId, artistId, Instant.now())).isEqualTo(1);
+        assertThat(store.increment(festivalId, artistId, "rehearsal-2026-09-28:", Instant.now())).isEqualTo(1);
+
+        assertThat(count(festivalId, revisionId, artistId)).isEqualTo(1);
+        var rehearsalCount = store.currentArtists(festivalId, revisionId, "rehearsal-2026-09-28:")
+            .stream().filter(item -> item.artistId().equals(artistId)).findFirst().orElseThrow();
+        assertThat(rehearsalCount.artistId()).isEqualTo(artistId);
+        assertThat(rehearsalCount.hypedCount()).isEqualTo(1);
+    }
+
     private long count(UUID festivalId, UUID revisionId, String artistId) {
         return store.currentArtists(festivalId, revisionId).stream()
             .filter(item -> item.artistId().equals(artistId))
