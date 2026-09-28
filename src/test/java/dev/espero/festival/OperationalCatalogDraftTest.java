@@ -41,15 +41,20 @@ class OperationalCatalogDraftTest {
         ObjectNode draft = (ObjectNode) JSON.readTree(Files.readString(DRAFT));
         List<String> gaps = new ArrayList<>();
 
-        fillImages(draft.path("spaces"), gaps);
-        fillImages(draft.path("artists"), gaps);
+        for (JsonNode artist : draft.path("artists")) {
+            assertThat(artist.path("imageUrl").isNull()).isFalse();
+            assertThat(artist.path("imageWidth").asInt()).isPositive();
+            assertThat(artist.path("imageHeight").asInt()).isPositive();
+        }
         for (JsonNode performance : draft.path("performances")) {
             String date = performance.path("festivalDate").asString();
-            if (performance.path("startsAt").isNull()) {
-                gaps.add(fill((ObjectNode) performance, "startsAt", date + "T19:00:00+09:00"));
-            }
-            if (performance.path("endsAt").isNull()) {
+            if ("performance-sgaeting".equals(performance.path("id").asString())) {
+                assertThat(performance.path("startsAt").asString())
+                    .isEqualTo("2026-09-29T17:30:00+09:00");
                 gaps.add(fill((ObjectNode) performance, "endsAt", date + "T19:30:00+09:00"));
+            } else {
+                assertThat(performance.path("startsAt").isNull()).isFalse();
+                assertThat(performance.path("endsAt").isNull()).isFalse();
             }
         }
 
@@ -63,20 +68,6 @@ class OperationalCatalogDraftTest {
         assertThat(manifest.spaceMenuItems()).hasSize(24);
         assertThat(manifest.artists()).hasSize(16);
         assertThat(manifest.stampGuideTranslations()).hasSize(2);
-    }
-
-    private static void fillImages(JsonNode rows, List<String> gaps) {
-        for (JsonNode row : rows) {
-            addIfGap(gaps, fill((ObjectNode) row, "imageUrl", "https://example.invalid/image.png"));
-            addIfGap(gaps, fill((ObjectNode) row, "imageWidth", 1000));
-            addIfGap(gaps, fill((ObjectNode) row, "imageHeight", 1000));
-        }
-    }
-
-    private static void addIfGap(List<String> gaps, String field) {
-        if (field != null) {
-            gaps.add(field);
-        }
     }
 
     /** Fills a field that must still be null in the draft; returns null otherwise. */

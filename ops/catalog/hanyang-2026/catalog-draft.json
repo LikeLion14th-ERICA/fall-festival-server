@@ -2230,58 +2230,58 @@
     {
       "id": "nct-wish",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/nct-wish.jpg",
+      "imageWidth": 1080,
+      "imageHeight": 1350
     },
     {
       "id": "nowimyoung",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/nowimyoung.jpg",
+      "imageWidth": 1440,
+      "imageHeight": 1800
     },
     {
       "id": "kim-haon",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/haon.png",
+      "imageWidth": 1080,
+      "imageHeight": 1350
     },
     {
-      "id": "lucenne",
+      "id": "rescene",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/rescene.jpg",
+      "imageWidth": 3277,
+      "imageHeight": 4096
     },
     {
       "id": "heegyu",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/heegyu.jpg",
+      "imageWidth": 1080,
+      "imageHeight": 1440
     },
     {
       "id": "ahof",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/ahof.jpg",
+      "imageWidth": 1440,
+      "imageHeight": 960
     },
     {
-      "id": "alphadriveone",
+      "id": "alphadrive1",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/alphadrive1.jpg",
+      "imageWidth": 3064,
+      "imageHeight": 2292
     },
     {
       "id": "fromis-9",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/fromis-9.jpg",
+      "imageWidth": 2000,
+      "imageHeight": 2500
     },
     {
       "id": "contest-boston-city-boy",
@@ -2363,7 +2363,7 @@
       "introduction": "🎶김하온🎶\n💨 힘을 뺀 목소리로 더 깊게 박히는 사색의 라임 💨\n'붕붕' 타고 동심의 하늘 위를 날아오를 김하온"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "locale": "ko",
       "name": "리센느",
       "imageAlt": "리센느 프로필 사진",
@@ -2384,7 +2384,7 @@
       "introduction": "⚡아홉⚡\n🏆 아홉 명이 완성하는 단 하나의 무대 🏆\n명예의 전당을 향해 거침없이 달려가는 아홉(AHOF)"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "locale": "ko",
       "name": "알파드라이브원",
       "imageAlt": "알파드라이브원 프로필 사진",
@@ -2489,6 +2489,46 @@
       "artistId": "contest-manchui",
       "sortOrder": 1,
       "url": "https://www.instagram.com/maaaaaaanchui/"
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/nctwish_official/"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/now_im_young/"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/noahmik/"
+    },
+    {
+      "artistId": "rescene",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/rescene_official/"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/ooxstalgia/"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/AHOF_official/"
+    },
+    {
+      "artistId": "alphadrive1",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/ald1.official/"
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/officialfromis_9/"
     }
   ],
   "artistLinkTranslations": [
@@ -2530,6 +2570,54 @@
     },
     {
       "artistId": "contest-manchui",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "rescene",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "alphadrive1",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "fromis-9",
       "sortOrder": 1,
       "locale": "ko",
       "label": "Instagram"
@@ -2582,17 +2670,17 @@
       "url": "https://open.spotify.com/track/21IVUjbu1ms4ZISGt74NCy"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 1,
       "url": "https://open.spotify.com/track/6uosenLUNFZtOIih5T0qfV"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 2,
       "url": "https://open.spotify.com/track/1pBUzZE9PoKLoPxo6QxsG6"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 3,
       "url": "https://open.spotify.com/track/26GehcyfHwgzfS0ok9yDYk"
     },
@@ -2627,17 +2715,17 @@
       "url": "https://open.spotify.com/track/0ku6osTANoM57WO6LWAgwZ"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 1,
       "url": "https://open.spotify.com/track/4LYM1IwuTq6b5vqTdQTbag"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 2,
       "url": "https://open.spotify.com/track/2tMfEwk96cjTSRTelQkwx6"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 3,
       "url": "https://open.spotify.com/track/5SCyHMxB5SWZP4EAKI5YRu"
     },
@@ -2713,19 +2801,19 @@
       "title": "Skrr (feat. 지젤 of aespa)"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 1,
       "locale": "ko",
       "title": "LOVE ATTACK"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 2,
       "locale": "ko",
       "title": "Deja Vu"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 3,
       "locale": "ko",
       "title": "Pretty Girl"
@@ -2767,19 +2855,19 @@
       "title": "RUN TO YOU"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 1,
       "locale": "ko",
       "title": "FREAK ALARM"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 2,
       "locale": "ko",
       "title": "OMG!"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 3,
       "locale": "ko",
       "title": "BORN DIRE"
@@ -2807,50 +2895,50 @@
     {
       "id": "performance-nct-wish",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T19:30:00+09:00",
+      "endsAt": "2026-09-29T20:00:00+09:00"
     },
     {
       "id": "performance-nowimyoung",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T20:00:00+09:00",
+      "endsAt": "2026-09-29T20:45:00+09:00"
     },
     {
       "id": "performance-kim-haon",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T20:45:00+09:00",
+      "endsAt": "2026-09-29T21:30:00+09:00"
     },
     {
-      "id": "performance-lucenne",
+      "id": "performance-rescene",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T22:00:00+09:00",
+      "endsAt": "2026-09-29T22:30:00+09:00"
     },
     {
       "id": "performance-heegyu",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T20:00:00+09:00",
+      "endsAt": "2026-10-01T20:40:00+09:00"
     },
     {
       "id": "performance-ahof",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T20:40:00+09:00",
+      "endsAt": "2026-10-01T21:20:00+09:00"
     },
     {
       "id": "performance-alphadriveone",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T21:20:00+09:00",
+      "endsAt": "2026-10-01T22:00:00+09:00"
     },
     {
       "id": "performance-fromis-9",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T22:00:00+09:00",
+      "endsAt": "2026-10-01T22:30:00+09:00"
     },
     {
       "id": "performance-sgaeting",
@@ -2891,7 +2979,7 @@
       "description": null
     },
     {
-      "performanceId": "performance-lucenne",
+      "performanceId": "performance-rescene",
       "locale": "ko",
       "title": "리센느",
       "description": null
@@ -2956,8 +3044,8 @@
       "displayOrder": 1
     },
     {
-      "performanceId": "performance-lucenne",
-      "artistId": "lucenne",
+      "performanceId": "performance-rescene",
+      "artistId": "rescene",
       "displayOrder": 1
     },
     {
@@ -2972,7 +3060,7 @@
     },
     {
       "performanceId": "performance-alphadriveone",
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "displayOrder": 1
     },
     {
