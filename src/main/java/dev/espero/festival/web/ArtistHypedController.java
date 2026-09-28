@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -38,6 +39,7 @@ public class ArtistHypedController {
     private final ArtistHypedStore store;
     private final ApiMetaSupport metaSupport;
     private final Clock clock;
+    private CachedCounts cachedCounts;
 
     public ArtistHypedController(
         CatalogSnapshotProvider snapshots,
@@ -57,10 +59,7 @@ public class ArtistHypedController {
         Instant now = clock.instant();
         try {
             String prefix = countPrefix(context.snapshot(), now);
-            var items = store.currentArtists(festivalId(context.snapshot()), context.snapshot().context().revisionId(), prefix)
-                .stream()
-                .map(count -> new ArtistHypedResponse.Item(count.artistId(), count.hypedCount()))
-                .toList();
+            var items = currentCounts(countKey(context.snapshot(), prefix));
             return ResponseEntity.ok().cacheControl(CacheControl.noStore())
                 .body(new ApiResponse<>(
                     new ArtistHypedResponse.Summary(enabled(context.snapshot(), now), items),
@@ -93,8 +92,9 @@ public class ArtistHypedController {
             if (!enabled(context.snapshot(), now)) {
                 throw new ApiException(HttpStatus.CONFLICT, "HYPED_CLOSED", "지금은 기대돼요 참여 시간이 아닙니다.", false);
             }
-            long count = store.increment(festivalId(context.snapshot()), artistId,
-                countPrefix(context.snapshot(), now), now);
+            String prefix = countPrefix(context.snapshot(), now);
+            long count = store.increment(festivalId(context.snapshot()), artistId, prefix, now);
+            updateCachedCount(countKey(context.snapshot(), prefix), artistId, count);
             return ResponseEntity.ok().cacheControl(CacheControl.noStore())
                 .body(new ApiResponse<>(
                     new ArtistHypedResponse.Increment(artistId, count),
@@ -104,6 +104,33 @@ public class ArtistHypedController {
             RequestDiagnostics.failure(request, exception);
             throw unavailable();
         }
+    }
+
+    // ponytail: one bounded entry for the single-instance deployment; serialize cache misses only here.
+    private synchronized List<ArtistHypedResponse.Item> currentCounts(CountKey key) {
+        Instant now = clock.instant();
+        if (cachedCounts == null || !cachedCounts.key().equals(key)
+            || now.isBefore(cachedCounts.loadedAt()) || !now.isBefore(cachedCounts.loadedAt().plusSeconds(1))) {
+            var items = store.currentArtists(key.festivalId(), key.revisionId(), key.prefix()).stream()
+                .map(count -> new ArtistHypedResponse.Item(count.artistId(), count.hypedCount()))
+                .toList();
+            cachedCounts = new CachedCounts(key, now, items);
+        }
+        return cachedCounts.items();
+    }
+
+    private synchronized void updateCachedCount(CountKey key, String artistId, long count) {
+        if (cachedCounts != null && cachedCounts.key().equals(key)) {
+            var items = cachedCounts.items().stream()
+                .map(item -> item.artistId().equals(artistId)
+                    ? new ArtistHypedResponse.Item(artistId, Math.max(item.hypedCount(), count)) : item)
+                .toList();
+            cachedCounts = new CachedCounts(key, cachedCounts.loadedAt(), items);
+        }
+    }
+
+    private CountKey countKey(CatalogSnapshot snapshot, String prefix) {
+        return new CountKey(festivalId(snapshot), snapshot.context().revisionId(), prefix);
     }
 
     private Context context(HttpServletRequest request) {
@@ -148,4 +175,6 @@ public class ArtistHypedController {
     }
 
     private record Context(CatalogSnapshot snapshot, String locale) {}
+    private record CountKey(UUID festivalId, UUID revisionId, String prefix) {}
+    private record CachedCounts(CountKey key, Instant loadedAt, List<ArtistHypedResponse.Item> items) {}
 }
