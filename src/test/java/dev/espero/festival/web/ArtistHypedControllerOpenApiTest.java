@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,6 +53,7 @@ class ArtistHypedControllerOpenApiTest {
     private final ObjectMapper json = new ObjectMapper();
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final ArtistHypedStore store = mock(ArtistHypedStore.class);
+    private final Clock clock = mock(Clock.class);
     private JsonNode openApi;
     private MockMvc mvc;
 
@@ -59,6 +61,12 @@ class ArtistHypedControllerOpenApiTest {
     void setUp() throws Exception {
         openApi = json.readTree(Files.readString(Path.of("api-v2", "openapi.json")));
         useTime("2030-10-01T00:00:00Z");
+        when(clock.withZone(any())).thenAnswer(invocation -> Clock.fixed(clock.instant(), invocation.getArgument(0)));
+        ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
+        mvc = MockMvcBuilders.standaloneSetup(new ArtistHypedController(snapshots, store, metaSupport, clock))
+            .setControllerAdvice(new GlobalApiExceptionHandler(metaSupport))
+            .addFilters(new RequestIdFilter())
+            .build();
         when(snapshots.required()).thenReturn(snapshot());
         when(snapshots.publishedLocales()).thenReturn(List.of("ko"));
     }
@@ -186,6 +194,95 @@ class ArtistHypedControllerOpenApiTest {
             Instant.parse("2026-09-28T02:00:00Z"));
     }
 
+    @Test
+    void cachesCountsForOneSecondAndRetriesFailedRefreshWithoutServingExpiredCounts() throws Exception {
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, ""))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 5)))
+            .thenThrow(new TransientDataAccessResourceException("unavailable"))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 9)));
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(5));
+        useTime("2030-10-01T00:00:00.999Z");
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(5));
+        verify(store).currentArtists(FESTIVAL_ID, REVISION_ID, "");
+        useTime("2030-10-01T00:00:01Z");
+        mvc.perform(get(LIST_PATH)).andExpect(status().isServiceUnavailable());
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(9));
+        verify(store, times(3)).currentArtists(FESTIVAL_ID, REVISION_ID, "");
+    }
+
+    @Test
+    void updatesCachedCountsWithoutExtendingTtlOrRegressingOnLateWriteCompletion() throws Exception {
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, ""))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 5)))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 8)));
+        when(store.isCurrentArtist(REVISION_ID, "artist-a")).thenReturn(true);
+        when(store.increment(eq(FESTIVAL_ID), eq("artist-a"), eq(""), any())).thenReturn(7L, 6L);
+        mvc.perform(get(LIST_PATH)).andExpect(status().isOk());
+        useTime("2030-10-01T00:00:00.500Z");
+        for (int i = 0; i < 2; i++) {
+            mvc.perform(post(POST_PATH).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isOk());
+        }
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(7));
+        verify(store).currentArtists(FESTIVAL_ID, REVISION_ID, "");
+        useTime("2030-10-01T00:00:01Z");
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(8));
+        verify(store, times(2)).currentArtists(FESTIVAL_ID, REVISION_ID, "");
+    }
+
+    @Test
+    void recalculatesMidnightAvailabilityEvenWhileCountsAreCached() throws Exception {
+        useTime("2030-10-01T14:59:59.500Z");
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.hypedEnabled").value(true));
+        useTime("2030-10-01T15:00:00Z");
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.hypedEnabled").value(false));
+        verify(store).currentArtists(FESTIVAL_ID, REVISION_ID, "");
+    }
+
+    @Test
+    void switchesNamespaceAndRevisionBeforeCacheExpiry() throws Exception {
+        useTime("2026-09-28T05:59:59.500Z");
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, "rehearsal-2026-09-28:"))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 100)));
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, ""))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 2)));
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(100));
+        useTime("2026-09-28T06:00:00Z");
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].hypedCount").value(2));
+        CatalogSnapshot original = snapshot();
+        UUID revision = UUID.randomUUID();
+        when(snapshots.required()).thenReturn(new CatalogSnapshot(
+            new CatalogSnapshot.FestivalContext(FESTIVAL_ID.toString(), revision, 8),
+            List.of(), List.of(), List.of(), Map.of(), null, null, null, original.home()));
+        when(store.currentArtists(FESTIVAL_ID, revision, ""))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-c", 3)));
+        mvc.perform(get(LIST_PATH)).andExpect(jsonPath("$.data.items[0].artistId").value("artist-c"));
+        verify(store).currentArtists(FESTIVAL_ID, revision, "");
+    }
+
+    @Test
+    void concurrentReadsShareOneDatabaseQuery() throws Exception {
+        when(store.currentArtists(FESTIVAL_ID, REVISION_ID, ""))
+            .thenReturn(List.of(new ArtistHypedStore.Count("artist-a", 5)));
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(12)) {
+            var requests = new java.util.ArrayList<java.util.concurrent.Future<?>>();
+            for (int i = 0; i < 12; i++) {
+                requests.add(executor.submit(() -> {
+                    start.await();
+                    mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
+                        .andExpect(jsonPath("$.data.items[0].hypedCount").value(5));
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (var request : requests) {
+                request.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            }
+        }
+        verify(store).currentArtists(FESTIVAL_ID, REVISION_ID, "");
+    }
+
     private MvcResult assertMatches(String path, String method, int expectedStatus,
         MockHttpServletRequestBuilder request) throws Exception {
         MvcResult result = mvc.perform(request)
@@ -221,12 +318,8 @@ class ArtistHypedControllerOpenApiTest {
     }
 
     private void useTime(String instant) {
-        Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
-        ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
-        mvc = MockMvcBuilders.standaloneSetup(new ArtistHypedController(snapshots, store, metaSupport, clock))
-            .setControllerAdvice(new GlobalApiExceptionHandler(metaSupport))
-            .addFilters(new RequestIdFilter())
-            .build();
+        when(clock.instant()).thenReturn(Instant.parse(instant));
+        when(clock.getZone()).thenReturn(ZoneOffset.UTC);
     }
 
     private CatalogSnapshot snapshot() {
