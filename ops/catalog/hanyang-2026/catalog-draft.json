@@ -3120,10 +3120,7 @@
     "pinId": null,
     "mapVersion": null,
     "instructions": [
-      "외부인 티켓존 방문: 외부인 티켓 구매 부스로 이동",
-      "티켓 금액 송금: 버튼을 눌러 지정 계좌와 금액이 입력된 송금 화면으로 이동",
-      "송금 완료 화면 확인: 완료 화면을 닫지 말고 티켓 부스 스태프에게 제시",
-      "팔찌 수령 후 입장: 확인 후 팔찌를 받고 외부인 존에서 관람"
+      "외부인 티켓 가격: 25,000원"
     ],
     "festivalStartDate": null,
     "festivalEndDate": null,
@@ -3146,7 +3143,7 @@
     ],
     "rewardName": "몬스터 음료",
     "rewardLocationText": "멋사 부스",
-    "rewardHoursText": null,
+    "rewardHoursText": "매일 11:00~17:00",
     "rewardNotice": "상품은 준비 수량 소진 시 지급이 종료됩니다",
     "qrValue": "https://festival.likelionerica.com/stamps"
   },
@@ -3196,19 +3193,13 @@
     {
       "locale": "en",
       "instructions": [
-        "Visit the Ticket Booth",
-        "Transfer the Ticket Fee: Tap the button to open the pre-filled transfer screen",
-        "Show Transfer Confirmation: Keep the confirmation screen open and show it to staff",
-        "Get Your Wristband & Enter: After verification, enter the Visitor Zone"
+        "Visitor ticket price: KRW 25,000"
       ]
     },
     {
       "locale": "zh-Hans",
       "instructions": [
-        "前往售票处",
-        "支付票款：点击按钮进入已填写账号和金额的转账页面",
-        "出示转账成功页面：请勿关闭页面，并向工作人员出示",
-        "领取手环并入场：确认后进入访客区观演"
+        "访客门票价格：25,000韩元"
       ]
     }
   ],
@@ -3223,7 +3214,7 @@
       ],
       "rewardName": "Monster Drink",
       "rewardLocationText": "LIKELION Booth",
-      "rewardHoursText": null,
+      "rewardHoursText": "Daily 11:00–17:00",
       "rewardNotice": "Prizes available while supplies last"
     },
     {
@@ -3236,7 +3227,7 @@
       ],
       "rewardName": "Monster 饮料",
       "rewardLocationText": "LIKELION 展位",
-      "rewardHoursText": null,
+      "rewardHoursText": "每日 11:00–17:00",
       "rewardNotice": "奖品数量有限，领完即止"
     }
   ]

@@ -103,7 +103,7 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-03 | 공간에서 지도 이동 | 공간 `mapTarget` → AREA 지도 → 현재 버전 핀 → 장소 상세 → 원래 공간 |
 | HTTP-04 | 전체·구역 지도 탐색 | overview의 AREA 핀 → 대상 AREA 지도, 필터와 PLACE 핀 관계, stale `mapVersion` 409 후 최신 핀 재조회 |
 | HTTP-05 | 공연 탐색 | config 기본 날짜 → lineup → artist → performance → timetable, 출연진·공연 ID와 순서 관계 |
-| HTTP-06 | 티켓·스탬프 확인 | ticket guide의 `UNCONFIGURED`·strong ETag/304·map target, stamp 제목·보상·기간·일일 한도, 부스 QR 적립(참여 쿠키·부스당 하루 1회·4개 제한)과 가득 찬 판의 수령 1회 |
+| HTTP-06 | 티켓·스탬프 확인 | ticket guide의 25,000원 단일 가격·strong ETag/304·계좌 비노출, stamp 제목·보상·기간·일일 한도, 부스 QR 적립(참여 쿠키·부스당 하루 1회·4개 제한)과 가득 찬 판의 수령 1회 |
 | HTTP-07 | 관리자 세션 | 로그인 → `/admin/me` → refresh rotation → 이전 refresh 거부 → logout 뒤 refresh 거부 |
 | HTTP-08 | 혼잡도·운영 시간 운영 | 공개 조회 → 운영 시간 목록·상세 조회 → catalog 초기값과 같은 첫 저장 및 감사 기록 → 동일 key replay 204 → 운영 시간 재조회·공개 혼잡도 반영 → 같은 시간/혼잡도 재저장의 no-op |
 | HTTP-09 | 충돌·확인 처리 | 운영 시간 stale `If-Match`의 409와 필수 헤더 428, 잘못된 시간의 422, FULL 확인 누락 422, 확인 뒤 FULL 반영과 감사 건수 |
@@ -112,7 +112,7 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-12 | 관리자 입력 경계 | 허용하지 않거나 누락된 Origin의 credential 발급 거절, 잘못된 비밀번호·손상 access token·malformed JSON·access token 없는 logout의 안전한 오류 |
 | HTTP-13 | release E2E datasource 격리 | Hikari·JNDI override가 있어도 후보 import helper와 HTTP context가 Testcontainers datasource만 사용 |
 | HTTP-14 | 전체 후보 탐색 | 모든 선언 날짜·ARTIST/CONTEST 목록의 반복 응답·순서·상세 관계와 노출된 모든 공간 category filter·중복 없음 |
-| HTTP-15 | 계좌 CLI의 즉시 반영 | 별도 Account CLI의 TICKET set·clear가 실행 중 server의 ticket guide·version·ETag/304에 즉시 반영되고 마감 시 계좌를 숨김 |
+| HTTP-15 | 이전 계좌 CLI와 공개 가격 격리 | 별도 Account CLI의 TICKET set·clear에도 ticket guide가 가격만 반환하고 ETag/304·응답에 계좌가 나타나지 않음을 확인 |
 | HTTP-16 | 혼잡도·운영 시간 동시 변경 | 실제 관리자 HTTP 요청의 동일 key/ETag 경쟁에서 한 번만 저장·감사되고 stale 수정은 409. 같은 key의 다른 본문 거절과 날짜 제거 뒤 완료 요청 replay 204도 확인 |
 | HTTP-17 | 게시·재시작·rollback lifecycle | A 게시 → 실행 server의 A snapshot 유지 → 재시작의 B 노출 → expected-current rollback → 재시작의 새 revision A 복원과 동적 상태 보존 |
 | HTTP-18 | 공개 입력 오류 후 복구 | 잘못된 날짜·분류·지도 query와 존재하지 않는 공간·지도·장소·출연진·공연이 안정 오류·후보 meta를 내고, 잘못된 admin bearer가 공개 탐색을 막지 않으며 다음 config 조회가 복구됨 |
@@ -120,13 +120,13 @@ Flyway를 적용하고 후보 catalog manifest를 실제 catalog CLI로 import·
 | HTTP-20 | 미게시 축제 배포 | 다른 축제의 seed가 있어도 선택 회차에 published revision이 없으면 `/healthz`는 살아 있고 `/readyz`는 `not_ready`, 공개 config는 안전한 `CATALOG_NOT_READY`로 실패 |
 | HTTP-21 | 공개 읽기 rate limit | trusted proxy client 단위 429·`Retry-After`·안전 envelope, 다른 client의 독립 bucket, clock 회복 뒤 재조회와 서버 생성 request ID를 실제 HTTP로 확인 |
 | HTTP-22 | 관리자 로그인 rate limit | 잘못된 비밀번호 추측이 trusted proxy client 단위로 제한되고 다른 client·refill 뒤에는 다시 인증 오류로 처리되며 cookie를 발급하지 않음 |
-| HTTP-23 | 티켓 송금 초 경계 | `09:59:59`·`10:00:00`·`17:59:59`·`18:00:00` KST에서 `DAILY_CLOSED`/`TRANSFER_OPEN`, 계좌 노출, settings version, 이전·현재 ETag의 200/304가 정확히 전환됨 |
+| HTTP-23 | 이전 송금 시간과 공개 가격 격리 | 과거 송금 시간 경계와 무관하게 ticket guide의 25,000원 단일 가격·계좌 비노출 및 ETag/304가 유지됨 |
 | HTTP-24 | 혼잡도·운영 시간 경계 | 실제 Spring HTTP E2E는 익일 `01:00` 허용·`01:01` 거절, 야간 운영일을 유지한 자정 통과 대기 쓰기 성공, 종료 경계 대기 쓰기 stale 충돌, 마지막 축제일 익일 저장을 확인한다. 전날 OPEN과 당일 일정 겹침에서 당일 우선·당일 CLOSED 유지, 날짜별 idempotency key 범위는 unit/consumer/provider 검증에서 확인한다. 기존 경계 검증은 첫 축제일 전·중간 공백일·마지막 날 뒤, 비축제일 저장 409, 잘못된 날짜 400, 목록 빈 배열, 누락·stale `If-Match` 428/409를 다룬다. |
 | HTTP-25 | 공지 lifecycle | 실제 관리자 생성 Location·replay·key reuse·If-Match stale·수정·삭제와 공개 목록 반영·conditional read를 확인 |
 | HTTP-26 | 상품·판매 상태 lifecycle | 상품 생성 Location·replay·목록/상세/관리자 목록·조합 ON_SALE/SOLD_OUT·옵션 변경·hard delete와 media detach를 확인 |
 | HTTP-27 | 이미지 upload/delivery | multipart 인증·상한·유형·replay·media 공개 200/304 header·replacement/detach·processor/storage 실패 rollback을 확인 |
-| HTTP-28 | 수령 code·rate limit | 이전/신규 hash, 앞자리 0, 잘못된 code, 5회 이후 429, spoofing, refill, unconfigured 상태와 DB/secret 무변경을 확인 |
-| HTTP-29 | GOODS account CLI | 실제 child JVM dry-run/set/stale/clear/restart가 payment-guide에 반영되고 TICKET state를 바꾸지 않음을 확인 |
+| HTTP-28 | 수령 code·rate limit | 이전/신규 hash, 앞자리 0, 잘못된 code, 5회 이후 429, spoofing, refill, unconfigured 상태와 DB/secret 무변경을 확인. KST 11:00–17:00 수령 시간 경계는 `StampCardFlowIntegrationTest`에서 별도 확인 |
+| HTTP-29 | 이전 GOODS 계좌 CLI와 공개 비노출 | 실제 child JVM dry-run/set/stale/clear/restart 중 상품 가격·판매 상태가 유지되고 계좌가 노출되지 않으며 옛 payment-guide가 404인지 확인 |
 | HTTP-30 | notice template CLI | preview·전체 교체·관리자 목록/상세·template 삭제 뒤 notice 보존·malformed/duplicate 무변경을 확인 |
 | HTTP-31 | 관리자 mutation boundary | 8개 mutation route의 auth/key/precondition 거절과 notice replay/stale/key reuse side effect를 부분 범위로 확인 |
 | HTTP-32 | 아티스트 Hyped | 게시된 ARTIST의 익명 반복 POST·GET 누적값, CONTEST/없는 ID 거절, 축제일 KST 자정 전후, no-store, DB 일치를 실제 HTTP로 확인 |

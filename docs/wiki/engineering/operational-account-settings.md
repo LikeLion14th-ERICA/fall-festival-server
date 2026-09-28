@@ -1,16 +1,21 @@
 # 계좌 운영 설정
 
-[위키 홈](../README.md) · 읽는 때: `TICKET`·`GOODS` 계좌 변경, 역할 provisioning, 계좌 CLI 또는 retention 변경
+[위키 홈](../README.md) · 읽는 때: 이전 계좌 설정·이력 보존, 역할 provisioning, 계좌 CLI 또는 retention 변경
+
+2026-09-28 사용자 결정 이후 공개 티켓·굿즈·부스 API는 계좌·복사·송금 정보를 내보내지
+않는다. 아래 저장 모델과 CLI는 이미 적용된 DB·감사 이력을 안전하게 관리하기 위한
+기존 구조다. 행사 중 공개 정보를 바꾸기 위해 새 계좌를 등록하지 않는다. 구 서버
+이미지로 되돌리면 저장된 계좌가 다시 공개될 수 있으므로 D가 비공개 상태를 확인하고
+필요한 `clear`를 적용한 뒤에만 기동한다.
 
 ## 범위와 모델
 
 `operational_account_settings`는 `(festival_id, purpose, scope_id)` 현재값과 증가하는 `version`을
 저장한다. `purpose`는 축제 단위의 `TICKET`·`GOODS`와 부스 단위의 `SPACE`(V23)이며, `SPACE`의
 `scope_id`는 부스 API id, 나머지는 빈 문자열이다. `SPACE`는 서비스 내부 은행 식별자
-`bank_code`와 토스 연결 노출 여부 `toss_link_enabled`를 가지며 송금 링크는 가질 수 없다. 공개
-조회는 [부스 상세](../product/spaces.md#부스-계좌-송금-안내)의 `bankTransfer`다. 상태는 공개 가능한 `CONFIGURED`와 표시를
-중단하는 `UNCONFIGURED`다. 은행명·계좌번호·예금주·선택 송금 링크는 catalog revision 밖의
-운영 설정이다. 이 PR은 HTTP 관리자 쓰기와 공개 조회를 만들지 않는다.
+`bank_code`와 과거 토스 연결 플래그 `toss_link_enabled`를 가지며 송금 링크는 가질 수 없다.
+은행명·계좌번호·예금주·선택 송금 링크는 catalog revision 밖의 운영 설정이다.
+`CONFIGURED`·`UNCONFIGURED` 상태와 무관하게 현재 공개 API에는 계좌가 없다.
 
 V15의 trigger는 INSERT/UPDATE/DELETE마다 `operational_account_setting_history`에 전후 값을
 append-only로 남긴다. 이력에는 실제 login DB role인 `session_user`, CLI가 받은 작업자 표시명,
@@ -72,7 +77,7 @@ java '-Dloader.main=dev.espero.festival.AccountSettingsCliApplication' -cp targe
 input JSON은 `bankName`, `accountNumber`, `accountHolder`, `transferLinkUrl`, `bankId`,
 `tossLinkEnabled`만 받는다. `SPACE`는 `bankId`(소문자·숫자·하이픈)가 필수이고
 `transferLinkUrl`을 쓸 수 없으며, `TICKET`·`GOODS`는 `bankId`와 `tossLinkEnabled`를 쓸 수 없다.
-`bankName`은 공개 응답의 `bankDisplayName`, `accountHolder`는 `accountHolderName`이 된다. 파일은
+이 필드들은 이전 공개 응답을 위한 저장 형식이며 현재 공개 API에 매핑되지 않는다. 파일은
 regular file·16 KiB 이하·unknown field 없음이어야 하며 symlink는 거절한다. 사용 뒤 운영자가
 승인된 비밀 관리 절차로 파일을 제거한다. 링크는 선택 사항이지만 HTTPS, 기본 포트, userinfo와
 fragment 없음, `ACCOUNT_TRANSFER_LINK_ALLOWED_HOSTS`의 정확한 host 중 하나여야 한다. 빈
@@ -90,27 +95,15 @@ allowlist에서는 링크가 있는 설정을 저장할 수 없다.
 재적용한다. 두 CLI가 동시에 변경하면 하나는 expected version 불일치로 실패한다. catalog
 rollback은 계좌 값을 rollback하지 않는다.
 
-## 티켓 read 전환 runbook
+## 공개 read와 이전 이미지로의 복구
 
-`/api/v2/ticket-guide`는 catalog의 가격·일정·안내·map target과 현재 `TICKET` 설정을 합쳐
-응답한다. 계좌를 등록하기 전에는 일정이 완전해도 `status: UNCONFIGURED`이고 `account`는
-null이므로, 아래 순서를 지켜야 사용자에게 빈 계좌가 노출되지 않는다.
+현재 `/api/v2/ticket-guide`는 25,000원 단일 가격만 반환한다. 공개 굿즈 목록·상세와
+부스 상세도 계좌 설정을 읽어 응답하지 않으며 옛 goods payment-guide 경로는 제거됐다.
+과거의 송금 시간·계좌 노출을 확인하던 read 전환 절차는 적용하지 않는다.
 
-1. account operator role로 `set --purpose=TICKET`을 **dry-run**으로 실행해 state, version,
-   바뀔 field 이름과 끝 네 자리를 확인한다.
-2. `--confirm`과 `--last-four`, `--expected-version`, `--actor`, `--reason`, `--evidence-id`로
-   적용한다. 값 자체는 출력·로그에 남지 않는다.
-3. 기존 catalog revision의 legacy 계좌 열과 새 설정이 같은 계좌인지 **값을 출력하지 않고**
-   대조한다. 끝 네 자리와 은행 일치 여부만 운영자가 눈으로 확인하며, 다르면 전환을 멈춘다.
-4. read 전환 binary를 배포한다. 배포 뒤 `/api/v2/ticket-guide`가 송금 시간 안에서
-   `TRANSFER_OPEN`과 `account`, `paymentSettingsVersion`을 반환하는지 확인한다.
-5. 계좌 분리 이전 binary로의 rollback은 금지한다. 그 binary는 catalog의 legacy 열을 다시
-   읽으므로 설정에서 바꾼 계좌와 어긋난 값을 노출할 수 있다. 문제가 생기면 계좌 설정을
-   `clear`하거나 `restore-version`으로 되돌린다.
-
-계좌를 바꾸면 version이 올라가고 응답 본문의 `paymentSettingsVersion`이 바뀌므로 ETag도
-바뀐다. 프런트의 15초 polling은 다음 주기에 새 표현을 받는다. 서버는 응답을 캐시하지 않고
-`Cache-Control: private, no-cache`를 보낸다.
+DB 이력 보존이나 복구를 위해 CLI를 실행해야 한다면 D는 별도 승인과 작업 기록을 남긴다.
+구 이미지의 공개 read가 이전 계좌 설정을 다시 사용할 수 있으므로 이전 이미지 기동
+전에 현재 설정을 확인하고 필요한 목적·부스별로 `clear`를 적용한 후 비노출을 검증한다.
 
 통합 cleanup 단계는 history를 1년 뒤 batch 삭제하되, 각 `(festival_id, purpose)`의 최신 event를
 남긴다. 이는 현재 설정의 근거이면서 직접 SQL DELETE 뒤에도 version을 재사용하지 않는
@@ -119,10 +112,9 @@ watermark다. cleanup은 current table key/version만 읽고 account 원문을 �
 
 ## 보안과 검증
 
-한 사람이 CLI 변경을 확정하는 것은 사용자 결정이다. 빠른 현장 변경을 위해 선택했지만 그
-사람의 실수나 자격증명 유출이 즉시 공개 계좌 변경으로 이어진다. CLI의 dry-run, expected
-version, 끝 네 자리 확인, trigger history, 별도 DB role과 사후 log가 그 위험을 줄이지만
-2인 승인은 제공하지 않는다.
+한 사람이 CLI 변경을 확정하는 것은 이전 운영 결정이다. 현재 공개 API는 계좌를 읽지
+않지만, 구 이미지로의 rollback이나 자격증명 유출은 재노출 위험을 만든다. CLI의 dry-run,
+expected version, 끝 네 자리 확인, trigger history와 별도 DB role을 유지한다.
 
 Testcontainers 검증은 trigger history, direct SQL 기록, direct DELETE 뒤 monotonic version과
 restore, history 권한 거부, cleanup 최소 SELECT, isolated Flyway schema, dry-run redaction,

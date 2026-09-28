@@ -36,7 +36,7 @@
 | 요청 제한 | public/admin/login/stamp/artist-hyped token bucket, trusted proxy hop, `429 RATE_LIMITED`와 `Retry-After`; Hyped 쓰기는 공개 조회와 별도 bucket | `RateLimitTest`(Hyped 포함), release E2E HTTP-21·22 |
 | idempotency·동시성 | 같은 key replay, 다른 body `409 IDEMPOTENCY_KEY_REUSED`, in-flight 충돌, `If-Match`; 혼잡도 시간·단계 쓰기의 축제 행 → 시간·상태 행 잠금 순서, 날짜별 key 범위와 자정 선택 변경 충돌 | `AdminIdempotencyServiceIntegrationTest`, `AdminMutationPreconditionsTest`, `CrowdingConcurrencyE2eTest`, 야간 운영 E2E 및 운영 시간 provider 검증 |
 | JSON 본문 경계 | `/api/v2`의 JSON `POST`·`PUT`·`PATCH`·`DELETE` 요청은 declared/chunked 여부와 관계없이 64KiB 이하이며, multipart 이미지는 별도 10MiB 제한 | `JsonRequestBodyLimitFilterTest`, `SecurityConfigurationTest` |
-| 수령 인증·동적 결제 안내 | 수령 코드는 공백을 제거하지 않은 정확한 6자리 숫자만 허용하고, 성공 수령 인증과 `GET /api/v2/goods/{goodsId}/payment-guide`는 `Cache-Control: no-store` | `StampReceiptVerifierTest`, `CatalogControllerOpenApiTest`, `GoodsFlowIntegrationTest` |
+| 수령 인증·결제 비노출 | 수령 코드는 정확한 6자리 숫자만 허용하고 KST 11:00 이상 17:00 미만에만 성공한다. 티켓·굿즈·부스 공개 응답에는 계좌·송금 필드가 없으며 옛 goods payment-guide 경로는 404다. 성공 수령 인증은 `Cache-Control: no-store`다. | `StampCardFlowIntegrationTest`, `CatalogControllerOpenApiTest`, `GoodsFlowIntegrationTest` |
 | 게시·공개 분리 | validated published revision만 노출, draft/rollback 원자성, restart 뒤 revision 전환 | `CatalogPublicationLifecycleE2eTest`, 운영 E2E OPS-01~20 |
 | 인증·관리자 cache | 모든 `/api/v2/admin/**` 성공·401·403·CORS/CSRF 오류 응답은 `Cache-Control: no-store`; operating-hours GET의 조건부 응답에도 적용하고, Spring Security와 선행 rate/JSON 거부 오류도 `nosniff`·`DENY` 헤더 유지 | `SecurityConfigurationTest`, `RateLimitTest`, 운영 시간 HTTP 검증 |
 | 운영 시간 권한·감사 | runtime만 `crowding_operating_hours`의 SELECT·INSERT·UPDATE를 사용하고 catalog export/publish role은 접근하지 못함. 저장·감사·idempotency는 한 transaction이며 실패한 감사는 시간을 rollback | migration·role provisioning·운영 시간 통합 검증 |
@@ -60,6 +60,7 @@
 - [ ] `security-filesystem`과 `docker-build`의 Trivy filesystem·root image high/critical 결과와 대응을 release 기록에 남겼다.
 - [ ] 긴 query/header, slow request의 서버·proxy 제한을 실제 설정과 함께 확인했다.
 - [ ] 공지·링크를 소비하는 프런트가 raw HTML이나 `javascript:` URL을 실행하지 않는지 확인했다.
+- [ ] 공개 티켓·굿즈·부스 응답과 실제 화면에 계좌·복사·송금 연결이 없고, 구 이미지로 rollback하기 전 이전 계좌 설정을 비공개 처리하는 절차를 확인했다.
 
 현재 요청 제한은 단일 인스턴스 in-memory token bucket이다. 수평 확장 또는 다른 proxy 경로를
 도입하면 shared limiter와 client identity 정책을 별도 설계·검증한다. account 기반 brute-force,

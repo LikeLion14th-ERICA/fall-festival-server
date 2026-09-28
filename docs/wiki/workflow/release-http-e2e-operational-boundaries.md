@@ -1,10 +1,9 @@
 # 운영·보안 HTTP E2E 상세 케이스
 
-[릴리스 HTTP E2E 개요](release-http-e2e.md) · [위키 홈](../README.md) · 읽는 때: 스탬프 수령 확인, 운영 계좌·템플릿 process, 관리자 mutation 경계를 릴리스 후보에서 구현·검토할 때
+[릴리스 HTTP E2E 개요](release-http-e2e.md) · [위키 홈](../README.md) · 읽는 때: 스탬프 수령 확인, 비공개 계좌 이력·템플릿 process, 관리자 mutation 경계를 릴리스 후보에서 구현·검토할 때
 
-이 문서는 HTTP-28–HTTP-31의 수용 조건과 구현 범위를 기록한다. HTTP-28–30은
-**코드 작성·미실행**, HTTP-31은 **부분 구현·미실행**이다. 컴파일·테스트를 실행하지 않았으므로
-통과 또는 출시 완료의 증거가 아니다. 계좌와 스탬프 값은 모두 test-only
+이 문서는 HTTP-28–HTTP-31의 수용 조건과 구현 범위를 기록한다. 과거 후보에서의
+테스트 실행 여부는 이번 후보의 통과 또는 출시 완료 증거가 아니다. 계좌와 스탬프 값은 모두 test-only
 fixture로 만들고, 비밀 원문을 source, assertion message, child process 출력 캡처, PR 본문에
 남기지 않는다.
 
@@ -17,7 +16,7 @@ fixture로 만들고, 비밀 원문을 source, assertion message, child process 
 | ID | JUnit method | 코드 작성 범위 |
 | --- | --- | --- |
 | HTTP-28 | `receiptRotationRateLimitsAndUnconfiguredServerPreserveDatabaseAndSecrets` | 이전·신규 코드 및 앞자리 0, 잘못된 형식, 5회 이후 429, XFF 왼쪽 위조 방어·다른 client·12초 refill, 이전 코드 제거 후 재기동, 미설정 503, 전체 DB 무변경·응답/로그 비밀 비노출 |
-| HTTP-29 | `goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects` | 실제 두 상품 payment-guide에 별도 GOODS CLI dry-run/set/stale/clear 즉시 반영, 이력/version·TICKET 격리, 재기동 뒤 clear 보존, CLI redaction |
+| HTTP-29 | `legacyGoodsAccountChangesNeverExposePaymentDetails` | 별도 GOODS CLI dry-run/set/stale/clear 이력·version·TICKET 격리, 공개 굿즈 가격 유지·계좌 비노출·payment-guide 404, 재기동 뒤에도 비노출, CLI redaction |
 | HTTP-30 | `templateCliReplacementIsAtomicAndPreservesNoticesFromRemovedTemplates` | preview 무변경, 전체 교체·관리자 HTTP 목록/상세, 인증/query 경계, 템플릿 기반 공지 생성, 템플릿 삭제 후 공지/감사 보존, malformed/duplicate preview·confirm 실패 무변경 |
 | HTTP-31 | `administratorMutationMatrixRejectsBeforeSideEffectsAndNoticeReplayIsExactlyOnce` | 8개 mutation route의 무인증/손상 bearer·key 누락/형식/중복, notice/product If-Match 누락/형식, notice 생성/수정/삭제 replay·stale·key 재사용, DB·파일 상태 |
 
@@ -26,7 +25,7 @@ HTTP-31의 정상 상품·판매 상태·실제 이미지 업로드 및 replay·
 구조상 유효한 최소 payload와 존재하지 않는 ID, nonempty multipart를 사용해 **header/auth 경계만**
 검사하며 이를 정상 media decode·upload·product 생성의 증거로 사용하지 않는다. 상품 stale ETag,
 잘못된 enum/media reference, processor/storage failure의 HTTP matrix는 이 클래스에 구현하지 않았다.
-HTTP-29의 상품은 계좌 reader 검증용 DB fixture이며 상품 생성 경로 검증은 HTTP-26의 책임이다.
+HTTP-29의 상품은 이전 계좌 이력과 공개 비노출 검증용 DB fixture이며 상품 생성 경로 검증은 HTTP-26의 책임이다.
 
 중요한 구현 차이: `NoticeController`의 If-Match 검사는 `AdminIdempotencyService`의 별도
 reservation transaction 이후다. 따라서 notice의 missing/malformed/stale If-Match 실패는
@@ -34,14 +33,14 @@ reservation transaction 이후다. 따라서 notice의 missing/malformed/stale I
 테스트는 이 실제 상태를 구분해 검사한다. 모든 거절이 reservation 자체까지 무변경이라는
 아래 원래 설계의 기대는 현재 notice 구현과 맞지 않으므로, 이를 강화하려면 별도 구현 결정이 필요하다.
 
-등록할 focused 명령은 다음과 같다. **이번 작업에서는 실행하지 않았다.**
+focused 실행 명령은 다음과 같다. 결과는 후보별 작업 기록에 남긴다.
 
 ```powershell
 cmd /d /c "mvnw.cmd --batch-mode --no-transfer-progress -Dtest=OperationalBoundariesHttpE2eTest test"
 ```
 
 HTTP-28–30은 중앙 release 시나리오 inventory에 구현 상태로 포함되며 HTTP-31은 위 명시 범위의
-부분 구현으로 포함된다. 어떤 ID도 후보별 실행 증거가 없으므로 PASS 수는 늘지 않는다. HTTP-26/27
+부분 구현으로 포함된다. 후보별 실행 증거 없이는 PASS 수를 늘리지 않는다. HTTP-26/27
 연결과 위 잔여 matrix를 확인한 뒤 최종 gate 통과 여부를 판단한다.
 
 ## 공통 harness·격리
@@ -85,33 +84,20 @@ HTTP-28–30은 중앙 release 시나리오 inventory에 구현 상태로 포함
 않으면 PASS로 해석하지 말고 fixture isolation failure로 끝낸다. hash 제거 instance와 limiter
 state를 각각 폐기한다.
 
-## HTTP-29 · GOODS 계좌 CLI의 실행 중 반영 — P0
+## HTTP-29 · 이전 GOODS 계좌 CLI와 공개 비노출 — P0
 
-**목적.** runtime HTTP reader와 별도 account operator CLI가 같은 current setting/history를
-안전하게 공유하는지 확인한다. goods payment guide는 현재 conditional ETag나 settings version을
-계약하지 않으므로 존재하지 않는 header/field를 기대하지 않는다.
+**목적.** 이전 운영 계좌 설정과 변경 이력은 보존하면서 공개 상품 API에 계좌나 송금
+안내가 다시 나타나지 않는지 확인한다.
 
-### 준비물
-
-- published candidate에 상품을 하나 이상 만들고, server는 `GOODS` current setting이 없는
-  상태에서 먼저 실행한다. 모든 public payment guide 경로는 `GET /api/v2/goods/{goodsId}/payment-guide`다.
-- account CLI child process에는 test-only account input file, festival id, `--purpose=GOODS`,
-  expected version, actor/reason/evidence id를 준다. input file은 정상 file·16 KiB 이하·no
-  unknown fields로 만들고 test 종료 시 삭제한다.
-
-| 단계 | CLI 또는 HTTP 흐름 | 수용 조건 | DB·출력 불변식 |
-| --- | --- | --- | --- |
-| 29.1 | 모든 goods payment guide를 익명 GET | `200`, `data.account=null/absent` | GOODS current/history baseline을 기록한다. 상품마다 다른 계좌나 admin auth 요구가 없어야 한다. |
-| 29.2 | `set` dry-run, `--confirm` 없는 상태로 실행 | exit 성공, `mode=DRY_RUN`, HTTP/DB 변화 없음 | stdout에는 purpose/version/changed fields/last four만 있고 full bank/account/holder/link, datasource secret이 없다. |
-| 29.3 | 같은 set을 `--confirm`과 audit metadata로 적용 | exit 성공, 다음 HTTP GET에서 모든 goods가 같은 test-only account representation | current setting은 CONFIGURED와 새 version, history는 정확히 1건 증가한다. HTTP test는 fixture value를 response와 비교할 수 있으나 log에는 쓰지 않는다. |
-| 29.4 | 이전 expected version으로 confirmed set 또는 clear | CLI가 `ACCOUNT_EXPECTED_VERSION_MISMATCH`로 안전 실패 | current/history와 다음 HTTP response가 29.3 후와 byte-for-business-value 동일하다. |
-| 29.5 | 현재 version으로 confirmed clear | exit 성공, 다음 HTTP GET에서 account 숨김 | current setting은 UNCONFIGURED의 새 version, history는 유효 변경 1건만 더 가진다. |
-| 29.6 | server를 재기동하고 payment guide 재조회 | `200`, clear 상태 지속 | child JVM/server 종료, temp input 삭제, account raw value redaction을 재검사한다. |
-
-**중단·정리.** dry-run 또는 stale failure가 history를 늘리면 실패다. TICKET 사례의 ETag/version
-동작을 GOODS에 복사하지 않는다. account는 catalog revision과 별도이므로 catalog rollback으로
-복구를 기대하지 않고, 필요한 rollback은 current version을 확인한 `restore-version` 또는
-`clear`로 별도 시나리오에서 다룬다.
+- 임시 DB에 두 상품과 test-only GOODS 계좌 설정을 준비한다. 별도 CLI JVM의 dry-run,
+  confirm set, stale expected-version 거절, clear와 서버 재시작을 순서대로 검증한다.
+- 각 단계의 `GET /api/v2/goods`·`GET /api/v2/goods/{goodsId}`에는 가격·판매 상태만
+  있으며 계좌·예금주·송금 링크가 없다. 이전
+  `GET /api/v2/goods/{goodsId}/payment-guide`는 `404`다.
+- dry-run·stale 실패는 DB 이력을 늘리지 않고, 유효 set·clear는 해당 이력만 남긴다.
+  CLI 출력에는 계좌 원문이나 datasource 비밀값이 없어야 한다.
+- 서버를 재시작한 뒤에도 같은 비노출을 확인한다. 구 이미지로 rollback할 때는 이전
+  계좌 설정이 재공개될 수 있으므로 D의 `clear`·검증 없이 기동하지 않는다.
 
 ## HTTP-30 · 공지 템플릿 process → HTTP 경계 — P1
 

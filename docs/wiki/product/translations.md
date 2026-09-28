@@ -5,6 +5,9 @@
 2026-09-18에 받은 번역 자료(한국어·영어·중국어 간체, 24쪽)를 화면별로 옮긴 표다.
 [다국어](../engineering/i18n.md) 규칙에 따라 앱 텍스트와 카탈로그 번역은 이 표와
 [학교 용어](terminology.md)의 표기만 사용한다. 일본어 번역은 아직 받지 않았다.
+원본 PDF의 결제·송금 문구는 2026-09-28 사용자 결정으로 사용 중단했다.
+티켓은 가격만, 굿즈는 가격·재고만, 부스는 콘텐츠·메뉴 가격만 안내한다.
+아래 가격·수령 시간 번역은 이 결정에 맞춰 추가한 운영 문구이며 원본 PDF의 인용은 아니다.
 
 - 중국어는 원본 PDF의 글자 렌더링으로 옮겼다. PDF 텍스트 레이어는 `学`·`区`·`见`·`会`
   같은 여러 글자를 `页`로 잘못 매핑하므로 복사한 텍스트를 그대로 쓰지 않는다.
@@ -61,7 +64,7 @@
 | `BEFORE_OPEN` | 오늘 재학생존 입장은 {시각}에 시작해요 | Student Zone entry starts at {시각} today | 今日学生区{시각}开放入场 |
 | `CLOSED` | 오늘 재학생존 운영이 종료됐어요 | The Student Zone is closed for today | 今日学生区已关闭 |
 
-## 굿즈샵·결제
+## 굿즈샵
 
 | 한국어 | 영어 | 중국어 간체 |
 |---|---|---|
@@ -72,25 +75,8 @@
 | 사이즈 선택 | Select Size | 选择尺码 |
 | 구매 가능 | Available | 有货 |
 | 품절 | Sold Out | 售罄 |
-| 굿즈 부스에서 담당자가 실제 재고를 확인한 뒤 지급합니다 | Staff will confirm stock at the merch booth before handing over your item | 工作人员将在周边摊位确认库存后发放商品 |
-| 계좌 확인 | Bank Details | 查看账号 |
-| 계좌 안내 | Bank Details | 转账信息 |
-| 입금 계좌 | Account Number | 收款账号 |
-| 은행 | Bank | 银行 |
-| 예금주 | Account Holder | 户名 |
-| 구매 상품 | Order Details | 订单详情 |
-| 구매 상품명 | Item | 商品 |
-| 선택 사항 | Options | 选项 |
-| 최종 금액 | Total | 合计 |
+| 가격 | Price | 价格 |
 | 원 | KRW | 韩元 |
-| 토스로 송금하기 | Transfer with Toss | 使用 Toss 转账 |
-| 계좌번호 복사하기 | Copy Account Number | 复制账号 |
-| 현장 송금 수령 안내 | Bank Transfer & On-site Pickup | 转账及现场领取指南 |
-| 1. 굿즈 부스의 담당자에게 원하는 상품과 사이즈를 말해주세요 | 1. Tell the staff at the merch booth which item and size you want | 1. 请告知周边摊位工作人员您想要的商品和尺码。 |
-| 2. 담당자가 실제 재고를 확인해 드립니다 | 2. Staff will check stock availability | 2. 工作人员将确认库存。 |
-| 3. 안내된 계좌로 송금한 뒤 완료 화면을 담당자에게 보여주세요 | 3. Transfer to the account shown and show staff the confirmation screen. | 3. 请转账至所示账户，并向工作人员出示转账成功页面。 |
-| 4. 담당자가 송금 내역을 확인 후 현장에서 바로 지급합니다 | 4. Once the transfer is confirmed, staff will hand you your item on site | 4. 工作人员确认转账后，将现场发放商品。 |
-| 송금 후 완료 화면을 직원에게 보여주세요 | After transferring, show staff the confirmation screen. | 转账后，请向工作人员出示转账成功页面。 |
 
 상품명(운영 데이터): 야구 유니폼 Baseball Jersey 棒球球衣 · 축구 유니폼 Football Jersey
 足球球衣 · 바람막이 Windbreaker 防风外套 · 반다나 Bandana 头巾 · 슬로건 Cheering Towel
@@ -121,6 +107,7 @@
 | 운영 주체 | Operator | 运营方 |
 | 진행 이벤트 | Events | 活动 |
 | 메뉴 판매 품목 | Menu | 菜单 |
+| 메뉴 가격 | Menu Price | 菜单价格 |
 | 학생회 | Student Council | 学生会 |
 | 찜하기 | Save | 收藏 |
 | 찜하기(찜 완료 후 표기) | Saved | 已收藏 |
@@ -158,31 +145,7 @@ catalog manifest의 공간 번역으로 쓴다. 번호는 원본 표의 순서�
 | 한국어 | 영어 | 중국어 간체 |
 |---|---|---|
 | 외부인 티켓 | Visitor Tickets | 访客票 |
-| 오늘 | Today | 今天 |
-| 화 / 수 / 목 | Tue / Wed / Thu | 周二 / 周三 / 周四 |
-| 외부인 1인 당일 입장권 | Same-Day Visitor Ticket | 访客当日票 |
-| 1인 | 1 Person | 1人 |
-| 환경부담금 포함 | Includes Eco Fee | 含环保费 |
-| 인원 | People | 人数 |
-| 금액 | Total | 金额 |
-| 당일 구매한 티켓은 당일에만 사용할 수 있으며 다른 날짜로 이월 되지 않습니다. 사용하지 않은 티켓은 환불이 어려울 수 있으니 방문 일정을 확인한 뒤 결제해 주세요. | Valid only on the date of purchase. Tickets cannot be used on another date, and unused tickets may not be refundable. Please check your visit date before paying. | 门票仅限购买当天使用，不可转至其他日期。未使用的门票可能无法退款，请确认到访日期后再付款。 |
-| 외부인 티켓 구매하기 | Buy Ticket | 购买门票 |
-| 티켓존 위치 확인하기 | Find Ticket Booth | 查看售票处 |
-| 구매 및 입장 방법 | Purchase & Entry | 购票及入场 |
-| 1. 외부인 티켓존 방문: 외부인 티켓 구매 부스로 이동 | 1. Visit the Ticket Booth | 1. 前往售票处 |
-| 2. 티켓 금액 송금: 버튼을 눌러 지정 계좌와 금액이 입력된 송금 화면으로 이동 | 2. Transfer the Ticket Fee: Tap the button to open the pre-filled transfer screen | 2. 支付票款：点击按钮进入已填写账号和金额的转账页面 |
-| 3. 송금 완료 화면 확인: 완료 화면을 닫지 말고 티켓 부스 스태프에게 제시 | 3. Show Transfer Confirmation: Keep the confirmation screen open and show it to staff | 3. 出示转账成功页面：请勿关闭页面，并向工作人员出示 |
-| 4. 팔찌 수령 후 입장: 확인 후 팔찌를 받고 외부인 존에서 관람 | 4. Get Your Wristband & Enter: After verification, enter the Visitor Zone | 4. 领取手环并入场：确认后进入访客区观演 |
-| 외부인 티켓 결제 | Visitor Ticket Payment | 访客票支付 |
-| 상품명 | Item | 商品 |
-| 외부인 입장 1일권 | 1-Day Visitor Ticket | 访客一日票 |
-| 인원 수 | People | 人数 |
-| 관람 위치 | Viewing Area | 观演区域 |
-| 토스로 바로 송금 | Transfer with Toss | 使用 Toss 转账 |
-| 버튼을 누르면 받는 계좌와 결제 금액이 입력된 토스 송금 화면으로 이동합니다. | Tap to open Toss with the account and amount pre-filled. | 点击后进入已填写收款账号和金额的 Toss 转账页面。 |
-| 송금 완료 후 화면을 부스 관계자에게 보여주세요. | Show the transfer confirmation screen to booth staff. | 转账后，请向摊位工作人员出示转账成功页面。 |
-| 토스가 설치되어 있지 않나요? | Don't have Toss? | 没有安装 Toss？ |
-| 아래 계좌번호를 복사해 사용하는 은행 앱에서 송금하세요 | Copy the account number below and transfer using your banking app. | 复制下方账号，并使用您的银行 App 转账。 |
+| 외부인 티켓 가격: 25,000원 | Visitor ticket price: KRW 25,000 | 访客门票价格：25,000韩元 |
 
 ## 스탬프투어
 
@@ -196,6 +159,7 @@ catalog manifest의 공간 번역으로 쓴다. 번호는 원본 표의 순서�
 | 다른 부스 체험 후 운영자가 보여주는 QR 스캔 | After trying activities at other booths, scan the QR code shown by staff. | 体验其他展位后，扫描工作人员出示的二维码 |
 | 총 4개를 다 모은 뒤 멋사 부스에서 몬스터 수령 | Collect all 4 stamps and claim your Monster at the LIKELION Booth | 集满4枚印章后，前往 LIKELION 展位领取 Monster |
 | 상품은 준비 수량 소진 시 지급이 종료됩니다 | Prizes available while supplies last | 奖品数量有限，领完即止 |
+| 상품 수령 시간: 매일 11:00~17:00 | Prize pickup: daily 11:00–17:00 | 奖品领取时间：每日 11:00–17:00 |
 | 시작하기 | Start | 开始集章 |
 | 스탬프 4개를 모두 모으면 멋사 부스에서 몬스터를 받을 수 있어요 | Collect all 4 stamps to claim your Monster at the LIKELION Booth | 集满4枚印章后，可前往 LIKELION 展位领取 Monster |
 | 오늘 모은 스탬프 | Today's Stamps | 今日印章 |
@@ -245,8 +209,6 @@ catalog manifest의 공간 번역으로 쓴다. 번호는 원본 표의 순서�
 **번역이 없는 문구**
 
 - 일본어 전체.
-- 굿즈: `결제하기` 버튼, 결제 완료 화면의 `결제가 완료되었어요`.
-- 티켓: 송금 완료 화면의 `결제가 완료되었어요`.
 - 공연: 타임테이블 `안내사항`, `DAY 1~3` 표기 여부, `개막식`·`폐막식`, 공연 정보 팝업 본문 항목.
 - 부스: `부스 목록` 절이 비어 있음. `전체` 분류, 운영 시간·위치·문의 라벨.
 - 홈: 공식 채널, 에리카 웰컴 데이 전체 이름, 공지 목록·알림 메시지 화면.
@@ -260,6 +222,4 @@ catalog manifest의 공간 번역으로 쓴다. 번호는 원본 표의 순서�
 - 혼잡도 한국어: 번역 원문 `공간이 충분해요`·`절반 이상 찼어요`·`많이 혼잡해요`는 서버 문장보다
   짧다. 서버 문장은 위 표처럼 번역을 대응시켰다.
 - 중국어 `재학생존` 표기가 `本校学生区`와 `学生区`로 섞여 있다.
-- 티켓 구매 방법 1·3단계의 영어·중국어는 한국어 뒷부분(구매 부스로 이동, 티켓 부스 스태프)을
-  줄였다.
 - 굿즈 `슬로건`은 `Cheering Towel`로 번역됐다. 상품 실물과 맞는지 확인이 필요하다.

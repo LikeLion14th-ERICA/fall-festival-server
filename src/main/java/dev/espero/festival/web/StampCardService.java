@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
@@ -35,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class StampCardService {
 
     static final int DAILY_LIMIT = 4;
+    private static final LocalTime REWARD_OPENS = LocalTime.of(11, 0);
+    private static final LocalTime REWARD_CLOSES = LocalTime.of(17, 0);
     private static final Pattern PARTICIPANT_TOKEN = Pattern.compile("^[A-Za-z0-9_-]{43}$");
     private static final Pattern BOOTH_TOKEN = Pattern.compile("^[A-Za-z0-9_-]{16,128}$");
 
@@ -121,12 +124,17 @@ public class StampCardService {
     public void claimReward(String participantToken) {
         UUID participant = participant(participantToken).orElseThrow(StampCardService::incomplete);
         store.lockParticipant(participant);
-        LocalDate today = today(snapshots.required());
+        CatalogSnapshot snapshot = snapshots.required();
+        LocalDate today = today(snapshot);
         if (store.rewardClaimed(participant, today)) {
             throw conflict("STAMP_REWARD_CLAIMED", "오늘은 이미 상품을 받았어요.");
         }
         if (store.collections(participant, today).size() < DAILY_LIMIT) {
             throw incomplete();
+        }
+        LocalTime now = LocalTime.now(clock.withZone(snapshot.context().timezone()));
+        if (now.isBefore(REWARD_OPENS) || !now.isBefore(REWARD_CLOSES)) {
+            throw conflict("STAMP_REWARD_CLOSED", "상품 수령은 11:00부터 17:00 전까지 가능해요.");
         }
         store.insertReward(participant, today, clock.instant());
     }
