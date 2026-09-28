@@ -82,6 +82,46 @@ revision·locale을 남긴다. `RELEASE_COMMIT`에 배포 commit을 넣으면 �
 같은 volume으로 컨테이너를 교체한 뒤 이전 기록이 남는지도 확인한다. 로그 수집·대시보드·경보
 수신과 DB/JVM 병목 지표는 별도 운영 gate이며 이 파일 설정만으로 완료되었다고 판정하지 않는다.
 
+## 스탬프 동시 처리 보호
+
+스탬프 안내·판 조회는 `stamp-read`, START·QR 적립은 `stamp-write` 클라이언트별 bucket을
+사용한다. 각각 `RATE_LIMIT_STAMP_READ_CAPACITY`/`RATE_LIMIT_STAMP_WRITE_CAPACITY` 기본
+120, `RATE_LIMIT_STAMP_READ_REFILL_PER_SECOND`/`RATE_LIMIT_STAMP_WRITE_REFILL_PER_SECOND`
+기본 4.0이다. 일반 공개 조회와 Hyped 한도는 바꾸지 않는다. 같은 NAT의 사용자는 각
+bucket을 공유한다. 수령 코드 검증은 기존 5회 burst·12초당 1회 정책을 유지한다.
+
+DB를 사용하는 스탬프 카드 GET·START·적립·수령은 백엔드 인스턴스당
+`FESTIVAL_STAMP_MAX_CONCURRENT_REQUESTS`(기본 4)개까지 처리한다. controller에서 service의
+transaction 시작 전에 permit을 얻고 commit/rollback 이후 반환한다. 초과 요청은 대기열이나
+DB transaction을 만들지 않고 `503 SERVICE_UNAVAILABLE`, `retryable: true`, `Retry-After: 1`,
+`Cache-Control: no-store`를 반환한다. 잘못된 수령 코드는 DB permit 없이 기존대로 거절하며,
+메모리 snapshot에서 읽는 `/stamp-guide` 및 다른 기능에는 이 동시 처리 제한을 적용하지 않는다.
+
+`FESTIVAL_STAMP_TRANSACTION_TIMEOUT_SECONDS` 기본 3초는 Spring transaction과 JDBC query의
+남은 실행 시간을 제한한다. `FESTIVAL_STAMP_LOCK_TIMEOUT_MS` 기본 1000ms는 START 중복 충돌과
+참여자 행 잠금 전에 `set_config(..., true)`로 설정하여 해당 transaction에서만 적용한다.
+commit/rollback 이후 pooled connection에 설정을 남기지 않는다. participant `FOR UPDATE`와
+일일 부스·수령 unique 제약은 유지한다. DB·transaction 실패도 stamp 구간에서만 같은 503으로
+변환하고 내부 진단은 요청 ID·예외 종류·코드 위치만 남긴다.
+
+transaction timeout은 **Hikari connection 획득 대기, HTTP 전송, commit의 모든 네트워크 대기**를
+3초 이내로 보장하지 않는다. Hikari 기본 connection-timeout은 별도 override가 없으면 30초다.
+공유 pool의 실제 maximum-pool-size보다 stamp 동시 수를 작게 유지하고 active/pending/획득 시간,
+PostgreSQL lock wait, 요청 p95를 함께 확인한다. 기본 4개는 다른 기능용 headroom을 남기려는
+보호값이며 처리량 보증이나 물리적인 전용 connection 예약은 아니다. 다른 기능이 pool을
+모두 점유하면 허용된 stamp 요청도 연결을 기다릴 수 있다. 다중 backend에서는 permit과
+rate bucket이 각각 별도이므로 인스턴스 수만큼 총 동시 요청이 늘어나는 점을 재평가한다.
+
+카드 응답은 해당 참여자·날짜의 최대 4개 적립에만 게시 revision 부스 이름을 LEFT JOIN한다.
+적립은 잠금 아래에서 읽은 목록과 미수령 상태를 응답에 재사용하며 무기한 cache를 두지 않는다.
+정상 카드 조회는 SQL 5→4회, 정상 적립은 10→8회(잠금 timeout 설정 1회 포함)다. 삭제된
+게시 부스의 이름은 기존대로 null이며 적립 시각·부스 ID 순서를 유지한다. DB migration은 없다.
+
+배포는 백엔드 코드와 위 환경변수 기본값 확인 후 재배포한다. 승인된 staging에서 초과 시 503과
+다른 기능의 p95·오류율, 마지막 요청 이후 permit·pool pending 회복, 일일 4칸·수령 1회 유지와
+동시 중복 요청을 확인한다. 응답이 유실된 쓰기는 현재 판을 다시 읽어 반영 여부를 확인한다.
+로컬 PostgreSQL 회귀는 운영 부하·실제 기기의 체감 개선이나 수령 NAT 용량을 보증하지 않는다.
+
 ## 재학생존 운영 시간 설정
 
 운영 시간 목록·상세 GET과 날짜별 PUT은 관리자 전용이며 모든 응답에 `Cache-Control: no-store`를

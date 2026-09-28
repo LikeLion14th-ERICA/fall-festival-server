@@ -12344,13 +12344,31 @@
             }
           },
           "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "description": "스탬프 DB 동시 처리 한도 또는 DB/transaction 실패는 SERVICE_UNAVAILABLE(retryable=true), Retry-After: 1, Cache-Control: no-store. 안내·수령 코드 미설정 오류는 기존 오류 코드를 유지한다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "enum": [
+                    1
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE일 때 재시도 전 최소 대기 초. 응답 유실 가능성이 있는 쓰기는 현재 스탬프판을 먼저 확인한다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE 응답은 저장하지 않는다."
               }
             },
             "content": {
@@ -12732,13 +12750,31 @@
             }
           },
           "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "description": "스탬프 DB 동시 처리 한도 또는 DB/transaction 실패는 SERVICE_UNAVAILABLE(retryable=true), Retry-After: 1, Cache-Control: no-store. 안내·수령 코드 미설정 오류는 기존 오류 코드를 유지한다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "enum": [
+                    1
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE일 때 재시도 전 최소 대기 초. 응답 유실 가능성이 있는 쓰기는 현재 스탬프판을 먼저 확인한다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE 응답은 저장하지 않는다."
               }
             },
             "content": {
@@ -13255,13 +13291,31 @@
             }
           },
           "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "description": "스탬프 DB 동시 처리 한도 또는 DB/transaction 실패는 SERVICE_UNAVAILABLE(retryable=true), Retry-After: 1, Cache-Control: no-store. 안내·수령 코드 미설정 오류는 기존 오류 코드를 유지한다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "enum": [
+                    1
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE일 때 재시도 전 최소 대기 초. 응답 유실 가능성이 있는 쓰기는 현재 스탬프판을 먼저 확인한다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE 응답은 저장하지 않는다."
               }
             },
             "content": {
@@ -13765,13 +13819,31 @@
             }
           },
           "503": {
-            "description": "일시적으로 정보를 불러올 수 없습니다.",
+            "description": "스탬프 DB 동시 처리 한도 또는 DB/transaction 실패는 SERVICE_UNAVAILABLE(retryable=true), Retry-After: 1, Cache-Control: no-store. 안내·수령 코드 미설정 오류는 기존 오류 코드를 유지한다.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
                   "type": "string"
                 },
                 "description": "응답 meta.requestId와 동일"
+              },
+              "Retry-After": {
+                "schema": {
+                  "type": "integer",
+                  "enum": [
+                    1
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE일 때 재시도 전 최소 대기 초. 응답 유실 가능성이 있는 쓰기는 현재 스탬프판을 먼저 확인한다."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "no-store"
+                  ]
+                },
+                "description": "SERVICE_UNAVAILABLE 응답은 저장하지 않는다."
               }
             },
             "content": {

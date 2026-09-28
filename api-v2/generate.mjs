@@ -55,6 +55,7 @@ for(const op of operations){
     const requestIdHeader={'X-Request-Id':{schema:{type:'string'},description:op.binaryResponse||usesConditionalMeta?'요청 추적 ID':'응답 meta.requestId와 동일'}};
     const responseOverride=op.responseOverrides?.[status];
     const response={description:status<300?'성공':responseOverride?.description??genericErrors[status]?.[1]??'조건부 요청이 필요합니다.',headers:{...requestIdHeader,...(status===429?{'Retry-After':{schema:{type:'integer',minimum:0},description:'재시도 전 대기 초'}}:{}),...locationHeaders,...conditionalHeaders,...cacheControlHeaders,...binaryHeaders}};
+    Object.assign(response.headers,responseOverride?.headers??{});
     if(op.binaryResponse&&status===200)response.content={'image/webp':{schema:{type:'string',format:'binary'}}};
     else if(!noBodyStatuses.has(status))response.content={'application/json':{schema:{$ref:`#/components/schemas/${status<300?responseName:'Error'}`},examples:{}}};
     return [status,response];

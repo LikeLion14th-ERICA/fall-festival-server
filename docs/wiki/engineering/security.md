@@ -76,11 +76,19 @@ SDK의 오류 코드만 로그에 남긴다.
 | admin | `/api/v2/admin/**` | 60회 즉시, 초당 1회 회복 |
 | admin-login | `POST /admin/sessions`, `/admin/sessions/refresh` | 5회 즉시, 12초마다 1회 회복 |
 | stamp-receipt | `POST /stamp-receipt-verifications` | 5회 즉시, 12초마다 1회 회복 |
+| stamp-read | `GET/HEAD /stamp-guide`, `/stamp-card` | 120회 즉시, 초당 4회 회복. 일반 공개 조회와 분리 |
+| stamp-write | `POST /stamp-participants`, `/stamp-collections` | 120회 즉시, 초당 4회 회복. 스탬프 읽기·일반 공개 조회와 분리 |
 | artist-hyped | `POST /artists/{artistId}/hyped` | 120 단위 즉시, 초당 4 단위 회복. 새 묶음은 delta만큼, 기존 {}·중복 확인은 요청당 1 단위. 공개 조회 bucket과 분리 |
 | artist-hyped-read | `GET /artist-hyped`, `HEAD /artist-hyped` | 120회 즉시, 초당 4회 회복. 일반 공개 조회·Hyped 쓰기 bucket과 분리 |
 
 Hyped 조회가 한도에 도달해도 같은 클라이언트의 굿즈·공지 조회 한도는 소모되지 않는다.
 반대로 일반 공개 조회나 Hyped 쓰기의 한도 소진도 Hyped 조회 한도에 영향을 주지 않는다.
+
+스탬프 조회·START·QR 적립도 굿즈·공지·타임테이블의 일반 공개 한도를 소모하지 않는다.
+수령 코드 검증은 별도 `stamp-receipt` 정책을 유지한다. 같은 Wi-Fi/NAT의 사용자는 이
+6자리 코드 추측 방어 한도를 공유하므로 수령 시 429가 발생할 수 있다. 참여 쿠키를 새로
+발급받아 추측 한도를 우회하게 만들거나 운영 throughput만을 위해 이 제한을 해제하지 않는다.
+현장 수령 용량을 늘리는 별도 정책은 인증된 직원 채널·전역 추측 상한 등 보안 설계 후 결정한다.
 
 묶음 POST는 filter가 기본 1 단위를 소비하고, 새 묶음임을 transaction 안에서 확인한 뒤
 같은 정책·클라이언트 bucket에서 나머지 `delta - 1`을 원자적으로 소비한다. 추가 한도가

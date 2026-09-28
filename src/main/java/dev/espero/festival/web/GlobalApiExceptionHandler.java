@@ -77,6 +77,21 @@ public class GlobalApiExceptionHandler {
             .body(errorBody(exception.code(), exception.getMessage(), true, request));
     }
 
+    @ExceptionHandler(StampServiceUnavailableException.class)
+    ResponseEntity<ApiErrorResponse> handleStampUnavailable(
+        StampServiceUnavailableException exception, HttpServletRequest request
+    ) {
+        if (exception.getCause() != null) {
+            RequestDiagnostics.failure(request, exception);
+            log.error("Stamp infrastructure failure: request_id={} diagnostic={}",
+                ApiMetaSupport.resolveRequestId(request), RequestDiagnostics.describe(exception));
+        }
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header(HttpHeaders.RETRY_AFTER, "1")
+            .header(HttpHeaders.CACHE_CONTROL, "no-store")
+            .body(errorBody("SERVICE_UNAVAILABLE", exception.getMessage(), true, request));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiErrorResponse> handleValidation(
         MethodArgumentNotValidException exception,

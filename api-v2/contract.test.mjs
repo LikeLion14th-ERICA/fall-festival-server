@@ -160,6 +160,16 @@ test('Hyped batch replay keeps its original rehearsal namespace',async()=>{
   assert.equal(summary.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,1);
 });
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
+test('Stamp DB overload uses the existing retryable error envelope and a bounded retry hint',()=>{
+  for(const [path,method]of [['stamp-card','get'],['stamp-participants','post'],['stamp-collections','post'],['stamp-receipt-verifications','post']]){
+    const response=spec.paths[`/api/v2/${path}`][method].responses['503'];
+    assert.equal(response.content['application/json'].schema.$ref,'#/components/schemas/Error');
+    assert.deepEqual(response.headers['Retry-After'].schema.enum,[1]);
+    assert.deepEqual(response.headers['Cache-Control'].schema.enum,['no-store']);
+    assert.match(response.description,/SERVICE_UNAVAILABLE/);
+  }
+  assert.equal(spec.paths['/api/v2/stamp-guide'].get.responses['503'].headers['Retry-After'],undefined);
+});
 test('Goods image upload error contract matches its Spring runtime behavior',()=>{
   const upload=operation('postAdminGoodsImage');
   const response=(status,scenario)=>upload.responses[status];

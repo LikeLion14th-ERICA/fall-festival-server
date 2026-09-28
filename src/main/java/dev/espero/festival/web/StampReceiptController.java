@@ -30,17 +30,20 @@ public class StampReceiptController {
     private final ApiMetaSupport metaSupport;
     private final StampReceiptVerifier verifier;
     private final StampCardService cards;
+    private final StampRequestAdmission admission;
 
     public StampReceiptController(
         CatalogSnapshotProvider snapshots,
         ApiMetaSupport metaSupport,
         StampReceiptVerifier verifier,
-        StampCardService cards
+        StampCardService cards,
+        StampRequestAdmission admission
     ) {
         this.snapshots = snapshots;
         this.metaSupport = metaSupport;
         this.verifier = verifier;
         this.cards = cards;
+        this.admission = admission;
     }
 
     @PostMapping(path = "/stamp-receipt-verifications", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -69,7 +72,10 @@ public class StampReceiptController {
                 false
             );
         }
-        cards.claimReward(StampCardController.participantToken(request));
+        admission.execute(() -> {
+            cards.claimReward(StampCardController.participantToken(request));
+            return null;
+        });
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .body(new ApiResponse<>(new Verification(true), metaSupport.meta(request, snapshot.context(), locale)));

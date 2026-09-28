@@ -38,17 +38,20 @@ public class StampCardController {
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
     private final StampCardService cards;
+    private final StampRequestAdmission admission;
 
-    public StampCardController(CatalogSnapshotProvider snapshots, ApiMetaSupport metaSupport, StampCardService cards) {
+    public StampCardController(CatalogSnapshotProvider snapshots, ApiMetaSupport metaSupport, StampCardService cards,
+        StampRequestAdmission admission) {
         this.snapshots = snapshots;
         this.metaSupport = metaSupport;
         this.cards = cards;
+        this.admission = admission;
     }
 
     @PostMapping("/stamp-participants")
     public ResponseEntity<ApiResponse<StampCardResponse>> start(HttpServletRequest request) {
         String locale = validate(request);
-        StampCardService.Started started = cards.start(participantToken(request));
+        StampCardService.Started started = admission.execute(() -> cards.start(participantToken(request)));
         ResponseEntity.BodyBuilder response = ResponseEntity
             .status(started.startedNow() ? HttpStatus.CREATED : HttpStatus.OK)
             .cacheControl(CacheControl.noStore());
@@ -70,7 +73,7 @@ public class StampCardController {
         String locale = validate(request);
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
-            .body(new ApiResponse<>(cards.current(participantToken(request)), meta(request, locale)));
+            .body(new ApiResponse<>(admission.execute(() -> cards.current(participantToken(request))), meta(request, locale)));
     }
 
     @PostMapping(path = "/stamp-collections", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -79,7 +82,8 @@ public class StampCardController {
         @RequestBody CollectInput input
     ) {
         String locale = validate(request);
-        StampCardResponse card = cards.collect(participantToken(request), input == null ? null : input.token());
+        StampCardResponse card = admission.execute(
+            () -> cards.collect(participantToken(request), input == null ? null : input.token()));
         return ResponseEntity.ok()
             .cacheControl(CacheControl.noStore())
             .body(new ApiResponse<>(card, meta(request, locale)));

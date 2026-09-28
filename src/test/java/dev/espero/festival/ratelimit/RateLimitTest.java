@@ -95,6 +95,13 @@ class RateLimitTest {
     @Test
     void mapsRoutesToTheirPolicies() {
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/stamp-receipt-verifications")).isEqualTo("stamp-receipt");
+        for (String path : new String[] {"/api/v2/stamp-card", "/api/v2/stamp-guide"}) {
+            assertThat(RateLimitFilter.policyName("GET", path)).isEqualTo("stamp-read");
+            assertThat(RateLimitFilter.policyName("HEAD", path)).isEqualTo("stamp-read");
+        }
+        for (String path : new String[] {"/api/v2/stamp-participants", "/api/v2/stamp-collections"}) {
+            assertThat(RateLimitFilter.policyName("POST", path)).isEqualTo("stamp-write");
+        }
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/admin/sessions")).isEqualTo("admin-login");
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/admin/sessions/refresh")).isEqualTo("admin-login");
         assertThat(RateLimitFilter.policyName("PUT", "/api/v2/admin/crowding")).isEqualTo("admin");
@@ -148,7 +155,7 @@ class RateLimitTest {
 
     private static RateLimitFilter filter(int hops) {
         return new RateLimitFilter(
-            new RateLimitProperties(true, hops, null, null, null, null, null, null),
+            new RateLimitProperties(true, hops, null, null, null, null, null, null, null, null),
             new RequestRateLimiter(Clock.systemUTC()), null
         );
     }
@@ -160,6 +167,10 @@ class RateLimitTest {
         "festival.rate-limit.public-read.refill-per-second=0.001",
         "festival.rate-limit.artist-hyped.capacity=2",
         "festival.rate-limit.artist-hyped.refill-per-second=0.001",
+        "festival.rate-limit.stamp-read.capacity=2",
+        "festival.rate-limit.stamp-read.refill-per-second=0.001",
+        "festival.rate-limit.stamp-write.capacity=2",
+        "festival.rate-limit.stamp-write.refill-per-second=0.001",
         "festival.rate-limit.stamp-receipt.capacity=1",
         "festival.rate-limit.stamp-receipt.refill-per-second=0.001"
     })
@@ -167,6 +178,26 @@ class RateLimitTest {
 
         @Autowired
         private WebApplicationContext context;
+
+        @Test
+        void stampBucketsDoNotConsumeEachOtherOrPublicAndReceiptBudgets() throws Exception {
+            MockMvc mvc = MockMvcBuilders.webAppContextSetup(context)
+                .addFilters(context.getBean("rateLimitFilter", org.springframework.boot.web.servlet.FilterRegistrationBean.class)
+                    .getFilter()).apply(springSecurity()).build();
+            String client = "198.51.100.37";
+            mvc.perform(get("/api/v2/stamp-card").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(get("/api/v2/stamp-guide").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(get("/api/v2/stamp-card").with(remote(client))).andExpect(status().isTooManyRequests());
+            mvc.perform(post("/api/v2/stamp-participants").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(post("/api/v2/stamp-collections").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(post("/api/v2/stamp-participants").with(remote(client))).andExpect(status().isTooManyRequests());
+            mvc.perform(post("/api/v2/stamp-receipt-verifications").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(post("/api/v2/stamp-receipt-verifications").with(remote(client)))
+                .andExpect(status().isTooManyRequests());
+            mvc.perform(get("/api/v2/goods").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(get("/api/v2/notices").with(remote(client))).andExpect(status().isNotFound());
+            mvc.perform(get("/api/v2/timetable").with(remote(client))).andExpect(status().isTooManyRequests());
+        }
 
         @Test
         void answersTooManyRequestsWithTheErrorEnvelopeAndRetryAfter() throws Exception {
