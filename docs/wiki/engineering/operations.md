@@ -141,6 +141,12 @@ SELECT·INSERT·UPDATE를 준다. catalog export/publish role은 새 테이블�
 누적 수는 같은 cache에도 반영하되 TTL을 연장하지 않는다. 만료 후 DB 조회 실패는 기존대로
 503을 반환하며 오래된 cache로 대체하지 않는다. 외부 DB 변경은 다음 만료 후 조회에 반영된다.
 
+Hyped GET·HEAD는 `artist-hyped-read` 전용 bucket을 사용한다.
+`RATE_LIMIT_ARTIST_HYPED_READ_CAPACITY`(기본 `120`)와
+`RATE_LIMIT_ARTIST_HYPED_READ_REFILL_PER_SECOND`(기본 `4.0`)로 조정하며, 두 값이 없으면
+기본값을 적용한다. 폴링·클릭 후 재조회가 굿즈·공지 등 일반 공개 조회 한도를 소모하지 않는다.
+Hyped 읽기·쓰기·일반 공개 조회는 같은 클라이언트에서도 각각 독립된 한도를 사용한다.
+
 공개 쓰기의 보호 속도 제한은 `RATE_LIMIT_ARTIST_HYPED_CAPACITY`(기본 `120`)와
 `RATE_LIMIT_ARTIST_HYPED_REFILL_PER_SECOND`(기본 `4.0`)로 조정한다. 이는 개인별 참여 횟수
 한도가 아니라 서버 요청 보호 설정이다. 집계는 축제 회차·아티스트별 누적값이며 카탈로그

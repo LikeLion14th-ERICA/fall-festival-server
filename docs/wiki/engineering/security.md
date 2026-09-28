@@ -77,6 +77,10 @@ SDK의 오류 코드만 로그에 남긴다.
 | admin-login | `POST /admin/sessions`, `/admin/sessions/refresh` | 5회 즉시, 12초마다 1회 회복 |
 | stamp-receipt | `POST /stamp-receipt-verifications` | 5회 즉시, 12초마다 1회 회복 |
 | artist-hyped | `POST /artists/{artistId}/hyped` | 120회 즉시, 초당 4회 회복. 공개 조회 bucket과 분리 |
+| artist-hyped-read | `GET /artist-hyped`, `HEAD /artist-hyped` | 120회 즉시, 초당 4회 회복. 일반 공개 조회·Hyped 쓰기 bucket과 분리 |
+
+Hyped 조회가 한도에 도달해도 같은 클라이언트의 굿즈·공지 조회 한도는 소모되지 않는다.
+반대로 일반 공개 조회나 Hyped 쓰기의 한도 소진도 Hyped 조회 한도에 영향을 주지 않는다.
 
 클라이언트는 `RATE_LIMIT_TRUSTED_PROXY_HOPS`로 정한다. 브라우저 요청은 Next.js proxy와 호스팅
 load balancer를 거치므로 소켓 주소는 proxy다. 0으로 두면 모든 사용자가 한 bucket을 쓰게 되므로
