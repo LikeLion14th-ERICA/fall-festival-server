@@ -6,14 +6,14 @@
 [v5](../docs/wiki/product/admin/README.md)로 통일했습니다. 특정 과거 commit이 아니라 현재
 branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 비교용 스냅샷으로 보존하며 현재
 요구는 [화면 데이터 표](SCREEN-DATA.md)와 [화면 상태](SCREEN-STATES.md)를 사용합니다.
-실제 행사 날짜·가격·계좌·사진은 운영 자료로 확정해야 하며 예제는 가상 데이터입니다.
+실제 행사 날짜·가격·사진은 운영 자료로 확정해야 하며 예제는 가상 데이터입니다.
 
 | 결과물 | 용도 |
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
-| [ENDPOINTS.md](ENDPOINTS.md) | 52개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 408개 응답 원문 |
-| [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 183개·제외 6개 필드 → API 또는 프런트 상태 추적표 |
+| [ENDPOINTS.md](ENDPOINTS.md) | 51개 요청과 지원 시나리오 빠른 조회 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 399개 응답 원문 |
+| [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 165개·제외 24개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [CROWDING-OPERATING-HOURS-FRONTEND.md](CROWDING-OPERATING-HOURS-FRONTEND.md) | 관리자 재학생존 운영시간 설정만 모은 프런트 전달 문서 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |
@@ -28,13 +28,13 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 예제는 source module에서 생성되므로 생성 JSON만 직접 수정하지 않습니다.
 
 릴리스 coverage metadata도 `openapi.json`에서 자동 inventory합니다. 원천 매핑은
-`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 52개 operation이
+`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 51개 operation이
 정확히 한 번 분류되는지, 각 live operation의 provider test와
 HTTP-01~32·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
 live provider와 52개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
 정렬된 Maven `-Dtest` CSV로 출력합니다. 이 검사는 제품 route를 활성화하지 않습니다.
 
-현재 branch는 OpenAPI의 52개 operation을 live provider 검증 대상으로 분류합니다.
+현재 branch는 OpenAPI의 51개 operation을 live provider 검증 대상으로 분류합니다.
 공개 공연 조회와 홈 공통 설정뿐 아니라 아티스트 Hyped 조회·참여도 Spring Boot에
 구현되어 있습니다. 경로별 구현·검증 근거는
 [릴리스 operation coverage](release-operation-coverage.json)와 해당 provider test를
