@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "api-v2/openapi.json",
-  "operationCount": 52,
+  "operationCount": 51,
   "operations": [
     {
       "operationId": "getConfig",
@@ -150,26 +150,6 @@
       "scenarioIds": [
         "HTTP-18",
         "HTTP-26"
-      ],
-      "unresolvedReason": null
-    },
-    {
-      "operationId": "getPaymentGuide",
-      "path": "/api/v2/goods/{goodsId}/payment-guide",
-      "method": "GET",
-      "status": "live",
-      "testMapping": {
-        "kind": "provider",
-        "tests": [
-          {
-            "file": "src/test/java/dev/espero/festival/web/GoodsFlowIntegrationTest.java",
-            "test": "returnsPaymentGuideAccountOnlyWhenConfigured"
-          }
-        ]
-      },
-      "scenarioIds": [
-        "HTTP-18",
-        "HTTP-29"
       ],
       "unresolvedReason": null
     },
@@ -458,11 +438,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java",
-            "test": "reflectsEachAccountChangeOnTheNextRequestWithANewEtag"
-          },
-          {
-            "file": "src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java",
-            "test": "hidesTheAccountAndChangesTheEtagAtTheDailyTransferClose"
+            "test": "servesOnlyPriceAndIgnoresLegacyTicketAccountAndTransferWindow"
           }
         ]
       },
@@ -1394,7 +1370,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/e2e/OperationalAccountPropagationE2eTest.java",
-            "test": "cliSetAndClearPropagateToHttpWithConditionalEtagSemantics"
+            "test": "ticketAccountCliChangesNeverEnterThePublicAmountResponse"
           }
         ]
       },
@@ -1459,7 +1435,6 @@
         "getGoodsAvailability",
         "getGood",
         "getGoodAvailability",
-        "getPaymentGuide",
         "getLineup",
         "getArtist",
         "getTimetable",
@@ -1543,7 +1518,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/e2e/OperationalAccountPropagationE2eTest.java",
-            "test": "transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds"
+            "test": "transferWindowBoundariesDoNotChangeTheAmountResponse"
           }
         ]
       },
@@ -1670,13 +1645,11 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/e2e/OperationalBoundariesHttpE2eTest.java",
-            "test": "goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects"
+            "test": "legacyGoodsAccountChangesNeverExposePaymentDetails"
           }
         ]
       },
-      "operationIds": [
-        "getPaymentGuide"
-      ]
+      "operationIds": []
     },
     {
       "id": "HTTP-30",

@@ -47,9 +47,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Cross-process release check for the revision-independent TICKET account.
- * The web process serves a published ticket fixture while each account write
- * goes through the real AccountSettingsCliApplication child JVM.
+ * Cross-process check that legacy TICKET account changes never enter the
+ * public amount-only response. Account writes use the real CLI child JVM.
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -127,12 +126,11 @@ class OperationalAccountPropagationE2eTest {
     }
 
     @Test
-    void cliSetAndClearPropagateToHttpWithConditionalEtagSemantics() throws Exception {
+    void ticketAccountCliChangesNeverEnterThePublicAmountResponse() throws Exception {
         HttpResponse<String> initial = ticketGuide();
         assertThat(initial.statusCode()).isEqualTo(200);
-        assertThat(jsonString(initial.body(), "$.data.status")).isEqualTo("UNCONFIGURED");
+        assertThat(jsonNumber(initial.body(), "$.data.unitPrice.amount").intValue()).isEqualTo(5000);
         assertThat(nullableJsonValue(initial.body(), "$.data.account")).isNull();
-        assertThat(nullableJsonValue(initial.body(), "$.data.paymentSettingsVersion")).isNull();
         String initialEtag = strongEtag(initial);
 
         ProcessResult set = configureTicketAccount("OPS-E2E-PROP-1");
@@ -142,16 +140,12 @@ class OperationalAccountPropagationE2eTest {
 
         HttpResponse<String> configured = ticketGuide();
         assertThat(configured.statusCode()).isEqualTo(200);
-        assertThat(jsonString(configured.body(), "$.data.status")).isEqualTo("TRANSFER_OPEN");
-        assertThat(jsonString(configured.body(), "$.data.account.accountNumber")).isEqualTo(ACCOUNT_NUMBER);
-        assertThat(jsonNumber(configured.body(), "$.data.paymentSettingsVersion").longValue()).isEqualTo(1L);
+        assertThat(jsonNumber(configured.body(), "$.data.unitPrice.amount").intValue()).isEqualTo(5000);
+        assertThat(configured.body()).doesNotContain(ACCOUNT_NUMBER, "account", "transferLink");
         String configuredEtag = strongEtag(configured);
-        assertThat(configuredEtag).isNotEqualTo(initialEtag);
+        assertThat(configuredEtag).isEqualTo(initialEtag);
 
-        HttpResponse<String> stale = ticketGuide(initialEtag);
-        assertThat(stale.statusCode()).isEqualTo(200);
-        assertThat(jsonString(stale.body(), "$.data.account.accountNumber")).isEqualTo(ACCOUNT_NUMBER);
-        HttpResponse<String> matching = ticketGuide(configuredEtag);
+        HttpResponse<String> matching = ticketGuide(initialEtag);
         assertThat(matching.statusCode()).isEqualTo(304);
         assertThat(matching.body()).isEmpty();
         assertThat(requiredHeader(matching, "ETag")).isEqualTo(configuredEtag);
@@ -159,9 +153,9 @@ class OperationalAccountPropagationE2eTest {
 
         clock.set(OffsetDateTime.parse("2026-09-29T18:00:00+09:00").toInstant());
         HttpResponse<String> closed = ticketGuide();
-        assertThat(jsonString(closed.body(), "$.data.status")).isEqualTo("DAILY_CLOSED");
+        assertThat(jsonNumber(closed.body(), "$.data.unitPrice.amount").intValue()).isEqualTo(5000);
         assertThat(nullableJsonValue(closed.body(), "$.data.account")).isNull();
-        assertThat(strongEtag(closed)).isNotEqualTo(configuredEtag);
+        assertThat(strongEtag(closed)).isEqualTo(configuredEtag);
         clock.set(IN_WINDOW.toInstant());
 
         ProcessResult clear = accountCli(
@@ -174,44 +168,38 @@ class OperationalAccountPropagationE2eTest {
 
         HttpResponse<String> cleared = ticketGuide();
         assertThat(cleared.statusCode()).isEqualTo(200);
-        assertThat(jsonString(cleared.body(), "$.data.status")).isEqualTo("UNCONFIGURED");
+        assertThat(jsonNumber(cleared.body(), "$.data.unitPrice.amount").intValue()).isEqualTo(5000);
         assertThat(nullableJsonValue(cleared.body(), "$.data.account")).isNull();
-        assertThat(jsonNumber(cleared.body(), "$.data.paymentSettingsVersion").longValue()).isEqualTo(2L);
         String clearedEtag = strongEtag(cleared);
-        assertThat(clearedEtag).isNotEqualTo(configuredEtag);
-        assertThat(ticketGuide(configuredEtag).statusCode()).isEqualTo(200);
+        assertThat(clearedEtag).isEqualTo(configuredEtag);
         assertThat(ticketGuide(clearedEtag).statusCode()).isEqualTo(304);
     }
 
     @Test
-    void transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds() throws Exception {
+    void transferWindowBoundariesDoNotChangeTheAmountResponse() throws Exception {
         assertSuccess(configureTicketAccount("OPS-E2E-TICKET-BOUNDARY"));
 
         clock.set(OffsetDateTime.parse("2026-09-29T09:59:59+09:00").toInstant());
         HttpResponse<String> beforeOpen = ticketGuide();
-        assertTicketExposure(beforeOpen, "DAILY_CLOSED", false);
         String beforeOpenEtag = strongEtag(beforeOpen);
 
         clock.set(OffsetDateTime.parse("2026-09-29T10:00:00+09:00").toInstant());
         HttpResponse<String> opened = ticketGuide();
-        assertTicketExposure(opened, "TRANSFER_OPEN", true);
         String openEtag = strongEtag(opened);
-        assertThat(openEtag).isNotEqualTo(beforeOpenEtag);
-        assertThat(ticketGuide(beforeOpenEtag).statusCode()).isEqualTo(200);
+        assertThat(openEtag).isEqualTo(beforeOpenEtag);
         assertThat(ticketGuide(openEtag).statusCode()).isEqualTo(304);
 
         clock.set(OffsetDateTime.parse("2026-09-29T17:59:59+09:00").toInstant());
         HttpResponse<String> beforeClose = ticketGuide();
-        assertTicketExposure(beforeClose, "TRANSFER_OPEN", true);
         assertThat(strongEtag(beforeClose)).isEqualTo(openEtag);
 
         clock.set(OffsetDateTime.parse("2026-09-29T18:00:00+09:00").toInstant());
         HttpResponse<String> closed = ticketGuide();
-        assertTicketExposure(closed, "DAILY_CLOSED", false);
         String closedEtag = strongEtag(closed);
-        assertThat(closedEtag).isNotEqualTo(openEtag);
-        assertThat(ticketGuide(openEtag).statusCode()).isEqualTo(200);
+        assertThat(closedEtag).isEqualTo(openEtag);
         assertThat(ticketGuide(closedEtag).statusCode()).isEqualTo(304);
+        assertThat(jsonNumber(closed.body(), "$.data.unitPrice.amount").intValue()).isEqualTo(5000);
+        assertThat(closed.body()).doesNotContain(ACCOUNT_NUMBER, "account", "transferLink");
     }
 
     private ProcessResult configureTicketAccount(String evidenceId) throws Exception {
@@ -224,17 +212,6 @@ class OperationalAccountPropagationE2eTest {
             "--input-file=" + input, "--last-four=9876", "--confirm",
             "--actor=account-propagation-e2e", "--reason=release-verification", "--evidence-id=" + evidenceId
         );
-    }
-
-    private void assertTicketExposure(HttpResponse<String> response, String status, boolean exposesAccount) {
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(jsonString(response.body(), "$.data.status")).isEqualTo(status);
-        assertThat(jsonNumber(response.body(), "$.data.paymentSettingsVersion").longValue()).isEqualTo(1L);
-        if (exposesAccount) {
-            assertThat(jsonString(response.body(), "$.data.account.accountNumber")).isEqualTo(ACCOUNT_NUMBER);
-        } else {
-            assertThat(nullableJsonValue(response.body(), "$.data.account")).isNull();
-        }
     }
 
     private void publishTicketFixture() throws Exception {

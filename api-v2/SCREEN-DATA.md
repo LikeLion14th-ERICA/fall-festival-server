@@ -1,6 +1,6 @@
 # 화면 데이터 → API 필드
 
-Product Context v5 기준 27개 화면의 데이터 183개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
+Product Context v5 기준 27개 화면의 데이터 165개를 추적합니다. 제외 항목은 이력으로 표시합니다. 필드 경로는 응답 data 기준이며 [화면 상태·조회 규칙](SCREEN-STATES.md)을 함께 적용합니다. 이전 Google Sheets 스냅샷은 현재 계약의 기준이 아닙니다.
 
 | 데이터 ID | 항목 | 처리 | 계약/프런트 책임 | 위키 근거 |
 |---|---|---|---|---|
@@ -45,7 +45,7 @@ Product Context v5 기준 27개 화면의 데이터 183개를 추적합니다. �
 | MAP-POPUP-D06 | 상세 대상 항목 | API | Place.spaceId | [위키](../docs/wiki/product/map.md) |
 | MAP-OVERVIEW-D07 | 장소명 또는 번호 | API | Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의) | [위키](../docs/wiki/product/map.md) |
 | MAP-AREA-D07 | 장소명 또는 번호 | API | Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의) | [위키](../docs/wiki/product/map.md) |
-| MAP-OVERVIEW-D08 | 외부인 티켓존 위치 | API | TicketGuide.mapTarget | [위키](../docs/wiki/product/map.md) |
+| MAP-OVERVIEW-D08 | 외부인 티켓존 위치 | 제외 | 제외: 외부인 티켓 금액 안내에서 지도 연결 제거 | [위키](../docs/wiki/product/map.md) |
 | HOME-D01 | 혼잡도 단계 | API | Crowding.savedLevel | [위키](../docs/wiki/product/home.md) |
 | HOME-D02 | 운영 상태 | API | Crowding.status | [위키](../docs/wiki/product/home.md) |
 | HOME-D03 | 마지막 수정 시각 | API | Crowding.updatedAt + Crowding.timeBasis | [위키](../docs/wiki/product/home.md) |
@@ -81,13 +81,13 @@ Product Context v5 기준 27개 화면의 데이터 183개를 추적합니다. �
 | GOODS-DETAIL-D04 | 색상 | API | Goods.colors | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D05 | 사이즈 | API | Goods.sizes | [위키](../docs/wiki/product/goods.md) |
 | GOODS-DETAIL-D06 | 색상×사이즈별 구매 가능 여부 | API | Availability.combinations | [위키](../docs/wiki/product/goods.md) |
-| GOODS-DETAIL-D07 | 현장 확인·수령 안내 | 프런트 | 프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내 | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D01 | 상품명 | API | PaymentGuide.name | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D02 | 상품 가격 | API | PaymentGuide.price | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D03 | 은행명 | API | BankAccount.bankName | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D04 | 계좌번호 | API | BankAccount.accountNumber | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D05 | 예금주 | API | BankAccount.holder | [위키](../docs/wiki/product/goods.md) |
-| GOODS-PAYMENT-D06 | 현장 송금·수령 안내 | API | PaymentGuide.instructions | [위키](../docs/wiki/product/goods.md) |
+| GOODS-DETAIL-D07 | 현장 확인·수령 안내 | 제외 | 제외: 사용자 결정에 따라 송금 안내 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D01 | 상품명 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D02 | 상품 가격 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D03 | 은행명 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D04 | 계좌번호 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D05 | 예금주 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
+| GOODS-PAYMENT-D06 | 현장 송금·수령 안내 | 제외 | 제외: 사용자 결정에 따라 굿즈 송금 화면 제거 | [위키](../docs/wiki/product/goods.md) |
 | SHOW-LINEUP-D01 | 대표 사진 | API | Lineup.items[].image | [위키](../docs/wiki/product/lineup.md) |
 | SHOW-LINEUP-D02 | 이름 | API | Lineup.items[].name | [위키](../docs/wiki/product/lineup.md) |
 | SHOW-LINEUP-D03 | 공연 날짜 | API | Lineup.date | [위키](../docs/wiki/product/lineup.md) |
@@ -111,17 +111,17 @@ Product Context v5 기준 27개 화면의 데이터 183개를 추적합니다. �
 | SHOW-POPUP-D02 | 출연진 | API | Performance.artists | [위키](../docs/wiki/product/timetable.md) |
 | SHOW-POPUP-D03 | 시작·종료 시간 | API | Performance.startsAt + Performance.endsAt | [위키](../docs/wiki/product/timetable.md) |
 | SHOW-POPUP-D04 | 간단한 안내 | API | Performance.description | [위키](../docs/wiki/product/timetable.md) |
-| TICKET-D01 | 이용 날짜 | API | TicketGuide.date (서버 KST 기준을 사용) | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D01 | 이용 날짜 | 제외 | 제외: 날짜 선택·당일권 상태 없음 | [위키](../docs/wiki/product/ticket.md) |
 | TICKET-D02 | 1인 금액 | API | TicketGuide.unitPrice | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D03 | 선택 인원 | 브라우저 | 브라우저: 기본·최소 1명, 토스 복귀 시 1명 | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D04 | 총액 | 프런트 | 프런트: 인원 × Money.amount, 안전 정수 범위 확인 | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D05 | 송금 제공 일정 | API | TicketGuide.transferOpensAt + TicketGuide.transferClosesAt | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D06 | 현장 수령 시간 | API | TicketGuide.pickupOpensAt + TicketGuide.pickupClosesAt | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D07 | 은행명 | API | BankAccount.bankName | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D08 | 계좌번호 | API | TicketGuide.account (운영 밖 null) | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D09 | 예금주 | API | BankAccount.holder | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D10 | 티켓존 위치 | API | TicketGuide.mapTarget | [위키](../docs/wiki/product/ticket.md) |
-| TICKET-D11 | 송금·수령·환불 안내 | API | TicketGuide.instructions | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D03 | 선택 인원 | 제외 | 제외: 송금용 인원 선택 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D04 | 총액 | 제외 | 제외: 송금용 합계 계산 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D05 | 송금 제공 일정 | 제외 | 제외: 송금 제공 일정 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D06 | 현장 수령 시간 | 제외 | 제외: 현장 수령 시간 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D07 | 은행명 | 제외 | 제외: 티켓 계좌 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D08 | 계좌번호 | 제외 | 제외: 티켓 계좌 복사 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D09 | 예금주 | 제외 | 제외: 티켓 예금주 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D10 | 티켓존 위치 | 제외 | 제외: 금액 안내에서 지도 연결 없음 | [위키](../docs/wiki/product/ticket.md) |
+| TICKET-D11 | 송금·수령·환불 안내 | 제외 | 제외: 송금·수령 안내 없음 | [위키](../docs/wiki/product/ticket.md) |
 | STAMP-START-D01 | 축제 정보 | API | StampGuide.title + StampGuide.reward.name | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-START-D02 | 행사 기간 | API | StampGuide.dates | [위키](../docs/wiki/product/stamp.md) |
 | STAMP-START-D03 | 참여 방법 | API | StampGuide.instructions | [위키](../docs/wiki/product/stamp.md) |

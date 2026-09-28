@@ -17,11 +17,6 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SchemaValidatorsConfig;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-import dev.espero.festival.account.OperationalAccountPurpose;
-import dev.espero.festival.account.OperationalAccountSetting;
-import dev.espero.festival.account.OperationalAccountSettingsService;
-import dev.espero.festival.account.OperationalAccountState;
-import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
 import dev.espero.festival.domain.CatalogSnapshot.Image;
@@ -60,8 +55,6 @@ class CatalogControllerOpenApiTest {
     private final ObjectMapper json = new ObjectMapper();
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final StampCardService stampCards = mock(StampCardService.class);
-    private final OperationalAccountSettingsService accountSettings =
-        mock(OperationalAccountSettingsService.class);
     private JsonNode openApi;
     private MockMvc mvc;
 
@@ -70,22 +63,8 @@ class CatalogControllerOpenApiTest {
         openApi = json.readTree(Files.readString(OPENAPI_FILE));
         Clock clock = Clock.fixed(Instant.parse("2030-10-01T09:00:00.123456789Z"), ZoneOffset.UTC);
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
-        when(accountSettings.findCurrent(ApiMetaTestFixtures.FESTIVAL_ID, OperationalAccountPurpose.TICKET))
-            .thenReturn(Optional.of(new OperationalAccountSetting(
-                ApiMetaTestFixtures.FESTIVAL_ID,
-                OperationalAccountPurpose.TICKET,
-                OperationalAccountState.CONFIGURED,
-                2,
-                "개발용 은행",
-                "MOCK-NOT-PAYABLE",
-                "개발용 예금주",
-                null,
-                Instant.parse("2030-09-01T00:00:00Z")
-            )));
         mvc = MockMvcBuilders.standaloneSetup(
-            new CatalogController(snapshots, metaSupport, spaceId -> spaceId.equals("space-booth")
-                ? Optional.of(new CatalogResponses.BankTransfer("example-bank", "예시 은행", "000123456789", "예시 예금주", false))
-                : Optional.empty()),
+            new CatalogController(snapshots, metaSupport),
             new ConfigController(snapshots, metaSupport, clock),
             new StampReceiptController(snapshots, metaSupport, new StampReceiptVerifier(
                 java.util.HexFormat.of().formatHex(StampReceiptVerifier.sha256("048213"))
@@ -93,11 +72,8 @@ class CatalogControllerOpenApiTest {
             new StampCardController(snapshots, metaSupport, stampCards),
             new TicketGuideController(
                 snapshots,
-                accountSettings,
                 new ConditionalResponseSupport(new tools.jackson.databind.ObjectMapper()),
-                metaSupport,
-                new FestivalProperties(ApiMetaTestFixtures.FESTIVAL_ID.toString()),
-                clock
+                metaSupport
             )
         ).setControllerAdvice(new GlobalApiExceptionHandler(metaSupport)).build();
     }

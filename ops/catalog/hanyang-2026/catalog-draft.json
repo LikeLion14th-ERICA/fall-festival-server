@@ -2,18 +2,18 @@
   "festivalDays": [
     {
       "festivalDate": "2026-09-29",
-      "opensAt": null,
-      "closesAt": null
+      "opensAt": "2026-09-29T09:00:00+09:00",
+      "closesAt": "2026-09-30T00:00:00+09:00"
     },
     {
       "festivalDate": "2026-09-30",
-      "opensAt": null,
-      "closesAt": null
+      "opensAt": "2026-09-30T09:00:00+09:00",
+      "closesAt": "2026-10-01T00:00:00+09:00"
     },
     {
       "festivalDate": "2026-10-01",
-      "opensAt": null,
-      "closesAt": null
+      "opensAt": "2026-10-01T09:00:00+09:00",
+      "closesAt": "2026-10-02T00:00:00+09:00"
     }
   ],
   "spaces": [
@@ -503,7 +503,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 1번 (주점 구역 왼쪽 위)",
       "operatorText": "첨단융합대학 동아리 AEGIS",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "닭꼬치와 염통꼬치, 오리훈제구이와 소세지야채볶음을 선보이는 썬더이지스입니다. 친구들과 다양한 메뉴를 나누며 축제의 저녁을 즐겨보세요.",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -516,7 +516,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 2번 (1번 주점 오른쪽)",
       "operatorText": "국방지능정보융합공학부 국방전략기술공학과 학생회",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "흑후추 우삼겹 볶음과 최가네 닭볶음, 두부김치를 만날 수 있는 최가네포차입니다. 든든한 안주와 함께 축제의 하루를 마무리해보세요.",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -529,7 +529,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 4번 (1번 주점 아래)",
       "operatorText": "글로벌문화통상학부 학생회",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "글로벌문화통상학부가 준비한 ‘안녕하세요글문통입니다잘부탁드립니다’, 줄여서 ‘안글잘부’입니다. 재치 있는 이름의 국물무뼈닭발과 제육볶음, 김치전부터 다양한 사이드 메뉴까지 만나보세요.",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -542,7 +542,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 5번 (2번 주점 아래)",
       "operatorText": "중앙동아리 HYCO",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "중앙천체관측동아리 HYCO가 남월쌀국수와 함께 준비한 ‘남월 우주정거장점’입니다. 2050년, 우주에서도 맛으로 승부하는 우주정거장 하이코휴게소에서 따뜻한 국물 한 그릇 하고 가세요!",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -1864,97 +1864,6 @@
   ],
   "spaceMenuItems": [
     {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "닭꼬치",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "염통꼬치",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "오리훈제구이",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 4,
-      "name": "소세지야채볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-choi-pocha",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "흑후추 우삼겹 볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-choi-pocha",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "최가네 닭볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-choi-pocha",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "두부김치",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-geulmuntong",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "김치전",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-geulmuntong",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "국물무뼈닭발",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-geulmuntong",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "제육볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-namwol",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "직화 백짬뽕 칼국수",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-namwol",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "직화 우삼겹 숙주 볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-namwol",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "스페이스X 스테이크",
-      "priceAmount": null
-    },
-    {
       "spaceId": "truck-onekitchen",
       "locale": "ko",
       "sortOrder": 1,
@@ -2321,58 +2230,58 @@
     {
       "id": "nct-wish",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/nct-wish.jpg",
+      "imageWidth": 1080,
+      "imageHeight": 1350
     },
     {
       "id": "nowimyoung",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/nowimyoung.jpg",
+      "imageWidth": 1440,
+      "imageHeight": 1800
     },
     {
       "id": "kim-haon",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/haon.png",
+      "imageWidth": 1080,
+      "imageHeight": 1350
     },
     {
-      "id": "lucenne",
+      "id": "rescene",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/rescene.jpg",
+      "imageWidth": 3277,
+      "imageHeight": 4096
     },
     {
       "id": "heegyu",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/heegyu.jpg",
+      "imageWidth": 1080,
+      "imageHeight": 1440
     },
     {
       "id": "ahof",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/ahof.jpg",
+      "imageWidth": 1440,
+      "imageHeight": 960
     },
     {
-      "id": "alphadriveone",
+      "id": "alphadrive1",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/alphadrive1.jpg",
+      "imageWidth": 3064,
+      "imageHeight": 2292
     },
     {
       "id": "fromis-9",
       "category": "ARTIST",
-      "imageUrl": null,
-      "imageWidth": null,
-      "imageHeight": null
+      "imageUrl": "https://festival.likelionerica.com/artists/fromis-9.jpg",
+      "imageWidth": 2000,
+      "imageHeight": 2500
     },
     {
       "id": "contest-boston-city-boy",
@@ -2454,7 +2363,7 @@
       "introduction": "🎶김하온🎶\n💨 힘을 뺀 목소리로 더 깊게 박히는 사색의 라임 💨\n'붕붕' 타고 동심의 하늘 위를 날아오를 김하온"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "locale": "ko",
       "name": "리센느",
       "imageAlt": "리센느 프로필 사진",
@@ -2475,7 +2384,7 @@
       "introduction": "⚡아홉⚡\n🏆 아홉 명이 완성하는 단 하나의 무대 🏆\n명예의 전당을 향해 거침없이 달려가는 아홉(AHOF)"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "locale": "ko",
       "name": "알파드라이브원",
       "imageAlt": "알파드라이브원 프로필 사진",
@@ -2580,6 +2489,46 @@
       "artistId": "contest-manchui",
       "sortOrder": 1,
       "url": "https://www.instagram.com/maaaaaaanchui/"
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/nctwish_official/"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/now_im_young/"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/noahmik/"
+    },
+    {
+      "artistId": "rescene",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/rescene_official/"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/ooxstalgia/"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/AHOF_official/"
+    },
+    {
+      "artistId": "alphadrive1",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/ald1.official/"
+    },
+    {
+      "artistId": "fromis-9",
+      "sortOrder": 1,
+      "url": "https://www.instagram.com/officialfromis_9/"
     }
   ],
   "artistLinkTranslations": [
@@ -2621,6 +2570,54 @@
     },
     {
       "artistId": "contest-manchui",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "nct-wish",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "nowimyoung",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "kim-haon",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "rescene",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "heegyu",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "ahof",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "alphadrive1",
+      "sortOrder": 1,
+      "locale": "ko",
+      "label": "Instagram"
+    },
+    {
+      "artistId": "fromis-9",
       "sortOrder": 1,
       "locale": "ko",
       "label": "Instagram"
@@ -2673,17 +2670,17 @@
       "url": "https://open.spotify.com/track/21IVUjbu1ms4ZISGt74NCy"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 1,
       "url": "https://open.spotify.com/track/6uosenLUNFZtOIih5T0qfV"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 2,
       "url": "https://open.spotify.com/track/1pBUzZE9PoKLoPxo6QxsG6"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 3,
       "url": "https://open.spotify.com/track/26GehcyfHwgzfS0ok9yDYk"
     },
@@ -2718,17 +2715,17 @@
       "url": "https://open.spotify.com/track/0ku6osTANoM57WO6LWAgwZ"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 1,
       "url": "https://open.spotify.com/track/4LYM1IwuTq6b5vqTdQTbag"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 2,
       "url": "https://open.spotify.com/track/2tMfEwk96cjTSRTelQkwx6"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 3,
       "url": "https://open.spotify.com/track/5SCyHMxB5SWZP4EAKI5YRu"
     },
@@ -2804,19 +2801,19 @@
       "title": "Skrr (feat. 지젤 of aespa)"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 1,
       "locale": "ko",
       "title": "LOVE ATTACK"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 2,
       "locale": "ko",
       "title": "Deja Vu"
     },
     {
-      "artistId": "lucenne",
+      "artistId": "rescene",
       "sortOrder": 3,
       "locale": "ko",
       "title": "Pretty Girl"
@@ -2858,19 +2855,19 @@
       "title": "RUN TO YOU"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 1,
       "locale": "ko",
       "title": "FREAK ALARM"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 2,
       "locale": "ko",
       "title": "OMG!"
     },
     {
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "sortOrder": 3,
       "locale": "ko",
       "title": "BORN DIRE"
@@ -2898,56 +2895,56 @@
     {
       "id": "performance-nct-wish",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T19:30:00+09:00",
+      "endsAt": "2026-09-29T20:00:00+09:00"
     },
     {
       "id": "performance-nowimyoung",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T20:00:00+09:00",
+      "endsAt": "2026-09-29T20:45:00+09:00"
     },
     {
       "id": "performance-kim-haon",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T20:45:00+09:00",
+      "endsAt": "2026-09-29T21:30:00+09:00"
     },
     {
-      "id": "performance-lucenne",
+      "id": "performance-rescene",
       "festivalDate": "2026-09-29",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-09-29T22:00:00+09:00",
+      "endsAt": "2026-09-29T22:30:00+09:00"
     },
     {
       "id": "performance-heegyu",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T20:00:00+09:00",
+      "endsAt": "2026-10-01T20:40:00+09:00"
     },
     {
       "id": "performance-ahof",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T20:40:00+09:00",
+      "endsAt": "2026-10-01T21:20:00+09:00"
     },
     {
       "id": "performance-alphadriveone",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T21:20:00+09:00",
+      "endsAt": "2026-10-01T22:00:00+09:00"
     },
     {
       "id": "performance-fromis-9",
       "festivalDate": "2026-10-01",
-      "startsAt": null,
-      "endsAt": null
+      "startsAt": "2026-10-01T22:00:00+09:00",
+      "endsAt": "2026-10-01T22:30:00+09:00"
     },
     {
       "id": "performance-sgaeting",
       "festivalDate": "2026-09-29",
-      "startsAt": "2026-09-29T17:30:00+09:00",
-      "endsAt": null
+      "startsAt": "2026-09-29T18:30:00+09:00",
+      "endsAt": "2026-09-29T19:30:00+09:00"
     },
     {
       "id": "contest-day2-special",
@@ -2982,7 +2979,7 @@
       "description": null
     },
     {
-      "performanceId": "performance-lucenne",
+      "performanceId": "performance-rescene",
       "locale": "ko",
       "title": "리센느",
       "description": null
@@ -3047,8 +3044,8 @@
       "displayOrder": 1
     },
     {
-      "performanceId": "performance-lucenne",
-      "artistId": "lucenne",
+      "performanceId": "performance-rescene",
+      "artistId": "rescene",
       "displayOrder": 1
     },
     {
@@ -3063,7 +3060,7 @@
     },
     {
       "performanceId": "performance-alphadriveone",
-      "artistId": "alphadriveone",
+      "artistId": "alphadrive1",
       "displayOrder": 1
     },
     {
@@ -3123,10 +3120,7 @@
     "pinId": null,
     "mapVersion": null,
     "instructions": [
-      "외부인 티켓존 방문: 외부인 티켓 구매 부스로 이동",
-      "티켓 금액 송금: 버튼을 눌러 지정 계좌와 금액이 입력된 송금 화면으로 이동",
-      "송금 완료 화면 확인: 완료 화면을 닫지 말고 티켓 부스 스태프에게 제시",
-      "팔찌 수령 후 입장: 확인 후 팔찌를 받고 외부인 존에서 관람"
+      "외부인 티켓 가격: 25,000원"
     ],
     "festivalStartDate": null,
     "festivalEndDate": null,
@@ -3149,7 +3143,7 @@
     ],
     "rewardName": "몬스터 음료",
     "rewardLocationText": "멋사 부스",
-    "rewardHoursText": null,
+    "rewardHoursText": "매일 11:00~17:00",
     "rewardNotice": "상품은 준비 수량 소진 시 지급이 종료됩니다",
     "qrValue": "https://festival.likelionerica.com/stamps"
   },
@@ -3199,19 +3193,13 @@
     {
       "locale": "en",
       "instructions": [
-        "Visit the Ticket Booth",
-        "Transfer the Ticket Fee: Tap the button to open the pre-filled transfer screen",
-        "Show Transfer Confirmation: Keep the confirmation screen open and show it to staff",
-        "Get Your Wristband & Enter: After verification, enter the Visitor Zone"
+        "Visitor ticket price: KRW 25,000"
       ]
     },
     {
       "locale": "zh-Hans",
       "instructions": [
-        "前往售票处",
-        "支付票款：点击按钮进入已填写账号和金额的转账页面",
-        "出示转账成功页面：请勿关闭页面，并向工作人员出示",
-        "领取手环并入场：确认后进入访客区观演"
+        "访客门票价格：25,000韩元"
       ]
     }
   ],
@@ -3226,7 +3214,7 @@
       ],
       "rewardName": "Monster Drink",
       "rewardLocationText": "LIKELION Booth",
-      "rewardHoursText": null,
+      "rewardHoursText": "Daily 11:00–17:00",
       "rewardNotice": "Prizes available while supplies last"
     },
     {
@@ -3239,7 +3227,7 @@
       ],
       "rewardName": "Monster 饮料",
       "rewardLocationText": "LIKELION 展位",
-      "rewardHoursText": null,
+      "rewardHoursText": "每日 11:00–17:00",
       "rewardNotice": "奖品数量有限，领完即止"
     }
   ]

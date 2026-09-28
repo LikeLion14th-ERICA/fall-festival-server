@@ -25,7 +25,7 @@ reference ID와 검증 결과만 연결한다.
 | --- | --- | --- |
 | 릴리스 책임자 | 전체 순서와 최종 판정 | 동일 `evidenceId`와 후보 digest, 승인·변경 창 |
 | C 인프라 담당 | image, container, Caddy·Cloudflare, alert | 현재·이전 artifact와 config reference, rollback 경로 |
-| D 데이터 담당 | DB, Flyway, 계좌, paired recovery | mutation 승인, recovery set, RPO/RTO |
+| D 데이터 담당 | DB, Flyway, 이전 계좌 이력, paired recovery | mutation 승인, recovery set, RPO/RTO |
 | B 콘텐츠 담당 | catalog와 승인 운영 데이터 대조 | 승인 자료 버전, published revision |
 | A 서비스 담당 | 관리자·공개 기능과 현장 흐름 확인 | 지원 browser/device, 운영자 인수 기준 |
 | 독립 확인자 | 증거와 PASS/BLOCKED 검토 | 실행자와 다른 사람, 비밀값 미노출 확인 |
@@ -109,18 +109,17 @@ smoke를 다시 통과하기 전에는 운영 재개로 판정하지 않는다.
 | 영역 | 승인 자료와 대조할 값 | 공개 결과의 합격 기준 |
 | --- | --- | --- |
 | 축제·혼잡도 | 날짜, 일별 개장·마감, 전날 야간 구간과 당일 시작의 겹침, 익일 `01:00` 종료 경계 | KST operatingDay 선택과 실제 운영 종료가 승인 일정과 일치하고 자정 뒤 상태·수정 시각 보존 확인 |
-| 공연 | 단일 무대, 출연진, 순서·시각, 반입 금지 안내 | 목록·상세·타임테이블 관계와 문구가 승인본과 일치 |
+| 공연 | 단일 무대, 출연진, 순서·시각, 프런트의 반입 금지 안내 | 목록·상세·타임테이블과 프런트 안내가 승인본과 일치 |
 | 부스 | 분류, 소개, 메뉴 가격, 이미지, 지도 연결 | 모든 승인 부스가 한 번씩 연결되고 임시값이 없음 |
 | 지도 | 최종 이미지·버전, 핀 좌표, 장소 연결 | 승인 배치와 일치하고 같은 물리 장소가 불필요하게 중복되지 않음 |
 | 굿즈 | 상품·가격·실제 옵션 조합·이미지·판매 상태 | 수량 모델을 만들지 않고 실제 제공 조합과 상태가 일치 |
-| 티켓 | 단가·송금 시간·계좌·티켓존·수령 안내 | 미확정값을 노출하지 않고 승인된 값과 상태만 제공 |
-| 스탬프 | 운영일·공통 QR·일일 한도·수령 안내·담당자 | 공통 QR 흐름과 현장 안내가 승인 운영안과 일치 |
+| 티켓 | 1인 가격 25,000원 | 가격만 보이고 계좌·복사·송금·결제 안내가 없음 |
+| 스탬프 | 운영일·부스별 QR·일일 한도·11:00~17:00 수령 안내·담당자 | 부스별 QR 흐름과 현장 안내가 승인 운영안과 일치하고 서버가 수령 시간 밖 인증을 거절 |
 | 외부 링크 | URL, 공개 접근, 모바일 가독성 | 로그인 없이 HTTPS로 열리고 승인 대상과 일치 |
 | 언어 | 공개 locale, 공식 명칭, 번역 완료 상태 | 준비된 언어만 보이고 미완성 언어 fallback이 없음 |
 
 1. B가 자료별 승인자·버전·승인 시각을 기록하고 임시·미정 값을 분리한다.
-2. D는 계좌 원문을 기록하지 않고 승인 담당자와 함께 purpose, version, 은행명·끝 네 자리만
-   대조한다. catalog revision과 계좌 version을 별개로 기록한다.
+2. D는 이전 계좌 설정이 공개 API에 노출되지 않는지 확인한다. 원문은 evidence에 기록하지 않는다.
 3. B가 API 응답의 ID·revision과 공개 화면을 항목별로 대조하고, A가 모바일 화면과 실제 사용자
    경로를 독립 확인한다.
 4. 누락, 중복, 오래된 예시, 미승인 번역은 수정 대상과 소유자를 기록한다. 실제 값으로 추측해
@@ -128,10 +127,11 @@ smoke를 다시 통과하기 전에는 운영 재개로 판정하지 않는다.
 
 **PASS:** 모든 공개 항목이 추적 가능한 승인 자료와 일치하고 두 사람의 확인이 있으며,
 미정 값은 숨김·준비 전 상태 등 계약된 표현으로 남는다. **FAIL/BLOCKED:** 승인 근거가 없거나
-임시값·synthetic catalog·잘못된 계좌·미완성 locale이 공개되면 차단한다.
+임시값·synthetic catalog·계좌 정보·미완성 locale이 공개되면 차단한다.
 
 **중단·복구:** catalog 데이터는 수정본을 새 revision으로 validate·publish하고 restart한다.
-공지·굿즈·혼잡도는 관리자 경로, 계좌는 `restore-version` 또는 `clear`로 각각 되돌린다.
+공지·굿즈·혼잡도는 관리자 경로로 각각 되돌린다. 이전 이미지는 계좌를 다시 공개할 수
+있으므로 rollback 전에 D가 운영 계좌 설정을 확인하고 필요한 `clear`를 적용한다.
 정정 뒤 영향받은 표 행과 공개 smoke를 다시 대조한다.
 
 ## 5. OA-03 · DB+media 짝 복원 리허설
@@ -145,9 +145,9 @@ smoke를 다시 통과하기 전에는 운영 재개로 판정하지 않는다.
    상태를 확인한다. 한쪽만 있거나 시점이 다르면 시작하지 않는다.
 3. 복원 시작 시각을 기록하고 DB와 media를 같은 복원 대상에 연결한다. 후보 image digest와
    migration 정책은 사전에 승인된 값만 사용한다.
-4. Flyway history/checksum, published revision, 공지·굿즈·계좌의 의미값, DB media reference와
+4. Flyway history/checksum, published revision, 공지·굿즈의 의미값, DB media reference와
    실제 파일 대응을 확인한다.
-5. public HTTPS에서 catalog, 공지, 굿즈, 계좌 상태, 연결된 상품 이미지, `/healthz`, `/readyz`,
+5. public HTTPS에서 catalog, 공지, 굿즈, 계좌 비노출, 연결된 상품 이미지, `/healthz`, `/readyz`,
    `meta.revision`을 확인한다. staging용 관리자 계정으로 로그인과 승인된 대표 쓰기 한 건을
    확인하고 cleanup한다.
 6. 복구된 데이터의 시점, 허용 손실, 총 복구 시간, 누락 파일·dangling reference 수를 기록해
@@ -168,7 +168,7 @@ recovery set 단위로 처리하며, 성공 증거를 만들기 위해 원본 ar
 
 1. staging의 container ID, current/target image digest, DB·media mount identity, profile,
    `FESTIVAL_ID`, ingress/upstream reference와 OA-03 recovery set을 기록한다.
-2. 재생성 전 연결된 실제 staging 이미지 URL과 공지·굿즈 조합 상태·계좌 version 등 동적
+2. 재생성 전 연결된 실제 staging 이미지 URL과 공지·굿즈 조합 상태 등 동적
    baseline을 기록한다.
 3. 승인된 배포 절차를 사용해 container를 새로 만들되 기존 media volume과 DB 설정 reference를
    명시적으로 다시 연결한다. 단순 process restart 결과를 이 단계의 증거로 쓰지 않는다.
@@ -200,33 +200,33 @@ OA-03의 paired set으로 복원하고 post-recovery smoke를 남긴다.
 | 혼잡도 | 관리자가 staging 상태 변경 후 즉시 조회와 다음 polling | 오래된 edge 응답 없이 최신 상태 반영 |
 | 공지 | 등록·수정·삭제 및 KST 자정 전후 일반/분실물 | 일반 공지만 날짜 경계에 맞게 사라지고 분실물은 유지 |
 | 굿즈 | 한 조합의 판매 상태 변경 후 목록·상세·availability | 세 응답이 같은 상태이며 이전 cache가 남지 않음 |
-| 티켓·계좌 | 시간 경계와 account version 변경 | 마감 후 계좌가 숨고 상세의 `no-store`가 실제 경로에서도 유지 |
+| 티켓·결제 비노출 | 동일 URL의 반복 조회와 프런트 화면 | 티켓 가격 25,000원만 보이고 계좌·복사·송금 경로가 없음 |
 | locale | 같은 URL의 지원 locale 전환 | 다른 언어 응답이 cache key에서 섞이지 않음 |
 | ETag | stable ETag의 304, 업무 변경 뒤 이전 validator 재요청 | 불변이면 304, 변경 뒤에는 새 내용·validator를 반환 |
 | versioned media | 동일 URL 재조회와 새 version URL | 승인 cache 정책과 content type, 새 자산 전환이 일치 |
 
 각 사례는 public response status, 안전한 header 요약, edge cache 상태, KST 시각, 변경 전후 업무
-version을 남긴다. 계좌 원문과 token은 캡처하지 않는다.
+version을 남긴다. 이전 계좌 원문과 token은 캡처하지 않는다.
 
 **PASS:** Caddy/Cloudflare/browser를 지난 결과가 origin의 의도한 상태와 일치하고, 동적·민감
 응답이 오래 캐시되지 않으며 locale·ETag·시간 경계가 섞이지 않는다. **FAIL/BLOCKED:** stale
-공지·품절·계좌, 잘못된 304, locale 혼합, 승인되지 않은 cache rule 또는 origin 비교 불가가
+공지·품절·계좌 노출, 잘못된 304, locale 혼합, 승인되지 않은 cache rule 또는 origin 비교 불가가
 있으면 차단한다.
 
 **중단·복구:** 승인된 이전 Caddy/Cloudflare config로 복귀하고 필요할 때만 승인된 범위의
 cache purge를 수행한다. purge를 애플리케이션 데이터 복구로 취급하지 않는다. config 복귀 뒤
 표의 모든 영향 사례를 다시 확인한다.
 
-## 8. OA-06 · 실제 browser/mobile QR·송금 수용
+## 8. OA-06 · 실제 browser/mobile QR·가격 안내 수용
 
-**목적:** backend 응답만으로 판정할 수 없는 실제 기기 저장, QR camera, 외부 송금 앱 전환과
+**목적:** backend 응답만으로 판정할 수 없는 실제 기기 저장, QR camera, 가격 안내와
 현장 담당자 흐름을 검증한다.
 
 ### 공통 기기 조건
 
 - 승인된 지원 matrix의 실제 iOS·Android 기기와 browser/version, viewport, 네트워크를 기록한다.
-- staging에서는 synthetic 계좌와 전용 QR·수령 코드를 사용한다. 운영 최종 대조는 승인된 실제
-  정보의 읽기 전용 확인을 기본으로 하며 계좌·code 원문을 evidence에 남기지 않는다.
+- staging에서는 전용 QR·수령 코드를 사용한다. 운영 최종 대조는 승인된 실제
+  정보의 읽기 전용 확인을 기본으로 하며 code 원문을 evidence에 남기지 않는다.
 - offline, 느린 응답, background→foreground, 요청 순서 역전을 포함하고 마지막 정상값과 오류
   표시를 함께 관찰한다.
 
@@ -241,25 +241,24 @@ cache purge를 수행한다. purge를 애플리케이션 데이터 복구로 취
    수령 완료로 바뀌지 않는지 확인한다.
 6. 수령 코드 교체 구간은 승인된 절차에서 이전·새 코드의 의도한 허용 기간과 종료를 확인한다.
    사람 단위 중복 지급 방지는 서버가 보장하지 않으므로 현장 위험 인수 기록을 별도로 남긴다.
+7. 수령 인증은 KST 10:59:59에 `409 STAMP_REWARD_CLOSED`, 11:00:00에 성공,
+   16:59:59에 성공, 17:00:00에 같은 오류인지 각각 별도 완성 카드로 확인한다.
 
-### 티켓·굿즈 송금 안내
+### 티켓·굿즈·부스 가격 안내
 
-1. 승인된 가격·인원·총액, 은행명·끝 네 자리, 운영 시간과 현장 수령 안내를 두 사람이 대조한다.
-2. 계좌 복사가 계좌번호만 복사하고 성공·실패 대체 안내가 보이는지 확인한다.
-3. 토스 설치 기기와 미설치 기기에서 외부 전환, 취소, browser 복귀를 확인한다. 복귀 뒤 티켓
-   인원·금액이 계약대로 초기화되고 자동 구매·입금 완료가 표시되지 않아야 한다.
-4. 운영 전·마감 뒤·계좌 미설정 상태에서는 계좌와 송금 action이 노출·활성화되지 않는지 확인한다.
-5. 지도 위치 연결과 뒤로 가기, 긴 번역, 확대·reflow, keyboard·screen reader 핵심 경로를 확인한다.
+1. 외부인 티켓 화면의 25,000원, 굿즈 가격·판매 상태, 부스 메뉴 가격을 승인 자료와 대조한다.
+2. 세 화면과 공개 API 응답에 은행명·계좌번호·예금주·복사·토스 연결·송금 완료 상태가
+   없는지 확인한다. 프런트의 이전 버튼과 딥링크도 남아 있지 않아야 한다.
+3. 지도 위치 연결과 뒤로 가기, 긴 번역, 확대·reflow, keyboard·screen reader 핵심 경로를 확인한다.
 
-**PASS:** 지원 기기별 QR·로컬 상태·코드 검증과 송금 전환·복사·복귀·비활성화 흐름이 계약과
+**PASS:** 지원 기기별 QR·로컬 상태·코드 및 시간 검증, 가격·재고 안내와 결제 기능 비노출이 계약과
 일치하고 운영 담당자가 sign-off한다. **FAIL/BLOCKED:** 실제 기기 미실행, 운영값 미승인,
-잘못된 계좌·금액 노출, 검증 전 수령 처리, 마감 후 송금 활성화 또는 필수 대체 안내 부재가
+계좌·송금 기능 노출, 잘못된 금액, 검증 전·시간 밖 수령 처리가
 있으면 차단한다.
 
-**중단·복구:** 잘못된 계좌는 `clear` 또는 승인된 `restore-version`, 잘못된 catalog 안내는 새
-revision publish+restart로 분리해 복구한다. 스탬프 code 문제는 승인된 secret rotation과
-restart 절차를 따른다. 앱 내부 입금 상태나 서버의 사람 단위 수령 원장을 임시로 추가해 우회하지
-않는다.
+**중단·복구:** 잘못된 catalog 안내는 새 revision publish+restart로 복구한다. 구 이미지로
+되돌릴 때 이전 운영 계좌 설정이 재공개될 위험을 D가 확인하고 필요한 `clear`를 먼저 적용한다.
+스탬프 code 문제는 승인된 secret rotation과 restart 절차를 따른다.
 
 ## 9. OA-07 · alert·on-call·교대 인수
 
@@ -405,6 +404,6 @@ decision: PASS | BLOCKED
 operator/reviewer/decidedAt: <references-and-Asia/Seoul-time>
 ```
 
-인수인계에는 현재 image digest·catalog revision·account version, 다음 당직자와 연락 채널,
+인수인계에는 현재 image digest·catalog revision, 다음 당직자와 연락 채널,
 known issue, rollback 기준, paired recovery set과 마지막 성공 smoke 시각을 포함한다. `PASS` 뒤
 후보나 운영 데이터가 바뀌면 변경 영향에 해당하는 OA 시나리오를 다시 검증한다.

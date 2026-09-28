@@ -226,6 +226,32 @@ class StampCardFlowIntegrationTest {
             .andExpect(jsonPath("$.data.rewardClaimed").value(false));
     }
 
+    @Test
+    void verifiesRewardsOnlyFromElevenUntilBeforeSeventeenInFestivalTime() throws Exception {
+        clock.set(OffsetDateTime.parse("2030-10-01T10:59:59+09:00"));
+        Cookie morning = fullCard();
+        expectError(mvc.perform(receipt(morning, RECEIPT_CODE)), 409, "STAMP_REWARD_CLOSED");
+        clock.set(OffsetDateTime.parse("2030-10-01T11:00:00+09:00"));
+        mvc.perform(receipt(morning, RECEIPT_CODE)).andExpect(status().isOk());
+
+        clock.set(OffsetDateTime.parse("2030-10-01T16:59:59+09:00"));
+        Cookie afternoon = fullCard();
+        mvc.perform(receipt(afternoon, RECEIPT_CODE)).andExpect(status().isOk());
+
+        clock.set(OffsetDateTime.parse("2030-10-01T17:00:00+09:00"));
+        Cookie evening = fullCard();
+        expectError(mvc.perform(receipt(evening, RECEIPT_CODE)), 409, "STAMP_REWARD_CLOSED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stamp_rewards", Map.of(), Long.class)).isEqualTo(2);
+    }
+
+    private Cookie fullCard() throws Exception {
+        Cookie participant = start();
+        for (String booth : List.of("likelion", "photo", "tarot", "career")) {
+            mvc.perform(collect(participant, token(booth))).andExpect(status().isOk());
+        }
+        return participant;
+    }
+
     private Cookie start() throws Exception {
         return participantCookie(mvc.perform(post("/api/v2/stamp-participants"))
             .andExpect(status().isCreated()).andReturn());

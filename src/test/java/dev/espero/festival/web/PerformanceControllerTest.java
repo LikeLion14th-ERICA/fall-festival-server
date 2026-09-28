@@ -111,6 +111,24 @@ class PerformanceControllerTest {
     }
 
     @Test
+    void servesArtistsAndLineupWithoutBackendImages() throws Exception {
+        when(store.lineup(REVISION_ID, DAY_TWO, "ARTIST", "ko")).thenReturn(List.of(
+            new LineupItem("artist-a", "performance-a", "테스트 아티스트", null)
+        ));
+        when(store.findArtist(REVISION_ID, "artist-a", "ko")).thenReturn(Optional.of(new Artist(
+            "artist-a", "ARTIST", "테스트 아티스트", null, null,
+            List.of(), List.of(), List.of()
+        )));
+
+        mvc.perform(get("/api/v2/lineup"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.items[0].image").value(org.hamcrest.Matchers.nullValue()));
+        mvc.perform(get("/api/v2/artists/artist-a"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.image").value(org.hamcrest.Matchers.nullValue()));
+    }
+
+    @Test
     void choosesTheFirstOrLastFestivalDayOutsideTheFestival() throws Exception {
         Clock before = Clock.fixed(Instant.parse("2030-09-01T00:00:00Z"), ZoneOffset.UTC);
         Clock after = Clock.fixed(Instant.parse("2030-11-01T00:00:00Z"), ZoneOffset.UTC);

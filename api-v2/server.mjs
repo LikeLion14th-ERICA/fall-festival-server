@@ -29,7 +29,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding','getAdminCrowdingOperatingHours','getAdminCrowdingOperatingHoursDay','putAdminCrowdingOperatingHoursDay',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
-    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
+    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getArtistHyped','postArtistHyped',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
     'postAdminGoodsImage','getGoodsImage'
   ]);
@@ -89,6 +89,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       }
       scenario=req.headers['x-mock-scenario']||query.__scenario||'normal';delete query.__scenario;
       if(!route.scenarios.includes(scenario))failure(400,'UNKNOWN_SCENARIO','이 요청에서 지원하지 않는 시나리오입니다.');
+      if(route.operationId==='verifyStampReceipt'&&!req.headers['x-mock-time'])now='2030-10-01T12:00:00+09:00';
       if(scenario==='all-languages')state.languages=['ko','en','zh-Hans','ja'];
       locale=query.locale||'ko';
       if(!state.languages.includes(locale)){

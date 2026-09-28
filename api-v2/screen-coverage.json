@@ -55,10 +55,15 @@
     {
       "id": "GOODS-PAYMENT",
       "name": "굿즈 계좌 안내",
-      "operations": [
-        "getPaymentGuide"
+      "operations": [],
+      "browserData": [
+        "GOODS-PAYMENT-D01",
+        "GOODS-PAYMENT-D02",
+        "GOODS-PAYMENT-D03",
+        "GOODS-PAYMENT-D04",
+        "GOODS-PAYMENT-D05",
+        "GOODS-PAYMENT-D06"
       ],
-      "browserData": [],
       "legacySource": {
         "pendingIds": "GOODS-PAYMENT-Q01, TICKET-Q03, ADM-GOODS-Q03"
       }
@@ -152,6 +157,7 @@
       "browserData": [
         "MAP-OVERVIEW-D04",
         "MAP-OVERVIEW-D05",
+        "MAP-OVERVIEW-D08",
         "MAP-OVERVIEW-D09",
         "MAP-OVERVIEW-D10",
         "MAP-OVERVIEW-D11",
@@ -208,8 +214,16 @@
         "getTicketGuide"
       ],
       "browserData": [
+        "TICKET-D01",
         "TICKET-D03",
-        "TICKET-D04"
+        "TICKET-D04",
+        "TICKET-D05",
+        "TICKET-D06",
+        "TICKET-D07",
+        "TICKET-D08",
+        "TICKET-D09",
+        "TICKET-D10",
+        "TICKET-D11"
       ],
       "legacySource": {
         "pendingIds": "TICKET-Q01~Q03, MAP-OVERVIEW-Q03, HOME-Q06"
@@ -1128,8 +1142,8 @@
         "pendingIds": "MAP-OVERVIEW-Q03",
         "requiredInScreen": "조건부"
       },
-      "owner": "API",
-      "target": "TicketGuide.mapTarget",
+      "owner": "제외",
+      "target": "제외: 외부인 티켓 금액 안내에서 지도 연결 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/map.md"
@@ -1776,10 +1790,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "프런트",
-      "target": "프런트 고정 UI: 현장 상품·색상·사이즈 확인 후 송금 안내",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 송금 안내 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1794,10 +1808,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "PaymentGuide.name",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1812,10 +1826,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "PaymentGuide.price",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1830,10 +1844,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.bankName",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1848,10 +1862,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.accountNumber",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1866,10 +1880,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.holder",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -1884,10 +1898,10 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "PaymentGuide.instructions",
+      "owner": "제외",
+      "target": "제외: 사용자 결정에 따라 굿즈 송금 화면 제거",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
-      "sourceDecision": "위키 v5",
+      "sourceDecision": "최신 사용자 결정",
       "sourceMaterial": "../docs/wiki/product/goods.md"
     },
     {
@@ -2316,8 +2330,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "TicketGuide.date (서버 KST 기준을 사용)",
+      "owner": "제외",
+      "target": "제외: 날짜 선택·당일권 상태 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2352,8 +2366,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "브라우저",
-      "target": "브라우저: 기본·최소 1명, 토스 복귀 시 1명",
+      "owner": "제외",
+      "target": "제외: 송금용 인원 선택 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2370,8 +2384,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "프런트",
-      "target": "프런트: 인원 × Money.amount, 안전 정수 범위 확인",
+      "owner": "제외",
+      "target": "제외: 송금용 합계 계산 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2388,8 +2402,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "TicketGuide.transferOpensAt + TicketGuide.transferClosesAt",
+      "owner": "제외",
+      "target": "제외: 송금 제공 일정 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2406,8 +2420,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "TicketGuide.pickupOpensAt + TicketGuide.pickupClosesAt",
+      "owner": "제외",
+      "target": "제외: 현장 수령 시간 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2424,8 +2438,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.bankName",
+      "owner": "제외",
+      "target": "제외: 티켓 계좌 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2442,8 +2456,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "TicketGuide.account (운영 밖 null)",
+      "owner": "제외",
+      "target": "제외: 티켓 계좌 복사 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2460,8 +2474,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "BankAccount.holder",
+      "owner": "제외",
+      "target": "제외: 티켓 예금주 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2478,8 +2492,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "TicketGuide.mapTarget",
+      "owner": "제외",
+      "target": "제외: 금액 안내에서 지도 연결 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"
@@ -2496,8 +2510,8 @@
         "pendingIds": "",
         "requiredInScreen": "필수"
       },
-      "owner": "API",
-      "target": "TicketGuide.instructions",
+      "owner": "제외",
+      "target": "제외: 송금·수령 안내 없음",
       "requiredInScreen": "OpenAPI required 및 SCREEN-STATES.md 참조",
       "sourceDecision": "위키 v5",
       "sourceMaterial": "../docs/wiki/product/ticket.md"

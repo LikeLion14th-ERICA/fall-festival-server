@@ -37,8 +37,8 @@ public class PerformanceRevisionValidator {
             """, parameters, resultSet -> {
                 image(
                     resultSet.getString("image_url"),
-                    resultSet.getInt("image_width"),
-                    resultSet.getInt("image_height")
+                    resultSet.getObject("image_width", Integer.class),
+                    resultSet.getObject("image_height", Integer.class)
                 );
             });
 
@@ -169,7 +169,12 @@ public class PerformanceRevisionValidator {
         return value == null ? 0L : value;
     }
 
-    private void image(String value, int width, int height) {
+    private void image(String value, Integer width, Integer height) {
+        if (value == null) {
+            require(width == null && height == null, "Artist image dimensions require a URL.");
+            return;
+        }
+        require(width != null && height != null, "Artist image dimensions are required with a URL.");
         uri(value, "Artist image URL");
         require(width > 0 && height > 0, "Artist image dimensions must be positive.");
     }

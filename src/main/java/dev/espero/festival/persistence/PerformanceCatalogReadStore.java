@@ -376,12 +376,7 @@ public class PerformanceCatalogReadStore {
             resultSet.getString("artist_id"),
             resultSet.getString("performance_id"),
             resultSet.getString("name"),
-            new Image(
-                resultSet.getString("image_url"),
-                resultSet.getString("image_alt"),
-                resultSet.getInt("image_width"),
-                resultSet.getInt("image_height")
-            )
+            imageOrNull(resultSet)
         );
     }
 
@@ -391,13 +386,18 @@ public class PerformanceCatalogReadStore {
             resultSet.getString("id"),
             resultSet.getString("category"),
             resultSet.getString("name"),
-            new Image(
-                resultSet.getString("image_url"),
-                resultSet.getString("image_alt"),
-                resultSet.getInt("image_width"),
-                resultSet.getInt("image_height")
-            ),
+            imageOrNull(resultSet),
             resultSet.getString("introduction")
+        );
+    }
+
+    private Image imageOrNull(ResultSet resultSet) throws SQLException {
+        String url = resultSet.getString("image_url");
+        return url == null ? null : new Image(
+            url,
+            resultSet.getString("image_alt"),
+            resultSet.getInt("image_width"),
+            resultSet.getInt("image_height")
         );
     }
 

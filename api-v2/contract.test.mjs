@@ -27,6 +27,19 @@ const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
+test('frontend-owned space and artist images may be null',()=>{
+  const cases=[
+    ['Space',examples.getSpaces.scenarios.normal.response.data.items[0]],
+    ['Artist',examples.getArtist.scenarios.normal.response.data],
+    [null,examples.getLineup.scenarios.normal.response.data.items[0]],
+  ];
+  for(const [name,item] of cases){
+    const schema=name?{$ref:`#/components/schemas/${name}`}:spec.components.schemas.Lineup.properties.items.items;
+    standardValidate(schema,{...item,image:null});
+    const missing={...item};delete missing.image;
+    assert.notEqual(localValidate(schema,missing,spec).length,0);
+  }
+});
 test('Meta revision distinguishes aligned content from unscoped and error responses',()=>{
   const metaSchema={$ref:'#/components/schemas/Meta'};
   const baseMeta={requestId:'revision-contract',serverTime:'2030-10-01T12:00:00+09:00',timezone:'Asia/Seoul',festivalId:'festival-mock',locale:'ko',mock:true};
@@ -37,7 +50,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
     'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
     'getCrowding','getAdminCrowding','putAdminCrowding','getAdminCrowdingOperatingHours','getAdminCrowdingOperatingHoursDay','putAdminCrowdingOperatingHoursDay',
     'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
-    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
+    'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getArtistHyped','postArtistHyped',
     'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
     'postAdminGoodsImage','getGoodsImage'
   ]);
@@ -49,7 +62,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.ok(examples.getTicketGuide.scenarios.normal.response.meta.revision>=1);
   assert.equal(examples.getCrowding.scenarios.normal.response.meta.revision,0);
 });
-test('27 screens include restored crowding-hours mappings without duplicate IDs',()=>{assert.equal(coverage.screens.length,27);assert.equal(coverage.data.length,189);assert.equal(coverage.data.filter(x=>x.owner!=='제외').length,183);assert.equal(coverage.data.filter(x=>x.owner==='제외').length,6);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));for(const id of ['ADM-CROWD-HOURS-D01','ADM-CROWD-HOURS-D02','ADM-CROWD-HOURS-D03','ADM-CROWD-HOURS-D04'])assert.equal(coverage.data.find(d=>d.id===id).owner,'API');assert.equal(coverage.data.find(d=>d.id==='ADM-CROWD-HOURS-D05').owner,'브라우저');});
+test('27 legacy screens retain current mappings while payment screens are excluded',()=>{assert.equal(coverage.screens.length,27);assert.equal(coverage.data.length,189);assert.equal(coverage.data.filter(x=>x.owner!=='제외').length,165);assert.equal(coverage.data.filter(x=>x.owner==='제외').length,24);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens.filter(s=>s.id!=='GOODS-PAYMENT'))assert.ok(s.operations.length>0);assert.deepEqual(coverage.screens.find(s=>s.id==='GOODS-PAYMENT').operations,[]);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));for(const id of ['ADM-CROWD-HOURS-D01','ADM-CROWD-HOURS-D02','ADM-CROWD-HOURS-D03','ADM-CROWD-HOURS-D04'])assert.equal(coverage.data.find(d=>d.id===id).owner,'API');assert.equal(coverage.data.find(d=>d.id==='ADM-CROWD-HOURS-D05').owner,'브라우저');});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('Hyped mock keeps repeatable artist counts across festival days with KST closure',async()=>{
   const session='hyped-contract';
@@ -218,6 +231,21 @@ test('Stamp receipt verification hides the code and changes claimed only after s
   assert.deepEqual(clientStates.stamp.receiptCodeRejected,{date:'2030-10-01',started:true,count:4,claimed:false,route:'STAMP-REWARD',message:'코드를 확인해 주세요'});
   assert.deepEqual(clientStates.stamp.claimed,{date:'2030-10-01',started:true,count:4,claimed:true});
 });
+test('Stamp reward pickup accepts 11:00 through 16:59:59 KST and rejects closed hours',async()=>{
+  const operationId=operation('verifyStampReceipt');
+  for(const [time,accepted] of [
+    ['10:59:59',false],['11:00:00',true],['16:59:59',true],['17:00:00',false]
+  ]){
+    const now=`2030-10-01T${time}+09:00`;
+    const state=createState();
+    if(accepted)assert.deepEqual(execute(operationId,state,{body:{code:'482913'},now}).data,{verified:true});
+    else assert.throws(()=>execute(operationId,state,{body:{code:'482913'},now}),error=>error.status===409&&error.code==='STAMP_REWARD_CLOSED');
+    const response=await call('/api/v2/stamp-receipt-verifications',{method:'POST',body:{code:'482913'},session:`pickup-${time.replaceAll(':','')}`,headers:{'X-Mock-Time':now}});
+    assert.equal(response.status,accepted?200:409);
+    if(!accepted)assert.equal(response.body.error.code,'STAMP_REWARD_CLOSED');
+  }
+  assert.equal(examples.verifyStampReceipt.scenarios['reward-closed'].response.error.code,'STAMP_REWARD_CLOSED');
+});
 test('Booth stamps: one per booth per day, four a day, reward once for a full card',async()=>{
   const session='stamp-flow',tokens=['mock-booth-token-0001','mock-booth-token-0002','mock-booth-token-0003','mock-booth-token-0004','mock-booth-token-0005'];
   const collect=token=>call('/api/v2/stamp-collections',{method:'POST',body:{token},session});
@@ -238,7 +266,7 @@ test('Booth stamps: one per booth per day, four a day, reward once for a full ca
   assert.ok(operation('startStampParticipation').responses['201'].headers['Set-Cookie']);
 });
 test('Sensitive and administrator success responses declare no-store',async()=>{
-  for(const id of ['verifyStampReceipt','getPaymentGuide'])assert.equal(operation(id).responses['200'].headers['Cache-Control'].schema.enum[0],'no-store');
+  assert.equal(operation('verifyStampReceipt').responses['200'].headers['Cache-Control'].schema.enum[0],'no-store');
   for(const adminOperation of Object.values(spec.paths).flatMap(Object.values).filter(item=>item.tags.includes('관리자'))){
     for(const [status,response]of Object.entries(adminOperation.responses))if(Number(status)>=200&&Number(status)<300)assert.equal(response.headers['Cache-Control'].schema.enum[0],'no-store',adminOperation.operationId);
   }
@@ -246,7 +274,6 @@ test('Sensitive and administrator success responses declare no-store',async()=>{
     assert.ok(conditional.responses['304'].headers.ETag,conditional.operationId);
     if(conditional.responses['200'].headers['Cache-Control'])assert.deepEqual(conditional.responses['304'].headers['Cache-Control'].schema.enum,conditional.responses['200'].headers['Cache-Control'].schema.enum,conditional.operationId);
   }
-  assert.equal((await call('/api/v2/goods/goods-shirt/payment-guide')).headers.get('cache-control'),'no-store');
   assert.equal((await call('/api/v2/admin/me',{headers:admin})).headers.get('cache-control'),'no-store');
 });
 
@@ -606,7 +633,7 @@ test('Goods save changes only one combination and derives sold-out; failed write
   assert.equal(sold.allSoldOut,true);
   assert.equal(sold.combinations.find(c=>c.combinationId==='combo-shirt-a-m').status,'SOLD_OUT');
   assert.equal((await call('/api/v2/goods',{session})).body.data.items.length,1);
-  assert.ok((await call('/api/v2/goods/goods-shirt/payment-guide',{session})).body.data.account);
+  assert.equal((await call('/api/v2/goods/goods-shirt',{session})).body.data.price.currency,'KRW');
   await write('ON_SALE');
   assert.equal((await call('/api/v2/goods/goods-shirt/availability',{session})).body.data.allSoldOut,false);
 });
@@ -668,20 +695,23 @@ test('Published languages omit incomplete notices and goods without fallback',as
   const zhGoods=(await call('/api/v2/goods?locale=zh-Hans',{session})).body.data.items;
   assert.deepEqual(zhGoods,[]);
   assert.deepEqual((await call('/api/v2/goods-availability?locale=zh-Hans',{session})).body.data.items,[]);
-  for(const path of ['/api/v2/goods/goods-shirt?locale=zh-Hans','/api/v2/goods/goods-shirt/availability?locale=zh-Hans','/api/v2/goods/goods-shirt/payment-guide?locale=zh-Hans'])assert.equal((await call(path,{session})).status,404,path);
+  for(const path of ['/api/v2/goods/goods-shirt?locale=zh-Hans','/api/v2/goods/goods-shirt/availability?locale=zh-Hans'])assert.equal((await call(path,{session})).status,404,path);
   const adminView=await call('/api/v2/admin/notices/notice-ko-only',{headers:admin});
   assert.equal(adminView.status,200);assert.equal(Object.hasOwn(adminView.body.data.translations,'en'),false);
 });
 test('Public dynamic routes reject known locales that are not published',async()=>{
-  for(const path of ['/api/v2/notices?locale=en','/api/v2/goods?locale=en','/api/v2/goods-availability?locale=en','/api/v2/goods/goods-shirt?locale=en','/api/v2/goods/goods-shirt/availability?locale=en','/api/v2/goods/goods-shirt/payment-guide?locale=en']){
+  for(const path of ['/api/v2/notices?locale=en','/api/v2/goods?locale=en','/api/v2/goods-availability?locale=en','/api/v2/goods/goods-shirt?locale=en','/api/v2/goods/goods-shirt/availability?locale=en']){
     const response=await call(path,{session:`unready-${path.length}`});
     assert.equal(response.status,400,path);assert.equal(response.body.error.code,'LOCALE_NOT_READY',path);
   }
 });
-test('Ticket close boundary hides account; next day reopens; price uses integer KRW',async()=>{
-  for(const [now,expected]of [['2030-10-01T20:59:59+09:00','TRANSFER_OPEN'],['2030-10-01T21:00:00+09:00','DAILY_CLOSED'],['2030-10-02T00:00:00+09:00','TRANSFER_OPEN'],['2030-10-04T00:00:00+09:00','FESTIVAL_ENDED']]){
-    const data=(await call('/api/v2/ticket-guide',{headers:{'X-Mock-Time':now}})).body.data;assert.equal(data.status,expected);assert.equal(data.account!==null,expected==='TRANSFER_OPEN');assert.equal(data.unitPrice.currency,'KRW');assert.ok(Number.isInteger(data.unitPrice.amount));
+test('Ticket guide exposes the published amount only',async()=>{
+  for(const now of ['2030-10-01T20:59:59+09:00','2030-10-01T21:00:00+09:00','2030-10-04T00:00:00+09:00']){
+    const data=(await call('/api/v2/ticket-guide',{headers:{'X-Mock-Time':now}})).body.data;
+    assert.deepEqual(data,{unitPrice:{amount:25000,currency:'KRW'}});
   }
+  const missing=(await call('/api/v2/ticket-guide',{headers:{'X-Mock-Scenario':'unconfigured'}})).body.data;
+  assert.deepEqual(missing,{unitPrice:null});
 });
 test('Map links resolve to the same version, place, pin and space',async()=>{
   const spaces=(await call('/api/v2/spaces')).body.data.items;
@@ -695,7 +725,6 @@ test('MapTarget is a canonical current PLACE pin and null means unlinked',async(
   assert.match(description,/PLACE/);
   assert.match(description,/null/);
   assert.equal(spec.components.schemas.Space.properties.mapTarget.description,description);
-  assert.equal(spec.components.schemas.TicketGuide.properties.mapTarget.description,description);
   const session='map-target-contract',spacesResponse=await call('/api/v2/spaces',{session}),spaces=spacesResponse.body.data.items;
   assert.ok(spaces.length>0);
   for(const space of spaces){
@@ -704,10 +733,6 @@ test('MapTarget is a canonical current PLACE pin and null means unlinked',async(
     assert.deepEqual({festivalId:response.body.meta.festivalId,revision:response.body.meta.revision},{festivalId:spacesResponse.body.meta.festivalId,revision:spacesResponse.body.meta.revision});
     const pin=response.body.data.items.find(p=>p.id===target.pinId);assert.ok(pin);assert.deepEqual(pin.target,{kind:'PLACE',placeId:target.placeId});
   }
-  const ticket=await call('/api/v2/ticket-guide',{session}),ticketTarget=ticket.body.data.mapTarget;assert.ok(ticketTarget);
-  const ticketPins=await call(`/api/v2/maps/${ticketTarget.mapId}/pins?mapVersion=${ticketTarget.mapVersion}`,{session});
-  const ticketPin=ticketPins.body.data.items.find(p=>p.id===ticketTarget.pinId);assert.ok(ticketPin);assert.deepEqual(ticketPin.target,{kind:'PLACE',placeId:ticketTarget.placeId});
-  assert.equal((await call('/api/v2/ticket-guide',{session,headers:{'X-Mock-Scenario':'unconfigured'}})).body.data.mapTarget,null);
   assert.equal((await call('/api/v2/spaces/space-booth',{session,headers:{'X-Mock-Scenario':'missing-optional'}})).body.data.mapTarget,null);
 });
 test('Map pin filters follow the design chips in stable order and AREA pins stay visible',async()=>{
@@ -735,7 +760,7 @@ test('Runtime validator rejects representative schema violations independently o
 });
 
 test('crowding hours use their approved route while legacy routes and out-of-scope fields stay removed',async()=>{
-  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,183);
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,165);
   for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
   assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
   for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);
@@ -925,11 +950,15 @@ test('Crowd messages use the approved translation for each ready locale',async()
   assert.match(await beforeOpen('en'),/^Student Zone entry starts at \d{2}:\d{2} today$/);
   assert.match(await beforeOpen('zh-Hans'),/^今日学生区\d{2}:\d{2}开放入场$/);
 });
-test('Booth bank transfer appears only on the detail response',async()=>{
+test('Goods and spaces expose prices without transfer details',async()=>{
+  assert.equal(spec.paths['/api/v2/goods/{goodsId}/payment-guide'],undefined);
+  const goods=(await call('/api/v2/goods/goods-shirt')).body.data;
+  assert.equal(goods.price.currency,'KRW');
+  assert.equal(Object.hasOwn(goods,'account'),false);
+  assert.equal((await call('/api/v2/goods/goods-shirt/payment-guide')).status,404);
   const detail=(await call('/api/v2/spaces/space-pub')).body.data;
-  assert.equal(detail.bankTransfer.accountNumber,'000000000000');
-  assert.equal(typeof detail.bankTransfer.tossLinkEnabled,'boolean');
-  assert.equal((await call('/api/v2/spaces/space-booth')).body.data.bankTransfer,null);
+  assert.equal(Object.hasOwn(detail,'bankTransfer'),false);
+  assert.ok(detail.menu.every(item=>item.price.currency==='KRW'));
   const list=(await call('/api/v2/spaces')).body.data.items;
-  assert.ok(list.every(space=>space.bankTransfer===null));
+  assert.ok(list.every(space=>!Object.hasOwn(space,'bankTransfer')));
 });

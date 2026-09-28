@@ -209,12 +209,8 @@ class CatalogPublicationLifecycleE2eTest {
 
         HttpResponse<String> ticketResponse = get(http, server, "/api/v2/ticket-guide");
         JsonNode ticket = catalogResponse(ticketResponse, publication);
-        assertThat(ticket.at("/data/mapTarget/mapVersion").asText()).isEqualTo(candidate.mapVersion());
-        assertThat(ticket.at("/data/status").asText()).isEqualTo("TRANSFER_OPEN");
-        assertThat(ticket.at("/data/paymentSettingsVersion").asLong()).isEqualTo(dynamic.account().version());
-        assertThat(ticket.at("/data/account/bankName").asText()).isEqualTo(dynamic.account().bankName());
-        assertThat(ticket.at("/data/account/accountNumber").asText()).isEqualTo(dynamic.account().accountNumber());
-        assertThat(ticket.at("/data/account/holder").asText()).isEqualTo(dynamic.account().accountHolder());
+        assertThat(ticket.at("/data").size()).isEqualTo(1);
+        assertThat(ticket.at("/data").has("unitPrice")).isTrue();
 
         HttpResponse<String> crowdingResponse = get(http, server, "/api/v2/crowding");
         JsonNode crowding = successfulBody(crowdingResponse);

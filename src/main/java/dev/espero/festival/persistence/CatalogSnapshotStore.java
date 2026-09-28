@@ -357,7 +357,7 @@ public class CatalogSnapshotStore {
                 spaceId,
                 resultSet.getString("category"),
                 resultSet.getString("name"),
-                new Image(
+                resultSet.getString("image_url") == null ? null : new Image(
                     resultSet.getString("image_url"),
                     resultSet.getString("image_alt"),
                     resultSet.getInt("image_width"),
@@ -556,7 +556,9 @@ public class CatalogSnapshotStore {
         requireApiId(context.festivalId(), "Meta.festivalId");
         for (Space space : spaces) {
             requireApiId(space.id(), "Space.id");
-            verifyImage(space.image(), "Space.image");
+            if (space.image() != null) {
+                verifyImage(space.image(), "Space.image");
+            }
             if (space.contact() != null) {
                 requireHttpsUri(space.contact().url(), "Space.contact.url");
             }

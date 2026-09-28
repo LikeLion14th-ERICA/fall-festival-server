@@ -27,7 +27,7 @@ export const schemas = {
   Error: object({ error: object({ code: text('프런트가 분기할 안정적인 오류 코드'), message: text('안전한 진단 문구. 화면별 오류 문구는 프런트 번역에서 선택.'), details: array(object({ field: text('요청 내 필드 또는 파라미터'), reason: text('검증 실패 이유') }), '추가 정보가 없으면 []'), retryable: bool('같은 요청 재시도 가능성. 화면 버튼 노출 요구와는 별개.') }), meta: ref('Meta') }),
   Money: object({ amount: integer('대한민국 원(KRW) 정수. 소수점·문자열·센트 단위 없음.', 0, { maximum: 9007199254740991 }), currency: enumeration(['KRW'], '금액 단위') }),
   Image: object({ url: text('HTTPS 또는 origin 기준 상대 URL. 목 자산은 /__mock/assets/ 아래.', { format: 'uri-reference' }), alt: text('이미지 대체 텍스트'), width: integer('원본 너비(px)', 1), height: integer('원본 높이(px)', 1) }),
-  Link: object({ label: text('선택 언어의 링크 표시명'), url: text('외부 HTTPS 주소. 목에서는 송금 불가 예시 주소.', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭. rel=noopener noreferrer 권장.') }),
+  Link: object({ label: text('선택 언어의 링크 표시명'), url: text('외부 HTTPS 주소.', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭. rel=noopener noreferrer 권장.') }),
   Channel: object({ id, label: text('공식 채널 표시명'), url: text('확인된 공식 채널 HTTPS 주소', { format: 'uri', pattern: '^https://' }), target: enumeration(['_blank'], '새 탭'), iconKey: text('프런트 아이콘 사전 키. URL이나 공식 명칭에서 추측하지 않음.') }),
   MapTarget: object({ mapId: id, placeId: id, pinId: id, mapVersion: text('좌표와 이미지 버전이 일치해야 함') }, undefined, mapTargetDescription),
   Config: object({ festival: object({ id, title: text('행사 표시명'), dates: array(date, '행사 날짜 오름차순. 자료 미확보 시 [].', { uniqueItems: true }), defaultDate: nullable(date, '축제 전 첫날·기간중 오늘·종료 후 마지막날. 날짜 미확보 시 null.') }), languages: array(object({ code: locale, label: text('원어 언어명') }), '준비 완료 언어만 순서대로 제공', { minItems: 1 }), links: object({ universityNotices: nullable(ref('Link'), '자료 미확보 시 null'), faq: nullable(ref('Link'), 'FAQ 외부 새 탭 연결. 승인 URL 미확보 시 null.'), officialChannels: array(ref('Channel'), '선정·준비 완료 채널만 제공') }) }),
@@ -56,18 +56,16 @@ export const schemas = {
   GoodsList: object({ items: array(ref('Goods'), '요청 공개 언어 번역이 완결된 상품 전체. 품절 상품도 유지.') }),
   AvailabilityList: object({ items: array(ref('Availability'), '공개 응답은 요청 공개 언어 번역이 완결된 상품의 조합 상태이고, 관리자 응답은 전체 상품의 조합 상태. 실패 시 상품 목록과 독립적으로 오류 처리.') }),
   BankAccount: object({ bankName: text('은행명'), accountNumber: text('계좌 문자열. 목 값은 송금할 수 없는 MOCK-NOT-PAYABLE.'), holder: text('예금주') }),
-  PaymentGuide: object({ goodsId: id, name: text('요청 공개 언어의 상품명. 해당 언어 번역이 미완료이면 404.'), price: ref('Money'), account: nullable(ref('BankAccount'), '운영 계좌 CLI로 승인된 GOODS 계좌. 미승인이면 null. 관리자 웹에서는 변경 불가.'), transferLink: nullable(ref('Link'), '승인된 계좌 설정의 송금 링크. 없으면 null.'), instructions: array(text('안내 문구'), '현장 확인·송금·지급 안내. 입금/지급 완료 상태 없음.'), locationText: optionalText, hoursText: optionalText }),
-  Artist: object({ id, category: enumeration(['ARTIST', 'CONTEST'], '아티스트 / 콘테스트'), name: text('출연진 이름'), image: ref('Image'), introduction: optionalText, socialLinks: array(ref('Link'), '없으면 []와 영역 숨김'), songs: array(ref('Link'), '대표곡명과 YouTube 주소', { maxItems: 3 }), performances: array(object({ id, date, startsAt: timestamp, endsAt: timestamp }), '이 출연진의 등록 공연 일정') }),
+  Artist: object({ id, category: enumeration(['ARTIST', 'CONTEST'], '아티스트 / 콘테스트'), name: text('출연진 이름'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), introduction: optionalText, socialLinks: array(ref('Link'), '없으면 []와 영역 숨김'), songs: array(ref('Link'), '대표곡명과 YouTube 주소', { maxItems: 3 }), performances: array(object({ id, date, startsAt: timestamp, endsAt: timestamp }), '이 출연진의 등록 공연 일정') }),
   ArtistHypedItem: object({ artistId: id, hypedCount: integer('축제 전체에서 이 아티스트가 받은 누적 Hyped 수. 공연 날짜와 catalog revision에 독립적.', 0, { maximum: 9007199254740991 }) }),
   ArtistHypedSummary: object({ hypedEnabled: bool('서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 그날의 운영 시간 밖에서도 true.'), items: array(ref('ArtistHypedItem'), '현재 게시된 ARTIST 전원. artistId 오름차순이며 미참여자는 0. CONTEST는 제외.') }),
   ArtistHypedIncrement: object({ artistId: id, hypedCount: integer('이번 요청의 원자적 +1 후 누적 Hyped 수.', 1, { maximum: 9007199254740991 }) }),
   ArtistHypedInput: object({}, [], '빈 JSON 객체만 허용한다. 로그인·참여자 식별자·멱등 키가 없다.'),
-  Lineup: object({ date, category: enumeration(['ARTIST', 'CONTEST'], '선택 분류'), items: array(object({ artistId: id, performanceId: id, name: text('출연진명'), image: ref('Image'), order: integer('선택 날짜·분류 내 공연 순서', 1) }), '공연순, 동률 id순. + 버튼만 상세 이동.') }),
+  Lineup: object({ date, category: enumeration(['ARTIST', 'CONTEST'], '선택 분류'), items: array(object({ artistId: id, performanceId: id, name: text('출연진명'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), order: integer('선택 날짜·분류 내 공연 순서', 1) }), '공연순, 동률 id순. + 버튼만 상세 이동.') }),
   Performance: object({ id, date, title: text('공연명'), artists: array(object({ id, name: text('출연진명') }), '출연진'), startsAt: timestamp, endsAt: timestamp, description: optionalText }),
   Timetable: object({ dates: array(date, '행사 날짜'), axis: object({ startTime: text('시간축 시작 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }), endTime: text('시간축 끝 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }) }), items: array(ref('Performance'), '날짜·시작시각·id 순. 공연 일정은 실시간 갱신 대상 아님.') }),
   ProhibitedItems: object({ items: array(text('반입 금지 물품명'), '선택 언어로 사전 번역한 고정 목록. 자료 대기 시 [].'), message: optionalText }),
-  Space: object({ id, category: enumeration(['PUB', 'BOOTH', 'FLEA_MARKET', 'FOOD_TRUCK', 'STUDENT_COUNCIL_BOOTH', 'PROMOTION_BOOTH'], '주점/부스/플리마켓/푸드트럭/총학생회 부스/프로모션 부스'), name: text('장소명'), image: ref('Image'), locationText: text('목록 필수 위치 안내'), operator: optionalText, hoursText: optionalText, description: optionalText, contact: nullable(ref('Link'), '없으면 영역 숨김'), experience: optionalText, events: array(text('부스 이벤트'), '부스·총학생회 부스·프로모션 부스만, 없으면 []'), menu: array(object({ name: text('메뉴명'), price: ref('Money') }), '주점·푸드트럭만. 미확정 가격 메뉴의 노출 정책은 별도 결정.'), mapTarget: nullable(ref('MapTarget'), mapTargetDescription), bankTransfer: nullable(ref('BankTransfer'), '부스 수취 계좌. 상세 조회에서만 제공하고 목록에서는 항상 null. 공개할 계좌가 없으면 null이며 이때 계좌 안내와 송금 버튼을 표시하지 않음. 상세 응답은 Cache-Control: no-store로 매번 최신 계좌를 받음.') }),
-  BankTransfer: object({ bankId: text('서비스 내부 은행 식별자. 토스 송금 링크의 은행 파라미터와 같은 값이라고 가정하지 않음.'), bankDisplayName: text('화면에 표시할 은행명'), accountNumber: text('앞자리 0을 보존하는 문자열 계좌번호'), accountHolderName: text('부스 담당자가 확인한 공개용 예금주명. 금융기관 실명 검증 결과가 아님.'), tossLinkEnabled: bool('토스 송금 연결 노출 여부. 실기기 검증 전에는 false이며 계좌 복사는 항상 별도로 제공.') }, undefined, '송금 안내 전용. 금액은 저장하지 않으며 메뉴 가격과 분리한다. 입금 확인은 웹앱 밖에서 현장 근무자가 한다.'),
+  Space: object({ id, category: enumeration(['PUB', 'BOOTH', 'FLEA_MARKET', 'FOOD_TRUCK', 'STUDENT_COUNCIL_BOOTH', 'PROMOTION_BOOTH'], '주점/부스/플리마켓/푸드트럭/총학생회 부스/프로모션 부스'), name: text('장소명'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), locationText: text('목록 필수 위치 안내'), operator: optionalText, hoursText: optionalText, description: optionalText, contact: nullable(ref('Link'), '없으면 영역 숨김'), experience: optionalText, events: array(text('부스 이벤트'), '부스·총학생회 부스·프로모션 부스만, 없으면 []'), menu: array(object({ name: text('메뉴명'), price: ref('Money') }), '주점·푸드트럭만. 미확정 가격 메뉴의 노출 정책은 별도 결정.'), mapTarget: nullable(ref('MapTarget'), mapTargetDescription) }),
   Spaces: object({ items: array(ref('Space'), '선택 분류 목록. 검색·날짜·페이지 파라미터 없음. 별 우선 정렬은 브라우저.') }),
   Map: object({ id, name: text('지도명'), kind: enumeration(['OVERVIEW', 'AREA'], '전체/구역 지도'), version: text('불변 이미지·좌표 버전'), image: ref('Image') }),
   Maps: object({ items: array(ref('Map'), '등록 지도. overviewId와 id로 연결.'), overviewId: nullable(id, '등록 지도 없으면 null') }),
@@ -75,7 +73,7 @@ export const schemas = {
   Pin: object({ id, category: text('핀 세부 종류 ID. 운영 목록에서 제공하며 명칭을 enum으로 고정하지 않음.'), filterGroup: nullable(pinFilterGroup, '화장실·포토부스·흡연구역·쓰레기통 PLACE 핀만 값을 가짐. 그 밖의 PLACE 핀은 null이며 `전체`에서만 표시. AREA 핀은 null이며 필터와 무관하게 항상 표시.'), label: text('선택 언어 표시명'), x: { type: 'number', minimum: 0, maximum: 1, description: '이미지 왼쪽 기준 가로 비율. 지도 조작과 무관.' }, y: { type: 'number', minimum: 0, maximum: 1, description: '이미지 위쪽 기준 세로 비율.' }, target: { oneOf: [object({ kind: enumeration(['PLACE'], '장소 팝업. filterGroup이 있으면 해당 필터에서, 없으면 `전체`에서만 표시.'), placeId: id }), object({ kind: enumeration(['AREA'], '팝업 없이 구역 지도 이동. filterGroup은 null이며 필터와 무관하게 항상 표시.'), mapId: id })] } }),
   Pins: object({ mapId: id, mapVersion: text('요청한 이미지 버전과 동일'), filters: array(ref('PinFilter'), '현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 필터만 반환. 화장실·포토부스·흡연구역·쓰레기통 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외.'), items: array(ref('Pin'), '핀 목록. 서버 필터 query는 제공하지 않으며 클라이언트가 PLACE의 filterGroup으로 표시를 제어하고 AREA는 항상 표시.') }),
   Place: object({ id, kind: enumeration(['SPACE', 'FACILITY', 'LANDMARK'], '유형별 팝업 구성'), name: optionalText, locationText: optionalText, hoursText: optionalText, description: optionalText, usage: optionalText, spaceId: nullable(id, 'SPACE 유형만 상세 연결. 나머지는 null.') }),
-  TicketGuide: object({ date, status: enumeration(['BEFORE_FESTIVAL', 'TRANSFER_OPEN', 'DAILY_CLOSED', 'FESTIVAL_ENDED', 'UNCONFIGURED'], '시간별 송금 안내 상태. 일정이 없거나 TICKET 계좌 설정이 없으면 UNCONFIGURED다.'), unitPrice: nullable(ref('Money'), '가격 자료 대기 시 null. 0원과 다름.'), transferOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), transferClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), account: nullable(ref('BankAccount'), 'catalog revision 밖의 TICKET 계좌 설정에서 제공. 계좌 설정이 없거나 송금 제공 시간 밖이면 null.'), transferLink: nullable(ref('Link'), '링크 표시명 출처가 정해지기 전까지 항상 null. 계좌 설정은 URL만 보관한다.'), paymentSettingsVersion: nullable(integer('현재 TICKET 계좌 설정의 version. 값이 바뀌면 계좌 설정이 바뀐 것이며 응답 ETag도 함께 바뀐다.', 1), '계좌를 한 번도 설정하지 않았으면 null. 설정을 해제한 뒤에도 version은 남는다.'), mapTarget: nullable(ref('MapTarget'), mapTargetDescription), instructions: array(text('안내'), '승인된 현장 안내. 목에서 환불 정책을 임의로 확정하지 않음.') }),
+  TicketGuide: object({ unitPrice: nullable(ref('Money'), '게시 카탈로그의 1인 입장권 금액. 가격 자료가 없는 이전 revision에서는 null이며 0원과 다름.') }, undefined, '외부인 티켓 금액 안내 전용. 계좌·송금·토스·수령 상태를 제공하지 않음.'),
   StampGuide: object({ title: text('행사 제목'), dates: array(date, '실제 행사 기간'), instructions: array(text('참여·상품 안내'), '없으면 []'), reward: object({ name: text('경품명'), locationText: optionalText, hoursText: optionalText, notice: text('당일 1회·소진 시 현장 안내') }), dailyLimit: enumeration([4], '당일 최대 적립'), timezone: enumeration(['Asia/Seoul'], '자정 초기화'), qrValue: nullable(text('스탬프투어 시작 안내용 공통 주소. 적립에는 쓰지 않으며 비밀키가 아님.'), '배포 방식·책임 미합의 시 null. 적립은 부스별 QR 링크의 토큰(StampCollectionInput.token)으로 한다.') }),
   StampCard: object({ date: text('축제 시간대(Asia/Seoul) 기준 오늘 날짜. 자정이 지나면 다시 START해야 새 스탬프판이 열린다.', { format: 'date' }), dailyLimit: enumeration([4], '하루 최대 적립 개수'), stamps: array(ref('StampCardStamp'), '오늘 적립한 부스. 부스당 하루 1개, 적립 시각순.', { maxItems: 4 }), rewardClaimed: bool('오늘 상품을 받았는지. 서버가 수령 인증 성공 때 기록한다.') }, undefined, '이 브라우저의 익명 참여자(HttpOnly 쿠키)의 오늘 스탬프판. 오늘 START(POST /stamp-participants) 뒤에만 있고, 그 전에는 STAMP_NOT_STARTED(404)이므로 시작 화면을 보여 준다. 계정·복구 없음.'),
   StampCardStamp: object({ boothId: id, boothName: nullable(text('부스 표시명'), '게시 catalog에서 사라진 부스면 null'), collectedAt: timestamp }),
@@ -108,7 +106,6 @@ export const operations = [
   ['getGoodsAvailability','GET','/goods-availability','AvailabilityList','상품 목록의 판매 상태',['GOODS-LIST'],[],['normal','empty','sold-out','error']],
   ['getGood','GET','/goods/{goodsId}','Goods','상품 상세',['GOODS-DETAIL'],[],['normal','missing-optional','not-found','error']],
   ['getGoodAvailability','GET','/goods/{goodsId}/availability','Availability','상품 상세의 판매 상태',['GOODS-DETAIL'],[],['normal','sold-out','not-found','error']],
-  ['getPaymentGuide','GET','/goods/{goodsId}/payment-guide','PaymentGuide','굿즈 계좌 안내',['GOODS-PAYMENT'],[],['normal','missing-optional','not-found','error']],
   ['getLineup','GET','/lineup','Lineup','날짜·분류별 라인업',['SHOW-LINEUP'],[param('date',date,'생략하면 config.defaultDate. 제공되지 않는 행사 날짜는 400.'),param('category',{...schemas.Artist.properties.category,default:'ARTIST'},'기본 ARTIST')],['normal','empty','error']],
   ['getArtist','GET','/artists/{artistId}','Artist','출연진 상세',['SHOW-ARTIST'],[],['normal','missing-optional','not-found','error']],
   ['getArtistHyped','GET','/artist-hyped','ArtistHypedSummary','아티스트별 Hyped 누적 수와 참여 가능 상태',['SHOW-LINEUP','SHOW-ARTIST'],[],['normal','closed','ended','empty','error']],
@@ -122,12 +119,12 @@ export const operations = [
   ['getMap','GET','/maps/{mapId}','Map','지도 이미지·버전',['MAP-OVERVIEW','MAP-AREA'],[],['normal','not-found','error']],
   ['getPins','GET','/maps/{mapId}/pins','Pins','지도별 핀',['MAP-OVERVIEW','MAP-AREA'],[param('mapVersion',text('조회한 Map.version'),'이미지와 다른 버전 요청은 409',true)],['normal','empty','not-found','version-conflict','error']],
   ['getPlace','GET','/places/{placeId}','Place','장소 팝업',['MAP-POPUP'],[],['normal','missing-optional','not-found','error']],
-  ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 안내',['TICKET'],[],['normal','before-open','closed','ended','unconfigured','error']],
+  ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 금액 안내',['TICKET'],[],['normal','unconfigured','error']],
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
   ['startStampParticipation','POST','/stamp-participants','StampCard','스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급',['STAMP-START'],[],['normal','already-started','error']],
   ['getStampCard','GET','/stamp-card','StampCard','오늘의 스탬프판',['STAMP-COLLECT','STAMP-REWARD'],[],['normal','empty','not-started','error']],
   ['collectStamp','POST','/stamp-collections','StampCard','부스 QR 스탬프 적립(부스당 하루 1회)',['STAMP-COLLECT'],[],['normal','not-started','invalid-token','already-collected','card-full','reward-claimed','error'],'StampCollectionInput'],
-  ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증',['STAMP-REWARD'],[],['normal','invalid-code','card-incomplete','reward-claimed','error'],'StampReceiptVerificationInput'],
+  ['verifyStampReceipt','POST','/stamp-receipt-verifications','StampReceiptVerification','스탬프 상품 수령 인증(매일 KST 11:00 이상 17:00 미만)',['STAMP-REWARD'],[],['normal','invalid-code','card-incomplete','reward-claimed','reward-closed','error'],'StampReceiptVerificationInput'],
   ['getAdminCrowding','GET','/admin/crowding','Crowding','관리자 혼잡도',['ADM-CROWD'],[],['normal','before-open','closed','unmodified','unconfigured','error']],
   ['putAdminCrowding','PUT','/admin/crowding','Crowding','선택된 operatingDay 혼잡도 저장. 다음 날 운영 중이면 전날 operatingDay 유지',['ADM-CROWD'],[],['normal','full','not-festival-day','error'],'CrowdingInput'],
   ['getAdminNotices','GET','/admin/notices','AdminNotices','관리자 공지 목록',['ADM-NOTICE-LIST'],[],['normal','empty','error']],
@@ -144,7 +141,6 @@ Object.assign(operations.find(operation=>operation.operationId==='verifyStampRec
   successStatus: 200,
   cacheControl: 'no-store',
 });
-operations.find(operation=>operation.operationId==='getPaymentGuide').cacheControl='no-store';
 for(const operationId of ['getArtistHyped','postArtistHyped']){
   const operation=operations.find(candidate=>candidate.operationId===operationId);
   operation.cacheControl='no-store';
@@ -165,8 +161,7 @@ Object.assign(operations.find(operation=>operation.operationId==='collectStamp')
   successStatus: 200,
   cacheControl: 'no-store',
 });
-// The ticket guide combines static catalog content with the current TICKET
-// account setting, so clients poll it and revalidate with If-None-Match.
+// The ticket amount belongs to the published catalog revision.
 Object.assign(operations.find(operation=>operation.operationId==='getTicketGuide'), {
   conditional: true,
   cacheControl: 'private, no-cache',

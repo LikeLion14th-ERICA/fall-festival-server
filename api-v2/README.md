@@ -6,14 +6,14 @@
 [v5](../docs/wiki/product/admin/README.md)로 통일했습니다. 특정 과거 commit이 아니라 현재
 branch의 생성 결과물을 함께 유지합니다. 이전 화면 원문은 비교용 스냅샷으로 보존하며 현재
 요구는 [화면 데이터 표](SCREEN-DATA.md)와 [화면 상태](SCREEN-STATES.md)를 사용합니다.
-실제 행사 날짜·가격·계좌·사진은 운영 자료로 확정해야 하며 예제는 가상 데이터입니다.
+실제 행사 날짜·가격·사진은 운영 자료로 확정해야 하며 예제는 가상 데이터입니다.
 
 | 결과물 | 용도 |
 |---|---|
 | [openapi.json](openapi.json) | OpenAPI 3.1 경로·메서드·파라미터·필드·필수 여부·상태 코드·예제 |
-| [ENDPOINTS.md](ENDPOINTS.md) | 52개 요청과 지원 시나리오 빠른 조회 |
-| [examples.json](examples.json) | 요청 헤더·본문·경로와 408개 응답 원문 |
-| [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 183개·제외 6개 필드 → API 또는 프런트 상태 추적표 |
+| [ENDPOINTS.md](ENDPOINTS.md) | 51개 요청과 지원 시나리오 빠른 조회 |
+| [examples.json](examples.json) | 요청 헤더·본문·경로와 399개 응답 원문 |
+| [SCREEN-DATA.md](SCREEN-DATA.md) | 27개 화면의 현행 추적 165개·제외 24개 필드 → API 또는 프런트 상태 추적표 |
 | [FRONTEND.md](FRONTEND.md) | 실행·시나리오 전환·화면 연동 |
 | [CROWDING-OPERATING-HOURS-FRONTEND.md](CROWDING-OPERATING-HOURS-FRONTEND.md) | 관리자 재학생존 운영시간 설정만 모은 프런트 전달 문서 |
 | [DECISIONS.md](DECISIONS.md) | 합의가 필요한 기술 계약과 운영 자료 |
@@ -28,13 +28,13 @@ springdoc 또는 Swagger UI가 없으며, 정적 OpenAPI 3.1 문서와 계약 �
 예제는 source module에서 생성되므로 생성 JSON만 직접 수정하지 않습니다.
 
 릴리스 coverage metadata도 `openapi.json`에서 자동 inventory합니다. 원천 매핑은
-`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 52개 operation이
+`release-operation-coverage.mjs`에 두고 `npm run check:release-coverage`로 51개 operation이
 정확히 한 번 분류되는지, 각 live operation의 provider test와
 HTTP-01~32·OPS-01~20 매핑이 유효한지 확인합니다. `npm run release:test-selection`은
 live provider와 52개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17MigrationReleaseTest`를
 정렬된 Maven `-Dtest` CSV로 출력합니다. 이 검사는 제품 route를 활성화하지 않습니다.
 
-현재 branch는 OpenAPI의 52개 operation을 live provider 검증 대상으로 분류합니다.
+현재 branch는 OpenAPI의 51개 operation을 live provider 검증 대상으로 분류합니다.
 공개 공연 조회와 홈 공통 설정뿐 아니라 아티스트 Hyped 조회·참여도 Spring Boot에
 구현되어 있습니다. 경로별 구현·검증 근거는
 [릴리스 operation coverage](release-operation-coverage.json)와 해당 provider test를
@@ -89,14 +89,15 @@ live provider와 52개 HTTP/OPS 시나리오의 테스트 class, `Postgresql17Mi
 ## 화면 계약의 주요 결정
 
 - 혼잡도는 사용자 홈과 관리자가 공유합니다. 지도에는 표시하지 않습니다. 운영 시간은 published FestivalDay에서 초기값을 가져오고, 관리자 저장값은 축제일별로 revision과 독립해 유지합니다. `/admin/crowding/operating-hours` 목록·날짜별 상세·저장은 ADMIN 전용입니다. 상세 ETag를 `If-Match`로 보내며 저장에는 `Idempotency-Key`가 필요하고 성공·완료 재시도는 204입니다. 관리자 저장 전에는 현재 게시 일정의 시간을 사용합니다. 관리자는 실제 published FestivalDay에 운영 전·종료 뒤에도 저장할 수 있고 다른 날짜의 PUT은 `409 NOT_FESTIVAL_DAY`입니다. 시작은 해당 날짜 안, 종료는 시작 이후 익일 `01:00`까지 분 단위로 입력하며 실제 구간은 종료 순간을 제외합니다. 시각은 `Asia/Seoul`로 정규화하고 `:00`이 아닌 초와 모든 소수초 입력은 거절합니다. 시간 편집은 혼잡도 단계와 수정 시각을 변경하지 않습니다. 자정 뒤 전날 구간이 열려 있고 당일 일정이 시작되지 않았으면 전날 운영일·상태·수정 시각을 유지하며, 당일 일정이 시작되면 오늘을 우선합니다. 혼잡도 단계 저장은 현재 운영일 또는 OPEN 구간에서 허용하고 idempotency 범위도 운영일별입니다. 공개 홈은 실제 운영 시간 상태를 우선하고 운영 전·종료에는 혼잡도 수정 시각을 숨깁니다. 일정이 없으면 `503 CROWDING_SCHEDULE_UNCONFIGURED`입니다.
-- 굿즈는 Goods.options에 등록된 실제 색상×사이즈 조합만 표시합니다. 관리자가 ON_SALE(구매 가능)/SOLD_OUT(품절)을 선택하며 수량 입력·저장은 없습니다. 상품 정보와 판매 상태를 독립 조회하고 전체 품절이어도 상품과 계좌 안내 진입을 유지합니다. 신규 상품·조합은 ON_SALE로 시작하고 색상·사이즈·조합 삭제는 허용합니다. 삭제한 조합의 판매 상태를 제거하고 유지 조합 상태는 보존합니다.
+- 굿즈는 Goods.options에 등록된 실제 색상×사이즈 조합만 표시합니다. 관리자가 ON_SALE(구매 가능)/SOLD_OUT(품절)을 선택하며 수량 입력·저장은 없습니다. 상품 가격과 판매 상태를 독립 조회하고 전체 품절이어도 상품은 목록에 유지합니다. 계좌·송금 안내 경로는 제공하지 않습니다. 신규 상품·조합은 ON_SALE로 시작하고 색상·사이즈·조합 삭제는 허용합니다. 삭제한 조합의 판매 상태를 제거하고 유지 조합 상태는 보존합니다.
+- 부스·주점 메뉴는 등록된 이름과 가격만 표시합니다. 공간 목록·상세 응답에 계좌나 송금 정보는 포함하지 않습니다.
 - 한국어 공지는 먼저 저장·게시하며 영어가 PENDING/FAILED여도 막지 않습니다. 선택 언어의 READY 번역만 노출합니다. 직접 이미지 첨부와 공개 공지 상세 API는 없습니다.
 - 타임테이블은 고정 반입 금지 물품 목록·안내를 /prohibited-items로 조회합니다. 공연 진행 여부에 따라 숨기지 않으며 현재 시각선은 축제 당일 17:00~22:00에만 표시합니다.
 - 공지는 당일 일반 공지와 날짜와 무관한 분실물 공지를 합칩니다. 신규 공지와 삭제 공지의 갱신 UX가 달라 `visibleIds`를 제공합니다. 공개 상세·공지 이미지 API는 없습니다.
 - 지도 이미지와 핀 요청을 분리합니다. 핀 요청의 `mapVersion`은 필수이며 이미지 버전 불일치는 409입니다. 구역 이동과 장소 팝업 대상은 서로 다른 타입입니다. 핀은 세부 `category`와 디자인 필터 `filterGroup`(화장실·포토부스·흡연구역·쓰레기통)을 함께 내보냅니다. 그 밖의 `PLACE` 핀은 `filterGroup: null`로 `전체`에서만 보이고, `AREA` 핀은 `filterGroup: null`로 항상 표시합니다.
 - 시간표는 단일 무대만 사용하며 Stage 모델이나 stage 필드는 추가하지 않습니다.
 - 아티스트 Hyped는 게시된 `ARTIST`만 대상으로 익명 클릭마다 축제 회차·아티스트별 누적 수를 원자적으로 1 올립니다. 로그인·개인별 횟수 제한은 없고, 서버의 `Asia/Seoul` 기준 등록된 `FestivalDay`에만 참여할 수 있습니다. 라인업은 수만 표시하고 상세의 `기대돼요 {count}`만 클릭할 수 있습니다. `GET /artist-hyped`와 `POST /artists/{artistId}/hyped`는 동적 상태로 `revision: 0`, `Cache-Control: no-store`를 사용합니다. POST 결과가 모호할 때 자동 재시도하지 않고 GET으로 동기화합니다. 화면 연결과 오류 처리는 [프런트 안내](FRONTEND.md#아티스트-hyped)를 따릅니다.
-- 티켓은 오늘의 송금·수령 안내입니다. 수량과 합계는 프런트 상태입니다. 입금 확인·주문 생성·지급 완료 API는 없습니다. 송금 시간 밖에는 계좌를 반환하지 않습니다.
+- 외부인 티켓은 게시 카탈로그의 1인 금액만 안내합니다. 계좌·송금·토스·수령 상태 API는 공개하지 않습니다.
 - 스탬프는 안내를 조회하고, 수령 안내 창에서 현장 담당자가 입력한 코드는 `POST /stamp-receipt-verifications`로 서버 검증합니다. 참여 시작·4칸 누적·수령 완료·KST 날짜 초기화는 브라우저 상태이며, 인증 성공의 `verified: true`일 때만 `claimed`를 저장합니다. 코드는 서버 비밀 설정으로만 관리하고 서버 참여 기록·중복 차단·상품 재고 API는 만들지 않습니다. START 전 기본 카메라 QR 직접 진입은 시작 화면으로 보내고 자동 시작·적립하지 않습니다.
 - FAQ는 준비 완료된 외부 페이지를 새 탭으로 연결합니다. 자료·공개 확인 전 `faq`는 `null`이며 FAQ 콘텐츠·번역·전용 API는 제공하지 않습니다. 웰컴 데이(`WELCOME-001`)는 참여 저조로 2026-09-22 결정에 따라 제거해 `Config.links`에서 뺐습니다.
 

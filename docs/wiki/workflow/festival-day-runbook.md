@@ -1,6 +1,6 @@
 # 행사 당일 운영 절차서
 
-[위키 홈](../README.md) · 읽는 때: 행사 기간 중 콘텐츠 수정·계좌 교체·스탬프 코드 교체·장애 대응을 실제로 수행할 때
+[위키 홈](../README.md) · 읽는 때: 행사 기간 중 콘텐츠 수정·스탬프 코드 교체·장애 대응을 실제로 수행할 때
 
 이 문서는 명령을 실행하는 절차만 다룬다. 각 CLI·API의 설계 근거는
 [게시](../engineering/publishing.md), [계좌 운영 설정](../engineering/operational-account-settings.md),
@@ -21,27 +21,19 @@ host port/network, Caddy upstream과 TLS 설정은 아직 확인되지 않았으
   publish`로 새 revision을 만들어도, 실행 중인 프로세스는 시작 시 적재한 published snapshot만
   서비스한다. **게시 후 반드시 backend를 재시작**해야 `/readyz`와 공개 API의 `meta.revision`이
   새 revision으로 바뀐다. 재시작 전에는 게시가 끝났어도 사용자에게 이전 콘텐츠가 보인다.
-- **동적 운영 데이터(공지, 굿즈 상품/재고, 혼잡도, 계좌, 공지 템플릿):** 관리자 API·CLI로 바로
+- **동적 운영 데이터(공지, 굿즈 상품/재고, 혼잡도, 공지 템플릿):** 관리자 API로 바로
   반영되며 재시작이 필요 없다. 프런트는 15초 polling으로 다음 주기에 새 값을 받는다.
 
 행사 당일 콘텐츠를 고칠 때는 먼저 이 둘 중 어디에 속하는지 확인한다. catalog 수정인데
 재시작을 잊으면 "게시했는데 안 바뀐다"는 오인 장애가 생긴다.
 
-## 2. 계좌 교체
+## 2. 이전 계좌 설정의 보존
 
-[계좌 운영 설정](../engineering/operational-account-settings.md)의 CLI 사용 절을 따른다. 요약:
-
-1. account operator role로 **dry-run** 먼저 실행해 state, version, 바뀔 field, 끝 네 자리를
-   확인한다(`--confirm` 없이).
-2. 문제 없으면 `--confirm --last-four=<새 계좌 끝 네 자리> --expected-version=<현재 version>
-   --actor=<이름> --reason=<사유> --evidence-id=<근거>`로 적용한다.
-3. 응답·로그에는 계좌 원문이 남지 않는다. 끝 네 자리와 은행명만 눈으로 대조한다.
-4. `TICKET`·`GOODS`는 `--purpose=TICKET`/`--purpose=GOODS`, 부스는
-   `--purpose=SPACE --space-id=<부스 API id>`를 쓴다.
-5. 재시작이 필요 없다. version이 올라가면 ETag가 바뀌고 다음 polling에 새 계좌가 반영된다.
-
-계좌를 잘못 바꿨으면 `restore-version`으로 이전 version을 새 version으로 재적용한다(덮어쓰지
-않고 새 이력을 쌓는다). 당장 계좌를 감춰야 하면 `clear`로 `UNCONFIGURED`로 바꾼다.
+2026-09-28 결정 이후 티켓·굿즈·부스 공개 API와 화면은 계좌·송금 기능을 제공하지 않는다.
+이전 운영 계좌 설정과 변경 이력은 데이터 보존 대상으로 남겨 두며 행사 중 공개 정보
+수정을 위해 계좌 CLI를 실행하지 않는다. 복원·삭제가 필요한 경우에는 D가
+[계좌 운영 설정](../engineering/operational-account-settings.md)의 이력·권한 규칙을
+별도 검토한다.
 
 ## 3. 스탬프 수령 인증 코드 교체
 
@@ -54,6 +46,9 @@ README의 "스탬프 수령 인증 코드 설정" 절 그대로 실행한다.
    더 이상 안 쓸 때 옛 값을 뺀다.
 4. **환경변수 변경은 재시작이 있어야 반영된다.** 컨테이너를 재시작한다.
 5. hash도 비밀값이므로 커밋·문서·티켓에 남기지 않는다.
+
+상품 수령 인증은 매일 KST 11:00 이상 17:00 미만에만 성공한다. C와 A는
+`STAMP_REWARD_CLOSED` 응답과 현장 안내 시간이 일치하는지 확인한다.
 
 ## 4. 장애 시 롤백
 
@@ -69,8 +64,7 @@ java '-Dloader.main=dev.espero.festival.CatalogCliApplication' -cp target/fall-f
   끼어들었으면 `BASE_REVISION_CONFLICT`로 실패한다 — 실패하면 현재 published revision을 다시
   확인하고 재시도한다.
 - rollback도 catalog이므로 **게시 후 backend 재시작**이 있어야 반영된다.
-- 실시간 혼잡도 저장값은 catalog rollback 대상이 아니다. 계좌 설정도 rollback되지 않으므로
-  계좌 문제는 3번 섹션의 `restore-version`/`clear`로 따로 되돌린다.
+- 실시간 혼잡도 저장값과 이전 계좌 설정 이력은 catalog rollback 대상이 아니다.
 - 로컬 워크벤치를 쓸 수 있으면 [로컬 카탈로그 워크벤치](../engineering/catalog-workbench.md)의
   화면으로 같은 CLI 흐름을 브라우저에서 수행할 수 있다(단, 워크벤치 자체에는 rollback 화면이
   없으므로 rollback은 항상 CLI로 한다).
@@ -102,6 +96,9 @@ Cloudflare TLS/proxy 설정은 아직 확인되지 않았으므로 아래 절차
    위치는 C·D가 작업 기록에 남기고, 아래의 보존 정책을 적용한다.
 3. 새 이미지로 교체할 때는 기존에 확인한 `espero-media` volume을 반드시 다시 mount하고,
    DB 접속 환경변수와 `FESTIVAL_ID`를 유지한다. volume 없이 컨테이너를 재생성하지 않는다.
+   **2026-09-28 이전 이미지는 계좌를 다시 공개할 수 있다.** 이전 이미지로 rollback할 때는
+   D가 남아 있는 운영 계좌 설정을 확인하고 공개되지 않도록 `clear`를 적용·검증한 뒤에만
+   기동한다. 이미지를 되돌리는 것만으로 계좌 비공개 결정이 유지된다고 가정하지 않는다.
 4. Flyway는 애플리케이션 시작 시 자동 실행될 수 있다. 2026-09-20 사전 점검 결과는 PostgreSQL
    17.11, `public` schema, V1~V26 전부 `success`이며 당시 현재 SQL과 checksum이 일치했다.
    새 artifact가 추가 migration을 포함하거나 이력·checksum이 다르면 재시작하지 말고 DB
@@ -182,7 +179,7 @@ recovery set ID, 시작 전후 결과, 중단·복구 판단, 실제 연락 채�
 | A 서비스 리드 | 관리자 인증·혼잡도·공지·굿즈·스탬프 기능과 오류 대응 자료를 확인한다. | 총학생회 요청 창구, 요청 우선순위·장애 상황 총괄, 기능 오류 대응을 맡는다. |
 | B 콘텐츠 리드 | 부스·지도·공연·시간표 자료를 수합·검수하고 catalog 게시·rollback을 준비한다. | 일정·장소 변경 반영, catalog 게시·rollback, 공개 화면 최종 확인을 맡는다. |
 | C 인프라·교육 리드 | A1·Docker·Caddy·TLS·배포·모니터링, 운영자 교육·리허설, Git backup branch 보존을 맡는다. | 서버 상태 감시·재기동·복구, 운영 절차 안내, 교대 운영자 인수인계를 맡는다. |
-| D 데이터 리드 | DB 역할·권한·Flyway, 계좌 변경 절차, DB·media backup 정책·복원 훈련을 맡는다. | DB 상태 점검, 계좌 변경, backup·restore 총괄, 데이터 정합성 확인을 맡는다. |
+| D 데이터 리드 | DB 역할·권한·Flyway, DB·media backup 정책·복원 훈련을 맡는다. | DB 상태 점검, backup·restore 총괄, 데이터 정합성 확인을 맡는다. |
 
 C가 운영자 교육·리허설을 진행하고 이수 여부를 기록한다. A는 기능·오류 대응 자료를, B는 콘텐츠
 입력·검수 자료를 제공한다. 교육에는 관리자 로그인, 혼잡도 운영일 확인, 공지 등록, 굿즈 품절 전환,
@@ -195,7 +192,6 @@ C가 운영자 교육·리허설을 진행하고 이수 여부를 기록한다. 
 | 서버 배포·장애 복구 | C | D | D가 DB 호환성을 확인하고 A가 서비스 기능을 확인한다. 서버 장애와 교육 요청이 겹치면 C는 복구에 집중하고 A가 운영자 문의를 접수한다. | A1 접근 권한 |
 | Flyway·DB 권한 변경 | D | C | C가 배포 순서와 실행 환경을 확인한다. | provider가 승인한 DB 권한 |
 | DB·media backup·restore·보존 | D | C | C가 media volume·외부 저장소 상태를 확인한다. | DB backup/restore와 volume 접근 권한 |
-| 계좌 교체 | D | C | A가 서비스 반영 결과를 확인한다. | DB account operator role, 서버 실행 환경 접근 |
 | 운영자 교육·리허설·교대 인수인계 | C | D | A가 기능·오류 대응 자료를, B가 콘텐츠 입력·검수 자료를 제공한다. | 교육 자료와 관리자 절차 접근 |
 | Git backup branch 보존·정리 | C | D | D가 삭제 전 DB 호환성·복구 필요성을 확인한다. | Git ref 관리 권한 |
 
@@ -241,9 +237,9 @@ ETag와 상태가 바뀌었는지 다음 polling 또는 즉시 조회로 확인�
 - [ ] 재학생존 운영 시간 V31 배포 때 최신 main의 preflight·runtime 권한을 확인하고 catalog export/publish 접근을 거부했다.
 - [ ] 배포 뒤 게시된 축제일의 카탈로그 초기 시간이 `updatedAt: null`로 조회되는지 확인하고, 승인된 시간을 날짜별 저장한 뒤 조회·재시작 후에도 유지되는지 확인했다.
 - [ ] 구버전 애플리케이션으로 rollback할 때 카탈로그 초기 시간을 읽을 수 있는지 확인했고, `crowding_operating_hours`와 저장 행을 보존했다.
-- [ ] 계좌를 바꿨으면 dry-run으로 먼저 확인했고, 끝 네 자리만 대조했다.
+- [ ] 티켓·굿즈·부스 공개 응답과 화면에 계좌·복사·송금 기능이 없고, 가격·재고·메뉴 가격만 보이는지 확인했다.
 - [ ] 스탬프 코드를 바꿨으면 환경변수 변경 후 재시작했고, 교체 시점엔 두 코드를 함께 열어뒀다.
-- [ ] 롤백은 catalog와 계좌를 구분해서 실행했다(계좌는 catalog rollback으로 되돌아가지 않는다).
+- [ ] 스탬프 수령 인증은 KST 11:00부터 17:00 직전까지만 성공하고, 시간 밖에는 `STAMP_REWARD_CLOSED`인지 확인했다.
 - [ ] `/healthz`·`/readyz`로 재시작 뒤 정상 기동을 확인했다.
 - [ ] 재기동·이미지 교체 전 DB와 `espero-media` volume을 같은 백업 artifact ID로 함께 보관했다.
 - [ ] backup recovery set의 보존 기간과 삭제 예정 시점이 정책에 맞고, DB·media가 함께 관리된다.

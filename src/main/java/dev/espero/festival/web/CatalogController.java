@@ -1,9 +1,5 @@
 package dev.espero.festival.web;
 
-import dev.espero.festival.account.OperationalAccountSetting;
-import dev.espero.festival.account.OperationalAccountSettingsService;
-import dev.espero.festival.account.OperationalAccountTarget;
-import dev.espero.festival.context.FestivalProperties;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.domain.CatalogSnapshot.CatalogMap;
 import dev.espero.festival.domain.CatalogSnapshot.Pin;
@@ -12,14 +8,9 @@ import dev.espero.festival.domain.SpaceCategories;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,43 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v2")
 public class CatalogController {
 
-
     private final CatalogSnapshotProvider snapshots;
     private final ApiMetaSupport metaSupport;
-    private final Function<String, Optional<CatalogResponses.BankTransfer>> bankTransfers;
-
-    /** Serves catalog routes without booth accounts. */
     public CatalogController(CatalogSnapshotProvider snapshots, ApiMetaSupport metaSupport) {
-        this(snapshots, metaSupport, spaceId -> Optional.empty());
-    }
-
-    @Autowired
-    public CatalogController(
-        CatalogSnapshotProvider snapshots,
-        ApiMetaSupport metaSupport,
-        OperationalAccountSettingsService accounts,
-        FestivalProperties festival
-    ) {
-        this(snapshots, metaSupport, spaceId -> accounts
-            .findCurrent(OperationalAccountTarget.space(festival.configuredFestivalId(), spaceId))
-            .filter(OperationalAccountSetting::isConfigured)
-            .map(setting -> new CatalogResponses.BankTransfer(
-                setting.bankCode(),
-                setting.bankName(),
-                setting.accountNumber(),
-                setting.accountHolder(),
-                setting.tossLinkEnabled()
-            )));
-    }
-
-    CatalogController(
-        CatalogSnapshotProvider snapshots,
-        ApiMetaSupport metaSupport,
-        Function<String, Optional<CatalogResponses.BankTransfer>> bankTransfers
-    ) {
         this.snapshots = snapshots;
         this.metaSupport = metaSupport;
-        this.bankTransfers = bankTransfers;
     }
 
     @GetMapping("/spaces")
@@ -79,26 +38,19 @@ public class CatalogController {
         }
         List<CatalogResponses.Space> items = snapshot.spaces().stream()
             .filter(space -> category.equals("ALL") || space.category().equals(category))
-            .map(space -> spaceResponse(space, null))
+            .map(CatalogController::spaceResponse)
             .toList();
         return new ApiResponse<>(new CatalogResponses.Spaces(items), meta(snapshot, request));
     }
 
-    /**
-     * The detail carries the booth's current receiving account, read on every
-     * request so a changed account is never served from a cache.
-     */
     @GetMapping("/spaces/{spaceId}")
-    public ResponseEntity<ApiResponse<CatalogResponses.Space>> getSpace(
+    public ApiResponse<CatalogResponses.Space> getSpace(
         @PathVariable String spaceId,
         HttpServletRequest request
     ) {
         CatalogSnapshot snapshot = snapshot(request, Set.of("locale"));
         Space space = snapshot.findSpace(spaceId).orElseThrow(this::notFound);
-        CatalogResponses.BankTransfer bankTransfer = bankTransfers.apply(space.id()).orElse(null);
-        return ResponseEntity.ok()
-            .cacheControl(CacheControl.noStore())
-            .body(new ApiResponse<>(spaceResponse(space, bankTransfer), meta(snapshot, request)));
+        return new ApiResponse<>(spaceResponse(space), meta(snapshot, request));
     }
 
     @GetMapping("/maps")
@@ -220,7 +172,7 @@ public class CatalogController {
         return new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.", false);
     }
 
-    private static CatalogResponses.Space spaceResponse(Space space, CatalogResponses.BankTransfer bankTransfer) {
+    private static CatalogResponses.Space spaceResponse(Space space) {
         CatalogResponses.Link contact = space.contact() == null
             ? null
             : new CatalogResponses.Link(space.contact().label(), space.contact().url(), "_blank");
@@ -242,8 +194,7 @@ public class CatalogController {
             space.experience(),
             space.events(),
             menu,
-            targetResponse(space.mapTarget()),
-            bankTransfer
+            targetResponse(space.mapTarget())
         );
     }
 
@@ -252,6 +203,9 @@ public class CatalogController {
     }
 
     private static CatalogResponses.Image imageResponse(CatalogSnapshot.Image image) {
+        if (image == null) {
+            return null;
+        }
         return new CatalogResponses.Image(image.url(), image.alt(), image.width(), image.height());
     }
 

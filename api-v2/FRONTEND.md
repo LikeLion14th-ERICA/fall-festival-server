@@ -80,16 +80,16 @@ const imageUrl = goods[0]?.image?.url ? new URL(goods[0].image.url, apiOrigin).h
 |---|---|
 | 홈 | config normal / faq-ready / missing-optional / empty, crowd before-open / closed / unmodified / unconfigured, notices empty / error |
 | 목록·상세 | 목록 empty, 상세 missing-optional / not-found / error. 선택 정보가 없는 영역은 제목까지 숨김 |
-| 굿즈 | goods 정상 + goods-availability error, availability sold-out, payment-guide missing-optional. 품절과 조회 실패를 구분 |
+| 굿즈 | goods 정상 + goods-availability error, availability sold-out. 가격·판매 상태를 표시하고 품절과 조회 실패를 구분 |
 | 공지 | new-notice / deleted, 관리자 생성→조회→수정→삭제, all-languages를 적용한 목 세션의 locale=en 번역 대기 제외 |
 | 지도 | 이미지 정상 + pins error / empty / version-conflict. 장소→상세 및 상세→핀 연결 |
-| 티켓 | before-open / closed / ended / unconfigured. 계좌 숨김·가격 미정·오늘 날짜 표시 |
+| 티켓 | `unitPrice`가 null이면 금액 준비 중. 값이 있으면 1인 금액만 표시 |
 | 관리자 | unauthorized / forbidden / error. 저장 실패 시 기존 값 유지, FULL 확인. 혼잡도는 `If-Match`·`Idempotency-Key`를 사용하며 동일 상태 재선택은 204로 성공하고 저장 시각을 유지. 운영 시간은 날짜별 조회·저장, ETag 충돌·검증 실패·게시 해제 상태를 확인 |
 | 스탬프 | guide missing-optional, 수령 인증 normal / invalid-code / error, 별도 client-state-examples의 시작 전·직접 QR 시작 전·2칸·4칸·코드 오류·수령·다음 날짜 |
 
 ## 갱신과 프런트 책임
 
-혼잡도(홈만)·공지·굿즈 판매 상태·외부인 티켓 안내는 화면이 보이는 동안 15초 HTTP polling으로 갱신합니다.
+혼잡도(홈만)·공지·굿즈 판매 상태는 화면이 보이는 동안 15초 HTTP polling으로 갱신합니다. 티켓 금액은 게시 revision이 바뀔 때 다시 조회합니다.
 진입·재활성화·온라인 복귀 때 즉시 조회하고, 숨김·오프라인이면 중단합니다. 요청을 겹치게
 보내지 않고 실패는 30초, 60초 순으로 backoff하며 마지막 정상값을 유지합니다. 먼저 시작한
 요청의 늦은 응답이 최신 화면을 덮지 않게 generation을 비교해 폐기합니다. `meta.revision`이
@@ -155,34 +155,30 @@ polling합니다. 숨겨지거나 오프라인이면 멈춥니다. GET이나 POS
 polling에서 `If-None-Match`로 보내면 변경이 없을 때 304와 빈 본문을 받습니다. 304에서는
 직전 표현을 그대로 유지하고 새 `ETag`만 갱신합니다.
 
-티켓 안내는 정적 카탈로그 안내와 현재 `TICKET` 계좌 설정을 합친 표현입니다. 계좌가 등록되지
-않았거나 해제되면 일정이 있어도 `status`는 `UNCONFIGURED`이고 `account`는 null입니다.
-`paymentSettingsVersion`은 계좌 설정의 version이며, 계좌가 바뀌면 이 값과 `ETag`가 함께
-바뀌므로 다음 polling(최대 15초)에서 새 계좌를 받습니다. 계좌를 한 번도 설정하지 않았으면
-null입니다. `transferLink`는 표시명 출처가 정해질 때까지 항상 null이므로 토스 버튼 문구는
-프런트가 소유합니다.
+티켓 안내 응답의 `data`는 `unitPrice` 한 필드만 담습니다. 2026년 확정 1인 금액은
+25,000원입니다. 이전 revision에서 가격이 준비되지 않았다면 `unitPrice`는
+null입니다. 계좌·송금·토스·수령 상태는 티켓 API에 없습니다. 기존 `status`, `account`,
+`mapTarget` 등에 의존하는 프런트는 `unitPrice`만 읽도록 먼저 전환한 뒤 이 API를 배포합니다.
+`ETag`는 게시 콘텐츠가 바뀔 때만 바뀌므로 티켓 금액 확인을 위해 15초 polling할 필요가 없습니다.
 
 서버는 `Cache-Control: private, no-cache`를 보냅니다. Next.js same-origin proxy는 `ETag`,
 `If-None-Match`, `Cache-Control`, 304 상태를 그대로 전달해야 하며 자체 캐시를 추가하지
 않습니다. 이 proxy 동작의 확인은 웹 저장소의 integration acceptance 범위입니다.
 
-### 굿즈 결제 안내
+### 굿즈·부스 가격 표시
 
-`GET /goods/{goodsId}/payment-guide`는 운영 `GOODS` 계좌를 매 요청 반영하므로 성공 응답에도
-`Cache-Control: no-store`가 붙습니다. 결제 안내를 열 때 다시 조회해 현재 계좌를 사용하고,
-same-origin proxy도 이 헤더를 보존하며 응답을 저장하지 않습니다.
+굿즈 가격은 `GET /goods`와 `GET /goods/{goodsId}`의 `price`, 판매 상태는
+`GET /goods-availability`와 `GET /goods/{goodsId}/availability`에서 읽습니다.
+부스·주점 메뉴 가격은 `GET /spaces/{spaceId}`의 `menu[].price`에서 읽습니다.
+굿즈와 부스 화면에는 계좌 정보·복사 버튼·토스 연결·송금 안내를 표시하지 않습니다.
+기존 굿즈 결제 안내 경로는 제거됐고 부스 응답에도 `bankTransfer`가 없습니다.
 
-### 부스 계좌 송금 안내
+부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동은 프런트 상태입니다. **스탬프는 서버 상태입니다(2026-09-22).** START는 축제일마다 한 번 누르는 `POST /stamp-participants`(오늘 처음 START 201, 오늘 이미 START 200)이고, 서버가 HttpOnly `__Host-festival-stamp` 쿠키를 내려주므로 프런트는 참여자 ID를 저장하거나 읽지 않습니다. 같은 origin의 `/api/v2` 요청이면 쿠키가 자동으로 붙습니다(`credentials: 'same-origin'`). 부스 QR 링크 `…/stamps?b=<토큰>`으로 들어오면 `b` 값을 그대로 `POST /stamp-collections` `{"token": "..."}`로 보내고, 스탬프판은 응답 또는 `GET /stamp-card`(`StampCard`)로 그립니다. 시작 화면 표시 여부는 `GET /stamp-card`로 정합니다. 200이면 오늘 START를 마친 것이므로 시작 화면을 건너뛰고 수집 화면을, `STAMP_NOT_STARTED`(404)이면 시작 화면을 보여 줍니다. 서버가 한국 시간 0시에 START를 초기화하므로 로컬에 시작 여부를 저장하지 않습니다. 부스 QR 링크 진입도 같습니다. `POST /stamp-collections`가 200이면 바로 수집 화면에 적립 결과를 보여 주고, `STAMP_NOT_STARTED`(404)이면 적립 없이 시작 화면으로 보냅니다. `STAMP_NOT_STARTED`(404)는 어느 API든 시작 화면으로, `STAMP_ALREADY_COLLECTED`는 `이 부스의 스탬프는 오늘 이미 받았어요`, `INVALID_STAMP_TOKEN`은 `스탬프투어 QR이 아니에요`, `STAMP_CARD_FULL`·`STAMP_REWARD_CLAIMED`는 적립 없이 현재 판을 유지합니다. `rewardClaimed: true`이면 그날 스탬프투어를 비활성 상태(`QR 찍기`·상품 버튼 비활성, `오늘 상품 수령 완료`)로 보여 주고, 수령 뒤 외부 카메라 진입(`STAMP_REWARD_CLAIMED`)도 오류 창 대신 이 완료 화면으로 보냅니다. 서버는 그날 적립·수령을 모두 거절하고 다음 날 0시에 START부터 다시 열립니다. 토큰은 저장·로그하지 않습니다. 4칸을 모은 사용자의 수령 안내 창에는 `상품 수령` 버튼을 만들지 말고 수령 인증 코드 입력칸과 `확인` 버튼을 둡니다. 코드는 공백을 제거하거나 숫자를 정규화하지 않은 ASCII 숫자 6자리여야 하므로 입력칸은 `inputmode="numeric"`로 6자리만 받습니다. 멋사 부스 담당자가 입력한 코드만 `POST /stamp-receipt-verifications`로 보내며, 성공 응답은 `Cache-Control: no-store`이고 서버가 오늘 수령을 기록합니다(`StampCard.rewardClaimed`). 입력값은 저장하지 않습니다. `INVALID_RECEIPT_CODE`·`STAMP_CARD_INCOMPLETE`·`STAMP_REWARD_CLAIMED`·통신 오류에서는 안내 창을 유지하거나 현재 상태를 다시 읽습니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
 
-부스 상세(`GET /spaces/{spaceId}`)의 `bankTransfer`로 계좌를 표시합니다. 목록에서는 항상 null이고,
-상세에서도 null이면 계좌 안내와 송금 버튼을 숨깁니다. 상세 응답은 `Cache-Control: no-store`이므로
-송금 안내를 열 때 상세를 다시 불러 최신 계좌를 씁니다. 금액은 메뉴 가격으로 프런트가 계산합니다.
-같은 부스 메뉴만 `단가 × 수량`으로 합산하고, 가격이 null인 메뉴는 0원으로 계산하지 않으며 다른
-부스 메뉴는 한 합계로 묶지 않습니다. 합계는 안내값일 뿐 입금 증거가 아닙니다.
-`tossLinkEnabled`가 true일 때만 토스 버튼을 보이고, 계좌·금액 복사는 항상 제공합니다. `bankId`를
-토스 링크의 은행 파라미터로 그대로 쓰지 않습니다. 토스 송금 URL 규격은 아직 실기기 검증 전입니다.
-
-부스 즐겨찾기, 선택 날짜·분류, 지도 확대·이동, 티켓 인원·합계는 프런트 상태입니다. **스탬프는 서버 상태입니다(2026-09-22).** START는 축제일마다 한 번 누르는 `POST /stamp-participants`(오늘 처음 START 201, 오늘 이미 START 200)이고, 서버가 HttpOnly `__Host-festival-stamp` 쿠키를 내려주므로 프런트는 참여자 ID를 저장하거나 읽지 않습니다. 같은 origin의 `/api/v2` 요청이면 쿠키가 자동으로 붙습니다(`credentials: 'same-origin'`). 부스 QR 링크 `…/stamps?b=<토큰>`으로 들어오면 `b` 값을 그대로 `POST /stamp-collections` `{"token": "..."}`로 보내고, 스탬프판은 응답 또는 `GET /stamp-card`(`StampCard`)로 그립니다. 시작 화면 표시 여부는 `GET /stamp-card`로 정합니다. 200이면 오늘 START를 마친 것이므로 시작 화면을 건너뛰고 수집 화면을, `STAMP_NOT_STARTED`(404)이면 시작 화면을 보여 줍니다. 서버가 한국 시간 0시에 START를 초기화하므로 로컬에 시작 여부를 저장하지 않습니다. 부스 QR 링크 진입도 같습니다. `POST /stamp-collections`가 200이면 바로 수집 화면에 적립 결과를 보여 주고, `STAMP_NOT_STARTED`(404)이면 적립 없이 시작 화면으로 보냅니다. `STAMP_NOT_STARTED`(404)는 어느 API든 시작 화면으로, `STAMP_ALREADY_COLLECTED`는 `이 부스의 스탬프는 오늘 이미 받았어요`, `INVALID_STAMP_TOKEN`은 `스탬프투어 QR이 아니에요`, `STAMP_CARD_FULL`·`STAMP_REWARD_CLAIMED`는 적립 없이 현재 판을 유지합니다. `rewardClaimed: true`이면 그날 스탬프투어를 비활성 상태(`QR 찍기`·상품 버튼 비활성, `오늘 상품 수령 완료`)로 보여 주고, 수령 뒤 외부 카메라 진입(`STAMP_REWARD_CLAIMED`)도 오류 창 대신 이 완료 화면으로 보냅니다. 서버는 그날 적립·수령을 모두 거절하고 다음 날 0시에 START부터 다시 열립니다. 토큰은 저장·로그하지 않습니다. 4칸을 모은 사용자의 수령 안내 창에는 `상품 수령` 버튼을 만들지 말고 수령 인증 코드 입력칸과 `확인` 버튼을 둡니다. 코드는 공백을 제거하거나 숫자를 정규화하지 않은 ASCII 숫자 6자리여야 하므로 입력칸은 `inputmode="numeric"`로 6자리만 받습니다. 멋사 부스 담당자가 입력한 코드만 `POST /stamp-receipt-verifications`로 보내며, 성공 응답은 `Cache-Control: no-store`이고 서버가 오늘 수령을 기록합니다(`StampCard.rewardClaimed`). 입력값은 저장하지 않습니다. `INVALID_RECEIPT_CODE`·`STAMP_CARD_INCOMPLETE`·`STAMP_REWARD_CLAIMED`·통신 오류에서는 안내 창을 유지하거나 현재 상태를 다시 읽습니다. START 전 기본 카메라로 QR URL에 직접 들어오면 `STAMP-START`로 이동하며 시작 기록·적립을 만들지 않습니다. QR 권한 거절·카메라 오류는 HTTP 오류가 아니며 로컬 예제와 화면 상태 정의로 개발합니다. 상품 소진 안내는 현장 운영 책임입니다.
+상품 수령 시간은 매일 KST **11:00~17:00**입니다. 17:00 정각부터 서버는
+`409 STAMP_REWARD_CLOSED`를 반환하므로 수령 완료로 표시하지 말고 수령 가능 시간을
+안내하세요. 목 서버는 기본 수령 예시에 정오를 쓰며 `X-Mock-Time`으로 10:59:59,
+11:00:00, 16:59:59, 17:00:00 경계를 확인할 수 있습니다.
 
 ## 새 관리자 계약 연동
 

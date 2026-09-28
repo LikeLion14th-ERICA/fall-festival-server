@@ -155,7 +155,7 @@ class OperationalBoundariesHttpE2eTest {
     }
 
     @Test
-    void goodsAccountCliDryRunSetStaleClearAndRestartPropagateWithoutTicketSideEffects() throws Exception {
+    void legacyGoodsAccountChangesNeverExposePaymentDetails() throws Exception {
         String account = "11" + String.format(java.util.Locale.ROOT, "%010d", new SecureRandom().nextLong(10_000_000_000L));
         String bank = "TestBank-" + UUID.randomUUID();
         String holder = "TestHolder-" + UUID.randomUUID();
@@ -165,19 +165,19 @@ class OperationalBoundariesHttpE2eTest {
         try (HttpClient http = client(); ConfigurableApplicationContext server = start(true, "", false)) {
             JdbcTemplate jdbc = server.getBean(JdbcTemplate.class);
             goods = List.of(seedGoods(jdbc), seedGoods(jdbc));
-            for (UUID id : goods) goodsAccount(http, server, id, null);
+            for (UUID id : goods) goodsWithoutPayment(http, server, id);
             Map<String, String> before = state(jdbc);
             ProcessResult preview = accountSet(input, account, false, 0);
             success(preview);
             assertThat(preview.output()).contains("mode=DRY_RUN");
             noSecrets(preview.output(), List.of(account, bank, holder));
             assertThat(state(jdbc)).isEqualTo(before);
-            for (UUID id : goods) goodsAccount(http, server, id, null);
+            for (UUID id : goods) goodsWithoutPayment(http, server, id);
             ProcessResult applied = accountSet(input, account, true, 0);
             success(applied);
             assertThat(applied.output()).contains("mode=APPLIED", "resultVersion=1");
             noSecrets(applied.output(), List.of(account, bank, holder));
-            for (UUID id : goods) goodsAccount(http, server, id, account);
+            for (UUID id : goods) goodsWithoutPayment(http, server, id);
             assertThat(accountHistory(jdbc)).isEqualTo(1L);
             assertThat(jdbc.queryForObject("SELECT version FROM operational_account_settings WHERE purpose='GOODS'", Long.class)).isEqualTo(1L);
             Map<String, String> configured = state(jdbc);
@@ -186,7 +186,7 @@ class OperationalBoundariesHttpE2eTest {
             assertThat(stale.output()).contains("ACCOUNT_EXPECTED_VERSION_MISMATCH");
             noSecrets(stale.output(), List.of(account, bank, holder));
             assertThat(state(jdbc)).isEqualTo(configured);
-            for (UUID id : goods) goodsAccount(http, server, id, account);
+            for (UUID id : goods) goodsWithoutPayment(http, server, id);
             ProcessResult clear = cli("AccountSettingsCliApplication", "clear", "--festival-id=" + FESTIVAL_ID,
                 "--purpose=GOODS", "--expected-version=1", "--confirm", "--actor=operational-http-e2e",
                 "--reason=release-verification", "--evidence-id=HTTP-29-clear");
@@ -194,11 +194,11 @@ class OperationalBoundariesHttpE2eTest {
             assertThat(clear.output()).contains("state=UNCONFIGURED", "resultVersion=2");
             noSecrets(clear.output(), List.of(account, bank, holder));
             assertThat(accountHistory(jdbc)).isEqualTo(2L);
-            for (UUID id : goods) goodsAccount(http, server, id, null);
+            for (UUID id : goods) goodsWithoutPayment(http, server, id);
             assertThat(jdbc.queryForObject("SELECT count(*) FROM operational_account_settings WHERE purpose='TICKET'", Long.class)).isZero();
         }
         try (HttpClient http = client(); ConfigurableApplicationContext restarted = start(true, "", false)) {
-            for (UUID id : goods) goodsAccount(http, restarted, id, null);
+            for (UUID id : goods) goodsWithoutPayment(http, restarted, id);
             assertThat(accountHistory(restarted.getBean(JdbcTemplate.class))).isEqualTo(2L);
         } finally {
             Files.delete(input);
@@ -481,13 +481,13 @@ class OperationalBoundariesHttpE2eTest {
         return jdbc.queryForObject("SELECT count(*) FROM operational_account_setting_history WHERE purpose='GOODS'", Long.class);
     }
 
-    private void goodsAccount(HttpClient http, ConfigurableApplicationContext server, UUID id, String account) throws Exception {
-        HttpResponse<String> response = get(http, server, "/api/v2/goods/" + id + "/payment-guide", null);
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.headers().firstValue("Cache-Control")).contains("no-store");
-        JsonNode value = body(response).at("/data/account");
-        if (account == null) assertThat(value.isMissingNode() || value.isNull()).isTrue();
-        else assertThat(value.path("accountNumber").asText().equals(account)).as("expected test-only account").isTrue();
+    private void goodsWithoutPayment(HttpClient http, ConfigurableApplicationContext server, UUID id) throws Exception {
+        HttpResponse<String> details = get(http, server, "/api/v2/goods/" + id, null);
+        assertThat(details.statusCode()).isEqualTo(200);
+        assertThat(body(details).at("/data/price/amount").asLong()).isEqualTo(1000L);
+        assertThat(body(details).at("/data/account").isMissingNode()).isTrue();
+        HttpResponse<String> paymentGuide = get(http, server, "/api/v2/goods/" + id + "/payment-guide", null);
+        assertThat(paymentGuide.statusCode()).isEqualTo(404);
     }
 
     private String login(HttpClient http, ConfigurableApplicationContext server) throws Exception {

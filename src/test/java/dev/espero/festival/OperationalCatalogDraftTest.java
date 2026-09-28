@@ -1,98 +1,57 @@
 package dev.espero.festival;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ObjectNode;
 
 /**
- * The 2026 Hanyang festival catalog draft holds only confirmed content, and
- * the values nobody could supply yet are null. This keeps the draft honest in
- * both directions: the gaps are exactly the documented ones, and filling only
- * those gaps yields a manifest the import validator accepts.
+ * The 2026 Hanyang festival catalog draft contains confirmed content and
+ * keeps optional, unapproved content empty.
  */
 class OperationalCatalogDraftTest {
 
     private static final Path DRAFT = Path.of("ops/catalog/hanyang-2026/catalog-draft.json");
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
-    @TempDir
-    private Path tempDir;
-
     @Test
-    void isNotImportableUntilTheDocumentedGapsAreFilled() {
-        CatalogManifestReader reader = new CatalogManifestReader(new CatalogManifestValidator());
-        assertThatThrownBy(() -> reader.read(DRAFT, UUID.randomUUID()))
-            .isInstanceOf(CatalogCliException.class);
-    }
-
-    @Test
-    void validatesOnceOnlyTheDocumentedGapsAreFilled() throws IOException {
-        ObjectNode draft = (ObjectNode) JSON.readTree(Files.readString(DRAFT));
-        List<String> gaps = new ArrayList<>();
-
-        for (JsonNode day : draft.path("festivalDays")) {
-            String date = day.path("festivalDate").asString();
-            gaps.add(fill((ObjectNode) day, "opensAt", date + "T11:00:00+09:00"));
-            gaps.add(fill((ObjectNode) day, "closesAt", date + "T23:00:00+09:00"));
-        }
-        fillImages(draft.path("spaces"), gaps);
-        fillImages(draft.path("artists"), gaps);
-        for (JsonNode item : draft.path("spaceMenuItems")) {
-            addIfGap(gaps, fill((ObjectNode) item, "priceAmount", 1));
-        }
-        for (JsonNode performance : draft.path("performances")) {
-            String date = performance.path("festivalDate").asString();
-            if (performance.path("startsAt").isNull()) {
-                gaps.add(fill((ObjectNode) performance, "startsAt", date + "T19:00:00+09:00"));
-            }
-            if (performance.path("endsAt").isNull()) {
-                gaps.add(fill((ObjectNode) performance, "endsAt", date + "T19:30:00+09:00"));
-            }
-        }
-
-        assertThat(gaps).as("every filled field was a null gap in the draft").doesNotContainNull();
-        Path filled = tempDir.resolve("filled.json");
-        Files.writeString(filled, JSON.writeValueAsString(draft));
+    void validatesConfirmedOperationalDraft() {
         CatalogManifest manifest = new CatalogManifestReader(new CatalogManifestValidator())
-            .read(filled, UUID.randomUUID()).manifest();
+            .read(DRAFT, UUID.randomUUID()).manifest();
 
         assertThat(manifest.spaces()).hasSize(68);
+        assertThat(manifest.spaceMenuItems()).hasSize(24);
         assertThat(manifest.artists()).hasSize(16);
         assertThat(manifest.stampGuideTranslations()).hasSize(2);
     }
 
-    private static void fillImages(JsonNode rows, List<String> gaps) {
-        for (JsonNode row : rows) {
-            addIfGap(gaps, fill((ObjectNode) row, "imageUrl", "https://example.invalid/image.png"));
-            addIfGap(gaps, fill((ObjectNode) row, "imageWidth", 1000));
-            addIfGap(gaps, fill((ObjectNode) row, "imageHeight", 1000));
+    @Test
+    void retainsConfirmedSgaetingTimeAndOptionalImages() throws IOException {
+        JsonNode draft = JSON.readTree(Files.readString(DRAFT));
+        boolean found = false;
+        for (JsonNode performance : draft.path("performances")) {
+            if ("performance-sgaeting".equals(performance.path("id").asString())) {
+                found = true;
+                assertThat(performance.path("startsAt").asString())
+                    .isEqualTo("2026-09-29T18:30:00+09:00");
+                assertThat(performance.path("endsAt").asString())
+                    .isEqualTo("2026-09-29T19:30:00+09:00");
+            }
         }
-    }
-
-    private static void addIfGap(List<String> gaps, String field) {
-        if (field != null) {
-            gaps.add(field);
+        assertThat(found).isTrue();
+        for (JsonNode space : draft.path("spaces")) {
+            assertThat(space.path("imageUrl").isNull()).isTrue();
         }
-    }
-
-    /** Fills a field that must still be null in the draft; returns null otherwise. */
-    private static String fill(ObjectNode row, String field, Object value) {
-        if (!row.has(field) || !row.get(field).isNull()) {
-            return null;
+        for (JsonNode artist : draft.path("artists")) {
+            assertThat(artist.path("imageUrl").isNull()).isFalse();
+            assertThat(artist.path("imageWidth").asInt()).isPositive();
+            assertThat(artist.path("imageHeight").asInt()).isPositive();
         }
-        row.putPOJO(field, value);
-        return field;
     }
 
 }

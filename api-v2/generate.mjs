@@ -34,7 +34,7 @@ const unscopedOperations=new Set([
   'createAdminSession','refreshAdminSession','deleteCurrentAdminSession','getCurrentAdmin',
   'getCrowding','getAdminCrowding','putAdminCrowding','getAdminCrowdingOperatingHours','getAdminCrowdingOperatingHoursDay','putAdminCrowdingOperatingHoursDay',
   'getNotices','getAdminNotice','getAdminNotices','postAdminNotice','putAdminNotice','deleteAdminNotice',
-  'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getPaymentGuide','getArtistHyped','postArtistHyped',
+  'getGoods','getGoodsAvailability','getGood','getGoodAvailability','getArtistHyped','postArtistHyped',
   'getAdminGoods','getAdminProducts','getAdminProduct','postAdminProduct','putAdminProduct','deleteAdminProduct','putAdminAvailability',
   'postAdminGoodsImage','getGoodsImage'
 ]);
@@ -88,7 +88,7 @@ for(const op of operations){
       body.options=body.options.filter(option=>option.colorId!==removedColor.id);
     }
     if(body?.translations&&scenario==='validation-failed')delete body.translations.en;
-    let now=scenarioTime(scenario,MOCK_NOW);
+    let now=scenarioTime(scenario,op.operationId==='verifyStampReceipt'?'2030-10-01T12:00:00+09:00':MOCK_NOW);
     const meta=revision=>({requestId:'mock-example-request',serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});
     const conditionalMeta=revision=>({timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale:'ko',mock:true});
     const initialEtag=op.operationId==='putAdminCrowdingOperatingHoursDay'
