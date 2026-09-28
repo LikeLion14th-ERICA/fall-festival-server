@@ -3002,7 +3002,7 @@
       "endsAt": "2026-09-29T21:30:00+09:00"
     },
     {
-      "id": "performance-lucenne",
+      "id": "performance-rescene",
       "festivalDate": "2026-09-29",
       "startsAt": "2026-09-29T22:00:00+09:00",
       "endsAt": "2026-09-29T22:30:00+09:00"
@@ -3070,7 +3070,7 @@
       "description": null
     },
     {
-      "performanceId": "performance-lucenne",
+      "performanceId": "performance-rescene",
       "locale": "ko",
       "title": "리센느",
       "description": null
@@ -3135,7 +3135,7 @@
       "displayOrder": 1
     },
     {
-      "performanceId": "performance-lucenne",
+      "performanceId": "performance-rescene",
       "artistId": "rescene",
       "displayOrder": 1
     },
