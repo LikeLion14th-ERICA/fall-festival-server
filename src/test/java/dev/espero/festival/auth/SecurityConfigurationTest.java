@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,13 @@ class SecurityConfigurationTest {
         }) {
             mockMvc.perform(get(path)).andExpect(status().isOk()).andExpect(content().string("public"));
         }
+    }
+
+    @Test
+    void writesSecurityHeadersBeforeControllerRuns() throws Exception {
+        mockMvc.perform(get("/api/v2/security-probe/header-timing"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("DENY"));
     }
 
     @Test
@@ -128,6 +136,11 @@ class SecurityConfigurationTest {
         @GetMapping({"/api/v2/crowding", "/api/v2/stamp-guide", "/api/v2/ticket-guide"})
         String publicApi() {
             return "public";
+        }
+
+        @GetMapping("/api/v2/security-probe/header-timing")
+        String headerTiming(HttpServletResponse response) {
+            return response.getHeader("X-Frame-Options");
         }
 
         @GetMapping("/api/v2/admin/security-probe")
