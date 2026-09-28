@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -40,17 +41,20 @@ public class GoodsMediaController {
     private final MediaStorage mediaStorage;
     private final FestivalProperties festivalProperties;
     private final GoodsMediaConditionalSupport conditional;
+    private final GoodsMediaServingCache cache;
 
     public GoodsMediaController(
         MediaAssetStore mediaAssets,
         MediaStorage mediaStorage,
         FestivalProperties festivalProperties,
-        GoodsMediaConditionalSupport conditional
+        GoodsMediaConditionalSupport conditional,
+        GoodsMediaServingCache cache
     ) {
         this.mediaAssets = mediaAssets;
         this.mediaStorage = mediaStorage;
         this.festivalProperties = festivalProperties;
         this.conditional = conditional;
+        this.cache = cache;
     }
 
     @GetMapping("/{mediaId}/{variant}")
@@ -62,30 +66,41 @@ public class GoodsMediaController {
         validateQuery(request);
         MediaVariant mediaVariant = parseVariant(variant);
         UUID festivalId = festivalProperties.configuredFestivalId();
+        // Checked on every request: a detached image must stop being served at once.
         if (mediaAssets.findAttachedForServing(festivalId, mediaId).isEmpty()) {
             throw notFound();
         }
 
         String etag = conditional.strongEtag(mediaId, mediaVariant);
         HttpHeaders headers = responseHeaders(etag);
-        InputStream input;
-        long length;
         try {
-            length = mediaStorage.size(festivalId, mediaId, mediaVariant);
-            input = mediaStorage.open(festivalId, mediaId, mediaVariant);
+            // A stat only: neither a matching validator nor the memory copy may conceal a missing file.
+            long length = mediaStorage.size(festivalId, mediaId, mediaVariant);
+            if (conditional.matches(request.getHeader(HttpHeaders.IF_NONE_MATCH), etag)) {
+                return new ResponseEntity<>(null, headers, HttpStatus.NOT_MODIFIED);
+            }
+            var cached = cache.bytes(mediaId, mediaVariant);
+            if (cached.isPresent()) {
+                return ok(headers, cached.get());
+            }
+            if (cache.fits(length)) {
+                byte[] content;
+                try (InputStream input = mediaStorage.open(festivalId, mediaId, mediaVariant)) {
+                    content = input.readAllBytes();
+                }
+                cache.rememberBytes(mediaId, mediaVariant, content);
+                return ok(headers, content);
+            }
+            InputStream input = mediaStorage.open(festivalId, mediaId, mediaVariant);
+            // The resource converter closes the stream after writing it.
+            return ResponseEntity.ok().headers(headers).contentLength(length).body(new InputStreamResource(input));
         } catch (IOException exception) {
             throw unavailable(exception);
         }
-        if (conditional.matches(request.getHeader(HttpHeaders.IF_NONE_MATCH), etag)) {
-            try {
-                input.close();
-            } catch (IOException exception) {
-                throw unavailable(exception);
-            }
-            return new ResponseEntity<>(null, headers, HttpStatus.NOT_MODIFIED);
-        }
-        // The resource converter closes the stream after writing it.
-        return ResponseEntity.ok().headers(headers).contentLength(length).body(new InputStreamResource(input));
+    }
+
+    private static ResponseEntity<Resource> ok(HttpHeaders headers, byte[] content) {
+        return ResponseEntity.ok().headers(headers).contentLength(content.length).body(new ByteArrayResource(content));
     }
 
     private static HttpHeaders responseHeaders(String etag) {

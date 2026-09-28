@@ -71,6 +71,9 @@ class GoodsMediaControllerIntegrationTest {
     @Autowired
     private MediaStorage mediaStorage;
 
+    @Autowired
+    private GoodsMediaConditionalSupport conditional;
+
     private MockMvc mvc;
 
     @BeforeEach
@@ -140,6 +143,24 @@ class GoodsMediaControllerIntegrationTest {
         performStreaming(get(route(mediaId, "master")).header("If-None-Match", thumbEtag))
             .andExpect(status().isOk())
             .andExpect(content().bytes(bytes("master")));
+    }
+
+    @Test
+    void servesRepeatedRequestsFromMemoryButNeverConcealsAMissingFile() throws Exception {
+        UUID mediaId = insertAttachedMediaWithFiles(FESTIVAL_ID);
+        String etag = performStreaming(route(mediaId, "640")).andReturn().getResponse().getHeader("ETag");
+        assertThat(etag).isEqualTo(conditional.strongEtag(mediaId, MediaVariant.THUMB_640));
+        performStreaming(route(mediaId, "640"))
+            .andExpect(status().isOk())
+            .andExpect(header().longValue("Content-Length", bytes("640").length))
+            .andExpect(content().bytes(bytes("640")));
+        mvc.perform(get(route(mediaId, "640")).header("If-None-Match", etag))
+            .andExpect(status().isNotModified());
+
+        mediaStorage.delete(FESTIVAL_ID, mediaId);
+        mvc.perform(get(route(mediaId, "640"))).andExpect(status().isServiceUnavailable());
+        mvc.perform(get(route(mediaId, "640")).header("If-None-Match", etag))
+            .andExpect(status().isServiceUnavailable());
     }
 
     @Test
