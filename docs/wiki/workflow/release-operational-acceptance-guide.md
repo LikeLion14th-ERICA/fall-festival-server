@@ -198,7 +198,7 @@ OA-03의 paired set으로 복원하고 post-recovery smoke를 남긴다.
 | --- | --- | --- |
 | 라우팅·TLS | public URL의 API, Caddy upstream, Cloudflare proxy 상태 | 인증서·host·forwarded header·status가 승인 설정과 일치 |
 | 혼잡도 | 관리자가 staging 상태 변경 후 즉시 조회와 다음 polling | 오래된 edge 응답 없이 최신 상태 반영 |
-| 공지 | 등록·수정·삭제 및 KST 자정 전후 일반/분실물 | 일반 공지만 날짜 경계에 맞게 사라지고 분실물은 유지 |
+| 공지 | 등록·수정·삭제 및 KST 자정 전후 일반/분실물 | 일반·분실물 모두 날짜 경계 이후 유지되고 삭제 성공 시 목록에서 제거 |
 | 굿즈 | 한 조합의 판매 상태 변경 후 목록·상세·availability | 세 응답이 같은 상태이며 이전 cache가 남지 않음 |
 | 티켓·결제 비노출 | 동일 URL의 반복 조회와 프런트 화면 | 티켓 가격 25,000원만 보이고 계좌·복사·송금 경로가 없음 |
 | locale | 같은 URL의 지원 locale 전환 | 다른 언어 응답이 cache key에서 섞이지 않음 |

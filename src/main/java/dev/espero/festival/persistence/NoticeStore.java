@@ -33,24 +33,16 @@ public class NoticeStore {
         this.jdbc = jdbc;
     }
 
-    /** Notices visible to the public: LOST_FOUND always, GENERAL only within
-     * the given window (the caller's KST "today"). */
-    public List<Notice> findVisible(UUID festivalId, Instant generalWindowStart, Instant generalWindowEnd) {
+    /** All non-deleted notices for the festival, ordered by original creation time. */
+    public List<Notice> findVisible(UUID festivalId) {
         List<NoticeHeader> headers = jdbc.query("""
             SELECT id, festival_id, category, template_id, created_at, updated_at
             FROM notices
             WHERE festival_id = :festivalId
               AND deleted_at IS NULL
-              AND (
-                category = 'LOST_FOUND'
-                OR (created_at >= :windowStart AND created_at < :windowEnd)
-              )
             ORDER BY created_at DESC, id
             """,
-            new MapSqlParameterSource()
-                .addValue("festivalId", festivalId)
-                .addValue("windowStart", atUtc(generalWindowStart))
-                .addValue("windowEnd", atUtc(generalWindowEnd)),
+            new MapSqlParameterSource().addValue("festivalId", festivalId),
             (resultSet, rowNumber) -> mapHeader(resultSet)
         );
         return hydrate(headers);

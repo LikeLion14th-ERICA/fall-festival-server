@@ -29,8 +29,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class NoticeStoreIntegrationTest {
 
     private static final UUID FESTIVAL_ID = UUID.fromString("ec00912b-763f-4f8f-8f57-4bdfc389ccbf");
-    private static final Instant WINDOW_START = Instant.parse("2030-10-01T15:00:00Z");
-    private static final Instant WINDOW_END = Instant.parse("2030-10-02T15:00:00Z");
+    private static final Instant REFERENCE_TIME = Instant.parse("2030-10-01T15:00:00Z");
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(PostgresTestImages.image());
@@ -50,25 +49,25 @@ class NoticeStoreIntegrationTest {
 
     @Test
     @Transactional
-    void findVisibleShowsLostFoundRegardlessOfDateAndGeneralOnlyInsideTheWindow() {
-        UUID insideGeneral = insertNotice("GENERAL", WINDOW_START.plusSeconds(3600));
-        UUID outsideGeneral = insertNotice("GENERAL", WINDOW_START.minusSeconds(3600));
-        UUID oldLostFound = insertNotice("LOST_FOUND", WINDOW_START.minusSeconds(86400));
+    void findVisibleShowsAllNoticeTypesRegardlessOfDateOrderedNewestFirst() {
+        UUID recentGeneral = insertNotice("GENERAL", REFERENCE_TIME.plusSeconds(3600));
+        UUID oldGeneral = insertNotice("GENERAL", REFERENCE_TIME.minusSeconds(3600));
+        UUID oldLostFound = insertNotice("LOST_FOUND", REFERENCE_TIME.minusSeconds(86400));
 
-        List<Notice> visible = store.findVisible(FESTIVAL_ID, WINDOW_START, WINDOW_END);
+        List<Notice> visible = store.findVisible(FESTIVAL_ID);
 
-        assertThat(visible).extracting(Notice::id).contains(insideGeneral, oldLostFound);
-        assertThat(visible).noneMatch(notice -> notice.id().equals(outsideGeneral));
+        assertThat(visible).extracting(Notice::id).containsExactly(recentGeneral, oldGeneral, oldLostFound);
+        assertThat(store.findVisible(UUID.randomUUID())).isEmpty();
     }
 
     @Test
     @Transactional
     void findVisibleAssemblesTranslationsAndOrderedLinksWithLabels() {
-        UUID noticeId = insertNotice("GENERAL", WINDOW_START.plusSeconds(60));
+        UUID noticeId = insertNotice("GENERAL", REFERENCE_TIME.plusSeconds(60));
         insertLink(noticeId, "https://example.invalid/a", 0, Map.of("ko", "링크1", "en", "Link1"));
         insertLink(noticeId, "https://example.invalid/b", 1, Map.of("ko", "링크2", "en", "Link2"));
 
-        List<Notice> visible = store.findVisible(FESTIVAL_ID, WINDOW_START, WINDOW_END);
+        List<Notice> visible = store.findVisible(FESTIVAL_ID);
         Notice notice = visible.stream().filter(n -> n.id().equals(noticeId)).findFirst().orElseThrow();
 
         assertThat(notice.translations()).containsOnlyKeys("ko", "en");
@@ -82,10 +81,10 @@ class NoticeStoreIntegrationTest {
     @Test
     @Transactional
     void findVisibleExcludesSoftDeletedNotices() {
-        UUID deleted = insertNotice("LOST_FOUND", WINDOW_START);
+        UUID deleted = insertNotice("GENERAL", REFERENCE_TIME.minusSeconds(86400));
         jdbc.update("UPDATE notices SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id", Map.of("id", deleted));
 
-        List<Notice> visible = store.findVisible(FESTIVAL_ID, WINDOW_START, WINDOW_END);
+        List<Notice> visible = store.findVisible(FESTIVAL_ID);
 
         assertThat(visible).noneMatch(notice -> notice.id().equals(deleted));
     }
@@ -93,8 +92,8 @@ class NoticeStoreIntegrationTest {
     @Test
     @Transactional
     void findAllForAdminReturnsEveryNonDeletedNoticeRegardlessOfDate() {
-        UUID recent = insertNotice("GENERAL", WINDOW_START);
-        UUID old = insertNotice("GENERAL", WINDOW_START.minusSeconds(1_000_000));
+        UUID recent = insertNotice("GENERAL", REFERENCE_TIME);
+        UUID old = insertNotice("GENERAL", REFERENCE_TIME.minusSeconds(1_000_000));
 
         List<Notice> all = store.findAllForAdmin(FESTIVAL_ID);
 
@@ -104,7 +103,7 @@ class NoticeStoreIntegrationTest {
     @Test
     @Transactional
     void findForAdminReturnsEmptyForAnotherFestivalOrDeletedNotice() {
-        UUID noticeId = insertNotice("GENERAL", WINDOW_START);
+        UUID noticeId = insertNotice("GENERAL", REFERENCE_TIME);
 
         assertThat(store.findForAdmin(FESTIVAL_ID, noticeId)).isPresent();
         assertThat(store.findForAdmin(UUID.randomUUID(), noticeId)).isEmpty();

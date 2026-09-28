@@ -58,7 +58,11 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
-            "test": "listsTodaysGeneralNoticeAndAnyDayLostFoundOrderedNewestFirst"
+            "test": "listsAllNoticeTypesRegardlessOfDateOrderedNewestFirst"
+          },
+          {
+            "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",
+            "test": "keepsNoticesVisibleAcrossKstMidnight"
           },
           {
             "file": "src/test/java/dev/espero/festival/web/NoticeFlowIntegrationTest.java",

@@ -691,11 +691,16 @@ test('Notice create/edit/delete synchronizes ready-language public list and immu
   const alreadyDeleted=await call('/api/v2/admin/notices/'+id,{session,method:'DELETE',headers:{...admin,'If-Match':beforeDelete.headers.get('etag'),'Idempotency-Key':'notice-delete-2'}});
   assert.equal(alreadyDeleted.body.error.code,'ALREADY_DELETED');
 });
-test('Notice KST midnight hides old general notices but retains lost items and admin history',async()=>{
+test('Notice KST midnight retains all notice types regardless of creation date',async()=>{
+  const session='notice-midnight';
+  const before=(await call('/api/v2/notices',{session,headers:{'X-Mock-Time':'2030-10-01T23:59:59+09:00'}})).body.data;
   const headers={'X-Mock-Time':'2030-10-02T00:00:00+09:00'};
-  const publicList=(await call('/api/v2/notices',{headers})).body.data.items;
-  assert.ok(publicList.length>0);assert.ok(publicList.every(n=>n.type==='LOST_FOUND'));
-  assert.ok((await call('/api/v2/admin/notices',{headers:{...headers,...admin}})).body.data.items.some(n=>n.type==='GENERAL'));
+  const after=(await call('/api/v2/notices',{session,headers})).body.data;
+  assert.ok(before.visibleIds.includes('notice-old'));
+  assert.ok(before.items.some(n=>n.type==='LOST_FOUND'));
+  assert.equal(before.asOfDate,'2030-10-01');assert.equal(after.asOfDate,'2030-10-02');
+  assert.deepEqual(after.items,before.items);assert.deepEqual(after.visibleIds,before.visibleIds);
+  assert.ok((await call('/api/v2/admin/notices',{session,headers:{...headers,...admin}})).body.data.items.some(n=>n.id==='notice-old'));
 });
 test('Published languages omit incomplete notices and goods without fallback',async()=>{
   const session='published-locale-completeness';
