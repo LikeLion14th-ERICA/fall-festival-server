@@ -6,7 +6,8 @@
 
 | 파일 | 용도 |
 |---|---|
-| `catalog-draft.json` | catalog manifest 초안. Catalog CLI 또는 로컬 카탈로그 워크벤치로 import한다. |
+| `catalog-draft.json` | 전체 운영 카탈로그 초안. 아직 남은 필수값 때문에 단독 import 불가. |
+| `prepare-artist-roster.py` | 현재 published export의 목 ARTIST만 실제 8팀으로 교체한 후보 manifest 생성. DB 쓰기 없음. |
 | `goods-draft.json` | 굿즈 7종의 `POST /api/v2/admin/products` 요청 body 초안 |
 
 `OperationalCatalogDraftTest`와 `OperationalGoodsDraftTest`는 두 가지를 확인한다. 초안의 빈 값이 아래
@@ -33,8 +34,7 @@
 QA 중 라이브 사이트가 여전히 개발용 mock 카탈로그를 서빙하고 있는 걸 발견해(안태규,
 `festival.likelionerica.com`이 실서비스 URL로 승격됐는데 실제 데이터로 재publish가 안
 된 상태) 실제 publish를 서두르며 기획팀이 준 아래 자료를 반영했다. 여전히 남은
-차단 항목(축제 운영시간, 나머지 부스 이미지, 기존 주점 메뉴 가격, 메인 라인업 8팀
-공연시각, 반입금지물품, 티켓 송금가능시간)이 있어 이번 반영만으로 publish는 안 된다.
+차단 항목(축제 운영시간, 나머지 부스 이미지, 기존 주점 메뉴 가격, 반입금지물품, 티켓 송금가능시간)이 있어 이번 반영만으로 publish는 안 된다.
 
 - 플리마켓 셀러 12곳(셀러 10·MD스토어 1·운영본부 1)
 - 프로모션 스트리트 신규 10곳(ic-pbl·신한은행·상담센터·인권센터·학생지원팀·글로벌
@@ -47,7 +47,7 @@ QA 중 라이브 사이트가 여전히 개발용 mock 카탈로그를 서빙하
 - 콘테스트 공연팀 8명을 `CONTEST` 카테고리 아티스트로 추가(2일차 학생 스페셜공연 2팀,
   3일차 TO:GETHER 본선 6팀) — 대표곡은 명세대로 넣지 않았다. 같은 시간대 팀은 공연
   하나로 묶었다(`performanceArtists`).
-- 콘테스트 공연팀 8명 사진만 실제로 반영: `ops/catalog/hanyang-2026/assets/contest-artists/`에
+- 콘테스트 공연팀 8명 사진을 실제로 반영: `ops/catalog/hanyang-2026/assets/contest-artists/`에
   원본 커밋, `imageUrl`은 raw GitHub URL 참조(굿즈와 달리 관리자 업로드 API가 없어 기존
   artist 이미지 필드와 같은 방식을 그대로 씀). 부스·이벤트 쪽 "대표 이미지"는 전부 텍스트가
   박힌 홍보 포스터라(제목·날짜·소속팀 표기 포함) 카드 이미지로 못 쓴다고 판단해 넣었다가
@@ -60,8 +60,60 @@ QA 중 라이브 사이트가 여전히 개발용 mock 카탈로그를 서빙하
 | 축제일 운영 시작·종료 시각 | `festivalDays[].opensAt/closesAt` | 재학생존 혼잡도의 카탈로그 초기값이다. 관리자 저장 전에는 이 값을 쓰고, 관리자가 날짜별 시간을 저장하면 그 값이 우선한다. 2026-09-28 결정으로 익일 `00:00`까지 허용하므로 이를 피하려고 23:59로 줄이지 않는다. 주간·야간 중 실제 승인 시간은 확인 후 관리자가 날짜별로 저장한다. |
 | 부스·주점 대표 이미지 | `spaces[].imageUrl/imageWidth/imageHeight` | 68곳 전부 null. 기획팀이 준 "대표 이미지" 파일들을 확인해보니 실제로는 행사 홍보 포스터(제목·날짜·소속팀 텍스트가 이미지에 박혀 있음)라 카드형 대표 이미지로 못 쓴다 — 한 번 imageUrl로 넣었다가 실제 파일 열어보고 되돌렸다(2026-09-28). 부스 카드용 별도 사진(텍스트 없는 순수 이미지)이 있어야 채울 수 있다. |
 | 주점 메뉴 가격 | `spaceMenuItems[].priceAmount` | 기존 주점 4곳의 13개 메뉴는 여전히 가격 없음(0원은 무료로 표시되므로 넣지 않는다). 신규 추가한 푸드트럭 12곳·24개 메뉴는 실제 가격까지 채워 넣었다. |
-| 아티스트 사진 | `artists[].imageUrl/imageWidth/imageHeight` | 메인 라인업 8팀은 여전히 없음 — 총학생회 사용 승인은 받았지만(2026-09-22), Figma 포스터 원본이 비율 제각각·용량이 커서(최대 15MB) 디자인팀에 카드용 크롭 이미지를 요청한 상태다. `lucenne`은 Figma상 `RESCENE`과 같은 팀임을 확인했다(2026-09-22). 신규 추가한 콘테스트 공연팀 8명(학생 스페셜공연·TO:GETHER 본선)은 기획팀이 준 실제 사진으로 채웠다(`ops/catalog/hanyang-2026/assets/contest-artists/`). |
-| 공연 시각 | `performances[].startsAt/endsAt` | 메인 라인업 8팀은 여전히 없음(스개팅은 시작 17:30만 확인). 신규 콘테스트 공연 2건(2일차 학생 스페셜공연 19:00~20:00, 3일차 TO:GETHER 본선 17:10~19:10)은 실제 시각을 반영했다 — 같은 시간대 여러 팀은 `performanceArtists`로 한 공연에 묶었다. |
+| 공연 시각 | `performances[].endsAt` | 메인 라인업 8팀과 콘테스트 공연 2건의 시각은 확정 반영했다. 스개팅은 시작 17:30만 확인돼 종료 시각이 없다. |
+
+## 실제 아티스트 8팀만 교체하는 게시 후보
+
+사용자가 확정한 공연 시각과 배포된 프런트 카드 사진을 메인 8팀에 반영했다. 사진 URL은
+https://festival.likelionerica.com/artists/ 아래 배포된 파일이며 8개 모두 HTTP 200과
+원본 픽셀 크기를 확인했다. 한국어 소개·대표곡은 기존 초안의 내용을 쓴다. 아티스트 ID는
+nct-wish, nowimyoung, kim-haon, rescene, heegyu, ahof, alphadrive1, fromis-9다.
+alphadriveone은 현재 프런트의 DAY 3 ID alphadrive1로 통일했다. 리센느는 공식 영문 표기 re:scene에 맞춰 ID를 rescene으로 통일했다.
+사용자가 제공한 Instagram 주소 8개도 링크로 넣었다.
+
+| 날짜 | 공연 시각 (KST) | 아티스트 |
+|---|---|---|
+| 9/29 | 19:30~20:00 · 20:00~20:45 · 20:45~21:30 · 22:00~22:30 | NCT WISH · 나우아임영 · 김하온 · 리센느 |
+| 10/1 | 20:00~20:40 · 20:40~21:20 · 21:20~22:00 · 22:00~22:30 | 희규 · 아홉 · 알파드라이브원 · 프로미스나인 |
+
+전체 초안은 위의 운영시간·부스 이미지·주점 메뉴 가격·스개팅 종료 시각 등으로 계속
+import 차단 상태다. 아래 절차는 현재 게시본의 다른 영역과 CONTEST를 그대로 유지하는
+ARTIST 범위의 후보를 만든다. 따라서 다른 mock 콘텐츠는 남는다.
+
+1. D는 DB 상태·역할과 DB/미디어 변경 전 짝 백업을 확인하고
+   [읽기 전용 사전 점검](../../../docs/wiki/engineering/database-preflight.md)을 수행한다.
+   STOP_AND_REVIEW면 D/DB 제공자의 검토와 명시적 변경 승인이 있기 전까지 중단한다.
+   B(카탈로그 게시 담당)는 현재 축제 published revision UUID를 확인하고
+   [로컬 카탈로그 워크벤치](../../../docs/wiki/engineering/catalog-workbench.md)에서 그 revision을
+   export해 ignored out/ 아래 저장한다. export finding을 확인한다.
+   LEGACY_TICKET_SCHEDULE_UNCONFIGURED 등 import 차단 finding이 있으면 중단한다.
+   export·후보에는 운영 데이터가 있으므로 commit하지 않는다.
+2. export의 festivalId가 대상 회차이고 baselineRevisionId가 방금 export한 published
+   revision UUID와 같은지 확인한다. 다르면 새 published revision을 다시 확인하고 export한다.
+   후보는 아래 명령으로 만들며 기존 파일을 덮어쓰지 않는다.
+
+   ```powershell
+   python ops/catalog/hanyang-2026/prepare-artist-roster.py out/published.json out/artist-candidate.json --festival-id <festival-uuid> --expected-revision <exported-revision-uuid>
+   ```
+
+3. 워크벤치에서 후보를 검증하고 현재 게시본과 비교한다. 차이는 ARTIST 3팀 제거·8팀 추가,
+   이들 번역·링크·대표곡과 관련된 기존 ARTIST 공연 제거·8건 추가만 있어야 한다. CONTEST,
+   festivalDays, timetableConfig와 나머지 section 변경이 있으면 중단한다. 현재 published
+   pointer가 여전히 baselineRevisionId와 같아야 한다.
+4. B가 후보를 가져와 draft를 게시한다. C는 B와 정한 통제 시간에 A1 백엔드를 재시작한다.
+   B는 GET /api/v2/lineup의 9/29 ARTIST 4팀·9/30 0팀·10/1 4팀,
+   GET /api/v2/artist-hyped의 8개 ID 참여 가능 여부, /readyz 및 공개 응답의
+   meta.revision을 확인한다. 문제 시 [게시 CLI rollback](../../../docs/wiki/engineering/publishing.md)의
+   --expected-current로 이전 published revision을 새 revision으로 복제·게시하고,
+   C가 재시작한 뒤 다시 확인한다. Hyped 누적 수는 catalog 밖이므로 rollback 대상이 아니다.
+
+프런트 후속 작업: DAY 3 ARTIST 강제 정적 목록 분기와 DAY 1의
+mock-artist-wish 한 팀일 때 목록을 보충하는 분기를 제거하고, 실제 ID의 상세를 API에서
+조회하도록 변경한다. 현재 프런트 저장소는 확인되지 않아 이 작업 범위에 포함하지 않는다.
+그 전에도 DAY 3의 alphadrive1 ID는 이번 백엔드 후보와 일치하지만, 프런트가 정적
+상세를 보여주는 문제는 남는다. 리센느 역시 현재 프런트의 rescene 정적 상세가
+API 공연 시각을 가릴 수 있다. 프런트 영어 정적 이름·소개에 남은
+RESCENE 표기도 re:scene으로 고쳐야 한다.
 
 굿즈 7종은 실제 관리자 API로 상품과 이미지를 등록 완료했다(2026-09-21). 업로드 이미지는 원본이
 1024×1024보다 작아 비율 유지 확대·투명 여백 추가로 처리했다. A1 이미지 저장 volume이 최초 배포
@@ -80,7 +132,7 @@ QA 중 라이브 사이트가 여전히 개발용 mock 카탈로그를 서빙하
   (`ticketGuide.unitPriceAmount`). 현장 수령(티켓부스) 운영은 13:00 시작이 확정됐지만, 종료는
   "마지막 무대 종료 30분 전"으로 공연 타임테이블이 확정돼야 정해지는 값이라 아직 고정 시각을
   넣지 않았다. `dailyTransferOpenTime/CloseTime`·`dailyPickupOpenTime/CloseTime` 네 값은
-  검증기가 전부 채워야만 통과시키므로(all-or-nothing), 공연 시각이 정해지기 전에는 하나만
+  검증기가 전부 채워야만 통과시키므로(all-or-nothing), 현장 수령 종료 시간이 확정되기 전에는 하나만
   채우지 않는다.
 - 영어·중국어 공간·아티스트 번역: 공개 조건을 채우지 못하므로 한국어만 넣었다. 주점 이름·운영
   주체·메뉴의 승인 번역은 번역표에 있다.

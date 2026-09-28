@@ -47,17 +47,23 @@ class OperationalCatalogDraftTest {
             gaps.add(fill((ObjectNode) day, "closesAt", date + "T23:00:00+09:00"));
         }
         fillImages(draft.path("spaces"), gaps);
-        fillImages(draft.path("artists"), gaps);
+        for (JsonNode artist : draft.path("artists")) {
+            assertThat(artist.path("imageUrl").isNull()).isFalse();
+            assertThat(artist.path("imageWidth").asInt()).isPositive();
+            assertThat(artist.path("imageHeight").asInt()).isPositive();
+        }
         for (JsonNode item : draft.path("spaceMenuItems")) {
             addIfGap(gaps, fill((ObjectNode) item, "priceAmount", 1));
         }
         for (JsonNode performance : draft.path("performances")) {
             String date = performance.path("festivalDate").asString();
-            if (performance.path("startsAt").isNull()) {
-                gaps.add(fill((ObjectNode) performance, "startsAt", date + "T19:00:00+09:00"));
-            }
-            if (performance.path("endsAt").isNull()) {
+            if ("performance-sgaeting".equals(performance.path("id").asString())) {
+                assertThat(performance.path("startsAt").asString())
+                    .isEqualTo("2026-09-29T17:30:00+09:00");
                 gaps.add(fill((ObjectNode) performance, "endsAt", date + "T19:30:00+09:00"));
+            } else {
+                assertThat(performance.path("startsAt").isNull()).isFalse();
+                assertThat(performance.path("endsAt").isNull()).isFalse();
             }
         }
 
