@@ -40,6 +40,22 @@ class RateLimitTest {
     }
 
     @Test
+    void weightedReservationsAreAtomicAndUseTheExistingPolicyBucket() {
+        MutableClock clock = new MutableClock();
+        RequestRateLimiter limiter = new RequestRateLimiter(clock);
+        RateLimitProperties.Policy policy = new RateLimitProperties.Policy(5, 1.0);
+        assertThat(limiter.acquire("artist-hyped", policy, "a")).isZero();
+        assertThat(limiter.acquire("artist-hyped", policy, "a", 3)).isZero();
+        assertThat(limiter.acquire("artist-hyped", policy, "a", 2)).isEqualTo(1);
+        // A rejected weighted acquisition did not consume the remaining token.
+        assertThat(limiter.acquire("artist-hyped", policy, "a")).isZero();
+        assertThat(limiter.acquire("artist-hyped", policy, "a")).isEqualTo(1);
+        assertThat(limiter.acquire("artist-hyped-read", policy, "a", 5)).isZero();
+        clock.advanceMillis(3_000);
+        assertThat(limiter.acquire("artist-hyped", policy, "a", 3)).isZero();
+    }
+
+    @Test
     void keepsActiveBucketsWhenTheClientTableIsFull() {
         MutableClock clock = new MutableClock();
         RequestRateLimiter limiter = new RequestRateLimiter(clock, 2, 10_000_000_000L);

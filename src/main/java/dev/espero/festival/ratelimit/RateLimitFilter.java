@@ -59,12 +59,16 @@ class RateLimitFilter extends OncePerRequestFilter {
             response.setHeader(HttpHeaders.CACHE_CONTROL, "no-store");
         }
         if (policyName != null) {
-            long retryAfter = limiter.acquire(policyName, policy(policyName), client(request));
+            String client = client(request);
+            long retryAfter = limiter.acquire(policyName, policy(policyName), client);
             if (retryAfter > 0) {
                 response.setHeader("Retry-After", Long.toString(retryAfter));
                 errors.write(request, response, HttpStatus.TOO_MANY_REQUESTS.value(),
                     "RATE_LIMITED", "잠시 후 다시 요청해 주세요.", true);
                 return;
+            }
+            if (policyName.equals("artist-hyped")) {
+                HypedWriteAdmission.record(request, limiter, properties.artistHyped(), client);
             }
         }
         chain.doFilter(request, response);

@@ -37,6 +37,7 @@ public class ArtistHypedController {
 
     private final CatalogSnapshotProvider snapshots;
     private final ArtistHypedStore store;
+    private final ArtistHypedBatchService batches;
     private final ApiMetaSupport metaSupport;
     private final Clock clock;
     private CachedCounts cachedCounts;
@@ -44,11 +45,13 @@ public class ArtistHypedController {
     public ArtistHypedController(
         CatalogSnapshotProvider snapshots,
         ArtistHypedStore store,
+        ArtistHypedBatchService batches,
         ApiMetaSupport metaSupport,
         Clock clock
     ) {
         this.snapshots = snapshots;
         this.store = store;
+        this.batches = batches;
         this.metaSupport = metaSupport;
         this.clock = clock;
     }
@@ -81,11 +84,20 @@ public class ArtistHypedController {
         if (!PUBLIC_ID.matcher(artistId).matches()) {
             throw PublicContentLocale.invalidQuery();
         }
-        if (body == null || !body.isEmpty()) {
-            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION_FAILED", "요청 필드를 확인해 주세요.", false);
+        ArtistHypedBatchRequest batch = ArtistHypedBatchRequest.parse(body);
+        UUID festivalId = festivalId(context.snapshot());
+        if (batch != null && !batch.festivalId().equals(festivalId)) {
+            throw new ApiException(HttpStatus.CONFLICT, "FESTIVAL_MISMATCH", "현재 축제의 요청이 아닙니다.", false);
         }
         Instant now = clock.instant();
         try {
+            if (batch != null) {
+                var applied = batches.apply(new ArtistHypedBatchService.Command(festivalId,
+                    context.snapshot().context().revisionId(), batch.batchId(), artistId, batch.delta(),
+                    countPrefix(context.snapshot(), now), now, enabled(context.snapshot(), now)), request);
+                updateCachedCount(countKey(context.snapshot(), applied.countPrefix()), artistId, applied.count());
+                return incrementResponse(request, context, artistId, applied.count());
+            }
             if (!store.isCurrentArtist(context.snapshot().context().revisionId(), artistId)) {
                 throw new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.", false);
             }
@@ -95,15 +107,18 @@ public class ArtistHypedController {
             String prefix = countPrefix(context.snapshot(), now);
             long count = store.increment(festivalId(context.snapshot()), artistId, prefix, now);
             updateCachedCount(countKey(context.snapshot(), prefix), artistId, count);
-            return ResponseEntity.ok().cacheControl(CacheControl.noStore())
-                .body(new ApiResponse<>(
-                    new ArtistHypedResponse.Increment(artistId, count),
-                    metaSupport.dynamicMeta(request, context.snapshot().context(), context.locale())
-                ));
+            return incrementResponse(request, context, artistId, count);
         } catch (DataAccessException exception) {
             RequestDiagnostics.failure(request, exception);
             throw unavailable();
         }
+    }
+
+    private ResponseEntity<ApiResponse<ArtistHypedResponse.Increment>> incrementResponse(
+        HttpServletRequest request, Context context, String artistId, long count) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+            .body(new ApiResponse<>(new ArtistHypedResponse.Increment(artistId, count),
+                metaSupport.dynamicMeta(request, context.snapshot().context(), context.locale())));
     }
 
     // ponytail: one bounded entry for the single-instance deployment; serialize cache misses only here.

@@ -2,6 +2,25 @@
 
 [위키 홈](../README.md) · 읽는 때: 코드·의존성·배포 변경 검증
 
+## 2026-09-29 Hyped 묶음 전송 로컬 검증
+
+- macOS, OpenJDK 26.0.2.1, Maven Wrapper, Docker의 임시 PostgreSQL에서 실행했다.
+  `TMPDIR=/private/tmp`, `-Djava.io.tmpdir=/private/tmp`, `-DargLine=-Djava.io.tmpdir=/private/tmp`로
+  macOS `/tmp` symlink와 기존 미디어 경로 보안 검사의 충돌을 피했다.
+- `sh ./mvnw --batch-mode --no-transfer-progress verify`: 765개, 실패·오류 0, skip 7,
+  실행 가능한 JAR 패키징 성공. skip 7개는 외부 WebP 도구/Alpine profile 검사다.
+- 이후 정수의 소수·지수 표기 허용을 보완한 최종 코드에서
+  `-Dtest=ArtistHypedBatchIntegrationTest,ArtistHypedControllerOpenApiTest verify`: 17개,
+  실패·오류·skip 0, JAR 재패키징 성공. 전체 suite를 이 마지막 수정 후 다시 실행하지는 않았다.
+- `npm --prefix api-v2 run check`: 462개 통과, 51 operations·403 examples.
+  입력 계약, 동일 ID replay, 충돌·회차·마감·리허설 구간을 확인했다.
+- 실제 PostgreSQL 배치 회귀는 동시 같은/다른 ID, 트랜잭션 rollback, 서비스 재생성 후 replay,
+  마감 후 확인, 가중 rate limit과 Retry-After를 포함한다. 역할·프리플라이트 회귀도 통과했다.
+- 별도 웹 저장소의 큐 회귀 18개 포함 전체 131개, 타입·변경 파일 lint·production 빌드 통과.
+  fake-indexeddb로 다중 탭, 응답 유실, ACK 저장 실패, 재실행 복구를 확인했다.
+- `git diff --check`, 변경 문서 상대 링크 검사를 통과했다. 운영 배포·기기 강제 종료·실제
+  동시 사용자 지연 개선·운영 DB 권한 적용은 이 로컬 결과에 포함하지 않는다.
+
 릴리스 후보의 staging evidence bundle 연결, candidate digest·OpenAPI hash·migration checksum,
 coverage·scan·PostgreSQL 17·E2E·load·recovery·browser handoff gate는 [릴리스 증거 runbook](release-evidence-runbook.md)을
 따른다. 이 문서는 아래 명령의 결과를 대체하지 않고 후보별 판정과 보호된 운영 기록 연결을 정의한다.

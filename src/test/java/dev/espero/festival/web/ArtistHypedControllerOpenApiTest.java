@@ -53,6 +53,7 @@ class ArtistHypedControllerOpenApiTest {
     private final ObjectMapper json = new ObjectMapper();
     private final CatalogSnapshotProvider snapshots = mock(CatalogSnapshotProvider.class);
     private final ArtistHypedStore store = mock(ArtistHypedStore.class);
+    private final ArtistHypedBatchService batches = mock(ArtistHypedBatchService.class);
     private final Clock clock = mock(Clock.class);
     private JsonNode openApi;
     private MockMvc mvc;
@@ -63,7 +64,7 @@ class ArtistHypedControllerOpenApiTest {
         useTime("2030-10-01T00:00:00Z");
         when(clock.withZone(any())).thenAnswer(invocation -> Clock.fixed(clock.instant(), invocation.getArgument(0)));
         ApiMetaSupport metaSupport = ApiMetaTestFixtures.contentMetaSupport(clock);
-        mvc = MockMvcBuilders.standaloneSetup(new ArtistHypedController(snapshots, store, metaSupport, clock))
+        mvc = MockMvcBuilders.standaloneSetup(new ArtistHypedController(snapshots, store, batches, metaSupport, clock))
             .setControllerAdvice(new GlobalApiExceptionHandler(metaSupport))
             .addFilters(new RequestIdFilter())
             .build();

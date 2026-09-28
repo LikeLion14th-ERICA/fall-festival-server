@@ -1,4 +1,4 @@
--- Run with psql after V15 (or its merge-time renumbered successor) has migrated.
+-- Run with psql after V34 (or its merge-time renumbered successor) has migrated.
 -- Example variables are intentionally omitted: role and schema names are supplied by each DB provider.
 -- Required psql variables: schema, runtime_role, cleanup_role, account_operator_role,
 -- catalog_export_role, catalog_publish_role.
@@ -17,6 +17,9 @@ REVOKE ALL ON FUNCTION :"schema".record_operational_account_setting_history() FR
 GRANT USAGE ON SCHEMA :"schema" TO :"runtime_role";
 GRANT SELECT ON TABLE :"schema".operational_account_settings TO :"runtime_role";
 GRANT SELECT, INSERT, UPDATE ON TABLE :"schema".artist_hyped_counts TO :"runtime_role";
+-- Successful batch receipts must survive retries and cannot be removed by runtime cleanup.
+REVOKE ALL ON TABLE :"schema".artist_hyped_batches FROM :"runtime_role";
+GRANT SELECT, INSERT, UPDATE ON TABLE :"schema".artist_hyped_batches TO :"runtime_role";
 REVOKE ALL ON TABLE :"schema".crowding_operating_hours FROM :"runtime_role";
 GRANT SELECT, INSERT, UPDATE ON TABLE :"schema".crowding_operating_hours TO :"runtime_role";
 
@@ -77,6 +80,10 @@ REVOKE ALL ON TABLE :"schema".crowding_operating_hours FROM :"catalog_publish_ro
 REVOKE ALL ON TABLE :"schema".artist_hyped_counts FROM PUBLIC;
 REVOKE ALL ON TABLE :"schema".artist_hyped_counts FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".artist_hyped_counts FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".artist_hyped_batches FROM PUBLIC;
+REVOKE ALL ON TABLE :"schema".artist_hyped_batches FROM :"catalog_export_role";
+REVOKE ALL ON TABLE :"schema".artist_hyped_batches FROM :"catalog_publish_role";
+REVOKE ALL ON TABLE :"schema".artist_hyped_batches FROM :"cleanup_role";
 REVOKE ALL ON TABLE :"schema".notices FROM :"catalog_export_role";
 REVOKE ALL ON TABLE :"schema".notices FROM :"catalog_publish_role";
 REVOKE ALL ON TABLE :"schema".notice_translations FROM :"catalog_export_role";

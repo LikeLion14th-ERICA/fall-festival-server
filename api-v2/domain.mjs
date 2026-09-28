@@ -1,6 +1,7 @@
 // Fictional fixtures only. No DB, actual festival dates, account, or user records.
 import { initializeAdmin,inventoryFor,adminExecute,validateNotice,crowdingOperatingHoursFor } from './admin-domain.mjs';
 export const MOCK_NOW = '2030-10-01T18:00:00+09:00';
+export const MOCK_HYPED_FESTIVAL_ID = '00000000-0000-4000-8000-000000000001';
 export const DATES = ['2030-10-01','2030-10-02','2030-10-03'];
 export const IMAGE = { url: '/__mock/assets/sample.svg', alt: '개발용 예시 이미지 · 실제 행사 자료 아님', width: 800, height: 600 };
 // Fictional six-digit reward code used only by the mock server.
@@ -239,7 +240,7 @@ export function createState() {
     places.push({id:landmark.id,kind:landmark.kind,name:landmark.name,locationText:landmark.locationText,hoursText:landmark.hoursText,description:landmark.description,usage:landmark.usage,spaceId:null});
   }
   return initializeAdmin({
-    revision:1,nextId:1,hypedCounts:{},festivalDays:[
+    revision:1,nextId:1,hypedCounts:{},hypedBatches:{},festivalDays:[
       {operatingDay:'2030-10-01',opensAt:'13:00',closesAt:'22:00'},
       {operatingDay:'2030-10-02',opensAt:'12:00',closesAt:'21:00'},
       {operatingDay:'2030-10-03',opensAt:'14:00',closesAt:'20:00'},
@@ -507,13 +508,25 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       break;
     }
     case 'postArtistHyped':{
+      if(!body||Array.isArray(body)||typeof body!=='object')failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.');
+      const batch=Object.keys(body).length>0;
+      const uuid=/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+      if(batch&&(Object.keys(body).length!==3||!uuid.test(body.festivalId)||!uuid.test(body.batchId)||!Number.isSafeInteger(body.delta)||body.delta<1||body.delta>20))failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.');
+      if(batch&&body.festivalId.toLowerCase()!==MOCK_HYPED_FESTIVAL_ID)failure(409,'FESTIVAL_MISMATCH','현재 축제 회차와 다른 요청입니다.');
+      const batchKey=batch?body.batchId.toLowerCase():null;
+      const previous=batch?state.hypedBatches[batchKey]:null;
+      if(previous){
+        if(previous.artistId!==params.artistId||previous.delta!==body.delta)failure(409,'IDEMPOTENCY_CONFLICT','같은 묶음을 다른 요청에 사용할 수 없습니다.');
+        data={artistId:previous.artistId,hypedCount:previous.hypedCount};
+        break;
+      }
       const artist=state.artists.find(candidate=>candidate.id===params.artistId);
       if(!artist||artist.category!=='ARTIST'||scenario==='contest')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
       if(!hypedEnabled)failure(409,'HYPED_CLOSED','지금은 기대돼요 참여 시간이 아닙니다.');
-      if(!body||Object.keys(body).length)failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.');
-      const hypedCount=(state.hypedCounts[hypedPrefix+artist.id]||0)+1;
+      const hypedCount=(state.hypedCounts[hypedPrefix+artist.id]||0)+(batch?body.delta:1);
       state.hypedCounts[hypedPrefix+artist.id]=hypedCount;
       data={artistId:artist.id,hypedCount};
+      if(batch)state.hypedBatches[batchKey]={...data,delta:body.delta,prefix:hypedPrefix};
       break;
     }
     case 'getTimetable':data={dates:DATES,axis:{startTime:'17:00',endTime:'22:00'},items:empty?[]:structuredClone(state.performances).sort((a,b)=>a.startsAt.localeCompare(b.startsAt)||a.id.localeCompare(b.id))};break;

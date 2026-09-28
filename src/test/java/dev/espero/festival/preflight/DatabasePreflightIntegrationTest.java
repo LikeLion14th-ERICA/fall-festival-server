@@ -98,6 +98,7 @@ class DatabasePreflightIntegrationTest {
         assertThat(report.festivals()).hasSize(1);
         assertThat(report.revisions()).anySatisfy(revision -> assertThat(revision.get("state")).isEqualTo("published"));
         assertThat(report.catalogPresence()).containsKey("performances");
+        assertThat(report.catalogPresence()).doesNotContainKeys("artist_hyped_counts", "artist_hyped_batches");
         assertThat(statements).isNotEmpty();
         assertThat(rolledBack[0]).isTrue();
         assertThat(scalar("SELECT count(*) FROM flyway_schema_history")).isEqualTo(before);
