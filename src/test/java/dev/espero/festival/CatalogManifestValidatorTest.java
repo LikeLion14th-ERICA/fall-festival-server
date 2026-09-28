@@ -66,6 +66,25 @@ class CatalogManifestValidatorTest {
     }
 
     @Test
+    void acceptsMissingArtistImageAndRejectsIncompleteImages() {
+        PerformanceFixture fixture = new PerformanceFixture();
+        fixture.artists.set(0, new CatalogManifest.Artist("artist-one", "ARTIST", null, null, null));
+        assertThatCode(() -> validator.validate(fixture.manifest())).doesNotThrowAnyException();
+
+        assertInvalid(f -> f.artists.set(0,
+            new CatalogManifest.Artist("artist-one", "ARTIST", null, 100, null)),
+            "dimensions require a URL");
+        assertInvalid(f -> f.artists.set(0,
+            new CatalogManifest.Artist("artist-one", "ARTIST", "/artist.png", null, 100)),
+            "dimensions are required with a URL");
+        assertThatThrownBy(() -> validator.validate(new PerformanceFixture().manifestWithSpace(
+            new CatalogManifest.Space("space-one", "BOOTH", "/space.png", 100, null)
+        )))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("spaces.image dimensions are required with a URL");
+    }
+
+    @Test
     void validatesArtistLinksAndTheirKoreanTranslations() {
         assertInvalid(fixture -> fixture.artistLinks.set(0,
             new CatalogManifest.ArtistLink("missing", 1, "https://example.test")),

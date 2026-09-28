@@ -252,6 +252,9 @@ public class CatalogController {
     }
 
     private static CatalogResponses.Image imageResponse(CatalogSnapshot.Image image) {
+        if (image == null) {
+            return null;
+        }
         return new CatalogResponses.Image(image.url(), image.alt(), image.width(), image.height());
     }
 

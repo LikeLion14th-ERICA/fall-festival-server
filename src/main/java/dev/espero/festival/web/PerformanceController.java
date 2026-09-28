@@ -296,6 +296,9 @@ public class PerformanceController {
     }
 
     private static PerformanceResponses.Image image(PerformanceCatalogReadStore.Image image) {
+        if (image == null) {
+            return null;
+        }
         return new PerformanceResponses.Image(image.url(), image.alt(), image.width(), image.height());
     }
 

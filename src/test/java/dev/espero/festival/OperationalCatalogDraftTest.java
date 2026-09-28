@@ -41,16 +41,8 @@ class OperationalCatalogDraftTest {
         ObjectNode draft = (ObjectNode) JSON.readTree(Files.readString(DRAFT));
         List<String> gaps = new ArrayList<>();
 
-        for (JsonNode day : draft.path("festivalDays")) {
-            String date = day.path("festivalDate").asString();
-            gaps.add(fill((ObjectNode) day, "opensAt", date + "T11:00:00+09:00"));
-            gaps.add(fill((ObjectNode) day, "closesAt", date + "T23:00:00+09:00"));
-        }
         fillImages(draft.path("spaces"), gaps);
         fillImages(draft.path("artists"), gaps);
-        for (JsonNode item : draft.path("spaceMenuItems")) {
-            addIfGap(gaps, fill((ObjectNode) item, "priceAmount", 1));
-        }
         for (JsonNode performance : draft.path("performances")) {
             String date = performance.path("festivalDate").asString();
             if (performance.path("startsAt").isNull()) {
@@ -68,6 +60,7 @@ class OperationalCatalogDraftTest {
             .read(filled, UUID.randomUUID()).manifest();
 
         assertThat(manifest.spaces()).hasSize(68);
+        assertThat(manifest.spaceMenuItems()).hasSize(24);
         assertThat(manifest.artists()).hasSize(16);
         assertThat(manifest.stampGuideTranslations()).hasSize(2);
     }

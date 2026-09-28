@@ -27,6 +27,19 @@ const admin={Authorization:'Bearer mock-admin'};
 const operation=id=>Object.values(spec.paths).flatMap(Object.values).find(o=>o.operationId===id);
 
 test('OpenAPI 3.1 document passes standard parser validation',async()=>{await SwaggerParser.validate(structuredClone(spec));});
+test('frontend-owned space and artist images may be null',()=>{
+  const cases=[
+    ['Space',examples.getSpaces.scenarios.normal.response.data.items[0]],
+    ['Artist',examples.getArtist.scenarios.normal.response.data],
+    [null,examples.getLineup.scenarios.normal.response.data.items[0]],
+  ];
+  for(const [name,item] of cases){
+    const schema=name?{$ref:`#/components/schemas/${name}`}:spec.components.schemas.Lineup.properties.items.items;
+    standardValidate(schema,{...item,image:null});
+    const missing={...item};delete missing.image;
+    assert.notEqual(localValidate(schema,missing,spec).length,0);
+  }
+});
 test('Meta revision distinguishes aligned content from unscoped and error responses',()=>{
   const metaSchema={$ref:'#/components/schemas/Meta'};
   const baseMeta={requestId:'revision-contract',serverTime:'2030-10-01T12:00:00+09:00',timezone:'Asia/Seoul',festivalId:'festival-mock',locale:'ko',mock:true};

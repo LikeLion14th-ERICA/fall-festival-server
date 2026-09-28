@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import dev.espero.festival.support.PostgresTestImages;
 import dev.espero.festival.domain.CatalogSnapshot;
 import dev.espero.festival.persistence.CatalogSnapshotStore;
+import dev.espero.festival.persistence.PerformanceCatalogReadStore;
 import dev.espero.festival.persistence.LocaleCompletenessStore;
 import dev.espero.festival.persistence.PerformanceRevisionValidator;
 import java.io.IOException;
@@ -65,6 +66,9 @@ class CatalogRevisionServiceIntegrationTest {
 
     @Autowired
     private CatalogSnapshotStore snapshots;
+
+    @Autowired
+    private PerformanceCatalogReadStore performanceCatalog;
 
     @Autowired
     private PerformanceRevisionValidator performanceRevisions;
@@ -735,6 +739,41 @@ class CatalogRevisionServiceIntegrationTest {
         for (String table : performanceTables()) {
             assertThat(rowCount(table, revisionId)).as(table).isPositive();
         }
+    }
+
+    @Test
+    void publishesAndExportsMissingImagesWhileKeepingExistingImagesSupported() throws IOException {
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper()
+            .findAndRegisterModules();
+        com.fasterxml.jackson.databind.node.ObjectNode json = (com.fasterxml.jackson.databind.node.ObjectNode)
+            mapper.readTree(manifestJson("qr-no-images", "/assets/maps/overview-v1.png"));
+        for (String field : new String[] {"spaces", "artists"}) {
+            com.fasterxml.jackson.databind.node.ObjectNode row =
+                (com.fasterxml.jackson.databind.node.ObjectNode) json.path(field).get(0);
+            row.putNull("imageUrl");
+            row.putNull("imageWidth");
+            row.putNull("imageHeight");
+        }
+        Path manifest = tempDir.resolve("no-images.json");
+        Files.writeString(manifest, mapper.writeValueAsString(json));
+
+        UUID withoutImages = revisions.importManifest(manifest, "release-bot");
+        revisions.publish(withoutImages, "release-bot");
+        assertThat(snapshots.loadPublished().findSpace("space-booth").orElseThrow().image()).isNull();
+        assertThat(performanceCatalog.findArtist(withoutImages, "artist-one", "ko").orElseThrow().image()).isNull();
+        assertThat(performanceCatalog.lineup(
+            withoutImages, LocalDate.of(2026, 10, 1), "ARTIST", "ko"
+        )).singleElement().satisfies(item -> assertThat(item.image()).isNull());
+        CatalogManifest exported = exports.export(withoutImages).manifest();
+        assertThat(exported.spaces().getFirst().imageWidth()).isNull();
+        assertThat(exported.artists().getFirst().imageHeight()).isNull();
+
+        UUID withImages = importManifest("qr-with-images", "/assets/maps/overview-v1.png");
+        revisions.publish(withImages, "release-bot");
+        assertThat(snapshots.loadPublished().findSpace("space-booth").orElseThrow().image().url())
+            .isEqualTo("/assets/spaces/booth.png");
+        assertThat(performanceCatalog.findArtist(withImages, "artist-one", "ko").orElseThrow().image().url())
+            .isEqualTo("/assets/artists/one.png");
     }
 
     @Test

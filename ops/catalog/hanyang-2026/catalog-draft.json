@@ -2,18 +2,18 @@
   "festivalDays": [
     {
       "festivalDate": "2026-09-29",
-      "opensAt": null,
-      "closesAt": null
+      "opensAt": "2026-09-29T09:00:00+09:00",
+      "closesAt": "2026-09-30T00:00:00+09:00"
     },
     {
       "festivalDate": "2026-09-30",
-      "opensAt": null,
-      "closesAt": null
+      "opensAt": "2026-09-30T09:00:00+09:00",
+      "closesAt": "2026-10-01T00:00:00+09:00"
     },
     {
       "festivalDate": "2026-10-01",
-      "opensAt": null,
-      "closesAt": null
+      "opensAt": "2026-10-01T09:00:00+09:00",
+      "closesAt": "2026-10-02T00:00:00+09:00"
     }
   ],
   "spaces": [
@@ -503,7 +503,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 1번 (주점 구역 왼쪽 위)",
       "operatorText": "첨단융합대학 동아리 AEGIS",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "닭꼬치와 염통꼬치, 오리훈제구이와 소세지야채볶음을 선보이는 썬더이지스입니다. 친구들과 다양한 메뉴를 나누며 축제의 저녁을 즐겨보세요.",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -516,7 +516,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 2번 (1번 주점 오른쪽)",
       "operatorText": "국방지능정보융합공학부 국방전략기술공학과 학생회",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "흑후추 우삼겹 볶음과 최가네 닭볶음, 두부김치를 만날 수 있는 최가네포차입니다. 든든한 안주와 함께 축제의 하루를 마무리해보세요.",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -529,7 +529,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 4번 (1번 주점 아래)",
       "operatorText": "글로벌문화통상학부 학생회",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "글로벌문화통상학부가 준비한 ‘안녕하세요글문통입니다잘부탁드립니다’, 줄여서 ‘안글잘부’입니다. 재치 있는 이름의 국물무뼈닭발과 제육볶음, 김치전부터 다양한 사이드 메뉴까지 만나보세요.",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -542,7 +542,7 @@
       "locationText": "체육관 앞 · 학술정보관 주차장 주점존 5번 (2번 주점 아래)",
       "operatorText": "중앙동아리 HYCO",
       "hoursText": "18:00 ~ 익일 00:00",
-      "descriptionText": null,
+      "descriptionText": "중앙천체관측동아리 HYCO가 남월쌀국수와 함께 준비한 ‘남월 우주정거장점’입니다. 2050년, 우주에서도 맛으로 승부하는 우주정거장 하이코휴게소에서 따뜻한 국물 한 그릇 하고 가세요!",
       "experienceText": null,
       "contactLabel": null,
       "contactUrl": null
@@ -1863,97 +1863,6 @@
     }
   ],
   "spaceMenuItems": [
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "닭꼬치",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "염통꼬치",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "오리훈제구이",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-thunder-aegis",
-      "locale": "ko",
-      "sortOrder": 4,
-      "name": "소세지야채볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-choi-pocha",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "흑후추 우삼겹 볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-choi-pocha",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "최가네 닭볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-choi-pocha",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "두부김치",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-geulmuntong",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "김치전",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-geulmuntong",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "국물무뼈닭발",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-geulmuntong",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "제육볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-namwol",
-      "locale": "ko",
-      "sortOrder": 1,
-      "name": "직화 백짬뽕 칼국수",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-namwol",
-      "locale": "ko",
-      "sortOrder": 2,
-      "name": "직화 우삼겹 숙주 볶음",
-      "priceAmount": null
-    },
-    {
-      "spaceId": "pub-namwol",
-      "locale": "ko",
-      "sortOrder": 3,
-      "name": "스페이스X 스테이크",
-      "priceAmount": null
-    },
     {
       "spaceId": "truck-onekitchen",
       "locale": "ko",

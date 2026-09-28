@@ -158,8 +158,8 @@ public class CatalogExportService {
             resultSet.getString("id"),
             resultSet.getString("category"),
             resultSet.getString("image_url"),
-            resultSet.getInt("image_width"),
-            resultSet.getInt("image_height")
+            resultSet.getObject("image_width", Integer.class),
+            resultSet.getObject("image_height", Integer.class)
         ));
     }
 
@@ -358,8 +358,8 @@ public class CatalogExportService {
             resultSet.getString("id"),
             resultSet.getString("category"),
             resultSet.getString("image_url"),
-            resultSet.getInt("image_width"),
-            resultSet.getInt("image_height")
+            resultSet.getObject("image_width", Integer.class),
+            resultSet.getObject("image_height", Integer.class)
         ));
     }
 

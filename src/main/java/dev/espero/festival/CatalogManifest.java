@@ -286,8 +286,8 @@ public record CatalogManifest(
         String id,
         String category,
         String imageUrl,
-        int imageWidth,
-        int imageHeight
+        Integer imageWidth,
+        Integer imageHeight
     ) {}
 
     public record SpaceTranslation(
@@ -406,8 +406,8 @@ public record CatalogManifest(
         String id,
         String category,
         String imageUrl,
-        int imageWidth,
-        int imageHeight
+        Integer imageWidth,
+        Integer imageHeight
     ) {}
 
     public record ArtistTranslation(

@@ -28625,7 +28625,15 @@
             "description": "출연진 이름"
           },
           "image": {
-            "$ref": "#/components/schemas/Image"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Image"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "프런트에서 이미지를 관리하면 null"
           },
           "introduction": {
             "anyOf": [
@@ -28827,7 +28835,15 @@
                   "description": "출연진명"
                 },
                 "image": {
-                  "$ref": "#/components/schemas/Image"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/Image"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "프런트에서 이미지를 관리하면 null"
                 },
                 "order": {
                   "type": "integer",
@@ -29054,7 +29070,15 @@
             "description": "장소명"
           },
           "image": {
-            "$ref": "#/components/schemas/Image"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Image"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "프런트에서 이미지를 관리하면 null"
           },
           "locationText": {
             "type": "string",

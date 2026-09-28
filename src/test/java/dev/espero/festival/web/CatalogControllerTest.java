@@ -51,6 +51,21 @@ class CatalogControllerTest {
     }
 
     @Test
+    void servesSpacesWhoseImagesAreOwnedByTheFrontend() {
+        Space space = new Space(
+            "space-test", "BOOTH", "테스트 부스", null, "테스트 위치", null, null,
+            null, null, null, List.of(), List.of(), null
+        );
+        when(snapshots.required()).thenReturn(new CatalogSnapshot(
+            context(), List.of(space), List.of(), List.of(), Map.of(), null
+        ));
+
+        assertThat(controller.getSpaces(request(Map.of())).data().items()).singleElement()
+            .satisfies(item -> assertThat(item.image()).isNull());
+        assertThat(controller.getSpace("space-test", request(Map.of())).getBody().data().image()).isNull();
+    }
+
+    @Test
     void addsTheBoothAccountOnlyToTheUncachedDetailResponse() {
         when(snapshots.required()).thenReturn(snapshotWithMap());
         CatalogResponses.BankTransfer account =

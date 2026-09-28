@@ -65,7 +65,7 @@ public final class CatalogManifestValidator {
         for (CatalogManifest.Space space : spaces.values()) {
             id(space.id(), "spaces.id");
             require(SpaceCategories.ALL.contains(space.category()), "Unsupported space category: " + space.category());
-            image(space.imageUrl(), space.imageWidth(), space.imageHeight(), "spaces.image");
+            optionalImage(space.imageUrl(), space.imageWidth(), space.imageHeight(), "spaces.image");
         }
         requireTranslations(
             manifest.spaceTranslations(), "spaceTranslations", CatalogManifest.SpaceTranslation::spaceId,
@@ -344,7 +344,7 @@ public final class CatalogManifestValidator {
             id(artist.id(), "artists.id");
             require(ARTIST_CATEGORIES.contains(artist.category()),
                 "Unsupported artist category: " + artist.category());
-            image(artist.imageUrl(), artist.imageWidth(), artist.imageHeight(), "artists.image");
+            optionalImage(artist.imageUrl(), artist.imageWidth(), artist.imageHeight(), "artists.image");
         }
 
         Set<String> artistTranslationKeys = new HashSet<>();
@@ -754,6 +754,15 @@ public final class CatalogManifestValidator {
     private void image(String url, int width, int height, String field) {
         uri(url, field + ".url");
         require(width > 0 && height > 0, field + " dimensions must be positive");
+    }
+
+    private void optionalImage(String url, Integer width, Integer height, String field) {
+        if (url == null) {
+            require(width == null && height == null, field + " dimensions require a URL");
+            return;
+        }
+        require(width != null && height != null, field + " dimensions are required with a URL");
+        image(url, width, height, field);
     }
 
     private void uri(String value, String field) {
