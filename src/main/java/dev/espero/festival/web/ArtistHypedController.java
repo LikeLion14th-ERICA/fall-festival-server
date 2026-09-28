@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -29,6 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ArtistHypedController {
 
     private static final Pattern PUBLIC_ID = Pattern.compile("^[a-z0-9][a-z0-9-]{0,63}$");
+    private static final LocalDate REHEARSAL_DAY = LocalDate.of(2026, 9, 28);
+    private static final LocalTime REHEARSAL_START = LocalTime.of(11, 0);
+    private static final LocalTime REHEARSAL_END = LocalTime.of(15, 0);
 
     private final CatalogSnapshotProvider snapshots;
     private final ArtistHypedStore store;
@@ -52,7 +56,8 @@ public class ArtistHypedController {
         Context context = context(request);
         Instant now = clock.instant();
         try {
-            var items = store.currentArtists(festivalId(context.snapshot()), context.snapshot().context().revisionId())
+            String prefix = countPrefix(context.snapshot(), now);
+            var items = store.currentArtists(festivalId(context.snapshot()), context.snapshot().context().revisionId(), prefix)
                 .stream()
                 .map(count -> new ArtistHypedResponse.Item(count.artistId(), count.hypedCount()))
                 .toList();
@@ -88,7 +93,8 @@ public class ArtistHypedController {
             if (!enabled(context.snapshot(), now)) {
                 throw new ApiException(HttpStatus.CONFLICT, "HYPED_CLOSED", "축제일에만 기대돼요에 참여할 수 있습니다.", false);
             }
-            long count = store.increment(festivalId(context.snapshot()), artistId, now);
+            long count = store.increment(festivalId(context.snapshot()), artistId,
+                countPrefix(context.snapshot(), now), now);
             return ResponseEntity.ok().cacheControl(CacheControl.noStore())
                 .body(new ApiResponse<>(
                     new ArtistHypedResponse.Increment(artistId, count),
@@ -114,8 +120,22 @@ public class ArtistHypedController {
     }
 
     private boolean enabled(CatalogSnapshot snapshot, Instant now) {
-        LocalDate today = LocalDate.ofInstant(now, snapshot.context().timezone());
-        return snapshot.home().dates().contains(today);
+        var local = now.atZone(snapshot.context().timezone());
+        if (local.toLocalDate().equals(REHEARSAL_DAY)) {
+            return enabledRehearsalWindow(now, snapshot.context().timezone());
+        }
+        return snapshot.home().dates().contains(local.toLocalDate());
+    }
+
+    private String countPrefix(CatalogSnapshot snapshot, Instant now) {
+        return enabledRehearsalWindow(now, snapshot.context().timezone()) ? "rehearsal-2026-09-28:" : "";
+    }
+
+    private boolean enabledRehearsalWindow(Instant now, java.time.ZoneId timezone) {
+        var local = now.atZone(timezone);
+        LocalTime time = local.toLocalTime();
+        return local.toLocalDate().equals(REHEARSAL_DAY)
+            && !time.isBefore(REHEARSAL_START) && time.isBefore(REHEARSAL_END);
     }
 
     private UUID festivalId(CatalogSnapshot snapshot) {

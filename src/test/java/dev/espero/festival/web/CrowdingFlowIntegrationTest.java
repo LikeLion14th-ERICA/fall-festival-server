@@ -105,7 +105,7 @@ class CrowdingFlowIntegrationTest {
     @Test
     void rejectsSavingBeforeTheFirstFestivalDayAndKeepsPublicBeforeOpen() throws Exception {
         publish(DEVELOPMENT_CATALOG);
-        clock.set(OffsetDateTime.parse("2026-09-28T12:00:00+09:00"));
+        clock.set(OffsetDateTime.parse("2026-09-27T12:00:00+09:00"));
 
         publicCrowding()
             .andExpect(status().isOk())
