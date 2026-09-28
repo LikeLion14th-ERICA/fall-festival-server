@@ -59,16 +59,22 @@ public class ArtistHypedStore {
 
     /** A single PostgreSQL statement serializes concurrent increments on one artist row. */
     public long increment(UUID festivalId, String artistId, Instant now) {
+        return increment(festivalId, artistId, 1, now);
+    }
+
+    public long increment(UUID festivalId, String artistId, int delta, Instant now) {
+        if (delta < 1 || delta > 20) throw new IllegalArgumentException("Hyped delta must be between 1 and 20");
         Long count = jdbc.queryForObject("""
             INSERT INTO artist_hyped_counts (festival_id, artist_id, hyped_count, updated_at)
-            VALUES (:festivalId, :artistId, 1, :updatedAt)
+            VALUES (:festivalId, :artistId, :delta, :updatedAt)
             ON CONFLICT (festival_id, artist_id) DO UPDATE
-            SET hyped_count = artist_hyped_counts.hyped_count + 1,
+            SET hyped_count = artist_hyped_counts.hyped_count + EXCLUDED.hyped_count,
                 updated_at = EXCLUDED.updated_at
             RETURNING hyped_count
             """, new MapSqlParameterSource()
                 .addValue("festivalId", festivalId)
                 .addValue("artistId", artistId)
+                .addValue("delta", delta)
                 .addValue("updatedAt", OffsetDateTime.ofInstant(now, ZoneOffset.UTC)), Long.class);
         if (count == null) {
             throw new IllegalStateException("Artist Hyped increment returned no count.");

@@ -13,7 +13,7 @@
 | GOODS-DETAIL | goods/{id} + availability | null 선택 영역 숨김. options의 실제 조합만 표시. 상세 오류와 상태 오류 분리. 전체 품절이어도 가격·판매 상태 표시. 색상 선택 이미지 전환 없음 |
 | GOODS-PAYMENT | 제거된 화면 | 최신 사용자 결정에 따라 계좌·송금 안내를 제공하지 않음. 과거 화면 ID는 추적 기록에만 남김 |
 | SHOW-LINEUP | lineup + artist-hyped, 날짜·분류 선택. `artistId`로 결합한 ARTIST 누적 수만 표시하고 버튼은 두지 않음 | 해당 날짜·분류 items=[]는 빈 목록. Hyped 조회 실패를 0회로 표시하지 않고 마지막 정상 수가 있으면 유지. 필터·스크롤은 프런트 |
-| SHOW-ARTIST | artists/{id} + artist-hyped. `hypedEnabled=true`일 때만 상세의 `기대돼요 {count}` 버튼으로 `POST /artists/{id}/hyped` 호출 | 소개·SNS·대표곡 누락 영역 제목까지 숨김. 아티스트 상세 404/일시 오류 구분, 외부 링크 새 탭. Hyped가 닫히면 누적 수는 읽기 전용, 조회 실패 시 마지막 정상 수 유지. POST 성공 수만 반영하고 404·409·429·일시 오류에서는 올리지 않음. 결과가 모호하면 자동 재전송하지 않고 GET으로 동기화. 화면 진입·재활성화·온라인 복귀 및 표시 중 polling은 [프런트 안내](FRONTEND.md#아티스트-hyped)를 따름 |
+| SHOW-ARTIST | artists/{id} + artist-hyped. `hypedEnabled=true`일 때만 상세의 `기대돼요 {count}` 클릭을 저장하고 1초·최대20회 묶음으로 POST | 소개·SNS·대표곡 누락 영역 제목까지 숨김. 상세 404/일시 오류 구분, 외부 링크 새 탭. 닫힌 Hyped는 읽기 전용, 조회 실패 시 마지막 정상 수 유지. 서버 확인 수만 표시하고 대기·실패를 성공으로 올리지 않음. 저장한 묶음은 같은 batchId로 재시도·PWA 재실행 복구. 429는 Retry-After, 영구 오류는 실패 안내. 기존 {} 요청만 자동 재전송 금지. 클릭별 GET은 제거하고 조회·복구 정책은 [프런트 안내](FRONTEND.md#아티스트-hyped)를 따름 |
 | SHOW-TIMETABLE | timetable + prohibited-items | 공연 없음과 고정 안내 없음 분리. 현재선은 축제 당일 오늘 열17:00~22:00. 시간축 변경과 별개. 안내는 공연 밖에도 유지 |
 | SHOW-POPUP | performances/{id} | 설명·출연진 누락 영역 숨김. 선택 공연 오류 재시도 |
 | BOOTH-LIST | spaces, 분류 선택 | 분류별 빈 목록. 별 우선·그룹 내 가나다순 정렬·스크롤은 같은 브라우저 상태. 목록 오류 재시도 |

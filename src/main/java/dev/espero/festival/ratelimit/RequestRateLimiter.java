@@ -46,6 +46,14 @@ public class RequestRateLimiter {
      * otherwise the whole seconds until a token is available.
      */
     public long acquire(String policyName, RateLimitProperties.Policy policy, String client) {
+        return acquire(policyName, policy, client, 1);
+    }
+
+    /** Atomically reserves every token in a batch, or reserves none. */
+    public long acquire(String policyName, RateLimitProperties.Policy policy, String client, int cost) {
+        if (cost < 1 || cost > policy.capacity()) {
+            throw new IllegalArgumentException("Token cost must fit the policy capacity");
+        }
         synchronized (lock) {
             long now = nanos();
             String key = policyName + '|' + client;
@@ -53,7 +61,7 @@ public class RequestRateLimiter {
             if (bucket == null) {
                 bucket = createBucket(policyName, policy, key, now);
             }
-            return bucket.take(policy, now);
+            return bucket.take(policy, now, cost);
         }
     }
 
@@ -97,15 +105,15 @@ public class RequestRateLimiter {
             this.updatedAt = now;
         }
 
-        long take(RateLimitProperties.Policy policy, long now) {
+        long take(RateLimitProperties.Policy policy, long now, int cost) {
             double elapsedSeconds = Math.max(0, now - updatedAt) / 1_000_000_000.0;
             tokens = Math.min(policy.capacity(), tokens + elapsedSeconds * policy.refillPerSecond());
             updatedAt = now;
-            if (tokens >= 1) {
-                tokens -= 1;
+            if (tokens >= cost) {
+                tokens -= cost;
                 return 0;
             }
-            return Math.max(1, (long) Math.ceil((1 - tokens) / policy.refillPerSecond()));
+            return Math.max(1, (long) Math.ceil((cost - tokens) / policy.refillPerSecond()));
         }
 
         long idleSince(long now) {

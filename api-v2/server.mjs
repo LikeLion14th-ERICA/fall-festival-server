@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { createHash, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { createState,execute,ApiFailure,failure,MOCK_NOW,isoKst,scenarioTime } from './domain.mjs';
+import { createState,execute,ApiFailure,failure,MOCK_NOW,MOCK_HYPED_FESTIVAL_ID,isoKst,scenarioTime } from './domain.mjs';
 import { crowdingOperatingHoursFor,normalizeCrowdingOperatingHoursInput } from './admin-domain.mjs';
 import { validate } from './validate.mjs';
 
@@ -34,8 +34,8 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
     'postAdminGoodsImage','getGoodsImage'
   ]);
   const server=http.createServer(async(req,res)=>{
-    let now=MOCK_NOW,locale='ko',scenario='normal',state=createState();const requestId=randomUUID();
-    const meta=revision=>({requestId,serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId:'festival-mock',revision,locale,mock:true});
+    let now=MOCK_NOW,locale='ko',scenario='normal',state=createState(),festivalId='festival-mock';const requestId=randomUUID();
+    const meta=revision=>({requestId,serverTime:isoKst(now),timezone:'Asia/Seoul',festivalId,revision,locale,mock:true});
     const send=(status,value,extra={})=>{res.writeHead(status,{...headers,'X-Request-Id':requestId,...extra});res.end(noBodyStatuses.has(status)?undefined:JSON.stringify(value));};
     try{
       const origin=req.headers.origin;
@@ -67,6 +67,7 @@ export async function createMockServer({origins=['http://localhost:3000','http:/
       const pathRoutes=routes.filter(r=>r.regex.test(url.pathname));
       const route=pathRoutes.find(r=>r.method===req.method);
       if(!route){if(pathRoutes.length){res.setHeader('Allow',pathRoutes.map(r=>r.method).join(', '));failure(405,'METHOD_NOT_ALLOWED','지원하지 않는 메서드입니다.');}failure(404,'NOT_FOUND','경로가 없습니다.');}
+      if(['getArtistHyped','postArtistHyped'].includes(route.operationId))festivalId=MOCK_HYPED_FESTIVAL_ID;
       if(route.cookieCsrf&&!origin)failure(403,'ADMIN_CSRF_INVALID','허용되지 않은 관리자 요청 출처입니다.');
       if(route.requiresBearer){const token=req.headers.authorization;if(!token||token==='Bearer mock-expired')failure(401,'UNAUTHORIZED','관리자 인증이 필요합니다.');if(token!=='Bearer mock-admin')failure(403,'FORBIDDEN','관리자 권한이 없습니다.');}
       if(route.requiresRefreshCookie&&!req.headers.cookie?.includes('__Host-festival-admin-refresh=MOCK-OPAQUE-REFRESH-TOKEN'))failure(401,'ADMIN_REFRESH_TOKEN_INVALID','관리자 세션을 갱신할 수 없습니다.');

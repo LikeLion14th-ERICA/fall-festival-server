@@ -4,6 +4,7 @@ import dev.espero.festival.media.GoodsImageUploadTooLargeException;
 import dev.espero.festival.media.GoodsImageValidationException;
 import dev.espero.festival.media.MediaProcessingBusyException;
 import dev.espero.festival.media.MediaServiceUnavailableException;
+import dev.espero.festival.ratelimit.HypedRateLimitException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.List;
@@ -66,6 +67,14 @@ public class GlobalApiExceptionHandler {
             new ApiErrorResponse.ErrorBody(exception.code(), exception.getMessage(), List.of(), exception.retryable()),
             metaSupport.metaForError(request)
         ));
+    }
+
+    @ExceptionHandler(HypedRateLimitException.class)
+    ResponseEntity<ApiErrorResponse> handleHypedRateLimit(HypedRateLimitException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .header(HttpHeaders.RETRY_AFTER, Long.toString(exception.retryAfterSeconds()))
+            .header(HttpHeaders.CACHE_CONTROL, "no-store")
+            .body(errorBody(exception.code(), exception.getMessage(), true, request));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

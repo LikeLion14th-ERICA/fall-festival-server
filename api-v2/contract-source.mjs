@@ -59,8 +59,13 @@ export const schemas = {
   Artist: object({ id, category: enumeration(['ARTIST', 'CONTEST'], '아티스트 / 콘테스트'), name: text('출연진 이름'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), introduction: optionalText, socialLinks: array(ref('Link'), '없으면 []와 영역 숨김'), songs: array(ref('Link'), '대표곡명과 YouTube 주소', { maxItems: 3 }), performances: array(object({ id, date, startsAt: timestamp, endsAt: timestamp }), '이 출연진의 등록 공연 일정') }),
   ArtistHypedItem: object({ artistId: id, hypedCount: integer('축제 전체에서 이 아티스트가 받은 누적 Hyped 수. 공연 날짜와 catalog revision에 독립적.', 0, { maximum: 9007199254740991 }) }),
   ArtistHypedSummary: object({ hypedEnabled: bool('서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 2026-09-28은 11시부터 사전 개방하며 15시 전 리허설 집계와 이후 실제 집계를 분리한다. 프런트는 이 값을 따른다.'), items: array(ref('ArtistHypedItem'), '현재 게시된 ARTIST 전원. artistId 오름차순이며 미참여자는 0. CONTEST는 제외.') }),
-  ArtistHypedIncrement: object({ artistId: id, hypedCount: integer('이번 요청의 원자적 +1 후 누적 Hyped 수.', 1, { maximum: 9007199254740991 }) }),
-  ArtistHypedInput: object({}, [], '빈 JSON 객체만 허용한다. 로그인·참여자 식별자·멱등 키가 없다.'),
+  ArtistHypedIncrement: object({ artistId: id, hypedCount: integer('원자적 증가 후 누적 Hyped 수. 같은 batchId 재전송은 최초 성공 때의 수를 반환하며 다시 증가하지 않는다.', 1, { maximum: 9007199254740991 }) }),
+  ArtistHypedBatchInput: object({
+    festivalId: text('GET /artist-hyped 응답 meta.festivalId. 다른 축제 회차의 대기 클릭을 합산하지 않는다.', { format: 'uuid', pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' }),
+    batchId: text('묶음별 무작위 UUID. 최초 전송 이후 artistId·delta와 함께 고정하며 재시도 때 재사용한다. 사용자 식별자가 아니다.', { format: 'uuid', pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' }),
+    delta: integer('이 묶음에 포함된 명시적 클릭 수. 서버 속도 제한도 신규 delta만큼 차감한다.', 1, { maximum: 20 }),
+  }),
+  ArtistHypedInput: { oneOf: [object({}, [], '구버전 호환용 +1. 모호한 실패의 자동 재시도는 불가.'), ref('ArtistHypedBatchInput')], description: '기존 {} 또는 festivalId·batchId·delta를 모두 포함한 묶음. 같은 축제·batchId는 DB에서 한 번만 적용한다.' },
   Lineup: object({ date, category: enumeration(['ARTIST', 'CONTEST'], '선택 분류'), items: array(object({ artistId: id, performanceId: id, name: text('출연진명'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), order: integer('선택 날짜·분류 내 공연 순서', 1) }), '공연순, 동률 id순. + 버튼만 상세 이동.') }),
   Performance: object({ id, date, title: text('공연명'), artists: array(object({ id, name: text('출연진명') }), '출연진'), startsAt: timestamp, endsAt: timestamp, description: optionalText }),
   Timetable: object({ dates: array(date, '행사 날짜'), axis: object({ startTime: text('시간축 시작 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }), endTime: text('시간축 끝 HH:mm', { pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$' }) }), items: array(ref('Performance'), '날짜·시작시각·id 순. 공연 일정은 실시간 갱신 대상 아님.') }),
@@ -109,7 +114,7 @@ export const operations = [
   ['getLineup','GET','/lineup','Lineup','날짜·분류별 라인업',['SHOW-LINEUP'],[param('date',date,'생략하면 config.defaultDate. 제공되지 않는 행사 날짜는 400.'),param('category',{...schemas.Artist.properties.category,default:'ARTIST'},'기본 ARTIST')],['normal','empty','error']],
   ['getArtist','GET','/artists/{artistId}','Artist','출연진 상세',['SHOW-ARTIST'],[],['normal','missing-optional','not-found','error']],
   ['getArtistHyped','GET','/artist-hyped','ArtistHypedSummary','아티스트별 Hyped 누적 수와 참여 가능 상태',['SHOW-LINEUP','SHOW-ARTIST'],[],['normal','closed','ended','empty','error']],
-  ['postArtistHyped','POST','/artists/{artistId}/hyped','ArtistHypedIncrement','아티스트 Hyped +1',['SHOW-ARTIST'],[],['normal','closed','ended','contest','not-found','error'],'ArtistHypedInput'],
+  ['postArtistHyped','POST','/artists/{artistId}/hyped','ArtistHypedIncrement','아티스트 Hyped 클릭 묶음 또는 기존 +1',['SHOW-ARTIST'],[],['normal','batch','closed','ended','contest','not-found','error'],'ArtistHypedInput'],
   ['getTimetable','GET','/timetable','Timetable','3일 타임테이블',['SHOW-TIMETABLE'],[],['normal','empty','error']],
   ['getPerformance','GET','/performances/{performanceId}','Performance','공연 정보 팝업',['SHOW-POPUP'],[],['normal','missing-optional','not-found','error']],
   ['getProhibitedItems','GET','/prohibited-items','ProhibitedItems','고정 반입 금지 물품 안내',['SHOW-TIMETABLE'],[],['normal','empty','error']],
@@ -148,7 +153,7 @@ for(const operationId of ['getArtistHyped','postArtistHyped']){
 }
 Object.assign(operations.find(operation=>operation.operationId==='postArtistHyped'), {
   successStatus: 200,
-  responseOverrides: {409:{description:'참여 시간 밖에는 Hyped 참여 불가',code:'HYPED_CLOSED',message:'지금은 기대돼요 참여 시간이 아닙니다.',retryable:false}},
+  responseOverrides: {409:{description:'HYPED_CLOSED: 신규 참여 종료 / FESTIVAL_MISMATCH: 다른 축제 회차 / IDEMPOTENCY_CONFLICT: 같은 batchId에 다른 artistId·delta. 이미 성공한 동일 묶음은 참여 종료 후에도 200으로 확인.',retryable:false}},
 });
 // Booth stamps: an anonymous HttpOnly participant cookie, never cached.
 Object.assign(operations.find(operation=>operation.operationId==='startStampParticipation'), {

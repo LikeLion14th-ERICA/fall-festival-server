@@ -144,7 +144,7 @@ SELECT·INSERT·UPDATE를 준다. catalog export/publish role은 새 테이블�
 Hyped GET·HEAD는 `artist-hyped-read` 전용 bucket을 사용한다.
 `RATE_LIMIT_ARTIST_HYPED_READ_CAPACITY`(기본 `120`)와
 `RATE_LIMIT_ARTIST_HYPED_READ_REFILL_PER_SECOND`(기본 `4.0`)로 조정하며, 두 값이 없으면
-기본값을 적용한다. 폴링·클릭 후 재조회가 굿즈·공지 등 일반 공개 조회 한도를 소모하지 않는다.
+기본값을 적용한다. Hyped 폴링이 굿즈·공지 등 일반 공개 조회 한도를 소모하지 않는다.
 Hyped 읽기·쓰기·일반 공개 조회는 같은 클라이언트에서도 각각 독립된 한도를 사용한다.
 
 공개 쓰기의 보호 속도 제한은 `RATE_LIMIT_ARTIST_HYPED_CAPACITY`(기본 `120`)와
@@ -152,6 +152,29 @@ Hyped 읽기·쓰기·일반 공개 조회는 같은 클라이언트에서도 �
 한도가 아니라 서버 요청 보호 설정이다. 집계는 축제 회차·아티스트별 누적값이며 카탈로그
 재게시로 초기화하지 않는다. 게시 전후에도 같은 아티스트 ID를 유지하고 다른 출연자에게
 재사용하지 않는다.
+
+새 프런트는 클릭을 IndexedDB에 먼저 저장한 뒤 1초·최대 20회씩 전송하며 클릭마다 GET을
+추가하지 않는다. 새 묶음은 delta만큼 쓰기 한도를 소비하고 기존 묶음의 결과 확인은 HTTP
+요청당 1 단위만 소비한다. capacity가 delta보다 작으면 422로 거절되므로 이 프런트를 사용하는
+환경은 `RATE_LIMIT_ARTIST_HYPED_CAPACITY`를 최소 20으로 유지한다(기본 120). 429는
+`Retry-After`, 네트워크·5xx는 같은 batchId로 backoff 재시도한다.
+
+배포 순서는 **V34 migration → runtime DB 권한 → 백엔드 → 프런트**다.
+`tools/database/provision-operational-account-roles.sql`의 새 `artist_hyped_batches`
+SELECT/INSERT/UPDATE 권한을 적용한다. runtime과 migration 계정이 다르면 테이블 생성만으로
+쓰기가 허용되지 않는다. 백엔드가 기존 `{}`와 새 묶음을 모두 처리하는지 확인한 후 프런트를
+배포한다. 구형 백엔드는 새 본문을 422로 거절하며 프런트는 이 요청을 영구 실패로 처리한다.
+
+되돌릴 때는 프런트부터 되돌리고 이미 생성한 V34 테이블·기록·권한은 보존한다. 구형 PWA나
+탭이 새 요청을 계속 보낼 수 있으므로 백엔드의 묶음 지원을 먼저 제거하지 않는다. 클라이언트
+큐의 최대 수명과 조정하지 않은 ledger 삭제·TTL 정리는 금지한다. DB 복원은 counts와 batches를
+같은 시점으로 복원해야 한다. counts만 복원하면 재시도가 중복되거나 누락될 수 있다.
+
+저장된 묶음은 화면 이동·PWA 재실행·온라인 복귀 때 복구하며 종료 중 실행을 보장하지 않는다.
+같은 축제의 이미 성공한 묶음은 참여 마감 후에도 확인할 수 있다. 종료 후 처음 도착하면
+HYPED_CLOSED, 회차 전환 후에는 FESTIVAL_MISMATCH로 거절한다. 리허설 receipt는 실제
+집계에 합치지 않는다. 물리 iOS·Android PWA의 종료/재실행 확인과 운영 지연 측정은 로컬
+자동 검증과 별도로 수행해야 한다.
 
 ## 구현 규칙
 

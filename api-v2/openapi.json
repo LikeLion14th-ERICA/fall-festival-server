@@ -4647,7 +4647,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -4726,7 +4726,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -4805,7 +4805,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-04T00:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -4823,7 +4823,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -4872,7 +4872,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -4892,7 +4892,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5060,7 +5060,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5137,7 +5137,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5169,7 +5169,7 @@
     "/api/v2/artists/{artistId}/hyped": {
       "post": {
         "operationId": "postArtistHyped",
-        "summary": "아티스트 Hyped +1",
+        "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1",
         "description": "연결 화면: SHOW-ARTIST. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -5233,7 +5233,7 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "아티스트 Hyped +1: normal",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: normal",
                     "value": {
                       "data": {
                         "artistId": "artist-a",
@@ -5243,7 +5243,25 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
+                        "revision": 0,
+                        "locale": "ko",
+                        "mock": true
+                      }
+                    }
+                  },
+                  "batch": {
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: batch",
+                    "value": {
+                      "data": {
+                        "artistId": "artist-a",
+                        "hypedCount": 10
+                      },
+                      "meta": {
+                        "requestId": "mock-example-request",
+                        "serverTime": "2030-10-01T18:00:00.000+09:00",
+                        "timezone": "Asia/Seoul",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5251,7 +5269,7 @@
                     }
                   },
                   "closed": {
-                    "summary": "아티스트 Hyped +1: closed",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: closed",
                     "value": {
                       "data": {
                         "artistId": "artist-a",
@@ -5261,7 +5279,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T23:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5298,7 +5316,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "아티스트 Hyped +1: locale-not-ready",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -5310,7 +5328,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5318,7 +5336,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "아티스트 Hyped +1: bad-request",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -5330,7 +5348,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5395,7 +5413,7 @@
                 },
                 "examples": {
                   "contest": {
-                    "summary": "아티스트 Hyped +1: contest",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: contest",
                     "value": {
                       "error": {
                         "code": "NOT_FOUND",
@@ -5407,7 +5425,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5415,7 +5433,7 @@
                     }
                   },
                   "not-found": {
-                    "summary": "아티스트 Hyped +1: not-found",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: not-found",
                     "value": {
                       "error": {
                         "code": "NOT_FOUND",
@@ -5427,7 +5445,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5467,7 +5485,7 @@
             }
           },
           "409": {
-            "description": "참여 시간 밖에는 Hyped 참여 불가",
+            "description": "HYPED_CLOSED: 신규 참여 종료 / FESTIVAL_MISMATCH: 다른 축제 회차 / IDEMPOTENCY_CONFLICT: 같은 batchId에 다른 artistId·delta. 이미 성공한 동일 묶음은 참여 종료 후에도 200으로 확인.",
             "headers": {
               "X-Request-Id": {
                 "schema": {
@@ -5492,7 +5510,7 @@
                 },
                 "examples": {
                   "ended": {
-                    "summary": "아티스트 Hyped +1: ended",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: ended",
                     "value": {
                       "error": {
                         "code": "HYPED_CLOSED",
@@ -5504,7 +5522,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-04T00:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5632,7 +5650,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "아티스트 Hyped +1: rate-limited",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -5644,7 +5662,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5709,7 +5727,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "아티스트 Hyped +1: error",
+                    "summary": "아티스트 Hyped 클릭 묶음 또는 기존 +1: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -5721,7 +5739,7 @@
                         "requestId": "mock-example-request",
                         "serverTime": "2030-10-01T18:00:00.000+09:00",
                         "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
+                        "festivalId": "00000000-0000-4000-8000-000000000001",
                         "revision": 0,
                         "locale": "ko",
                         "mock": true
@@ -5739,6 +5757,7 @@
         "x-contract-status": "screen-specified",
         "x-mock-scenarios": [
           "normal",
+          "batch",
           "closed",
           "ended",
           "contest",
@@ -5756,7 +5775,20 @@
               "schema": {
                 "$ref": "#/components/schemas/ArtistHypedInput"
               },
-              "example": {}
+              "examples": {
+                "single": {
+                  "summary": "기존 클라이언트 +1",
+                  "value": {}
+                },
+                "batch": {
+                  "summary": "저장한 클릭 10회 묶음",
+                  "value": {
+                    "festivalId": "00000000-0000-4000-8000-000000000001",
+                    "batchId": "00000000-0000-4000-8000-000000000002",
+                    "delta": 10
+                  }
+                }
+              }
             }
           }
         }
@@ -28214,7 +28246,7 @@
           "hypedCount": {
             "type": "integer",
             "minimum": 1,
-            "description": "이번 요청의 원자적 +1 후 누적 Hyped 수.",
+            "description": "원자적 증가 후 누적 Hyped 수. 같은 batchId 재전송은 최초 성공 때의 수를 반환하며 다시 증가하지 않는다.",
             "maximum": 9007199254740991
           }
         },
@@ -28225,12 +28257,52 @@
         "additionalProperties": false,
         "description": ""
       },
-      "ArtistHypedInput": {
+      "ArtistHypedBatchInput": {
         "type": "object",
-        "properties": {},
-        "required": [],
+        "properties": {
+          "festivalId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "GET /artist-hyped 응답 meta.festivalId. 다른 축제 회차의 대기 클릭을 합산하지 않는다.",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "batchId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "묶음별 무작위 UUID. 최초 전송 이후 artistId·delta와 함께 고정하며 재시도 때 재사용한다. 사용자 식별자가 아니다.",
+            "format": "uuid",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "delta": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "이 묶음에 포함된 명시적 클릭 수. 서버 속도 제한도 신규 delta만큼 차감한다.",
+            "maximum": 20
+          }
+        },
+        "required": [
+          "festivalId",
+          "batchId",
+          "delta"
+        ],
         "additionalProperties": false,
-        "description": "빈 JSON 객체만 허용한다. 로그인·참여자 식별자·멱등 키가 없다."
+        "description": ""
+      },
+      "ArtistHypedInput": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false,
+            "description": "구버전 호환용 +1. 모호한 실패의 자동 재시도는 불가."
+          },
+          {
+            "$ref": "#/components/schemas/ArtistHypedBatchInput"
+          }
+        ],
+        "description": "기존 {} 또는 festivalId·batchId·delta를 모두 포함한 묶음. 같은 축제·batchId는 DB에서 한 번만 적용한다."
       },
       "Lineup": {
         "type": "object",

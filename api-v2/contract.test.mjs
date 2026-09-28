@@ -6,7 +6,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { createMockServer } from './server.mjs';
 import { validate as localValidate } from './validate.mjs';
-import { createState,DATES,failure,execute } from './domain.mjs';
+import { createState,DATES,failure,execute,MOCK_HYPED_FESTIVAL_ID } from './domain.mjs';
 import { adminExecute,crowdingOperatingHoursFor,normalizeCrowdingOperatingHoursInput } from './admin-domain.mjs';
 
 const read=name=>readFile(new URL(name,import.meta.url),'utf8').then(JSON.parse);
@@ -110,6 +110,54 @@ test('Hyped mock keeps repeatable artist counts across festival days with KST cl
   assert.equal(readonly.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,3);
   const invalid=await call(postPath,{method:'POST',body:{extra:true},session});
   assert.equal(invalid.status,422);
+});
+test('Hyped batch schema accepts only legacy empty input or a complete bounded batch',()=>{
+  const schema={$ref:'#/components/schemas/ArtistHypedInput'};
+  const batch={festivalId:MOCK_HYPED_FESTIVAL_ID,batchId:'abcdef00-0000-4000-8000-000000000002',delta:20};
+  standardValidate(schema,{});standardValidate(schema,batch);
+  const validate=ajv.compile({...schema,components:spec.components});
+  for(const invalid of [null,[],{delta:1},{...batch,delta:0},{...batch,delta:21},{...batch,delta:1.5},{...batch,delta:'2'},{...batch,delta:true},{...batch,batchId:'bad'},{...batch,festivalId:'bad'},{...batch,extra:true}]){
+    assert.equal(validate(invalid),false,JSON.stringify(invalid));
+    assert.notEqual(localValidate(schema,invalid,spec).length,0,JSON.stringify(invalid));
+  }
+  assert.deepEqual(operation('postArtistHyped').requestBody.content['application/json'].examples.single.value,{});
+  assert.equal(examples.postArtistHyped.scenarios.batch.response.data.hypedCount,10);
+});
+test('Hyped durable batch contract replays the original result without adding clicks again',async()=>{
+  const session='hyped-batch-replay',path='/api/v2/artists/artist-a/hyped';
+  const initial=await call('/api/v2/artist-hyped',{session});
+  assert.equal(initial.body.meta.festivalId,MOCK_HYPED_FESTIVAL_ID);
+  const batch={festivalId:initial.body.meta.festivalId,batchId:'abcdef00-0000-4000-8000-000000000002',delta:10};
+  const send=(body,extra={})=>call(path,{method:'POST',body,session,...extra});
+  const concurrent=await Promise.all([send(batch),send({...batch,batchId:batch.batchId.toUpperCase()})]);
+  assert.deepEqual(concurrent.map(response=>[response.status,response.body.data.hypedCount]),[[200,10],[200,10]]);
+  assert.equal((await send({})).body.data.hypedCount,11);
+  assert.equal((await send(batch)).body.data.hypedCount,10);
+  const summary=await call('/api/v2/artist-hyped',{session});
+  assert.equal(summary.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,11);
+  const conflict=await send({...batch,delta:9});
+  assert.equal(conflict.status,409);assert.equal(conflict.body.error.code,'IDEMPOTENCY_CONFLICT');
+  const wrongArtist=await call('/api/v2/artists/artist-b/hyped',{method:'POST',body:batch,session});
+  assert.equal(wrongArtist.status,409);assert.equal(wrongArtist.body.error.code,'IDEMPOTENCY_CONFLICT');
+  const wrongFestival=await send({...batch,festivalId:'00000000-0000-4000-8000-000000000099'});
+  assert.equal(wrongFestival.status,409);assert.equal(wrongFestival.body.error.code,'FESTIVAL_MISMATCH');
+  const closedHeaders={'X-Mock-Time':'2030-10-04T00:00:00+09:00'};
+  const replayAfterClose=await send(batch,{headers:closedHeaders});
+  assert.equal(replayAfterClose.status,200);assert.equal(replayAfterClose.body.data.hypedCount,10);
+  const unseen={...batch,batchId:'00000000-0000-4000-8000-000000000003'};
+  const unseenAfterClose=await send(unseen,{headers:closedHeaders});
+  assert.equal(unseenAfterClose.status,409);assert.equal(unseenAfterClose.body.error.code,'HYPED_CLOSED');
+  assert.equal((await send(unseen)).body.data.hypedCount,21);
+});
+test('Hyped batch replay keeps its original rehearsal namespace',async()=>{
+  const session='hyped-batch-rehearsal',path='/api/v2/artists/artist-a/hyped';
+  const batch={festivalId:MOCK_HYPED_FESTIVAL_ID,batchId:'00000000-0000-4000-8000-000000000004',delta:5};
+  const send=(body,time)=>call(path,{method:'POST',body,session,headers:{'X-Mock-Time':time}});
+  assert.equal((await send(batch,'2026-09-28T14:00:00+09:00')).body.data.hypedCount,5);
+  assert.equal((await send(batch,'2026-09-28T18:00:00+09:00')).body.data.hypedCount,5);
+  assert.equal((await send({},'2026-09-28T18:00:00+09:00')).body.data.hypedCount,1);
+  const summary=await call('/api/v2/artist-hyped',{session,headers:{'X-Mock-Time':'2026-09-28T18:00:00+09:00'}});
+  assert.equal(summary.body.data.items.find(item=>item.artistId==='artist-a').hypedCount,1);
 });
 test('No out-of-scope payment, user identity, FAQ or performance admin route',()=>{const paths=Object.keys(spec.paths).join(' ');assert.doesNotMatch(paths,/\/orders|\/payments|\/users|\/login|\/faq|\/admin\/performances/);assert.match(paths,/\/stamp-receipt-verifications/);});
 test('Goods image upload error contract matches its Spring runtime behavior',()=>{
