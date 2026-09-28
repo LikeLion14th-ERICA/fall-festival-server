@@ -18,7 +18,8 @@ public record RateLimitProperties(
     Policy admin,
     Policy adminLogin,
     Policy stampReceipt,
-    Policy artistHyped
+    Policy artistHyped,
+    Policy artistHypedRead
 ) {
 
     public RateLimitProperties {
@@ -35,6 +36,8 @@ public record RateLimitProperties(
         stampReceipt = stampReceipt == null ? new Policy(5, 1.0 / 12) : stampReceipt;
         // Anonymous Hyped clicks cannot consume the public read budget.
         artistHyped = artistHyped == null ? new Policy(120, 4.0) : artistHyped;
+        // Polling and post-click refreshes cannot consume other public APIs' budget.
+        artistHypedRead = artistHypedRead == null ? new Policy(120, 4.0) : artistHypedRead;
     }
 
     /** A token bucket: {@code capacity} requests at once, refilled at {@code refillPerSecond}. */

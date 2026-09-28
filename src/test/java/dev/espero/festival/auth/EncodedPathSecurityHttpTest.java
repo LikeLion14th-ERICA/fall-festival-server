@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.*;
     "server.servlet.context-path=/festival",
     "festival.admin-auth.allowed-origin=https://admin.test.invalid",
     "festival.rate-limit.trusted-proxy-hops=1",
+    "festival.rate-limit.public-read.capacity=2",
+    "festival.rate-limit.public-read.refill-per-second=0.000001",
+    "festival.rate-limit.artist-hyped.capacity=2",
+    "festival.rate-limit.artist-hyped.refill-per-second=0.000001",
+    "festival.rate-limit.artist-hyped-read.capacity=2",
+    "festival.rate-limit.artist-hyped-read.refill-per-second=0.000001",
     "festival.rate-limit.stamp-receipt.capacity=1",
     "festival.rate-limit.stamp-receipt.refill-per-second=0.000001",
     "festival.rate-limit.admin-login.capacity=1",
@@ -60,6 +66,64 @@ class EncodedPathSecurityHttpTest {
     }
 
     @Test
+    void hypedReadsCannotExhaustGoodsAndNoticeReads() throws Exception {
+        String address = "192.0.2.60";
+        assertThat(send("GET", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(200);
+        var limited = send("GET", "/api/v2/artist-hyped", null, address);
+        assertThat(limited.statusCode()).isEqualTo(429);
+        assertThat(limited.body()).contains("RATE_LIMITED", "\"retryable\":true");
+        assertThat(limited.headers().firstValue("Retry-After")).isPresent();
+        assertThat(limited.headers().firstValue("Cache-Control").orElse("")).isEqualTo("no-store");
+
+        assertThat(send("GET", "/api/v2/goods/goods-a", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/notices", null, address).statusCode()).isEqualTo(200);
+        // The normal public limit still applies independently.
+        assertThat(send("GET", "/api/v2/notices", null, address).statusCode()).isEqualTo(429);
+        assertThat(send("POST", "/api/v2/artists/artist-a/hyped", null, address).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void publicReadsCannotExhaustHypedReadsOrWrites() throws Exception {
+        String address = "192.0.2.61";
+        assertThat(send("GET", "/api/v2/goods/goods-a", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/notices", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/notices", null, address).statusCode()).isEqualTo(429);
+
+        assertThat(send("GET", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("HEAD", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(429);
+        assertThat(send("POST", "/api/v2/artists/artist-a/hyped", null, address).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void hypedWritesCannotExhaustHypedReadsOrPublicReads() throws Exception {
+        String address = "192.0.2.62";
+        assertThat(send("POST", "/api/v2/artists/artist-a/hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("POST", "/api/v2/artists/artist-a/hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("POST", "/api/v2/artists/artist-a/hyped", null, address).statusCode()).isEqualTo(429);
+
+        assertThat(send("GET", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/goods/goods-a", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/notices", null, address).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void encodedHypedReadsAndHeadShareTheDedicatedBucket() throws Exception {
+        String address = "192.0.2.63";
+        assertThat(send("GET", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v2/artist%2dhyped", null, address).statusCode()).isEqualTo(200);
+        for (String path : new String[] {"/api/v2/artist-hyped", "/api/v2/artist%2Dhyped",
+            "/%61pi/v2/artist-hyped", "/api/v2/artist-hyped?locale=ko"}) {
+            var limited = send("GET", path, null, address);
+            assertThat(limited.statusCode()).isEqualTo(429);
+            assertThat(limited.headers().firstValue("Retry-After")).isPresent();
+        }
+        assertThat(send("HEAD", "/api/v2/artist-hyped", null, address).statusCode()).isEqualTo(429);
+        assertThat(send("GET", "/api/v2/artist-hyped", null, "192.0.2.64").statusCode()).isEqualTo(200);
+    }
+
+    @Test
     void encodedCookieRoutesRejectMissingAndHostileOrigins() throws Exception {
         int address = 10;
         for (String path : new String[] {"/api/v2/admin/s%65ssions", "/api/v2/%61dmin/sessions/refresh",
@@ -86,11 +150,12 @@ class EncodedPathSecurityHttpTest {
 
     @RestController
     static class Probe {
-        @PostMapping({"/api/v2/stamp-receipt-verifications", "/api/v2/admin/sessions", "/api/v2/admin/sessions/refresh"})
+        @PostMapping({"/api/v2/stamp-receipt-verifications", "/api/v2/admin/sessions", "/api/v2/admin/sessions/refresh",
+            "/api/v2/artists/artist-a/hyped"})
         String post() { return "reached"; }
         @DeleteMapping("/api/v2/admin/sessions/current")
         String delete() { return "reached"; }
-        @GetMapping("/api/v2/admin/path-probe")
+        @GetMapping({"/api/v2/admin/path-probe", "/api/v2/artist-hyped", "/api/v2/goods/goods-a", "/api/v2/notices"})
         String get() { return "reached"; }
     }
 }

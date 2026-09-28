@@ -83,7 +83,8 @@ class RateLimitTest {
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/admin/sessions/refresh")).isEqualTo("admin-login");
         assertThat(RateLimitFilter.policyName("PUT", "/api/v2/admin/crowding")).isEqualTo("admin");
         assertThat(RateLimitFilter.policyName("GET", "/api/v2/crowding")).isEqualTo("public-read");
-        assertThat(RateLimitFilter.policyName("GET", "/api/v2/artist-hyped")).isEqualTo("public-read");
+        assertThat(RateLimitFilter.policyName("GET", "/api/v2/artist-hyped")).isEqualTo("artist-hyped-read");
+        assertThat(RateLimitFilter.policyName("HEAD", "/api/v2/artist-hyped")).isEqualTo("artist-hyped-read");
         assertThat(RateLimitFilter.policyName("POST", "/api/v2/artists/artist-a/hyped")).isEqualTo("artist-hyped");
         assertThat(RateLimitFilter.policyName("OPTIONS", "/api/v2/admin/crowding")).isNull();
         assertThat(RateLimitFilter.policyName("GET", "/readyz")).isNull();
@@ -131,7 +132,7 @@ class RateLimitTest {
 
     private static RateLimitFilter filter(int hops) {
         return new RateLimitFilter(
-            new RateLimitProperties(true, hops, null, null, null, null, null),
+            new RateLimitProperties(true, hops, null, null, null, null, null, null),
             new RequestRateLimiter(Clock.systemUTC()), null
         );
     }

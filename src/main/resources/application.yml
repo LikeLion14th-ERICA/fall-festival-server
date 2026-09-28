@@ -69,6 +69,9 @@ festival:
     artist-hyped:
       capacity: ${RATE_LIMIT_ARTIST_HYPED_CAPACITY:120}
       refill-per-second: ${RATE_LIMIT_ARTIST_HYPED_REFILL_PER_SECOND:4.0}
+    artist-hyped-read:
+      capacity: ${RATE_LIMIT_ARTIST_HYPED_READ_CAPACITY:120}
+      refill-per-second: ${RATE_LIMIT_ARTIST_HYPED_READ_REFILL_PER_SECOND:4.0}
   http-observation:
     slow-request-ms: ${FESTIVAL_HTTP_SLOW_REQUEST_MS:500}
     log-success: ${FESTIVAL_HTTP_LOG_SUCCESS:true}

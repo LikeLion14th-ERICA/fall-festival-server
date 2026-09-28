@@ -80,6 +80,9 @@ class RateLimitFilter extends OncePerRequestFilter {
         if (method.equals("POST") && ARTIST_HYPED_MUTATION.matcher(path).matches()) {
             return "artist-hyped";
         }
+        if ((method.equals("GET") || method.equals("HEAD")) && path.equals(ARTIST_HYPED_PATH)) {
+            return "artist-hyped-read";
+        }
         if (method.equals("POST")
             && (path.equals("/api/v2/admin/sessions") || path.equals("/api/v2/admin/sessions/refresh"))) {
             return "admin-login";
@@ -94,6 +97,7 @@ class RateLimitFilter extends OncePerRequestFilter {
         return switch (name) {
             case "stamp-receipt" -> properties.stampReceipt();
             case "artist-hyped" -> properties.artistHyped();
+            case "artist-hyped-read" -> properties.artistHypedRead();
             case "admin-login" -> properties.adminLogin();
             case "admin" -> properties.admin();
             default -> properties.publicRead();
