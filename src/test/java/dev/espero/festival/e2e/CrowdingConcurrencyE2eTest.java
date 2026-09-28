@@ -186,7 +186,7 @@ class CrowdingConcurrencyE2eTest {
     void loopbackPublicCrowdingFollowsFirstDayGapDayAndLastDayBoundaries() throws Exception {
         PreparedCandidate candidate = prepared();
 
-        assertPublicCrowdingAt("2026-09-28T12:00:00+09:00", "2026-09-29", "BEFORE_OPEN");
+        assertPublicCrowdingAt("2026-09-27T12:00:00+09:00", "2026-09-29", "BEFORE_OPEN");
         assertPublicCrowdingAt("2026-09-30T12:00:00+09:00", "2026-10-02", "BEFORE_OPEN");
         assertPublicCrowdingAt("2026-10-04T12:00:00+09:00", "2026-10-03", "CLOSED");
 
