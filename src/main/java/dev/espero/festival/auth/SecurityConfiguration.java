@@ -17,6 +17,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.HeaderWriterFilter;
+import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -54,12 +58,20 @@ public class SecurityConfiguration {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.withObjectPostProcessor(new ObjectPostProcessor<HeaderWriterFilter>() {
-                @Override public <O extends HeaderWriterFilter> O postProcess(O filter) {
-                    filter.setShouldWriteHeadersEagerly(true);
-                    return filter;
-                }
-            }))
+            .headers(headers -> headers
+                // Headers are written eagerly, so the default no-cache Pragma and Expires would
+                // outlive the immutable Cache-Control that goods images set. Only that route is exempt.
+                .cacheControl(cache -> cache.disable())
+                .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                    new NegatedRequestMatcher(PathPatternRequestMatcher.withDefaults()
+                        .matcher(HttpMethod.GET, "/api/v2/media/goods-images/**")),
+                    new CacheControlHeadersWriter()))
+                .withObjectPostProcessor(new ObjectPostProcessor<HeaderWriterFilter>() {
+                    @Override public <O extends HeaderWriterFilter> O postProcess(O filter) {
+                        filter.setShouldWriteHeadersEagerly(true);
+                        return filter;
+                    }
+                }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())

@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,9 +21,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-/** Anonymous streaming delivery for live goods image associations. */
+/**
+ * Anonymous delivery for live goods image associations. The body is written on
+ * the request thread: an async StreamingResponseBody would run on the shared
+ * application task executor, whose eight threads a few slow mobile clients can
+ * occupy while every other image waits in its queue.
+ */
 @RestController
 @RequestMapping("/api/v2/media/goods-images")
 @Profile("db")
@@ -48,7 +54,7 @@ public class GoodsMediaController {
     }
 
     @GetMapping("/{mediaId}/{variant}")
-    public ResponseEntity<StreamingResponseBody> get(
+    public ResponseEntity<Resource> get(
         HttpServletRequest request,
         @PathVariable UUID mediaId,
         @PathVariable String variant
@@ -63,7 +69,9 @@ public class GoodsMediaController {
         String etag = conditional.strongEtag(mediaId, mediaVariant);
         HttpHeaders headers = responseHeaders(etag);
         InputStream input;
+        long length;
         try {
+            length = mediaStorage.size(festivalId, mediaId, mediaVariant);
             input = mediaStorage.open(festivalId, mediaId, mediaVariant);
         } catch (IOException exception) {
             throw unavailable(exception);
@@ -76,12 +84,8 @@ public class GoodsMediaController {
             }
             return new ResponseEntity<>(null, headers, HttpStatus.NOT_MODIFIED);
         }
-        StreamingResponseBody body = output -> {
-            try (input) {
-                input.transferTo(output);
-            }
-        };
-        return ResponseEntity.ok().headers(headers).body(body);
+        // The resource converter closes the stream after writing it.
+        return ResponseEntity.ok().headers(headers).contentLength(length).body(new InputStreamResource(input));
     }
 
     private static HttpHeaders responseHeaders(String etag) {

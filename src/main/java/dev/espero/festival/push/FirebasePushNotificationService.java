@@ -33,10 +33,20 @@ class FirebasePushNotificationService implements PushNotificationService {
         try {
             var result = messaging.subscribeToTopic(List.of(deviceToken), topic);
             if (result.getSuccessCount() != 1 || result.getFailureCount() != 0) {
+                // Per-token rejection (for example a token issued for another Firebase project).
+                var errors = result.getErrors();
+                log.warn("Push subscribe rejected: reason={}",
+                    errors == null || errors.isEmpty() ? "-" : errors.getFirst().getReason());
                 throw new PushSubscriptionFailedException(null);
             }
         } catch (FirebaseMessagingException exception) {
-            log.warn("Push subscribe failed: errorCode={}", exception.getMessagingErrorCode());
+            // Topic management errors carry no FCM-specific code, so the platform code, the
+            // HTTP status and the cause type identify them. Messages may echo request data.
+            var response = exception.getHttpResponse();
+            log.warn("Push subscribe failed: errorCode={} messagingErrorCode={} httpStatus={} cause={}",
+                exception.getErrorCode(), exception.getMessagingErrorCode(),
+                response == null ? "-" : response.getStatusCode(),
+                exception.getCause() == null ? "-" : exception.getCause().getClass().getName());
             throw new PushSubscriptionFailedException(exception);
         }
     }
@@ -57,7 +67,10 @@ class FirebasePushNotificationService implements PushNotificationService {
         try {
             messaging.send(message.build());
         } catch (FirebaseMessagingException exception) {
-            log.warn("Notice-created push failed: errorCode={}", exception.getMessagingErrorCode());
+            var response = exception.getHttpResponse();
+            log.warn("Notice-created push failed: errorCode={} messagingErrorCode={} httpStatus={}",
+                exception.getErrorCode(), exception.getMessagingErrorCode(),
+                response == null ? "-" : response.getStatusCode());
         }
     }
 }

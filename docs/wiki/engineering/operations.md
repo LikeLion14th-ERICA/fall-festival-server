@@ -176,6 +176,15 @@ HYPED_CLOSED, 회차 전환 후에는 FESTIVAL_MISMATCH로 거절한다. 리허�
 집계에 합치지 않는다. 물리 iOS·Android PWA의 종료/재실행 확인과 운영 지연 측정은 로컬
 자동 검증과 별도로 수행해야 한다.
 
+### 굿즈 이미지 전달
+
+`GET /api/v2/media/goods-images/{mediaId}/{variant}`는 요청 스레드에서 `Content-Length`와 함께
+본문을 쓴다. 비동기 streaming은 Spring 기본 작업 executor(8 thread)를 공유해 느린 모바일
+클라이언트 몇 명이 다른 이미지 전송을 막을 수 있어 사용하지 않는다. 응답은
+`Cache-Control: public, max-age=31536000, immutable`과 강한 ETag만 사용하며, 이 경로에는
+Spring Security 기본 `Pragma: no-cache`·`Expires: 0`을 쓰지 않는다. URL에 확장자가 없으므로
+CDN(Cloudflare 등)은 이 경로를 캐시 대상으로 지정하는 규칙이 있어야 edge에서 응답한다.
+
 ## 구현 규칙
 
 - 운영 콘텐츠는 최소 `draft / scheduled / published / archived` 생명주기와 게시자,

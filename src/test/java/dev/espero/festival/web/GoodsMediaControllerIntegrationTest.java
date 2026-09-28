@@ -2,7 +2,6 @@ package dev.espero.festival.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -113,6 +112,9 @@ class GoodsMediaControllerIntegrationTest {
                 .andExpect(header().string("Content-Disposition", "inline"))
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(header().string("Cache-Control", GoodsMediaController.CACHE_CONTROL))
+                .andExpect(header().doesNotExist("Pragma"))
+                .andExpect(header().doesNotExist("Expires"))
+                .andExpect(header().longValue("Content-Length", expected.length))
                 .andExpect(header().string("ETag", org.hamcrest.Matchers.matchesPattern("\"[0-9a-f]{64}\"")))
                 .andExpect(content().bytes(expected))
                 .andReturn();
@@ -187,10 +189,8 @@ class GoodsMediaControllerIntegrationTest {
     private org.springframework.test.web.servlet.ResultActions performStreaming(
         org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder requestBuilder
     ) throws Exception {
-        MvcResult initial = mvc.perform(requestBuilder)
-            .andExpect(request().asyncStarted())
-            .andReturn();
-        return mvc.perform(asyncDispatch(initial));
+        // Written synchronously; see GoodsMediaController.
+        return mvc.perform(requestBuilder).andExpect(request().asyncNotStarted());
     }
 
     private UUID insertAttachedMediaWithFiles(UUID festivalId) throws Exception {

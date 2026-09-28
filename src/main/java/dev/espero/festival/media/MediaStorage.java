@@ -20,5 +20,8 @@ public interface MediaStorage {
 
     InputStream open(UUID festivalId, UUID mediaId, MediaVariant variant) throws IOException;
 
+    /** Stored variants are immutable once finalized, so the size matches any later open. */
+    long size(UUID festivalId, UUID mediaId, MediaVariant variant) throws IOException;
+
     void delete(UUID festivalId, UUID mediaId) throws IOException;
 }

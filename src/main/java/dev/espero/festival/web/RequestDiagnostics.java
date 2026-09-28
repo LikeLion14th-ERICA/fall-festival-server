@@ -35,7 +35,8 @@ public final class RequestDiagnostics {
                     break;
                 }
             }
-            causes.add(type + "@" + location);
+            // "type@location" read as an e-mail address to log viewers and was masked entirely.
+            causes.add(type + " at " + location);
         }
         // Never call Throwable.toString/getMessage or include SQL, filenames or suppressed exceptions.
         return String.join("|", causes);
