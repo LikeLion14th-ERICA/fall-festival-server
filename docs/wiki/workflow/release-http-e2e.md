@@ -50,7 +50,7 @@ required CI, migration/운영 승인과 staging 증거를 함께 요구한다.
 | 이전 GOODS 계좌 CLI·공개 비노출 | HTTP-29 | P0 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
 | notice template CLI | HTTP-30 | P1 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
 | admin mutation boundary | HTTP-31 | P1 | [운영·보안 상세](release-http-e2e-operational-boundaries.md) |
-| 익명 아티스트 Hyped | HTTP-32 | P0 | 실제 게시 아티스트의 반복 클릭·누적 조회·CONTEST 제외·KST 날짜 경계·no-store와 DB 일치 |
+| 익명 아티스트 Hyped | HTTP-32 | P0 | 실제 게시 아티스트의 반복 클릭·누적 조회·CONTEST 제외·9월 28일 사전 실개방부터 축제일까지 누적 보존·KST 종료 경계·no-store와 DB 일치 |
 | ingress/browser/media/load rehearsal | STAGE-01–05 | release gate | [staging·운영 리허설 상세](release-http-e2e-staging.md) |
 
 각 ID는 다음 상태 중 하나로 기록한다. **계획**은 수용 조건만 존재함, **구현**은 코드가

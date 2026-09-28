@@ -137,14 +137,16 @@ class ArtistHypedHttpE2eTest {
             """, String.class, FESTIVAL);
         assertThat(contestId).isNotBlank();
 
-        CLOCK.now = opening.minusNanos(1);
+        CLOCK.now = Instant.parse("2026-09-28T01:59:59Z");
         assertThat(enabled()).isFalse();
         assertError(post(artistId), 409, "HYPED_CLOSED");
         assertThat(count(artistId)).isZero();
 
-        CLOCK.now = opening;
+        CLOCK.now = Instant.parse("2026-09-28T06:00:00Z");
         assertThat(enabled()).isTrue();
         assertIncrement(post(artistId), artistId, 1);
+        CLOCK.now = opening;
+        assertThat(enabled()).isTrue();
         assertIncrement(post(artistId), artistId, 2);
         assertThat(count(artistId)).isEqualTo(2);
         assertError(post(contestId), 404, "NOT_FOUND");
