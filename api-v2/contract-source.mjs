@@ -75,7 +75,7 @@ export const schemas = {
   Pin: object({ id, category: text('핀 세부 종류 ID. 운영 목록에서 제공하며 명칭을 enum으로 고정하지 않음.'), filterGroup: nullable(pinFilterGroup, '화장실·포토부스·흡연구역·쓰레기통 PLACE 핀만 값을 가짐. 그 밖의 PLACE 핀은 null이며 `전체`에서만 표시. AREA 핀은 null이며 필터와 무관하게 항상 표시.'), label: text('선택 언어 표시명'), x: { type: 'number', minimum: 0, maximum: 1, description: '이미지 왼쪽 기준 가로 비율. 지도 조작과 무관.' }, y: { type: 'number', minimum: 0, maximum: 1, description: '이미지 위쪽 기준 세로 비율.' }, target: { oneOf: [object({ kind: enumeration(['PLACE'], '장소 팝업. filterGroup이 있으면 해당 필터에서, 없으면 `전체`에서만 표시.'), placeId: id }), object({ kind: enumeration(['AREA'], '팝업 없이 구역 지도 이동. filterGroup은 null이며 필터와 무관하게 항상 표시.'), mapId: id })] } }),
   Pins: object({ mapId: id, mapVersion: text('요청한 이미지 버전과 동일'), filters: array(ref('PinFilter'), '현재 mapId·mapVersion의 PLACE 핀에 실제로 존재하는 필터만 반환. 화장실·포토부스·흡연구역·쓰레기통 고정 순서이며 locale 표시명을 포함. AREA 핀은 제외.'), items: array(ref('Pin'), '핀 목록. 서버 필터 query는 제공하지 않으며 클라이언트가 PLACE의 filterGroup으로 표시를 제어하고 AREA는 항상 표시.') }),
   Place: object({ id, kind: enumeration(['SPACE', 'FACILITY', 'LANDMARK'], '유형별 팝업 구성'), name: optionalText, locationText: optionalText, hoursText: optionalText, description: optionalText, usage: optionalText, spaceId: nullable(id, 'SPACE 유형만 상세 연결. 나머지는 null.') }),
-  TicketGuide: object({ date, status: enumeration(['BEFORE_FESTIVAL', 'TRANSFER_OPEN', 'DAILY_CLOSED', 'FESTIVAL_ENDED', 'UNCONFIGURED'], '시간별 송금 안내 상태. 일정이 없거나 TICKET 계좌 설정이 없으면 UNCONFIGURED다.'), unitPrice: nullable(ref('Money'), '가격 자료 대기 시 null. 0원과 다름.'), transferOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), transferClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupOpensAt: nullable(timestamp, '운영 자료 대기 시 null'), pickupClosesAt: nullable(timestamp, '운영 자료 대기 시 null'), account: nullable(ref('BankAccount'), 'catalog revision 밖의 TICKET 계좌 설정에서 제공. 계좌 설정이 없거나 송금 제공 시간 밖이면 null.'), transferLink: nullable(ref('Link'), '링크 표시명 출처가 정해지기 전까지 항상 null. 계좌 설정은 URL만 보관한다.'), paymentSettingsVersion: nullable(integer('현재 TICKET 계좌 설정의 version. 값이 바뀌면 계좌 설정이 바뀐 것이며 응답 ETag도 함께 바뀐다.', 1), '계좌를 한 번도 설정하지 않았으면 null. 설정을 해제한 뒤에도 version은 남는다.'), mapTarget: nullable(ref('MapTarget'), mapTargetDescription), instructions: array(text('안내'), '승인된 현장 안내. 목에서 환불 정책을 임의로 확정하지 않음.') }),
+  TicketGuide: object({ unitPrice: nullable(ref('Money'), '게시 카탈로그의 1인 입장권 금액. 가격 자료가 없는 이전 revision에서는 null이며 0원과 다름.') }, undefined, '외부인 티켓 금액 안내 전용. 계좌·송금·토스·수령 상태를 제공하지 않음.'),
   StampGuide: object({ title: text('행사 제목'), dates: array(date, '실제 행사 기간'), instructions: array(text('참여·상품 안내'), '없으면 []'), reward: object({ name: text('경품명'), locationText: optionalText, hoursText: optionalText, notice: text('당일 1회·소진 시 현장 안내') }), dailyLimit: enumeration([4], '당일 최대 적립'), timezone: enumeration(['Asia/Seoul'], '자정 초기화'), qrValue: nullable(text('스탬프투어 시작 안내용 공통 주소. 적립에는 쓰지 않으며 비밀키가 아님.'), '배포 방식·책임 미합의 시 null. 적립은 부스별 QR 링크의 토큰(StampCollectionInput.token)으로 한다.') }),
   StampCard: object({ date: text('축제 시간대(Asia/Seoul) 기준 오늘 날짜. 자정이 지나면 다시 START해야 새 스탬프판이 열린다.', { format: 'date' }), dailyLimit: enumeration([4], '하루 최대 적립 개수'), stamps: array(ref('StampCardStamp'), '오늘 적립한 부스. 부스당 하루 1개, 적립 시각순.', { maxItems: 4 }), rewardClaimed: bool('오늘 상품을 받았는지. 서버가 수령 인증 성공 때 기록한다.') }, undefined, '이 브라우저의 익명 참여자(HttpOnly 쿠키)의 오늘 스탬프판. 오늘 START(POST /stamp-participants) 뒤에만 있고, 그 전에는 STAMP_NOT_STARTED(404)이므로 시작 화면을 보여 준다. 계정·복구 없음.'),
   StampCardStamp: object({ boothId: id, boothName: nullable(text('부스 표시명'), '게시 catalog에서 사라진 부스면 null'), collectedAt: timestamp }),
@@ -122,7 +122,7 @@ export const operations = [
   ['getMap','GET','/maps/{mapId}','Map','지도 이미지·버전',['MAP-OVERVIEW','MAP-AREA'],[],['normal','not-found','error']],
   ['getPins','GET','/maps/{mapId}/pins','Pins','지도별 핀',['MAP-OVERVIEW','MAP-AREA'],[param('mapVersion',text('조회한 Map.version'),'이미지와 다른 버전 요청은 409',true)],['normal','empty','not-found','version-conflict','error']],
   ['getPlace','GET','/places/{placeId}','Place','장소 팝업',['MAP-POPUP'],[],['normal','missing-optional','not-found','error']],
-  ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 안내',['TICKET'],[],['normal','before-open','closed','ended','unconfigured','error']],
+  ['getTicketGuide','GET','/ticket-guide','TicketGuide','외부인 티켓 금액 안내',['TICKET'],[],['normal','unconfigured','error']],
   ['getStampGuide','GET','/stamp-guide','StampGuide','스탬프 안내·공통 QR',['STAMP-START','STAMP-COLLECT','STAMP-REWARD'],[],['normal','missing-optional','error']],
   ['startStampParticipation','POST','/stamp-participants','StampCard','스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급',['STAMP-START'],[],['normal','already-started','error']],
   ['getStampCard','GET','/stamp-card','StampCard','오늘의 스탬프판',['STAMP-COLLECT','STAMP-REWARD'],[],['normal','empty','not-started','error']],
@@ -165,8 +165,7 @@ Object.assign(operations.find(operation=>operation.operationId==='collectStamp')
   successStatus: 200,
   cacheControl: 'no-store',
 });
-// The ticket guide combines static catalog content with the current TICKET
-// account setting, so clients poll it and revalidate with If-None-Match.
+// The ticket amount belongs to the published catalog revision.
 Object.assign(operations.find(operation=>operation.operationId==='getTicketGuide'), {
   conditional: true,
   cacheControl: 'private, no-cache',

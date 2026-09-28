@@ -2,7 +2,7 @@
 const groups={
   'BOOTH-LIST':['Space.image','Space.name','Space.locationText','Space.category','브라우저: savedSpaceIds','브라우저: 선택 분류·스크롤'],
   'BOOTH-DETAIL':['Space.image','Space.name','Space.category','Space.operator','Space.hoursText','Space.locationText','Space.contact','Space.description','Space.experience','Space.events','Space.menu[].name','Space.menu[].price','브라우저: savedSpaceIds','Space.mapTarget','브라우저: 현재 상세 페이지 URL'],
-  'MAP-OVERVIEW':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Pin.target','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)','TicketGuide.mapTarget','제외: 지도 혼잡도 표시 없음','제외: 지도 혼잡도 색상 없음','제외: 지도 혼잡도 안내 없음','제외: 지도 혼잡도 수정 시각 없음'],
+  'MAP-OVERVIEW':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Pin.target','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)','제외: 외부인 티켓 금액 안내에서 지도 연결 제거','제외: 지도 혼잡도 표시 없음','제외: 지도 혼잡도 색상 없음','제외: 지도 혼잡도 안내 없음','제외: 지도 혼잡도 수정 시각 없음'],
   'MAP-AREA':['Map.image','Pin.x + Pin.y','Pin.category','브라우저: Pins.items에서 실제 종류 추출; 필터 단위 미정','브라우저: 선택 필터·핀','Space.mapTarget','Map.image (장소명·번호 포함; 구체 표기 방식은 디자인 협의)'],
   'MAP-POPUP':['Place.name','Place.hoursText','Place.description','Place.locationText','Place.usage','Place.spaceId'],
   'HOME':['Crowding.savedLevel','Crowding.status','Crowding.updatedAt + Crowding.timeBasis','Crowding.opensAt','Crowding.closesAt','프런트 고정 UI: Crowding.colorToken → 디자인 색상','프런트 번역: Crowding.status; Crowding.message는 참고','Config.languages','브라우저: 선택 언어, 기본 ko','Notices.items[0].title','Config.links.universityNotices','Config.links.faq','제외: 웰컴데이(WELCOME-001) 기능 제거(2026-09-22)','Config.links.officialChannels','Channel.label + Channel.iconKey','StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여)'],
@@ -14,7 +14,7 @@ const groups={
   'SHOW-ARTIST':['Artist.image','Artist.name','Artist.performances[].date','Artist.performances[].startsAt + Artist.performances[].endsAt','Artist.introduction','Artist.socialLinks','Artist.songs[].label','Artist.songs[].url'],
   'SHOW-TIMETABLE':['Performance.title','Performance.date','Performance.startsAt','Performance.endsAt','ProhibitedItems.message','프런트: Meta.serverTime + 경과 시간, 축제 당일 17:00~22:00 오늘 열만 (시간축 변경과 별개)'],
   'SHOW-POPUP':['Performance.title','Performance.artists','Performance.startsAt + Performance.endsAt','Performance.description'],
-  'TICKET':['TicketGuide.date (서버 KST 기준을 사용)','TicketGuide.unitPrice','브라우저: 기본·최소 1명, 토스 복귀 시 1명','프런트: 인원 × Money.amount, 안전 정수 범위 확인','TicketGuide.transferOpensAt + TicketGuide.transferClosesAt','TicketGuide.pickupOpensAt + TicketGuide.pickupClosesAt','BankAccount.bankName','TicketGuide.account (운영 밖 null)','BankAccount.holder','TicketGuide.mapTarget','TicketGuide.instructions'],
+  'TICKET':['제외: 날짜 선택·당일권 상태 없음','TicketGuide.unitPrice','제외: 송금용 인원 선택 없음','제외: 송금용 합계 계산 없음','제외: 송금 제공 일정 없음','제외: 현장 수령 시간 없음','제외: 티켓 계좌 없음','제외: 티켓 계좌 복사 없음','제외: 티켓 예금주 없음','제외: 금액 안내에서 지도 연결 없음','제외: 송금·수령 안내 없음'],
   'STAMP-START':['StampGuide.title + StampGuide.reward.name','StampGuide.dates','StampGuide.instructions','StampGuide.reward.notice'],
   'STAMP-COLLECT':['StampCard (GET /stamp-card가 404 STAMP_NOT_STARTED면 미참여)','StampCard.stamps (부스당 하루 1개, 최대 StampCard.dailyLimit)','StampCard.rewardClaimed','StampCard.date (축제 시간대 자정 초기화)','StampCollectionInput.token ← 부스 QR 링크의 b 값'],
   'STAMP-REWARD':['프런트 고정 UI: 담당자에게 제시·수령 인증 코드 입력·확인 버튼; 상품 수령 버튼 없음'],

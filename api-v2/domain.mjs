@@ -544,9 +544,7 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
     case 'getPlace':data=find(state.places,params.placeId);if(missing)Object.assign(data,{hoursText:null,description:null,usage:null});break;
     case 'getTicketGuide':{
       const unconfigured=scenario==='unconfigured';
-      const ticketStatus=unconfigured?'UNCONFIGURED':date<DATES[0]?'BEFORE_FESTIVAL':date>DATES.at(-1)?'FESTIVAL_ENDED':isoKst(now).slice(11,16)>='21:00'?'DAILY_CLOSED':'TRANSFER_OPEN';
-      const schedule=defaultDate(date),open=ticketStatus==='TRANSFER_OPEN';
-      data={date,status:ticketStatus,unitPrice:unconfigured?null:money(1500),transferOpensAt:unconfigured?null:`${schedule}T00:00:00+09:00`,transferClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,pickupOpensAt:unconfigured?null:`${schedule}T13:00:00+09:00`,pickupClosesAt:unconfigured?null:`${schedule}T21:00:00+09:00`,account:open?{bankName:'개발용 은행',accountNumber:'MOCK-NOT-PAYABLE',holder:'개발용 예금주'}:null,transferLink:null,paymentSettingsVersion:unconfigured?null:1,mapTarget:unconfigured?null:{mapId:'map-overview',placeId:'place-ticket',pinId:'pin-ticket',mapVersion:'mock-map-1'},instructions:['실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.','입금과 지급 여부는 현장에서 확인합니다.']};break;
+      data={unitPrice:unconfigured?null:money(25000)};break;
     }
     case 'getStampGuide':data={title:'개발용 스탬프투어',dates:DATES,instructions:['축제일마다 START를 누르면 그날 참여가 시작됩니다.','부스마다 다른 QR을 찍어 부스당 하루 1개, 하루 4개까지 적립합니다.'],reward:{name:'몬스터',locationText:missing?null:'예시 수령 장소',hoursText:missing?null:'예시 수령 시간',notice:'하루 1회·당일 수령. 준비 수량 소진 시 현장에서 안내합니다.'},dailyLimit:4,timezone:'Asia/Seoul',qrValue:missing?null:'MOCK-COMMON-QR'};break;
     case 'startStampParticipation':

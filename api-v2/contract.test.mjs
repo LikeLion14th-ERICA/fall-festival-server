@@ -62,7 +62,7 @@ test('Meta revision distinguishes aligned content from unscoped and error respon
   assert.ok(examples.getTicketGuide.scenarios.normal.response.meta.revision>=1);
   assert.equal(examples.getCrowding.scenarios.normal.response.meta.revision,0);
 });
-test('27 screens include restored crowding-hours mappings without duplicate IDs',()=>{assert.equal(coverage.screens.length,27);assert.equal(coverage.data.length,189);assert.equal(coverage.data.filter(x=>x.owner!=='제외').length,183);assert.equal(coverage.data.filter(x=>x.owner==='제외').length,6);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));for(const id of ['ADM-CROWD-HOURS-D01','ADM-CROWD-HOURS-D02','ADM-CROWD-HOURS-D03','ADM-CROWD-HOURS-D04'])assert.equal(coverage.data.find(d=>d.id===id).owner,'API');assert.equal(coverage.data.find(d=>d.id==='ADM-CROWD-HOURS-D05').owner,'브라우저');});
+test('27 screens include restored crowding-hours mappings without duplicate IDs',()=>{assert.equal(coverage.screens.length,27);assert.equal(coverage.data.length,189);assert.equal(coverage.data.filter(x=>x.owner!=='제외').length,172);assert.equal(coverage.data.filter(x=>x.owner==='제외').length,17);assert.equal(new Set(coverage.data.map(x=>x.id)).size,189);for(const s of coverage.screens)assert.ok(s.operations.length>0);assert.ok(coverage.data.filter(x=>x.owner==='브라우저').length>=10);assert.ok(!coverage.data.some(x=>x.id==='ADM-NOTICE-EDIT-D04'));assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D01').label,'담당자 제시·수령 인증 코드 입력 안내');assert.equal(coverage.data.find(d=>d.id==='STAMP-REWARD-D02').target,'StampReceiptVerificationInput.code → StampReceiptVerification.verified');assert.ok(coverage.data.some(d=>d.id==='SHOW-ARTIST-D09'&&d.target.includes('ArtistHypedSummary')));for(const id of ['ADM-CROWD-HOURS-D01','ADM-CROWD-HOURS-D02','ADM-CROWD-HOURS-D03','ADM-CROWD-HOURS-D04'])assert.equal(coverage.data.find(d=>d.id===id).owner,'API');assert.equal(coverage.data.find(d=>d.id==='ADM-CROWD-HOURS-D05').owner,'브라우저');});
 test('Public routes stay anonymous and admin routes require the documented bearer/cookie credential',()=>{for(const [path,methods]of Object.entries(spec.paths))for(const o of Object.values(methods)){const isLogin=o.operationId==='createAdminSession';assert.equal(o.security.length>0,path.includes('/admin/')&&!isLogin);}});
 test('Hyped mock keeps repeatable artist counts across festival days with KST closure',async()=>{
   const session='hyped-contract';
@@ -691,10 +691,13 @@ test('Public dynamic routes reject known locales that are not published',async()
     assert.equal(response.status,400,path);assert.equal(response.body.error.code,'LOCALE_NOT_READY',path);
   }
 });
-test('Ticket close boundary hides account; next day reopens; price uses integer KRW',async()=>{
-  for(const [now,expected]of [['2030-10-01T20:59:59+09:00','TRANSFER_OPEN'],['2030-10-01T21:00:00+09:00','DAILY_CLOSED'],['2030-10-02T00:00:00+09:00','TRANSFER_OPEN'],['2030-10-04T00:00:00+09:00','FESTIVAL_ENDED']]){
-    const data=(await call('/api/v2/ticket-guide',{headers:{'X-Mock-Time':now}})).body.data;assert.equal(data.status,expected);assert.equal(data.account!==null,expected==='TRANSFER_OPEN');assert.equal(data.unitPrice.currency,'KRW');assert.ok(Number.isInteger(data.unitPrice.amount));
+test('Ticket guide exposes the published amount only',async()=>{
+  for(const now of ['2030-10-01T20:59:59+09:00','2030-10-01T21:00:00+09:00','2030-10-04T00:00:00+09:00']){
+    const data=(await call('/api/v2/ticket-guide',{headers:{'X-Mock-Time':now}})).body.data;
+    assert.deepEqual(data,{unitPrice:{amount:25000,currency:'KRW'}});
   }
+  const missing=(await call('/api/v2/ticket-guide',{headers:{'X-Mock-Scenario':'unconfigured'}})).body.data;
+  assert.deepEqual(missing,{unitPrice:null});
 });
 test('Map links resolve to the same version, place, pin and space',async()=>{
   const spaces=(await call('/api/v2/spaces')).body.data.items;
@@ -708,7 +711,6 @@ test('MapTarget is a canonical current PLACE pin and null means unlinked',async(
   assert.match(description,/PLACE/);
   assert.match(description,/null/);
   assert.equal(spec.components.schemas.Space.properties.mapTarget.description,description);
-  assert.equal(spec.components.schemas.TicketGuide.properties.mapTarget.description,description);
   const session='map-target-contract',spacesResponse=await call('/api/v2/spaces',{session}),spaces=spacesResponse.body.data.items;
   assert.ok(spaces.length>0);
   for(const space of spaces){
@@ -717,10 +719,6 @@ test('MapTarget is a canonical current PLACE pin and null means unlinked',async(
     assert.deepEqual({festivalId:response.body.meta.festivalId,revision:response.body.meta.revision},{festivalId:spacesResponse.body.meta.festivalId,revision:spacesResponse.body.meta.revision});
     const pin=response.body.data.items.find(p=>p.id===target.pinId);assert.ok(pin);assert.deepEqual(pin.target,{kind:'PLACE',placeId:target.placeId});
   }
-  const ticket=await call('/api/v2/ticket-guide',{session}),ticketTarget=ticket.body.data.mapTarget;assert.ok(ticketTarget);
-  const ticketPins=await call(`/api/v2/maps/${ticketTarget.mapId}/pins?mapVersion=${ticketTarget.mapVersion}`,{session});
-  const ticketPin=ticketPins.body.data.items.find(p=>p.id===ticketTarget.pinId);assert.ok(ticketPin);assert.deepEqual(ticketPin.target,{kind:'PLACE',placeId:ticketTarget.placeId});
-  assert.equal((await call('/api/v2/ticket-guide',{session,headers:{'X-Mock-Scenario':'unconfigured'}})).body.data.mapTarget,null);
   assert.equal((await call('/api/v2/spaces/space-booth',{session,headers:{'X-Mock-Scenario':'missing-optional'}})).body.data.mapTarget,null);
 });
 test('Map pin filters follow the design chips in stable order and AREA pins stay visible',async()=>{
@@ -748,7 +746,7 @@ test('Runtime validator rejects representative schema violations independently o
 });
 
 test('crowding hours use their approved route while legacy routes and out-of-scope fields stay removed',async()=>{
-  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,183);
+  assert.equal(coverage.data.filter(d=>d.owner!=='제외').length,172);
   for(const s of coverage.screens.filter(s=>s.id.startsWith('MAP')))assert.ok(!s.operations.includes('getCrowding'));
   assert.deepEqual(operation('getCrowding')['x-screen-ids'],['HOME']);
   for(const path of ['/api/v2/admin/operating-hours','/api/v2/admin/operating-hours/2030-10-01','/api/v2/admin/goods/goods-shirt/colors/color-a/sizes/size-m/inventory','/api/v2/performance-alert'])assert.equal((await call(path,{headers:admin})).status,404);

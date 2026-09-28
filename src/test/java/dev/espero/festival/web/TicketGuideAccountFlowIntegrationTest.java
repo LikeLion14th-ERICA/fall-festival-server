@@ -44,10 +44,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Serves the public ticket guide from a published catalog and the separate
- * operational account setting. An account change is visible on the very next
- * request without a catalog publish or restart, which is well inside the
- * frontend's 15 second polling interval.
+ * A published ticket amount stays independent of legacy account settings
+ * and transfer hours.
  */
 @SpringBootTest(properties = "festival.id=ec00912b-763f-4f8f-8f57-4bdfc389ccbf")
 @ActiveProfiles("db")
@@ -101,67 +99,23 @@ class TicketGuideAccountFlowIntegrationTest {
     }
 
     @Test
-    void reflectsEachAccountChangeOnTheNextRequestWithANewEtag() throws Exception {
-        String unconfigured = ticketGuide()
-            .andExpect(status().isOk())
-            .andExpect(header().string("Cache-Control", "private, no-cache"))
-            .andExpect(jsonPath("$.data.status").value("UNCONFIGURED"))
-            .andExpect(jsonPath("$.data.account").doesNotExist())
-            .andExpect(jsonPath("$.data.paymentSettingsVersion").doesNotExist())
-            .andReturn().getResponse().getHeader("ETag");
-
-        accounts.set(FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0, account("110-0000-1234"), "1234", audit());
-        Instant changedAt = clock.instant();
-
+    void servesOnlyPriceAndIgnoresLegacyTicketAccountAndTransferWindow() throws Exception {
         String first = ticketGuide()
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.status").value("TRANSFER_OPEN"))
-            .andExpect(jsonPath("$.data.account.accountNumber").value("110-0000-1234"))
-            .andExpect(jsonPath("$.data.paymentSettingsVersion").value(1))
-            .andExpect(jsonPath("$.data.transferLink").doesNotExist())
-            .andReturn().getResponse().getHeader("ETag");
-        assertThat(first).isNotEqualTo(unconfigured);
-
-        // A proxy revalidating with the old tag gets the new body; with the new tag, a 304.
-        conditionalTicketGuide(unconfigured).andExpect(status().isOk());
-        conditionalTicketGuide(first)
-            .andExpect(status().isNotModified())
-            .andExpect(header().string("ETag", first))
-            .andExpect(header().string("Cache-Control", "private, no-cache"));
-
-        accounts.set(FESTIVAL_ID, OperationalAccountPurpose.TICKET, 1, account("110-0000-5678"), "5678", audit());
-
-        String second = ticketGuide()
-            .andExpect(jsonPath("$.data.account.accountNumber").value("110-0000-5678"))
-            .andExpect(jsonPath("$.data.paymentSettingsVersion").value(2))
-            .andReturn().getResponse().getHeader("ETag");
-        assertThat(second).isNotEqualTo(first);
-        conditionalTicketGuide(first).andExpect(status().isOk());
-        assertThat(clock.instant()).isEqualTo(changedAt);
-
-        accounts.clear(FESTIVAL_ID, OperationalAccountPurpose.TICKET, 2, audit());
-        ticketGuide()
-            .andExpect(jsonPath("$.data.status").value("UNCONFIGURED"))
+            .andExpect(header().string("Cache-Control", "private, no-cache"))
+            .andExpect(jsonPath("$.data.unitPrice.amount").value(5000))
             .andExpect(jsonPath("$.data.account").doesNotExist())
-            .andExpect(jsonPath("$.data.paymentSettingsVersion").value(3));
-    }
+            .andExpect(jsonPath("$.data.status").doesNotExist())
+            .andReturn().getResponse().getHeader("ETag");
 
-    @Test
-    void hidesTheAccountAndChangesTheEtagAtTheDailyTransferClose() throws Exception {
         accounts.set(FESTIVAL_ID, OperationalAccountPurpose.TICKET, 0, account("110-0000-1234"), "1234", audit());
-        clock.set(OffsetDateTime.parse("2026-09-29T17:59:59+09:00"));
-        String open = ticketGuide()
-            .andExpect(jsonPath("$.data.status").value("TRANSFER_OPEN"))
-            .andReturn().getResponse().getHeader("ETag");
-
         clock.set(OffsetDateTime.parse("2026-09-29T18:00:00+09:00"));
-        String closed = ticketGuide()
-            .andExpect(jsonPath("$.data.status").value("DAILY_CLOSED"))
+        String second = ticketGuide()
+            .andExpect(jsonPath("$.data.unitPrice.amount").value(5000))
             .andExpect(jsonPath("$.data.account").doesNotExist())
             .andReturn().getResponse().getHeader("ETag");
-
-        assertThat(closed).isNotEqualTo(open);
-        conditionalTicketGuide(open).andExpect(status().isOk());
+        assertThat(second).isEqualTo(first);
+        conditionalTicketGuide(first).andExpect(status().isNotModified());
     }
 
     private ResultActions ticketGuide() throws Exception {

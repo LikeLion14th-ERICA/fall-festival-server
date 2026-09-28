@@ -21,7 +21,7 @@
 | MAP-OVERVIEW | maps + pins | 핀이 비어도 이미지 유지. 이미지/핀 오류 분리, 실패 부분 재조회. mapVersion409는 버전 재동기화. 혼잡도 표시 없음 |
 | MAP-AREA | maps/{id} + pins | 없는 핀 분류 숨김. 기본안은 확대 없음·가로 스크롤. 전체 복귀는 기본 위치/전체 필터. 상세에서 복귀는 이전 상태 유지 |
 | MAP-POPUP | places/{id} | null 안내 영역 숨김. 정보 실패여도 지도 이미지 유지. SPACE만 부스 상세 연결. 바깥 선택으로 닫기 |
-| TICKET | ticket-guide, 서버 KST 오늘 | unconfigured는 자료 대기. before-open/closed/ended는 계좌null. 메뉴 유지. 인원 기본·최소1, 합계KRW×인원, 송금 복귀1명 |
+| TICKET | ticket-guide의 `unitPrice` | 게시된 1인 금액만 표시. 이전 revision의 가격 미설정은 null이며 금액 준비 중으로 처리. 계좌·송금·수령 상태 없음 |
 | STAMP-START | stamp-guide + 당일 로컬 상태 | 선택 수령 안내·QR 누락은 자료 대기. START만으로 적립하지 않음. START 전 기본 카메라 QR 직접 진입은 이 화면으로 이동하며 자동 시작·적립 없음 |
 | STAMP-COLLECT | guide + 로컬 count/date/started/claimed | 처음0칸. 공통 QR1회당1개·하루4개. 자정 초기화. START 후 기본 카메라 QR 진입만 적립 처리하며 카메라 오류는 HTTP 오류와 분리 |
 | STAMP-REWARD | 로컬4칸·수령 상태 + `POST /stamp-receipt-verifications` | 4칸 전 수령 불가. 안내 창에는 상품 수령 버튼 없이 담당자용 코드 입력칸과 확인 버튼을 둔다. `verified: true`일 때만 `claimed=true`로 저장·창 닫기. 코드 오류·통신 실패는 미수령 상태·창을 유지하고 코드값은 저장하지 않는다. 서버 지급 기록·재고·엄격한 중복 차단 없음 |

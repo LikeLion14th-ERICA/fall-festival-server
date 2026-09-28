@@ -25,7 +25,7 @@
 | GET | `/api/v2/maps/{mapId}` | 지도 이미지·버전 | MAP-OVERVIEW, MAP-AREA | normal, not-found, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/maps/{mapId}/pins` | 지도별 핀 | MAP-OVERVIEW, MAP-AREA | normal, empty, not-found, version-conflict, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/places/{placeId}` | 장소 팝업 | MAP-POPUP | normal, missing-optional, not-found, error, locale-not-ready, bad-request, rate-limited |
-| GET | `/api/v2/ticket-guide` | 외부인 티켓 안내 | TICKET | normal, before-open, closed, ended, unconfigured, error, locale-not-ready, bad-request, rate-limited |
+| GET | `/api/v2/ticket-guide` | 외부인 티켓 금액 안내 | TICKET | normal, unconfigured, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/stamp-guide` | 스탬프 안내·공통 QR | STAMP-START, STAMP-COLLECT, STAMP-REWARD | normal, missing-optional, error, locale-not-ready, bad-request, rate-limited |
 | POST | `/api/v2/stamp-participants` | 스탬프투어 시작(축제일마다 1회)·익명 참여 쿠키 발급 | STAMP-START | normal, already-started, error, locale-not-ready, bad-request, rate-limited |
 | GET | `/api/v2/stamp-card` | 오늘의 스탬프판 | STAMP-COLLECT, STAMP-REWARD | normal, empty, not-started, error, locale-not-ready, bad-request, rate-limited |

@@ -62,7 +62,7 @@ const scenarioTests = {
   'HTTP-12': [{ file: sessionE2e, test: 'sessionBoundaryRejectsBadOriginCredentialsTokensAndMalformedBodies' }],
   'HTTP-13': [{ file: web, test: 'releaseCliChildCannotBeRedirectedByAHostileDatasourceOverride' }],
   'HTTP-14': [{ file: web, test: 'traversesEveryDeclaredDateCategoryAndExposedSpaceFilter' }],
-  'HTTP-15': [{ file: account, test: 'cliSetAndClearPropagateToHttpWithConditionalEtagSemantics' }],
+  'HTTP-15': [{ file: account, test: 'ticketAccountCliChangesNeverEnterThePublicAmountResponse' }],
   'HTTP-16': [
     { file: crowdingE2e, test: 'concurrentIdenticalCrowdingWritesMutateOnceReplaySafelyAndRejectKeyReuse' },
     { file: crowdingHoursE2e, test: 'levelWaitingAcrossMidnightRequiresRefetch' },
@@ -76,7 +76,7 @@ const scenarioTests = {
   'HTTP-20': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
   'HTTP-21': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
   'HTTP-22': [{ file: failure, test: 'unpublishedCatalogStaysUnavailableWhileRateLimitsAreScopedAndRecoverable' }],
-  'HTTP-23': [{ file: account, test: 'transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds' }],
+  'HTTP-23': [{ file: account, test: 'transferWindowBoundariesDoNotChangeTheAmountResponse' }],
   'HTTP-24': [
     { file: crowdingE2e, test: 'loopbackAdminRejectsGapDayWritesButAllowsFestivalDayWritesOutsideHours' },
     { file: crowdingHoursE2e, test: 'hoursWaitingForPublicationChecksNewMembership' },
@@ -138,7 +138,7 @@ const providerTests = {
   getMap: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi'),
   getPins: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi'),
   getPlace: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesEveryCatalogSuccessEnvelopeAndPayloadAgainstOpenApi'),
-  getTicketGuide: provider('src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java', 'reflectsEachAccountChangeOnTheNextRequestWithANewEtag', 'hidesTheAccountAndChangesTheEtagAtTheDailyTransferClose'),
+  getTicketGuide: provider('src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java', 'servesOnlyPriceAndIgnoresLegacyTicketAccountAndTransferWindow'),
   getStampGuide: provider('src/test/java/dev/espero/festival/web/StampGuideControllerTest.java', 'returnsGuideMatchingApiV2Schema', 'throwsServiceUnavailableWhenGuideNotConfigured', 'rejectsUnreadyAndUnknownLocalesWithoutFallingBack'),
   startStampParticipation: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesStampCardEndpointsAgainstOpenApi'),
   getStampCard: provider('src/test/java/dev/espero/festival/web/CatalogControllerOpenApiTest.java', 'validatesStampCardEndpointsAgainstOpenApi'),

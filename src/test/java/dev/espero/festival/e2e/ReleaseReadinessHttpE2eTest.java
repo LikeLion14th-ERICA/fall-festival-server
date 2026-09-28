@@ -660,13 +660,10 @@ class ReleaseReadinessHttpE2eTest {
     private void assertTicketAndStampJourney(PreparedCandidate candidate) throws Exception {
         HttpResponse<String> ticketGuide = candidateResponse("/api/v2/ticket-guide", candidate);
         assertThat(requiredHeader(ticketGuide, "Cache-Control")).contains("private", "no-cache");
-        assertThat(jsonString(ticketGuide.body(), "$.data.status")).isEqualTo("UNCONFIGURED");
-        assertThat(jsonValue(ticketGuide.body(), "$.data.account")).isNull();
-        assertThat(jsonValue(ticketGuide.body(), "$.data.paymentSettingsVersion")).isNull();
-        Map<?, ?> ticketTarget = nullableObject(ticketGuide.body(), "$.data.mapTarget");
-        if (ticketTarget != null) {
-            assertTicketMapTargetJourney(candidate, ticketTarget);
+        if (candidate.requireUserJourneyContent()) {
+            assertThat(jsonNumber(ticketGuide.body(), "$.data.unitPrice.amount").intValue()).isPositive();
         }
+        assertThat(ticketGuide.body()).doesNotContain("\"account\"");
         String ticketEtag = requiredHeader(ticketGuide, "ETag");
         HttpResponse<String> ticketNotModified = send(HttpRequest.newBuilder(uri("/api/v2/ticket-guide"))
             .header("If-None-Match", ticketEtag)

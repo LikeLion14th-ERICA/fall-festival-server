@@ -458,11 +458,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java",
-            "test": "reflectsEachAccountChangeOnTheNextRequestWithANewEtag"
-          },
-          {
-            "file": "src/test/java/dev/espero/festival/web/TicketGuideAccountFlowIntegrationTest.java",
-            "test": "hidesTheAccountAndChangesTheEtagAtTheDailyTransferClose"
+            "test": "servesOnlyPriceAndIgnoresLegacyTicketAccountAndTransferWindow"
           }
         ]
       },
@@ -1394,7 +1390,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/e2e/OperationalAccountPropagationE2eTest.java",
-            "test": "cliSetAndClearPropagateToHttpWithConditionalEtagSemantics"
+            "test": "ticketAccountCliChangesNeverEnterThePublicAmountResponse"
           }
         ]
       },
@@ -1543,7 +1539,7 @@
         "tests": [
           {
             "file": "src/test/java/dev/espero/festival/e2e/OperationalAccountPropagationE2eTest.java",
-            "test": "transferWindowBoundariesChangeExposureAndConditionalRepresentationAtExactSeconds"
+            "test": "transferWindowBoundariesDoNotChangeTheAmountResponse"
           }
         ]
       },

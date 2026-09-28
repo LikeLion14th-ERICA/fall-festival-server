@@ -11582,7 +11582,7 @@
     "/api/v2/ticket-guide": {
       "get": {
         "operationId": "getTicketGuide",
-        "summary": "외부인 티켓 안내",
+        "summary": "외부인 티켓 금액 안내",
         "description": "연결 화면: TICKET. 목의 인증/시나리오 헤더는 연동 안내를 참고.",
         "tags": [
           "공개"
@@ -11658,147 +11658,13 @@
                 },
                 "examples": {
                   "normal": {
-                    "summary": "외부인 티켓 안내: normal",
+                    "summary": "외부인 티켓 금액 안내: normal",
                     "value": {
                       "data": {
-                        "date": "2030-10-01",
-                        "status": "TRANSFER_OPEN",
                         "unitPrice": {
-                          "amount": 1500,
+                          "amount": 25000,
                           "currency": "KRW"
-                        },
-                        "transferOpensAt": "2030-10-01T00:00:00+09:00",
-                        "transferClosesAt": "2030-10-01T21:00:00+09:00",
-                        "pickupOpensAt": "2030-10-01T13:00:00+09:00",
-                        "pickupClosesAt": "2030-10-01T21:00:00+09:00",
-                        "account": {
-                          "bankName": "개발용 은행",
-                          "accountNumber": "MOCK-NOT-PAYABLE",
-                          "holder": "개발용 예금주"
-                        },
-                        "transferLink": null,
-                        "paymentSettingsVersion": 1,
-                        "mapTarget": {
-                          "mapId": "map-overview",
-                          "placeId": "place-ticket",
-                          "pinId": "pin-ticket",
-                          "mapVersion": "mock-map-1"
-                        },
-                        "instructions": [
-                          "실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.",
-                          "입금과 지급 여부는 현장에서 확인합니다."
-                        ]
-                      },
-                      "meta": {
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "before-open": {
-                    "summary": "외부인 티켓 안내: before-open",
-                    "value": {
-                      "data": {
-                        "date": "2030-09-30",
-                        "status": "BEFORE_FESTIVAL",
-                        "unitPrice": {
-                          "amount": 1500,
-                          "currency": "KRW"
-                        },
-                        "transferOpensAt": "2030-10-01T00:00:00+09:00",
-                        "transferClosesAt": "2030-10-01T21:00:00+09:00",
-                        "pickupOpensAt": "2030-10-01T13:00:00+09:00",
-                        "pickupClosesAt": "2030-10-01T21:00:00+09:00",
-                        "account": null,
-                        "transferLink": null,
-                        "paymentSettingsVersion": 1,
-                        "mapTarget": {
-                          "mapId": "map-overview",
-                          "placeId": "place-ticket",
-                          "pinId": "pin-ticket",
-                          "mapVersion": "mock-map-1"
-                        },
-                        "instructions": [
-                          "실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.",
-                          "입금과 지급 여부는 현장에서 확인합니다."
-                        ]
-                      },
-                      "meta": {
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "closed": {
-                    "summary": "외부인 티켓 안내: closed",
-                    "value": {
-                      "data": {
-                        "date": "2030-10-01",
-                        "status": "DAILY_CLOSED",
-                        "unitPrice": {
-                          "amount": 1500,
-                          "currency": "KRW"
-                        },
-                        "transferOpensAt": "2030-10-01T00:00:00+09:00",
-                        "transferClosesAt": "2030-10-01T21:00:00+09:00",
-                        "pickupOpensAt": "2030-10-01T13:00:00+09:00",
-                        "pickupClosesAt": "2030-10-01T21:00:00+09:00",
-                        "account": null,
-                        "transferLink": null,
-                        "paymentSettingsVersion": 1,
-                        "mapTarget": {
-                          "mapId": "map-overview",
-                          "placeId": "place-ticket",
-                          "pinId": "pin-ticket",
-                          "mapVersion": "mock-map-1"
-                        },
-                        "instructions": [
-                          "실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.",
-                          "입금과 지급 여부는 현장에서 확인합니다."
-                        ]
-                      },
-                      "meta": {
-                        "timezone": "Asia/Seoul",
-                        "festivalId": "festival-mock",
-                        "revision": 1,
-                        "locale": "ko",
-                        "mock": true
-                      }
-                    }
-                  },
-                  "ended": {
-                    "summary": "외부인 티켓 안내: ended",
-                    "value": {
-                      "data": {
-                        "date": "2030-10-04",
-                        "status": "FESTIVAL_ENDED",
-                        "unitPrice": {
-                          "amount": 1500,
-                          "currency": "KRW"
-                        },
-                        "transferOpensAt": "2030-10-03T00:00:00+09:00",
-                        "transferClosesAt": "2030-10-03T21:00:00+09:00",
-                        "pickupOpensAt": "2030-10-03T13:00:00+09:00",
-                        "pickupClosesAt": "2030-10-03T21:00:00+09:00",
-                        "account": null,
-                        "transferLink": null,
-                        "paymentSettingsVersion": 1,
-                        "mapTarget": {
-                          "mapId": "map-overview",
-                          "placeId": "place-ticket",
-                          "pinId": "pin-ticket",
-                          "mapVersion": "mock-map-1"
-                        },
-                        "instructions": [
-                          "실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.",
-                          "입금과 지급 여부는 현장에서 확인합니다."
-                        ]
+                        }
                       },
                       "meta": {
                         "timezone": "Asia/Seoul",
@@ -11810,24 +11676,10 @@
                     }
                   },
                   "unconfigured": {
-                    "summary": "외부인 티켓 안내: unconfigured",
+                    "summary": "외부인 티켓 금액 안내: unconfigured",
                     "value": {
                       "data": {
-                        "date": "2030-10-01",
-                        "status": "UNCONFIGURED",
-                        "unitPrice": null,
-                        "transferOpensAt": null,
-                        "transferClosesAt": null,
-                        "pickupOpensAt": null,
-                        "pickupClosesAt": null,
-                        "account": null,
-                        "transferLink": null,
-                        "paymentSettingsVersion": null,
-                        "mapTarget": null,
-                        "instructions": [
-                          "실제 가격·계좌·환불 정책이 아닌 개발용 예시입니다.",
-                          "입금과 지급 여부는 현장에서 확인합니다."
-                        ]
+                        "unitPrice": null
                       },
                       "meta": {
                         "timezone": "Asia/Seoul",
@@ -11893,7 +11745,7 @@
                 },
                 "examples": {
                   "locale-not-ready": {
-                    "summary": "외부인 티켓 안내: locale-not-ready",
+                    "summary": "외부인 티켓 금액 안내: locale-not-ready",
                     "value": {
                       "error": {
                         "code": "LOCALE_NOT_READY",
@@ -11913,7 +11765,7 @@
                     }
                   },
                   "bad-request": {
-                    "summary": "외부인 티켓 안내: bad-request",
+                    "summary": "외부인 티켓 금액 안내: bad-request",
                     "value": {
                       "error": {
                         "code": "INVALID_QUERY",
@@ -12036,7 +11888,7 @@
                 },
                 "examples": {
                   "rate-limited": {
-                    "summary": "외부인 티켓 안내: rate-limited",
+                    "summary": "외부인 티켓 금액 안내: rate-limited",
                     "value": {
                       "error": {
                         "code": "RATE_LIMITED",
@@ -12095,7 +11947,7 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "외부인 티켓 안내: error",
+                    "summary": "외부인 티켓 금액 안내: error",
                     "value": {
                       "error": {
                         "code": "SERVICE_UNAVAILABLE",
@@ -12125,9 +11977,6 @@
         "x-contract-status": "screen-specified",
         "x-mock-scenarios": [
           "normal",
-          "before-open",
-          "closed",
-          "ended",
           "unconfigured",
           "error",
           "locale-not-ready",
@@ -29642,23 +29491,6 @@
       "TicketGuide": {
         "type": "object",
         "properties": {
-          "date": {
-            "type": "string",
-            "minLength": 1,
-            "description": "Asia/Seoul 기준 YYYY-MM-DD.",
-            "format": "date"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "BEFORE_FESTIVAL",
-              "TRANSFER_OPEN",
-              "DAILY_CLOSED",
-              "FESTIVAL_ENDED",
-              "UNCONFIGURED"
-            ],
-            "description": "시간별 송금 안내 상태. 일정이 없거나 TICKET 계좌 설정이 없으면 UNCONFIGURED다."
-          },
           "unitPrice": {
             "anyOf": [
               {
@@ -29668,140 +29500,14 @@
                 "type": "null"
               }
             ],
-            "description": "가격 자료 대기 시 null. 0원과 다름."
-          },
-          "transferOpensAt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
-                "format": "date-time",
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "운영 자료 대기 시 null"
-          },
-          "transferClosesAt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
-                "format": "date-time",
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "운영 자료 대기 시 null"
-          },
-          "pickupOpensAt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
-                "format": "date-time",
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "운영 자료 대기 시 null"
-          },
-          "pickupClosesAt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "description": "RFC 3339. 응답은 +09:00 offset을 포함하며 밀리초는 선택.",
-                "format": "date-time",
-                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?\\+09:00$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "운영 자료 대기 시 null"
-          },
-          "account": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/BankAccount"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "catalog revision 밖의 TICKET 계좌 설정에서 제공. 계좌 설정이 없거나 송금 제공 시간 밖이면 null."
-          },
-          "transferLink": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Link"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "링크 표시명 출처가 정해지기 전까지 항상 null. 계좌 설정은 URL만 보관한다."
-          },
-          "paymentSettingsVersion": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 1,
-                "description": "현재 TICKET 계좌 설정의 version. 값이 바뀌면 계좌 설정이 바뀐 것이며 응답 ETag도 함께 바뀐다."
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "계좌를 한 번도 설정하지 않았으면 null. 설정을 해제한 뒤에도 version은 남는다."
-          },
-          "mapTarget": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/MapTarget"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "같은 published FestivalRevision의 현재 map version에 속한 PLACE 핀을 식별하는 canonical 연결. mapId·mapVersion·pinId·placeId는 함께 일치해야 하며 다른 revision·AREA 핀·구버전 핀은 허용하지 않음. 값이 null이면 연결되지 않은 상태."
-          },
-          "instructions": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "description": "안내"
-            },
-            "description": "승인된 현장 안내. 목에서 환불 정책을 임의로 확정하지 않음."
+            "description": "게시 카탈로그의 1인 입장권 금액. 가격 자료가 없는 이전 revision에서는 null이며 0원과 다름."
           }
         },
         "required": [
-          "date",
-          "status",
-          "unitPrice",
-          "transferOpensAt",
-          "transferClosesAt",
-          "pickupOpensAt",
-          "pickupClosesAt",
-          "account",
-          "transferLink",
-          "paymentSettingsVersion",
-          "mapTarget",
-          "instructions"
+          "unitPrice"
         ],
         "additionalProperties": false,
-        "description": ""
+        "description": "외부인 티켓 금액 안내 전용. 계좌·송금·토스·수령 상태를 제공하지 않음."
       },
       "StampGuide": {
         "type": "object",
