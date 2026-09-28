@@ -5427,7 +5427,7 @@
             }
           },
           "409": {
-            "description": "축제일 밖에는 Hyped 참여 불가",
+            "description": "참여 시간 밖에는 Hyped 참여 불가",
             "headers": {
               "X-Request-Id": {
                 "schema": {
@@ -5456,7 +5456,7 @@
                     "value": {
                       "error": {
                         "code": "HYPED_CLOSED",
-                        "message": "축제일에만 기대돼요에 참여할 수 있습니다.",
+                        "message": "지금은 기대돼요 참여 시간이 아닙니다.",
                         "details": [],
                         "retryable": false
                       },
@@ -28081,7 +28081,7 @@
         "properties": {
           "hypedEnabled": {
             "type": "boolean",
-            "description": "서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 그날의 운영 시간 밖에서도 true."
+            "description": "서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 2026-09-28은 11시부터 사전 개방하며 15시 전 리허설 집계와 이후 실제 집계를 분리한다. 프런트는 이 값을 따른다."
           },
           "items": {
             "type": "array",

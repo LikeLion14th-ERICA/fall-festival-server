@@ -436,6 +436,10 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
   if(scenario==='version-conflict')failure(409,'MAP_VERSION_MISMATCH','지도 이미지를 다시 조회해 주세요.');
   const empty=scenario==='empty',missing=scenario==='missing-optional',sold=scenario==='sold-out';
   const date=dayKst(now);
+  const hypedRehearsalDay=date==='2026-09-28';
+  const hypedTime=isoKst(now).slice(11,19);
+  const hypedEnabled=hypedRehearsalDay?hypedTime>='11:00:00':DATES.includes(date);
+  const hypedPrefix=hypedRehearsalDay&&hypedTime>='11:00:00'&&hypedTime<'15:00:00'?'rehearsal-2026-09-28:':'';
   let data,status=200;
   const mutate=()=>{state.revision++;now=isoKst(+new Date(now)+state.revision);return now;};
   const getAvailability=goodsId=>inventoryFor(state,goodsId,{failure,sold,locale});
@@ -498,18 +502,18 @@ export function execute(op,state,{params={},query={},body,scenario='normal',now=
       if(missing)Object.assign(data,{introduction:null,socialLinks:[],songs:[]});break;
     }
     case 'getArtistHyped':{
-      data={hypedEnabled:DATES.includes(date),items:(empty?[]:state.artists.filter(artist=>artist.category==='ARTIST'))
-        .map(artist=>({artistId:artist.id,hypedCount:state.hypedCounts[artist.id]||0}))
+      data={hypedEnabled,items:(empty?[]:state.artists.filter(artist=>artist.category==='ARTIST'))
+        .map(artist=>({artistId:artist.id,hypedCount:state.hypedCounts[hypedPrefix+artist.id]||0}))
         .sort((a,b)=>a.artistId.localeCompare(b.artistId))};
       break;
     }
     case 'postArtistHyped':{
       const artist=state.artists.find(candidate=>candidate.id===params.artistId);
       if(!artist||artist.category!=='ARTIST'||scenario==='contest')failure(404,'NOT_FOUND','요청한 정보를 찾을 수 없습니다.');
-      if(!DATES.includes(date))failure(409,'HYPED_CLOSED','축제일에만 기대돼요에 참여할 수 있습니다.');
+      if(!hypedEnabled)failure(409,'HYPED_CLOSED','지금은 기대돼요 참여 시간이 아닙니다.');
       if(!body||Object.keys(body).length)failure(422,'VALIDATION_FAILED','요청 필드를 확인해 주세요.');
-      const hypedCount=(state.hypedCounts[artist.id]||0)+1;
-      state.hypedCounts[artist.id]=hypedCount;
+      const hypedCount=(state.hypedCounts[hypedPrefix+artist.id]||0)+1;
+      state.hypedCounts[hypedPrefix+artist.id]=hypedCount;
       data={artistId:artist.id,hypedCount};
       break;
     }

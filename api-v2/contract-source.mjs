@@ -58,7 +58,7 @@ export const schemas = {
   BankAccount: object({ bankName: text('은행명'), accountNumber: text('계좌 문자열. 목 값은 송금할 수 없는 MOCK-NOT-PAYABLE.'), holder: text('예금주') }),
   Artist: object({ id, category: enumeration(['ARTIST', 'CONTEST'], '아티스트 / 콘테스트'), name: text('출연진 이름'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), introduction: optionalText, socialLinks: array(ref('Link'), '없으면 []와 영역 숨김'), songs: array(ref('Link'), '대표곡명과 YouTube 주소', { maxItems: 3 }), performances: array(object({ id, date, startsAt: timestamp, endsAt: timestamp }), '이 출연진의 등록 공연 일정') }),
   ArtistHypedItem: object({ artistId: id, hypedCount: integer('축제 전체에서 이 아티스트가 받은 누적 Hyped 수. 공연 날짜와 catalog revision에 독립적.', 0, { maximum: 9007199254740991 }) }),
-  ArtistHypedSummary: object({ hypedEnabled: bool('서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 그날의 운영 시간 밖에서도 true.'), items: array(ref('ArtistHypedItem'), '현재 게시된 ARTIST 전원. artistId 오름차순이며 미참여자는 0. CONTEST는 제외.') }),
+  ArtistHypedSummary: object({ hypedEnabled: bool('서버의 Asia/Seoul 날짜가 게시된 FestivalDay 중 하나일 때 true. 2026-09-28은 11시부터 사전 개방하며 15시 전 리허설 집계와 이후 실제 집계를 분리한다. 프런트는 이 값을 따른다.'), items: array(ref('ArtistHypedItem'), '현재 게시된 ARTIST 전원. artistId 오름차순이며 미참여자는 0. CONTEST는 제외.') }),
   ArtistHypedIncrement: object({ artistId: id, hypedCount: integer('이번 요청의 원자적 +1 후 누적 Hyped 수.', 1, { maximum: 9007199254740991 }) }),
   ArtistHypedInput: object({}, [], '빈 JSON 객체만 허용한다. 로그인·참여자 식별자·멱등 키가 없다.'),
   Lineup: object({ date, category: enumeration(['ARTIST', 'CONTEST'], '선택 분류'), items: array(object({ artistId: id, performanceId: id, name: text('출연진명'), image: nullable(ref('Image'), '프런트에서 이미지를 관리하면 null'), order: integer('선택 날짜·분류 내 공연 순서', 1) }), '공연순, 동률 id순. + 버튼만 상세 이동.') }),
@@ -148,7 +148,7 @@ for(const operationId of ['getArtistHyped','postArtistHyped']){
 }
 Object.assign(operations.find(operation=>operation.operationId==='postArtistHyped'), {
   successStatus: 200,
-  responseOverrides: {409:{description:'축제일 밖에는 Hyped 참여 불가',code:'HYPED_CLOSED',message:'축제일에만 기대돼요에 참여할 수 있습니다.',retryable:false}},
+  responseOverrides: {409:{description:'참여 시간 밖에는 Hyped 참여 불가',code:'HYPED_CLOSED',message:'지금은 기대돼요 참여 시간이 아닙니다.',retryable:false}},
 });
 // Booth stamps: an anonymous HttpOnly participant cookie, never cached.
 Object.assign(operations.find(operation=>operation.operationId==='startStampParticipation'), {

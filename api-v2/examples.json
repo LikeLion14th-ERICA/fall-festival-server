@@ -3272,7 +3272,7 @@
         "response": {
           "error": {
             "code": "HYPED_CLOSED",
-            "message": "축제일에만 기대돼요에 참여할 수 있습니다.",
+            "message": "지금은 기대돼요 참여 시간이 아닙니다.",
             "details": [],
             "retryable": false
           },

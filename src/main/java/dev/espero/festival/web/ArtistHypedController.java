@@ -91,7 +91,7 @@ public class ArtistHypedController {
                 throw new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.", false);
             }
             if (!enabled(context.snapshot(), now)) {
-                throw new ApiException(HttpStatus.CONFLICT, "HYPED_CLOSED", "축제일에만 기대돼요에 참여할 수 있습니다.", false);
+                throw new ApiException(HttpStatus.CONFLICT, "HYPED_CLOSED", "지금은 기대돼요 참여 시간이 아닙니다.", false);
             }
             long count = store.increment(festivalId(context.snapshot()), artistId,
                 countPrefix(context.snapshot(), now), now);
@@ -122,7 +122,7 @@ public class ArtistHypedController {
     private boolean enabled(CatalogSnapshot snapshot, Instant now) {
         var local = now.atZone(snapshot.context().timezone());
         if (local.toLocalDate().equals(REHEARSAL_DAY)) {
-            return enabledRehearsalWindow(now, snapshot.context().timezone());
+            return !local.toLocalTime().isBefore(REHEARSAL_START);
         }
         return snapshot.home().dates().contains(local.toLocalDate());
     }

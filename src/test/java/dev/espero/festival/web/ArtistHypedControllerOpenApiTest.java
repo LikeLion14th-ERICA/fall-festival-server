@@ -131,7 +131,7 @@ class ArtistHypedControllerOpenApiTest {
     }
 
     @Test
-    void enablesHypedOnlyDuringTheRehearsalWindowOnSeptemberTwentyEighth() throws Exception {
+    void keepsHypedOpenAfterRehearsalOnSeptemberTwentyEighth() throws Exception {
         useTime("2026-09-28T01:59:59Z");
         mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
             .andExpect(jsonPath("$.data.hypedEnabled").value(false));
@@ -143,7 +143,10 @@ class ArtistHypedControllerOpenApiTest {
             .andExpect(jsonPath("$.data.hypedEnabled").value(true));
         useTime("2026-09-28T06:00:00Z");
         mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.hypedEnabled").value(false));
+            .andExpect(jsonPath("$.data.hypedEnabled").value(true));
+        useTime("2026-09-28T14:59:59Z");
+        mvc.perform(get(LIST_PATH)).andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hypedEnabled").value(true));
     }
 
     @Test
@@ -172,6 +175,13 @@ class ArtistHypedControllerOpenApiTest {
         MvcResult festivalRead = mvc.perform(get(LIST_PATH)).andExpect(status().isOk()).andReturn();
         assertThat(json.readTree(festivalRead.getResponse().getContentAsString())
             .at("/data/items/0/hypedCount").asLong()).isEqualTo(3);
+        when(store.increment(FESTIVAL_ID, "artist-a", "", Instant.parse("2026-09-28T06:00:00Z")))
+            .thenReturn(4L);
+        MvcResult livePost = assertMatches("/api/v2/artists/{artistId}/hyped", "post", 200,
+            post(POST_PATH).contentType(MediaType.APPLICATION_JSON).content("{}"));
+        assertThat(json.readTree(livePost.getResponse().getContentAsString())
+            .at("/data/hypedCount").asLong()).isEqualTo(4);
+        verify(store).increment(FESTIVAL_ID, "artist-a", "", Instant.parse("2026-09-28T06:00:00Z"));
         verify(store).increment(FESTIVAL_ID, "artist-a", "rehearsal-2026-09-28:",
             Instant.parse("2026-09-28T02:00:00Z"));
     }
