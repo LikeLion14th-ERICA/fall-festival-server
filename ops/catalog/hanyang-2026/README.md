@@ -2,17 +2,17 @@
 
 제1회 한양문화제 동심(2026-09-29 ~ 10-01)의 실제 운영 자료를 manifest 형식으로 옮긴 **초안**이다.
 [개발용 manifest](../../../dev/catalog/README.md)와 달리 가상 값이 없고, 확인된 내용만 넣었다.
-아직 받지 못한 필수 값은 `null`로 두었기 때문에 **이 상태로는 import할 수 없다.**
+확인되지 않은 선택 정보는 `null`로 두었다. 필수 필드 검증은 통과하지만 현재 게시본의
+스탬프 부스·토큰과 타임테이블 축, 기준 revision이 없으므로 **운영 DB에 단독 import하지 않는다.**
 
 | 파일 | 용도 |
 |---|---|
-| `catalog-draft.json` | 전체 운영 카탈로그 초안. 아직 남은 필수값 때문에 단독 import 불가. |
+| `catalog-draft.json` | 실제 콘텐츠 초안. 현재 게시본의 운영 상태와 결합한 뒤 import한다. |
 | `prepare-artist-roster.py` | 현재 published export의 목 ARTIST만 실제 8팀으로 교체한 후보 manifest 생성. DB 쓰기 없음. |
 | `goods-draft.json` | 굿즈 7종의 `POST /api/v2/admin/products` 요청 body 초안 |
 
-`OperationalCatalogDraftTest`와 `OperationalGoodsDraftTest`는 두 가지를 확인한다. 초안의 빈 값이 아래
-표의 항목뿐이라는 것, 그리고 그 항목만 채우면 import 검증과 상품 API 검증을 통과한다는 것이다.
-값을 채우면 테스트의 채움 목록에서도 해당 항목을 뺀다.
+`OperationalCatalogDraftTest`와 `OperationalGoodsDraftTest`는 카탈로그 manifest 검증과
+상품 API 검증을 확인한다.
 
 이 저장소는 공개되어 있다. 계좌번호·예금주·연락처 같은 개인정보는 이 디렉터리에 넣지 않는다.
 
@@ -34,8 +34,8 @@
 QA 중 라이브 사이트가 여전히 개발용 mock 카탈로그를 서빙하고 있는 걸 발견해(안태규,
 `festival.likelionerica.com`이 실서비스 URL로 승격됐는데 실제 데이터로 재publish가 안
 된 상태) 실제 publish를 서두르며 기획팀이 준 아래 자료를 반영했다. 메인 아티스트
-8팀의 시각도 확인해 반영했지만, 스개팅 종료 시각이 비어 있어 이 초안만으로는
-import할 수 없다. 반입 금지 물품과 티켓 송금 가능 시간 등 선택 정보도 확인이 필요하다.
+8팀의 시각과 스개팅 18:30~19:30을 확인해 반영했다. 반입 금지 물품과 티켓 송금 가능
+시간 등 선택 정보는 추가 확인이 필요하다.
 
 - 플리마켓 셀러 12곳(셀러 10·MD스토어 1·운영본부 1)
 - 프로모션 스트리트 신규 10곳(ic-pbl·신한은행·상담센터·인권센터·학생지원팀·글로벌
@@ -60,11 +60,11 @@ import할 수 없다. 반입 금지 물품과 티켓 송금 가능 시간 등 �
 - 사용자 확인 행사 전체 운영 시간은 매일 09:00~익일 00:00이며,
   `festivalDays[].opensAt/closesAt`에 실제 날짜가 넘어가는 시각으로 반영했다.
 
-## 채워야 하는 값 (import 차단)
+## 공연 시각과 선택 정보
 
 | 항목 | 위치 | 비고 |
 |---|---|---|
-| 스개팅 종료 시각 | `performances[].endsAt` | 시작 17:30만 확인됐다. 메인 라인업 8팀과 콘테스트 공연 2건의 시각은 반영했다. |
+| 스개팅 | `performances[].startsAt/endsAt` | 사용자 최종 확인(2026-09-28): 9/29 18:30~19:30. 메인 라인업 8팀과 콘테스트 공연 2건의 시각도 반영했다. |
 
 공간 68곳의 이미지 3개 필드는 `null`이다. 이미지는 프런트엔드
 담당 범위이므로 백엔드의 V33 migration과 공개 응답 계약은 이미지가 없으면 `image: null`을
@@ -84,7 +84,8 @@ alphadriveone은 현재 프런트의 DAY 3 ID alphadrive1로 통일했다. 리�
 | 9/29 | 19:30~20:00 · 20:00~20:45 · 20:45~21:30 · 22:00~22:30 | NCT WISH · 나우아임영 · 김하온 · 리센느 |
 | 10/1 | 20:00~20:40 · 20:40~21:20 · 21:20~22:00 · 22:00~22:30 | 희규 · 아홉 · 알파드라이브원 · 프로미스나인 |
 
-전체 초안은 스개팅 종료 시각이 비어 있어 여전히 import 차단 상태다. 아래 절차는 현재 게시본의 다른 영역과 CONTEST를 그대로 유지하는
+전체 초안은 현재 게시본의 스탬프 부스·토큰, 타임테이블 축, 기준 revision을 담고 있지 않다.
+아래 절차는 현재 게시본의 다른 영역과 CONTEST를 그대로 유지하는
 ARTIST 범위의 후보를 만든다. 따라서 다른 mock 콘텐츠는 남는다.
 
 1. D는 DB 상태·역할과 DB/미디어 변경 전 짝 백업을 확인하고
@@ -174,9 +175,12 @@ RESCENE 표기도 re:scene으로 고쳐야 한다.
 
 ## import 순서
 
-1. 위 표의 값을 채우고 두 초안 테스트를 통과시킨다.
-2. [DB 읽기 전용 사전 점검](../../../docs/wiki/engineering/database-preflight.md) 뒤, 로컬 카탈로그
-   워크벤치 또는 Catalog CLI로 import → validate → publish한다. festival id와 기준 revision은
-   명령에서 명시한다.
+1. 두 초안 테스트를 통과시키고 현재 게시본을 다시 export한다. 전체 운영 콘텐츠 후보는
+   현재 게시본의 `festivalId`, `baselineRevisionId`, `stampBooths`, `stampBoothTokens`,
+   `timetableConfig`를 보존하고 나머지 section에는 이 초안을 사용한다. 목 데이터가 섞이지
+   않았는지 diff와 manifest 검증을 확인한다. 토큰 해시가 들어간 후보는 commit하지 않는다.
+2. [DB 읽기 전용 사전 점검](../../../docs/wiki/engineering/database-preflight.md)과 변경 직전
+   DB·media 짝 백업·복원 확인 뒤, 로컬 카탈로그 워크벤치 또는 Catalog CLI로
+   import → validate → publish한다. festival id와 기준 revision은 명시한다.
 3. 서버를 재시작한 뒤 `/readyz`와 공개 API를 확인한다.
 4. 굿즈 이미지를 업로드하고, 받은 id를 넣어 상품을 등록한다. 입금 계좌는 운영 계좌 CLI로 따로 넣는다.
